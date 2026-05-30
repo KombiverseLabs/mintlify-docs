@@ -1,0 +1,53 @@
+---
+title: "Traefik"
+description: "Inspect StackKits service routing through Traefik"
+sidebarTitle: "Traefik"
+icon: route
+---
+
+Traefik is the StackKits reverse proxy. It routes service hostnames such as `base.<domain>`, `auth.<domain>`, and `kuma.<domain>`.
+
+## Prerequisites
+
+<Note>
+  Open Traefik only from a trusted network or through the protection configured by StackKits.
+</Note>
+
+## Steps
+
+<Steps>
+  <Step title="Open Traefik">
+    Use the Traefik row in the Node Hub or open `https://traefik.<domain>`.
+  </Step>
+  <Step title="Check routers">
+    Confirm that each enabled service has a router and points to the expected service backend.
+  </Step>
+  <Step title="Check middleware">
+    Verify that protected services use the TinyAuth middleware and intentionally public routes do not.
+  </Step>
+</Steps>
+
+## Verify
+
+- Routers exist for enabled services.
+- Backend services show healthy targets.
+- Public and protected routes match your rollout intent.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="TinyAuth" icon="lock-keyhole" href="/guides/stackkits/services/tinyauth">
+    Confirm auth behavior for protected routes.
+  </Card>
+  <Card title="Whoami" icon="bug" href="/guides/stackkits/services/whoami">
+    Inspect forwarding headers on a diagnostic route.
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="A route exists but returns a bad gateway">
+    The reverse proxy is reachable, but the target container or internal port is not. Check the service container first.
+  </Accordion>
+</AccordionGroup>

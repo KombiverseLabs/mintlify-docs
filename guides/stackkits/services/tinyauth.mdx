@@ -1,0 +1,53 @@
+---
+title: "TinyAuth"
+description: "Use TinyAuth as the StackKits forward-auth entrypoint"
+sidebarTitle: "TinyAuth"
+icon: lock-keyhole
+---
+
+TinyAuth protects StackKits service routes and normally lives at `auth.<domain>`.
+
+## Prerequisites
+
+<Note>
+  PocketID should be reachable before you rely on TinyAuth for daily sign-in.
+</Note>
+
+## Steps
+
+<Steps>
+  <Step title="Open TinyAuth">
+    Open `https://auth.<domain>` from the Node Hub.
+  </Step>
+  <Step title="Sign in">
+    Use the generated admin account or the PocketID-backed login path configured by StackKits.
+  </Step>
+  <Step title="Rotate the generated password">
+    Replace any generated bootstrap password after the first successful login.
+  </Step>
+</Steps>
+
+## Verify
+
+- Protected service routes redirect to TinyAuth.
+- After login, the original service opens.
+- Identity headers are passed only through trusted routes.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="PocketID" icon="fingerprint" href="/guides/stackkits/services/pocketid">
+    Confirm the passkey identity provider.
+  </Card>
+  <Card title="Traefik" icon="route" href="/guides/stackkits/services/traefik">
+    Review protected middleware routing.
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Login loops back to TinyAuth">
+    Check that PocketID is reachable at `id.<domain>` and that the browser can keep cookies for the deployment domain.
+  </Accordion>
+</AccordionGroup>

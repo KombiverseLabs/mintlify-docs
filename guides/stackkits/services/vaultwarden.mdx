@@ -1,0 +1,53 @@
+---
+title: "Vaultwarden"
+description: "Start using Vaultwarden on a StackKits server"
+sidebarTitle: "Vaultwarden"
+icon: vault
+---
+
+Vaultwarden is the Bitwarden-compatible password vault exposed at `vault.<domain>` when enabled.
+
+## Prerequisites
+
+<Note>
+  Vaultwarden has its own app login. Protect the route and configure app-level admin settings before adding real secrets.
+</Note>
+
+## Steps
+
+<Steps>
+  <Step title="Open Vaultwarden">
+    Open `https://vault.<domain>` from the Node Hub.
+  </Step>
+  <Step title="Create the owner account">
+    Register the initial account and store recovery information separately.
+  </Step>
+  <Step title="Lock down signups">
+    Disable open registration unless this is intentionally a private onboarding window.
+  </Step>
+</Steps>
+
+## Verify
+
+- The owner account can sign in.
+- New account creation follows your intended policy.
+- Backups cover the Vaultwarden data volume.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="TinyAuth" icon="lock-keyhole" href="/guides/stackkits/services/tinyauth">
+    Confirm route protection before storing real secrets.
+  </Card>
+  <Card title="Uptime Kuma" icon="chart-line" href="/guides/stackkits/services/uptime-kuma">
+    Monitor the vault route and alert path.
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="The vault opens but sync fails">
+    Check that the public URL, TLS mode, and browser extension URL all match the same `vault.<domain>` route.
+  </Accordion>
+</AccordionGroup>

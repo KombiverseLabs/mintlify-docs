@@ -1,0 +1,417 @@
+---
+title: "Base Kit"
+description: "The single-environment homelab blueprint — local or cloud, any node count"
+sidebarTitle: "Base Kit"
+icon: house
+---
+
+The **Base Kit** is designed for **single-environment deployments** — all services share one deployment target.
+
+It can run on a single server or span multiple nodes in the same environment (local or cloud). This is the simplest architecture pattern, optimized for reliability and straightforward operations.
+
+<Note>
+  The Base Kit follows an IaC-first approach using OpenTofu for infrastructure provisioning and Docker Compose for service deployment.
+</Note>
+
+## Overview
+
+```mermaid
+graph TB
+    subgraph Env["Single Environment (local or cloud)"]
+        subgraph Core["Core Services"]
+            Traefik["Traefik v3<br/>Reverse Proxy"]
+        end
+        
+        subgraph Platform["PaaS Platform"]
+            Dokploy["Dokploy<br/>Container Platform"]
+        end
+        
+        subgraph Monitoring["Observability"]
+            UptimeKuma["Uptime Kuma<br/>Status Monitoring"]
+            Dozzle["Dozzle<br/>Log Viewer"]
+        end
+        
+        subgraph Identity["Identity (Optional)"]
+            TinyAuth["TinyAuth"]
+            PocketID["PocketID"]
+        end
+    end
+    
+    Internet["Internet"] --> Traefik
+    Traefik --> Platform
+    Traefik --> Monitoring
+    Traefik --> Identity
+    
+    style Env fill:#1e293b,stroke:#38bdf8,color:#f8fafc
+    style Core fill:#1e293b,stroke:#fbbf24,color:#f8fafc
+    style Platform fill:#1e293b,stroke:#4ade80,color:#f8fafc
+    style Monitoring fill:#1e293b,stroke:#a78bfa,color:#f8fafc
+    style Identity fill:#1e293b,stroke:#ec4899,color:#f8fafc
+```
+
+## Common starting profiles
+
+Base Kit no longer relies on the old monolithic `variant` selector. Start from the baseline and use context, mode, and add-ons to shape the deployment.
+
+<Tabs>
+  <Tab title="Baseline">
+    The standard single-environment path.
+    
+    | Surface | Description |
+    |---------|-------------|
+    | **Traefik v3** | Reverse proxy with auto-SSL |
+    | **Dokploy** | Container platform (like Vercel for your homelab) |
+    | **Uptime Kuma / Beszel** | Lightweight uptime or node-health UX |
+    | **Dozzle** | Real-time Docker log viewer |
+    | **monitoring-agent** | OTLP collector baseline enabled by default |
+    
+    ```yaml kombination.yaml
+    stackkit: base-kit
+    ```
+  </Tab>
+  <Tab title="With monitoring-core">
+    Add centralized fan-in and longer retention when the deployment needs it.
+    
+    | Surface | Description |
+    |---------|-------------|
+    | **monitoring-agent** | Default node-level OTLP collector |
+    | **monitoring-core** | Optional OTLP gateway and retention tier |
+    | **VictoriaMetrics** | Optional durable metrics backend |
+    | **Grafana** | Optional dashboards when enabled with the backend tier |
+    
+    ```yaml kombination.yaml
+    stackkit: base-kit
+
+    addons:
+      - monitoring-core
+    ```
+  </Tab>
+  <Tab title="Low-resource intent">
+    Lightweight operator intent for constrained hardware.
+    
+    | Surface | Description |
+    |---------|-------------|
+    | **mode: pi** | Forces the lightweight experience |
+    | **monitoring-agent** | Keeps the collector baseline |
+    | **No retention tier by default** | Avoids heavier fan-in and storage services |
+    
+    ```yaml kombination.yaml
+    stackkit: base-kit
+    mode: pi
+    ```
+  </Tab>
+</Tabs>
+
+## Included services
+
+<CardGroup cols={2}>
+  <Card title="Traefik v3" icon="route">
+    **Reverse Proxy & SSL**
+    
+    Automatic HTTPS certificates (Let's Encrypt), routing, and load balancing for all services.
+  </Card>
+  <Card title="Dokploy" icon="rocket">
+    **Container Platform**
+    
+    Self-hosted PaaS like Vercel/Railway. Deploy from Git, manage databases, and scale apps.
+  </Card>
+  <Card title="Coolify" icon="cloud">
+    **Alternative PaaS**
+    
+    Open-source alternative to Heroku. Best for users with their own domain.
+  </Card>
+  <Card title="Uptime Kuma" icon="heart-pulse">
+    **Status Monitoring**
+    
+    Monitor your services with beautiful status pages and alerts.
+  </Card>
+  <Card title="Beszel" icon="chart-line">
+    **Server Metrics**
+    
+    Lightweight resource monitoring (CPU, RAM, disk, network).
+  </Card>
+  <Card title="Dozzle" icon="list">
+    **Log Viewer**
+    
+    Real-time Docker container log viewer in your browser.
+  </Card>
+</CardGroup>
+
+### Optional identity services
+
+<CardGroup cols={2}>
+  <Card title="TinyAuth" icon="key">
+    **Lightweight Auth Proxy**
+    
+    Simple authentication middleware for protecting services with basic auth or OAuth2.
+  </Card>
+  <Card title="PocketID" icon="id-card">
+    **OIDC Provider**
+    
+    Full-featured OpenID Connect provider for single sign-on across your homelab.
+  </Card>
+</CardGroup>
+
+## Requirements
+
+| Resource | Low | Standard | High |
+|----------|-----|----------|------|
+| **CPU** | 2 cores | 4 cores | 8 cores |
+| **RAM** | 4 GB | 8 GB | 16 GB |
+| **Storage** | 20 GB SSD | 50 GB SSD | 100+ GB SSD |
+| **Observability** | Collector baseline only | Collector baseline | Collector baseline + optional monitoring-core |
+
+### Supported operating systems
+
+| OS | Version | Status |
+|----|---------|--------|
+| Ubuntu | 24.04 LTS | ✅ Recommended |
+| Ubuntu | 22.04 LTS | ✅ Supported |
+| Debian | 12 (Bookworm) | ✅ Supported |
+
+## Quick start
+
+<Steps>
+  <Step title="Create your spec file">
+    ```yaml kombination.yaml
+    stackkit: base-kit
+    
+    # Node configuration
+    nodes:
+      - name: main-server
+        type: local  # or vps, cloud
+        connection:
+          host: 192.168.1.100
+          user: root
+          ssh_key: ~/.ssh/id_ed25519
+    
+    # Domain (optional - enables auto-SSL)
+    domain: homelab.example.com
+    email: you@example.com
+    
+    # Service toggles
+    services:
+      dokploy:
+        enabled: true
+      uptime_kuma:
+        enabled: true
+      dozzle:
+        enabled: true
+    ```
+  </Step>
+  
+  <Step title="Validate configuration">
+    ```bash
+    stackkit validate
+    ```
+    
+    Output:
+    ```text
+    ✓ StackKit: base-kit (v1.0.0)
+    ✓ Monitoring: OTLP collector baseline
+    ✓ OS: ubuntu-24
+    ✓ Compute tier: standard
+    ✓ All service dependencies satisfied
+    ✓ No port conflicts detected
+    
+    Ready to deploy!
+    ```
+  </Step>
+  
+  <Step title="Generate infrastructure code">
+    ```bash
+    stackkit generate
+    ```
+    
+    Creates:
+    - `tofu/main.tf` — OpenTofu configuration
+    - `tofu/variables.tf` — Variables
+    - `docker-compose.yml` — Service definitions
+    - `traefik/` — Reverse proxy config
+  </Step>
+  
+  <Step title="Preview and apply">
+    ```bash
+    stackkit plan   # Preview changes
+    stackkit apply  # Deploy
+    ```
+  </Step>
+</Steps>
+
+## Configuration reference
+
+### Node settings
+
+```yaml
+nodes:
+  - name: main-server
+    type: local              # local, vps, cloud
+    os: ubuntu-24            # ubuntu-24, ubuntu-22, debian-12
+    
+    connection:
+      host: 192.168.1.100
+      port: 22
+      user: root
+      ssh_key: ~/.ssh/id_ed25519
+      # OR password: ${SSH_PASSWORD}
+    
+    resources:               # Optional — auto-detected
+      cpu: 4
+      memory_gb: 8
+      disk_gb: 50
+```
+
+### Domain and SSL
+
+<Tabs>
+  <Tab title="With domain">
+    ```yaml
+    domain: homelab.example.com
+    email: you@example.com
+    
+    ssl:
+      provider: letsencrypt
+      # Optional: wildcard for *.homelab.example.com
+      wildcard: true
+    ```
+  </Tab>
+  <Tab title="Local only">
+    ```yaml
+    # No domain — access via IP:port
+    # Dokploy will be available at http://IP:3000
+    
+    ssl:
+      provider: selfsigned
+    ```
+  </Tab>
+</Tabs>
+
+### Service configuration
+
+```yaml
+services:
+  traefik:
+    enabled: true           # Always required
+    dashboard: true         # Enable Traefik UI
+    log_level: INFO
+    
+  dokploy:
+    enabled: true
+    # Dokploy runs on port 3000 by default
+    
+  uptime_kuma:
+    enabled: true
+    public_page: true       # Enable public status page
+    
+  dozzle:
+    enabled: true
+    remote_hosts: []        # Add remote Docker hosts
+    
+  # Optional identity
+  tinyauth:
+    enabled: false
+    
+  pocketid:
+    enabled: false
+```
+
+## Deployment modes
+
+The Base Kit supports two deployment modes:
+
+| Mode | Engine | When to use |
+|------|--------|-------------|
+| **Simple** | OpenTofu only | Quick setup, one-time deployment |
+| **Advanced** | OpenTofu + Terramate | Drift detection, Day-2 operations |
+
+Advanced mode is automatically enabled when:
+- `driftDetection.enabled: true`
+- `autoUpdates.enabled: true`
+- `compliance.required: true`
+
+```yaml
+# Enable advanced mode
+operations:
+  driftDetection:
+    enabled: true
+    schedule: "0 */6 * * *"  # Every 6 hours
+  autoUpdates:
+    enabled: true
+    schedule: "0 4 * * 0"    # Sunday 4am
+```
+
+## File structure
+
+After `stackkit generate`:
+
+```text
+.
+├── kombination.yaml          # Your configuration
+├── tofu/
+│   ├── main.tf              # Infrastructure definition
+│   ├── variables.tf         # Input variables
+│   ├── outputs.tf           # Output values
+│   └── terraform.tfvars     # Generated values
+├── docker-compose.yml        # Service definitions
+├── traefik/
+│   ├── traefik.yml          # Static config
+│   └── dynamic/
+│       └── routes.yml       # Dynamic routing
+└── data/                    # Persistent volumes
+```
+
+## Constraints
+
+The Base Kit enforces these rules:
+
+| Constraint | Value | Reason |
+|------------|-------|--------|
+| Environment | Single (local or cloud) | Single-environment pattern |
+| Traefik required | Yes | All services need routing |
+| Min RAM | 4 GB | Services won't fit in less |
+
+<Warning>
+  The Base Kit serves a single-environment pattern. If you need:
+  - **Hybrid local + cloud** — [Modern Homelab Kit](/stackkits/kits/modern-homelab)
+  - **Automatic failover and redundancy** — [High Availability Kit](/stackkits/kits/ha-kit)
+</Warning>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Services not accessible">
+    1. Check Traefik is running: `docker logs traefik`
+    2. Verify DNS resolves to your server
+    3. Check firewall allows ports 80/443
+    4. For local: Use `http://IP:PORT` instead of domain
+  </Accordion>
+  
+  <Accordion title="SSL certificate errors">
+    - **Let's Encrypt**: Domain must be publicly accessible
+    - **Self-signed**: Add browser exception or use `curl -k`
+    - Check rate limits at https://letsencrypt.org/docs/rate-limits/
+  </Accordion>
+  
+  <Accordion title="Dokploy not starting">
+    1. Check port 3000 is not in use: `netstat -tlnp | grep 3000`
+    2. Verify Docker socket permissions
+    3. Check logs: `docker logs dokploy`
+  </Accordion>
+  
+  <Accordion title="Low disk space warnings">
+    1. Prune unused images: `docker image prune -a`
+    2. Check volume sizes: `docker system df`
+    3. Consider adding external storage
+  </Accordion>
+</AccordionGroup>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Node Hub" icon="grid-2" href="/guides/stackkits/node-hub">
+    Open the standard `base.<domain>` dashboard and service guide matrix.
+  </Card>
+  <Card title="CUE basics" icon="code" href="/stackkits/explanations/cue-architecture">
+    Learn how to customize StackKit schemas
+  </Card>
+</CardGroup>

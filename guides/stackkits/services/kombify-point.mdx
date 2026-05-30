@@ -1,0 +1,53 @@
+---
+title: "kombify Point DNS"
+description: "Use kombify Point for local StackKits service names"
+sidebarTitle: "kombify Point DNS"
+icon: globe
+---
+
+kombify Point provides local LAN DNS so names such as `base.<domain>` and `auth.<domain>` resolve to the StackKits server.
+
+## Prerequisites
+
+<Note>
+  Use kombify Point only for local DNS zones you control. Public DNS changes belong in your normal DNS provider.
+</Note>
+
+## Steps
+
+<Steps>
+  <Step title="Check the health endpoint">
+    Open the kombify Point row in the Node Hub or check the generated health URL.
+  </Step>
+  <Step title="Point clients at the resolver">
+    Configure your router or client device to use the StackKits server as DNS for the local zone.
+  </Step>
+  <Step title="Test a service name">
+    Resolve `base.<domain>` from a client device on the LAN, then open the Node Hub.
+  </Step>
+</Steps>
+
+## Verify
+
+- `base.<domain>` resolves to the StackKits server LAN IP.
+- Other local service names resolve consistently.
+- Public domains still use your normal upstream resolver.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Node Hub" icon="grid-2" href="/guides/stackkits/node-hub">
+    Confirm that generated local names open correctly.
+  </Card>
+  <Card title="Traefik" icon="route" href="/guides/stackkits/services/traefik">
+    Check that resolved hostnames route to the expected services.
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Only the server can resolve the names">
+    The DNS service may be healthy, but clients are not using it. Check router DHCP DNS settings or the client resolver configuration.
+  </Accordion>
+</AccordionGroup>

@@ -1,0 +1,53 @@
+---
+title: "PocketID"
+description: "Create the first passkey and use PocketID as the StackKits identity provider"
+sidebarTitle: "PocketID"
+icon: fingerprint
+---
+
+PocketID is the default passkey identity provider for StackKits services. It usually lives at `id.<domain>`.
+
+## Prerequisites
+
+<Note>
+  Open the Node Hub first and keep the generated admin information available until the first passkey is created.
+</Note>
+
+## Steps
+
+<Steps>
+  <Step title="Open setup">
+    Open `https://id.<domain>/setup` from the Node Hub.
+  </Step>
+  <Step title="Create the first admin">
+    Register the first admin user and passkey. Use a real operator identity, not a shared team mailbox.
+  </Step>
+  <Step title="Verify OIDC clients">
+    Keep the generated TinyAuth client enabled so protected service routes can use the login layer.
+  </Step>
+</Steps>
+
+## Verify
+
+- `id.<domain>` loads the PocketID UI.
+- The first admin can sign in with a passkey.
+- TinyAuth login redirects to PocketID when OIDC is enabled.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="TinyAuth" icon="lock-keyhole" href="/guides/stackkits/services/tinyauth">
+    Connect protected routes to the login layer.
+  </Card>
+  <Card title="Node Hub" icon="grid-2" href="/guides/stackkits/node-hub">
+    Return to first-run setup.
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="The setup page says the instance is already claimed">
+    Sign in with the existing admin account. If ownership is unknown, use the recovery material from the StackKits rollout output.
+  </Accordion>
+</AccordionGroup>

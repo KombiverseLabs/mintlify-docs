@@ -1,0 +1,53 @@
+---
+title: "Uptime Kuma"
+description: "Monitor StackKits services with Uptime Kuma"
+sidebarTitle: "Uptime Kuma"
+icon: chart-line
+---
+
+Uptime Kuma provides service uptime checks and status pages at `kuma.<domain>`.
+
+## Prerequisites
+
+<Note>
+  Use Node Hub service URLs as monitor targets so the checks match the real user-facing routes.
+</Note>
+
+## Steps
+
+<Steps>
+  <Step title="Open Uptime Kuma">
+    Use the Status button or open `https://kuma.<domain>`.
+  </Step>
+  <Step title="Create monitors">
+    Add HTTP monitors for important services such as Node Hub, TinyAuth, PocketID, and your app platform.
+  </Step>
+  <Step title="Add notifications">
+    Configure the notification channel you actually watch before publishing a status page.
+  </Step>
+</Steps>
+
+## Verify
+
+- The Node Hub monitor is green.
+- Protected services return the expected redirect or success code.
+- Notifications work with a test alert.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Node Hub" icon="grid-2" href="/guides/stackkits/node-hub">
+    Keep the rollout overview as the first monitor.
+  </Card>
+  <Card title="Dokploy" icon="rocket" href="/guides/stackkits/services/dokploy">
+    Add monitors for app workloads.
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Protected services look down">
+    For auth-protected services, monitor a health endpoint that is intentionally reachable or expect a redirect response instead of HTTP 200.
+  </Accordion>
+</AccordionGroup>

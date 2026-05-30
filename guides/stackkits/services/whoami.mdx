@@ -1,0 +1,52 @@
+---
+title: "Whoami"
+description: "Use Whoami to verify routing and auth headers"
+sidebarTitle: "Whoami"
+icon: bug
+---
+
+Whoami is a small diagnostic service at `whoami.<domain>`. Use it to confirm routing, headers, and auth behavior before debugging larger apps.
+
+## Prerequisites
+
+<Note>
+  Whoami is useful only when the reverse proxy and auth layer are enabled.
+</Note>
+
+## Steps
+
+<Steps>
+  <Step title="Open Whoami">
+    Open the Whoami row from the Node Hub.
+  </Step>
+  <Step title="Inspect headers">
+    Check the forwarded host, scheme, and identity headers after signing in.
+  </Step>
+  <Step title="Compare routes">
+    Use the result as the baseline when another service route behaves differently.
+  </Step>
+</Steps>
+
+## Verify
+
+- The page shows the expected hostname.
+- Protected access redirects through TinyAuth before the response appears.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Traefik" icon="route" href="/guides/stackkits/services/traefik">
+    Compare the router and middleware state.
+  </Card>
+  <Card title="TinyAuth" icon="lock-keyhole" href="/guides/stackkits/services/tinyauth">
+    Confirm the auth redirect path.
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Whoami is reachable without login">
+    Confirm that the service is meant to be protected and check the Traefik middleware for the Whoami router.
+  </Accordion>
+</AccordionGroup>
