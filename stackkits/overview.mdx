@@ -149,25 +149,26 @@ Each node is automatically classified based on hardware and provider metadata:
 
 ### 3. Add-Ons = composable extensions
 
-Add-Ons replace the old monolithic variant system. They are stackable and declare their compatibility:
+Add-Ons replace the old monolithic variant system. They are stackable, declare their compatibility, and layer onto any kit. The catalog currently ships 18 add-ons:
 
-| Add-On | Category | Compatible StackKits |
-|--------|----------|---------------------|
-| `monitoring` | Observability | base, modern, ha |
-| `backup` | Data | base, modern, ha |
-| `vpn-overlay` | Networking | modern, ha |
-| `gpu-workloads` | Compute | base, modern |
-| `media` | Applications | base, modern |
-| `smart-home` | IoT | base |
+| Category | Add-Ons |
+|----------|---------|
+| Observability & data | `monitoring`, `backup`, `backup-repo-server` |
+| Apps & media | `media`, `photos`, `vault`, `file-sharing`, `calendar`, `mail`, `gameserver` |
+| Compute & dev | `ai-workloads`, `dev-platform` |
+| Identity & access | `authelia`, `remote-desktop` |
+| Networking | `vpn-overlay`, `tunnel` |
+| Reliability | `ha` |
+| Home | `smart-home` |
 
 ```yaml kombination.yaml
 addons:
-  - monitoring       # OTLP collector baseline
-  - backup           # Restic + configurable targets
+  - monitoring       # VictoriaMetrics + Grafana + Loki + Alloy
+  - backup           # Kopia encrypted backups (3-2-1)
   - media            # Jellyfin + *arr stack
 ```
 
-For the current monitoring contract, see [/stackkits/reference/monitoring](/stackkits/reference/monitoring).
+See the full per-add-on detail and the platform-service alternatives in [tool alternatives](/stackkits/reference/tool-alternatives). For the monitoring contract, see [/stackkits/reference/monitoring](/stackkits/reference/monitoring).
 
 ## Progressive capability model
 

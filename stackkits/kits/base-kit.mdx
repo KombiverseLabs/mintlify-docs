@@ -60,7 +60,7 @@ Base Kit no longer relies on the old monolithic `variant` selector. Start from t
     | Surface | Description |
     |---------|-------------|
     | **Traefik v3** | Reverse proxy with auto-SSL |
-    | **Dokploy** | Container platform (like Vercel for your homelab) |
+    | **Coolify** | App platform (PaaS) — smart default; Dokploy/Komodo selectable |
     | **Uptime Kuma / Beszel** | Lightweight uptime or node-health UX |
     | **Dozzle** | Real-time Docker log viewer |
     | **monitoring-agent** | OTLP collector baseline enabled by default |
@@ -104,31 +104,35 @@ Base Kit no longer relies on the old monolithic `variant` selector. Start from t
 
 ## Included services
 
+<Note>
+  The app platform is **context-resolved** — the Base Kit does not hard-pin a PaaS. On standard/low tiers the resolver enables **Coolify** by default; the high tier also adds Portainer, Prometheus, and Grafana. Override any choice in your spec — see [tool alternatives](/stackkits/reference/tool-alternatives) for the full matrix.
+</Note>
+
 <CardGroup cols={2}>
   <Card title="Traefik v3" icon="route">
     **Reverse Proxy & SSL**
     
     Automatic HTTPS certificates (Let's Encrypt), routing, and load balancing for all services.
   </Card>
-  <Card title="Dokploy" icon="rocket">
-    **Container Platform**
-    
-    Self-hosted PaaS like Vercel/Railway. Deploy from Git, manage databases, and scale apps.
-  </Card>
   <Card title="Coolify" icon="cloud">
-    **Alternative PaaS**
+    **App platform (smart default)**
     
-    Open-source alternative to Heroku. Best for users with their own domain.
+    Self-hosted PaaS like Vercel/Heroku. Deploy from Git, manage databases, scale apps. Enabled by default — swap for Dokploy or Komodo with one override.
+  </Card>
+  <Card title="Dokploy / Komodo" icon="rocket">
+    **Alternative app platforms**
+    
+    Prefer a different PaaS? Select Dokploy (Vercel/Railway-style) or Komodo instead of Coolify.
   </Card>
   <Card title="Uptime Kuma" icon="heart-pulse">
     **Status Monitoring**
     
     Monitor your services with beautiful status pages and alerts.
   </Card>
-  <Card title="Beszel" icon="chart-line">
+  <Card title="Netdata" icon="gauge">
     **Server Metrics**
     
-    Lightweight resource monitoring (CPU, RAM, disk, network).
+    Real-time per-node metrics (CPU, RAM, disk, network). Beszel or Glances on low-resource nodes.
   </Card>
   <Card title="Dozzle" icon="list">
     **Log Viewer**
