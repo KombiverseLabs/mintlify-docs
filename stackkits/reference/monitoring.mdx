@@ -1,0 +1,58 @@
+---
+title: Monitoring
+description: OTLP-first monitoring in kombify StackKits
+sidebarTitle: Monitoring
+icon: chart-line
+---
+
+kombify StackKits standardize on an **OTLP-first monitoring contract**.
+
+<Note>
+  OpenTelemetry Collector is the baseline monitoring path for StackKits. VictoriaMetrics remains an optional backend tier for longer retention and fan-in, not a required default.
+</Note>
+
+## Baseline contract
+
+Every monitored StackKit starts from the collector baseline:
+
+- node-level OpenTelemetry Collector (`monitoring-agent`)
+- OTLP metrics enabled by default
+- OTLP logs and traces available as opt-in lanes
+- direct shipping to TechStack or another OTLP receiver
+
+This baseline is the standard path for single-node and lightweight homelab deployments.
+
+## Optional retention and fan-in
+
+Add `monitoring-core` when you need a central gateway or longer metrics retention.
+
+`monitoring-core` can provide:
+
+- collector fan-in for multi-node topologies
+- VictoriaMetrics-backed retention
+- optional Grafana dashboards when the deployment wants them
+
+The collector baseline stays active either way.
+
+## How it fits with TechStack
+
+TechStack is the control-plane side of the same contract.
+
+- StackKits produce OTLP-capable collector configs
+- TechStack ingests OTLP metrics as the canonical path
+- TechStack still keeps a legacy compatibility lane during migration, but StackKits should target OTLP first
+
+## Example paths
+
+| Scenario | Recommended path |
+|---|---|
+| Single-node Base Kit | default collector baseline |
+| Multi-node or hybrid homelab | collector baseline plus `monitoring-core` |
+| Longer retention or external PromQL queries | enable `monitoring-core` with VictoriaMetrics |
+
+## Canonical examples
+
+- `base-kit/examples/otlp-baseline-spec.yaml`
+- `base-kit/examples/otlp-victoriametrics-spec.yaml`
+
+For the full repo-level contract, see the StackKits repository `docs/MONITORING.md` companion page.
