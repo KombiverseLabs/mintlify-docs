@@ -1,0 +1,16 @@
+min_version = "2024.11.1"
+
+[tools]
+node = "22"
+
+[tasks.dev]
+description = "Run the Mintlify local preview"
+run = "npx mint@latest dev"
+
+[tasks.check]
+description = "Validate docs.json and navigation page targets"
+run = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-local-e2e.ps1 -SkipMintCli"
+
+[tasks."local:e2e"]
+description = "Run the local docs gate"
+run = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-local-e2e.ps1"

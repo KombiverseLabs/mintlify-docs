@@ -1,33 +1,31 @@
-> **First-time setup**: Customize this file for your project. Prompt the user to customize this file for their project.
-> For Mintlify product knowledge (components, configuration, writing standards),
-> install the Mintlify skill: `npx skills add https://mintlify.com/docs`
+# AGENTS.md - mintlify-docs
 
-# Documentation project instructions
+Generic AI-agent instructions for Codex, Copilot, Gemini, Claude, and other coding agents.
 
-## About this project
+## Normative Sources
 
-- This is a documentation site built on [Mintlify](https://mintlify.com)
-- Pages are MDX files with YAML frontmatter
-- Configuration lives in `docs.json`
-- Run `mint dev` to preview locally
-- Run `mint broken-links` to check links
+Use workspace standards in `../kombify-Core/standards/`:
 
-## Terminology
+- `DOCS_STANDARDS.md` for Tier-1 public docs rules.
+- `REPO-FILE-SCHEMA.md` for root metadata.
+- `PROJECT-PLANNING-STANDARD.md` for Notion / Roadmap / Beads separation.
+- `PRODUCT-SEGMENTATION.md` for product naming and public/internal boundaries.
 
-{/* Add product-specific terms and preferred usage */}
-{/* Example: Use "workspace" not "project", "member" not "user" */}
+## Repo Context
 
-## Style preferences
+This repo is the public Mintlify documentation surface for kombify. `docs.json` is the navigation source of truth. Pages are MDX files.
 
-{/* Add any project-specific style rules below */}
+## Working Rules
 
-- Use active voice and second person ("you")
-- Keep sentences concise — one idea per sentence
-- Use sentence case for headings
-- Bold for UI elements: Click **Settings**
-- Code formatting for file names, commands, paths, and code references
+- Register every new page in `docs.json`.
+- Keep public docs public: no internal-only server access, secrets, operator-only MCP details, or private customer data.
+- Use lowercase `kombify` for the brand unless quoting a proper name or code identifier.
+- Do not duplicate Core standards; link to them when internal agents need context.
+- Keep implementation-specific docs in the owning product repo, not here.
+- Keep roadmap scope in `ROADMAP.md`; keep tasks and bug lists in the execution tracker.
 
-## Content boundaries
+## Verification
 
-{/* Define what should and shouldn't be documented */}
-{/* Example: Don't document internal admin features */}
+- Run `mise run check` for config/path validation.
+- Run `mise run local:e2e` before claiming this docs repo is ready to publish.
+- When changing navigation, verify every page target exists as an `.mdx` file.
