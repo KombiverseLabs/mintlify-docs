@@ -1,0 +1,35 @@
+---
+title: "Changelog"
+description: "What's new in StackKits and the kombify platform"
+icon: "newspaper"
+mode: "center"
+---
+
+Product updates, organized newest first. For deeper details on each release, see the [StackKits release notes on GitHub](https://github.com/kombifyio/StackKits/releases).
+
+<Update label="2026-06-05" description="Week of June 2 – June 5">
+
+## StackKits v0.3.1 and v0.3.2
+
+Two patch releases shipped this week, focused on Coolify routing, auth, installer reliability, and security.
+
+### New
+
+- **Canonical live scenarios.** Releases are now validated against three reference setups: local Coolify (SK-S1), kombify.me on Komodo (SK-S2), and custom-domain Coolify (SK-S3). Installer runs are split into bounded Start, Wait, and Verify phases so you can see exactly where a deploy is. See [Choosing a kit](/guides/stackkits/choosing-a-kit).
+- **Coolify managed routing.** BaseKit on Coolify now bootstraps, reconciles, and exposes StackKit services through the managed proxy at predictable hostnames like `base.<domain>`, `id.<domain>`, `photos.<domain>`, and `kuma.<domain>`. See [Deploy with the CLI or TechStack](/guides/stackkits/deploy-with-cli-or-techstack).
+
+### Improved
+
+- **PocketID + TinyAuth on BaseKit.** Provider registration and runtime checks were restored, so protected services again show PocketID login (with TinyAuth as the password-only fallback) instead of skipping straight to TinyAuth. See [PocketID](/guides/stackkits/services/pocketid) and [TinyAuth](/guides/stackkits/services/tinyauth).
+- **Cloudflare DNS-01 for custom domains.** Custom-domain Coolify rollouts now correctly pass Cloudflare Global API Key credentials to Traefik when `CLOUDFLARE_EMAIL` is set, while scoped API tokens continue to work as before. See [Traefik](/guides/stackkits/services/traefik).
+- **Installer readiness.** Live installer jobs hand off VM state before verification and wait for routed services and certificates in bounded phases, instead of relying on one long-running job.
+- **Security updates.** Go crypto and networking dependencies (`golang.org/x/crypto`, `golang.org/x/net`, and related modules) were updated and lint, static, and security checks restored to a clean state.
+
+### Fixed
+
+- **Coolify proxy recovery.** Fallback and reconciliation now correctly restore file-provider routing, dynamic config mounts, proxy TLS, service routes, host-gateway access, and dynamic-config sync.
+- **Coolify endpoint contract.** BaseKit keeps the persisted Coolify endpoint node-local at `http://127.0.0.1:8000`, while bootstrap and readiness probes can use a separate endpoint reachable from remote Docker targets.
+- **Restore-drill metrics.** Host CPU metrics now preserve legitimate zero values instead of dropping them as missing data.
+- **Release archive validation.** Smoke checks now validate the current Coolify platform contract from packaged contents instead of obsolete token API markers.
+
+</Update>
