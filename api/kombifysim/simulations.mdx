@@ -1,0 +1,358 @@
+---
+title: Simulations API
+description: Create and manage simulation environments
+---
+
+
+Simulations are isolated environments where you can safely test homelab configurations. Each simulation contains one or more nodes (virtual servers) connected via virtual networks.
+
+## Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/simulations` | List all simulations |
+| POST | `/api/v1/simulations` | Create a new simulation |
+| GET | `/api/v1/simulations/{id}` | Get simulation details |
+| DELETE | `/api/v1/simulations/{id}` | Delete a simulation |
+| POST | `/api/v1/simulations/{id}/start` | Start all nodes |
+| POST | `/api/v1/simulations/{id}/stop` | Stop all nodes |
+| POST | `/api/v1/simulations/{id}/snapshot` | Create a snapshot |
+| POST | `/api/v1/simulations/{id}/restore` | Restore from snapshot |
+
+## List simulations
+
+```bash
+GET /api/v1/simulations
+```
+
+**Query parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `status` | string | Filter by status: `running`, `stopped`, `error` |
+| `limit` | int | Max results (default: 20) |
+| `offset` | int | Pagination offset |
+
+**Example:**
+
+```bash
+curl https://api.kombify.io/v1/simulation/simulations
+```
+
+**Response:**
+
+```json
+{
+  "simulations": [
+    {
+      "id": "sim_abc123",
+      "name": "ha-cluster-test",
+      "status": "running",
+      "nodes_count": 3,
+      "created_at": "2026-01-26T10:00:00Z",
+      "started_at": "2026-01-26T10:01:00Z"
+    },
+    {
+      "id": "sim_def456",
+      "name": "single-node-test",
+      "status": "stopped",
+      "nodes_count": 1,
+      "created_at": "2026-01-25T14:00:00Z"
+    }
+  ],
+  "total": 2,
+  "limit": 20,
+  "offset": 0
+}
+```
+
+## Create simulation
+
+```bash
+POST /api/v1/simulations
+Content-Type: application/json
+```
+
+**Request body:**
+
+```json
+{
+  "name": "my-test-env",
+  "description": "Testing HA configuration",
+  "nodes": [
+    {
+      "name": "primary",
+      "os": "ubuntu-22.04",
+      "resources": {
+        "cpu": 2,
+        "memory": "2048Mi"
+      }
+    },
+    {
+      "name": "replica-1",
+      "os": "ubuntu-22.04",
+      "resources": {
+        "cpu": 2,
+        "memory": "2048Mi"
+      }
+    }
+  ],
+  "networks": [
+    {
+      "name": "internal",
+      "subnet": "172.20.0.0/24"
+    }
+  ]
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": "sim_xyz789",
+  "name": "my-test-env",
+  "status": "creating",
+  "nodes": [
+    {
+      "id": "node_aaa111",
+      "name": "primary",
+      "status": "creating",
+      "ssh_port": 30001
+    },
+    {
+      "id": "node_bbb222",
+      "name": "replica-1",
+      "status": "creating",
+      "ssh_port": 30002
+    }
+  ],
+  "networks": [
+    {
+      "id": "net_ccc333",
+      "name": "internal",
+      "subnet": "172.20.0.0/24"
+    }
+  ],
+  "created_at": "2026-01-26T10:30:00Z"
+}
+```
+
+## Get simulation details
+
+```bash
+GET /api/v1/simulations/{id}
+```
+
+**Response:**
+
+```json
+{
+  "id": "sim_xyz789",
+  "name": "my-test-env",
+  "description": "Testing HA configuration",
+  "status": "running",
+  "nodes": [
+    {
+      "id": "node_aaa111",
+      "name": "primary",
+      "os": "ubuntu-22.04",
+      "status": "running",
+      "ssh_port": 30001,
+      "ip_addresses": {
+        "internal": "172.20.0.10"
+      },
+      "resources": {
+        "cpu": 2,
+        "memory": "2048Mi"
+      }
+    }
+  ],
+  "networks": [
+    {
+      "id": "net_ccc333",
+      "name": "internal",
+      "subnet": "172.20.0.0/24",
+      "gateway": "172.20.0.1"
+    }
+  ],
+  "created_at": "2026-01-26T10:30:00Z",
+  "started_at": "2026-01-26T10:31:00Z"
+}
+```
+
+## Start simulation
+
+Starts all nodes in the simulation.
+
+```bash
+POST /api/v1/simulations/{id}/start
+```
+
+**Response:**
+
+```json
+{
+  "id": "sim_xyz789",
+  "status": "starting",
+  "message": "Starting 2 nodes..."
+}
+```
+
+## Stop simulation
+
+Stops all nodes but preserves their state.
+
+```bash
+POST /api/v1/simulations/{id}/stop
+```
+
+**Response:**
+
+```json
+{
+  "id": "sim_xyz789",
+  "status": "stopping",
+  "message": "Stopping 2 nodes..."
+}
+```
+
+## Delete simulation
+
+Removes the simulation and all its nodes. **This is permanent.**
+
+```bash
+DELETE /api/v1/simulations/{id}
+```
+
+**Query parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `force` | bool | Force delete even if running |
+
+**Response:**
+
+```json
+{
+  "id": "sim_xyz789",
+  "deleted": true
+}
+```
+
+## Create snapshot
+
+Saves the current state of all nodes.
+
+```bash
+POST /api/v1/simulations/{id}/snapshot
+Content-Type: application/json
+```
+
+**Request body:**
+
+```json
+{
+  "name": "before-database-migration",
+  "description": "Snapshot before testing DB migration"
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": "snap_111222",
+  "simulation_id": "sim_xyz789",
+  "name": "before-database-migration",
+  "size_mb": 512,
+  "created_at": "2026-01-26T11:00:00Z"
+}
+```
+
+## Restore from snapshot
+
+Restores all nodes to a previous snapshot state.
+
+```bash
+POST /api/v1/simulations/{id}/restore
+Content-Type: application/json
+```
+
+**Request body:**
+
+```json
+{
+  "snapshot_id": "snap_111222"
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": "sim_xyz789",
+  "status": "restoring",
+  "snapshot_id": "snap_111222",
+  "message": "Restoring 2 nodes from snapshot..."
+}
+```
+
+## Common patterns
+
+<Accordion title="Create a multi-node HA test environment" icon="server">
+
+```bash
+# Create simulation with 3 nodes
+curl -X POST https://api.kombify.io/v1/simulation/simulations \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "ha-test",
+    "nodes": [
+      {"name": "node-1", "os": "ubuntu-22.04", "resources": {"cpu": 2, "memory": "2048Mi"}},
+      {"name": "node-2", "os": "ubuntu-22.04", "resources": {"cpu": 2, "memory": "2048Mi"}},
+      {"name": "node-3", "os": "ubuntu-22.04", "resources": {"cpu": 2, "memory": "2048Mi"}}
+    ],
+    "networks": [
+      {"name": "cluster", "subnet": "172.20.0.0/24"}
+    ]
+  }'
+
+# SSH into each node
+ssh -p 30001 root@localhost  # node-1
+ssh -p 30002 root@localhost  # node-2
+ssh -p 30003 root@localhost  # node-3
+```
+
+</Accordion>
+
+<Accordion title="Snapshot before risky changes" icon="camera">
+
+```bash
+SIM_ID="sim_xyz789"
+
+# Create snapshot
+curl -X POST "https://api.kombify.io/v1/simulation/simulations/$SIM_ID/snapshot" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "pre-change"}'
+
+# Make your risky changes via SSH...
+
+# If something breaks, restore
+curl -X POST "https://api.kombify.io/v1/simulation/simulations/$SIM_ID/restore" \
+  -H "Content-Type: application/json" \
+  -d '{"snapshot_id": "snap_111222"}'
+```
+
+</Accordion>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Nodes API" icon="server" href="/api/kombifysim/nodes">
+    Manage individual nodes
+  </Card>
+  <Card title="Templates" icon="book" href="/api/kombifysim/templates">
+    Pre-built simulation templates
+  </Card>
+</CardGroup>

@@ -1,0 +1,121 @@
+---
+title: kombify AI architecture
+description: How Brain, Companions, and Managers work together
+sidebarTitle: Architecture
+icon: sitemap
+---
+
+kombify AI is not a single monolithic assistant. It is an orchestrated system of specialized agents coordinated by a central Brain router.
+
+## System overview
+
+```mermaid
+graph TB
+    subgraph Frontend["Frontend Surfaces"]
+        Widget["Chat Widget"]
+        Web["Web Chat"]
+        Mobile["Mobile App"]
+        Portal["Portal"]
+    end
+
+    subgraph Brain["Brain (Stateless Router)"]
+        Classify["Intent<br/>Classification"]
+        Registry["Agent<br/>Registry"]
+        Route["Route"]
+    end
+
+    subgraph Companions["Companions (On-Demand)"]
+        SmartHome["Smart Home"]
+        Personal["Personal"]
+        Work["Work"]
+    end
+
+    subgraph Managers["Managers (24/7)"]
+        Guard["Guard"]
+        ServerMgr["Server Manager"]
+    end
+
+    subgraph Infra["Your Infrastructure"]
+        Nodes["Nodes"]
+        Services["Services"]
+    end
+
+    Frontend --> Brain
+    Brain --> Companions
+    Brain --> Managers
+    Managers --> Infra
+    Companions -.->|"Delegate"| Managers
+
+    style Frontend fill:#1e293b,stroke:#38bdf8,color:#f8fafc
+    style Brain fill:#1e293b,stroke:#a78bfa,color:#f8fafc
+    style Companions fill:#1e293b,stroke:#fbbf24,color:#f8fafc
+    style Managers fill:#1e293b,stroke:#4ade80,color:#f8fafc
+    style Infra fill:#1e293b,stroke:#ec4899,color:#f8fafc
+```
+
+## The Brain
+
+The Brain is **not** an AI agent. It is a stateless routing and coordination service that:
+
+- Classifies user intent via rule-based and LLM-hybrid classification
+- Discovers available agents via an AgentCard registry
+- Routes work to the appropriate Companion or Manager
+- Collects observability data across all agents
+- Never holds user memory or executes tools directly
+
+## Companions vs Managers
+
+| Property | Companions | Managers |
+|----------|-----------|----------|
+| **Activation** | On-demand (user-initiated) | 24/7 background |
+| **Memory** | 4-layer persistent memory | No conversation memory |
+| **Interaction** | Conversational | Event-driven, task-oriented |
+| **Autonomy** | User-directed | Graduated (trust progression) |
+| **Examples** | Smart Home, Personal, Work | Guard, Server Manager |
+
+## Technology stack
+
+| Component | Technology |
+|-----------|-----------|
+| **AI Framework** | Google Genkit Go 1.4 |
+| **Agent Framework** | Google ADK Go 1.0 |
+| **Backend** | Go 1.25+, Chi v5 |
+| **Messaging** | NATS (multi-node coordination) |
+| **Database (SaaS)** | PostgreSQL 17 + pgvector |
+| **Database (Self-hosted)** | SQLite (pure Go) |
+| **Observability** | OpenTelemetry |
+
+## Multi-provider model routing
+
+kombify AI intelligently routes requests to the optimal model based on task complexity, cost, and user preferences.
+
+```mermaid
+flowchart LR
+    Request["User Request"]
+    Router["Model Router"]
+
+    subgraph Providers["Available Providers"]
+        Fast["GPT-5-nano<br/><small>Fast, cheap</small>"]
+        Balanced["Claude Sonnet<br/><small>Balanced</small>"]
+        Powerful["GPT-4o<br/><small>Complex tasks</small>"]
+        Local["Ollama<br/><small>Private, free</small>"]
+    end
+
+    Request --> Router
+    Router --> Providers
+
+    style Request fill:#1e293b,stroke:#38bdf8,color:#f8fafc
+    style Router fill:#1e293b,stroke:#a78bfa,color:#f8fafc
+    style Providers fill:#1e293b,stroke:#4ade80,color:#f8fafc
+```
+
+## Further reading
+
+<CardGroup cols={2}>
+  <Card title="Trust model" icon="shield" href="/ai/explanations/trust-model">
+    How Managers gain autonomy gradually
+  </Card>
+  <Card title="Memory system" icon="brain" href="/ai/explanations/memory-system">
+    The 4-layer Companion memory architecture
+  </Card>
+</CardGroup>

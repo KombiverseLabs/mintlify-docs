@@ -1,0 +1,68 @@
+---
+title: Trust progression model
+description: How kombify AI Managers gain autonomy gradually
+sidebarTitle: Trust model
+icon: shield
+---
+
+Managers operate with graduated autonomy. The trust progression model ensures that autonomous agents start conservatively and only gain more authority as they prove reliable.
+
+## Three trust levels
+
+```mermaid
+flowchart LR
+    Observer["Observer"]
+    Advisor["Advisor"]
+    Autonomous["Autonomous"]
+
+    Observer -->|"Consistent, accurate<br/>monitoring"| Advisor
+    Advisor -->|"Suggestions consistently<br/>accepted"| Autonomous
+
+    style Observer fill:#1e293b,stroke:#fbbf24,color:#f8fafc
+    style Advisor fill:#1e293b,stroke:#38bdf8,color:#f8fafc
+    style Autonomous fill:#1e293b,stroke:#4ade80,color:#f8fafc
+```
+
+### Observer
+
+The Manager monitors and logs but takes no action. This is the default starting level.
+
+- Detects issues and anomalies
+- Records observations in the activity log
+- No user notifications beyond the log
+
+### Advisor
+
+The Manager detects issues, proposes specific fixes, and asks for your confirmation before acting.
+
+- Sends notifications with proposed actions
+- Waits for explicit approval before executing
+- Tracks acceptance rate to build trust score
+
+### Autonomous
+
+The Manager executes fixes automatically without requiring confirmation.
+
+- Acts immediately on detected issues
+- Logs all actions for audit trail
+- Can be reverted to Advisor at any time
+
+## Why this matters
+
+Autonomous infrastructure agents need guardrails. Giving an AI full control from day one is risky. The trust progression model:
+
+- **Builds confidence** — You see the Manager's judgment before trusting it
+- **Prevents damage** — Bad suggestions are caught before execution
+- **Creates audit trails** — Every action is logged regardless of trust level
+- **Enables rollback** — You can reduce trust level at any time
+
+## Further reading
+
+<CardGroup cols={2}>
+  <Card title="Guard setup" icon="shield-check" href="/ai/how-to/guard">
+    Configure Guard's trust level
+  </Card>
+  <Card title="Architecture" icon="sitemap" href="/ai/explanations/architecture">
+    How Managers fit into the overall system
+  </Card>
+</CardGroup>

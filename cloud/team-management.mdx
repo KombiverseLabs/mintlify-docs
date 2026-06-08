@@ -1,0 +1,237 @@
+---
+title: Team management
+description: Manage team members and roles in Cloud
+sidebarTitle: Team management
+icon: users
+---
+
+
+Cloud provides comprehensive team management for collaborative homelab administration. Invite members, assign roles, and control access across all connected environments.
+
+## Team overview
+
+Access team settings from the sidebar: **Settings** → **Team**
+
+The team page shows:
+- All team members
+- Their roles and permissions
+- Invitation status
+- Activity history
+
+## Roles and permissions
+
+Cloud uses role-based access control (RBAC) with four predefined roles:
+
+### Owner
+
+<Note>
+One owner per organization. Transfer ownership via Settings → Organization.
+</Note>
+
+| Permission | Access |
+|------------|--------|
+| Manage billing | ✅ |
+| Delete organization | ✅ |
+| Manage team | ✅ |
+| All homelab access | ✅ |
+| All tool access | ✅ |
+
+### Admin
+
+| Permission | Access |
+|------------|--------|
+| Manage billing | ❌ |
+| Delete organization | ❌ |
+| Manage team | ✅ |
+| All homelab access | ✅ |
+| All tool access | ✅ |
+
+### Operator
+
+| Permission | Access |
+|------------|--------|
+| Manage billing | ❌ |
+| Delete organization | ❌ |
+| Manage team | ❌ |
+| View all homelabs | ✅ |
+| Manage assigned homelabs | ✅ |
+| Deploy changes | ✅ |
+| SSH access | ✅ |
+| Studio (view only) | 👁️ |
+
+### Viewer
+
+| Permission | Access |
+|------------|--------|
+| View assigned homelabs | ✅ |
+| View deployments | ✅ |
+| View logs | ✅ |
+| Make changes | ❌ |
+| SSH access | ❌ |
+
+## Inviting team members
+
+<Steps>
+  <Step title="Open team settings">
+    Navigate to **Settings** → **Team**
+  </Step>
+  <Step title="Click Invite">
+    Click the **Invite Member** button
+  </Step>
+  <Step title="Enter details">
+    - Email address
+    - Role (Admin, Operator, or Viewer)
+    - Optional: Assign specific homelabs
+  </Step>
+  <Step title="Send invitation">
+    Click **Send Invite** — they'll receive an email
+  </Step>
+</Steps>
+
+### Invitation email
+
+Recipients receive an email with:
+- Your organization name
+- Their assigned role
+- Link to accept (expires in 7 days)
+- Instructions to create account (if new to Cloud)
+
+### Pending invitations
+
+View and manage pending invitations:
+- **Resend** — Send the email again
+- **Revoke** — Cancel the invitation
+- **Edit** — Change role before acceptance
+
+## Managing members
+
+### Edit member
+
+1. Click a member's row
+2. Change their role
+3. Modify homelab assignments
+4. Click **Save**
+
+### Remove member
+
+1. Click the **...** menu on a member
+2. Select **Remove from team**
+3. Confirm the action
+
+<Warning>
+Removing a member immediately revokes all access. Their data and activity history are retained for audit purposes.
+</Warning>
+
+## Homelab assignments
+
+Control which homelabs each member can access:
+
+### Assignment modes
+
+| Mode | Description |
+|------|-------------|
+| **All homelabs** | Access to current and future homelabs |
+| **Specific homelabs** | Only assigned homelabs |
+
+### Assigning homelabs
+
+1. Edit a team member
+2. Under **Homelab Access**, choose mode
+3. If "Specific homelabs", check the ones to grant
+4. Save changes
+
+## Activity audit
+
+Track team activity:
+
+```text
+Feb 3, 10:32 AM  Jane (admin)     Deployed to "Production Homelab"
+Feb 3, 10:15 AM  John (operator)  SSH session on main-server
+Feb 3, 09:45 AM  Jane (admin)     Invited Bob as Viewer
+Feb 2, 04:20 PM  Bob (viewer)     Viewed deployment logs
+```
+
+### Filter activity
+
+- By member
+- By action type
+- By homelab
+- By date range
+
+### Export audit log
+
+Download activity logs as CSV:
+1. Apply desired filters
+2. Click **Export**
+3. Choose date range
+4. Download CSV file
+
+## SSO integration
+
+Enterprise plans support Single Sign-On via OIDC.
+
+<Tabs>
+  <Tab title="Setup overview">
+    1. Configure your identity provider (IdP)
+    2. Add OIDC settings in Cloud
+    3. Map IdP groups to Cloud roles
+    4. Enable SSO for your organization
+  </Tab>
+  <Tab title="Supported providers">
+    - Auth0 (built-in)
+    - Okta
+    - Azure AD
+    - Google Workspace
+    - Any OIDC-compliant provider
+  </Tab>
+</Tabs>
+
+See [Enterprise](/cloud/enterprise) for detailed SSO setup.
+
+## Team settings
+
+### Require 2FA
+
+Enforce two-factor authentication for all members:
+1. Go to **Settings** → **Security**
+2. Enable **Require 2FA**
+3. Members have 7 days to enable 2FA
+
+### Session timeout
+
+Configure automatic logout after inactivity:
+- 15 minutes
+- 30 minutes
+- 1 hour
+- 4 hours
+- 24 hours
+
+### IP allowlist
+
+Restrict access to specific IP ranges:
+1. Go to **Settings** → **Security**
+2. Enable **IP Allowlist**
+3. Add trusted IP ranges (CIDR notation)
+
+## Best practices
+
+<Accordion title="Principle of least privilege">
+Assign the minimum role needed:
+- **Viewer** for stakeholders who just need visibility
+- **Operator** for team members who deploy and manage
+- **Admin** for those who manage team and settings
+</Accordion>
+
+<Accordion title="Regular access reviews">
+Periodically review team access:
+- Remove inactive members
+- Verify role assignments are still appropriate
+- Check homelab assignments
+</Accordion>
+
+<Accordion title="Use specific homelab assignments">
+For larger teams, assign specific homelabs rather than "All":
+- Reduces blast radius of mistakes
+- Clearer accountability
+- Easier to audit
+</Accordion>

@@ -1,0 +1,140 @@
+---
+title: SSH Access
+description: Connecting to simulated nodes via SSH
+sidebarTitle: SSH Access
+icon: terminal
+---
+
+
+Every simulated node has full SSH access, just like a real server.
+
+## Default Credentials
+
+| Field | Value |
+|-------|-------|
+| **User** | `root` |
+| **Password** | `kombifysim` |
+| **Port Range** | 30000-39999 |
+
+## Connecting
+
+### Find Your Node's Port
+
+Each node gets a unique SSH port:
+
+```bash
+# List nodes with SSH ports
+curl -s https://api.kombify.io/v1/simulation/nodes | jq '.[] | {name, ssh_port}'
+```
+
+Output:
+```json
+{"name": "node-1", "ssh_port": 30001}
+{"name": "node-2", "ssh_port": 30002}
+{"name": "node-3", "ssh_port": 30003}
+```
+
+### Connect via SSH
+
+```bash
+ssh -p 30001 root@localhost
+# Password: kombifysim
+```
+
+### SSH Config (Recommended)
+
+Add to `~/.ssh/config`:
+
+```sshconfig
+Host sim-node-1
+    HostName localhost
+    Port 30001
+    User root
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+
+Host sim-node-2
+    HostName localhost
+    Port 30002
+    User root
+    StrictHostKeyChecking no
+    UserKnownHostsFile /dev/null
+```
+
+Now connect with:
+```bash
+ssh sim-node-1
+```
+
+## SSH Keys
+
+### Using Your Own Key
+
+```bash
+# Copy your key to the node
+ssh-copy-id -p 30001 root@localhost
+
+# Or manually
+cat ~/.ssh/id_rsa.pub | ssh -p 30001 root@localhost \
+  "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+```
+
+### Pre-provisioning Keys
+
+When creating a node, include your public key:
+
+```bash
+curl -X POST https://api.kombify.io/v1/simulation/nodes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "secure-node",
+    "os": "ubuntu-22.04",
+    "ssh_keys": ["ssh-rsa AAAA... your-key"]
+  }'
+```
+
+## File Transfer
+
+### SCP
+
+```bash
+# Upload
+scp -P 30001 local-file.txt root@localhost:/tmp/
+
+# Download
+scp -P 30001 root@localhost:/var/log/syslog ./
+```
+
+### rsync
+
+```bash
+rsync -avz -e "ssh -p 30001" ./myapp/ root@localhost:/opt/myapp/
+```
+
+## Port Forwarding
+
+Access services inside nodes:
+
+```bash
+# Forward node's port 80 to local 8080
+ssh -p 30001 -L 8080:localhost:80 root@localhost
+```
+
+Now access `http://localhost:8080` to reach the node's web server.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Connection refused">
+    1. Check the node is running: `curl https://api.kombify.io/v1/simulation/nodes`
+    2. Verify the port: node may be on different port
+    3. Wait a few seconds after node creation
+  </Accordion>
+  
+  <Accordion title="Host key changed">
+    Sim nodes are ephemeral, so host keys change:
+    ```bash
+    ssh-keygen -R "[localhost]:30001"
+    ```
+  </Accordion>
+</AccordionGroup>

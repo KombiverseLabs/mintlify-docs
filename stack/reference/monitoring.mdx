@@ -1,0 +1,117 @@
+---
+title: Monitoring
+description: Monitor your infrastructure with kombify TechStack
+sidebarTitle: Monitoring
+icon: chart-line
+---
+
+kombify TechStack uses **Monitoring 2.0**, an OTLP-first observability contract built around OpenTelemetry Collector and API-first monitoring surfaces.
+
+<Note>
+  OTLP metrics ingest is the canonical path. The legacy `PushMetrics` lane and the embedded TSDB remain available as migration and fallback compatibility layers.
+</Note>
+
+## Current operating model
+
+TechStack monitoring is intentionally split into two concerns:
+
+- **Ingest**: OTLP metrics arrive from collectors or OTLP-capable agents
+- **Query and diagnostics**: operators and AI assistants inspect the monitoring plane through stable HTTP APIs
+
+The default path is:
+
+1. Node or gateway collectors export metrics via OTLP
+2. TechStack ingests them through the OTLP metrics service
+3. Monitoring APIs expose status, health, queries, and alert state
+
+## Health and diagnostics
+
+Use the normal service health endpoint for runtime availability and the monitoring endpoints for observability health.
+
+| Endpoint | Purpose |
+|---|---|
+| `/api/v1/health` | service health for the TechStack runtime |
+| `/api/v1/monitor/status` | query backend, ingest backend, and compatibility-mode metadata |
+| `/api/v1/monitor/health` | live OTLP and legacy ingest diagnostics, queue status, parse errors, and backend health |
+
+<Tip>
+  `GET /api/v1/monitor/health` is the best debugging surface during rollout because it stays available even when the remote query backend is degraded.
+</Tip>
+
+## Query APIs
+
+TechStack exposes PromQL-style query surfaces through the monitoring API.
+
+| Endpoint | Purpose |
+|---|---|
+| `/api/v1/monitor/metrics/instant` | instant query |
+| `/api/v1/monitor/metrics/query` | range query |
+| `/api/v1/monitor/metrics/names` | known metric names |
+| `/api/v1/monitor/metrics/labels` | label names |
+| `/api/v1/monitor/metrics/values` | values for a label |
+| `/api/v1/monitor/alerts` | active alerts |
+| `/api/v1/monitor/alerts/rules` | alert rules and state |
+
+## Ingest paths
+
+### Canonical path
+
+- `opentelemetry.proto.collector.metrics.v1.MetricsService`
+- OTLP collectors on nodes or gateways
+- standard path for the StackKits collector baseline
+
+### Compatibility path
+
+- legacy gRPC `PushMetrics`
+- kept during migration for older agents
+- writes into the same monitoring backend contract
+
+## Storage and backends
+
+TechStack can operate against:
+
+- the embedded TSDB compatibility path
+- a remote PromQL-compatible backend such as VictoriaMetrics
+
+That means you can keep the simple built-in path for smaller deployments or move query and retention to a dedicated backend without changing the operator-facing monitoring APIs.
+
+## StackKits alignment
+
+StackKits and TechStack share the same monitoring direction:
+
+- OpenTelemetry Collector is the standard deployment primitive
+- OTLP metrics are the default transport
+- VictoriaMetrics is an optional add-on tier for retention and fan-in
+- older Prometheus-default wording should be treated as historical context only
+
+If you want the StackKits-side contract, see `/stackkits/reference/monitoring`.
+
+## Typical deployment patterns
+
+### Direct-to-TechStack baseline
+
+Best for single-node or lightweight homelabs.
+
+- collector on the node
+- OTLP export to TechStack
+- TechStack diagnostics and queries stay local and simple
+
+### Monitoring-core / retention tier
+
+Best for multi-node or longer-retention setups.
+
+- collector on each node
+- optional gateway / fan-in tier
+- optional VictoriaMetrics backend
+- TechStack keeps the same monitoring APIs while querying the remote backend
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Wallet reference" icon="key" href="/stack/reference/wallet">
+    Understand the wallet-first access and recovery model
+  </Card>
+  <Card title="Troubleshooting" icon="bug" href="/stack/reference/troubleshooting">
+    Debug common issues
+  </Card>
+</CardGroup>

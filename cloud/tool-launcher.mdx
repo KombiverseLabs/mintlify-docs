@@ -1,0 +1,221 @@
+---
+title: Tool launcher
+description: Launch kombify tools directly from kombify Cloud
+sidebarTitle: Tool launcher
+icon: rocket
+---
+
+
+The Tool Launcher provides one-click access to all kombify tools for your connected homelabs. No need to manage separate installations — everything runs in context of your selected stack.
+
+## Available tools
+
+<CardGroup cols={2}>
+  <Card title="kombify TechStack" icon="layer-group" href="#kombify-techstack">
+    Full orchestration and management
+  </Card>
+  <Card title="kombify Simulate" icon="flask" href="#kombify-simulate">
+    Test deployments in simulation
+  </Card>
+  <Card title="StackKits Studio" icon="cubes" href="#stackkits-studio">
+    Visual StackKit editor
+  </Card>
+  <Card title="Terminal" icon="terminal" href="#web-terminal">
+    SSH access to nodes
+  </Card>
+</CardGroup>
+
+## Launching tools
+
+### From the dashboard
+
+1. Select a homelab
+2. Click the **Tools** dropdown
+3. Choose the tool to launch
+
+### From homelab details
+
+1. Open a homelab's detail view
+2. Use the toolbar icons to launch tools
+3. Tool opens in a new tab with context
+
+## kombify TechStack
+
+Full-featured orchestration interface for managing your homelab.
+
+### Features available
+
+- Node management
+- Service configuration
+- Deployment pipeline
+- Job monitoring
+- Log viewer
+
+### Launch options
+
+| Option | Description |
+|--------|-------------|
+| **Read-only** | View configuration without changes |
+| **Full access** | Complete management capabilities |
+| **Specific node** | Open directly to a node |
+
+### Context passed
+
+When launched, Stack receives:
+- Homelab ID and connection details
+- Your kombify Cloud authentication
+- Role-based permissions
+
+## kombify Simulate
+
+Test changes in a simulated environment before deploying to production.
+
+### Features available
+
+- Create simulation from current config
+- Test StackKit updates
+- Validate configuration changes
+- Network latency testing
+
+### Workflow
+
+<Steps>
+  <Step title="Select homelab">
+    Choose which homelab's config to simulate
+  </Step>
+  <Step title="Launch Sim">
+    Click **Launch Sim** → opens in new tab
+  </Step>
+  <Step title="Create simulation">
+    Sim auto-creates environment from your config
+  </Step>
+  <Step title="Test changes">
+    Modify and test safely
+  </Step>
+  <Step title="Apply to production">
+    Export validated config back to kombify Cloud
+  </Step>
+</Steps>
+
+### Simulation presets
+
+| Preset | Description |
+|--------|-------------|
+| **Mirror** | Exact copy of production config |
+| **Minimal** | Reduced resources for quick tests |
+| **Stress** | Add latency/failures for resilience testing |
+
+## StackKits Studio
+
+Visual editor for StackKit configurations.
+
+### Features available
+
+- Drag-and-drop service configuration
+- Visual node layout
+- Schema validation in real-time
+- Diff view against current config
+
+### Capabilities
+
+<Accordion title="Service editor">
+Add, remove, and configure services visually:
+- Toggle services on/off
+- Set environment variables
+- Configure volumes and networks
+- View generated Docker Compose
+</Accordion>
+
+<Accordion title="Node designer">
+Design your node topology:
+- Add/remove nodes
+- Set roles and resources
+- Configure networking
+- View generated Tofu config
+</Accordion>
+
+<Accordion title="Validation panel">
+Real-time validation feedback:
+- Schema errors highlighted
+- Warnings with suggestions
+- Quick fixes available
+</Accordion>
+
+### Export options
+
+| Format | Description |
+|--------|-------------|
+| **stack-spec.yaml** | Standard config file |
+| **Docker Compose** | Generated compose file |
+| **OpenTofu** | Infrastructure as code |
+
+## Web terminal
+
+SSH access directly from your browser.
+
+### Features
+
+- Full terminal emulation
+- Multiple tabs
+- Copy/paste support
+- Session history
+
+### Connecting
+
+1. Select a node
+2. Click **Terminal** icon
+3. Authenticate (if required)
+4. Terminal opens in-browser
+
+### Security
+
+- End-to-end encryption via WebSocket
+- Session timeout after inactivity
+- Audit logging of all commands
+- Role-based access control
+
+## Tool permissions
+
+Access depends on your team role:
+
+| Role | Stack | Sim | Studio | Terminal |
+|------|-------|-----|--------|----------|
+| **Owner** | ✅ Full | ✅ Full | ✅ Full | ✅ Full |
+| **Admin** | ✅ Full | ✅ Full | ✅ Full | ✅ Full |
+| **Operator** | ✅ Full | ✅ Full | 👁️ View | ✅ Full |
+| **Viewer** | 👁️ View | ❌ | 👁️ View | ❌ |
+
+## Troubleshooting
+
+<Accordion title="Tool won't launch">
+**Check:**
+- Pop-up blocker disabled
+- Agent connected (green status)
+- Sufficient permissions
+
+**Try:**
+- Refresh the page
+- Reconnect agent
+- Contact team admin
+</Accordion>
+
+<Accordion title="Context not loading">
+**Check:**
+- Homelab selected before launch
+- Agent has recent heartbeat
+
+**Try:**
+- Re-select the homelab
+- Launch from homelab detail page
+</Accordion>
+
+<Accordion title="Terminal connection failed">
+**Check:**
+- Node is online
+- SSH service running
+- Firewall allows connection
+
+**Try:**
+- Verify node health in Stack
+- Check SSH port configuration
+</Accordion>

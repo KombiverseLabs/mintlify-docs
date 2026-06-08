@@ -1,0 +1,102 @@
+---
+title: API reference
+description: kombify AI REST API endpoints
+sidebarTitle: API
+icon: code
+---
+
+kombify AI exposes a REST API for programmatic interaction. All endpoints require JWT authentication via Auth0 OIDC.
+
+## Base URL
+
+| Mode | URL |
+|------|-----|
+| **SaaS** | `https://api.kombify.io/ai/v1` |
+| **Self-hosted** | `http://your-server:5270/api/v1` |
+
+## Authentication
+
+All requests require a valid JWT token in the `Authorization` header:
+
+```bash
+curl -H "Authorization: Bearer <your-jwt-token>" \
+  https://api.kombify.io/ai/v1/chat
+```
+
+## Endpoints
+
+### Chat
+
+#### `POST /api/v1/chat`
+
+Send a message and receive an AI response.
+
+```json
+{
+  "message": "What is the status of my servers?",
+  "companion": "smart-home",
+  "model": "gpt-4o",
+  "stream": true
+}
+```
+
+**Response:** Server-Sent Events (SSE) stream when `stream: true`, or JSON response.
+
+### Companions
+
+#### `GET /api/v1/companions`
+
+List available Companions and their configuration.
+
+#### `PUT /api/v1/companions/:id/config`
+
+Update a Companion's configuration.
+
+### Guard
+
+#### `GET /api/v1/guard/status`
+
+Get Guard's current status, trust level, and recent activity.
+
+#### `POST /api/v1/guard/config`
+
+Update Guard configuration (trust level, intervals, targets).
+
+### Models
+
+#### `GET /api/v1/models`
+
+List available models and their status.
+
+### Usage
+
+#### `GET /api/v1/usage`
+
+Get token usage statistics and cost estimates.
+
+```json
+{
+  "period": "2026-03",
+  "total_tokens": 1250000,
+  "estimated_cost_usd": 3.45,
+  "by_provider": {
+    "openai": { "tokens": 800000, "cost": 1.20 },
+    "anthropic": { "tokens": 450000, "cost": 2.25 }
+  }
+}
+```
+
+<Note>
+  This is a simplified reference. For the full OpenAPI specification, see the self-hosted AI portal at `/api/docs`.
+</Note>
+
+## Further reading
+
+<CardGroup cols={2}>
+  <Card title="Configuration" icon="gear" href="/ai/reference/configuration">
+    All configuration options
+  </Card>
+  <Card title="Architecture" icon="sitemap" href="/ai/explanations/architecture">
+    How the API fits into the overall system
+  </Card>
+</CardGroup>

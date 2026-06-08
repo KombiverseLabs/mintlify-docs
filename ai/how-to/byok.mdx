@@ -1,0 +1,62 @@
+---
+title: Bring Your Own Keys (BYOK)
+description: Configure your own AI provider API keys for self-hosted kombify AI
+sidebarTitle: BYOK setup
+icon: key
+---
+
+In self-hosted mode, kombify AI uses your own API keys to access AI models. This guide covers how to set up and manage your keys securely.
+
+## Supported providers
+
+| Provider | Models | Setup |
+|----------|--------|-------|
+| **OpenAI** | GPT-4o, GPT-5-nano | API key from platform.openai.com |
+| **Anthropic** | Claude Sonnet, Claude Haiku | API key from console.anthropic.com |
+| **Google AI** | Gemini Pro, Gemini Flash | API key from aistudio.google.com |
+| **Azure AI Foundry** | Hosted models | Endpoint + API key |
+| **OpenRouter** | 200+ models | API key from openrouter.ai |
+| **Ollama** | Self-hosted models | Local endpoint (no key needed) |
+
+## Adding API keys
+
+<Steps>
+  <Step title="Open the AI portal">
+    Navigate to your kombify AI portal (default: `http://your-server:5270`).
+  </Step>
+  <Step title="Go to Settings > API Keys">
+    Each provider has its own section with fields for the required credentials.
+  </Step>
+  <Step title="Enter your key">
+    Paste your API key. It is encrypted with AES-256-GCM before storage.
+  </Step>
+  <Step title="Test the connection">
+    Click "Test" to verify the key works and the provider is reachable.
+  </Step>
+</Steps>
+
+## Security
+
+- All keys are encrypted at rest with AES-256-GCM
+- Keys never leave your server
+- No key data is sent to kombify servers
+- Keys are stored in the local database (SQLite in self-hosted mode)
+
+## Cost management
+
+kombify AI tracks token usage and estimated costs per request. View your spending in **AI Settings > Usage**.
+
+<Tip>
+  Set monthly budget alerts to avoid unexpected costs. kombify AI defaults to cost-efficient models for simple tasks.
+</Tip>
+
+## Further reading
+
+<CardGroup cols={2}>
+  <Card title="Supported models" icon="microchip" href="/ai/reference/models">
+    Full list of supported models per provider
+  </Card>
+  <Card title="Configuration reference" icon="gear" href="/ai/reference/configuration">
+    All AI configuration options
+  </Card>
+</CardGroup>

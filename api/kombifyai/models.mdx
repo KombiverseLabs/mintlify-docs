@@ -1,0 +1,126 @@
+---
+title: Models & Keys
+description: Model discovery, preferences, and BYOK key management
+---
+
+## Models
+
+### List available models
+
+<ParamField method="GET" path="/v1/ai/models">
+  List available AI models from the provider registry, filtered by the user's plan tier.
+</ParamField>
+
+```bash
+curl https://api.kombify.io/v1/ai/models \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+**Response:**
+
+```json
+{
+  "models": [
+    {
+      "id": "gpt-4o",
+      "provider": "openai",
+      "capabilities": ["chat", "vision"],
+      "tier": "pro"
+    },
+    {
+      "id": "claude-sonnet-4-5-20250514",
+      "provider": "anthropic",
+      "capabilities": ["chat", "code"],
+      "tier": "pro"
+    }
+  ]
+}
+```
+
+### Service info
+
+<ParamField method="GET" path="/v1/ai/info">
+  Service metadata including available providers, tools, flows, prompts, and RAG status.
+</ParamField>
+
+---
+
+## Preferences
+
+### Get preferences
+
+<ParamField method="GET" path="/v1/ai/preferences">
+  Get the user's AI preferences (selected model, budget limits).
+</ParamField>
+
+### Set preferred model
+
+<ParamField method="PUT" path="/v1/ai/preferences/model">
+  Update the user's preferred AI model.
+</ParamField>
+
+```bash
+curl -X PUT https://api.kombify.io/v1/ai/preferences/model \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "claude-sonnet-4-5-20250514"}'
+```
+
+---
+
+## BYOK (Bring Your Own Key)
+
+Users can provide their own API keys for AI providers to use their own accounts and quotas.
+
+### List stored keys
+
+<ParamField method="GET" path="/v1/ai/keys">
+  List stored BYOK keys. Returns provider names only — secrets are never exposed.
+</ParamField>
+
+```bash
+curl https://api.kombify.io/v1/ai/keys \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+**Response:**
+
+```json
+{
+  "keys": [
+    {"provider": "openai", "created_at": "2026-03-15T10:00:00Z", "valid": true},
+    {"provider": "anthropic", "created_at": "2026-03-20T14:00:00Z", "valid": true}
+  ]
+}
+```
+
+### Store a key
+
+<ParamField method="POST" path="/v1/ai/keys">
+  Store or update a BYOK key. The key is encrypted at rest. Optional validation verifies the key works before storing.
+</ParamField>
+
+```bash
+curl -X POST https://api.kombify.io/v1/ai/keys \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "provider": "openai",
+    "api_key": "sk-...",
+    "validate": true
+  }'
+```
+
+### Delete a key
+
+<ParamField method="DELETE" path="/v1/ai/keys/{provider}">
+  Remove a stored BYOK key for a specific provider.
+</ParamField>
+
+### Key sources
+
+<ParamField method="GET" path="/v1/ai/keys/sources">
+  Information about available key sources per provider and tier-based limits.
+</ParamField>
+
+Key hierarchy: **BYOK** > **Managed Key** (platform-provided) > **Not available**.

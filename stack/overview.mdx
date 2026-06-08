@@ -1,0 +1,356 @@
+---
+title: "kombify TechStack"
+description: "The brain of your homelab — orchestration made simple"
+sidebarTitle: "Overview"
+icon: server
+---
+
+**kombify TechStack** is your homelab's control center. Tell it what you want, and it figures out how to make it happen — from a single server to a multi-node cluster.
+
+## The simple version
+
+<Card title="What does Stack do?" icon="lightbulb">
+  Imagine you want a private photo cloud for your family. Instead of spending days researching Docker, reverse proxies, and SSL certificates, you write a simple configuration file describing *what* you want.
+
+  Stack handles *everything else* — validation, setup, deployment, and ongoing maintenance.
+</Card>
+
+```yaml stack-spec.yaml
+# This is all you write
+stackkit: base-kit
+services:
+  - traefik    # Handles web traffic
+  - immich     # Your photo cloud
+```
+
+Stack transforms this into hundreds of lines of configuration and deploys it to your server automatically.
+
+<Accordion title="🔧 Technical details" icon="code">
+  Stack is a Go-based orchestration engine that:
+  - Reads your `stack-spec.yaml` specification
+  - Validates it against CUE schemas from StackKits
+  - Generates OpenTofu/Docker configurations
+  - Deploys via mTLS-secured gRPC agents on your nodes
+  - Continuously monitors for drift between desired and actual state
+  
+  **Tech stack:** Go 1.25+, PocketBase (SQLite), OpenTofu, CUE, gRPC with mTLS
+</Accordion>
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Write once, deploy anywhere" icon="file-code">
+    Your entire homelab configuration lives in one YAML file — version-controlled, shareable, reproducible
+  </Card>
+  <Card title="Test before you break things" icon="flask">
+    Simulate deployments in Docker before touching real hardware
+  </Card>
+  <Card title="Works with what you have" icon="arrows-rotate">
+    Already running servers? Stack discovers them and lets you adopt gradually
+  </Card>
+  <Card title="Self-healing" icon="shield-check">
+    Detects when reality drifts from your configuration and can fix it automatically
+  </Card>
+  <Card title="Wallet-first access" icon="key">
+    Daily access and recovery are split into `Tools`, `Access`, and `Recovery` so operators open services first and reveal credentials only when necessary
+  </Card>
+</CardGroup>
+
+## How it works
+
+```mermaid
+flowchart LR
+    subgraph You["👤 You"]
+        YAML["<b>stack-spec.yaml</b><br/>Your wishlist"]
+    end
+
+    subgraph Stack["⚙️ kombify TechStack"]
+        direction TB
+        Wizard["Wizard<br/><i>or manual edit</i>"]
+        Validate["Validate<br/><i>against rules</i>"]
+        Generate["Generate<br/><i>real configs</i>"]
+        Deploy["Deploy<br/><i>to servers</i>"]
+        
+        Wizard --> Validate --> Generate --> Deploy
+    end
+
+    subgraph Result["🏠 Your Homelab"]
+        S1["📸 Immich<br/>Photo Cloud"]
+      S2["🔐 TinyAuth + Pocket ID<br/>Access Layer"]
+        S3["📊 Homepage<br/>Dashboard"]
+    end
+
+    YAML --> Wizard
+    Deploy --> Result
+
+    style You fill:#1e293b,stroke:#38bdf8,color:#f8fafc
+    style Stack fill:#1e293b,stroke:#fbbf24,color:#f8fafc
+    style Result fill:#1e293b,stroke:#4ade80,color:#f8fafc
+```
+
+<Steps>
+  <Step title="Describe what you want" icon="wand-magic-sparkles">
+    Use the Easy Wizard or write a simple YAML file — no need to understand Docker, networking, or certificates
+  </Step>
+  <Step title="Stack validates your choices" icon="check">
+    Your configuration is checked against proven patterns to catch errors before deployment
+  </Step>
+  <Step title="Infrastructure code is generated" icon="code">
+    Stack creates all the complex configuration files you'd otherwise write by hand
+  </Step>
+  <Step title="Services are deployed" icon="rocket">
+    Lightweight agents on your servers apply the changes and report back
+  </Step>
+</Steps>
+
+<Accordion title="🔧 Under the hood: The complete data flow" icon="diagram-project">
+
+```mermaid
+flowchart TB
+    subgraph Input["Input Layer"]
+        UI["Web Dashboard<br/><small>Port 5261</small>"]
+        CLI["CLI Tool"]
+        YAML["stack-spec.yaml"]
+    end
+
+    subgraph Core["kombify TechStack Core"]
+        API["REST API<br/><small>Port 5260</small>"]
+        
+        subgraph Unifier["Unifier Engine"]
+            Parse["Parse YAML"]
+            Validate["CUE Validation"]
+            Resolve["Resolve Dependencies"]
+            Generate["Generate IaC"]
+        end
+        
+        PB[("PocketBase<br/><small>SQLite State</small>")]
+        gRPC["gRPC Server<br/><small>Port 5263</small>"]
+        ToFu["OpenTofu<br/>Runner"]
+    end
+
+    subgraph Agents["Node Agents"]
+        A1["Agent<br/><small>proxmox-01</small>"]
+        A2["Agent<br/><small>docker-01</small>"]
+        A3["Agent<br/><small>nas-01</small>"]
+    end
+
+    subgraph Infra["Deployed Infrastructure"]
+        Docker["Docker Containers"]
+        VMs["Virtual Machines"]
+        Services["Running Services"]
+    end
+
+    UI & CLI --> API
+    YAML --> API
+    API --> Unifier
+    API <--> PB
+    Unifier --> ToFu
+    ToFu --> gRPC
+    gRPC <-->|"mTLS encrypted"| A1 & A2 & A3
+    A1 & A2 & A3 --> Docker & VMs
+    Docker & VMs --> Services
+
+    style Input fill:#1e293b,stroke:#38bdf8,color:#f8fafc
+    style Core fill:#1e293b,stroke:#fbbf24,color:#f8fafc
+    style Agents fill:#1e293b,stroke:#a78bfa,color:#f8fafc
+    style Infra fill:#1e293b,stroke:#4ade80,color:#f8fafc
+```
+
+**Data flow explained:**
+1. **Input** — Configuration enters via Web UI, CLI, or direct YAML file
+2. **Unifier Engine** — Parses, validates against CUE schemas, resolves dependencies, generates OpenTofu code
+3. **State Management** — PocketBase stores stack state, job history, and agent registry
+4. **Agent Communication** — gRPC with mutual TLS ensures secure, authenticated communication
+5. **Deployment** — Agents execute changes on their respective nodes
+
+</Accordion>
+
+## Architecture at a glance
+
+```mermaid
+graph TB
+    subgraph Users["Users"]
+        Admin["👤 Admin"]
+        Dev["👤 Developer"]
+    end
+
+    subgraph Stack["kombify TechStack"]
+        Dashboard["🖥️ Dashboard<br/><small>SvelteKit</small>"]
+        API["🔌 API<br/><small>Go + PocketBase</small>"]
+        Agents["🤖 Agents<br/><small>Go + gRPC</small>"]
+    end
+
+    subgraph Nodes["Your Servers"]
+        N1["🖥️ Server 1"]
+        N2["🖥️ Server 2"]
+        N3["🖥️ Server 3"]
+    end
+
+    Users --> Dashboard
+    Dashboard --> API
+    API <-->|"Secure tunnel"| Agents
+    Agents --> Nodes
+
+    style Users fill:#1e293b,stroke:#38bdf8,color:#f8fafc
+    style Stack fill:#1e293b,stroke:#fbbf24,color:#f8fafc
+    style Nodes fill:#1e293b,stroke:#4ade80,color:#f8fafc
+```
+
+### Ports and services
+
+| Service | Port | What it does |
+|---------|------|--------------|
+| **Dashboard** | 5261 | Web interface for managing your homelab |
+| **API** | 5260 | REST API + PocketBase admin panel |
+| **gRPC** | 5263 | Secure communication with agents |
+
+<Accordion title="🔧 Technical specifications" icon="microchip">
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| **Backend** | Go 1.25+ | Core services, agents, CLI |
+| **Frontend** | SvelteKit 2.x | Modern reactive dashboard |
+| **Database** | PocketBase (SQLite) | Embedded state management |
+| **IaC Engine** | OpenTofu 1.6+ | Infrastructure provisioning |
+| **Validation** | CUE 0.15+ | Type-safe schema validation |
+| **Networking** | gRPC + mTLS | Encrypted agent communication |
+
+**Why these choices?**
+- **Go** — Single binary, low memory, cross-platform
+- **PocketBase** — Zero-config embedded database with auth
+- **OpenTofu** — Open-source Infrastructure as Code engine, battle-tested
+- **CUE** — Catch configuration errors before deployment
+- **mTLS** — Every connection is encrypted and authenticated
+
+</Accordion>
+
+## Core principles
+
+### 1. Your intent stays untouched
+
+```mermaid
+flowchart LR
+    Intent["📝 Your File<br/><i>stack-spec.yaml</i>"]
+    Generated["⚙️ Generated<br/><i>docker-compose.yml<br/>traefik.yml<br/>...</i>"]
+    Infra["🖥️ Running<br/><i>Your servers</i>"]
+
+    Intent -->|"read only"| Generated
+    Generated -->|"deployed"| Infra
+
+    style Intent fill:#1e293b,stroke:#38bdf8,color:#f8fafc
+    style Generated fill:#1e293b,stroke:#fbbf24,color:#f8fafc
+    style Infra fill:#1e293b,stroke:#4ade80,color:#f8fafc
+```
+
+kombify TechStack never modifies your configuration file. All transformations create separate artifacts that you can inspect.
+
+### 2. One Stack = one homelab
+
+<Note>
+  A single kombify TechStack instance manages one homelab. That homelab can include multiple physical servers (nodes), but they belong to one logical unit.
+</Note>
+
+Need multiple homelabs? Use [kombify Cloud](/cloud/overview) to manage several Stack instances from one dashboard.
+
+### 3. Brownfield-friendly
+
+Already have servers running? kombify TechStack doesn't force you to start from scratch:
+
+```mermaid
+flowchart LR
+    subgraph Existing["Existing Setup"]
+        E1["🖥️ NAS Server<br/><i>unmanaged</i>"]
+        E2["🖥️ Docker Host<br/><i>unmanaged</i>"]
+    end
+
+    subgraph Discovery["Stack Discovery"]
+        Scan["🔍 Scan network"]
+        Classify["📋 Classify devices"]
+    end
+
+    subgraph Adoption["Gradual Adoption"]
+        M1["✅ Docker Host<br/><i>managed</i>"]
+        U1["📋 NAS Server<br/><i>monitored only</i>"]
+    end
+
+    Existing --> Scan
+    Scan --> Classify
+    Classify --> Adoption
+
+    style Existing fill:#1e293b,stroke:#ef4444,color:#f8fafc
+    style Discovery fill:#1e293b,stroke:#fbbf24,color:#f8fafc
+    style Adoption fill:#1e293b,stroke:#4ade80,color:#f8fafc
+```
+
+- **Managed** — Stack fully controls configuration and deployment
+- **Unmanaged** — Stack sees the device but doesn't touch it
+- You can gradually move devices from unmanaged to managed as you're ready
+
+## Quick Example
+
+```yaml stack-spec.yaml
+version: "1.0"
+stackkit: base-kit
+
+meta:
+  name: my-homelab
+  domain: home.example.com
+
+nodes:
+  - name: proxmox-01
+    type: hypervisor
+    connection:
+      host: 192.168.1.100
+      user: root
+      ssh_key: ~/.ssh/id_ed25519
+
+services:
+  - traefik      # Reverse proxy with auto-SSL
+  - tinyauth     # Access gateway
+  - homepage     # Dashboard
+  - immich       # Photo management
+```
+
+```bash
+# Validate configuration
+kombify validate
+
+# Preview changes
+kombify plan
+
+# Apply to infrastructure
+kombify apply
+```
+
+## Self-Hosting
+
+<Card title="Self-Hosting Guide" icon="server" href="/stack/how-to/self-hosting">
+  Deploy kombify TechStack on your own infrastructure with Docker Compose
+</Card>
+
+## Next Steps
+
+<Columns cols={2}>
+  <Card title="Quick Start" icon="rocket" href="/stack/quickstart">
+    Deploy your first stack in 10 minutes
+  </Card>
+  <Card title="Architecture Deep Dive" icon="sitemap" href="/stack/explanations/architecture">
+    Understand the Unifier, agents, and data flow
+  </Card>
+</Columns>
+
+---
+
+## Getting Help
+
+<Columns cols={3}>
+  <Card title="Troubleshooting" icon="wrench" href="/stack/reference/troubleshooting">
+    Common issues and solutions
+  </Card>
+  <Card title="Discord" icon="discord" href="https://discord.gg/kombify">
+    Real-time community support
+  </Card>
+  <Card title="GitHub" icon="github" href="https://github.com/kombifyio/stack">
+    Report issues and contribute
+  </Card>
+</Columns>

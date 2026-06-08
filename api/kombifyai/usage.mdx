@@ -1,0 +1,123 @@
+---
+title: Usage & Costs
+description: Cost tracking, token budgets, and usage aggregation
+---
+
+## Cost tracking
+
+### List cost entries
+
+<ParamField method="GET" path="/v1/ai/costs">
+  List individual cost entries. Supports pagination.
+</ParamField>
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `limit` | int | Max results (default: 20) |
+| `offset` | int | Pagination offset |
+
+### Aggregate costs
+
+<ParamField method="GET" path="/v1/ai/costs/aggregate">
+  Get aggregated cost data over a time range, grouped by provider or model.
+</ParamField>
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `from` | string | Start date (ISO 8601) |
+| `to` | string | End date (ISO 8601) |
+| `by` | string | Group by: `provider`, `model`, `day` |
+
+```bash
+curl "https://api.kombify.io/v1/ai/costs/aggregate?from=2026-03-01&to=2026-03-31&by=provider" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+**Response:**
+
+```json
+{
+  "period": {"from": "2026-03-01", "to": "2026-03-31"},
+  "total_tokens": 1250000,
+  "estimated_cost_usd": 3.45,
+  "by_provider": {
+    "openai": {"tokens": 800000, "cost": 1.20},
+    "anthropic": {"tokens": 450000, "cost": 2.25}
+  }
+}
+```
+
+---
+
+## Token budget
+
+Token budgets enforce usage limits per tier. Free tier users have a monthly token allowance.
+
+### Get balance
+
+<ParamField method="GET" path="/v1/ai/tokens/balance">
+  Get the user's current token credit balance and limits.
+</ParamField>
+
+```bash
+curl https://api.kombify.io/v1/ai/tokens/balance \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Transaction ledger
+
+<ParamField method="GET" path="/v1/ai/tokens/ledger">
+  Get recent token transactions (credits used, top-ups, bonuses).
+</ParamField>
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `limit` | int | Max results (default: 50) |
+
+---
+
+## Webhooks
+
+Configure webhooks to receive notifications about AI events.
+
+### Get webhook config
+
+<ParamField method="GET" path="/v1/ai/webhooks/config">
+  Get current webhook configuration.
+</ParamField>
+
+### Update webhook config
+
+<ParamField method="POST" path="/v1/ai/webhooks/config">
+  Set or update webhook endpoint URL and event filters.
+</ParamField>
+
+### Delivery logs
+
+<ParamField method="GET" path="/v1/ai/webhooks/deliveries/{agent_id}">
+  Get webhook delivery logs for a specific agent.
+</ParamField>
+
+---
+
+## Home Assistant integration
+
+For users with Home Assistant connected to their kombify instance.
+
+### Converse
+
+<ParamField method="POST" path="/v1/ai/ha/converse">
+  Send a conversation request to the HA integration. Requires Brain.
+</ParamField>
+
+### Push context
+
+<ParamField method="POST" path="/v1/ai/ha/context">
+  Push Home Assistant state context for the AI companion to use.
+</ParamField>
+
+### Status
+
+<ParamField method="GET" path="/v1/ai/ha/status">
+  Get Home Assistant integration status and connection health.
+</ParamField>

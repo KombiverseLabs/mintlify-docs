@@ -1,0 +1,244 @@
+---
+title: kombify TechStack API
+description: REST API reference for the homelab orchestration engine
+---
+
+
+The kombify TechStack API lets you automate everything you can do in the dashboard — create stacks, manage nodes, trigger deployments, and monitor status.
+
+<Note>
+  **Base URL:** `https://api.kombify.io/v1/orchestrator` (SaaS) or `http://localhost:5260/api/v1` (self-hosted)
+</Note>
+
+## Quick start
+
+### 1. Get an authentication token
+
+```bash
+# Approved M2M integrations obtain Auth0 access tokens from the kombify authorization server.
+# Interactive users sign in through Universal Login / SSO at https://login.kombify.io/.
+TOKEN=$(curl -s -X POST https://login.kombify.io/oauth/token \
+  -H "Content-Type: application/json" \
+  -d '{
+    "grant_type": "client_credentials",
+    "client_id": "${YOUR_CLIENT_ID}",
+    "client_secret": "${YOUR_CLIENT_SECRET}",
+    "audience": "https://api.kombify.io"
+  }' | jq -r '.access_token')
+
+# 2. Use the token in API requests
+curl https://api.kombify.io/v1/orchestrator/stacks \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Response:
+```json
+{
+  "access_token": "eyJhbGciOiJSUzI1NiIs...",
+  "token_type": "Bearer",
+  "expires_in": 3600,
+  "audience": "https://api.kombify.io"
+}
+```
+
+### 2. Use the token in requests
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  https://api.kombify.io/v1/orchestrator/stacks
+```
+
+## API endpoints
+
+<CardGroup cols={2}>
+  <Card title="Stacks" icon="layer-group" href="/api/kombifytechstack/stacks">
+    Create, list, update, and delete infrastructure stacks
+  </Card>
+  <Card title="Workers" icon="server" href="/api/kombifytechstack/workers">
+    Manage node agents and their status
+  </Card>
+  <Card title="Jobs" icon="list-check" href="/api/kombifytechstack/jobs">
+    Track deployment jobs and their progress
+  </Card>
+  <Card title="Validation" icon="wand-magic-sparkles" href="/api/kombifytechstack/overview">
+    Validate configurations and generate IaC
+  </Card>
+</CardGroup>
+
+## Endpoint reference
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/health` | GET | Health check and version info |
+| `/api/v1/stacks` | GET | List all stacks |
+| `/api/v1/stacks` | POST | Create a new stack |
+| `/api/v1/stacks/{id}` | GET | Get stack details |
+| `/api/v1/stacks/{id}` | PUT | Update stack configuration |
+| `/api/v1/stacks/{id}` | DELETE | Delete a stack |
+| `/api/v1/stacks/{id}/apply` | POST | Apply stack to infrastructure |
+| `/api/v1/stacks/{id}/plan` | POST | Preview changes without applying |
+| `/api/v1/workers` | GET | List registered workers |
+| `/api/v1/workers` | POST | Register a new worker |
+| `/api/v1/workers/{id}` | GET | Get worker status and details |
+| `/api/v1/workers/{id}` | DELETE | Unregister a worker |
+| `/api/v1/jobs` | GET | List all jobs |
+| `/api/v1/jobs/{id}` | GET | Get job details and logs |
+| `/api/v1/unifier/validate` | POST | Validate a stack-spec.yaml |
+| `/api/v1/unifier/generate` | POST | Generate IaC from configuration |
+
+## Common patterns
+
+<Accordion title="Create and deploy a stack" icon="rocket">
+
+```bash
+# 1. Create the stack
+STACK_ID=$(curl -s -X POST https://api.kombify.io/v1/orchestrator/stacks \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "my-homelab",
+    "stackkit": "base-kit",
+    "config": {
+      "services": ["traefik", "immich", "homepage"]
+    }
+  }' | jq -r '.id')
+
+# 2. Preview changes
+curl -X POST "https://api.kombify.io/v1/orchestrator/stacks/$STACK_ID/plan" \
+  -H "Authorization: Bearer $TOKEN"
+
+# 3. Apply to infrastructure
+curl -X POST "https://api.kombify.io/v1/orchestrator/stacks/$STACK_ID/apply" \
+  -H "Authorization: Bearer $TOKEN"
+
+# 4. Check job status
+curl "https://api.kombify.io/v1/orchestrator/jobs?stack_id=$STACK_ID" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+</Accordion>
+
+<Accordion title="Monitor worker status" icon="heartbeat">
+
+```bash
+# List all workers with status
+curl https://api.kombify.io/v1/orchestrator/workers \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Response:
+```json
+{
+  "workers": [
+    {
+      "id": "worker_abc123",
+      "name": "proxmox-01",
+      "status": "online",
+      "last_seen": "2026-01-26T10:30:00Z",
+      "resources": {
+        "cpu_cores": 8,
+        "memory_gb": 32,
+        "disk_gb": 500
+      }
+    }
+  ]
+}
+```
+
+</Accordion>
+
+<Accordion title="Validate configuration before deployment" icon="check">
+
+```bash
+# Validate a stack-spec.yaml
+curl -X POST https://api.kombify.io/v1/orchestrator/unifier/validate \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/yaml" \
+  --data-binary @stack-spec.yaml
+```
+
+Response (success):
+```json
+{
+  "valid": true,
+  "warnings": [],
+  "resolved": {
+    "services": ["traefik", "immich", "homepage"],
+    "dependencies": {
+      "traefik": [],
+      "immich": ["traefik"],
+      "homepage": ["traefik"]
+    }
+  }
+}
+```
+
+Response (error):
+```json
+{
+  "valid": false,
+  "errors": [
+    {
+      "path": "services.immich.storage",
+      "message": "storage path '/data/photos' does not exist on node 'proxmox-01'"
+    }
+  ]
+}
+```
+
+</Accordion>
+
+## Error handling
+
+All errors follow a consistent format:
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid configuration",
+    "details": [
+      {
+        "field": "services",
+        "message": "At least one service is required"
+      }
+    ]
+  }
+}
+```
+
+| HTTP Code | Meaning |
+|-----------|---------|
+| 200 | Success |
+| 201 | Created |
+| 400 | Bad request — check your input |
+| 401 | Unauthorized — token missing or invalid |
+| 403 | Forbidden — insufficient permissions |
+| 404 | Not found |
+| 500 | Server error |
+
+## Rate limits
+
+| Plan | Requests/minute | Requests/hour |
+|------|-----------------|---------------|
+| Self-hosted | Unlimited | Unlimited |
+| Cloud Free | 60 | 1,000 |
+| Cloud Pro | 300 | 10,000 |
+| Cloud Team | 1,000 | 50,000 |
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Stacks API" icon="layer-group" href="/api/kombifytechstack/stacks">
+    Full stacks endpoint documentation
+  </Card>
+  <Card title="Workers API" icon="server" href="/api/kombifytechstack/workers">
+    Worker management endpoints
+  </Card>
+  <Card title="Jobs API" icon="list-check" href="/api/kombifytechstack/jobs">
+    Job tracking and logs
+  </Card>
+  <Card title="Validation API" icon="wand-magic-sparkles" href="/api/kombifytechstack/overview">
+    Validation and generation
+  </Card>
+</CardGroup>

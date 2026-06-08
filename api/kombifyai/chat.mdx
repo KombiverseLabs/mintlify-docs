@@ -1,0 +1,143 @@
+---
+title: Chat & Sessions
+description: Chat, session management, and companion endpoints
+---
+
+## Chat
+
+### Send a message
+
+<ParamField method="POST" path="/v1/ai/chat">
+  Send a message and receive an AI response. Supports streaming via SSE.
+</ParamField>
+
+```bash
+curl -X POST https://api.kombify.io/v1/ai/chat \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Explain my server architecture",
+    "companion": "smart-home",
+    "model": "gpt-4o",
+    "stream": true
+  }'
+```
+
+**Request body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `message` | string | Yes | The user message |
+| `companion` | string | No | Companion type (e.g., `smart-home`, `devops`) |
+| `model` | string | No | Model override (uses preference if omitted) |
+| `stream` | boolean | No | Enable SSE streaming (default: false) |
+| `session_id` | string | No | Continue an existing session |
+
+**Response:** JSON object or SSE stream when `stream: true`.
+
+### Companion chat
+
+<ParamField method="POST" path="/v1/ai/companion/{type}/chat">
+  Chat with a specific companion type. Requires Brain to be available.
+</ParamField>
+
+### List agents
+
+<ParamField method="GET" path="/v1/ai/agents">
+  List available AI agents and their capabilities. Requires Brain.
+</ParamField>
+
+---
+
+## Sessions
+
+### Create session
+
+<ParamField method="POST" path="/v1/ai/sessions">
+  Create a new chat session.
+</ParamField>
+
+```bash
+curl -X POST https://api.kombify.io/v1/ai/sessions \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"companion": "smart-home"}'
+```
+
+### List sessions
+
+<ParamField method="GET" path="/v1/ai/sessions">
+  List the authenticated user's sessions. Supports pagination.
+</ParamField>
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `limit` | int | Max results (default: 20) |
+| `offset` | int | Pagination offset |
+
+### Get session
+
+<ParamField method="GET" path="/v1/ai/sessions/{id}">
+  Get a specific session including its message history.
+</ParamField>
+
+### Delete session
+
+<ParamField method="DELETE" path="/v1/ai/sessions/{id}">
+  Delete a session and all its messages.
+</ParamField>
+
+---
+
+## Companion Memory
+
+Companions can store and recall information across sessions using memory layers.
+
+### List memories
+
+<ParamField method="GET" path="/v1/ai/memory">
+  List companion memories filtered by layer or type.
+</ParamField>
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `layer` | string | Memory layer filter (identity, preferences, history) |
+| `companion_type` | string | Filter by companion |
+| `limit` | int | Max results |
+| `offset` | int | Pagination offset |
+
+### Create memory
+
+<ParamField method="POST" path="/v1/ai/memory">
+  Store a new memory entry for a companion.
+</ParamField>
+
+### Delete memory
+
+<ParamField method="DELETE" path="/v1/ai/memory/{id}">
+  Delete a specific memory entry.
+</ParamField>
+
+---
+
+## Manager Approvals
+
+For enterprise/pro tiers, certain companion actions require human approval.
+
+### List approvals
+
+<ParamField method="GET" path="/v1/ai/approvals">
+  List pending manager approval requests.
+</ParamField>
+
+### Approve or reject
+
+<ParamField method="POST" path="/v1/ai/approvals/{id}">
+  Approve or reject a pending action. Requires pro tier or higher.
+</ParamField>
+
+### List events
+
+<ParamField method="GET" path="/v1/ai/events">
+  List manager events and audit log.
+</ParamField>

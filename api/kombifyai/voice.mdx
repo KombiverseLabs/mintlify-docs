@@ -1,0 +1,100 @@
+---
+title: Voice
+description: Speech-to-text, text-to-speech, and voice chat endpoints
+---
+
+kombify AI includes voice capabilities for speech-to-text (STT), text-to-speech (TTS), and voice chat.
+
+<Note>
+  Voice features require the voice module to be enabled. Check availability via `GET /v1/ai/voice/health`.
+</Note>
+
+## Voice chat
+
+### Voice chat (sync)
+
+<ParamField method="POST" path="/v1/ai/voice/chat">
+  Send text input and receive both text and audio response.
+</ParamField>
+
+### Voice chat (stream)
+
+<ParamField method="GET" path="/v1/ai/voice/stream">
+  SSE streaming endpoint for real-time voice chat.
+</ParamField>
+
+---
+
+## Speech-to-text
+
+### Transcribe
+
+<ParamField method="POST" path="/v1/ai/voice/transcribe">
+  Transcribe audio to text. Accepts audio file upload.
+</ParamField>
+
+```bash
+curl -X POST https://api.kombify.io/v1/ai/voice/transcribe \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "audio=@recording.wav"
+```
+
+---
+
+## Text-to-speech
+
+### Synthesize
+
+<ParamField method="POST" path="/v1/ai/voice/synthesize">
+  Convert text to speech audio.
+</ParamField>
+
+```bash
+curl -X POST https://api.kombify.io/v1/ai/voice/synthesize \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"text": "Hello, welcome to kombify", "voice": "alloy"}' \
+  --output speech.mp3
+```
+
+### Synthesize (stream)
+
+<ParamField method="POST" path="/v1/ai/voice/synthesize/stream">
+  Streaming TTS — audio chunks are sent as they are generated.
+</ParamField>
+
+### List voices
+
+<ParamField method="GET" path="/v1/ai/voice/voices">
+  List available TTS voices with their properties.
+</ParamField>
+
+---
+
+## Speaker verification
+
+<Note>
+  Speaker verification requires the verifier module. Not available on all plans.
+</Note>
+
+### Enroll
+
+<ParamField method="POST" path="/v1/ai/voice/enroll">
+  Enroll a speaker voice profile for verification.
+</ParamField>
+
+### Verify
+
+<ParamField method="POST" path="/v1/ai/voice/verify">
+  Verify a speaker against an enrolled profile.
+</ParamField>
+
+---
+
+## Health checks
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /v1/ai/voice/health` | Overall voice module health |
+| `GET /v1/ai/voice/tts/health` | TTS subsystem health |
+| `GET /v1/ai/voice/stt/health` | STT subsystem health |

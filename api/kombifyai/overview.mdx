@@ -1,0 +1,46 @@
+---
+title: kombify AI API
+description: REST API reference for the AI platform
+---
+
+The AI API provides programmatic access to kombify's AI features — chat, companions, voice, BYOK key management, cost tracking, and agent federation.
+
+<Note>
+  **Base URL:** `https://api.kombify.io/v1/ai` (SaaS) or `http://localhost:5270/api/v1` (self-hosted)
+</Note>
+
+## Authentication
+
+All endpoints (except health and A2A federation discovery) require an Auth0 access token from Universal Login / SSO. Requests are validated at the Cloudflare edge (`api.kombify.io`) before reaching the origin services. Legacy API-key compatibility is restricted to approved service integrations and is not a user-auth path.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  https://api.kombify.io/v1/ai/models
+```
+
+See [Authentication](/guides/auth/overview) for details on obtaining tokens.
+
+## Rate limiting
+
+Authenticated `/v1/ai/*` routes are rate-limited. Limits vary by tier (free, pro, enterprise, self-hosted). Rate limit headers are included in responses.
+
+## Streaming
+
+Chat and voice endpoints support Server-Sent Events (SSE) streaming. Set `Accept: text/event-stream` or `"stream": true` in the request body.
+
+## API endpoints
+
+<CardGroup cols={2}>
+  <Card title="Chat" icon="comments" href="/api/kombifyai/chat">
+    Chat, sessions, and companion interactions
+  </Card>
+  <Card title="Models & Keys" icon="key" href="/api/kombifyai/models">
+    Model discovery, BYOK key management, preferences
+  </Card>
+  <Card title="Voice" icon="microphone" href="/api/kombifyai/voice">
+    Speech-to-text, text-to-speech, voice chat
+  </Card>
+  <Card title="Usage & Costs" icon="chart-line" href="/api/kombifyai/usage">
+    Cost tracking, token budgets, usage aggregation
+  </Card>
+</CardGroup>
