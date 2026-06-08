@@ -1,0 +1,216 @@
+---
+title: "API reference"
+description: "REST API endpoints, authentication, and MCP integration for stackkit-server"
+sidebarTitle: "API"
+icon: code
+---
+
+The `stackkit-server` exposes an HTTP API for catalog browsing, spec validation, generation preview, deployment management, and AI agent integration.
+
+## Base URLs
+
+| Environment | URL |
+|-------------|-----|
+| Local development | `http://localhost:8082` |
+| Production (via Edge) | `https://api.kombify.io/stackkits` |
+
+The canonical OpenAPI spec is available at `/api/v1/openapi.yaml`.
+
+## Authentication
+
+Non-public endpoints require an API key via the `X-API-Key` header:
+
+```bash
+curl -H "X-API-Key: your-api-key" http://localhost:8082/api/v1/capabilities
+```
+
+Configure the key with `STACKKITS_API_KEY` environment variable or `--api-key` flag when starting the server.
+
+For local development, `--allow-unauthenticated` disables the key requirement.
+
+## Response format
+
+All endpoints return a consistent JSON envelope:
+
+```json
+{
+  "success": true,
+  "data": { },
+  "meta": {
+    "request_id": "abc-123"
+  }
+}
+```
+
+Error responses:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "StackKit 'unknown-kit' not found"
+  }
+}
+```
+
+The `X-Request-ID` header is passed through for tracing.
+
+## Rate limiting
+
+Default: 60 requests per IP per minute. Configure with `--rate-limit` or `STACKKITS_RATE_LIMIT`.
+
+## Endpoints
+
+### Health and discovery
+
+These endpoints are public (no API key required):
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/health` | Root health check |
+| `GET` | `/api/v1/health` | Service health check |
+| `GET` | `/api/v1/openapi.yaml` | OpenAPI 3.1 specification |
+| `GET` | `/api/v1/capabilities` | List all API capabilities |
+
+### Catalog
+
+Browse available StackKits and their schemas:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/v1/stackkits` | List all available StackKits |
+| `GET` | `/api/v1/stackkits/{name}` | Get full StackKit details |
+| `GET` | `/api/v1/stackkits/{name}/schema` | Get raw CUE schema (text/plain) |
+| `GET` | `/api/v1/stackkits/{name}/defaults` | Get default spec values |
+
+**Example:**
+
+```bash
+curl -H "X-API-Key: $KEY" http://localhost:8082/api/v1/stackkits
+```
+
+### Validation
+
+Validate specs against CUE schemas before deployment:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/v1/validate` | Validate a complete stack-spec |
+| `POST` | `/api/v1/validate/partial` | Validate partial fields (wizard mode) |
+
+**Example:**
+
+```bash
+curl -X POST -H "X-API-Key: $KEY" \
+  -H "Content-Type: application/json" \
+  -d @stack-spec.json \
+  http://localhost:8082/api/v1/validate
+```
+
+### Generation
+
+Preview generated infrastructure without writing files:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/v1/generate/tfvars` | Generate terraform.tfvars from validated spec |
+| `POST` | `/api/v1/generate/preview` | Preview generated output (dry-run) |
+
+### Management
+
+Read-only management endpoints for dashboards and monitoring:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/v1/status` | Node-local rollout status |
+| `POST` | `/api/v1/verify` | Run verification checks |
+| `POST` | `/api/v1/doctor` | Run diagnostic checks |
+| `POST` | `/api/v1/plan` | Preview rollout readiness (read-only) |
+
+<Info>
+  Mutating operations (apply, remove) are intentionally not exposed via the API by default. Use the CLI for deployments.
+</Info>
+
+### Logs
+
+Access structured deploy logs:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/v1/logs` | List all deploy runs (paginated) |
+| `GET` | `/api/v1/logs/latest` | Get the most recent deploy log |
+| `GET` | `/api/v1/logs/{runID}` | Get a specific deploy log |
+| `GET` | `/api/v1/logs/{runID}/stream` | Stream live events (SSE) |
+
+**Log query parameters:**
+
+| Parameter | Description |
+|-----------|-------------|
+| `limit` | Maximum results (for list) |
+| `offset` | Skip results (for pagination) |
+| `level` | Filter by log level |
+| `prefix` | Filter by event prefix |
+
+**SSE streaming example:**
+
+```javascript
+const es = new EventSource('/api/v1/logs/20260311-104539/stream');
+es.onmessage = (e) => console.log(JSON.parse(e.data));
+es.addEventListener('done', () => es.close());
+```
+
+### Evidence
+
+Retrieve rollout evidence bundles:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/v1/runs/{runID}/evidence` | Get evidence for a specific run |
+
+### Setup
+
+First-run setup endpoints used by the Node Hub:
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/v1/setup/base-hub/protection` | Read Base Hub protection state |
+| `POST` | `/api/v1/setup/base-hub/protection` | Activate TinyAuth protection |
+| `GET` | `/api/v1/setup/initial-access` | Read bootstrap credential state |
+| `POST` | `/api/v1/setup/initial-access/reveal` | Reveal bootstrap credentials (one-time) |
+
+## MCP integration
+
+StackKits supports AI agent integration via the Model Context Protocol:
+
+| Surface | Description |
+|---------|-------------|
+| `POST /mcp` | Native MCP endpoint on stackkit-server |
+| `GET /openmcp.json` | MCP discovery document |
+| `stackkit-mcp` | Standalone stdio/loopback MCP binary |
+
+MCP tools are **read-only by default**. To enable write operations:
+
+```bash
+export STACKKIT_MCP_ALLOW_WRITE=true
+```
+
+Token authentication for MCP:
+
+```bash
+export STACKKIT_MCP_TOKEN=your-token
+```
+
+## Local development
+
+Start a local server for development and testing:
+
+```bash
+stackkit-server --api-key dev-secret --base-dir .
+
+# Health check
+curl -s http://localhost:8082/api/v1/health
+
+# List kits
+curl -s -H "X-API-Key: dev-secret" http://localhost:8082/api/v1/capabilities
+```

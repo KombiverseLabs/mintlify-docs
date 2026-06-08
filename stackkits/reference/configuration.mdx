@@ -1,0 +1,244 @@
+---
+title: "Configuration reference"
+description: "Complete reference for stack-spec.yaml fields, CUE validation, and customization patterns"
+sidebarTitle: "Configuration"
+icon: sliders
+---
+
+The `stack-spec.yaml` file (also accepted as `kombination.yaml`) is your deployment contract. StackKits validates it against CUE schemas before generating any infrastructure.
+
+## Top-level structure
+
+```yaml
+version: "1.0"
+stackkit: base-kit
+
+meta:
+  name: my-homelab
+  domain: home.example.com
+  email: admin@example.com
+
+nodes:
+  - name: server-1
+    type: docker
+    connection:
+      host: 192.168.1.100
+      user: deploy
+      ssh_key: ~/.ssh/id_ed25519
+
+services:
+  traefik:
+    enabled: true
+  homepage:
+    enabled: true
+  immich:
+    enabled: true
+```
+
+## Field reference
+
+### Root fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `version` | string | Yes | Spec version (`"1.0"`) |
+| `stackkit` | string | Yes | Kit to deploy: `base-kit`, `modern-homelab`, `ha-kit` |
+| `meta` | object | Yes | Deployment metadata |
+| `nodes` | array | Yes | Target server definitions |
+| `services` | object/array | Yes | Services to deploy |
+
+### Meta
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Unique identifier (alphanumeric + hyphens) |
+| `domain` | string | Yes | Base domain for service routing |
+| `email` | string | No | Email for Let's Encrypt TLS certificates |
+
+### Nodes
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Unique node identifier |
+| `type` | string | Yes | `docker`, `hypervisor`, or `bare-metal` |
+| `connection.host` | string | Yes | IP address or hostname |
+| `connection.port` | int | No | SSH port (default: `22`) |
+| `connection.user` | string | No | SSH user (default: `root`) |
+| `connection.ssh_key` | string | No | Path to SSH private key |
+| `resources.cpu` | int | No | CPU core limit |
+| `resources.memory` | int | No | Memory in MB |
+
+### Services
+
+Services can be specified two ways:
+
+**Simple list** — enable with defaults:
+```yaml
+services:
+  - traefik
+  - homepage
+  - immich
+```
+
+**Object form** — customize per service:
+```yaml
+services:
+  traefik:
+    enabled: true
+    config:
+      dashboard: true
+      log_level: INFO
+  immich:
+    enabled: true
+    config:
+      upload_limit: 50GB
+```
+
+### Service fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `enabled` | bool | No | Enable/disable (default: `true`) |
+| `config` | object | No | Service-specific configuration |
+| `env` | object | No | Environment variable overrides |
+
+## Install modes
+
+The `--mode` flag controls bootstrap depth:
+
+| Mode | Behavior |
+|------|----------|
+| `bare` | Minimal setup, manual service configuration |
+| `bootstrapped` | Default. Automatic platform setup, on-demand app setup |
+| `advanced` | Full setup with day-2 lifecycle and runtime-intelligence surfaces |
+
+## Context targets
+
+The `--context` flag (or `context` field in spec) determines the deployment environment:
+
+| Context | Use case |
+|---------|----------|
+| `local` | Same machine, `home.localhost` DNS |
+| `cloud` | Remote VPS with public domain |
+| `pi` | Raspberry Pi / ARM devices |
+
+## Default services per kit
+
+<Tabs>
+  <Tab title="Base Kit">
+    **Foundation:** Traefik (reverse proxy), TinyAuth (authentication)
+
+    **Platform:** Homepage (dashboard), PocketID (identity), stackkit-server (API)
+
+    **Optional:** Uptime Kuma, Netdata, Dozzle, Whoami, Vaultwarden, Jellyfin, Immich
+  </Tab>
+  <Tab title="Modern Homelab">
+    Everything in Base Kit, plus:
+
+    **Platform:** Hybrid local + cloud routing, multi-domain TLS
+
+    **Additional:** Coolify or Dokploy (PaaS), Beszel (monitoring)
+  </Tab>
+  <Tab title="HA Kit">
+    Everything in Modern Homelab, plus:
+
+    **Platform:** Multi-node clustering, rolling updates, failover
+
+    **Additional:** Komodo (fleet management), distributed storage
+  </Tab>
+</Tabs>
+
+## Validation
+
+Validate your spec before deployment:
+
+```bash
+stackkit validate
+```
+
+The CUE-based validator checks:
+- All required fields are present
+- Types match the schema contracts
+- Node connections are valid
+- Service dependencies are satisfied
+- No port conflicts exist
+- Generated artifacts match the spec (no hand-edits)
+
+Partial validation (for wizard-style step-by-step input):
+
+```bash
+stackkit validate --partial
+```
+
+Or via the API:
+
+```bash
+curl -X POST http://localhost:8082/api/v1/validate \
+  -H "Content-Type: application/json" \
+  -d @stack-spec.json
+```
+
+## Environment variables
+
+Override service settings without modifying the spec:
+
+```yaml
+services:
+  immich:
+    enabled: true
+    env:
+      UPLOAD_LOCATION: /data/photos
+      DB_PASSWORD: "${IMMICH_DB_PASSWORD}"
+```
+
+<Warning>
+  Never hardcode secrets in your `stack-spec.yaml`. Use environment variable references with `${VAR_NAME}` syntax.
+</Warning>
+
+## Common customization patterns
+
+### Custom domain with Let's Encrypt
+
+```yaml
+meta:
+  name: family-cloud
+  domain: home.example.com
+  email: admin@example.com
+```
+
+Ensure DNS A/CNAME records point to your server and ports 80/443 are open.
+
+### Local-only development
+
+```yaml
+meta:
+  name: dev-lab
+  domain: home.localhost
+```
+
+No DNS or TLS configuration needed. Services are accessible at `*.home.localhost`.
+
+### Selective services
+
+```yaml
+services:
+  traefik:
+    enabled: true
+  homepage:
+    enabled: true
+  immich:
+    enabled: false    # skip photo management
+  vaultwarden:
+    enabled: true     # add password vault
+```
+
+## CUE contracts
+
+The `stack-spec.yaml` is validated against CUE schema contracts that define the allowed structure and constraints. CUE is the technical source of truth — the spec is the user-editable contract, generated files are outputs.
+
+The CUE layer structure:
+- **Foundation:** Host bootstrap, security baseline, network
+- **Platform:** PaaS adapter, reverse proxy, identity, logging
+- **Application:** User-facing services (photos, vault, media)
+
+For CUE internals, see [CUE architecture](/stackkits/explanations/cue-architecture).

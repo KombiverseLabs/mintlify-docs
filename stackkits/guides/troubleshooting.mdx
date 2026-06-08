@@ -1,0 +1,268 @@
+---
+title: "Troubleshooting"
+description: "Common issues, diagnostic commands, and recovery procedures for StackKits"
+sidebarTitle: "Troubleshooting"
+icon: wrench
+---
+
+## Quick diagnostics
+
+Run the built-in doctor command first — it checks for the most common issues:
+
+```bash
+stackkit doctor
+```
+
+This validates:
+- Docker is installed and running
+- OpenTofu is available (packaged version)
+- `stack-spec.yaml` is valid
+- CUE contracts are intact
+- Deployment state is consistent
+- Kit updates are available
+
+## Common issues
+
+### Installation
+
+<AccordionGroup>
+  <Accordion title="Installer fails with permission error">
+    The installer needs root/sudo access to install Docker and system packages.
+
+    ```bash
+    # Run with sudo
+    curl -sSL base.stackkit.cc | sudo sh
+
+    # Or install CLI only, then prepare with sudo
+    curl -sSL install.stackkit.cc | sh
+    sudo stackkit prepare
+    ```
+  </Accordion>
+
+  <Accordion title="Docker not found after prepare">
+    If `stackkit prepare` installed Docker but the CLI cannot find it, your shell
+    session needs to reload:
+
+    ```bash
+    # Reload shell
+    exec bash
+    # or
+    source ~/.bashrc
+
+    # Verify Docker
+    docker --version
+    ```
+  </Accordion>
+
+  <Accordion title="OpenTofu version mismatch">
+    StackKits packages its own OpenTofu binary. If you have a system-wide OpenTofu
+    that conflicts:
+
+    ```bash
+    # Check which binary is used
+    stackkit version
+
+    # The packaged binary is at
+    ls ~/.stackkits/bin/tofu
+    ```
+
+    StackKits uses its packaged version by default. The system `tofu` is not used.
+  </Accordion>
+</AccordionGroup>
+
+### Deployment
+
+<AccordionGroup>
+  <Accordion title="stackkit plan fails with provider errors">
+    Usually means the OpenTofu providers could not be downloaded:
+
+    ```bash
+    # Check network connectivity
+    curl -I https://registry.opentofu.org
+
+    # Retry with verbose output
+    stackkit plan -v
+    ```
+
+    Behind a proxy, set `HTTP_PROXY` and `HTTPS_PROXY` before running.
+  </Accordion>
+
+  <Accordion title="Services start but are not reachable">
+    Check the reverse proxy and DNS:
+
+    ```bash
+    # Verify services are running
+    stackkit status
+
+    # Check Traefik routing
+    docker logs traefik 2>&1 | tail -20
+
+    # For local deployments, verify DNS resolution
+    ping base.home.localhost
+    ```
+
+    For `*.home.localhost` domains, your system should resolve them automatically.
+    If not, add entries to `/etc/hosts`:
+
+    ```
+    127.0.0.1  base.home.localhost
+    127.0.0.1  auth.home.localhost
+    ```
+  </Accordion>
+
+  <Accordion title="TLS certificate errors">
+    With custom domains, Let's Encrypt needs:
+
+    - DNS A/CNAME records pointing to your server
+    - Ports 80 and 443 open and reachable from the internet
+    - A valid email in `meta.email`
+
+    ```bash
+    # Check certificate status via Traefik
+    docker exec traefik cat /letsencrypt/acme.json | head -20
+
+    # Force certificate renewal
+    docker restart traefik
+    ```
+  </Accordion>
+
+  <Accordion title="Port conflict on 80 or 443">
+    Another service is using the ports Traefik needs:
+
+    ```bash
+    # Find what's using port 80
+    sudo lsof -i :80
+    # or
+    sudo ss -tlnp | grep ':80'
+
+    # Stop the conflicting service, then retry
+    stackkit apply
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Post-deployment
+
+<AccordionGroup>
+  <Accordion title="Verification fails for some services">
+    ```bash
+    # Run full verification with details
+    stackkit verify --http --json
+
+    # Check specific service logs
+    docker logs <service-name> 2>&1 | tail -50
+
+    # Check if containers are healthy
+    docker ps --filter "health=unhealthy"
+    ```
+
+    Some services take 30-60 seconds to fully start. Wait and retry.
+  </Accordion>
+
+  <Accordion title="Node Hub shows 'Protect Base Hub' warning">
+    This is expected on first run. Complete the owner setup:
+
+    1. Open the Node Hub at `base.<domain>`
+    2. Register with PocketID (passkey-based login)
+    3. Click **Protect Base Hub**
+
+    After protection, the warning disappears and authentication is required.
+  </Accordion>
+
+  <Accordion title="Lost admin credentials">
+    If you completed initial setup but lost the bootstrap credentials:
+
+    ```bash
+    # Check break-glass recovery bundle
+    stackkit break-glass inspect
+
+    # The recovery bundle location
+    ls .stackkit/recovery/
+    ```
+
+    Break-glass bundles contain emergency access credentials generated during first-run.
+  </Accordion>
+</AccordionGroup>
+
+## Log inspection
+
+StackKits writes structured deploy logs for every operation:
+
+```bash
+# List all deploy runs
+stackkit logs
+
+# View the latest deploy log
+stackkit logs latest
+
+# View a specific run
+stackkit logs <run-id>
+
+# Filter by level
+stackkit logs latest --level error
+```
+
+Logs are stored under `.stackkit/runs/<runId>/` with full event history.
+
+### Live streaming
+
+During a deployment, stream logs in real-time:
+
+```bash
+# Via CLI
+stackkit apply -v
+
+# Via API (SSE)
+curl -N http://localhost:8082/api/v1/logs/<runId>/stream
+```
+
+## Health checks
+
+```bash
+# Full status overview
+stackkit status
+
+# API health endpoint
+curl http://localhost:8082/api/v1/health
+
+# HTTP verification of all services
+stackkit verify --http --json
+```
+
+## Recovery procedures
+
+### Rolling back a failed upgrade
+
+If a kit upgrade fails, the atomic snapshot allows full rollback:
+
+```bash
+stackkit kit upgrade rollback
+```
+
+This restores the OpenTofu state and Kopia volume snapshots from before the upgrade.
+
+### Removing a deployment
+
+To completely remove a StackKits deployment:
+
+```bash
+# Preview what will be destroyed
+stackkit remove --plan
+
+# Execute removal
+stackkit remove
+```
+
+<Warning>
+  `stackkit remove` destroys all provisioned infrastructure. Service data stored in Docker volumes will be removed unless you have backups configured.
+</Warning>
+
+### VPS compatibility check
+
+Before deploying to a new server, run a non-destructive compatibility check:
+
+```bash
+stackkit compat
+```
+
+This checks hardware, OS, and network without making any changes.

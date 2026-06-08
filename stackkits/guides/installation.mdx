@@ -1,0 +1,170 @@
+---
+title: "Installation guide"
+description: "System requirements, installation methods, and first-run walkthrough for StackKits"
+sidebarTitle: "Installation"
+icon: download
+---
+
+Before deploying a StackKit, verify your host meets the requirements and choose the installation method that fits your workflow.
+
+## System requirements
+
+<CardGroup cols={2}>
+  <Card title="Operating system" icon="linux">
+    Linux (Ubuntu 22.04+, Debian 12+, Fedora 39+) or macOS 13+. Windows via WSL2.
+  </Card>
+  <Card title="Hardware" icon="microchip">
+    **Minimum:** 2 CPU cores, 4 GB RAM, 40 GB disk.
+    **Recommended:** 4+ cores, 8+ GB RAM, 80+ GB SSD.
+  </Card>
+  <Card title="Network" icon="network-wired">
+    Outbound HTTPS for Docker images and OpenTofu providers.
+    Ports 80/443 for web services (configurable).
+  </Card>
+  <Card title="Software" icon="box-open">
+    Docker 24+ (auto-installed by `stackkit prepare` if missing).
+    SSH access if deploying to a remote node.
+  </Card>
+</CardGroup>
+
+## Installation methods
+
+StackKits offers three paths, from fully automated to fully manual.
+
+### One-line installer (recommended)
+
+The fastest path. Installs the CLI, downloads kit definitions, prepares the host, and deploys in one command:
+
+```bash
+curl -sSL base.stackkit.cc | sh
+```
+
+Kit-specific variants:
+
+| Command | Kit | Complexity |
+|---------|-----|------------|
+| `curl -sSL base.stackkit.cc \| sh` | Base Kit | Low |
+| `curl -sSL modern.stackkit.cc \| sh` | Modern Homelab | Medium |
+| `curl -sSL ha.stackkit.cc \| sh` | High Availability | High |
+
+<Info>
+  Base Kit is the verified beta path. Modern Homelab and HA Kit are alpha — they work, but their rollout matrices are still graduating.
+</Info>
+
+### CLI-only installer
+
+Install just the CLI when you want full control over each step:
+
+```bash
+curl -sSL install.stackkit.cc | sh
+```
+
+This installs three binaries:
+- `stackkit` — the main CLI for all deployment operations
+- `stackkit-server` — the HTTP API server (deployed automatically as a system app)
+- `stackkit-mcp` — the MCP connector for AI agent integration
+
+It also installs a packaged OpenTofu binary and the public kit catalog under `~/.stackkits/`.
+
+### Build from source
+
+```bash
+git clone https://github.com/kombifyio/StackKits.git
+cd StackKits
+go build -o build/stackkit ./cmd/stackkit
+go build -o build/stackkit-server ./cmd/stackkit-server
+./build/stackkit version
+```
+
+Requires Go 1.26+ and `mise` (task runner).
+
+## First-run walkthrough
+
+After installing the CLI, the deployment lifecycle follows a fixed sequence:
+
+<Steps>
+  <Step title="Initialize a workspace">
+    Create a `stack-spec.yaml` from your intent. The interactive wizard guides you through kit selection, domain strategy, and identity setup.
+
+    ```bash
+    mkdir my-homelab && cd my-homelab
+    stackkit init base-kit
+    ```
+
+    Key flags for non-interactive use:
+
+    | Flag | Purpose | Example |
+    |------|---------|---------|
+    | `--domain` | Base domain for services | `home.example.com` |
+    | `--admin-email` | Bootstrap identity email | `you@example.com` |
+    | `--mode` | Install depth | `bootstrapped` (default) |
+    | `--context` | Target environment | `local`, `cloud`, or `pi` |
+  </Step>
+
+  <Step title="Prepare the target">
+    Validates prerequisites, installs Docker if missing, and checks hardware compatibility.
+
+    ```bash
+    stackkit prepare
+    ```
+
+    For remote targets, pass SSH connection details:
+
+    ```bash
+    stackkit prepare --host 192.168.1.100 --user deploy --ssh-key ~/.ssh/id_ed25519
+    ```
+  </Step>
+
+  <Step title="Generate deployment artifacts">
+    Binds your `stack-spec.yaml` to the CUE contracts and writes generated OpenTofu files under `deploy/`.
+
+    ```bash
+    stackkit generate
+    ```
+  </Step>
+
+  <Step title="Preview and apply">
+    Preview what will be created, then apply:
+
+    ```bash
+    stackkit plan          # dry-run preview
+    stackkit apply         # deploy
+    ```
+
+    The apply step runs OpenTofu, bootstraps the selected PaaS, deploys system services, and prints the service URLs.
+  </Step>
+
+  <Step title="Verify the deployment">
+    Run post-deployment checks:
+
+    ```bash
+    stackkit verify --http --json
+    ```
+
+    This validates that all expected services are running and reachable. For Base Kit with local DNS, open `http://base.home.localhost` to see the Node Hub dashboard.
+  </Step>
+</Steps>
+
+## Minimum user intent
+
+Every installation needs at least these inputs:
+
+| Input | Purpose | Default |
+|-------|---------|---------|
+| StackKit | Which kit to install | `base-kit` |
+| Admin email | Bootstrap identity | Required for cloud/custom domain |
+| Domain strategy | Service routing | `home.localhost` (local) |
+| Install mode | Bootstrap depth | `bootstrapped` |
+
+Higher customization (custom domains, TLS, multi-node) increases the review and evidence needed before apply.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Configuration reference" icon="file-code" href="/stackkits/reference/configuration">
+    Customize your stack-spec.yaml with all available fields.
+  </Card>
+  <Card title="Troubleshooting" icon="wrench" href="/stackkits/guides/troubleshooting">
+    Common issues and how to resolve them.
+  </Card>
+</CardGroup>

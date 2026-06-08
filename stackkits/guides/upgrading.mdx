@@ -1,0 +1,170 @@
+---
+title: "Upgrading StackKits"
+description: "How to upgrade kit versions, configure backups, and roll back if needed"
+sidebarTitle: "Upgrading"
+icon: arrow-up
+---
+
+StackKits uses a channel-based release system with mandatory backups before every upgrade. This guide covers the complete upgrade workflow.
+
+## Before you upgrade
+
+### Configure backups (mandatory)
+
+Every upgrade creates an atomic snapshot before applying changes. Kopia backup must be configured first — there is no override to skip this step.
+
+```bash
+stackkit backup init --repo=local:/var/lib/kopia
+```
+
+<Warning>
+  Upgrades are refused if Kopia is not configured. This is a safety invariant — your data must be recoverable before any infrastructure change.
+</Warning>
+
+### Check for updates
+
+```bash
+stackkit doctor --check-updates
+```
+
+This queries the compatibility resolver and shows available kit and module versions for your current configuration.
+
+## Release channels
+
+Both kit versions and individual module versions use release channels:
+
+| Channel | Stability | Use case |
+|---------|-----------|----------|
+| `stable` | Production-ready | Default for most users |
+| `beta` | Feature-complete, testing | Early access to new features |
+| `edge` | Latest development | Testing and feedback |
+
+When you select a channel for the kit, the compatibility resolver picks each module version using the fallback hierarchy: `stable > beta > edge`. If a module has no `stable` release yet, it falls back to `beta`, then `edge`.
+
+## Upgrade workflow
+
+<Steps>
+  <Step title="Check current state">
+    ```bash
+    stackkit status
+    stackkit kit history
+    ```
+
+    Review your current kit version, channel, and deployment state.
+  </Step>
+
+  <Step title="Preview the upgrade">
+    ```bash
+    stackkit kit upgrade --to=channel:stable --dry-run
+    ```
+
+    This shows:
+    - Which kit version will be applied
+    - Which modules will be updated (with `reason`: matched, fallback, or override)
+    - Whether any breaking changes exist
+  </Step>
+
+  <Step title="Run the upgrade">
+    ```bash
+    stackkit kit upgrade --to=channel:stable
+    ```
+
+    The upgrade process:
+    1. Creates a Kopia snapshot of all persistent volumes
+    2. Copies the current OpenTofu state to `.stackkit/snapshots/`
+    3. Writes a manifest with snapshot IDs and version info
+    4. Downloads and applies new CUE contracts
+    5. Regenerates deployment artifacts
+    6. Runs `tofu apply` with the new configuration
+    7. Verifies the deployment
+  </Step>
+
+  <Step title="Verify">
+    ```bash
+    stackkit verify --http --json
+    ```
+
+    Confirm all services are running and reachable after the upgrade.
+  </Step>
+</Steps>
+
+## Rolling back
+
+If an upgrade causes issues, roll back to the pre-upgrade snapshot:
+
+```bash
+stackkit kit upgrade rollback
+```
+
+This restores:
+- The OpenTofu state from before the upgrade
+- Kopia volume snapshots (persistent data)
+- The previous kit version and CUE contracts
+
+<Info>
+  Rollback uses the manifest created during the upgrade to identify exactly which snapshots to restore. Every upgrade creates this manifest automatically.
+</Info>
+
+## Backup management
+
+### Daily backups
+
+Configure scheduled backups for ongoing data protection:
+
+```bash
+# Run a backup
+stackkit backup run
+
+# List available snapshots
+stackkit backup list
+
+# Verify backup integrity
+stackkit backup verify
+```
+
+### Restore from backup
+
+```bash
+# Restore a specific snapshot
+stackkit backup restore <snapshot-id>
+```
+
+### Migrating from Restic
+
+If you previously used Restic for backups:
+
+```bash
+stackkit backup migrate-from-restic
+```
+
+## Version history
+
+| Version | Status | Highlights |
+|---------|--------|------------|
+| v0.4.x | Current (beta hardening) | Kit update lifecycle, Base Hub protection, MCP integration |
+| v0.3.x | Public OSS release | CLI foundation, CUE contracts, Base Kit |
+| v0.2.x | Internal | Fresh VM local path |
+| v0.1.x | Internal | CUE CLI foundation |
+
+## Current limitations
+
+- **Single-node only**: Kit upgrades currently support single-node deployments. Multi-node rolling upgrades are planned for Phase 2.
+- **Manual channel promotion**: Kit and module versions are promoted between channels manually. Automatic promotion based on demand signals is planned for Phase 3.
+- **Base Kit verified**: The upgrade path is verified for Base Kit. Modern Homelab and HA Kit upgrades are alpha.
+
+## Break-glass recovery
+
+For emergency situations where normal rollback does not work:
+
+```bash
+# Inspect recovery bundle
+stackkit break-glass inspect
+
+# List available bundles
+stackkit break-glass list
+
+# Rotate recovery credentials
+stackkit break-glass rotate
+```
+
+Break-glass bundles contain emergency access credentials generated during first-run. Store them securely.

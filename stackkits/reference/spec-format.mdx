@@ -1,11 +1,11 @@
 ---
 title: Spec format reference
-description: Complete reference for the kombination.yaml specification format
+description: Complete reference for the stack-spec.yaml specification format
 sidebarTitle: Spec format
 icon: file-code
 ---
 
-The `kombination.yaml` file is the central configuration for your kombify deployment. This reference documents all available fields and their valid values.
+The `stack-spec.yaml` file (also accepted as `kombination.yaml`) is your deployment contract. This reference documents all available fields and their valid values.
 
 ## Top-level fields
 
@@ -74,7 +74,7 @@ Services can be specified as a simple list or as detailed objects:
 services:
   - traefik
   - immich
-  - authelia
+  - vaultwarden
 
 # Detailed: customize per service
 services:
@@ -99,11 +99,11 @@ services:
     enabled: true
     env:
       UPLOAD_LOCATION: /data/photos
-      DB_PASSWORD: "${DOPPLER_IMMICH_DB_PASSWORD}"
+      DB_PASSWORD: "${IMMICH_DB_PASSWORD}"
 ```
 
 <Warning>
-  Never hardcode secrets in your `kombination.yaml`. Use Doppler references or environment variable substitution.
+  Never hardcode secrets in your `stack-spec.yaml`. Use environment variable references with `${VAR_NAME}` syntax.
 </Warning>
 
 ## Validation
@@ -111,7 +111,7 @@ services:
 Validate your spec before deployment:
 
 ```bash
-kombify validate
+stackkit validate
 ```
 
 The validator checks:
@@ -145,12 +145,12 @@ services:
     enabled: true
     config:
       dashboard: true
-  authelia:
-    enabled: true
   immich:
     enabled: true
     config:
       upload_limit: 50GB
+  vaultwarden:
+    enabled: true
   homepage:
     enabled: true
 ```
