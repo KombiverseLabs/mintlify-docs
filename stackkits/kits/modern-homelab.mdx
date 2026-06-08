@@ -181,7 +181,7 @@ graph TB
 
 <Steps>
   <Step title="Define your hybrid setup">
-    ```yaml kombination.yaml
+    ```yaml stack-spec.yaml
     stackkit: modern-homelab
 
     domain: homelab.example.com
@@ -345,7 +345,7 @@ observability:
 
 ### Coolify -- Multi-node PaaS
 
-Coolify manages deployments across your nodes. While the Base Kit uses Dokploy within a single-environment pattern, Coolify provides additional capabilities for hybrid setups:
+Coolify manages deployments across your nodes. While the Base Kit defaults to Coolify for single-environment setups, the Modern Homelab Kit leverages its multi-node capabilities for hybrid topologies:
 
 - Multi-node deployment via SSH
 - Git-based deployments (push to deploy)
@@ -382,7 +382,7 @@ Services are placed on specific nodes based on their role:
 ## Adding more nodes
 
 ```yaml
-# Add to kombination.yaml
+# Add to stack-spec.yaml
 nodes:
   # ... existing nodes
 
@@ -437,7 +437,7 @@ The StackKit configures firewall rules automatically:
 | Feature | Base Kit | High Availability Kit | Modern Homelab Kit |
 |---------|-------------|------------|----------------|
 | **Nodes** | 1 | 2+ (local) | 2+ (cloud + local) |
-| **Platform** | Docker + Dokploy | Docker Swarm | Docker + Coolify |
+| **Platform** | Docker + Coolify | Docker Swarm | Docker + Coolify |
 | **Network** | Local only | Local LAN | VPN overlay (Headscale) |
 | **Public Access** | Optional (Cloudflare Tunnel) | Optional | Default |
 | **Monitoring** | OTLP collector baseline | OTLP collector + gateway planning | Collector baseline + monitoring-core |
@@ -487,7 +487,7 @@ The StackKit configures firewall rules automatically:
   </Step>
 
   <Step title="Provision cloud node">
-    Add a cloud node to your `kombination.yaml` and provision it:
+    Add a cloud node to your `stack-spec.yaml` and provision it:
     ```yaml
     stackkit: modern-homelab  # Changed from base-kit
 

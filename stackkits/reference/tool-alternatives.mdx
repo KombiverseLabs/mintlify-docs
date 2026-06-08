@@ -5,7 +5,7 @@ sidebarTitle: "Tool alternatives"
 icon: "shuffle"
 ---
 
-StackKits never locks you into a single tool. For each capability there is a **smart default** (what you get if you change nothing) and **alternatives** you can select in `kombination.yaml`. Defaults are resolved from your context (local vs cloud), compute tier, and domain — you can always override them.
+StackKits never locks you into a single tool. For each capability there is a **smart default** (what you get if you change nothing) and **alternatives** you can select in `stack-spec.yaml`. Defaults are resolved from your context (local vs cloud), compute tier, and domain — you can always override them.
 
 <Note>
   This page is the canonical, implementation-backed catalog. The Base Kit ships the **platform services** below; **add-ons** layer optional capabilities on top of any kit.
@@ -35,7 +35,7 @@ These run in every Base Kit deployment, selected by the resolver per context and
   The app platform is **context-resolved** — the Base Kit release default does not hard-pin Dokploy or Coolify. On standard and low tiers the resolver enables **Coolify**; switch with an explicit override in your spec.
 </Note>
 
-```yaml kombination.yaml
+```yaml stack-spec.yaml
 stackkit: base-kit
 
 # Override a smart default — e.g. use Dokploy instead of Coolify
@@ -69,7 +69,7 @@ Add-ons are composable modules you stack on any kit. Each declares its compatibl
 | **External access** | `tunnel` | Bypass CGNAT/DS-Lite to expose local services |
 | **High availability** | `ha` | Load balancing, VIP failover, database HA |
 
-```yaml kombination.yaml
+```yaml stack-spec.yaml
 stackkit: base-kit
 
 addons:
@@ -84,7 +84,7 @@ The resolver picks each tool from three inputs, in order of precedence:
 
 <Steps>
   <Step title="Explicit override">
-    Anything you set in `kombination.yaml` wins.
+    Anything you set in `stack-spec.yaml` wins.
   </Step>
   <Step title="Context (local / cloud / pi)">
     Cloud contexts favor public-DNS + Let's Encrypt defaults; `pi` / low-resource contexts drop heavier services (e.g. Glances instead of Netdata, no Prometheus).
@@ -101,6 +101,6 @@ The resolver picks each tool from three inputs, in order of precedence:
     Pick the right architecture pattern first.
   </Card>
   <Card title="Spec format" icon="file-code" href="/stackkits/reference/spec-format">
-    Full `kombination.yaml` reference.
+    Full `stack-spec.yaml` reference.
   </Card>
 </CardGroup>

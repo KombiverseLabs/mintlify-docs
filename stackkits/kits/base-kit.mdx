@@ -23,7 +23,7 @@ graph TB
         end
         
         subgraph Platform["PaaS Platform"]
-            Dokploy["Dokploy<br/>Container Platform"]
+            Coolify["Coolify<br/>App Platform"]
         end
         
         subgraph Monitoring["Observability"]
@@ -65,7 +65,7 @@ Base Kit no longer relies on the old monolithic `variant` selector. Start from t
     | **Dozzle** | Real-time Docker log viewer |
     | **monitoring-agent** | OTLP collector baseline enabled by default |
     
-    ```yaml kombination.yaml
+    ```yaml stack-spec.yaml
     stackkit: base-kit
     ```
   </Tab>
@@ -79,7 +79,7 @@ Base Kit no longer relies on the old monolithic `variant` selector. Start from t
     | **VictoriaMetrics** | Optional durable metrics backend |
     | **Grafana** | Optional dashboards when enabled with the backend tier |
     
-    ```yaml kombination.yaml
+    ```yaml stack-spec.yaml
     stackkit: base-kit
 
     addons:
@@ -95,7 +95,7 @@ Base Kit no longer relies on the old monolithic `variant` selector. Start from t
     | **monitoring-agent** | Keeps the collector baseline |
     | **No retention tier by default** | Avoids heavier fan-in and storage services |
     
-    ```yaml kombination.yaml
+    ```yaml stack-spec.yaml
     stackkit: base-kit
     mode: pi
     ```
@@ -177,7 +177,7 @@ Base Kit no longer relies on the old monolithic `variant` selector. Start from t
 
 <Steps>
   <Step title="Create your spec file">
-    ```yaml kombination.yaml
+    ```yaml stack-spec.yaml
     stackkit: base-kit
     
     # Node configuration
@@ -195,7 +195,7 @@ Base Kit no longer relies on the old monolithic `variant` selector. Start from t
     
     # Service toggles
     services:
-      dokploy:
+      coolify:
         enabled: true
       uptime_kuma:
         enabled: true
@@ -282,7 +282,7 @@ nodes:
   <Tab title="Local only">
     ```yaml
     # No domain — access via IP:port
-    # Dokploy will be available at http://IP:3000
+    # Coolify will be available at http://IP:8000
     
     ssl:
       provider: selfsigned
@@ -299,9 +299,9 @@ services:
     dashboard: true         # Enable Traefik UI
     log_level: INFO
     
-  dokploy:
+  coolify:
     enabled: true
-    # Dokploy runs on port 3000 by default
+    # Coolify runs on port 8000 by default
     
   uptime_kuma:
     enabled: true
@@ -350,7 +350,7 @@ After `stackkit generate`:
 
 ```text
 .
-├── kombination.yaml          # Your configuration
+├── stack-spec.yaml          # Your configuration
 ├── tofu/
 │   ├── main.tf              # Infrastructure definition
 │   ├── variables.tf         # Input variables
@@ -396,10 +396,10 @@ The Base Kit enforces these rules:
     - Check rate limits at https://letsencrypt.org/docs/rate-limits/
   </Accordion>
   
-  <Accordion title="Dokploy not starting">
-    1. Check port 3000 is not in use: `netstat -tlnp | grep 3000`
+  <Accordion title="Coolify not starting">
+    1. Check port 8000 is not in use: `netstat -tlnp | grep 8000`
     2. Verify Docker socket permissions
-    3. Check logs: `docker logs dokploy`
+    3. Check logs: `docker logs coolify`
   </Accordion>
   
   <Accordion title="Low disk space warnings">
