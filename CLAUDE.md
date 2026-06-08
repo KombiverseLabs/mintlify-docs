@@ -17,3 +17,13 @@ Use workspace standards in `../kombify-Core/standards/`, especially `DOCS_STANDA
 ## Verification
 
 Run `mise run check` for config/path validation and `mise run local:e2e` for the docs-local gate.
+
+## Linear (High-Level Planning)
+
+This repo maps to Linear label `area:websites` in the **Development** project.
+Check `list_issues --label area:websites` for active high-level tasks before
+starting significant work. Create Linear issues for cross-repo decisions,
+blockers, or feature-level planning. Granular execution stays in Beads.
+
+Workspace: [Kombiverse Labs](https://linear.app/kombiverse-labs)
+Standard: `LINEAR-PLANNING-STANDARD.md` in the kombify workspace root.
