@@ -1,0 +1,89 @@
+---
+title: Authentication overview
+description: Authentication and authorization guide for kombify
+---
+
+
+kombify implements a **zero-trust identity architecture** with multiple authentication methods for different use cases. This guide helps you choose and configure the right authentication approach.
+
+<Note>
+  For a deep dive into the identity architecture, see [Identity & security concepts](/concepts/spec-driven).
+</Note>
+
+## Authentication methods
+
+| Method | Use case | Recommended for |
+|--------|----------|-----------------|
+| **Passkeys (WebAuthn)** | Passwordless login | Human users (default) |
+| **OIDC/SSO** | Enterprise federation | Teams, organizations |
+| **mTLS certificates** | Service-to-service | Agents, workloads |
+| **API keys** | Programmatic access | Scripts, CI/CD |
+| **SSH keys** | Server access | Direct server management |
+
+## Quick decision guide
+
+<AccordionGroup>
+  <Accordion title="I'm setting up kombify for personal use" icon="user">
+    Use the default **passkey authentication**:
+    - Register a passkey during signup
+    - Add a backup passkey for recovery
+    - No passwords to remember or rotate
+  </Accordion>
+  
+  <Accordion title="I'm setting up kombify for my team" icon="users">
+    Use **Auth0 OIDC** with kombify Cloud:
+    - Centralized user management
+    - Role-based access control
+    - SSO across all kombify tools
+    
+    See [Auth0 setup](/integrations/auth0).
+  </Accordion>
+  
+  <Accordion title="I need to integrate with existing corporate SSO" icon="building">
+    Configure **SSO integration**:
+    - OIDC or SAML federation
+    - Map existing groups to kombify roles
+    - Maintain single identity source
+    
+    See [SSO integration](/guides/auth/sso-integration).
+  </Accordion>
+  
+  <Accordion title="I need programmatic access for automation" icon="robot">
+    Use **API keys** or **mTLS certificates**:
+    - API keys for simple scripts
+    - mTLS for production workloads
+    - Both support scoped permissions
+    
+    See [API keys](/guides/auth/api-keys).
+  </Accordion>
+</AccordionGroup>
+
+## Security defaults
+
+kombify ships with secure-by-default settings:
+
+- **Passkey-only login** (no passwords by default)
+- **mTLS for agents** (no static API keys in config files)
+- **Short-lived tokens** (1 hour access tokens)
+- **RBAC via groups** (least privilege by default)
+
+<Tip>
+  These are recommendations, not hard limits. Advanced users can intentionally adjust security posture if their use case requires it.
+</Tip>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Identity concepts" icon="lightbulb" href="/concepts/spec-driven">
+    Understand the full identity architecture
+  </Card>
+  <Card title="Auth0 setup" icon="shield" href="/integrations/auth0">
+    Configure Auth0 as your IdP
+  </Card>
+  <Card title="SSO integration" icon="key" href="/guides/auth/sso-integration">
+    Connect to enterprise SSO
+  </Card>
+  <Card title="API keys" icon="code" href="/guides/auth/api-keys">
+    Set up programmatic access
+  </Card>
+</CardGroup>
