@@ -63,7 +63,7 @@ A StackKit is a **smart configuration system** that:
   <Tab title="The solution">
     Pick a StackKit pattern, let context handle the rest:
     
-    ```yaml stack-spec.yaml
+    ```yaml kombination.yaml
     version: "2.0"
     stackkit: base
     domain: homelab.example.com
@@ -139,7 +139,7 @@ Each node is automatically classified based on hardware and provider metadata:
 
 | Context | Detection | Affects |
 |---------|-----------|---------|
-| **local** | Physical hardware, no cloud metadata | Self-signed TLS, local DNS, `*.home.localhost` |
+| **local** | Physical hardware, no cloud metadata | Self-signed TLS, Dokploy PaaS, local DNS |
 | **cloud** | Cloud provider metadata detected | Let's Encrypt, Coolify PaaS, public DNS |
 | **pi** | ARM + low memory or RPi detection | Reduced services, ARM images, tmpfs |
 
@@ -161,7 +161,7 @@ Add-Ons replace the old monolithic variant system. They are stackable, declare t
 | Reliability | `ha` |
 | Home | `smart-home` |
 
-```yaml stack-spec.yaml
+```yaml kombination.yaml
 addons:
   - monitoring       # VictoriaMetrics + Grafana + Loki + Alloy
   - backup           # Kopia encrypted backups (3-2-1)
@@ -194,7 +194,7 @@ The combination of StackKit × Context produces curated default configurations:
 
 | | local | cloud | pi |
 |---|---|---|---|
-| **base** | Coolify, self-signed TLS | Coolify, Let's Encrypt | Lean Docker, reduced services |
+| **base** | Dokploy, self-signed TLS | Coolify, Let's Encrypt | Lean Docker, reduced services |
 | **modern** | Tailscale exit node, hybrid DNS | Multi-cloud mesh | Edge relay role |
 | **ha** | Swarm + Keepalived | Cloud HA + managed LB | Not recommended |
 
