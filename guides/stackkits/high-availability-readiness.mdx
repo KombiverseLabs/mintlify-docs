@@ -1,0 +1,63 @@
+---
+title: "High availability readiness"
+description: "Check whether your infrastructure is ready for high-availability StackKits decisions"
+sidebarTitle: "HA readiness"
+---
+
+High availability is an operating model, not a checkbox. Before you choose the High Availability Kit as a target direction, confirm that the basics are in place.
+
+This guide is for the moment when "more reliable" starts to mean real customer, team, or business risk. It helps separate useful resilience planning from expensive overbuild.
+
+## What this guide helps you decide
+
+- whether downtime has real consequences
+- whether multiple nodes are enough to justify HA planning
+- whether backups, monitoring, and incident ownership are ready
+- whether Base Kit should still be the deployable first step
+
+## Current status
+
+The High Availability Kit is documented as a vision-oriented target architecture. Use Base Kit for production deployments today unless you are intentionally evaluating the HA design.
+
+## Readiness checklist
+
+You are closer to HA readiness when you can answer yes to most of these:
+
+- There are at least three suitable nodes.
+- Important services have documented recovery steps.
+- Backups are tested, not only configured.
+- Monitoring exists outside the service being monitored.
+- DNS and routing failure modes are understood.
+- Someone owns incident response.
+- You know which services actually require high availability.
+
+## Common false signals
+
+These do not automatically mean you need HA:
+
+- owning multiple servers
+- wanting faster services
+- running public apps
+- having many Docker containers
+- wanting backups
+
+Those needs may still fit Base Kit or Modern Homelab.
+
+The stronger signal is not infrastructure size. It is the consequence of failure.
+
+## When HA is justified
+
+High availability is worth planning when downtime creates business, customer, or operational risk.
+
+Examples:
+
+- startup services with customer impact
+- authentication or access services required by a team
+- production apps with external users
+- critical monitoring or routing infrastructure
+
+If no one owns response and recovery, the setup is not highly available yet. It is only distributed.
+
+## How this maps to the finder
+
+The finder treats startup intent, `3+` servers, public services, and startup-service use cases as HA signals. It may still recommend "Base Kit first" as the deployable starting point while marking High Availability as the target direction.

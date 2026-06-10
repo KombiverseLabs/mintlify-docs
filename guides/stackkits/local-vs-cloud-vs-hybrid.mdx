@@ -1,0 +1,79 @@
+---
+title: "Choose local, cloud, or hybrid infrastructure"
+description: "Decide where a StackKit should run before you choose the kit itself"
+sidebarTitle: "Local vs cloud"
+---
+
+This is the first real StackKits decision: where should the stack live, and what should that location make easier?
+
+StackKits can model a single local machine, a cloud server, or a hybrid environment. The right choice depends on the moment you are in: protecting private data, getting a public service online, connecting an existing local setup, or planning a more durable operating model.
+
+## What this guide helps you decide
+
+- whether ownership, reachability, or resilience matters most right now
+- whether one environment is enough for the first deployment
+- whether hybrid complexity is justified by a real use case
+- which answer the StackKits finder should preserve in the intent profile
+
+## Quick decision
+
+| Choose         | When it fits                                                                      | Common StackKit direction |
+| -------------- | --------------------------------------------------------------------------------- | ------------------------- |
+| Local hardware | You own the machine, want private data close to home, or need LAN-first services. | Base Kit                  |
+| Cloud server   | You want public reachability, simple DNS, and no hardware at home.                | Base Kit                  |
+| Hybrid         | You want local data plus cloud reachability or remote workers.                    | Modern Homelab            |
+| Not sure       | You are still learning the constraints.                                           | Base Kit first            |
+
+## Local hardware
+
+Local hardware is the best starting point when you already have a mini PC, server, NAS, or spare machine and want a private homelab.
+
+Use local when:
+
+- services should keep working on your LAN
+- storage is physically yours
+- public internet exposure should be optional
+- you are comfortable with router, DNS, or local network details
+
+Decision signal: local hardware is usually about ownership, privacy, LAN reliability, and learning from a machine you control.
+
+## Cloud server
+
+A cloud server is a good starting point when public access matters more than owning the hardware.
+
+Use cloud when:
+
+- you need predictable public DNS
+- your home internet is unreliable or behind carrier-grade NAT
+- you want to avoid hardware maintenance
+- the data you host is safe to place on that provider
+
+Decision signal: cloud is usually about reachability, simple DNS, and avoiding local network constraints.
+
+## Hybrid
+
+Hybrid setups are powerful, but they introduce coordination work. You now have at least two trust and network boundaries.
+
+Use hybrid when:
+
+- private data should stay local
+- public services should run from a cloud node
+- remote users need reliable access
+- you are ready to manage routing, tunnels, VPNs, or agents
+
+Decision signal: hybrid is justified when local ownership and public reachability both matter. If only one matters, start simpler.
+
+<Tip>
+  If this is your first StackKit deployment, start with one environment. A
+  single Base Kit can teach you the operating model before you add hybrid
+  complexity.
+</Tip>
+
+## How this maps to the finder
+
+The StackKits finder treats this answer as an intent signal:
+
+- `Local hardware` keeps the recommendation conservative.
+- `Cloud server` can still resolve to Base Kit.
+- `Hybrid` increases the fit for Modern Homelab.
+- `Not sure` avoids overfitting and keeps Base Kit as the safest first step.
