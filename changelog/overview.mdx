@@ -7,6 +7,25 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits release notes on GitHub](https://github.com/kombifyio/StackKits/releases).
 
+<Update label="2026-06-12" description="Week of June 8 – June 12">
+
+## StackKits v0.3.4
+
+One release this week, focused on a native MCP surface, TechStack-managed install readiness, and public release hygiene.
+
+### New
+
+- **Native MCP surface.** StackKits now exposes a single user-facing `stackkit` MCP connection, with `stackkit-mcp` as the local adapter and `stackkit-server /mcp` as the protected durable endpoint after install. Agents and IDEs can connect to one stable name across local, SSH, and remote setups.
+- **TechStack-managed install readiness.** Release archives include the MCP and server pieces needed for kombify-TechStack managed installs, with bounded MCP rollout and Fresh Ubuntu phase gates so you can see exactly when each phase completes. See [Install-only vs managed cloud](/guides/stackkits/install-only-vs-managed-cloud) and [Deploy with the CLI or TechStack](/guides/stackkits/deploy-with-cli-or-techstack).
+- **Agent discovery on stackkit.cc.** The site now ships OpenMCP metadata, updated `llms.txt`, and installation guidance for local, SSH, and protected durable MCP paths, so coding agents can discover and connect to a StackKit on their own.
+
+### Fixed
+
+- **Public release hygiene.** Public release builds no longer depend on private internal modules, and the Docker image build no longer leaks private module-auth configuration into the released image.
+- **Bounded release gates.** Build timing, website checks, MCP smoke tests, and timeout-budget checks are now bounded by the 15-minute command policy, so a stuck step fails fast instead of hanging the release.
+
+</Update>
+
 <Update label="2026-06-05" description="Week of June 2 – June 5">
 
 ## StackKits v0.3.1 and v0.3.2
