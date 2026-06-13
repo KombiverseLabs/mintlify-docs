@@ -1,0 +1,62 @@
+name: Parity Gate
+
+on:
+  pull_request:
+    paths:
+      - "guides/stackkits/services/**"
+
+jobs:
+  check-generated-ownership:
+    name: Verify generated docs ownership
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Check generated files for required provenance
+        run: |
+          set -euo pipefail
+          fail=0
+          changed_generated=()
+
+          for f in $(git diff --name-only origin/main...HEAD -- 'guides/stackkits/services/*.mdx' 2>/dev/null || true); do
+            if [ ! -f "$f" ]; then
+              continue
+            fi
+            if head -20 "$f" | grep -q '^generated: true'; then
+              changed_generated+=("$f")
+            fi
+          done
+
+          if [ ${#changed_generated[@]} -eq 0 ]; then
+            echo "No generated files modified in this PR."
+            exit 0
+          fi
+
+          echo "Generated files modified: ${changed_generated[*]}"
+
+          for f in "${changed_generated[@]}"; do
+            for key in generated_by content_hash source_hash; do
+              if ! head -20 "$f" | grep -q "^${key}:"; then
+                echo "::error file=${f}::generated:true file missing required frontmatter '${key}'"
+                fail=1
+              fi
+            done
+
+            generator=$(head -20 "$f" | grep '^generated_by:' | sed 's/^generated_by: *"\{0,1\}\([^"]*\)"\{0,1\}/\1/')
+            if [ -n "$generator" ] && [ "$generator" != "stackkit registry emit-mintlify" ]; then
+              echo "::error file=${f}::unexpected generated_by value: ${generator}"
+              fail=1
+            fi
+          done
+
+          commit_author=$(git log -1 --format='%ae' HEAD 2>/dev/null || true)
+          if [ ${#changed_generated[@]} -gt 0 ] && [ "$commit_author" != "github-actions[bot]@users.noreply.github.com" ]; then
+            echo "::warning::Generated files modified by a human commit (${commit_author}). Ensure changes come from the automated docs refresh workflow."
+          fi
+
+          if [ "$fail" -ne 0 ]; then
+            exit 1
+          fi
+          echo "parity gate: ok (${#changed_generated[@]} generated files checked)"
