@@ -10,7 +10,7 @@ The **Base Kit** is designed for **single-environment deployments** — all serv
 It can run on a single server or span multiple nodes in the same environment (local or cloud). This is the simplest architecture pattern, optimized for reliability and straightforward operations.
 
 <Note>
-  The Base Kit follows an IaC-first approach using OpenTofu for infrastructure provisioning and Docker Compose for service deployment.
+  The Base Kit follows an IaC-first approach using packaged OpenTofu plus a selected PaaS adapter. Coolify is the default beta path, and Komodo is the supported beta alternative.
 </Note>
 
 ## Overview
@@ -31,7 +31,7 @@ graph TB
             Dozzle["Dozzle<br/>Log Viewer"]
         end
         
-        subgraph Identity["Identity (Optional)"]
+        subgraph Identity["Identity"]
             TinyAuth["TinyAuth"]
             PocketID["PocketID"]
         end
@@ -60,7 +60,8 @@ Base Kit no longer relies on the old monolithic `variant` selector. Start from t
     | Surface | Description |
     |---------|-------------|
     | **Traefik v3** | Reverse proxy with auto-SSL |
-    | **Coolify** | App platform (PaaS) — smart default; Dokploy/Komodo selectable |
+    | **Coolify** | App platform (PaaS) - beta default |
+    | **Komodo** | Beta-supported alternative PaaS |
     | **Uptime Kuma / Beszel** | Lightweight uptime or node-health UX |
     | **Dozzle** | Real-time Docker log viewer |
     | **monitoring-agent** | OTLP collector baseline enabled by default |
@@ -105,7 +106,7 @@ Base Kit no longer relies on the old monolithic `variant` selector. Start from t
 ## Included services
 
 <Note>
-  The app platform is **context-resolved** — the Base Kit does not hard-pin a PaaS. On standard/low tiers the resolver enables **Coolify** by default; the high tier also adds Portainer, Prometheus, and Grafana. Override any choice in your spec — see [tool alternatives](/stackkits/reference/tool-alternatives) for the full matrix.
+  The app platform is **context-resolved**. The public BaseKit beta defaults to **Coolify** and supports **Komodo** as the beta alternative. Dokploy remains draft/non-beta and is not part of the canonical beta E2E matrix.
 </Note>
 
 <CardGroup cols={2}>
@@ -115,14 +116,14 @@ Base Kit no longer relies on the old monolithic `variant` selector. Start from t
     Automatic HTTPS certificates (Let's Encrypt), routing, and load balancing for all services.
   </Card>
   <Card title="Coolify" icon="cloud">
-    **App platform (smart default)**
+    **App platform (beta default)**
     
-    Self-hosted PaaS like Vercel/Heroku. Deploy from Git, manage databases, scale apps. Enabled by default — swap for Dokploy or Komodo with one override.
+    Self-hosted PaaS like Vercel/Heroku. BaseKit bootstraps Coolify, enables its API, stores platform placement state, and deploys StackKit-owned apps through Coolify.
   </Card>
-  <Card title="Dokploy / Komodo" icon="rocket">
-    **Alternative app platforms**
+  <Card title="Komodo" icon="rocket">
+    **Beta-supported alternative**
     
-    Prefer a different PaaS? Select Dokploy (Vercel/Railway-style) or Komodo instead of Coolify.
+    Komodo is the supported beta alternative for kombify.me provider-lease evidence. Dokploy remains draft until promoted by its own release evidence.
   </Card>
   <Card title="Uptime Kuma" icon="heart-pulse">
     **Status Monitoring**
@@ -141,18 +142,18 @@ Base Kit no longer relies on the old monolithic `variant` selector. Start from t
   </Card>
 </CardGroup>
 
-### Optional identity services
+### Identity services
 
 <CardGroup cols={2}>
   <Card title="TinyAuth" icon="key">
-    **Lightweight Auth Proxy**
+    **Lightweight auth proxy**
     
-    Simple authentication middleware for protecting services with basic auth or OAuth2.
+    Gateway auth boundary for protected routes.
   </Card>
   <Card title="PocketID" icon="id-card">
-    **OIDC Provider**
+    **Passkey-first OIDC provider**
     
-    Full-featured OpenID Connect provider for single sign-on across your homelab.
+    Owner activation and passkey login for the BaseKit beta path.
   </Card>
 </CardGroup>
 
@@ -228,10 +229,10 @@ Base Kit no longer relies on the old monolithic `variant` selector. Start from t
     ```
     
     Creates:
-    - `tofu/main.tf` — OpenTofu configuration
-    - `tofu/variables.tf` — Variables
-    - `docker-compose.yml` — Service definitions
-    - `traefik/` — Reverse proxy config
+    - `deploy/` - generated OpenTofu input and output files
+    - `.stackkit/platform.json` - selected PaaS placement and API context after apply
+    - `.stackkit/state.yaml` - setup-run state and retry-safe setup action evidence
+    - service output files with Base Hub, identity, monitoring, and application URLs
   </Step>
   
   <Step title="Preview and apply">
@@ -311,37 +312,29 @@ services:
     enabled: true
     remote_hosts: []        # Add remote Docker hosts
     
-  # Optional identity
+  # Identity is part of the beta baseline unless intentionally overridden
   tinyauth:
-    enabled: false
+    enabled: true
     
   pocketid:
-    enabled: false
+    enabled: true
 ```
 
 ## Deployment modes
 
-The Base Kit supports two deployment modes:
+The Base Kit supports these public install modes:
 
 | Mode | Engine | When to use |
 |------|--------|-------------|
-| **Simple** | OpenTofu only | Quick setup, one-time deployment |
-| **Advanced** | OpenTofu + Terramate | Drift detection, Day-2 operations |
+| **Bare** | Packaged OpenTofu without Base Hub/setup automation | Manual or BYOS foundations |
+| **Bootstrapped** | Packaged OpenTofu plus Base Hub, identity, monitoring, and setup actions | Default public beta path |
+| **Advanced** | Bootstrapped plus advanced handoff/runtime metadata | TechStack/Komodo and guided handoff paths |
 
-Advanced mode is automatically enabled when:
-- `driftDetection.enabled: true`
-- `autoUpdates.enabled: true`
-- `compliance.required: true`
+Terramate remains an explicit `terramate` / `advanced-terramate` opt-in until its stack templates have release-grade evidence.
 
 ```yaml
-# Enable advanced mode
-operations:
-  driftDetection:
-    enabled: true
-    schedule: "0 */6 * * *"  # Every 6 hours
-  autoUpdates:
-    enabled: true
-    schedule: "0 4 * * 0"    # Sunday 4am
+# Default beta mode
+mode: bootstrapped
 ```
 
 ## File structure
@@ -351,17 +344,12 @@ After `stackkit generate`:
 ```text
 .
 ├── stack-spec.yaml          # Your configuration
-├── tofu/
-│   ├── main.tf              # Infrastructure definition
-│   ├── variables.tf         # Input variables
-│   ├── outputs.tf           # Output values
-│   └── terraform.tfvars     # Generated values
-├── docker-compose.yml        # Service definitions
-├── traefik/
-│   ├── traefik.yml          # Static config
-│   └── dynamic/
-│       └── routes.yml       # Dynamic routing
-└── data/                    # Persistent volumes
+├── deploy/                  # Generated OpenTofu inputs and outputs
+├── .stackkit/
+│   ├── platform.json        # Selected PaaS context after apply
+│   ├── state.yaml           # Setup-run state
+│   └── security-baseline.json
+└── artifacts/               # Optional local evidence and diagnostics
 ```
 
 ## Constraints
@@ -376,8 +364,8 @@ The Base Kit enforces these rules:
 
 <Warning>
   The Base Kit serves a single-environment pattern. If you need:
-  - **Hybrid local + cloud** — [Modern Homelab Kit](/stackkits/kits/modern-homelab)
-  - **Automatic failover and redundancy** — [High Availability Kit](/stackkits/kits/ha-kit)
+  - **Hybrid local + cloud** — [Modern Homelab Kit](https://docs.kombify.io/stackkits/kits/modern-homelab)
+  - **Automatic failover and redundancy** — [High Availability Kit](https://docs.kombify.io/stackkits/kits/ha-kit)
 </Warning>
 
 ## Troubleshooting
@@ -412,10 +400,10 @@ The Base Kit enforces these rules:
 ## Next steps
 
 <CardGroup cols={2}>
-  <Card title="Node Hub" icon="grid-2" href="/guides/stackkits/node-hub">
+  <Card title="Node Hub" icon="grid-2" href="https://docs.kombify.io/guides/stackkits/node-hub">
     Open the standard `base.<domain>` dashboard and service guide matrix.
   </Card>
-  <Card title="CUE basics" icon="code" href="/stackkits/explanations/cue-architecture">
+  <Card title="CUE basics" icon="code" href="https://docs.kombify.io/stackkits/explanations/cue-architecture">
     Learn how to customize StackKit schemas
   </Card>
 </CardGroup>
