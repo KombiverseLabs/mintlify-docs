@@ -9,29 +9,40 @@ The fastest StackKits path is the Install Engine: one short command on the host 
 
 ## Fastest path
 
-Run the Base Kit one-liner on a Linux or macOS host with root/sudo access:
+Run the Base Kit one-liner on a Linux or macOS host with root/sudo access. Without a version pin, this installs the current stable latest release (`v0.4.4`):
 
 ```bash
-curl -sSL base.stackkit.cc | sh
+curl -sSL https://base.stackkit.cc | sh
 ```
 
 This installs the `stackkit` CLI, installs the Base Kit definitions, prepares Docker and OpenTofu, initializes the stack, generates deployment artifacts, applies the stack, and prints the service URLs.
+
+## Public beta path
+
+Use the pinned beta path when you are testing the current BaseKit beta prerelease (`v0.4.5-beta.1`):
+
+```bash
+export STACKKIT_RELEASE_VERSION=v0.4.5-beta.1
+curl -sSL https://base.stackkit.cc | sh
+```
+
+Prerelease pins are explicit by design. Unpinned installers stay on stable latest until the beta evidence and public mirror CI are clean enough for stable promotion.
 
 ## Per-kit one-liners
 
 Use a kit-specific one-liner when you already know the StackKit standard:
 
 ```bash
-curl -sSL base.stackkit.cc | sh      # Base Kit
-curl -sSL modern.stackkit.cc | sh    # Modern Homelab
-curl -sSL ha.stackkit.cc | sh        # High Availability
+curl -sSL https://base.stackkit.cc | sh      # Base Kit stable latest
+curl -sSL https://modern.stackkit.cc | sh    # Modern Homelab preview
+curl -sSL https://ha.stackkit.cc | sh        # High Availability preview
 ```
 
 | StackKit | Use case | Complexity |
 |----------|----------|------------|
-| `base-kit` | Single-environment homelab | Low |
-| `modern-homelab` | Hybrid local + cloud setup | Medium |
-| `ha-kit` | High availability and failover | High |
+| `base-kit` | Single-environment homelab | Public beta |
+| `modern-homelab` | Hybrid local + cloud setup | Preview |
+| `ha-kit` | High availability and failover | Preview |
 
 ## CLI-only path
 
@@ -80,13 +91,13 @@ The Base Kit default provisions a homelab foundation with StackKits standards, a
 ## Next steps
 
 <CardGroup cols={2}>
-  <Card title="CLI or TechStack" icon="route" href="/guides/stackkits/deploy-with-cli-or-techstack">
+  <Card title="CLI or TechStack" icon="route" href="https://docs.kombify.io/guides/stackkits/deploy-with-cli-or-techstack">
     Compare the Install Engine, CLI tool, and kombify-TechStack UI.
   </Card>
-  <Card title="Base Kit details" icon="house" href="/stackkits/kits/base-kit">
+  <Card title="Base Kit details" icon="house" href="https://docs.kombify.io/stackkits/kits/base-kit">
     Learn what Base Kit deploys and how its defaults work.
   </Card>
-  <Card title="Node Hub" icon="grid-2" href="/guides/stackkits/node-hub">
+  <Card title="Node Hub" icon="grid-2" href="https://docs.kombify.io/guides/stackkits/node-hub">
     Use the default dashboard at `base.<domain>` after rollout.
   </Card>
 </CardGroup>

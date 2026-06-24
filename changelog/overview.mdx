@@ -7,11 +7,34 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits release notes on GitHub](https://github.com/kombifyio/StackKits/releases).
 
+<Update label="2026-06-24" description="StackKits v0.4.4 stable and v0.4.5-beta.1 beta">
+
+## BaseKit public beta release channel
+
+StackKits now has a clearer public release split:
+
+- **Stable latest:** [v0.4.4](https://github.com/kombifyio/StackKits/releases/tag/v0.4.4) remains the unpinned official installer target.
+- **Pinned beta:** [v0.4.5-beta.1](https://github.com/kombifyio/StackKits/releases/tag/v0.4.5-beta.1) is the current BaseKit beta prerelease and must be installed with `STACKKIT_RELEASE_VERSION=v0.4.5-beta.1`.
+- **Beta scope:** BaseKit only. Modern Homelab and High Availability remain preview docs until their own released-content matrices graduate.
+
+### Improved
+
+- **Released-content evidence.** The beta evidence records SK-S1 local Coolify, SK-S2 kombify.me Komodo, SK-S3 custom-domain Coolify, SK-S5 negative guard, browser evidence, host security baseline, archive validation, SBOMs, and attestations.
+- **Ephemeral server E2E contract.** Cloud scenario evidence provisions fresh managed servers through the approved lease flow, runs StackKits over SSH as the transport, captures release artifacts, and cleans up DNS/server state after the run.
+- **Installer semantics.** Prereleases stay pinned by environment variable; unpinned `https://base.stackkit.cc` remains stable latest.
+
+### Known limits
+
+- Dokploy remains draft/non-beta. Coolify is the BaseKit default and Komodo is the supported beta alternative.
+- The Reddit/public beta announcement remains gated on green public mirror CI and docs freshness, not just on a published prerelease existing.
+
+</Update>
+
 <Update label="2026-06-19" description="Week of June 15 – June 19">
 
 ## A quiet week
 
-No StackKits releases shipped this week. The latest available build is still [v0.3.4](https://github.com/kombifyio/StackKits/releases/tag/v0.3.4), covered in the previous entry, with its [native MCP surface](/guides/stackkits/deploy-with-cli-or-techstack) and [TechStack-managed install readiness](/guides/stackkits/install-only-vs-managed-cloud).
+No StackKits releases shipped this week. The latest available build is still [v0.3.4](https://github.com/kombifyio/StackKits/releases/tag/v0.3.4), covered in the previous entry, with its [native MCP surface](https://docs.kombify.io/guides/stackkits/deploy-with-cli-or-techstack) and [TechStack-managed install readiness](https://docs.kombify.io/guides/stackkits/install-only-vs-managed-cloud).
 
 Expect the next product update in the following week's changelog.
 
@@ -26,7 +49,7 @@ One release this week, focused on a native MCP surface, TechStack-managed instal
 ### New
 
 - **Native MCP surface.** StackKits now exposes a single user-facing `stackkit` MCP connection, with `stackkit-mcp` as the local adapter and `stackkit-server /mcp` as the protected durable endpoint after install. Agents and IDEs can connect to one stable name across local, SSH, and remote setups.
-- **TechStack-managed install readiness.** Release archives include the MCP and server pieces needed for kombify-TechStack managed installs, with bounded MCP rollout and Fresh Ubuntu phase gates so you can see exactly when each phase completes. See [Install-only vs managed cloud](/guides/stackkits/install-only-vs-managed-cloud) and [Deploy with the CLI or TechStack](/guides/stackkits/deploy-with-cli-or-techstack).
+- **TechStack-managed install readiness.** Release archives include the MCP and server pieces needed for kombify-TechStack managed installs, with bounded MCP rollout and Fresh Ubuntu phase gates so you can see exactly when each phase completes. See [Install-only vs managed cloud](https://docs.kombify.io/guides/stackkits/install-only-vs-managed-cloud) and [Deploy with the CLI or TechStack](https://docs.kombify.io/guides/stackkits/deploy-with-cli-or-techstack).
 - **Agent discovery on stackkit.cc.** The site now ships OpenMCP metadata, updated `llms.txt`, and installation guidance for local, SSH, and protected durable MCP paths, so coding agents can discover and connect to a StackKit on their own.
 
 ### Fixed
@@ -44,13 +67,13 @@ Two patch releases shipped this week, focused on Coolify routing, auth, installe
 
 ### New
 
-- **Canonical live scenarios.** Releases are now validated against three reference setups: local Coolify (SK-S1), kombify.me on Komodo (SK-S2), and custom-domain Coolify (SK-S3). Installer runs are split into bounded Start, Wait, and Verify phases so you can see exactly where a deploy is. See [Choosing a kit](/guides/stackkits/choosing-a-kit).
-- **Coolify managed routing.** BaseKit on Coolify now bootstraps, reconciles, and exposes StackKit services through the managed proxy at predictable hostnames like `base.<domain>`, `id.<domain>`, `photos.<domain>`, and `kuma.<domain>`. See [Deploy with the CLI or TechStack](/guides/stackkits/deploy-with-cli-or-techstack).
+- **Canonical live scenarios.** Releases are now validated against three reference setups: local Coolify (SK-S1), kombify.me on Komodo (SK-S2), and custom-domain Coolify (SK-S3). Installer runs are split into bounded Start, Wait, and Verify phases so you can see exactly where a deploy is. See [Choosing a kit](https://docs.kombify.io/guides/stackkits/choosing-a-kit).
+- **Coolify managed routing.** BaseKit on Coolify now bootstraps, reconciles, and exposes StackKit services through the managed proxy at predictable hostnames like `base.<domain>`, `id.<domain>`, `photos.<domain>`, and `kuma.<domain>`. See [Deploy with the CLI or TechStack](https://docs.kombify.io/guides/stackkits/deploy-with-cli-or-techstack).
 
 ### Improved
 
-- **PocketID + TinyAuth on BaseKit.** Provider registration and runtime checks were restored, so protected services again show PocketID login (with TinyAuth as the password-only fallback) instead of skipping straight to TinyAuth. See [PocketID](/guides/stackkits/services/pocketid) and [TinyAuth](/guides/stackkits/services/tinyauth).
-- **Cloudflare DNS-01 for custom domains.** Custom-domain Coolify rollouts now correctly pass Cloudflare Global API Key credentials to Traefik when `CLOUDFLARE_EMAIL` is set, while scoped API tokens continue to work as before. See [Traefik](/guides/stackkits/services/traefik).
+- **PocketID + TinyAuth on BaseKit.** Provider registration and runtime checks were restored, so protected services again show PocketID login (with TinyAuth as the password-only fallback) instead of skipping straight to TinyAuth. See [PocketID](https://docs.kombify.io/guides/stackkits/services/pocketid) and [TinyAuth](https://docs.kombify.io/guides/stackkits/services/tinyauth).
+- **Cloudflare DNS-01 for custom domains.** Custom-domain Coolify rollouts now correctly pass Cloudflare Global API Key credentials to Traefik when `CLOUDFLARE_EMAIL` is set, while scoped API tokens continue to work as before. See [Traefik](https://docs.kombify.io/guides/stackkits/services/traefik).
 - **Installer readiness.** Live installer jobs hand off VM state before verification and wait for routed services and certificates in bounded phases, instead of relying on one long-running job.
 - **Security updates.** Go crypto and networking dependencies (`golang.org/x/crypto`, `golang.org/x/net`, and related modules) were updated and lint, static, and security checks restored to a clean state.
 

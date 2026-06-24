@@ -14,7 +14,7 @@ A StackKit combines three concepts to produce your infrastructure:
 ```mermaid
 graph TB
     subgraph Concepts["Three Concepts"]
-        SK["StackKit<br/>Architecture Pattern<br/>(base, modern, ha)"]
+        SK["StackKit<br/>Architecture Pattern<br/>(base-kit, modern-homelab, ha-kit)"]
         CTX["Node-Context<br/>Runtime Environment<br/>(local, cloud, pi)"]
         AO["Add-Ons<br/>Composable Extensions<br/>(monitoring, backup, ...)"]
     end
@@ -26,9 +26,9 @@ graph TB
     end
 
     subgraph Output["Generated Output"]
-        TF["main.tf<br/>Infrastructure code"]
-        Compose["docker-compose.yml<br/>Service definitions"]
-        Bootstrap["bootstrap.sh<br/>Node setup"]
+        TF["deploy/<br/>OpenTofu inputs"]
+        Compose["platform handoff<br/>PaaS app state"]
+        Bootstrap[".stackkit/<br/>setup evidence"]
     end
 
     Concepts --> Resolution --> Output
@@ -42,7 +42,7 @@ A StackKit is a **smart configuration system** that:
 1. **Validates** your choices against proven architecture patterns
 2. **Detects** your runtime environment and applies context-aware defaults
 3. **Merges** composable Add-Ons for additional capabilities
-4. **Generates** production-ready infrastructure code
+4. **Generates** release-packaged infrastructure artifacts and rollout evidence
 
 ## The problem StackKits solve
 
@@ -51,7 +51,7 @@ A StackKit is a **smart configuration system** that:
     You want to set up a homelab. You've heard of:
     - Traefik (or Caddy? or nginx?)
     - TinyAuth + PocketID (or Authentik? or Keycloak?)
-    - Dokploy (or Dockge? or Coolify?)
+    - Coolify (or Komodo? or another PaaS?)
     - Immich (or Photoprism?)
 
     **Questions that keep you stuck:**
@@ -65,7 +65,7 @@ A StackKit is a **smart configuration system** that:
     
     ```yaml stack-spec.yaml
     version: "2.0"
-    stackkit: base
+    stackkit: base-kit
     domain: homelab.example.com
 
     addons:
@@ -83,34 +83,36 @@ A StackKit is a **smart configuration system** that:
 
 ## Available StackKits
 
-StackKits are **architecture patterns**, not node-count definitions.
+StackKits are **architecture patterns**, not node-count definitions. The public beta scope is Base Kit; Modern Homelab and High Availability remain preview until their own evidence matrices graduate.
 
 <CardGroup cols={3}>
-  <Card title="Base Kit" icon="house" href="/stackkits/kits/base-kit">
+  <Card title="Base Kit" icon="house" href="https://docs.kombify.io/stackkits/kits/base-kit">
     **Single-environment pattern**
 
     All services in one deployment target. Simple, predictable.
 
-    - Docker Compose
+    - Coolify default
     - Any node count
     - Context-aware defaults
   </Card>
 
-  <Card title="Modern Homelab Kit" icon="cloud" href="/stackkits/kits/modern-homelab">
+  <Card title="Modern Homelab Kit" icon="cloud" href="https://docs.kombify.io/stackkits/kits/modern-homelab">
     **Hybrid infrastructure pattern**
 
     Bridges local and cloud environments with VPN overlay.
 
     - Multi-environment
+    - Preview
     - Coolify PaaS
     - Public + private services
   </Card>
 
-  <Card title="High Availability Kit" icon="shield-halved" href="/stackkits/kits/ha-kit">
+  <Card title="High Availability Kit" icon="shield-halved" href="https://docs.kombify.io/stackkits/kits/ha-kit">
     **High-availability pattern**
 
     Redundancy, failover, and quorum-based consensus.
 
+    - Preview
     - Docker Swarm cluster
     - Keepalived VIP
     - 3+ nodes recommended
@@ -125,12 +127,12 @@ A StackKit defines **how services relate to each other**, not how many servers y
 
 | StackKit | Pattern | Example |
 |----------|---------|---------|
-| **base** | Single-environment | 1 Pi running all services, or 3 servers sharing the same stack |
-| **modern** | Hybrid | Home server + cloud VPS connected via VPN |
-| **ha** | HA cluster | 3-node Docker Swarm with failover |
+| **base-kit** | Single-environment | 1 Pi running all services, or 3 servers sharing the same stack |
+| **modern-homelab** | Hybrid preview | Home server + cloud VPS connected via VPN |
+| **ha-kit** | HA preview | 3-node Docker Swarm with failover |
 
 <Tip>
-  A `base` StackKit can run on multiple nodes (same stack replicated). An `ha` StackKit can run on a single powerful node (simulated HA). The pattern defines the architecture, not the scale.
+  A `base-kit` StackKit can run on multiple nodes in the same environment. Preview kits define architecture patterns, not public beta support commitments.
 </Tip>
 
 ### 2. Node-Context = auto-detected environment
@@ -168,7 +170,7 @@ addons:
   - media            # Jellyfin + *arr stack
 ```
 
-See the full per-add-on detail and the platform-service alternatives in [tool alternatives](/stackkits/reference/tool-alternatives). For the monitoring contract, see [/stackkits/reference/monitoring](/stackkits/reference/monitoring).
+See the full per-add-on detail and the platform-service alternatives in [tool alternatives](https://docs.kombify.io/stackkits/reference/tool-alternatives). For the monitoring contract, see [/stackkits/reference/monitoring](https://docs.kombify.io/stackkits/reference/monitoring).
 
 ## Progressive capability model
 
@@ -194,9 +196,9 @@ The combination of StackKit × Context produces curated default configurations:
 
 | | local | cloud | pi |
 |---|---|---|---|
-| **base** | Coolify, self-signed TLS | Coolify, Let's Encrypt | Lean Docker, reduced services |
-| **modern** | Tailscale exit node, hybrid DNS | Multi-cloud mesh | Edge relay role |
-| **ha** | Swarm + Keepalived | Cloud HA + managed LB | Not recommended |
+| **base-kit** | Coolify, local `.home.localhost` links | Coolify or Komodo, Let's Encrypt | Lean profile, reduced services |
+| **modern-homelab** | Preview | Preview | Preview |
+| **ha-kit** | Preview | Preview | Preview |
 
 ### Validation flow
 
@@ -231,9 +233,9 @@ sequenceDiagram
 
 ## StackKit comparison
 
-| Feature | base | modern | ha |
+| Feature | base-kit | modern-homelab | ha-kit |
 |---------|------|--------|-----|
-| **Pattern** | Single-environment | Hybrid infrastructure | HA cluster |
+| **Pattern** | Single-environment public beta | Hybrid infrastructure preview | HA cluster preview |
 | **Container runtime** | Docker Compose | Docker + Coolify | Docker Swarm |
 | **Typical nodes** | 1 (supports N) | 2+ (multi-environment) | 3+ (odd for quorum) |
 | **Complexity** | Low | Medium | High |
@@ -245,7 +247,7 @@ sequenceDiagram
 
 <AccordionGroup>
   <Accordion title="I'm new to homelabs" icon="seedling">
-    **Use: base**
+    **Use: base-kit**
     
     Start simple with a single-environment setup:
     - Easy to understand
@@ -255,7 +257,7 @@ sequenceDiagram
   </Accordion>
   
   <Accordion title="I want local + cloud" icon="cloud">
-    **Use: modern**
+    **Use: modern-homelab**
     
     For hybrid setups connecting different environments:
     - VPN overlay connects all nodes
@@ -265,7 +267,7 @@ sequenceDiagram
   </Accordion>
   
   <Accordion title="I need high availability" icon="shield">
-    **Use: ha**
+    **Use: ha-kit**
     
     When downtime is unacceptable:
     - Automatic failover
@@ -278,16 +280,16 @@ sequenceDiagram
 ## Next steps
 
 <CardGroup cols={2}>
-  <Card title="Base Kit" icon="house" href="/stackkits/kits/base-kit">
+  <Card title="Base Kit" icon="house" href="https://docs.kombify.io/stackkits/kits/base-kit">
     Detailed documentation for the single-environment StackKit
   </Card>
-  <Card title="CUE language basics" icon="code" href="/stackkits/explanations/cue-architecture">
+  <Card title="CUE language basics" icon="code" href="https://docs.kombify.io/stackkits/explanations/cue-architecture">
     Learn the CUE language used in StackKits
   </Card>
-  <Card title="Customization guide" icon="sliders" href="/stackkits/explanations/cue-architecture">
+  <Card title="Customization guide" icon="sliders" href="https://docs.kombify.io/stackkits/explanations/cue-architecture">
     How to customize StackKits for your needs
   </Card>
-  <Card title="Quick start" icon="rocket" href="/stackkits/quickstart">
+  <Card title="Quick start" icon="rocket" href="https://docs.kombify.io/stackkits/quickstart">
     Deploy your first StackKit
   </Card>
 </CardGroup>
