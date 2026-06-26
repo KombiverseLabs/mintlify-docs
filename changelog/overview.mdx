@@ -7,6 +7,31 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits release notes on GitHub](https://github.com/kombifyio/StackKits/releases).
 
+<Update label="2026-06-26" description="Week of June 22 – June 26">
+
+## BaseKit graduates to public beta
+
+The v0.4 line landed on the unpinned official installer this week, taking BaseKit from pinned-prerelease testing to the public `latest` channel. Six releases shipped between Sunday and Wednesday: [v0.4.0-beta.1](https://github.com/kombifyio/StackKits/releases/tag/v0.4.0-beta.1), [v0.4.0](https://github.com/kombifyio/StackKits/releases/tag/v0.4.0), [v0.4.0-beta.2](https://github.com/kombifyio/StackKits/releases/tag/v0.4.0-beta.2), [v0.4.1](https://github.com/kombifyio/StackKits/releases/tag/v0.4.1), [v0.4.2](https://github.com/kombifyio/StackKits/releases/tag/v0.4.2), and [v0.4.3](https://github.com/kombifyio/StackKits/releases/tag/v0.4.3).
+
+### New
+
+- **BaseKit public beta on `latest`.** Unpinned installers at `https://base.stackkit.cc` now resolve to the v0.4 BaseKit public beta. You no longer need `STACKKIT_RELEASE_VERSION` to try the new BaseKit line on a fresh server. See [Choosing a kit](https://docs.kombify.io/guides/stackkits/choosing-a-kit) and [Install-only vs managed cloud](https://docs.kombify.io/guides/stackkits/install-only-vs-managed-cloud).
+- **Custom-domain Coolify on ephemeral servers.** Custom-domain rollouts (SK-S3) now provision a fresh provider-leased Ubuntu server through the lease API, install BaseKit over SSH, capture evidence, and clean up DNS records and the server lease automatically. See [Deploy with the CLI or TechStack](https://docs.kombify.io/guides/stackkits/deploy-with-cli-or-techstack).
+- **Agent-ready public surface.** Public docs, OpenMCP metadata, installer endpoints, and schemas now describe one BaseKit install path and one user-facing `stackkit` MCP connection, so coding agents have a single, stable entry point.
+
+### Improved
+
+- **Bounded install phases.** Custom-domain Coolify installs now run as explicit Start, Wait, Verify, and Cleanup phases with credential and provider preflight, so a stuck step fails fast with diagnostics instead of hanging the run.
+- **Cleaner public surface.** The public repository is now restricted to the BaseKit beta contract plus CLI, runtime, website, public docs, and the module catalog. Unreleased kits and internal scaffolding no longer ship in release archives.
+
+### Fixed
+
+- **Custom-domain Base Hub URLs.** Run-scoped custom-domain Base Hub URLs (for example, `https://base.e2e-cd-<run>.kombify.pro`) are now accepted when they stay inside the expected DNS zone, so SK-S3 evidence imports succeed instead of being rejected as malformed.
+- **Stable scenario contract.** Stable SK-S2 (kombify.me on Komodo) and SK-S3 (custom-domain Coolify) now claim only the supported bootstrapped BaseKit path, and the production verifier requires bootstrapped tfvars, Base Hub access summaries, public service URLs, and platform evidence from the official installer.
+- **Skipped-scenario diagnostics.** Production workflows now emit explicit blocked/skipped diagnostics when a scenario can't run, instead of failing later during artifact upload.
+
+</Update>
+
 <Update label="2026-06-24" description="StackKits v0.4.4 stable and v0.4.5-beta.1 beta">
 
 ## BaseKit public beta release channel
