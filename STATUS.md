@@ -36,5 +36,5 @@ Current implementation state only. Future scope belongs in `ROADMAP.md`.
 
 ## Tests
 
-- `mise run check` validates `docs.json` and navigation page targets.
+- `mise run check` validates `docs.json`, navigation page targets, and generated-docs ownership markers.
 - `mise run local:e2e` runs the same local validation and attempts Mintlify broken-link validation through `npx`.

@@ -28,7 +28,12 @@ mise run check
 mise run local:e2e
 ```
 
-The local E2E script validates `docs.json`, verifies navigation page targets, and runs Mintlify broken-link checks when the Mintlify CLI path is available through `npx`.
+The local E2E script validates `docs.json`, verifies navigation page targets, checks generated-docs frontmatter ownership, and runs Mintlify broken-link checks when the Mintlify CLI path is available through `npx`.
+
+The same gate also asserts the PostHog docs integration: `apiHost` must stay on
+the Kombify EU proxy `https://e.kombify.io`, `apiKey` must be a public Project
+API key (`phc_...`), and Mintlify session recording must remain disabled.
+Personal API keys are only for operator/MCP administration, never public docs.
 
 ## Standards
 

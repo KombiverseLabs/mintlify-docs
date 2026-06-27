@@ -1,0 +1,22 @@
+name: Deployment Standards Gate
+
+on:
+  push:
+    branches: [main]
+    paths: ["**"]
+  pull_request:
+    branches: [main]
+    paths: ["**"]
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  deployment-standards:
+    uses: KombiverseLabs/.github/.github/workflows/deployment-standards-gate.yml@main
+    with:
+      repo-id: mintlify-docs
+      run-local-e2e: false
+    secrets: inherit
