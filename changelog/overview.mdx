@@ -7,6 +7,33 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits release notes on GitHub](https://github.com/kombifyio/StackKits/releases).
 
+<Update label="2026-07-03" description="Week of June 29 – July 3">
+
+## StackKits v0.5 lands as stable
+
+The v0.5 line shipped this week, taking the Basement Kit to stable, previewing the new Cloud Kit, and rolling out a universal host security baseline. Four releases: [v0.5.0-beta.2](https://github.com/kombifyio/StackKits/releases/tag/v0.5.0-beta.2), [v0.5.0](https://github.com/kombifyio/StackKits/releases/tag/v0.5.0), [v0.5.1-beta.1](https://github.com/kombifyio/StackKits/releases/tag/v0.5.1-beta.1), and [v0.5.1-beta.2](https://github.com/kombifyio/StackKits/releases/tag/v0.5.1-beta.2).
+
+### New
+
+- **Basement Kit is stable, Cloud Kit is in preview.** [v0.5.0](https://github.com/kombifyio/StackKits/releases/tag/v0.5.0) is the new public `latest`. The single BaseKit line is now split into a shared foundation plus two shipped kits: **Basement Kit** (local, `base.stackkit.cc`) as the verified stable single-server product, and **Cloud Kit** (`cloud.stackkit.cc`) as the cloud profile in scaffolding, graduating in v0.5.1 once the managed `kombify.me` and custom-domain gates pass. The `base-kit → basement-kit` alias keeps existing installs working. See [Choosing a kit](https://docs.kombify.io/guides/stackkits/choosing-a-kit).
+- **Three-kit lineup on the website.** The product surface now lists Basement (stable), Cloud (graduating), and Modern Homelab (preview / early-access), with `/kits/basement` and `/kits/cloud` detail pages and a redirect from the old `/kits/base` URL.
+- **High Availability is now an add-on, not a kit.** [v0.5.1-beta.1](https://github.com/kombifyio/StackKits/releases/tag/v0.5.1-beta.1) retires the standalone HA Kit and ships HA as a node-gated overlay with two tiers: `warm-standby` (2+ nodes, restore-based, builds on the backup add-on) and `quorum` (3+ odd managers, etcd live failover). See [High availability readiness](https://docs.kombify.io/guides/stackkits/high-availability-readiness).
+
+### Improved
+
+- **Universal host security baseline.** The measured host baseline — UFW default-deny with SSH/HTTP/HTTPS allowed, fail2ban on the sshd jail, security-only unattended upgrades, sshd hardening, and sysctl controls — is now applied to **every kit** (Basement, Cloud, Modern Homelab) on any Linux/apt host, instead of Basement only.
+- **Coolify custom-domain routing hardened.** Generated Coolify proxy labels ensure BaseKit service routers win over fallback routers and request wildcard TLS coverage for custom-domain service hosts. See [Deploy with the CLI or TechStack](https://docs.kombify.io/guides/stackkits/deploy-with-cli-or-techstack).
+- **Deferred app readiness.** Accepted on-demand platform apps are now treated as deferred public-readiness evidence, while running and required services continue to gate the public URL check.
+
+### Fixed
+
+- **Cloud rollout no longer times out on first boot.** [v0.5.1-beta.2](https://github.com/kombifyio/StackKits/releases/tag/v0.5.1-beta.2) fixes cloud VM installs that failed with `failed to install Docker: apt_wait timeout` on v0.5.1-beta.1 by extending the apt-lock wait so it outlasts cloud-init and unattended-upgrades holding the dpkg lock on fresh servers.
+- **Coolify proxy reconciliation.** The Coolify Docker endpoint and generated router labels now reconcile correctly, so the custom-domain path no longer depends on host-side proxy shims.
+- **Browser evidence setup.** PocketID consent now completes during browser evidence capture, so BaseKit owner and passkey setup proof stays end-to-end. See [PocketID](https://docs.kombify.io/guides/stackkits/services/pocketid).
+- **Website product surface.** The nav and home page now reflect two kits over one base, and `/kits/basement` and `/kits/cloud` route to their detail pages instead of the retired `/kits/base` page.
+
+</Update>
+
 <Update label="2026-06-26" description="Week of June 22 – June 26">
 
 ## BaseKit graduates to public beta
