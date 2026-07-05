@@ -1,0 +1,44 @@
+---
+title: "API surface"
+description: "The kombify AI Platform API — endpoints, authentication, and integration basics"
+sidebarTitle: "API surface"
+icon: code
+---
+
+All kombify AI capability is exposed through one authenticated API behind the kombify gateway:
+
+```
+https://api.kombify.io/v1/ai/*
+```
+
+## Authentication
+
+Requests require a kombify identity — sign-in is Auth0-based, and API calls carry a bearer token:
+
+```bash
+curl https://api.kombify.io/v1/ai/models \
+  -H "Authorization: Bearer <your-token>"
+```
+
+Unauthenticated requests are rejected (`401`). Capability is additionally plan-gated: an authenticated call can be denied if your subscription does not include the feature, with an error that states what is missing.
+
+## Endpoint overview
+
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /v1/ai/models` | The model catalog available to your plan |
+| `/v1/ai/sessions` | Conversation sessions (the same sessions the [Workbench](/ai/workbench) uses) |
+| `/v1/ai/responses` | Generate model responses within a session |
+| `/v1/ai/structured` | Structured (schema-constrained) generation |
+| `/v1/ai/knowledge/query` | [Knowledge-grounded](/ai/knowledge) answers with citations |
+| `/v1/ai/model-executions` | Execution records: which model ran, usage |
+
+<Note>
+  A full endpoint-by-endpoint reference with request/response schemas is being finalized for the beta and will appear under **API Reference** as it stabilizes. During beta, treat the live API's error messages and this overview as the contract surface.
+</Note>
+
+## Design notes for integrators
+
+- **Sessions are shared across surfaces.** A session created via API shows up in the Workbench and vice versa — build on that instead of keeping a parallel history.
+- **Read the catalog at runtime.** Model identifiers change during beta; resolve them from `/v1/ai/models`.
+- **Expect explicit denials.** Plan-gated features return structured errors that say which entitlement is missing — surface that guidance to your users rather than retrying.
