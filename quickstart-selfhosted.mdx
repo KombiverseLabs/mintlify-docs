@@ -1,0 +1,357 @@
+---
+title: Quick start (self-hosted)
+description: Run kombify TechStack on your own infrastructure in 10 minutes
+---
+
+
+<Warning>
+  **Self-hosting status:** The open-source mirror of kombify TechStack is **planned** but not yet published, and self-hosted kombify Simulate is **coming soon**. The steps below describe the intended self-hosted workflow and may change before release. For a working setup today, use the [managed quick start](/quickstart).
+</Warning>
+
+Run kombify TechStack on your own infrastructure with full control and no SaaS dependencies. This guide walks you through setting up a complete homelab management system.
+
+<Note>
+  **What you'll get:** A self-hosted kombify TechStack instance that can manage your homelab, deploy StackKits, and monitor your infrastructure — all running on your own hardware.
+</Note>
+
+## Prerequisites
+
+<CardGroup cols={2}>
+  <Card title="Docker" icon="docker">
+    Docker Engine 24.0+ with Compose v2.20+
+  </Card>
+  <Card title="System resources" icon="microchip">
+    4GB RAM minimum, 10GB disk space
+  </Card>
+</CardGroup>
+
+<Tip>
+  If you prefer a managed experience without self-hosting, see [Quick start (SaaS)](/quickstart).
+</Tip>
+
+## Step 1: Install kombify TechStack
+
+<Steps>
+  <Step title="Create directory and download compose file">
+    ```bash
+    mkdir ~/kombify && cd ~/kombify
+    curl -O https://raw.githubusercontent.com/kombify/techstack/main/docker-compose.yml
+    ```
+  </Step>
+
+  <Step title="Start services">
+    ```bash
+    docker compose up -d
+    ```
+    
+    This starts:
+    - **kombify TechStack Core** (API + PocketBase) on port 5260
+    - **kombify TechStack UI** (SvelteKit dashboard) on port 5261
+  </Step>
+
+  <Step title="Access the dashboard">
+    Open `http://127.0.0.1:5261` (or your server's IP) in your browser.
+    
+    Default credentials:
+    - Email: `admin@techstack.local`
+    - Password: `admin123`
+    
+    <Warning>
+      Change the default password immediately after first login. Go to **Settings** → **Security** → **Change Password**.
+    </Warning>
+  </Step>
+</Steps>
+
+## Step 2: Verify installation
+
+Check that all services are running:
+
+<CodeGroup>
+```bash Health check
+curl http://127.0.0.1:5260/api/v1/health
+# Expected: {"status":"healthy","version":"1.0.0"}
+```
+
+```bash List stacks
+curl http://127.0.0.1:5260/api/v1/stacks
+# Expected: {"stacks":[]}
+```
+
+```bash PocketBase admin
+# Open http://127.0.0.1:5260/_/
+# Use the same admin credentials
+```
+</CodeGroup>
+
+### Service ports
+
+| Service | Port | Protocol | Description |
+|---------|------|----------|-------------|
+| Core API | 5260 | HTTP | REST API + PocketBase Admin |
+| Frontend | 5261 | HTTP | SvelteKit Dashboard |
+| gRPC | 5263 | gRPC/mTLS | Agent communication |
+
+## Step 3: Create your first stack
+
+<Steps>
+  <Step title="Start the Easy Wizard">
+    In the dashboard, click **"New Homelab"** → **"Easy Wizard"**.
+    
+    <Tip>
+      The Easy Wizard asks simple questions about what you want to build. For granular control, use the **Technical Wizard** instead.
+    </Tip>
+  </Step>
+
+  <Step title="Answer wizard questions">
+    | Question | Example | What it affects |
+    |----------|---------|-----------------|
+    | Stack name | `my-homelab` | Identifier for this stack |
+    | StackKit | `basement-kit` | Blueprint to use |
+    | Domain | `home.local` | SSL and routing |
+  </Step>
+
+  <Step title="Add your nodes">
+    Add the server(s) you want to manage:
+    
+    ```yaml
+    nodes:
+      - name: main-server
+        type: local
+        connection:
+          host: 192.168.1.100
+          user: root
+          ssh_key: ~/.ssh/id_rsa
+    ```
+    
+    <Note>
+      You can add multiple nodes. kombify TechStack will distribute services across them based on available resources.
+    </Note>
+  </Step>
+
+  <Step title="Select services">
+    Choose services to deploy from the StackKit:
+    - ✅ Traefik (reverse proxy with auto-SSL)
+    - ✅ Uptime Kuma (monitoring)
+    - ✅ Immich (photo management)
+    - ✅ Homepage (dashboard)
+  </Step>
+</Steps>
+
+## Step 4: Install agent on target server
+
+The kombify agent runs on each server you want to manage. It communicates with TechStack via mTLS-secured gRPC.
+
+<Steps>
+  <Step title="Generate agent credentials">
+    In the dashboard, go to **"Agents"** → **"Add Agent"**.
+    
+    You'll receive:
+    - A unique agent token
+    - An installation command
+    
+    Copy the installation command.
+  </Step>
+
+  <Step title="Run on target server">
+    SSH into your target server and run the installation:
+    
+    ```bash
+    curl -sSL https://install.kombify.io/agent | sudo sh -s -- \
+      --token YOUR_AGENT_TOKEN \
+      --server http://your-techstack-ip:5260
+    ```
+    
+    <Note>
+      The agent is a lightweight Go binary (~15MB). It connects outbound to TechStack, so no inbound ports are required on the target server.
+    </Note>
+  </Step>
+
+  <Step title="Verify connection">
+    The dashboard will show **"Agent Connected"** with a green status indicator.
+    
+    You can also check agent status on the server:
+    ```bash
+    sudo systemctl status kombify-agent
+    ```
+  </Step>
+</Steps>
+
+## Step 5: Deploy
+
+<Steps>
+  <Step title="Review your configuration">
+    Click **"Review"** to see the generated `kombination.yaml`.
+    
+    This is your single source of truth — version-controlled, shareable, and fully reproducible.
+  </Step>
+
+  <Step title="Simulate first (optional but recommended)">
+    Click **"Simulate"** to test the configuration in kombify Simulate before deploying to real hardware.
+  </Step>
+
+  <Step title="Apply">
+    Click **"Apply"** to start deployment.
+    
+    Watch the real-time progress:
+    ```text
+    ✅ Validating configuration...
+    ✅ Connecting to node: main-server
+    ✅ Installing Docker services...
+    ✅ Configuring network...
+    ✅ Deployment complete!
+    ```
+  </Step>
+
+  <Step title="Access services">
+    Your services are now running:
+    - Traefik: `http://your-server:8080`
+    - Uptime Kuma: `http://your-server:3001`
+    - Immich: `http://your-server:2283`
+  </Step>
+</Steps>
+
+## Optional: Add kombify Simulate
+
+<Note>
+  Self-hosted kombify Simulate is **coming soon** — the container image below is not yet publicly available. Simulate is available today through [kombify Cloud](/cloud/overview).
+</Note>
+
+Test configurations before deploying to real hardware.
+
+```bash
+# Add to docker-compose.yml
+services:
+  simulate:
+    image: ghcr.io/kombify/simulate:latest
+    ports:
+      - "5270:5270"
+      - "2222-2322:2222-2322"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - simulate-data:/app/data
+
+volumes:
+  simulate-data:
+```
+
+Then restart:
+```bash
+docker compose up -d
+```
+
+Access Simulate at `http://127.0.0.1:5270`.
+
+## Configuration
+
+### Environment variables
+
+Create a `.env` file:
+
+```bash .env
+# Core API
+TECHSTACK_PORT=5260
+TECHSTACK_GRPC_PORT=5263
+TECHSTACK_LOG_LEVEL=info
+
+# Database
+TECHSTACK_DATA_DIR=./data
+
+# Development mode (disable in production)
+TECHSTACK_DEV_MODE=false
+```
+
+### Custom domain
+
+To use a custom domain, update your `kombination.yaml`:
+
+```yaml
+stack:
+  domain: yourdomain.com
+  email: admin@yourdomain.com
+
+network:
+  ssl:
+    provider: letsencrypt
+```
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Explore kombify TechStack"
+    icon="server"
+    href="/techstack/overview"
+  >
+    Learn about TechStack's features
+  </Card>
+  <Card
+    title="Use kombify Simulate"
+    icon="flask"
+    href="/sim/overview"
+  >
+    Simulate before deploying
+  </Card>
+  <Card
+    title="Browse StackKits"
+    icon="boxes-stacked"
+    href="/stackkits/overview"
+  >
+    Explore infrastructure blueprints
+  </Card>
+  <Card
+    title="Production setup"
+    icon="shield"
+    href="/guides/self-hosting/security"
+  >
+    Configure for production use
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Port conflicts">
+    If ports are already in use, modify `docker-compose.yml`:
+    
+    ```yaml
+    services:
+      techstack:
+        ports:
+          - "5360:5260"  # Changed from 5260
+    ```
+  </Accordion>
+
+  <Accordion title="Permission errors">
+    Add your user to the docker group:
+    
+    ```bash
+    sudo usermod -aG docker $USER
+    newgrp docker
+    ```
+  </Accordion>
+
+  <Accordion title="Services not starting">
+    Check logs:
+    
+    ```bash
+    docker compose logs techstack
+    docker compose logs app
+    ```
+  </Accordion>
+
+  <Accordion title="Agent connection issues">
+    Verify network connectivity:
+    
+    ```bash
+    # On target server
+    curl http://your-techstack-ip:5260/api/v1/health
+    
+    # Check agent logs
+    sudo journalctl -u kombify-agent -f
+    ```
+  </Accordion>
+</AccordionGroup>
+
+<Info>
+  For production deployments, see the [self-hosting security guide](/guides/self-hosting/security).
+</Info>

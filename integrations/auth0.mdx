@@ -1,0 +1,149 @@
+---
+title: Auth0 integration
+description: Configure Auth0 as your SSO provider for kombify
+---
+
+Integrate Auth0 as your Single Sign-On (SSO) provider for kombify Cloud and self-hosted tools.
+
+## Overview
+
+Auth0 provides:
+- OAuth 2.0 and OpenID Connect (OIDC)
+- Multi-factor authentication (MFA)
+- Enterprise connections
+- Role-based access control (RBAC)
+
+kombify Cloud uses Auth0 for hosted SSO. All interactive sign-in happens through the hosted **Universal Login** page — kombify never collects credentials in embedded forms.
+
+<Note>
+  **Two-domain model:** in the browser and in issued tokens, the issuer is `login.kombify.io`. The underlying Auth0 tenant domain `kombify.eu.auth0.com` may still appear in backend configuration values — both refer to the same tenant.
+</Note>
+
+## Prerequisites
+
+<CardGroup cols={2}>
+  <Card title="Auth0 tenant" icon="server">
+    Hosted tenant with Universal Login; kombify SaaS uses `login.kombify.io`
+  </Card>
+  <Card title="Admin access" icon="key">
+    Access to the Auth0 dashboard
+  </Card>
+</CardGroup>
+
+## Setup for kombify Cloud
+
+### Step 1: Create an application
+
+<Steps>
+  <Step title="Access Auth0 dashboard">
+    Log in to your Auth0 tenant.
+  </Step>
+
+  <Step title="Create application">
+    Navigate to **Applications** -> **Create Application**
+
+    - Name: `kombify Cloud`
+    - Type: **Regular Web Application**
+  </Step>
+
+  <Step title="Configure callback URLs">
+    Add these URLs:
+
+    ```text
+    https://app.kombify.io/auth/callback/auth0
+    https://kombify.io/auth/callback/auth0
+    ```
+
+    For self-hosted environments, add the matching public callback URL for that deployment.
+  </Step>
+
+  <Step title="Configure logout URLs">
+    Add:
+
+    ```text
+    https://app.kombify.io
+    https://kombify.io
+    ```
+  </Step>
+
+  <Step title="Save credentials">
+    Copy these values:
+    - **Domain**
+    - **Client ID**
+    - **Client Secret**
+  </Step>
+</Steps>
+
+### Step 2: Configure kombify Cloud
+
+<Tabs>
+  <Tab title="SaaS (Managed)">
+    Configure the hosted tenant for:
+
+    - `AUTH0_DOMAIN`
+    - `AUTH0_ISSUER`
+    - `AUTH0_CLIENT_ID`
+    - `AUTH0_CLIENT_SECRET`
+  </Tab>
+
+  <Tab title="Self-hosted">
+    Update your `.env` file:
+
+    ```bash .env
+    AUTH0_DOMAIN=login.example.com
+    AUTH0_ISSUER=https://login.example.com/
+    AUTH0_CLIENT_ID=your-client-id
+    AUTH0_CLIENT_SECRET=your-client-secret
+    AUTH0_ROLE_CLAIM_NAMESPACE=https://kombify.io/roles
+    ```
+
+    Restart Cloud:
+
+    ```bash
+    docker compose restart cloud
+    ```
+  </Tab>
+</Tabs>
+
+## Setup for self-hosted tools
+
+Use the same Auth0 tenant or a dedicated tenant per environment. The exact variables depend on the tool, but the standard kombify contract is:
+
+```bash
+AUTH0_DOMAIN=auth.example.com
+AUTH0_ISSUER=https://auth.example.com/
+AUTH0_CLIENT_ID=tool-client-id
+AUTH0_CLIENT_SECRET=tool-client-secret
+```
+
+## Roles and claims
+
+Use a custom namespaced claim for roles:
+
+```json
+{
+  "https://kombify.io/roles": ["admin", "manager", "user"]
+}
+```
+
+Map those roles inside kombify according to the target service contract.
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Invalid callback URL">
+    Ensure the callback URL in Auth0 exactly matches the URL configured in the kombify service.
+  </Accordion>
+
+  <Accordion title="Token validation failed">
+    Verify the issuer metadata:
+
+    ```bash
+    curl https://login.example.com/.well-known/openid-configuration
+    ```
+  </Accordion>
+
+  <Accordion title="User not authorized">
+    Ensure the Auth0 application, organization, and role claims match the kombify environment configuration.
+  </Accordion>
+</AccordionGroup>
