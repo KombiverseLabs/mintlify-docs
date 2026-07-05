@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
-    [switch]$SkipMintCli
+    [switch]$SkipMintCli,
+    [string]$Sha = $env:LOCAL_E2E_SHA
 )
 
 Set-StrictMode -Version Latest
@@ -9,13 +10,15 @@ $ErrorActionPreference = "Stop"
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 Set-Location -LiteralPath $repoRoot
 
-$sha = (& git rev-parse HEAD 2>&1).Trim()
-if ($LASTEXITCODE -ne 0) {
-    throw "Could not resolve git SHA: $sha"
+if ([string]::IsNullOrWhiteSpace($Sha)) {
+    $Sha = (& git rev-parse HEAD 2>&1).Trim()
+    if ($LASTEXITCODE -ne 0) {
+        $Sha = "unknown-no-git"
+    }
 }
 
 Write-Host "repo: mintlify-docs"
-Write-Host "sha: $sha"
+Write-Host "sha: $Sha"
 Write-Host "cwd: $repoRoot"
 Write-Host "command: scripts/run-local-e2e.ps1"
 
@@ -86,15 +89,17 @@ foreach ($assetPath in @($docs.favicon, $docs.logo.light, $docs.logo.dark)) {
 Write-Host "docs_json: ok"
 Write-Host "navigation_pages: $($pages.Count)"
 
+& (Join-Path $PSScriptRoot "check-internal-links.ps1")
+
 if (-not $SkipMintCli) {
     $npxVersion = (& npx --version 2>&1)
     if ($LASTEXITCODE -ne 0) {
-        throw "npx is not available for Mintlify broken-link validation: $npxVersion"
+        throw "npx is not available for Mintlify validation: $npxVersion"
     }
     Write-Host "npx: $($npxVersion.Trim())"
-    & npx -y mint@latest broken-links
+    & npx -y mint@latest validate
     if ($LASTEXITCODE -ne 0) {
-        throw "Mintlify broken-links check failed"
+        throw "Mintlify validate failed"
     }
 }
 
