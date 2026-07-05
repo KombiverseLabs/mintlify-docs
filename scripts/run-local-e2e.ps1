@@ -53,6 +53,8 @@ function Add-PageRef {
             Add-PageRef -Node $property.Value -Pages $Pages
         } elseif ($property.Name -in @("groups", "tabs")) {
             Add-PageRef -Node $property.Value -Pages $Pages
+        } elseif ($property.Name -eq "root" -and $property.Value -is [string]) {
+            $Pages.Add($property.Value) | Out-Null
         }
     }
 }
@@ -90,6 +92,7 @@ Write-Host "docs_json: ok"
 Write-Host "navigation_pages: $($pages.Count)"
 
 & (Join-Path $PSScriptRoot "check-internal-links.ps1")
+& (Join-Path $PSScriptRoot "check-content-rules.ps1")
 
 if (-not $SkipMintCli) {
     $npxVersion = (& npx --version 2>&1)
