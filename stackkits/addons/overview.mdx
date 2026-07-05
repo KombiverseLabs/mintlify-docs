@@ -1,0 +1,52 @@
+---
+title: "Add-ons"
+description: "Reference table of all StackKit add-ons, grouped by layer"
+sidebarTitle: "Overview"
+icon: puzzle-piece
+---
+
+Add-ons are composable extensions that layer onto any StackKit. You declare them in your stack spec, and validation resolves them against your kit and node contexts:
+
+```yaml stack-spec.yaml
+addons:
+  - monitoring
+  - backup
+```
+
+The catalog currently ships 18 add-ons across six layers.
+
+<Note>
+  **Application-layer** add-ons install end-user applications; the individual apps they ship are documented in the Applications section of these docs. For per-capability alternatives, see [tool alternatives](/stackkits/reference/tool-alternatives).
+</Note>
+
+| Add-on | Layer | What it provides |
+|--------|-------|------------------|
+| AI / LLM (`ai-workloads`) | Application | Ollama + Open WebUI for local AI inference |
+| Calendar & Contacts (`calendar`) | Application | Radicale CalDAV/CardDAV + Bloben web UI |
+| Development Platform (`dev-platform`) | Application | Gitea + Woodpecker CI for self-hosted development |
+| File Sharing (`file-sharing`) | Application | Self-hosted file sharing and sync |
+| Game Server (`gameserver`) | Application | Self-hosted game server |
+| Mail Server (`mail`) | Application | Stalwart — all-in-one mail server (IMAP/JMAP/SMTP + CalDAV) |
+| Media Streaming (`media`) | Application | Jellyfin + *arr stack for private streaming |
+| Photo Gallery (`photos`) | Application | Immich — self-hosted photo and video management |
+| Remote Desktop (`remote-desktop`) | Application | Apache Guacamole — browser-based remote desktop |
+| Smart Home (`smart-home`) | Application | Home Assistant + MQTT + Zigbee2MQTT |
+| Password Manager (`vault`) | Application | Vaultwarden — Bitwarden-compatible password manager |
+| Backup (`backup`) | Infrastructure | Kopia-based encrypted backups with built-in database hooks and a 3-2-1 strategy |
+| Authelia (`authelia`) | Identity | Advanced authentication server (replaces TinyAuth) |
+| Backup Repository Server (`backup-repo-server`) | Platform | Kopia Repository Server for multi-host / multi-tenant backup fan-in |
+| [High Availability](/stackkits/addons/high-availability) (`ha`) | Platform | Tiered HA: warm standby (restore-based, ≥ 2 nodes) or quorum (etcd live failover, ≥ 3 odd manager nodes) |
+| Monitoring Stack (`monitoring`) | Observability | VictoriaMetrics + Grafana + Loki + Alloy |
+| CGNAT Tunnel (`tunnel`) | Network | Bypasses CGNAT/DS-Lite to expose local services publicly |
+| VPN Mesh Overlay (`vpn-overlay`) | Network | VPN mesh overlay networking between your nodes |
+
+## Deep dives
+
+<CardGroup cols={2}>
+  <Card title="High Availability" icon="shield-halved" href="/stackkits/addons/high-availability">
+    Warm-standby and quorum tiers, failover mechanics, and node requirements
+  </Card>
+  <Card title="Monitoring reference" icon="chart-line" href="/stackkits/reference/monitoring">
+    The monitoring contract shipped by the monitoring add-on
+  </Card>
+</CardGroup>

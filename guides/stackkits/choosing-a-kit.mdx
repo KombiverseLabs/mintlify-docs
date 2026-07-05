@@ -9,32 +9,33 @@ StackKits are pre-built infrastructure blueprints that define what services to r
 ## Available StackKits
 
 <CardGroup cols={3}>
-  <Card title="Base Kit" icon="house" href="https://docs.kombify.io/stackkits/kits/base-kit">
+  <Card title="Basement Kit" icon="house" href="https://docs.kombify.io/stackkits/kits/basement-kit">
     **Best for getting started**
     
-    Single-environment pattern. Local or cloud, any node count. Perfect for your first homelab.
+    Local single-environment pattern. Home network or Raspberry Pi, any node count. Perfect for your first homelab.
   </Card>
-  <Card title="Modern Homelab Kit" icon="rocket" href="https://docs.kombify.io/stackkits/kits/modern-homelab">
+  <Card title="Cloud Kit" icon="cloud" href="https://docs.kombify.io/stackkits/kits/cloud-kit">
+    **Best for cloud-only stacks**
+    
+    The same single-environment model on a VPS you bring. Public ingress and Let's Encrypt by default.
+  </Card>
+  <Card title="Modern Homelab (Preview)" icon="link" href="https://docs.kombify.io/stackkits/kits/modern-homelab">
     **Best for hybrid setups**
     
-    Cloud and local combined — both mandatory. Multi-node on both ends possible.
-  </Card>
-  <Card title="High Availability Kit" icon="shield" href="https://docs.kombify.io/stackkits/kits/ha-kit">
-    **Best for reliability**
-    
-    Automatic failover, redundancy, and quorum consensus. 3+ nodes minimum.
+    Cloud and local combined — both mandatory, joined by the bridge contract. Multi-node on both ends possible. Preview / Early Access.
   </Card>
 </CardGroup>
 
 ## How to choose
 
-| Question | Base | Modern | HA |
+| Question | Basement Kit | Cloud Kit | Modern Homelab (Preview) |
 |----------|------|--------|-----|
-| Where does your infra run? | Local or cloud (single environment) | Cloud and local (both required) | Any — HA features are the point |
-| Do you need high availability? | No | No | Yes — automatic failover |
-| Want AI/ML services? | Optional | Yes | Optional |
-| Experience level? | Beginner | Intermediate | Advanced |
-| Typical use case | First homelab, simple setups | Hybrid cloud+home, power users | Production services, uptime-critical |
+| Where does your infra run? | Local hardware or Pi (single environment) | Cloud VPS (single environment) | Cloud and local (both required, bridge contract) |
+| Want AI/ML services? | Optional | Optional | Yes |
+| Experience level? | Beginner | Beginner | Intermediate |
+| Typical use case | First homelab, simple setups | Single VPS, public services | Hybrid cloud+home, power users |
+
+High availability is **not a kit column** — it is an add-on dimension. If downtime is unacceptable, layer the [`ha` add-on](https://docs.kombify.io/stackkits/addons/high-availability) onto whichever kit fits: `warm-standby` needs 2+ nodes (automated restore to a standby, downtime = restore time), `quorum` needs 3+ odd manager nodes (etcd live failover, near-zero downtime). The node floors are technical prerequisites, never paywalls.
 
 ## Add-ons
 
@@ -47,9 +48,10 @@ Every StackKit can be extended with **add-ons** — composable modules you mix a
 - **AI / LLM** (`ai-workloads`) — Ollama + Open WebUI
 - **Dev platform** (`dev-platform`) — Gitea + Woodpecker CI
 - **Advanced auth** (`authelia`) — replaces TinyAuth
+- **High availability** (`ha`) — `warm-standby` or `quorum` failover tiers, see [High Availability](https://docs.kombify.io/stackkits/addons/high-availability)
 
 <Tip>
-  Start with a base kit and add what you need — you can add add-ons later without rebuilding your stack. See the full catalog and per-capability alternatives in [tool alternatives](https://docs.kombify.io/stackkits/reference/tool-alternatives).
+  Start with the Basement Kit and add what you need — you can add add-ons later without rebuilding your stack. See the full catalog and per-capability alternatives in [tool alternatives](https://docs.kombify.io/stackkits/reference/tool-alternatives).
 </Tip>
 
 ## What's next?

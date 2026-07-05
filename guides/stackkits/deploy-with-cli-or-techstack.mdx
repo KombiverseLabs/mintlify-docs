@@ -20,7 +20,7 @@ First choose the experience: direct StackKits execution or guided TechStack outc
 | First user decision | Where should StackKits run, and do I want one-command automation or explicit CLI control? | What outcome or use case do I want? |
 | Canonical action | Install Engine: `curl -sSL base.stackkit.cc \| sh`; CLI: `stackkit init <standard>` -> `stackkit apply`. | UI flow/job, no shell command. |
 | CLI install | Included in the Install Engine. CLI-only use can install through package/release/Git; today `curl -sSL install.stackkit.cc \| sh` is the documented CLI install script. | No user shell install step. |
-| StackKit standard | Install Engine encodes or prompts for the standard; CLI users choose `base-kit`, `modern-homelab`, or `ha-kit`. | TechStack asks StackKits to resolve the standard from intent and target evaluation. |
+| StackKit standard | Install Engine encodes or prompts for the standard; CLI users choose `basement-kit`, `cloud-kit`, or `modern-homelab`. | TechStack asks StackKits to resolve the standard from intent and target evaluation. |
 | User input style | One installer command or explicit CLI commands/spec values. | Use-case clicks, intent text, target selection, confirmation. |
 | Best fit | Direct technical execution: fastest default install or reproducible CLI workflow. | Guided user experience. |
 
@@ -29,7 +29,7 @@ First choose the experience: direct StackKits execution or guided TechStack outc
 | Install Engine user must decide | CLI user must decide | TechStack user must decide |
 |-------------------------------|----------------------|----------------------------|
 | Run the short one-liner on the host that should become the homelab. | Install the CLI only and choose a working directory. | Select use cases such as app hosting, media, vault, files, smart home, or describe the desired homelab in plain language. |
-| Use default/no-care mode or answer guided prompts. | Choose the StackKit standard explicitly. Start with `base-kit` for the first SvelteKit app rollout. | Select or connect the target server/agent. |
+| Use default/no-care mode or answer guided prompts. | Choose the StackKit standard explicitly. Start with `basement-kit` for the first SvelteKit app rollout. | Select or connect the target server/agent. |
 | Pick the generic/default one-liner or a kit-specific one-liner. | Enter technical values: domain/access mode, app image, port, hostname, health path, env, and secret references. | Provide only missing facts: domain preference, app artifact, secret source, or approval. |
 | Read the generated URLs and login output. | Review `stackkit plan` and run `stackkit apply`. | Review TechStack's recommendation and click apply. |
 
@@ -58,7 +58,7 @@ The CLI canonical file is `stack-spec.yaml`. For TechStack handoff, the CLI also
 When `apps:` is present, `stackkit generate` writes the user app resources to `deploy/apps.tf`.
 
 ```yaml stack-spec.yaml
-stackkit: base-kit
+stackkit: basement-kit
 
 network:
   domain: home.lab
@@ -87,7 +87,7 @@ apps:
   </Step>
 
   <Step title="Run the short one-liner">
-    For the default Base Kit path promoted on stackkit.cc:
+    For the default Basement Kit path:
 
     ```bash
     curl -sSL base.stackkit.cc | sh
@@ -98,10 +98,11 @@ apps:
     The direct per-kit command contract is:
 
     ```bash
-    curl -sSL base.stackkit.cc | sh      # Base Kit
-    curl -sSL modern.stackkit.cc | sh    # Modern Homelab
-    curl -sSL ha.stackkit.cc | sh        # High Availability
+    curl -sSL base.stackkit.cc | sh      # Basement Kit
+    curl -sSL cloud.stackkit.cc | sh     # Cloud Kit
     ```
+
+    Modern Homelab (Preview / Early Access) is initialized through the CLI (`stackkit init modern-homelab`) rather than a one-liner.
   </Step>
 
   <Step title="Choose default or guided prompts">
@@ -125,12 +126,12 @@ apps:
   </Step>
 
   <Step title="Choose the StackKit standard">
-    Choose the technical standard yourself. For the first SvelteKit app rollout, start with Base Kit:
+    Choose the technical standard yourself. For the first SvelteKit app rollout, start with the Basement Kit:
 
     ```bash
     mkdir my-sveltekit-stack
     cd my-sveltekit-stack
-    stackkit init base-kit
+    stackkit init basement-kit
     ```
   </Step>
 
@@ -222,7 +223,7 @@ Expected result:
     Create and deploy your first StackKit.
   </Card>
   <Card title="Choose a kit" icon="list" href="https://docs.kombify.io/guides/stackkits/choosing-a-kit">
-    Compare Base Kit, Modern Homelab, and High Availability Kit.
+    Compare Basement Kit, Cloud Kit, and Modern Homelab.
   </Card>
   <Card title="Node Hub" icon="grid-2" href="https://docs.kombify.io/guides/stackkits/node-hub">
     Use the standard dashboard and service how-to links after rollout.

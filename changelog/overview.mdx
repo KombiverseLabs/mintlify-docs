@@ -29,7 +29,7 @@ The v0.5 line shipped this week, taking the Basement Kit to stable, previewing t
 
 - **Cloud rollout no longer times out on first boot.** [v0.5.1-beta.2](https://github.com/kombifyio/StackKits/releases/tag/v0.5.1-beta.2) fixes cloud VM installs that failed with `failed to install Docker: apt_wait timeout` on v0.5.1-beta.1 by extending the apt-lock wait so it outlasts cloud-init and unattended-upgrades holding the dpkg lock on fresh servers.
 - **Coolify proxy reconciliation.** The Coolify Docker endpoint and generated router labels now reconcile correctly, so the custom-domain path no longer depends on host-side proxy shims.
-- **Browser evidence setup.** PocketID consent now completes during browser evidence capture, so BaseKit owner and passkey setup proof stays end-to-end. See [PocketID](https://docs.kombify.io/guides/stackkits/services/pocketid).
+- **Browser evidence setup.** PocketID consent now completes during browser evidence capture, so BaseKit owner and passkey setup proof stays end-to-end. See [PocketID](https://docs.kombify.io/stackkits/apps/pocketid).
 - **Website product surface.** The nav and home page now reflect two kits over one base, and `/kits/basement` and `/kits/cloud` route to their detail pages instead of the retired `/kits/base` page.
 
 </Update>
@@ -124,8 +124,8 @@ Two patch releases shipped this week, focused on Coolify routing, auth, installe
 
 ### Improved
 
-- **PocketID + TinyAuth on BaseKit.** Provider registration and runtime checks were restored, so protected services again show PocketID login (with TinyAuth as the password-only fallback) instead of skipping straight to TinyAuth. See [PocketID](https://docs.kombify.io/guides/stackkits/services/pocketid) and [TinyAuth](https://docs.kombify.io/guides/stackkits/services/tinyauth).
-- **Cloudflare DNS-01 for custom domains.** Custom-domain Coolify rollouts now correctly pass Cloudflare Global API Key credentials to Traefik when `CLOUDFLARE_EMAIL` is set, while scoped API tokens continue to work as before. See [Traefik](https://docs.kombify.io/guides/stackkits/services/traefik).
+- **PocketID + TinyAuth on BaseKit.** Provider registration and runtime checks were restored, so protected services again show PocketID login (with TinyAuth as the password-only fallback) instead of skipping straight to TinyAuth. See [PocketID](https://docs.kombify.io/stackkits/apps/pocketid) and [TinyAuth](https://docs.kombify.io/stackkits/apps/tinyauth).
+- **Cloudflare DNS-01 for custom domains.** Custom-domain Coolify rollouts now correctly pass Cloudflare Global API Key credentials to Traefik when `CLOUDFLARE_EMAIL` is set, while scoped API tokens continue to work as before. See [Traefik](https://docs.kombify.io/stackkits/apps/traefik).
 - **Installer readiness.** Live installer jobs hand off VM state before verification and wait for routed services and certificates in bounded phases, instead of relying on one long-running job.
 - **Security updates.** Go crypto and networking dependencies (`golang.org/x/crypto`, `golang.org/x/net`, and related modules) were updated and lint, static, and security checks restored to a clean state.
 

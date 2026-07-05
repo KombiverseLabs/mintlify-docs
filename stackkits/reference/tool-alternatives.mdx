@@ -8,18 +8,18 @@ icon: "shuffle"
 StackKits never lock you into a single tool. For each capability there is a **smart default** (what you get if you change nothing) and **alternatives** you can select in `stack-spec.yaml`. Defaults are resolved from your context (local vs cloud), compute tier, and domain — you can always override them.
 
 <Note>
-  This page is the canonical, implementation-backed catalog. The Base Kit ships the **platform services** below; **add-ons** layer optional capabilities on top of any kit.
+  This page is the canonical, implementation-backed catalog. Basement Kit and Cloud Kit ship the **platform services** below; **add-ons** layer optional capabilities on top of any kit — Basement, Cloud, or Modern Homelab.
 </Note>
 
-## Platform services (Base Kit)
+## Platform services
 
-These run in every Base Kit deployment, selected by the resolver per context and compute tier.
+These run in every Basement Kit and Cloud Kit deployment, selected by the resolver per context and compute tier.
 
 | Capability | Smart default | Alternatives you can select |
 |------------|---------------|-----------------------------|
 | **Reverse proxy & TLS** | Traefik v3 | — (standard edge for all kits) |
-| **App platform (PaaS)** | Coolify | Dokploy, Komodo |
-| **Container / compose UI** | Portainer *(high tier)* | Dockge |
+| **App platform (PaaS)** | Coolify | Komodo *(supported)*, Dokploy *(draft)*, Dockge *(experimental)* |
+| **Container management UI** | — *(covered by the app platform)* | Portainer *(high tier)*, Dockge |
 | **Forward-auth gateway** | TinyAuth | Authelia *(via `authelia` add-on)* |
 | **Identity / SSO (OIDC)** | PocketID | — |
 | **Internal PKI** | step-ca | — |
@@ -32,17 +32,69 @@ These run in every Base Kit deployment, selected by the resolver per context and
 | **Photos** | Immich | — |
 
 <Note>
-  The app platform is **context-resolved** — the Base Kit release default does not hard-pin Dokploy or Coolify. On standard and low tiers the resolver enables **Coolify**; switch with an explicit override in your spec.
+  The app platform is **context-resolved** — the release default does not hard-pin a PaaS. The resolver enables **Coolify** by default; **Komodo** is a supported drop-in switch, **Dokploy** is in draft, and **Dockge** is an experimental lightweight option. Switch with an explicit override in your spec.
 </Note>
 
 ```yaml stack-spec.yaml
-stackkit: base-kit
+stackkit: basement-kit
 
-# Override a smart default — e.g. use Dokploy instead of Coolify
+# Override a smart default — e.g. use Komodo instead of Coolify
 services:
   platform:
-    provider: dokploy   # coolify | dokploy | komodo
+    provider: komodo   # coolify | komodo | dokploy | dockge
 ```
+
+## Container management alternatives
+
+Day-to-day container operations are normally covered by your app platform (Coolify by default) or by [Dockge](https://docs.kombify.io/stackkits/apps/dockge) as the lightweight Compose-focused path. If you want a dedicated, full-featured management UI instead, Portainer is the documented alternative.
+
+### Portainer
+
+Portainer is a full-featured Docker management UI for inspecting and managing containers, images, volumes, and networks, served at `portainer.<domain>`. The resolver enables it on the **high compute tier**; on smaller setups Dockge is the lighter Compose-focused alternative.
+
+```yaml stack-spec.yaml
+stackkit: basement-kit
+
+services:
+  portainer:
+    enabled: true
+```
+
+<Tip>
+  Portainer locks new-admin creation a few minutes after start. If first-run setup times out, restart the container (`docker restart portainer`) and complete setup promptly.
+</Tip>
+
+<Note>
+  Portainer (full management), Dockge (Compose-focused), and your PaaS platform overlap — pick one management path per host to avoid conflicting owners for the same workloads.
+</Note>
+
+## Monitoring alternatives
+
+[Uptime Kuma](https://docs.kombify.io/stackkits/apps/uptime-kuma) is the default **uptime monitor** (checks and status pages), and the `monitoring` add-on delivers the full observability stack. For **per-node server metrics**, Netdata is the default and Beszel is the lightweight alternative.
+
+### Netdata
+
+Netdata provides real-time, high-resolution system metrics (CPU, RAM, disk, network, per-container) for each node, served at `netdata.<domain>`. It is the **default** server-metrics service on standard and high compute tiers — no configuration needed. On low-resource nodes the resolver uses lighter tools (Beszel or Glances) instead.
+
+<Tip>
+  Charts empty or a node missing? Verify the Netdata container is running (`docker logs netdata`) and that the host has access to `/proc` and `/sys`.
+</Tip>
+
+### Beszel
+
+Beszel is a lightweight server-monitoring tool with historical data and alerts — an **alternative** to Netdata, ideal for low-resource nodes (e.g. a Raspberry Pi) where a full metrics agent is too heavy. The Beszel hub is served at `monitor.<domain>`; register each node's Beszel agent so its metrics report to the hub, then set CPU, memory, and disk alert thresholds.
+
+```yaml stack-spec.yaml
+stackkit: basement-kit
+
+services:
+  beszel:
+    enabled: true
+```
+
+<Tip>
+  On `pi` and low compute tiers the resolver already prefers lightweight metrics. If a node is missing from the hub, confirm its Beszel agent is running and can reach `monitor.<domain>` (`docker logs beszel`).
+</Tip>
 
 ## Add-ons (optional capabilities)
 
@@ -67,10 +119,14 @@ Add-ons are composable modules you stack on any kit. Each declares its compatibl
 | **Advanced auth** | `authelia` | Advanced auth server (replaces TinyAuth) |
 | **Mesh VPN** | `vpn-overlay` | Mesh VPN overlay |
 | **External access** | `tunnel` | Bypass CGNAT/DS-Lite to expose local services |
-| **High availability** | `ha` | Load balancing, VIP failover, database HA |
+| **High availability** | `ha` | HA overlay: `warm-standby` tier (continuous backup + automated restore to a standby node) or `quorum` tier (live control-plane failover) |
+
+<Note>
+  The `ha` add-on tiers are node-gated as a **technical prerequisite, not a paywall**: `warm-standby` needs at least 2 nodes (downtime = restore time), `quorum` needs at least 3 (odd-numbered) manager nodes for quorum-based failover with near-zero downtime.
+</Note>
 
 ```yaml stack-spec.yaml
-stackkit: base-kit
+stackkit: basement-kit
 
 addons:
   - monitoring       # full observability stack

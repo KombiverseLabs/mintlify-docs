@@ -9,20 +9,20 @@ The fastest StackKits path is the Install Engine: one short command on the host 
 
 ## Fastest path
 
-Run the Base Kit one-liner on a Linux or macOS host with root/sudo access. Without a version pin, this installs the current stable latest release (`v0.4.4`):
+Run the Basement Kit one-liner on a Linux or macOS host with root/sudo access. Without a version pin, this installs the current stable latest release (`v0.5.0`):
 
 ```bash
 curl -sSL https://base.stackkit.cc | sh
 ```
 
-This installs the `stackkit` CLI, installs the Base Kit definitions, prepares Docker and OpenTofu, initializes the stack, generates deployment artifacts, applies the stack, and prints the service URLs.
+This installs the `stackkit` CLI, installs the Basement Kit definitions, prepares Docker and OpenTofu, initializes the stack, generates deployment artifacts, applies the stack, and prints the service URLs.
 
-## Public beta path
+## Pinned beta path
 
-Use the pinned beta path when you are testing the current BaseKit beta prerelease (`v0.4.5-beta.1`):
+Use a pinned prerelease when you are testing the current beta (`v0.5.1-beta.2`):
 
 ```bash
-export STACKKIT_RELEASE_VERSION=v0.4.5-beta.1
+export STACKKIT_RELEASE_VERSION=v0.5.1-beta.2
 curl -sSL https://base.stackkit.cc | sh
 ```
 
@@ -30,19 +30,20 @@ Prerelease pins are explicit by design. Unpinned installers stay on stable lates
 
 ## Per-kit one-liners
 
-Use a kit-specific one-liner when you already know the StackKit standard:
+Use a kit-specific one-liner when you already know the StackKit:
 
 ```bash
-curl -sSL https://base.stackkit.cc | sh      # Base Kit stable latest
-curl -sSL https://modern.stackkit.cc | sh    # Modern Homelab preview
-curl -sSL https://ha.stackkit.cc | sh        # High Availability preview
+curl -sSL https://base.stackkit.cc | sh      # Basement Kit stable latest
+curl -sSL https://cloud.stackkit.cc | sh     # Cloud Kit
 ```
 
-| StackKit | Use case | Complexity |
-|----------|----------|------------|
-| `base-kit` | Single-environment homelab | Public beta |
-| `modern-homelab` | Hybrid local + cloud setup | Preview |
-| `ha-kit` | High availability and failover | Preview |
+| StackKit | Use case | Status |
+|----------|----------|--------|
+| `basement-kit` | Local single-environment homelab | Stable |
+| `cloud-kit` | Cloud single-environment on your VPS | Preview, graduating |
+| `modern-homelab` | Hybrid local + cloud setup (bridge contract) | Preview / Early Access, via the CLI |
+
+Need failover? [High Availability](https://docs.kombify.io/stackkits/addons/high-availability) is an add-on you layer onto any kit, not a separate kit.
 
 ## CLI-only path
 
@@ -59,8 +60,12 @@ Use the CLI-only installer when you want to make the technical choices yourself:
     ```bash
     mkdir my-homelab
     cd my-homelab
-    stackkit init base-kit
+    stackkit init basement-kit
     ```
+
+    <Note>
+      `stackkit init base-kit` still works as a deprecated alias — it resolves to `basement-kit` and prints a deprecation warning. Use `basement-kit` in new specs and scripts.
+    </Note>
   </Step>
 
   <Step title="Prepare and generate">
@@ -86,7 +91,7 @@ Use the CLI-only installer when you want to make the technical choices yourself:
 
 ## What you get
 
-The Base Kit default provisions a homelab foundation with StackKits standards, add-ons, baselines, auth/routing defaults, generated infrastructure artifacts, and a service URL summary.
+The Basement Kit default provisions a homelab foundation with StackKits standards, add-ons, baselines, auth/routing defaults, generated infrastructure artifacts, and a service URL summary.
 
 ## Next steps
 
@@ -94,8 +99,8 @@ The Base Kit default provisions a homelab foundation with StackKits standards, a
   <Card title="CLI or TechStack" icon="route" href="https://docs.kombify.io/guides/stackkits/deploy-with-cli-or-techstack">
     Compare the Install Engine, CLI tool, and kombify-TechStack UI.
   </Card>
-  <Card title="Base Kit details" icon="house" href="https://docs.kombify.io/stackkits/kits/base-kit">
-    Learn what Base Kit deploys and how its defaults work.
+  <Card title="Basement Kit details" icon="house" href="https://docs.kombify.io/stackkits/kits/basement-kit">
+    Learn what the Basement Kit deploys and how its defaults work.
   </Card>
   <Card title="Node Hub" icon="grid-2" href="https://docs.kombify.io/guides/stackkits/node-hub">
     Use the default dashboard at `base.<domain>` after rollout.

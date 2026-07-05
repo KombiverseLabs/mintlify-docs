@@ -1,16 +1,32 @@
 ---
-title: Modern Homelab Kit
-description: Multi-node hybrid Docker infrastructure for advanced homelabs with public access and VPN overlay
-sidebarTitle: Modern Homelab Kit
+title: "Modern Homelab"
+description: "Hybrid local + cloud homelab — Basement and Cloud node-sets joined by an identity-aware bridge contract"
+sidebarTitle: "Modern Homelab"
 icon: microchip
+tag: "Preview"
 ---
 
-
-The **Modern Homelab Kit** brings multi-node hybrid infrastructure to your homelab. Designed for advanced users who need public-facing services, cloud+local server setups, and full observability across nodes.
+The **Modern Homelab** combines a local node-set and a cloud node-set into one homelab: public-facing services run at the cloud edge, private services and data stay at home, and an **interface/bridge contract** connects the two localities.
 
 <Warning>
-  **Schema-only** -- This StackKit has a CUE schema defined but is not yet functional. Use the [Base Kit](https://docs.kombify.io/stackkits/kits/base-kit) for production deployments.
+  **Early Access / Preview** — the Modern Homelab kit is alpha scaffolding today. It does not yet have a verified multi-node end-to-end gate, and its schema and defaults can still change. For production deployments today, use the [Basement Kit](https://docs.kombify.io/stackkits/kits/basement-kit).
 </Warning>
+
+## What makes a Modern Homelab
+
+A Modern Homelab is the **union of a Basement node-set and a Cloud node-set, plus the bridge contract**. The minimum topology is two nodes: at least one local **and** at least one cloud node.
+
+The defining piece is the bridge contract — not node count:
+
+| Bridge contract element | What it does |
+|-------------------------|--------------|
+| **Identity-aware proxy** | mTLS between localities (private PKI via Step-CA) plus TinyAuth as the auth boundary — cross-locality traffic is authenticated, not just tunneled |
+| **Cloudflare Tunnel (optional)** | Bypasses CGNAT / DS-Lite so local services stay reachable without opening home ports |
+| **Cross-locality service placement** | Decides which services run at the cloud edge and which stay local |
+| **Data-placement policy** | Declares which data may leave the local trust boundary |
+| **Cross-node backup** | Backups span localities instead of living next to the data they protect |
+
+By default, the **primary locality is cloud**: the control plane and public edge live on the cloud node. You can override this with explicit intent.
 
 ## Overview
 
@@ -20,514 +36,107 @@ graph TB
         Users["Users / Clients"]
     end
 
-    subgraph Cloud["Cloud Node (VPS)"]
-        Traefik["Traefik<br/>Reverse Proxy + TLS"]
-        Coolify["Coolify<br/>PaaS / Multi-Node Manager"]
-        Headscale["Headscale<br/>VPN Control Server"]
-        MonCloud["OTLP Gateway + optional VictoriaMetrics"]
+    subgraph Cloud["Cloud locality (default primary — control + edge)"]
+        Main["Main node<br/>Traefik ingress + ACME TLS"]
+        PaaS["PaaS adapter<br/>Coolify (default)"]
     end
 
-    subgraph VPN["VPN Overlay (Headscale/Tailscale)"]
-        Tunnel["Encrypted Tunnel"]
+    subgraph Bridge["Interface / bridge contract"]
+        Proxy["Identity-aware proxy<br/>mTLS (Step-CA) + TinyAuth"]
+        Tunnel["Cloudflare Tunnel (optional)<br/>CGNAT / DS-Lite bypass"]
     end
 
-    subgraph Local["Local Node(s) (On-Premises)"]
-        Apps["Applications<br/>Nextcloud, Immich, ..."]
-        Storage["Local Storage<br/>NAS / RAID"]
-        Loki["Loki + Promtail<br/>Log Collection"]
+    subgraph Local["Local locality (home network)"]
+        Apps["Private services + data<br/>photos, files, media, ..."]
+        Storage["Local storage"]
     end
 
-    Users -->|HTTPS| Traefik
-    Traefik --> Coolify
-    Traefik --> MonCloud
-    Cloud <-->|Headscale| Tunnel
-    Tunnel <-->|Encrypted| Local
-    Coolify -->|Deploys to| Apps
+    Users -->|HTTPS| Main
+    Main --> PaaS
+    Cloud <--> Proxy
+    Proxy <--> Local
+    Tunnel -.-> Local
 
     style Internet fill:#1e293b,stroke:#ef4444,color:#f8fafc
     style Cloud fill:#1e293b,stroke:#38bdf8,color:#f8fafc
-    style VPN fill:#1e293b,stroke:#fbbf24,color:#f8fafc
+    style Bridge fill:#1e293b,stroke:#fbbf24,color:#f8fafc
     style Local fill:#1e293b,stroke:#4ade80,color:#f8fafc
 ```
 
-## Key features
+## Multi-node alone is not Modern Homelab
 
-<CardGroup cols={3}>
-  <Card title="Multi-Node Docker" icon="server">
-    Deploy across cloud VPS and local servers
-  </Card>
-  <Card title="Coolify PaaS" icon="rocket">
-    Professional deployment platform for multi-node setups
-  </Card>
-  <Card title="VPN Overlay" icon="lock">
-    Headscale/Tailscale for secure inter-node communication
-  </Card>
-  <Card title="Full Observability" icon="chart-line">
-    OTLP collector baseline with optional central gateway, retention, and dashboards
-  </Card>
-  <Card title="Automatic TLS" icon="shield">
-    Let's Encrypt certificates via Traefik
-  </Card>
-  <Card title="Public Access" icon="globe">
-    Services accessible from the internet by default
-  </Card>
-</CardGroup>
+Adding nodes to a kit does not change the kit. The kit boundaries are drawn by locality and the bridge contract:
+
+| Topology | Kit |
+|----------|-----|
+| Several nodes, all local or Pi | [Basement Kit](https://docs.kombify.io/stackkits/kits/basement-kit) |
+| Several nodes, all cloud | [Cloud Kit](https://docs.kombify.io/stackkits/kits/cloud-kit) |
+| At least one local + one cloud node, joined by the bridge contract | **Modern Homelab** |
+
+There is no silent in-between: a bare cross-locality worker join (say, one local main with a single cloud worker and no bridge contract) is **not** treated as "Basement with a remote node". The resolver either upgrades that topology to a Modern Homelab — with the bridge contract required — or rejects it with actionable guidance.
 
 ## Requirements
 
-| Resource | Cloud Node (VPS) | Local Node | Total Minimum |
-|----------|------------------|------------|---------------|
-| **Nodes** | 1 VPS | 1+ local | 2+ |
-| **CPU** | 2 cores | 4 cores | 6 cores |
-| **RAM** | 4 GB | 8 GB | 12 GB |
-| **Storage** | 50 GB SSD | 100 GB | 150 GB |
-| **Network** | Public IPv4, 1 Gbps | LAN access | -- |
+- **At least 2 nodes:** one local node (home hardware) and one cloud node (a VPS you bring, when self-hosting)
+- A domain you control, with DNS access, for the public edge and TLS
+- SSH access to every node
 
-**Additional prerequisites:**
-- Own domain with DNS control (e.g., Cloudflare, Hetzner DNS)
-- DNS provider API access for automated TLS provisioning
-- SSH access to all nodes
+## Service placement
 
-<Warning>
-  The Modern Homelab Kit requires both cloud and local infrastructure. If you only need a single environment (local or cloud), use the [Base Kit](https://docs.kombify.io/stackkits/kits/base-kit) instead.
-</Warning>
+Cross-locality placement follows the control/edge-in-cloud default:
 
-## Architecture deep dive
+| Concern | Locality |
+|---------|----------|
+| Public entry, TLS termination | Cloud |
+| Control plane (main node) | Cloud (default primary — overridable by explicit intent) |
+| Private services and data | Local |
+| Backups | Cross-node, spanning localities |
 
-### Hybrid topology
+## PaaS adapter
 
-The Modern Homelab Kit connects cloud and local infrastructure using a VPN overlay:
+| Adapter | Status |
+|---------|--------|
+| **Coolify** | Default |
+| **Komodo** | Supported production alternative |
+| **Dokploy** | Draft |
 
-```mermaid
-graph LR
-    subgraph Cloud["Cloud VPS (Entry Point)"]
-        T["Traefik"]
-        C["Coolify"]
-        HS["Headscale"]
-    end
+## Self-hosted vs managed
 
-    subgraph VPN["Headscale VPN Mesh"]
-        TS1["Tailscale Agent"]
-        TS2["Tailscale Agent"]
-    end
+<Note>
+  **The topology is open source.** You can build the full Modern Homelab yourself: bring your own VPS for the cloud half and wire the bridge manually. Nothing in the architecture is feature-gated.
 
-    subgraph Local1["Local Server 1"]
-        App1["Nextcloud"]
-        App2["Immich"]
-    end
+  **Managed Modern Homelab** is the subscription option: kombify provisions the cloud half, sets up the bridge, and handles the lifecycle for you. You pay for the convenience — hosting, provisioning, lifecycle, and support — not for unlocked features.
+</Note>
 
-    subgraph Local2["Local Server 2 (Optional)"]
-        App3["Media Stack"]
-        NAS["Storage / NAS"]
-    end
+## Example spec (preview)
 
-    T -->|Public Traffic| C
-    HS --> TS1
-    HS --> TS2
-    TS1 --> Local1
-    TS2 --> Local2
-    C -->|Deploy via VPN| Local1
-    C -->|Deploy via VPN| Local2
+The spec below shows the intended shape. As a preview kit, field names and defaults may still change.
 
-    style Cloud fill:#1e293b,stroke:#38bdf8,color:#f8fafc
-    style VPN fill:#1e293b,stroke:#fbbf24,color:#f8fafc
-    style Local1 fill:#1e293b,stroke:#4ade80,color:#f8fafc
-    style Local2 fill:#1e293b,stroke:#4ade80,color:#f8fafc
-```
+```yaml stack-spec.yaml
+stackkit: modern-homelab
 
-**Traffic flow:**
-1. Public requests hit Traefik on the cloud VPS
-2. Traefik routes to Coolify-managed applications
-3. Applications on local nodes are reached via the Headscale VPN tunnel
-4. Local nodes never expose ports to the public internet
+domain: homelab.example.com
+email: you@example.com
 
-### Observability stack
-
-```mermaid
-graph TB
-    subgraph Collection["Data Collection"]
-    OTel["OTel Collector<br/>(per node)"]
-    Logs["Optional log lane<br/>(per node)"]
-    end
-
-  subgraph Gateway["Central Fan-In"]
-    GW["monitoring-core gateway<br/>OTLP fan-in"]
-    end
-
-  subgraph Backend["Optional retention tier"]
-    VM["VictoriaMetrics<br/>retention + PromQL"]
-    Graf["Optional Grafana<br/>dashboards"]
-    end
-
-  OTel --> GW
-  Logs --> GW
-  GW --> VM
-  VM --> Graf
-
-    style Collection fill:#1e293b,stroke:#38bdf8,color:#f8fafc
-  style Gateway fill:#1e293b,stroke:#fbbf24,color:#f8fafc
-  style Backend fill:#1e293b,stroke:#4ade80,color:#f8fafc
-```
-
-| Component | Purpose | Default Config |
-|-----------|---------|----------------|
-| OTel Collector | Metrics baseline | Per-node collector, OTLP export |
-| monitoring-core gateway | Fan-in | Optional central OTLP gateway |
-| VictoriaMetrics | Metrics retention | Optional backend for multi-node or longer retention |
-| Grafana | Visualization | Optional dashboard surface when backend tier is enabled |
-| Logs lane | Log forwarding | Opt-in; only enable when the deployment needs it |
-
-## Quick start
-
-<Steps>
-  <Step title="Define your hybrid setup">
-    ```yaml stack-spec.yaml
-    stackkit: modern-homelab
-
-    domain: homelab.example.com
-    email: you@example.com
-
-    nodes:
-      - name: cloud-entry
-        type: cloud
-        provider:
-          type: hetzner
-          region: fsn1
-          size: cx21
-          image: debian-12
-
-      - name: local-server
-        type: local
-        network:
-          localIp: 192.168.1.100
-          subnet: 192.168.1.0/24
-    ```
-  </Step>
-
-  <Step title="Configure VPN overlay">
-    ```yaml
-    vpn:
-      enabled: true
-      provider: headscale
-      magicDns: true
-    ```
-  </Step>
-
-  <Step title="Enable services">
-    ```yaml
-    services:
-      # Reverse proxy (cloud node)
-      traefik:
-        enabled: true
-        acme: true
-        acmeEmail: you@example.com
-
-      # PaaS platform (cloud node)
-      coolify:
-        enabled: true
-
-      # VPN control server (cloud node)
-      headscale:
-        enabled: true
-
-    addons:
-      - monitoring-core
-
-    observability:
-      monitoring:
-        signals:
-          metrics: true
-          logs: true
-        gateway:
-          enabled: true
-        backend:
-          enabled: true
-          grafana:
-            enabled: true
-    ```
-  </Step>
-
-  <Step title="Deploy infrastructure">
-    ```bash
-    stackkit validate
-    stackkit generate
-    stackkit deploy
-    ```
-  </Step>
-</Steps>
-
-## Configuration reference
-
-### Node configuration
-
-<Tabs>
-  <Tab title="Cloud Node">
-    ```yaml
-    nodes:
-      - name: cloud-entry
-        type: cloud
-        hostname: cloud-entry
-
-        provider:
-          type: hetzner        # hetzner, digitalocean, vultr, linode
-          region: fsn1
-          size: cx21           # 2 vCPU, 4 GB RAM
-          image: debian-12
-
-        docker:
-          version: "24.0"
-          dataRoot: /var/lib/docker
-
-        ssh:
-          user: root
-          port: 22
-    ```
-  </Tab>
-  <Tab title="Local Node">
-    ```yaml
-    nodes:
-      - name: local-server
-        type: local
-        hostname: local-server
-
-        provider:
-          type: bare-metal
-
-        network:
-          localIp: 192.168.1.100
-          subnet: 192.168.1.0/24
-
-        docker:
-          version: "24.0"
-          dataRoot: /var/lib/docker
-
-        labels:
-          storage: "true"
-          role: application
-    ```
-  </Tab>
-</Tabs>
-
-### VPN configuration
-
-```yaml
-vpn:
-  enabled: true
-  provider: headscale
-  derpEnabled: true
-  derpRegions:
-    - default
-  magicDns: true
-```
-
-The VPN overlay creates an encrypted mesh between all nodes. Headscale is the self-hosted Tailscale control server -- no third-party dependency required.
-
-### Monitoring configuration
-
-```yaml
-observability:
-  monitoring:
-    signals:
-      metrics: true
-      logs: true
-    collector:
-      profile: full
-    gateway:
-      enabled: true
-    backend:
-      enabled: true
-      retentionPeriod: 30d
-      grafana:
-        enabled: true
-```
-
-## Platform components
-
-### Coolify -- Multi-node PaaS
-
-Coolify manages deployments across your nodes. While the Base Kit defaults to Coolify for single-environment setups, the Modern Homelab Kit leverages its multi-node capabilities for hybrid topologies:
-
-- Multi-node deployment via SSH
-- Git-based deployments (push to deploy)
-- Built-in database management
-- Application monitoring and logs
-- Resource limits per container
-
-```yaml
-coolify:
-  autoUpdate: false
-  pushEnabled: true
-  instanceSettings:
-    isRegistrationEnabled: false
-    isAutoUpdateEnabled: false
-  resources:
-    cpuLimit: "2.0"
-    memoryLimit: "2048m"
-```
-
-### Service placement
-
-Services are placed on specific nodes based on their role:
-
-| Service | Placement | Reason |
-|---------|-----------|--------|
-| Traefik | Cloud node | Public entry point, TLS termination |
-| Coolify | Cloud node | Needs SSH access to all nodes |
-| Headscale | Cloud node | VPN coordination server |
-| Prometheus + Grafana | Cloud node | Accessible remotely |
-| Applications | Local node(s) | Data stays on-premises |
-| Storage/NAS | Local node(s) | Physical disk access |
-| Promtail + Node Exporter | All nodes | Per-node monitoring agents |
-
-## Adding more nodes
-
-```yaml
-# Add to stack-spec.yaml
 nodes:
-  # ... existing nodes
+  - name: cloud-edge
+    type: cloud          # default primary locality: control plane + public edge
 
-  - name: local-media
-    type: local
-    network:
-      localIp: 192.168.1.101
-      subnet: 192.168.1.0/24
-    labels:
-      role: media-server
+  - name: home-server
+    type: local          # private services and data
 ```
 
 ```bash
-stackkit deploy --node local-media
+stackkit validate
 ```
-
-The new node is automatically joined to the Headscale VPN mesh and registered in Coolify.
-
-## Security
-
-### Network isolation
-
-- Local nodes are **never** directly exposed to the internet
-- All inter-node traffic is encrypted via Headscale VPN
-- Traefik handles TLS termination for public services
-- Coolify enforces resource limits per container
-
-### Authentication
-
-```yaml
-auth:
-  provider: pocketid      # PocketID for SSO
-  twoFactor: true
-  allowedDomains:
-    - example.com
-```
-
-### Firewall rules
-
-The StackKit configures firewall rules automatically:
-
-| Port | Cloud Node | Local Node | Purpose |
-|------|-----------|------------|---------|
-| 22 | Open | LAN only | SSH access |
-| 80 | Open | Closed | HTTP redirect |
-| 443 | Open | Closed | HTTPS traffic |
-| 41641 | Open | Open | Headscale/WireGuard |
-| All others | Closed | Closed | -- |
-
-## Comparison with other StackKits
-
-| Feature | Base Kit | High Availability Kit | Modern Homelab Kit |
-|---------|-------------|------------|----------------|
-| **Nodes** | 1 | 2+ (local) | 2+ (cloud + local) |
-| **Platform** | Docker + Coolify | Docker Swarm | Docker + Coolify |
-| **Network** | Local only | Local LAN | VPN overlay (Headscale) |
-| **Public Access** | Optional (Cloudflare Tunnel) | Optional | Default |
-| **Monitoring** | OTLP collector baseline | OTLP collector + gateway planning | Collector baseline + monitoring-core |
-| **Domain Required** | No | No | Yes |
-| **Complexity** | Low | Medium | High |
-| **Status** | v1.0 (production) | vision-only | schema-only |
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="VPN connection issues">
-    1. Check Headscale status: `headscale nodes list`
-    2. Verify Tailscale agent on local node: `tailscale status`
-    3. Test connectivity: `tailscale ping <cloud-node>`
-    4. Check firewall: ensure UDP port 41641 is open on both sides
-  </Accordion>
-
-  <Accordion title="Coolify cannot reach local node">
-    1. Verify VPN tunnel is established
-    2. Check SSH access via VPN IP: `ssh root@<tailscale-ip>`
-    3. Ensure Docker is running on the target node
-    4. Check Coolify server settings for the correct VPN IP
-  </Accordion>
-
-  <Accordion title="TLS certificate errors">
-    1. Verify DNS records point to cloud node public IP
-    2. Check Traefik ACME logs: `docker logs traefik`
-    3. Ensure ports 80 and 443 are open on the cloud node
-    4. Verify DNS provider API credentials in Traefik config
-  </Accordion>
-
-  <Accordion title="Monitoring gaps">
-    1. Verify OTel Collector is running on all nodes
-    2. Check the OTLP receiver or gateway endpoint is reachable over the VPN path
-    3. Inspect TechStack `/api/v1/monitor/health` for ingest-lane and backend diagnostics
-    4. If enabled, verify VictoriaMetrics and Grafana separately from the collector baseline
-  </Accordion>
-</AccordionGroup>
-
-## Migration from the Base Kit
-
-<Steps>
-  <Step title="Backup all data">
-    ```bash
-    stackkit backup --all --output ./backup
-    ```
-  </Step>
-
-  <Step title="Provision cloud node">
-    Add a cloud node to your `stack-spec.yaml` and provision it:
-    ```yaml
-    stackkit: modern-homelab  # Changed from base-kit
-
-    nodes:
-      - name: cloud-entry
-        type: cloud
-        provider:
-          type: hetzner
-          region: fsn1
-          size: cx21
-          image: debian-12
-
-      - name: local-server   # Your existing server
-        type: local
-        network:
-          localIp: 192.168.1.100
-    ```
-  </Step>
-
-  <Step title="Deploy hybrid infrastructure">
-    ```bash
-    stackkit generate
-    stackkit deploy
-    ```
-  </Step>
-
-  <Step title="Restore data on local node">
-    ```bash
-    stackkit restore --from ./backup --node local-server
-    ```
-  </Step>
-</Steps>
 
 ## Next steps
 
 <CardGroup cols={2}>
-  <Card title="Monitoring Setup" icon="chart-line" href="https://docs.kombify.io/stackkits/reference/monitoring">
-    Configure the PLG observability stack
+  <Card title="Basement Kit" icon="house" href="https://docs.kombify.io/stackkits/kits/basement-kit">
+    The production-ready local kit — the recommended starting point today.
   </Card>
-  <Card title="Coolify Guide" icon="rocket" href="https://docs.kombify.io/guides/stackkits/services/coolify">
-    Deploy applications with Coolify
+  <Card title="Cloud Kit" icon="cloud" href="https://docs.kombify.io/stackkits/kits/cloud-kit">
+    The single-environment cloud sibling, without the hybrid bridge.
   </Card>
 </CardGroup>
