@@ -1,6 +1,6 @@
 ---
 title: mintlify-docs Roadmap
-last_verified: 2026-06-03
+last_verified: 2026-07-06
 roadmap_standard: kombify-roadmap@v1
 track: v0-expansion
 ---
