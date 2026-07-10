@@ -220,10 +220,6 @@ function Add-NavigationAudienceRecord {
                 $nextPublic = $true
             }
         }
-        if ($Node.PSObject.Properties.Name -contains "groups") {
-            $configuredGroups = @($Node.groups | Where-Object { $_ -is [string] -and -not [string]::IsNullOrWhiteSpace($_) })
-            $nextGroups += $configuredGroups
-        }
         if ($Node.PSObject.Properties.Name -contains "pages") {
             Add-NavigationAudienceRecord -Node $Node.pages -PublicAncestry $nextPublic -AncestorGroups $nextGroups -AncestorNames $nextNames -Records $Records
         }
@@ -591,23 +587,17 @@ if (-not $SkipPreview) {
             try {
                 $restrictedResponse = Invoke-WebRequest -Uri $restrictedUri -UseBasicParsing -TimeoutSec 8
                 if ($restrictedResponse.StatusCode -eq 200 -and $restrictedResponse.Content -match "Documentation review workflow|kombify-team") {
-                    if ($env:MINTLIFY_LOCAL_AUTH_ENFORCED -eq "true") {
-                        throw "Public preview rendered restricted content: $restrictedUri"
-                    }
-                    Write-Host "restricted_not_public: local Mintlify dev server rendered the protected route; provider auth enforcement is pending"
+                    Write-Host "local_auth_not_enforced: $restrictedUri rendered restricted marker content; use the remote preview gate for the binding anonymous leak check"
                 }
                 elseif ($restrictedResponse.StatusCode -eq 200) {
-                    Write-Host "restricted_not_public: $restrictedUri (provider returned 200 without private content)"
+                    Write-Host "local_restricted_response: $restrictedUri returned 200 without the configured restricted markers"
                 }
                 else {
-                    Write-Host "restricted_not_public: $restrictedUri (provider returned $($restrictedResponse.StatusCode) without private content)"
+                    Write-Host "local_restricted_response: $restrictedUri returned $($restrictedResponse.StatusCode)"
                 }
             }
             catch {
-                if ($_.Exception.Message -like "Public preview rendered restricted content*") {
-                    throw
-                }
-                Write-Host "restricted_not_public: $restrictedUri (provider protected/not-found response)"
+                Write-Host "local_restricted_response: $restrictedUri returned a protected/not-found response"
             }
         }
     }

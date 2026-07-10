@@ -44,9 +44,12 @@ mise run local:e2e
 
 The local E2E script validates `docs.json`, audience boundaries, navigation
 targets, internal links, redirect targets, orphan pages, and runs bounded
-public and authenticated internal preview HTTP smoke checks. `mint
-broken-links` is available as an advisory task (`mise run links:advisory`), not
-a blocking gate.
+public and authenticated internal preview HTTP smoke checks. Mint's local
+server does not enforce provider authentication, so `local_auth_not_enforced`
+is expected when the restricted marker renders. The binding anonymous leak
+check runs against the exact PR preview deployment in CI and remains red until
+Mintlify authentication is activated. `mint broken-links` is available as an
+advisory task (`mise run links:advisory`), not a blocking gate.
 
 ## Standards
 

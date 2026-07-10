@@ -23,7 +23,7 @@ permissions:
 jobs:
   static:
     name: Validate public and restricted navigation
-    runs-on: windows-2025
+    runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'ubuntu-24.04' }}
     timeout-minutes: 5
     steps:
       - name: Checkout
@@ -32,3 +32,58 @@ jobs:
       - name: Run static docs and audience gate
         shell: pwsh
         run: ./scripts/run-local-e2e.ps1 -SkipPreview
+
+  remote-preview:
+    name: Block anonymous preview leaks
+    if: github.event_name == 'pull_request'
+    runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'ubuntu-24.04' }}
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      deployments: read
+      pull-requests: read
+      statuses: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Wait for exact-head Mintlify deployment
+        id: preview
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          $deadline = (Get-Date).AddMinutes(4)
+          $environmentUrl = $null
+          do {
+            $deployments = gh api "repos/$env:REPOSITORY/deployments?sha=$env:HEAD_SHA&per_page=20" | ConvertFrom-Json
+            foreach ($deployment in @($deployments)) {
+              if (-not [string]::IsNullOrWhiteSpace([string]$deployment.environment_url)) {
+                $environmentUrl = [string]$deployment.environment_url
+                break
+              }
+              $statuses = gh api "repos/$env:REPOSITORY/deployments/$($deployment.id)/statuses?per_page=20" | ConvertFrom-Json
+              foreach ($status in @($statuses)) {
+                if (-not [string]::IsNullOrWhiteSpace([string]$status.environment_url)) {
+                  $environmentUrl = [string]$status.environment_url
+                  break
+                }
+              }
+              if ($null -ne $environmentUrl) { break }
+            }
+            if ($null -ne $environmentUrl) { break }
+            Start-Sleep -Seconds 10
+          } while ((Get-Date) -lt $deadline)
+          if ([string]::IsNullOrWhiteSpace($environmentUrl)) {
+            throw "No Mintlify deployment environment_url found for exact PR head $env:HEAD_SHA within four minutes"
+          }
+          "url=$environmentUrl" >> $env:GITHUB_OUTPUT
+          Write-Host "preview_url: $environmentUrl"
+
+      - name: Assert remote anonymous audience boundary
+        shell: pwsh
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.url }}
+        run: ./scripts/assert-remote-audience.ps1 -BaseUrl $env:PREVIEW_URL
