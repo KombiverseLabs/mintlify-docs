@@ -97,24 +97,6 @@ function Stop-ProcessTreeByPid {
     return @($descendants + $RootPid)
 }
 
-function Test-ProcessLooksLikeMintPreview {
-    param(
-        [Parameter(Mandatory = $true)][int]$ProcessId,
-        [Parameter(Mandatory = $true)][int]$Port
-    )
-
-    $procInfo = Get-CimInstance -ClassName Win32_Process -Filter "ProcessId = $ProcessId" -ErrorAction SilentlyContinue
-    if ($null -eq $procInfo) { return $false }
-
-    $procName = ([string]$procInfo.Name).ToLowerInvariant()
-    $cmdLine = [string]$procInfo.CommandLine
-    if ($procName -notmatch '^node(\.exe)?$') { return $false }
-    if ($cmdLine -notmatch 'mint') { return $false }
-
-    $listeners = @(Get-ListeningProcessIds -Port $Port)
-    return ($listeners -contains $ProcessId)
-}
-
 function Normalize-DocPath {
     param([Parameter(Mandatory = $true)][string]$PathValue)
     $value = $PathValue.Trim()
@@ -332,15 +314,6 @@ Write-Host "links: ok"
 Write-Host "redirects: ok"
 
 if (-not $SkipPreview) {
-    if (Test-ProcessLooksLikeMintPreview -ProcessId 49144 -Port 3000) {
-        Write-Host "cleanup_orphan_pid: 49144"
-        Stop-Process -Id 49144 -Force
-        Start-Sleep -Milliseconds 300
-        if (Test-ProcessLooksLikeMintPreview -ProcessId 49144 -Port 3000) {
-            throw "Failed to stop known orphan Mint preview PID 49144"
-        }
-    }
-
     $previewPort = Get-FreeTcpPort
     $occupiedAtStart = @(Get-ListeningProcessIds -Port $previewPort)
     if ($occupiedAtStart.Count -gt 0) {
