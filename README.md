@@ -25,10 +25,10 @@ npx -y mint@4.2.684 dev
 ## Audience workflow
 
 Normal public documentation updates can merge independently. Future public
-pages may merge as restricted review content under the `kombify-team` group and
-be reviewed on the same live Mintlify site. Publication is a small,
-reviewable navigation/frontmatter change from the group restriction to
-`public: true`.
+pages may merge as restricted review content for authenticated Mintlify
+organization members and be reviewed on the same live Mintlify site.
+Publication is a small, reviewable navigation/frontmatter change from
+`audience: organization-members` to `public: true`.
 
 Mintlify partial authentication keeps public `llms.txt`, MCP, and search
 results limited to public pages. Access control is not permission to store
@@ -43,14 +43,14 @@ mise run local:e2e
 ```
 
 The local E2E script validates `docs.json`, audience boundaries, navigation
-targets, internal links, redirect targets, orphan pages, and runs bounded
-public and authenticated internal preview HTTP smoke checks. Mint's local
+targets, internal links, redirect targets, orphan pages, and runs bounded local
+runtime HTTP smoke checks for both public and restricted routes. Mint's local
 server does not enforce provider authentication, so `local_auth_not_enforced`
-is expected when the restricted marker renders. The binding anonymous leak
-check runs against the exact PR preview and deployed `main` deployment in CI
-and remains red until Mintlify authentication is activated. `mint broken-links`
-is available as an advisory task (`mise run links:advisory`), not a blocking
-gate.
+is expected when the restricted marker renders and does not prove authenticated
+member access. The binding anonymous leak check runs against the exact PR
+preview and deployed `main` deployment in CI and remains red until Mintlify
+authentication is activated. `mint broken-links` is available as an advisory
+task (`mise run links:advisory`), not a blocking gate.
 
 ## Standards
 

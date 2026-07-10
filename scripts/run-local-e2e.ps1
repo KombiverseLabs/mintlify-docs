@@ -148,37 +148,35 @@ function Get-Frontmatter {
     param([Parameter(Mandatory = $true)][string]$Content)
 
     if (-not $Content.StartsWith("---")) {
-        return [pscustomobject]@{ Public = $false; Groups = @() }
+        return [pscustomobject]@{
+            Public = $false
+            Audience = $null
+            HasGroupsDeclaration = $false
+        }
     }
 
     $match = [regex]::Match($Content, "\A---\r?\n(?<body>.*?)\r?\n---\r?\n", [System.Text.RegularExpressions.RegexOptions]::Singleline)
     if (-not $match.Success) {
-        return [pscustomobject]@{ Public = $false; Groups = @() }
+        return [pscustomobject]@{
+            Public = $false
+            Audience = $null
+            HasGroupsDeclaration = $false
+        }
     }
 
     $body = $match.Groups["body"].Value
     $public = [regex]::IsMatch($body, "(?m)^public:\s*true\s*$")
-    $groups = [System.Collections.Generic.List[string]]::new()
-    $groupMatch = [regex]::Match($body, "(?ms)^groups:\s*(?<value>.*?)(?=^\S|\z)")
-    if ($groupMatch.Success) {
-        foreach ($line in ($groupMatch.Groups["value"].Value -split "\r?\n")) {
-            if ($line -match "^\s*-\s*(?<name>[A-Za-z0-9_-]+)\s*$") {
-                $groups.Add($matches["name"]) | Out-Null
-            }
-        }
-        if ($groupMatch.Groups["value"].Value.Trim() -match "^\[(?<inline>[^\]]+)\]$") {
-            foreach ($name in ($matches["inline"] -split ",")) {
-                $trimmed = $name.Trim().Trim("'`"")
-                if ($trimmed -ne "") {
-                    $groups.Add($trimmed) | Out-Null
-                }
-            }
-        }
+    $hasGroupsDeclaration = [regex]::IsMatch($body, "(?m)^groups:\s*")
+    $audience = $null
+    $audienceMatch = [regex]::Match($body, "(?m)^audience:\s*(?<value>.+?)\s*$")
+    if ($audienceMatch.Success) {
+        $audience = $audienceMatch.Groups["value"].Value.Trim().Trim("'`"")
     }
 
     return [pscustomobject]@{
         Public = $public
-        Groups = @($groups | Sort-Object -Unique)
+        Audience = $audience
+        HasGroupsDeclaration = $hasGroupsDeclaration
     }
 }
 
@@ -264,23 +262,31 @@ foreach ($page in $activePages) {
     }
     $pagePath = Join-Path $repoRoot (($page -replace "/", "\") + ".mdx")
     $frontmatter = Get-Frontmatter -Content (Get-Content -LiteralPath $pagePath -Raw)
-    $pageGroups = @($frontmatter.Groups)
-    $pageIsGrouped = $pageGroups.Count -gt 0
     $pageIsPublic = $frontmatter.Public
+    $pageAudience = if ([string]::IsNullOrWhiteSpace([string]$frontmatter.Audience)) { $null } else { [string]$frontmatter.Audience }
+    $pageIsRestricted = $pageAudience -eq "organization-members"
+    if ($frontmatter.HasGroupsDeclaration) {
+        $audienceErrors.Add("page '$page' declares unsupported 'groups' frontmatter (Mintlify Enterprise groups contract is not available here); use audience: organization-members") | Out-Null
+    }
+    if ($null -ne $pageAudience -and -not $pageIsRestricted) {
+        $audienceErrors.Add("page '$page' has unsupported audience value '$pageAudience'; expected 'organization-members'") | Out-Null
+    }
     foreach ($record in $recordsByPage[$page]) {
-        $hasGroups = $pageIsGrouped -or @($record.AncestorGroups).Count -gt 0
         $hasPublic = $pageIsPublic -or $record.PublicAncestry
-        if ($hasGroups -and $hasPublic) {
-            $audienceErrors.Add("page '$page' is both public and grouped") | Out-Null
+        if ($pageIsRestricted -and $hasPublic) {
+            $audienceErrors.Add("page '$page' is both public and restricted (organization-members)") | Out-Null
         }
-        if (-not $hasGroups -and -not $hasPublic) {
+        if (-not $pageIsRestricted -and -not $hasPublic) {
             $audienceErrors.Add("page '$page' has ambiguous audience classification") | Out-Null
         }
-        if ($record.PublicAncestry -and $pageIsGrouped) {
+        if ($record.PublicAncestry -and $pageIsRestricted) {
             $audienceErrors.Add("restricted page '$page' appears under public navigation ancestry") | Out-Null
         }
         if ($page.StartsWith("review/", [System.StringComparison]::OrdinalIgnoreCase) -and $hasPublic) {
             $audienceErrors.Add("public page '$page' appears under the internal review path") | Out-Null
+        }
+        if ($page.StartsWith("review/", [System.StringComparison]::OrdinalIgnoreCase) -and -not $pageIsRestricted) {
+            $audienceErrors.Add("review page '$page' must declare audience: organization-members") | Out-Null
         }
     }
 }
@@ -459,8 +465,7 @@ Write-Host "redirects: ok"
 
 if (-not $SkipPreview) {
     $previewViews = @(
-        @{ Name = "public"; Groups = @() },
-        @{ Name = "internal"; Groups = @("kombify-team") }
+        @{ Name = "runtime-smoke" }
     )
     foreach ($previewView in $previewViews) {
     $previewPort = Get-FreeTcpPort
@@ -484,8 +489,7 @@ if (-not $SkipPreview) {
     $launchedTreePids = @()
 
     try {
-        $groupsArgument = if (@($previewView.Groups).Count -gt 0) { "--groups " + (@($previewView.Groups) -join ",") } else { "" }
-        $mintCommand = "npx -y $mintSpec dev --port $previewPort $groupsArgument"
+        $mintCommand = "npx -y $mintSpec dev --port $previewPort"
         $mintProc = Start-Process -FilePath $env:ComSpec -ArgumentList @("/d", "/s", "/c", $mintCommand) -WorkingDirectory $repoRoot -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog -PassThru
         Write-Host "mint_preview_pid: $($mintProc.Id)"
 
@@ -493,12 +497,6 @@ if (-not $SkipPreview) {
         $previewTimeout = [TimeSpan]::FromMinutes(5)
         $deadline = (Get-Date).Add($previewTimeout)
         do {
-            if ($mintProc.HasExited) {
-                $stdoutTail = if (Test-Path -LiteralPath $stdoutLog) { (Get-Content -LiteralPath $stdoutLog -Tail 25 | Out-String) } else { "" }
-                $stderrTail = if (Test-Path -LiteralPath $stderrLog) { (Get-Content -LiteralPath $stderrLog -Tail 25 | Out-String) } else { "" }
-                throw "Mint preview exited before ready.`nSTDOUT:`n$stdoutTail`nSTDERR:`n$stderrTail"
-            }
-
             try {
                 $response = Invoke-WebRequest -Uri $previewBaseUrl -UseBasicParsing -TimeoutSec 3
                 if ($response.StatusCode -eq 200) {
@@ -518,6 +516,11 @@ if (-not $SkipPreview) {
                 }
             } catch {
                 Start-Sleep -Milliseconds 500
+            }
+            if ($mintProc.HasExited -and -not $ready) {
+                $stdoutTail = if (Test-Path -LiteralPath $stdoutLog) { (Get-Content -LiteralPath $stdoutLog -Tail 25 | Out-String) } else { "" }
+                $stderrTail = if (Test-Path -LiteralPath $stderrLog) { (Get-Content -LiteralPath $stderrLog -Tail 25 | Out-String) } else { "" }
+                throw "Mint preview exited before ready.`nSTDOUT:`n$stdoutTail`nSTDERR:`n$stderrTail"
             }
         } while ((Get-Date) -lt $deadline)
 
@@ -543,11 +546,9 @@ if (-not $SkipPreview) {
             "/stackkits/overview",
             "/stackkits/quickstart",
             "/stackkits/kits/basement-kit",
-            "/stackkits/kits/cloud-kit"
+            "/stackkits/kits/cloud-kit",
+            "/review/audience-workflow"
         )
-        if ($previewView.Name -eq "internal") {
-            $smokePaths += "/review/audience-workflow"
-        }
 
         foreach ($smokePath in $smokePaths) {
             $uri = $previewBaseUrl + $smokePath
@@ -583,22 +584,20 @@ if (-not $SkipPreview) {
         }
 
         $restrictedUri = $previewBaseUrl + "/review/audience-workflow"
-        if ($previewView.Name -eq "public") {
-            try {
-                $restrictedResponse = Invoke-WebRequest -Uri $restrictedUri -UseBasicParsing -TimeoutSec 8
-                if ($restrictedResponse.StatusCode -eq 200 -and $restrictedResponse.Content -match "Documentation review workflow|kombify-team") {
-                    Write-Host "local_auth_not_enforced: $restrictedUri rendered restricted marker content; use the remote preview gate for the binding anonymous leak check"
-                }
-                elseif ($restrictedResponse.StatusCode -eq 200) {
-                    Write-Host "local_restricted_response: $restrictedUri returned 200 without the configured restricted markers"
-                }
-                else {
-                    Write-Host "local_restricted_response: $restrictedUri returned $($restrictedResponse.StatusCode)"
-                }
+        try {
+            $restrictedResponse = Invoke-WebRequest -Uri $restrictedUri -UseBasicParsing -TimeoutSec 8
+            if ($restrictedResponse.StatusCode -eq 200 -and $restrictedResponse.Content -match "Documentation review workflow|organization members") {
+                Write-Host "local_auth_not_enforced: $restrictedUri rendered restricted marker content; local Mint CLI cannot prove provider authentication. Deployed/provider checks remain required."
             }
-            catch {
-                Write-Host "local_restricted_response: $restrictedUri returned a protected/not-found response"
+            elseif ($restrictedResponse.StatusCode -eq 200) {
+                Write-Host "local_restricted_response: $restrictedUri returned 200 without the configured restricted markers"
             }
+            else {
+                Write-Host "local_restricted_response: $restrictedUri returned $($restrictedResponse.StatusCode)"
+            }
+        }
+        catch {
+            Write-Host "local_restricted_response: $restrictedUri returned a protected/not-found response"
         }
     }
     finally {
@@ -617,9 +616,17 @@ if (-not $SkipPreview) {
                 }
 
                 $remainingListeners = @(Get-ListeningProcessIds -Port $previewPort)
-                $listenerOverlap = @($remainingListeners | Where-Object { $launchedTreePids -contains $_ })
-                if ($listenerOverlap.Count -gt 0) {
-                    throw "Mint preview cleanup failed; launched listener still active on port ${previewPort}: $($listenerOverlap -join ', ')"
+                $unexpectedListeners = @($remainingListeners | Where-Object { $occupiedAtStart -notcontains $_ })
+                if ($unexpectedListeners.Count -gt 0) {
+                    foreach ($listenerPid in $unexpectedListeners) {
+                        Stop-Process -Id $listenerPid -Force -ErrorAction SilentlyContinue
+                    }
+                    Start-Sleep -Milliseconds 300
+                    $remainingListeners = @(Get-ListeningProcessIds -Port $previewPort)
+                    $unexpectedListeners = @($remainingListeners | Where-Object { $occupiedAtStart -notcontains $_ })
+                }
+                if ($unexpectedListeners.Count -gt 0) {
+                    throw "Mint preview cleanup failed; listener still active on port ${previewPort}: $($unexpectedListeners -join ', ')"
                 }
             } catch {
                 throw "Mint preview cleanup error: $($_.Exception.Message)"

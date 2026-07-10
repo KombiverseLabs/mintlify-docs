@@ -3,7 +3,7 @@ param(
     [Parameter(Mandatory = $true)][uri]$BaseUrl,
     [string]$PublicPath = "/",
     [string]$RestrictedPath = "/review/audience-workflow",
-    [string[]]$RestrictedMarkers = @("Documentation review workflow", "kombify-team")
+    [string[]]$RestrictedMarkers = @("Documentation review workflow", "organization members")
 )
 
 Set-StrictMode -Version Latest

@@ -46,7 +46,7 @@ track: v0-public-authority
 - [ ] `mise run check` passes.
 - [ ] `mise run local:e2e` passes.
 - [ ] Mintlify partial authentication is enabled for the site and PR previews,
-  with authorized `kombify-team` reviewers.
+  with authenticated Mintlify organization-member access for restricted pages.
 - [ ] No open P0/P1 Beads bugs with `blocks:v0.3.0`.
 
 ## V1 Definition

@@ -14,8 +14,8 @@ Current implementation state only. Future scope belongs in `ROADMAP.md`.
 - Public landing page at `index.mdx`.
 - StackKits overview, quickstart, kit, service, explanation, and reference sections.
 - Site branding, favicon, logo, search prompt, navbar, contextual actions, and footer configured in `docs.json`.
-- Public and `kombify-team` restricted navigation metadata with a fail-closed audience-boundary gate.
-- Local validation covers anonymous public and authenticated internal preview views.
+- Public and organization-member restricted navigation metadata with a fail-closed audience-boundary gate.
+- Local validation covers anonymous runtime smoke for public and restricted routes.
 - PR and `main` validation includes a remote anonymous leak gate tied to the
   exact deployed commit.
 
@@ -24,7 +24,7 @@ Current implementation state only. Future scope belongs in `ROADMAP.md`.
 | Surface | Current State |
 |---|---|
 | Public docs | Mintlify-hosted site configured from this repo. |
-| Preview | Mintlify `4.2.684` local previews for public and `kombify-team` internal views. |
+| Preview | Mintlify `4.2.684` local preview runtime smoke for public and restricted routes. |
 
 ## Dependencies
 
@@ -38,8 +38,8 @@ Current implementation state only. Future scope belongs in `ROADMAP.md`.
 - Only StackKits content is currently represented in `docs.json`.
 - No package-managed validation toolchain is committed yet; the local gate uses PowerShell plus `npx`.
 - Mintlify dashboard partial-auth activation remains a provider-only blocker;
-  local group simulation is complete, while the remote PR/deployed-main gate
-  correctly stays red until provider enforcement is active.
+  local runtime smoke is complete, while the remote PR/deployed-main gate
+  correctly stays red until provider enforcement is active for organization-member auth.
 
 ## Tests
 
