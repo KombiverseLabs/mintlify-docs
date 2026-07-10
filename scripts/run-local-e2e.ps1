@@ -303,7 +303,11 @@ if (-not $SkipPreview) {
             "/journeys/oss-local",
             "/journeys/connected-free",
             "/journeys/paid-operated",
-            "/journeys/companion-voice"
+            "/journeys/companion-voice",
+            "/stackkits/overview",
+            "/stackkits/quickstart",
+            "/stackkits/kits/basement-kit",
+            "/stackkits/kits/cloud-kit"
         )
 
         foreach ($smokePath in $smokePaths) {

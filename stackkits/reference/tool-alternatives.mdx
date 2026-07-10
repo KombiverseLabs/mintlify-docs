@@ -1,106 +1,17 @@
 ---
 title: "Tool alternatives"
-description: "Every service StackKits can deploy, grouped by capability — the default and the alternatives you can switch to"
+description: "Service-selection model for current StackKits releases."
 sidebarTitle: "Tool alternatives"
-icon: "shuffle"
+icon: shuffle
 ---
 
-StackKits never lock you into a single tool. For each capability there is a **smart default** (what you get if you change nothing) and **alternatives** you can select in `stack-spec.yaml`. Defaults are resolved from your context (local vs cloud), compute tier, and domain — you can always override them.
+StackKits resolves service defaults from context and allows explicit overrides.
 
-<Note>
-  This page is the canonical, implementation-backed catalog. The Base Kit ships the **platform services** below; **add-ons** layer optional capabilities on top of any kit.
-</Note>
+## Scope
 
-## Platform services (Base Kit)
+This reference applies to current release kits:
 
-These run in every Base Kit deployment, selected by the resolver per context and compute tier.
+- `basement-kit`
+- `cloud-kit`
 
-| Capability | Smart default | Alternatives you can select |
-|------------|---------------|-----------------------------|
-| **Reverse proxy & TLS** | Traefik v3 | — (standard edge for all kits) |
-| **App platform (PaaS)** | Coolify | Dokploy, Komodo |
-| **Container / compose UI** | Portainer *(high tier)* | Dockge |
-| **Forward-auth gateway** | TinyAuth | Authelia *(via `authelia` add-on)* |
-| **Identity / SSO (OIDC)** | PocketID | — |
-| **Internal PKI** | step-ca | — |
-| **Uptime monitoring** | Uptime Kuma | — |
-| **Server metrics** | Netdata | Beszel, Glances *(low tier)* |
-| **Log viewer** | Dozzle | — |
-| **Full metrics stack** | Prometheus + Grafana *(high tier)* | `monitoring` add-on (VictoriaMetrics + Grafana + Loki + Alloy) |
-| **Password manager** | Vaultwarden | — |
-| **Media server** | Jellyfin | — |
-| **Photos** | Immich | — |
-
-<Note>
-  The app platform is **context-resolved** — the Base Kit release default does not hard-pin Dokploy or Coolify. On standard and low tiers the resolver enables **Coolify**; switch with an explicit override in your spec.
-</Note>
-
-```yaml stack-spec.yaml
-stackkit: base-kit
-
-# Override a smart default — e.g. use Dokploy instead of Coolify
-services:
-  platform:
-    provider: dokploy   # coolify | dokploy | komodo
-```
-
-## Add-ons (optional capabilities)
-
-Add-ons are composable modules you stack on any kit. Each declares its compatible StackKits and is enabled in the `addons:` list.
-
-| Capability | Add-on | What it deploys |
-|------------|--------|-----------------|
-| **Observability** | `monitoring` | VictoriaMetrics + Grafana + Loki + Alloy |
-| **Backup** | `backup` | Kopia encrypted backups, DB hooks, 3-2-1 targets |
-| **Backup fan-in** | `backup-repo-server` | Kopia Repository Server (multi-host / multi-tenant) |
-| **Media** | `media` | Jellyfin + *arr stack |
-| **Photos** | `photos` | Immich photo & video management |
-| **Password vault** | `vault` | Vaultwarden (Bitwarden-compatible) |
-| **Smart home** | `smart-home` | Home Assistant + MQTT + Zigbee2MQTT |
-| **AI / LLM** | `ai-workloads` | Ollama + Open WebUI (local inference) |
-| **Dev platform** | `dev-platform` | Gitea + Woodpecker CI |
-| **Calendar / CardDAV** | `calendar` | Radicale + Bloben web UI |
-| **Mail** | `mail` | Stalwart all-in-one (IMAP/JMAP/SMTP + CalDAV) |
-| **File sharing** | `file-sharing` | Self-hosted file sharing and sync |
-| **Remote desktop** | `remote-desktop` | Apache Guacamole (browser-based) |
-| **Game server** | `gameserver` | Self-hosted game server |
-| **Advanced auth** | `authelia` | Advanced auth server (replaces TinyAuth) |
-| **Mesh VPN** | `vpn-overlay` | Mesh VPN overlay |
-| **External access** | `tunnel` | Bypass CGNAT/DS-Lite to expose local services |
-| **High availability** | `ha` | Load balancing, VIP failover, database HA |
-
-```yaml stack-spec.yaml
-stackkit: base-kit
-
-addons:
-  - monitoring       # full observability stack
-  - backup           # encrypted 3-2-1 backups
-  - media            # Jellyfin + *arr
-```
-
-## How defaults are chosen
-
-The resolver picks each tool from three inputs, in order of precedence:
-
-<Steps>
-  <Step title="Explicit override">
-    Anything you set in `stack-spec.yaml` wins.
-  </Step>
-  <Step title="Context (local / cloud / pi)">
-    Cloud contexts favor public-DNS + Let's Encrypt defaults; `pi` / low-resource contexts drop heavier services (e.g. Glances instead of Netdata, no Prometheus).
-  </Step>
-  <Step title="Compute tier (low / standard / high)">
-    Higher tiers enable more by default — e.g. Portainer, Prometheus, and Grafana are added on the high tier.
-  </Step>
-</Steps>
-
-## Related
-
-<CardGroup cols={2}>
-  <Card title="Choosing a kit" icon="signs-post" href="https://docs.kombify.io/guides/stackkits/choosing-a-kit">
-    Pick the right architecture pattern first.
-  </Card>
-  <Card title="Spec format" icon="file-code" href="https://docs.kombify.io/stackkits/reference/spec-format">
-    Full `stack-spec.yaml` reference.
-  </Card>
-</CardGroup>
+Future concept kit pages do not imply current deployable service matrices.

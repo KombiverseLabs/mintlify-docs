@@ -1,295 +1,62 @@
 ---
-title: kombify StackKits
-description: Architecture-pattern-based infrastructure blueprints powered by CUE schemas
+title: "StackKits overview"
+description: "Current public StackKits product tree and release-aligned boundaries."
 icon: boxes-stacked
 ---
 
+StackKits is the Wave 1 OSS release surface for kombify infrastructure composition.
 
-StackKits are validated, reusable infrastructure blueprints that define **architecture patterns** for your homelab. Each StackKit describes how services relate to each other — not how many servers you need.
+## Current public product tree
 
-## What is a StackKit?
+The current public customer kits are:
 
-A StackKit combines three concepts to produce your infrastructure:
+1. **Basement Kit** (`basement-kit`) for local-first environments.
+2. **Cloud Kit** (`cloud-kit`) for cloud/VPS environments.
 
-```mermaid
-graph TB
-    subgraph Concepts["Three Concepts"]
-        SK["StackKit<br/>Architecture Pattern<br/>(base-kit, modern-homelab, ha-kit)"]
-        CTX["Node-Context<br/>Runtime Environment<br/>(local, cloud, pi)"]
-        AO["Add-Ons<br/>Composable Extensions<br/>(monitoring, backup, ...)"]
-    end
+Both are derived from the shared `base/` library and follow the same operating-mode contract:
 
-    subgraph Resolution["CUE Resolution"]
-        CUE["Smart Defaults<br/>StackKit × Context"]
-        Merge["Add-On Merging"]
-        Valid["Validation"]
-    end
-
-    subgraph Output["Generated Output"]
-        TF["deploy/<br/>OpenTofu inputs"]
-        Compose["platform handoff<br/>PaaS app state"]
-        Bootstrap[".stackkit/<br/>setup evidence"]
-    end
-
-    Concepts --> Resolution --> Output
-
-    style Concepts fill:#1e293b,stroke:#38bdf8,color:#f8fafc
-    style Resolution fill:#1e293b,stroke:#fbbf24,color:#f8fafc
-    style Output fill:#1e293b,stroke:#4ade80,color:#f8fafc
-```
-
-A StackKit is a **smart configuration system** that:
-1. **Validates** your choices against proven architecture patterns
-2. **Detects** your runtime environment and applies context-aware defaults
-3. **Merges** composable Add-Ons for additional capabilities
-4. **Generates** release-packaged infrastructure artifacts and rollout evidence
-
-## The problem StackKits solve
-
-<Tabs>
-  <Tab title="The challenge">
-    You want to set up a homelab. You've heard of:
-    - Traefik (or Caddy? or nginx?)
-    - TinyAuth + PocketID (or Authentik? or Keycloak?)
-    - Coolify (or Komodo? or another PaaS?)
-    - Immich (or Photoprism?)
-
-    **Questions that keep you stuck:**
-    - Which tools work well together?
-    - How do I configure them correctly?
-    - What are the best practices?
-    - How do I avoid security issues?
-  </Tab>
-  <Tab title="The solution">
-    Pick a StackKit pattern, let context handle the rest:
-    
-    ```yaml stack-spec.yaml
-    version: "2.0"
-    stackkit: base-kit
-    domain: homelab.example.com
-
-    addons:
-      - monitoring
-      - backup
-    ```
-    
-    **StackKits provide:**
-    - Curated service combinations
-    - Context-aware defaults (local vs cloud vs Raspberry Pi)
-    - Composable Add-Ons instead of monolithic configs
-    - Validation before deployment
-  </Tab>
-</Tabs>
-
-## Available StackKits
-
-StackKits are **architecture patterns**, not node-count definitions. The public beta scope is Base Kit; Modern Homelab and High Availability remain preview until their own evidence matrices graduate.
-
-<CardGroup cols={3}>
-  <Card title="Base Kit" icon="house" href="https://docs.kombify.io/stackkits/kits/base-kit">
-    **Single-environment pattern**
-
-    All services in one deployment target. Simple, predictable.
-
-    - Coolify default
-    - Any node count
-    - Context-aware defaults
-  </Card>
-
-  <Card title="Modern Homelab Kit" icon="cloud" href="https://docs.kombify.io/stackkits/kits/modern-homelab">
-    **Hybrid infrastructure pattern**
-
-    Bridges local and cloud environments with VPN overlay.
-
-    - Multi-environment
-    - Preview
-    - Coolify PaaS
-    - Public + private services
-  </Card>
-
-  <Card title="High Availability Kit" icon="shield-halved" href="https://docs.kombify.io/stackkits/kits/ha-kit">
-    **High-availability pattern**
-
-    Redundancy, failover, and quorum-based consensus.
-
-    - Preview
-    - Docker Swarm cluster
-    - Keepalived VIP
-    - 3+ nodes recommended
-  </Card>
-</CardGroup>
-
-## The three concepts
-
-### 1. StackKit = Architecture pattern
-
-A StackKit defines **how services relate to each other**, not how many servers you have.
-
-| StackKit | Pattern | Example |
-|----------|---------|---------|
-| **base-kit** | Single-environment | 1 Pi running all services, or 3 servers sharing the same stack |
-| **modern-homelab** | Hybrid preview | Home server + cloud VPS connected via VPN |
-| **ha-kit** | HA preview | 3-node Docker Swarm with failover |
-
-<Tip>
-  A `base-kit` StackKit can run on multiple nodes in the same environment. Preview kits define architecture patterns, not public beta support commitments.
-</Tip>
-
-### 2. Node-Context = auto-detected environment
-
-Each node is automatically classified based on hardware and provider metadata:
-
-| Context | Detection | Affects |
-|---------|-----------|---------|
-| **local** | Physical hardware, no cloud metadata | Self-signed TLS, local DNS, `*.home.localhost` |
-| **cloud** | Cloud provider metadata detected | Let's Encrypt, Coolify PaaS, public DNS |
-| **pi** | ARM + low memory or RPi detection | Reduced services, ARM images, tmpfs |
+- **Local only**
+- **Connect to Cloud**
+- **Managed later**
 
 <Note>
-  At Level 0 (standalone CLI), you specify context manually. At Level 2+ (with kombify TechStack agent), context is auto-detected from hardware reports.
+  Legacy `base-kit` exists as a compatibility identifier in current releases. New docs and new initialization flows use `basement-kit`.
 </Note>
 
-### 3. Add-Ons = composable extensions
+## Release truth
 
-Add-Ons replace the old monolithic variant system. They are stackable, declare their compatibility, and layer onto any kit. The catalog currently ships 18 add-ons:
+- Public repo: [github.com/kombifyio/stackKits](https://github.com/kombifyio/stackKits)
+- Latest public stable at verification time: `v0.5.2` (verified 2026-07-10)
+- Cloud Kit graduation evidence remains anchored in the `v0.5.1` release cycle
 
-| Category | Add-Ons |
-|----------|---------|
-| Observability & data | `monitoring`, `backup`, `backup-repo-server` |
-| Apps & media | `media`, `photos`, `vault`, `file-sharing`, `calendar`, `mail`, `gameserver` |
-| Compute & dev | `ai-workloads`, `dev-platform` |
-| Identity & access | `authelia`, `remote-desktop` |
-| Networking | `vpn-overlay`, `tunnel` |
-| Reliability | `ha` |
-| Home | `smart-home` |
+## Future concepts (not current deployable kits)
 
-```yaml stack-spec.yaml
-addons:
-  - monitoring       # VictoriaMetrics + Grafana + Loki + Alloy
-  - backup           # Kopia encrypted backups (3-2-1)
-  - media            # Jellyfin + *arr stack
+- **Modern Homelab Kit**: retained as future concept documentation only
+- **High Availability Kit**: retained as future concept documentation only
+
+These pages describe target architecture and do not represent current installable/public-release kits.
+
+## Install lanes in current release
+
+```bash
+curl -sSL https://base.stackkit.cc | sh
+curl -sSL https://cloud.stackkit.cc | sh
+curl -sSL https://install.stackkit.cc | sh
 ```
-
-See the full per-add-on detail and the platform-service alternatives in [tool alternatives](https://docs.kombify.io/stackkits/reference/tool-alternatives). For the monitoring contract, see [/stackkits/reference/monitoring](https://docs.kombify.io/stackkits/reference/monitoring).
-
-## Progressive capability model
-
-StackKits operate at different capability levels depending on how you access them:
-
-| Level | Name | Access Method | Capabilities |
-|-------|------|---------------|-------------|
-| **0** | Standalone CLI | `stackkit` CLI directly | CUE validation, IaC generation, direct provisioning |
-| **1** | Control Plane | kombify TechStack Web UI/API | Unifier pipeline, wizard UI, StackKit resolver |
-| **2** | Worker Agent | kombify TechStack + gRPC Agent | Context auto-detection, placement engine |
-| **3** | Runtime Intelligence | Day-2 operations | Drift detection, auto-remediation, cert renewal |
-| **4** | AI-Assisted (SaaS) | kombify Cloud | Natural language config, predictive scaling |
-
-<Warning>
-  Level 4 capabilities are available exclusively through kombify Cloud (SaaS) and require cloud connectivity.
-</Warning>
-
-## How StackKits work
-
-### Context-driven defaults matrix
-
-The combination of StackKit × Context produces curated default configurations:
-
-| | local | cloud | pi |
-|---|---|---|---|
-| **base-kit** | Coolify, local `.home.localhost` links | Coolify or Komodo, Let's Encrypt | Lean profile, reduced services |
-| **modern-homelab** | Preview | Preview | Preview |
-| **ha-kit** | Preview | Preview | Preview |
-
-### Validation flow
-
-When you run `stackkit validate` or use kombify TechStack:
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant CLI as stackkit CLI
-    participant CUE as CUE Engine
-    participant Kit as StackKit Schema
-    participant Ctx as Context Module
-    participant AO as Add-Ons
-    
-    User->>CLI: stackkit validate
-    CLI->>Kit: Load architecture pattern
-    CLI->>Ctx: Load context defaults
-    CLI->>AO: Load active add-ons
-    Kit->>CUE: Merge all schemas
-    Ctx->>CUE: Apply context defaults
-    AO->>CUE: Merge add-on services
-    CUE->>CUE: Validate & unify
-    
-    alt Valid
-        CUE-->>CLI: Resolved config
-        CLI-->>User: Ready to deploy!
-    else Invalid
-        CUE-->>CLI: Constraint errors
-        CLI-->>User: Error details + suggestions
-    end
-```
-
-## StackKit comparison
-
-| Feature | base-kit | modern-homelab | ha-kit |
-|---------|------|--------|-----|
-| **Pattern** | Single-environment public beta | Hybrid infrastructure preview | HA cluster preview |
-| **Container runtime** | Docker Compose | Docker + Coolify | Docker Swarm |
-| **Typical nodes** | 1 (supports N) | 2+ (multi-environment) | 3+ (odd for quorum) |
-| **Complexity** | Low | Medium | High |
-| **VPN overlay** | Optional (Add-On) | Built-in | Optional |
-| **Failover** | No | No | Yes |
-| **Best for** | First homelab, single VPS | Hybrid setups, public services | Production workloads |
-
-## Choosing a StackKit
-
-<AccordionGroup>
-  <Accordion title="I'm new to homelabs" icon="seedling">
-    **Use: base-kit**
-    
-    Start simple with a single-environment setup:
-    - Easy to understand
-    - Minimal resource requirements
-    - Great for learning
-    - Add capabilities later with Add-Ons
-  </Accordion>
-  
-  <Accordion title="I want local + cloud" icon="cloud">
-    **Use: modern-homelab**
-    
-    For hybrid setups connecting different environments:
-    - VPN overlay connects all nodes
-    - Public services via cloud nodes
-    - Private services stay local
-    - Coolify manages deployments
-  </Accordion>
-  
-  <Accordion title="I need high availability" icon="shield">
-    **Use: ha-kit**
-    
-    When downtime is unacceptable:
-    - Automatic failover
-    - Database clustering
-    - Load balancing with Keepalived
-    - Requires 3+ nodes (odd number for quorum)
-  </Accordion>
-</AccordionGroup>
 
 ## Next steps
 
 <CardGroup cols={2}>
-  <Card title="Base Kit" icon="house" href="https://docs.kombify.io/stackkits/kits/base-kit">
-    Detailed documentation for the single-environment StackKit
+  <Card title="Quickstart" icon="rocket" href="/stackkits/quickstart">
+    Start with release-backed commands.
   </Card>
-  <Card title="CUE language basics" icon="code" href="https://docs.kombify.io/stackkits/explanations/cue-architecture">
-    Learn the CUE language used in StackKits
+  <Card title="Basement Kit" icon="house" href="/stackkits/kits/basement-kit">
+    Local-first kit details.
   </Card>
-  <Card title="Customization guide" icon="sliders" href="https://docs.kombify.io/stackkits/explanations/cue-architecture">
-    How to customize StackKits for your needs
+  <Card title="Cloud Kit" icon="cloud" href="/stackkits/kits/cloud-kit">
+    Cloud-profile kit details.
   </Card>
-  <Card title="Quick start" icon="rocket" href="https://docs.kombify.io/stackkits/quickstart">
-    Deploy your first StackKit
+  <Card title="Choosing a kit" icon="list" href="/guides/stackkits/choosing-a-kit">
+    Decision guidance with current and future boundaries.
   </Card>
 </CardGroup>

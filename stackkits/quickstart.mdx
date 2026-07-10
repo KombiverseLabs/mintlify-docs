@@ -1,103 +1,50 @@
 ---
 title: "StackKits quickstart"
-description: "Deploy your first StackKit with the one-line installer or the CLI"
+description: "Release-backed quickstart commands for Basement Kit and Cloud Kit."
 sidebarTitle: "Quickstart"
 icon: rocket
 ---
 
-The fastest StackKits path is the Install Engine: one short command on the host that should become your homelab. If you want more control, install the CLI only and run the steps yourself.
+Use only the currently release-backed install and CLI commands.
 
-## Fastest path
-
-Run the Base Kit one-liner on a Linux or macOS host with root/sudo access. Without a version pin, this installs the current stable latest release (`v0.4.4`):
+## Fast install commands
 
 ```bash
 curl -sSL https://base.stackkit.cc | sh
+curl -sSL https://cloud.stackkit.cc | sh
 ```
 
-This installs the `stackkit` CLI, installs the Base Kit definitions, prepares Docker and OpenTofu, initializes the stack, generates deployment artifacts, applies the stack, and prints the service URLs.
-
-## Public beta path
-
-Use the pinned beta path when you are testing the current BaseKit beta prerelease (`v0.4.5-beta.1`):
+## CLI-only flow
 
 ```bash
-export STACKKIT_RELEASE_VERSION=v0.4.5-beta.1
-curl -sSL https://base.stackkit.cc | sh
+curl -sSL https://install.stackkit.cc | sh
+mkdir my-stack && cd my-stack
+stackkit init basement-kit
+stackkit prepare
+stackkit generate
+stackkit plan
+stackkit apply
+stackkit status
 ```
 
-Prerelease pins are explicit by design. Unpinned installers stay on stable latest until the beta evidence and public mirror CI are clean enough for stable promotion.
+<Note>
+  `base-kit` is still accepted as a compatibility alias in current releases, but `basement-kit` is the canonical identifier for new stacks.
+</Note>
 
-## Per-kit one-liners
+## Release note
 
-Use a kit-specific one-liner when you already know the StackKit standard:
-
-```bash
-curl -sSL https://base.stackkit.cc | sh      # Base Kit stable latest
-curl -sSL https://modern.stackkit.cc | sh    # Modern Homelab preview
-curl -sSL https://ha.stackkit.cc | sh        # High Availability preview
-```
-
-| StackKit | Use case | Complexity |
-|----------|----------|------------|
-| `base-kit` | Single-environment homelab | Public beta |
-| `modern-homelab` | Hybrid local + cloud setup | Preview |
-| `ha-kit` | High availability and failover | Preview |
-
-## CLI-only path
-
-Use the CLI-only installer when you want to make the technical choices yourself:
-
-<Steps>
-  <Step title="Install the CLI">
-    ```bash
-    curl -sSL install.stackkit.cc | sh
-    ```
-  </Step>
-
-  <Step title="Initialize a StackKit">
-    ```bash
-    mkdir my-homelab
-    cd my-homelab
-    stackkit init base-kit
-    ```
-  </Step>
-
-  <Step title="Prepare and generate">
-    ```bash
-    stackkit prepare
-    stackkit generate
-    ```
-  </Step>
-
-  <Step title="Preview and apply">
-    ```bash
-    stackkit plan
-    stackkit apply
-    ```
-  </Step>
-
-  <Step title="Check status">
-    ```bash
-    stackkit status
-    ```
-  </Step>
-</Steps>
-
-## What you get
-
-The Base Kit default provisions a homelab foundation with StackKits standards, add-ons, baselines, auth/routing defaults, generated infrastructure artifacts, and a service URL summary.
+Public stable latest is `v0.5.2` (verified 2026-07-10). This page intentionally avoids unproven installer hosts and obsolete beta pins.
 
 ## Next steps
 
 <CardGroup cols={2}>
-  <Card title="CLI or TechStack" icon="route" href="https://docs.kombify.io/guides/stackkits/deploy-with-cli-or-techstack">
-    Compare the Install Engine, CLI tool, and kombify-TechStack UI.
+  <Card title="Basement Kit" icon="house" href="/stackkits/kits/basement-kit">
+    Local-first kit details.
   </Card>
-  <Card title="Base Kit details" icon="house" href="https://docs.kombify.io/stackkits/kits/base-kit">
-    Learn what Base Kit deploys and how its defaults work.
+  <Card title="Cloud Kit" icon="cloud" href="/stackkits/kits/cloud-kit">
+    Cloud-profile details.
   </Card>
-  <Card title="Node Hub" icon="grid-2" href="https://docs.kombify.io/guides/stackkits/node-hub">
-    Use the default dashboard at `base.<domain>` after rollout.
+  <Card title="Choosing a kit" icon="list" href="/guides/stackkits/choosing-a-kit">
+    Current kits vs future concepts.
   </Card>
 </CardGroup>
