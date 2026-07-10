@@ -30,6 +30,10 @@ organization members and be reviewed on the same live Mintlify site.
 Publication is a small, reviewable navigation/frontmatter change from
 `audience: organization-members` to `public: true`.
 
+The audience access mode is configured in `audience-policy.json` (`accessMode`).
+Current mode is `organization-members`; if frontmatter does not match the active
+provider mode, the gate fails with a provider-mode mismatch message.
+
 Mintlify partial authentication keeps public `llms.txt`, MCP, and search
 results limited to public pages. Access control is not permission to store
 secrets, private customer data, or internal operational detail in this
@@ -65,3 +69,4 @@ task (`mise run links:advisory`), not a blocking gate.
 - `ROADMAP.md` - public docs roadmap.
 - `AGENTS.md` / `CLAUDE.md` - AI-agent instructions.
 - `docs.json` - Mintlify navigation and site configuration.
+- `audience-policy.json` - audience access-mode policy SSOT for the static gate.

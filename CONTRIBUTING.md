@@ -31,10 +31,11 @@ mise run local:e2e
 
 Public pages must have explicit `public: true` frontmatter and public
 navigation ancestry. Future review pages use `audience: organization-members`
-and must remain outside public navigation until publication. The `groups`
-frontmatter contract is not supported in this repository. This access control
-does not make secrets or internal operational details appropriate for this
-repository.
+and must remain outside public navigation until publication while
+`audience-policy.json` sets `accessMode` to `organization-members`. In this
+mode, MDX `groups` frontmatter is treated as a provider-mode mismatch. This
+access control does not make secrets or internal operational details
+appropriate for this repository.
 
 ## Writing guidelines
 

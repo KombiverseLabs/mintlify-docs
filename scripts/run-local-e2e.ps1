@@ -31,6 +31,20 @@ if (-not (Test-Path -LiteralPath $docsJsonPath -PathType Leaf)) {
 }
 
 $docs = Get-Content -LiteralPath $docsJsonPath -Raw | ConvertFrom-Json
+$audiencePolicyPath = Join-Path $repoRoot "audience-policy.json"
+if (-not (Test-Path -LiteralPath $audiencePolicyPath -PathType Leaf)) {
+    throw "audience-policy.json is missing"
+}
+$audiencePolicy = Get-Content -LiteralPath $audiencePolicyPath -Raw | ConvertFrom-Json
+$accessMode = if ($audiencePolicy.PSObject.Properties.Name -contains "accessMode") { [string]$audiencePolicy.accessMode } else { "" }
+if ([string]::IsNullOrWhiteSpace($accessMode)) {
+    throw "audience-policy.json must define accessMode"
+}
+$supportedAccessModes = @("organization-members", "enterprise-groups")
+if ($supportedAccessModes -notcontains $accessMode) {
+    throw "Unsupported access mode '$accessMode' in audience-policy.json. Supported values: $($supportedAccessModes -join ', ')"
+}
+$organizationMembersAudienceValue = "organization-members"
 
 function Get-FreeTcpPort {
     $listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, 0)
@@ -152,6 +166,7 @@ function Get-Frontmatter {
             Public = $false
             Audience = $null
             HasGroupsDeclaration = $false
+            Groups = @()
         }
     }
 
@@ -161,12 +176,30 @@ function Get-Frontmatter {
             Public = $false
             Audience = $null
             HasGroupsDeclaration = $false
+            Groups = @()
         }
     }
 
     $body = $match.Groups["body"].Value
     $public = [regex]::IsMatch($body, "(?m)^public:\s*true\s*$")
     $hasGroupsDeclaration = [regex]::IsMatch($body, "(?m)^groups:\s*")
+    $groups = [System.Collections.Generic.List[string]]::new()
+    $groupMatch = [regex]::Match($body, "(?ms)^groups:\s*(?<value>.*?)(?=^\S|\z)")
+    if ($groupMatch.Success) {
+        foreach ($line in ($groupMatch.Groups["value"].Value -split "\r?\n")) {
+            if ($line -match "^\s*-\s*(?<name>[A-Za-z0-9_-]+)\s*$") {
+                $groups.Add($matches["name"]) | Out-Null
+            }
+        }
+        if ($groupMatch.Groups["value"].Value.Trim() -match "^\[(?<inline>[^\]]+)\]$") {
+            foreach ($name in ($matches["inline"] -split ",")) {
+                $trimmed = $name.Trim().Trim("'`"")
+                if ($trimmed -ne "") {
+                    $groups.Add($trimmed) | Out-Null
+                }
+            }
+        }
+    }
     $audience = $null
     $audienceMatch = [regex]::Match($body, "(?m)^audience:\s*(?<value>.+?)\s*$")
     if ($audienceMatch.Success) {
@@ -177,6 +210,7 @@ function Get-Frontmatter {
         Public = $public
         Audience = $audience
         HasGroupsDeclaration = $hasGroupsDeclaration
+        Groups = @($groups | Sort-Object -Unique)
     }
 }
 
@@ -255,6 +289,7 @@ foreach ($record in $audienceRecords) {
 }
 
 $audienceErrors = [System.Collections.Generic.List[string]]::new()
+$restrictedPagesByPolicy = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
 foreach ($page in $activePages) {
     if (-not $recordsByPage.ContainsKey($page)) {
         $audienceErrors.Add("page '$page' has no navigation audience ancestry") | Out-Null
@@ -263,18 +298,34 @@ foreach ($page in $activePages) {
     $pagePath = Join-Path $repoRoot (($page -replace "/", "\") + ".mdx")
     $frontmatter = Get-Frontmatter -Content (Get-Content -LiteralPath $pagePath -Raw)
     $pageIsPublic = $frontmatter.Public
+    $pageGroups = @($frontmatter.Groups)
+    $pageHasGroups = $pageGroups.Count -gt 0
     $pageAudience = if ([string]::IsNullOrWhiteSpace([string]$frontmatter.Audience)) { $null } else { [string]$frontmatter.Audience }
-    $pageIsRestricted = $pageAudience -eq "organization-members"
-    if ($frontmatter.HasGroupsDeclaration) {
-        $audienceErrors.Add("page '$page' declares unsupported 'groups' frontmatter (Mintlify Enterprise groups contract is not available here); use audience: organization-members") | Out-Null
+    $pageIsRestricted = $false
+    if ($accessMode -eq "organization-members") {
+        $pageIsRestricted = $pageAudience -eq $organizationMembersAudienceValue
+        if ($frontmatter.HasGroupsDeclaration) {
+            $audienceErrors.Add("Provider mode mismatch for page '$page': accessMode 'organization-members' does not support MDX groups. Use audience: $organizationMembersAudienceValue or switch audience-policy.json accessMode with provider evidence.") | Out-Null
+        }
+        if ($null -ne $pageAudience -and $pageAudience -ne $organizationMembersAudienceValue) {
+            $audienceErrors.Add("Provider mode mismatch for page '$page': accessMode 'organization-members' expects audience '$organizationMembersAudienceValue', got '$pageAudience'") | Out-Null
+        }
+    } elseif ($accessMode -eq "enterprise-groups") {
+        $pageIsRestricted = $pageHasGroups
+        if ($null -ne $pageAudience) {
+            $audienceErrors.Add("Provider mode mismatch for page '$page': accessMode 'enterprise-groups' expects MDX groups and does not accept audience frontmatter") | Out-Null
+        }
+        if ($frontmatter.HasGroupsDeclaration -and -not $pageHasGroups) {
+            $audienceErrors.Add("Provider mode mismatch for page '$page': accessMode 'enterprise-groups' requires at least one group entry when groups frontmatter is declared") | Out-Null
+        }
     }
-    if ($null -ne $pageAudience -and -not $pageIsRestricted) {
-        $audienceErrors.Add("page '$page' has unsupported audience value '$pageAudience'; expected 'organization-members'") | Out-Null
+    if ($pageIsRestricted) {
+        $null = $restrictedPagesByPolicy.Add($page)
     }
     foreach ($record in $recordsByPage[$page]) {
         $hasPublic = $pageIsPublic -or $record.PublicAncestry
         if ($pageIsRestricted -and $hasPublic) {
-            $audienceErrors.Add("page '$page' is both public and restricted (organization-members)") | Out-Null
+            $audienceErrors.Add("page '$page' is both public and restricted under accessMode '$accessMode'") | Out-Null
         }
         if (-not $pageIsRestricted -and -not $hasPublic) {
             $audienceErrors.Add("page '$page' has ambiguous audience classification") | Out-Null
@@ -286,7 +337,11 @@ foreach ($page in $activePages) {
             $audienceErrors.Add("public page '$page' appears under the internal review path") | Out-Null
         }
         if ($page.StartsWith("review/", [System.StringComparison]::OrdinalIgnoreCase) -and -not $pageIsRestricted) {
-            $audienceErrors.Add("review page '$page' must declare audience: organization-members") | Out-Null
+            if ($accessMode -eq "organization-members") {
+                $audienceErrors.Add("review page '$page' must declare audience: $organizationMembersAudienceValue while accessMode is 'organization-members'") | Out-Null
+            } else {
+                $audienceErrors.Add("review page '$page' must declare non-empty MDX groups while accessMode is 'enterprise-groups'") | Out-Null
+            }
         }
     }
 }
@@ -298,8 +353,9 @@ if ($audienceErrors.Count -gt 0) {
     throw "Audience boundary validation failed"
 }
 Write-Host "audience_boundary: ok"
-Write-Host "public_pages: $(@($activePages | Where-Object { -not $_.StartsWith("review/") }).Count)"
-Write-Host "restricted_pages: $(@($activePages | Where-Object { $_.StartsWith("review/") }).Count)"
+Write-Host "audience_access_mode: $accessMode"
+Write-Host "public_pages: $($activePages.Count - $restrictedPagesByPolicy.Count)"
+Write-Host "restricted_pages: $($restrictedPagesByPolicy.Count)"
 
 $missingPages = [System.Collections.Generic.List[string]]::new()
 foreach ($page in $activePages) {

@@ -11,6 +11,7 @@ Current implementation state only. Future scope belongs in `ROADMAP.md`.
 ## Features
 
 - Mintlify documentation site configured by `docs.json`.
+- Audience access-mode policy configured by `audience-policy.json`.
 - Public landing page at `index.mdx`.
 - StackKits overview, quickstart, kit, service, explanation, and reference sections.
 - Site branding, favicon, logo, search prompt, navbar, contextual actions, and footer configured in `docs.json`.
