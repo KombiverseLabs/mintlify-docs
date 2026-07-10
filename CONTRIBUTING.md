@@ -15,14 +15,25 @@ Thank you for your interest in contributing to our documentation! This guide wil
 ### Option 2: Local development
 
 1. Fork and clone this repository
-2. Install the Mintlify CLI: `npm i -g mint`
+2. Install Node through `mise` and use the pinned CLI via `mise run dev`
 3. Create a branch for your changes
 4. Make changes
-5. Navigate to the docs directory and run `mint dev`
+5. Navigate to the docs directory and run `mise run dev`
 6. Preview your changes at `http://localhost:3000`
 7. Commit your changes and submit a pull request
 
-For more details on local development, see our [development guide](development.mdx).
+Run both audience views before opening a pull request:
+
+```powershell
+mise run check
+mise run local:e2e
+```
+
+Public pages must have explicit `public: true` frontmatter and public
+navigation ancestry. Future pages use a non-empty `groups` restriction and
+must remain outside public navigation until publication. This access control
+does not make secrets or internal operational details appropriate for this
+repository.
 
 ## Writing guidelines
 

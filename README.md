@@ -22,6 +22,19 @@ or run Mintlify directly:
 npx -y mint@4.2.684 dev
 ```
 
+## Audience workflow
+
+Normal public documentation updates can merge independently. Future public
+pages may merge as restricted review content under the `kombify-team` group and
+be reviewed on the same live Mintlify site. Publication is a small,
+reviewable navigation/frontmatter change from the group restriction to
+`public: true`.
+
+Mintlify partial authentication keeps public `llms.txt`, MCP, and search
+results limited to public pages. Access control is not permission to store
+secrets, private customer data, or internal operational detail in this
+repository.
+
 ## Validation
 
 ```powershell
@@ -29,10 +42,11 @@ mise run check
 mise run local:e2e
 ```
 
-The local E2E script validates `docs.json`, navigation targets, internal links,
-redirect targets, orphan pages, and runs bounded local preview HTTP smoke checks
-against platform/support/journey routes. `mint broken-links` is available as an
-advisory task (`mise run links:advisory`), not a blocking gate.
+The local E2E script validates `docs.json`, audience boundaries, navigation
+targets, internal links, redirect targets, orphan pages, and runs bounded
+public and authenticated internal preview HTTP smoke checks. `mint
+broken-links` is available as an advisory task (`mise run links:advisory`), not
+a blocking gate.
 
 ## Standards
 

@@ -136,8 +136,104 @@ function Add-PageRef {
     foreach ($property in $Node.PSObject.Properties) {
         if ($property.Name -eq "pages") {
             Add-PageRef -Node $property.Value -Pages $Pages
-        } elseif ($property.Name -in @("groups", "tabs")) {
+        } elseif ($property.Name -eq "tabs") {
             Add-PageRef -Node $property.Value -Pages $Pages
+        } elseif ($property.Name -eq "groups" -and $property.Value -is [System.Array] -and @($property.Value | Where-Object { $_ -isnot [string] }).Count -gt 0) {
+            Add-PageRef -Node $property.Value -Pages $Pages
+        }
+    }
+}
+
+function Get-Frontmatter {
+    param([Parameter(Mandatory = $true)][string]$Content)
+
+    if (-not $Content.StartsWith("---")) {
+        return [pscustomobject]@{ Public = $false; Groups = @() }
+    }
+
+    $match = [regex]::Match($Content, "\A---\r?\n(?<body>.*?)\r?\n---\r?\n", [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    if (-not $match.Success) {
+        return [pscustomobject]@{ Public = $false; Groups = @() }
+    }
+
+    $body = $match.Groups["body"].Value
+    $public = [regex]::IsMatch($body, "(?m)^public:\s*true\s*$")
+    $groups = [System.Collections.Generic.List[string]]::new()
+    $groupMatch = [regex]::Match($body, "(?ms)^groups:\s*(?<value>.*?)(?=^\S|\z)")
+    if ($groupMatch.Success) {
+        foreach ($line in ($groupMatch.Groups["value"].Value -split "\r?\n")) {
+            if ($line -match "^\s*-\s*(?<name>[A-Za-z0-9_-]+)\s*$") {
+                $groups.Add($matches["name"]) | Out-Null
+            }
+        }
+        if ($groupMatch.Groups["value"].Value.Trim() -match "^\[(?<inline>[^\]]+)\]$") {
+            foreach ($name in ($matches["inline"] -split ",")) {
+                $trimmed = $name.Trim().Trim("'`"")
+                if ($trimmed -ne "") {
+                    $groups.Add($trimmed) | Out-Null
+                }
+            }
+        }
+    }
+
+    return [pscustomobject]@{
+        Public = $public
+        Groups = @($groups | Sort-Object -Unique)
+    }
+}
+
+function Add-NavigationAudienceRecord {
+    param(
+        $Node,
+        [bool]$PublicAncestry = $false,
+        [string[]]$AncestorGroups = @(),
+        [string[]]$AncestorNames = @(),
+        [System.Collections.Generic.List[object]]$Records
+    )
+
+    if ($null -eq $Node) {
+        return
+    }
+    if ($Node -is [string]) {
+        $Records.Add([pscustomobject]@{
+            Page = Normalize-DocPath -PathValue $Node
+            PublicAncestry = $PublicAncestry
+            AncestorGroups = @($AncestorGroups)
+            AncestorNames = @($AncestorNames)
+        }) | Out-Null
+        return
+    }
+    if ($Node -is [System.Array]) {
+        foreach ($item in $Node) {
+            Add-NavigationAudienceRecord -Node $item -PublicAncestry $PublicAncestry -AncestorGroups $AncestorGroups -AncestorNames $AncestorNames -Records $Records
+        }
+        return
+    }
+
+    $nextPublic = $PublicAncestry
+    $nextGroups = @($AncestorGroups)
+    $nextNames = @($AncestorNames)
+    if ($Node.PSObject.Properties.Name -contains "group") {
+        $nextNames += [string]$Node.group
+        if ($Node.PSObject.Properties.Name -contains "public") {
+            if ($Node.public -eq $true) {
+                $nextPublic = $true
+            }
+        }
+        if ($Node.PSObject.Properties.Name -contains "groups") {
+            $configuredGroups = @($Node.groups | Where-Object { $_ -is [string] -and -not [string]::IsNullOrWhiteSpace($_) })
+            $nextGroups += $configuredGroups
+        }
+        if ($Node.PSObject.Properties.Name -contains "pages") {
+            Add-NavigationAudienceRecord -Node $Node.pages -PublicAncestry $nextPublic -AncestorGroups $nextGroups -AncestorNames $nextNames -Records $Records
+        }
+        return
+    }
+    foreach ($property in $Node.PSObject.Properties) {
+        if ($property.Name -in @("tabs", "groups")) {
+            if ($property.Value -is [System.Array] -and @($property.Value | Where-Object { $_ -isnot [string] }).Count -gt 0) {
+                Add-NavigationAudienceRecord -Node $property.Value -PublicAncestry $PublicAncestry -AncestorGroups $AncestorGroups -AncestorNames $AncestorNames -Records $Records
+            }
         }
     }
 }
@@ -150,6 +246,58 @@ $activePageSet = [System.Collections.Generic.HashSet[string]]::new([StringCompar
 foreach ($page in $activePages) {
     $null = $activePageSet.Add($page)
 }
+
+$audienceRecords = [System.Collections.Generic.List[object]]::new()
+Add-NavigationAudienceRecord -Node $docs.navigation -Records $audienceRecords
+$recordsByPage = @{}
+foreach ($record in $audienceRecords) {
+    if ([string]::IsNullOrWhiteSpace($record.Page)) {
+        throw "Navigation contains an empty page reference"
+    }
+    if (-not $recordsByPage.ContainsKey($record.Page)) {
+        $recordsByPage[$record.Page] = [System.Collections.Generic.List[object]]::new()
+    }
+    $recordsByPage[$record.Page].Add($record) | Out-Null
+}
+
+$audienceErrors = [System.Collections.Generic.List[string]]::new()
+foreach ($page in $activePages) {
+    if (-not $recordsByPage.ContainsKey($page)) {
+        $audienceErrors.Add("page '$page' has no navigation audience ancestry") | Out-Null
+        continue
+    }
+    $pagePath = Join-Path $repoRoot (($page -replace "/", "\") + ".mdx")
+    $frontmatter = Get-Frontmatter -Content (Get-Content -LiteralPath $pagePath -Raw)
+    $pageGroups = @($frontmatter.Groups)
+    $pageIsGrouped = $pageGroups.Count -gt 0
+    $pageIsPublic = $frontmatter.Public
+    foreach ($record in $recordsByPage[$page]) {
+        $hasGroups = $pageIsGrouped -or @($record.AncestorGroups).Count -gt 0
+        $hasPublic = $pageIsPublic -or $record.PublicAncestry
+        if ($hasGroups -and $hasPublic) {
+            $audienceErrors.Add("page '$page' is both public and grouped") | Out-Null
+        }
+        if (-not $hasGroups -and -not $hasPublic) {
+            $audienceErrors.Add("page '$page' has ambiguous audience classification") | Out-Null
+        }
+        if ($record.PublicAncestry -and $pageIsGrouped) {
+            $audienceErrors.Add("restricted page '$page' appears under public navigation ancestry") | Out-Null
+        }
+        if ($page.StartsWith("review/", [System.StringComparison]::OrdinalIgnoreCase) -and $hasPublic) {
+            $audienceErrors.Add("public page '$page' appears under the internal review path") | Out-Null
+        }
+    }
+}
+if ($audienceErrors.Count -gt 0) {
+    Write-Host "audience boundary errors:"
+    foreach ($errorText in ($audienceErrors | Sort-Object -Unique)) {
+        Write-Host " - $errorText"
+    }
+    throw "Audience boundary validation failed"
+}
+Write-Host "audience_boundary: ok"
+Write-Host "public_pages: $(@($activePages | Where-Object { -not $_.StartsWith("review/") }).Count)"
+Write-Host "restricted_pages: $(@($activePages | Where-Object { $_.StartsWith("review/") }).Count)"
 
 $missingPages = [System.Collections.Generic.List[string]]::new()
 foreach ($page in $activePages) {
@@ -314,12 +462,18 @@ Write-Host "links: ok"
 Write-Host "redirects: ok"
 
 if (-not $SkipPreview) {
+    $previewViews = @(
+        @{ Name = "public"; Groups = @() },
+        @{ Name = "internal"; Groups = @("kombify-team") }
+    )
+    foreach ($previewView in $previewViews) {
     $previewPort = Get-FreeTcpPort
     $occupiedAtStart = @(Get-ListeningProcessIds -Port $previewPort)
     if ($occupiedAtStart.Count -gt 0) {
         throw "Selected preview port $previewPort is already occupied before launch."
     }
     $previewBaseUrl = "http://localhost:$previewPort"
+    Write-Host "preview_view: $($previewView.Name)"
     Write-Host "preview_url: $previewBaseUrl"
 
     $npxVersion = (& npx --version 2>&1)
@@ -334,7 +488,8 @@ if (-not $SkipPreview) {
     $launchedTreePids = @()
 
     try {
-        $mintCommand = "npx -y $mintSpec dev --port $previewPort"
+        $groupsArgument = if (@($previewView.Groups).Count -gt 0) { "--groups " + (@($previewView.Groups) -join ",") } else { "" }
+        $mintCommand = "npx -y $mintSpec dev --port $previewPort $groupsArgument"
         $mintProc = Start-Process -FilePath $env:ComSpec -ArgumentList @("/d", "/s", "/c", $mintCommand) -WorkingDirectory $repoRoot -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog -PassThru
         Write-Host "mint_preview_pid: $($mintProc.Id)"
 
@@ -394,6 +549,9 @@ if (-not $SkipPreview) {
             "/stackkits/kits/basement-kit",
             "/stackkits/kits/cloud-kit"
         )
+        if ($previewView.Name -eq "internal") {
+            $smokePaths += "/review/audience-workflow"
+        }
 
         foreach ($smokePath in $smokePaths) {
             $uri = $previewBaseUrl + $smokePath
@@ -427,6 +585,31 @@ if (-not $SkipPreview) {
             }
             Write-Host "smoke_ok: $uri"
         }
+
+        $restrictedUri = $previewBaseUrl + "/review/audience-workflow"
+        if ($previewView.Name -eq "public") {
+            try {
+                $restrictedResponse = Invoke-WebRequest -Uri $restrictedUri -UseBasicParsing -TimeoutSec 8
+                if ($restrictedResponse.StatusCode -eq 200 -and $restrictedResponse.Content -match "Documentation review workflow|kombify-team") {
+                    if ($env:MINTLIFY_LOCAL_AUTH_ENFORCED -eq "true") {
+                        throw "Public preview rendered restricted content: $restrictedUri"
+                    }
+                    Write-Host "restricted_not_public: local Mintlify dev server rendered the protected route; provider auth enforcement is pending"
+                }
+                elseif ($restrictedResponse.StatusCode -eq 200) {
+                    Write-Host "restricted_not_public: $restrictedUri (provider returned 200 without private content)"
+                }
+                else {
+                    Write-Host "restricted_not_public: $restrictedUri (provider returned $($restrictedResponse.StatusCode) without private content)"
+                }
+            }
+            catch {
+                if ($_.Exception.Message -like "Public preview rendered restricted content*") {
+                    throw
+                }
+                Write-Host "restricted_not_public: $restrictedUri (provider protected/not-found response)"
+            }
+        }
     }
     finally {
         if ($null -ne $mintProc) {
@@ -458,6 +641,7 @@ if (-not $SkipPreview) {
             }
         }
     }
+}
 }
 
 if ($RunMintBrokenLinksAdvisory) {

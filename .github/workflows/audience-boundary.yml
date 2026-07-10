@@ -1,0 +1,34 @@
+name: Audience Boundary Gate
+
+on:
+  pull_request:
+    paths:
+      - "docs.json"
+      - "**/*.mdx"
+      - "scripts/run-local-e2e.ps1"
+      - "mise.toml"
+      - ".github/workflows/audience-boundary.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "docs.json"
+      - "**/*.mdx"
+      - "scripts/run-local-e2e.ps1"
+      - "mise.toml"
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    name: Validate public and restricted navigation
+    runs-on: windows-2025
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Run static docs and audience gate
+        shell: pwsh
+        run: ./scripts/run-local-e2e.ps1 -SkipPreview

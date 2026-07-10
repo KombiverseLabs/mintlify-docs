@@ -38,11 +38,15 @@ track: v0-public-authority
 - [ ] Preserve useful technical docs and historical release content with clear
   historical labeling.
 - [ ] Keep internal standards and implementation detail out of public pages.
+- [x] Keep future public pages reviewable in a restricted Mintlify audience
+  without creating a second content source.
 
 **Exit gate**
 
 - [ ] `mise run check` passes.
 - [ ] `mise run local:e2e` passes.
+- [ ] Mintlify partial authentication is enabled for the site and PR previews,
+  with authorized `kombify-team` reviewers.
 - [ ] No open P0/P1 Beads bugs with `blocks:v0.3.0`.
 
 ## V1 Definition
@@ -59,4 +63,6 @@ track: v0-public-authority
 ## Not Planned
 
 - **Internal docs merge:** Core internal docs and operator runbooks stay outside public Mintlify docs.
+- **Second documentation SSOT:** Future public content remains in this
+  repository and is restricted with Mintlify access controls during review.
 - **Generated roadmap sync:** Execution details stay out of `ROADMAP.md`.
