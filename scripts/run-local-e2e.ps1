@@ -10,7 +10,7 @@ $ErrorActionPreference = "Stop"
 
 $mintVersion = "4.2.684"
 $mintSpec = "mint@$mintVersion"
-$previewBaseUrl = "http://localhost:3000"
+$previewBaseUrl = $null
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 Set-Location -LiteralPath $repoRoot
@@ -31,6 +31,89 @@ if (-not (Test-Path -LiteralPath $docsJsonPath -PathType Leaf)) {
 }
 
 $docs = Get-Content -LiteralPath $docsJsonPath -Raw | ConvertFrom-Json
+
+function Get-FreeTcpPort {
+    $listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, 0)
+    try {
+        $listener.Start()
+        return ([System.Net.IPEndPoint]$listener.LocalEndpoint).Port
+    }
+    finally {
+        $listener.Stop()
+    }
+}
+
+function Get-ListeningProcessIds {
+    param([Parameter(Mandatory = $true)][int]$Port)
+    try {
+        $connections = Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction Stop
+        return @($connections | Select-Object -ExpandProperty OwningProcess -Unique)
+    }
+    catch {
+        return @()
+    }
+}
+
+function Get-ProcessDescendantIds {
+    param([Parameter(Mandatory = $true)][int]$RootPid)
+
+    $descendants = New-Object System.Collections.Generic.List[int]
+    $visited = New-Object System.Collections.Generic.HashSet[int]
+    $queue = New-Object System.Collections.Generic.Queue[int]
+    $queue.Enqueue($RootPid)
+    $null = $visited.Add($RootPid)
+
+    while ($queue.Count -gt 0) {
+        $currentPid = $queue.Dequeue()
+        $children = @(Get-CimInstance -ClassName Win32_Process -Filter "ParentProcessId = $currentPid" -ErrorAction SilentlyContinue)
+        foreach ($child in $children) {
+            $childPid = [int]$child.ProcessId
+            if ($visited.Add($childPid)) {
+                $descendants.Add($childPid) | Out-Null
+                $queue.Enqueue($childPid)
+            }
+        }
+    }
+
+    return @($descendants)
+}
+
+function Stop-ProcessTreeByPid {
+    param([Parameter(Mandatory = $true)][int]$RootPid)
+
+    $descendants = @(Get-ProcessDescendantIds -RootPid $RootPid)
+    foreach ($procId in ($descendants | Sort-Object -Descending)) {
+        $childProc = Get-Process -Id $procId -ErrorAction SilentlyContinue
+        if ($null -ne $childProc) {
+            Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    $rootProc = Get-Process -Id $RootPid -ErrorAction SilentlyContinue
+    if ($null -ne $rootProc) {
+        Stop-Process -Id $RootPid -Force -ErrorAction SilentlyContinue
+    }
+
+    return @($descendants + $RootPid)
+}
+
+function Test-ProcessLooksLikeMintPreview {
+    param(
+        [Parameter(Mandatory = $true)][int]$ProcessId,
+        [Parameter(Mandatory = $true)][int]$Port
+    )
+
+    $procInfo = Get-CimInstance -ClassName Win32_Process -Filter "ProcessId = $ProcessId" -ErrorAction SilentlyContinue
+    if ($null -eq $procInfo) { return $false }
+
+    $procName = ([string]$procInfo.Name).ToLowerInvariant()
+    $cmdLine = [string]$procInfo.CommandLine
+    if ($procName -notmatch '^node(\.exe)?$') { return $false }
+    if ($cmdLine -notmatch 'mint') { return $false }
+
+    $listeners = @(Get-ListeningProcessIds -Port $Port)
+    return ($listeners -contains $ProcessId)
+}
 
 function Normalize-DocPath {
     param([Parameter(Mandatory = $true)][string]$PathValue)
@@ -249,6 +332,23 @@ Write-Host "links: ok"
 Write-Host "redirects: ok"
 
 if (-not $SkipPreview) {
+    if (Test-ProcessLooksLikeMintPreview -ProcessId 49144 -Port 3000) {
+        Write-Host "cleanup_orphan_pid: 49144"
+        Stop-Process -Id 49144 -Force
+        Start-Sleep -Milliseconds 300
+        if (Test-ProcessLooksLikeMintPreview -ProcessId 49144 -Port 3000) {
+            throw "Failed to stop known orphan Mint preview PID 49144"
+        }
+    }
+
+    $previewPort = Get-FreeTcpPort
+    $occupiedAtStart = @(Get-ListeningProcessIds -Port $previewPort)
+    if ($occupiedAtStart.Count -gt 0) {
+        throw "Selected preview port $previewPort is already occupied before launch."
+    }
+    $previewBaseUrl = "http://localhost:$previewPort"
+    Write-Host "preview_url: $previewBaseUrl"
+
     $npxVersion = (& npx --version 2>&1)
     if ($LASTEXITCODE -ne 0) {
         throw "npx is not available for Mint preview validation: $npxVersion"
@@ -258,10 +358,11 @@ if (-not $SkipPreview) {
     $stdoutLog = Join-Path $env:TEMP ("mint-preview-stdout-" + [guid]::NewGuid().ToString("N") + ".log")
     $stderrLog = Join-Path $env:TEMP ("mint-preview-stderr-" + [guid]::NewGuid().ToString("N") + ".log")
     $mintProc = $null
+    $launchedTreePids = @()
 
     try {
-        $mintCommand = "npx -y $mintSpec dev"
-        $mintProc = Start-Process -FilePath "powershell.exe" -ArgumentList @("-NoProfile", "-Command", $mintCommand) -WorkingDirectory $repoRoot -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog -PassThru
+        $mintCommand = "npx -y $mintSpec dev --port $previewPort"
+        $mintProc = Start-Process -FilePath $env:ComSpec -ArgumentList @("/d", "/s", "/c", $mintCommand) -WorkingDirectory $repoRoot -RedirectStandardOutput $stdoutLog -RedirectStandardError $stderrLog -PassThru
         Write-Host "mint_preview_pid: $($mintProc.Id)"
 
         $ready = $false
@@ -277,8 +378,19 @@ if (-not $SkipPreview) {
             try {
                 $response = Invoke-WebRequest -Uri $previewBaseUrl -UseBasicParsing -TimeoutSec 3
                 if ($response.StatusCode -eq 200) {
-                    $ready = $true
-                    break
+                    $listenerPids = @(Get-ListeningProcessIds -Port $previewPort)
+                    $treePids = @((Get-ProcessDescendantIds -RootPid $mintProc.Id) + $mintProc.Id)
+                    $listenerInTree = $false
+                    foreach ($listenerPid in $listenerPids) {
+                        if ($treePids -contains $listenerPid) {
+                            $listenerInTree = $true
+                            break
+                        }
+                    }
+                    if ($listenerInTree) {
+                        $ready = $true
+                        break
+                    }
                 }
             } catch {
                 Start-Sleep -Milliseconds 500
@@ -346,11 +458,25 @@ if (-not $SkipPreview) {
     finally {
         if ($null -ne $mintProc) {
             try {
-                if (-not $mintProc.HasExited) {
-                    Stop-Process -Id $mintProc.Id -Force
+                $launchedTreePids = @(Stop-ProcessTreeByPid -RootPid $mintProc.Id | Sort-Object -Unique)
+                Start-Sleep -Milliseconds 300
+                $remainingPids = @()
+                foreach ($procId in $launchedTreePids) {
+                    if ($null -ne (Get-Process -Id $procId -ErrorAction SilentlyContinue)) {
+                        $remainingPids += $procId
+                    }
+                }
+                if ($remainingPids.Count -gt 0) {
+                    throw "Mint preview cleanup failed; remaining process IDs: $($remainingPids -join ', ')"
+                }
+
+                $remainingListeners = @(Get-ListeningProcessIds -Port $previewPort)
+                $listenerOverlap = @($remainingListeners | Where-Object { $launchedTreePids -contains $_ })
+                if ($listenerOverlap.Count -gt 0) {
+                    throw "Mint preview cleanup failed; launched listener still active on port ${previewPort}: $($listenerOverlap -join ', ')"
                 }
             } catch {
-                Write-Host "warning: could not stop mint preview process $($mintProc.Id): $($_.Exception.Message)"
+                throw "Mint preview cleanup error: $($_.Exception.Message)"
             }
         }
         foreach ($log in @($stdoutLog, $stderrLog)) {
