@@ -4,10 +4,11 @@ Tier-1 public documentation for kombify, built with Mintlify and configured by `
 
 ## Current Surface
 
-- Guides entrypoint: `index.mdx`
-- StackKits documentation under `stackkits/`
-- StackKits service guides under `guides/stackkits/services/`
-- Global navigation and branding in `docs.json`
+- Platform authority pages under `platform/`
+- AI, support, and journey authority pages under `ai/`, `support/`, and `journeys/`
+- StackKits documentation under `stackkits/` and `guides/stackkits/`
+- Identity reference pages under `identity/`
+- Global navigation and redirects in `docs.json`
 
 ## Local Development
 
