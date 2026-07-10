@@ -19,7 +19,7 @@ mise run dev
 or run Mintlify directly:
 
 ```powershell
-npx mint@latest dev
+npx -y mint@4.2.684 dev
 ```
 
 ## Validation
@@ -29,7 +29,10 @@ mise run check
 mise run local:e2e
 ```
 
-The local E2E script validates `docs.json`, verifies navigation page targets, and runs Mintlify broken-link checks when the Mintlify CLI path is available through `npx`.
+The local E2E script validates `docs.json`, navigation targets, internal links,
+redirect targets, orphan pages, and runs bounded local preview HTTP smoke checks
+against platform/support/journey routes. `mint broken-links` is available as an
+advisory task (`mise run links:advisory`), not a blocking gate.
 
 ## Standards
 
