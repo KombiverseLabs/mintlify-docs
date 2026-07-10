@@ -16,8 +16,8 @@ Current implementation state only. Future scope belongs in `ROADMAP.md`.
 - Site branding, favicon, logo, search prompt, navbar, contextual actions, and footer configured in `docs.json`.
 - Public and `kombify-team` restricted navigation metadata with a fail-closed audience-boundary gate.
 - Local validation covers anonymous public and authenticated internal preview views.
-- PR validation includes a remote anonymous preview leak gate tied to the exact
-  pull-request deployment.
+- PR and `main` validation includes a remote anonymous leak gate tied to the
+  exact deployed commit.
 
 ## Deployment
 
@@ -38,8 +38,8 @@ Current implementation state only. Future scope belongs in `ROADMAP.md`.
 - Only StackKits content is currently represented in `docs.json`.
 - No package-managed validation toolchain is committed yet; the local gate uses PowerShell plus `npx`.
 - Mintlify dashboard partial-auth activation remains a provider-only blocker;
-  local group simulation is complete, while the remote preview gate correctly
-  stays red until provider enforcement is active.
+  local group simulation is complete, while the remote PR/deployed-main gate
+  correctly stays red until provider enforcement is active.
 
 ## Tests
 

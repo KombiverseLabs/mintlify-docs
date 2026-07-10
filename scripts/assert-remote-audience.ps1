@@ -50,8 +50,7 @@ if ($restrictedResponse.StatusCode -eq 200) {
             throw "Remote preview leak: $restrictedUri rendered restricted marker '$marker'"
         }
     }
-    Write-Host "remote_restricted_ok: $restrictedUri returned 200 without restricted markers"
-    exit 0
+    throw "Remote preview leak: $restrictedUri returned 200 and is unexpectedly publicly renderable"
 }
 
 throw "Unexpected restricted route status for $restrictedUri`: $($restrictedResponse.StatusCode)"

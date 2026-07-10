@@ -6,6 +6,7 @@ on:
       - "docs.json"
       - "**/*.mdx"
       - "scripts/run-local-e2e.ps1"
+      - "scripts/assert-remote-audience.ps1"
       - "mise.toml"
       - ".github/workflows/audience-boundary.yml"
   push:
@@ -15,6 +16,7 @@ on:
       - "docs.json"
       - "**/*.mdx"
       - "scripts/run-local-e2e.ps1"
+      - "scripts/assert-remote-audience.ps1"
       - "mise.toml"
 
 permissions:
@@ -35,7 +37,7 @@ jobs:
 
   remote-preview:
     name: Block anonymous preview leaks
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'ubuntu-24.04' }}
     timeout-minutes: 5
     permissions:
@@ -53,31 +55,30 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
         run: |
           $deadline = (Get-Date).AddMinutes(4)
           $environmentUrl = $null
           do {
             $deployments = gh api "repos/$env:REPOSITORY/deployments?sha=$env:HEAD_SHA&per_page=20" | ConvertFrom-Json
-            foreach ($deployment in @($deployments)) {
-              if (-not [string]::IsNullOrWhiteSpace([string]$deployment.environment_url)) {
-                $environmentUrl = [string]$deployment.environment_url
-                break
-              }
-              $statuses = gh api "repos/$env:REPOSITORY/deployments/$($deployment.id)/statuses?per_page=20" | ConvertFrom-Json
+            $deployment = @($deployments | Sort-Object { [datetime]$_.created_at } -Descending | Select-Object -First 1)
+            if ($deployment.Count -gt 0) {
+              $statuses = gh api "repos/$env:REPOSITORY/deployments/$($deployment[0].id)/statuses?per_page=20" | ConvertFrom-Json
               foreach ($status in @($statuses)) {
-                if (-not [string]::IsNullOrWhiteSpace([string]$status.environment_url)) {
+                if ($status.state -eq "success" -and -not [string]::IsNullOrWhiteSpace([string]$status.environment_url)) {
                   $environmentUrl = [string]$status.environment_url
                   break
                 }
+                if ($status.state -in @("failure", "error", "inactive")) {
+                  throw "Mintlify deployment $($deployment[0].id) reached terminal provider state '$($status.state)' for exact head $env:HEAD_SHA"
+                }
               }
-              if ($null -ne $environmentUrl) { break }
             }
             if ($null -ne $environmentUrl) { break }
             Start-Sleep -Seconds 10
           } while ((Get-Date) -lt $deadline)
           if ([string]::IsNullOrWhiteSpace($environmentUrl)) {
-            throw "No Mintlify deployment environment_url found for exact PR head $env:HEAD_SHA within four minutes"
+            throw "No successful Mintlify deployment status with environment_url found for exact head $env:HEAD_SHA within four minutes"
           }
           "url=$environmentUrl" >> $env:GITHUB_OUTPUT
           Write-Host "preview_url: $environmentUrl"
