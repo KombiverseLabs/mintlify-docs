@@ -65,12 +65,13 @@ jobs:
             $deployment = @($deployments | Sort-Object { [datetime]$_.created_at } -Descending | Select-Object -First 1)
             if ($deployment.Count -gt 0) {
               $statuses = gh api "repos/$env:REPOSITORY/deployments/$($deployment[0].id)/statuses?per_page=20" | ConvertFrom-Json
-              foreach ($status in @($statuses)) {
+              $latestStatus = @($statuses | Sort-Object { [datetime]$_.created_at } -Descending | Select-Object -First 1)
+              if ($latestStatus.Count -gt 0) {
+                $status = $latestStatus[0]
                 if ($status.state -eq "success" -and -not [string]::IsNullOrWhiteSpace([string]$status.environment_url)) {
                   $environmentUrl = [string]$status.environment_url
-                  break
                 }
-                if ($status.state -in @("failure", "error", "inactive")) {
+                elseif ($status.state -in @("failure", "error", "inactive")) {
                   throw "Mintlify deployment $($deployment[0].id) reached terminal provider state '$($status.state)' for exact head $env:HEAD_SHA"
                 }
               }
