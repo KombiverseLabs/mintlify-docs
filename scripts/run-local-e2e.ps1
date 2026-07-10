@@ -308,7 +308,28 @@ if (-not $SkipPreview) {
 
         foreach ($smokePath in $smokePaths) {
             $uri = $previewBaseUrl + $smokePath
-            $res = Invoke-WebRequest -Uri $uri -UseBasicParsing -TimeoutSec 8
+            $attempts = 0
+            $maxAttempts = 3
+            $res = $null
+            $lastError = $null
+            while ($attempts -lt $maxAttempts) {
+                $attempts++
+                try {
+                    $res = Invoke-WebRequest -Uri $uri -UseBasicParsing -TimeoutSec 8
+                    $lastError = $null
+                    break
+                }
+                catch {
+                    $lastError = $_
+                    Start-Sleep -Milliseconds 700
+                }
+            }
+            if ($null -ne $lastError) {
+                throw "Preview smoke failed after $maxAttempts attempts: $uri :: $($lastError.Exception.Message)"
+            }
+            if ($null -eq $res) {
+                throw "Preview smoke failed: $uri returned no response"
+            }
             if ($res.StatusCode -ne 200) {
                 throw "Preview smoke failed: $uri returned status $($res.StatusCode)"
             }
