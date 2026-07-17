@@ -7,6 +7,31 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits release notes on GitHub](https://github.com/kombifyio/StackKits/releases).
 
+<Update label="2026-07-17" description="Week of July 13 – July 17">
+
+## Architecture v2 lands in beta
+
+One prerelease this week: [v0.6.0-beta.1](https://github.com/kombifyio/StackKits/releases/tag/v0.6.0-beta.1) publishes the StackKits Architecture v2 contract for early integration. The supported v1 Basement and Cloud rollout paths remain unchanged, and stable `latest` stays on [v0.5.2](https://github.com/kombifyio/StackKits/releases/tag/v0.5.2).
+
+### New
+
+- **Architecture v2 preview.** The new contract binds kit identity, inventory, modules, runtime networks, and owned artifacts into a single immutable resolved plan. It is fail-closed by design: generation and apply reject missing concrete renderers or runtime evidence instead of falling back to legacy behavior. Available for integration testing only — not yet on `latest`. See [Choosing a kit](/guides/stackkits/choosing-a-kit).
+- **Kit identity drives the plan.** The kit you pick now selects its capability plan directly, rather than a global context value deciding which kit is being built. Basement and Cloud share a common contract spine but keep separate deployment semantics: Basement owns home-site, LAN, private remote access, and optional public egress; Cloud owns cloud-site, private admin mesh, and public edge. Both support explicit multi-node plans without being redefined as a separate kit. See [Local vs cloud vs hybrid](/guides/stackkits/local-vs-cloud-vs-hybrid).
+- **Modern Homelab is now the federation product.** Modern Homelab is defined as the local-plus-cloud federation kit, requiring explicit site federation, isolated bridge and publication policies, placement and data authority, and fail-closed partition behavior. It stays in Preview until the bridge renderer and real multi-site evidence pass.
+
+### Improved
+
+- **High Availability stays an add-on.** `ha-kit` is rejected as a standalone product identity; HA continues to resolve as a kit- and mode-specific add-on overlay. Existing HA setups migrate through the compatibility seam. See [High availability readiness](/guides/stackkits/high-availability-readiness).
+- **v0.5 inputs still readable.** Existing v0.5 StackSpec inputs can be projected through the migration seam for one minor compatibility window. New plans persist under Architecture v2 and must be re-resolved when mandatory authority, instance, network, or artifact fields change.
+
+### Known limits
+
+- v0.6.0-beta.1 is a prerelease. It publishes version-tagged artifacts without advancing the stable `latest` release or OCI tag. The stable rollback baseline remains v0.5.2.
+- Architecture v2 generation and apply intentionally fail closed where a concrete typed renderer or runtime-evidence implementation is still missing. Modern Homelab runtime graduation is not claimed in this release.
+- Provider smokes, the Proxmox OS matrix, released-content SK-S1, and browser evidence are advisory documentation lanes for this prerelease; missing rows are published as `pending/unverified` rather than synthetic passes.
+
+</Update>
+
 <Update label="2026-07-10" description="Week of July 6 – July 10">
 
 ## Cloud Kit graduates to stable
