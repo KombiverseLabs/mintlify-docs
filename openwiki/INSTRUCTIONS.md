@@ -56,5 +56,5 @@ Ground claims in `codeintel_search`, `codeintel_repo_overview`,
 ## Freshness
 
 Each generated document records the full commit SHA it was generated against.
-Refresh through `mise run openwiki:update -- mintlify-docs` from the workspace root
+Refresh through `mise run openwiki:update mintlify-docs` from the workspace root
 when the repository changes outside `openwiki/`.
