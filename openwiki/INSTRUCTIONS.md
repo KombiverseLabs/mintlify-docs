@@ -1,8 +1,8 @@
 # OpenWiki charter: mintlify-docs
 
 Status: wiki not yet generated. See the workspace handoff at
-[`HANDOFF-OPENWIKI.md`](../../HANDOFF-OPENWIKI.md) (workspace root, 1 level above this
-repository; the link resolves in a local workspace checkout).
+`HANDOFF-OPENWIKI.md` in the workspace root (1 level above this repository;
+available in a local workspace checkout).
 
 Authority: `kombify-Core/standards/CODE-INTELLIGENCE-STANDARD.md` v3.3
 section 2a.
