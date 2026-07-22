@@ -53,6 +53,16 @@ jobs:
           cache: true
           cache-dependency-path: _stackkits/go.sum
 
+      - name: Configure private module access
+        if: steps.prereq.outputs.ready == 'true'
+        env:
+          REPO_SYNC_PAT: ${{ secrets.REPO_SYNC_PAT }}
+        run: |
+          set -euo pipefail
+          # kombify-StackKits imports the private kombify-go-common module.
+          git config --global url."https://x-access-token:${REPO_SYNC_PAT}@github.com/".insteadOf "https://github.com/"
+          echo "GOPRIVATE=github.com/KombiverseLabs/*" >> "$GITHUB_ENV"
+
       - name: Fetch Admin registry snapshot
         if: steps.prereq.outputs.ready == 'true'
         working-directory: _stackkits
