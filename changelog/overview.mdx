@@ -7,6 +7,48 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits release notes on GitHub](https://github.com/kombifyio/StackKits/releases).
 
+<Update label="2026-07-24" description="Week of July 20 – July 24">
+
+## StackKits v0.7 goes stable, plus SpeechKit Unified Voice
+
+Two big product tracks landed this week. StackKits shipped [v0.7.0](https://github.com/kombifyio/StackKits/releases/tag/v0.7.0) as the new stable `latest` on the native Architecture v2 line, then followed with sixteen patch releases through [v0.7.16](https://github.com/kombifyio/StackKits/releases/tag/v0.7.16) that graduate one runtime owner at a time. SpeechKit shipped its Unified Voice release in [v0.50.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.50.0), a Companion-hardware follow-up in [v0.51.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.51.0), and a Windows fix in [v0.51.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.51.1).
+
+### New
+
+- **Three stable StackKit families.** Basement Kit, Cloud Kit, and Modern Homelab are now the three public release families. Basement and Cloud graduate to the native Architecture v2 identity on stable; Modern Homelab is included in every public archive and installable via `install.sh modern-homelab`, but stays honestly labeled Preview. See [Choosing a kit](/guides/stackkits/choosing-a-kit) and [Local vs cloud vs hybrid](/guides/stackkits/local-vs-cloud-vs-hybrid).
+- **Cloud edge, host security, and offsite backup are apply-ready.** New provider-free runtimes bind and verify the Cloud public edge, Cloud host firewall + hardening baseline, and Cloud offsite backup (with fresh backup, restore, and readback evidence on every apply). See [Deploy with the CLI or TechStack](/guides/stackkits/deploy-with-cli-or-techstack).
+- **Home internal PKI is apply-ready.** Optional private TLS now has a single authenticated Home authority node, with compiler-derived leaf identities per service and public trust distribution to declared Home nodes. See [Traefik](/guides/stackkits/services/traefik).
+- **Modern Homelab federation is executable end to end.** Home ↔ Cloud federation now has bound runtime owners for the federation link, origin-mTLS bridge, Cloud-side publication, backend health, and outbound control agent — plus a five-way partition of Policy, Link, Control, Backup, and Observability authority. Modern Homelab remains Preview until the remaining owners graduate. See [High availability readiness](/guides/stackkits/high-availability-readiness).
+- **Live voice typing in SpeechKit.** Streaming dictation over a single warm WebSocket delivers draft words while you speak, with automatic fallback to classic transcription when a streaming provider isn't available.
+- **AssemblyAI joins Deepgram as a first-class provider.** Short dictation clips finish in one round trip on AssemblyAI Universal-3.5 Pro, and AssemblyAI is now available for live streaming partials. Requests can be steered with a situational prompt, explicit key terms, and preceding dialogue turns.
+- **Account-level voice preferences.** Pick your preferred speech providers once in the Workbench and every hosted request follows them automatically, with graceful fallback and honest reporting of which provider actually ran.
+- **Sign in with your identity provider.** A single SpeechKit deployment now accepts both service bearer tokens and IdP-issued JWTs (`bearer_or_oidc`), so mobile and web clients can sign in per user without a second deployment.
+- **Talk to a paired Kombify Box.** A paired Box can take one complete Touch-to-Talk voice turn end to end and speak back a local result, with each turn bound to the paired device and its Home Assistant claim.
+- **Auditable wake-word models.** The on-device "Kombify" and "Jarvis" wake words are now produced by a fully reproducible, pinned training pipeline.
+
+### Improved
+
+- **Native Architecture v2 everywhere.** CLI, API, MCP, catalog, compiler, generators, artifacts, and evidence all bind the same v2 identity from authoring through apply. New writes are v2-only; v1 stays read-only for migration. See [From intent to StackSpec](/guides/stackkits/from-intent-to-stack-spec).
+- **Governed RIL action surface.** A CUE-governed catalog of seven closed action primitives with explicit approval and grant requirements now sits behind a two-step `resolve` / `execute` API, with an atomic execution ledger for replay-safe operations. Provider credentials, raw SSH, arbitrary paths, and caller commands are refused before the governed owner runs.
+- **Tighter renderer boundaries.** Cloud public-edge, private-admin-mesh, and offsite-backup artifacts now carry only their exact compiler-owned routes, nodes, and authority — generic storage, DNS, credentials, and lease fields cannot cross the boundary.
+- **Native WebSocket clients work without dev overrides.** Mobile apps and CLIs presenting a session ticket subprotocol without an `Origin` header now proceed straight to ticket verification for SpeechKit's Voice Agent and streaming Dictation sockets. Browser origin allowlisting is unchanged.
+
+### Fixed
+
+- **Windows wake-word and startup crash.** SpeechKit [v0.51.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.51.1) bundles a compatible on-device speech runtime, so wake-word activation no longer aborts on startup and the app window no longer fails to open on affected machines. Update if you installed v0.50.0 or v0.51.0 on Windows.
+- **Streaming dictation session leaks.** Sessions that were created but never attached (for example, when a client falls back to batch transcription) are now reaped automatically once their ticket expires, so repeated fallbacks can no longer trigger a "per user limit exceeded" error.
+- **`ws_url` behind reverse proxies.** Streaming Dictation session responses now honor the configured public server URL when building `ws_url`, matching Voice Agent behavior behind proxies and Docker port mappings.
+- **Auto language detection on short clips.** Short dictation clips without an explicit language keep automatic language detection instead of being forced to English.
+- **`install.sh modern-homelab` works.** The installer now selects the dedicated `stackkits-modern-homelab` archive instead of rejecting the kit, and the default `all` install path stages Modern Homelab alongside Basement and Cloud.
+- **Persisted plan decoding.** Canonical plans now decode integer health ports, timeouts, and expected HTTP status lists correctly without weakening fractional-value rejection.
+
+### Known limits
+
+- Modern Homelab stays Preview until the remaining backup, observability, policy, and partition runtime owners graduate and live evidence is captured.
+- Candidate, device, provider, browser, and compatibility evidence remains `pending/unverified` for the v0.7.x line — the release publisher validates source, export, archive, checksum, and asset integrity, not live device compatibility.
+
+</Update>
+
 <Update label="2026-07-17" description="Week of July 13 – July 17">
 
 ## Architecture v2 lands in beta
