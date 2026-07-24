@@ -4,12 +4,13 @@ Generic AI-agent instructions for Codex, Copilot, Gemini, Claude, and other codi
 
 ## Normative Sources
 
-Use workspace standards in `../kombify-Core/standards/`:
+Use workspace-root standards and `../kombify-Core/standards/`:
 
-- `DOCS_STANDARDS.md` for Tier-1 public docs rules.
-- `REPO-FILE-SCHEMA.md` for root metadata.
-- `PROJECT-PLANNING-STANDARD.md` for Notion / Roadmap / Beads separation.
-- `PRODUCT-SEGMENTATION.md` for product naming and public/internal boundaries.
+- `../DOCUMENTATION-STANDARD.md` (workspace root, binding) for the documentation tier model and Tier-1 public docs rules.
+- `../kombify-Core/standards/REPO-FILE-SCHEMA.md` for root metadata.
+- `../LINEAR-PLANNING-STANDARD.md` (workspace root) for Linear / Roadmap / Beads separation.
+- `../PLATFORM-STRATEGY.md` (workspace root) for product naming and public/internal boundaries.
+- Repo gates: `.github/workflows/public-safety.yml` (public allowlist enforcement) and `.github/workflows/parity-gate.yml` (generated-MDX frontmatter).
 
 ## Repo Context
 

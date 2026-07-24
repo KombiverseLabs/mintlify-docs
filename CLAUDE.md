@@ -4,7 +4,7 @@ Claude-specific instructions. Keep aligned with `AGENTS.md`.
 
 ## Normative Sources
 
-Use workspace standards in `../kombify-Core/standards/`, especially `DOCS_STANDARDS.md`, `REPO-FILE-SCHEMA.md`, `PROJECT-PLANNING-STANDARD.md`, and `PRODUCT-SEGMENTATION.md`.
+Use the workspace-root `DOCUMENTATION-STANDARD.md` (binding), `LINEAR-PLANNING-STANDARD.md`, and `PLATFORM-STRATEGY.md`, plus `../kombify-Core/standards/REPO-FILE-SCHEMA.md`.
 
 ## Repo-Specific Rules
 
