@@ -1,11 +1,8 @@
 # OpenWiki charter: mintlify-docs
 
-Status: wiki not yet generated. See the workspace handoff at
-`HANDOFF-OPENWIKI.md` in the workspace root (1 level above this repository;
-available in a local workspace checkout).
+Status: generated against `fc905e821407cc6f74f0252d7724a9a4dcd7cf81` (init, 2026-07-24 UTC) by the local subscription automation. Scope, classification, and cadence are governed by the workspace HANDOFF-OPENWIKI.md and repo-manifest.json.
 
-Authority: `kombify-Core/standards/CODE-INTELLIGENCE-STANDARD.md` v3.3
-section 2a.
+Authority: `kombify-Core/standards/CODE-INTELLIGENCE-STANDARD.md` section 2a; the current version in the workspace checkout governs.
 
 ## Repository role
 
