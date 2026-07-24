@@ -46,9 +46,8 @@ The changelog also **supplies maturity context for** [Identity & Access map](ide
 | --- | --- | --- |
 | `.github/workflows/generated-stackkit-docs.yml` | Manual, daily, or repository-dispatch refresh of generated service guides; opens a PR. | Review generated provenance and the limited service-guide scope. |
 | `.github/workflows/parity-gate.yml` | Pull requests changing StackKits service guides. | Generated pages need expected provenance fields. |
-| `.github/workflows/openwiki-update.yml` | Manual or daily OpenWiki update; installs OpenWiki and opens an update PR. | Generated wiki content is intended for Git review; the workflow’s add-path includes broader files, but the repository charter restricts normal wiki generation to `openwiki/`. |
 
-The checkout also has uncommitted changes to `AGENTS.md`, `CLAUDE.md`, and an untracked OpenWiki workflow, plus two unexpected untracked paths reported by the local `git status`. These are not part of the generated wiki source of truth and should be accounted for separately before any broad commit or cleanup.
+OpenWiki generation itself is not a repository workflow: the `openwiki/` tree is refreshed by the workspace-root `mise run openwiki:update mintlify-docs` task under a local subscription, and the generated content is committed for Git review restricted to `openwiki/`.
 
 ## Practical maintenance checklist
 

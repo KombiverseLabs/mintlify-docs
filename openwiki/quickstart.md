@@ -55,7 +55,7 @@ The [site and publication model](site-publication.md) explains how `docs.json` t
 
 ## Update this wiki
 
-The charter directs maintainers to refresh from the workspace root with `mise run openwiki:update mintlify-docs` after repository changes outside `openwiki/`. The repository also contains a scheduled workflow at `.github/workflows/openwiki-update.yml` that opens an OpenWiki update pull request.
+The charter directs maintainers to refresh from the workspace root with `mise run openwiki:update mintlify-docs` after repository changes outside `openwiki/`. This refresh is a local, subscription-driven task, not a repository CI workflow.
 
 When updating, use the current checkout as source of truth; retain the full checkout SHA in every generated Markdown page; and keep generated output under `openwiki/` only.
 
