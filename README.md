@@ -113,7 +113,6 @@ request.
 | `mise run public-safety` | Assert the whole tree is public-safe. |
 | `mise run public-safety:test` | Focused fail-closed publication-boundary tests. |
 | `mise run local:e2e` | Full local gate, including the live preview. |
-| `mise run links:advisory` | Non-blocking provider link advisory. |
 
 `mise.toml` remains the authority for the task surface.
 
@@ -126,10 +125,9 @@ mise run local:e2e
 The gate starts the pinned Mintlify runtime and proves both public and forbidden
 routes over real HTTP. It must pass before publication.
 
-The upstream `mint broken-links` command currently parses root repository
-metadata such as `AGENTS.md` as MDX. It stays visible as
-`mise run links:advisory` and is not the release gate until that provider
-behaviour is fixed.
+`mint broken-links` runs blocking inside `mise run local:e2e`; the earlier
+provider issue (parsing root `AGENTS.md` as MDX) is solved via `.mintignore`
+(PR #22).
 
 ## Standards
 

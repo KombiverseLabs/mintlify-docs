@@ -1,0 +1,58 @@
+{
+  "$schema": "./schemas/public-safety-policy.schema.json",
+  "version": 1,
+  "publicationMode": "public-only",
+  "excludedDirectories": [
+    ".git",
+    ".mintlify",
+    "node_modules"
+  ],
+  "forbiddenPathPrefixes": [
+    "internal/",
+    "operations/",
+    "review/",
+    "runbooks/"
+  ],
+  "forbiddenFrontmatterKeys": [
+    "auth",
+    "authentication",
+    "groups",
+    "private",
+    "restricted"
+  ],
+  "forbiddenContentPatterns": [
+    {
+      "id": "operator-secret-name",
+      "pattern": "(?i)\\b(?:AUTH0_MCP_BEARER|DOPPLER_(?:CONFIG|PROJECT|TOKEN)|RENDER_API_KEY|REPO_SYNC_PAT)\\b"
+    },
+    {
+      "id": "internal-secret-path",
+      "pattern": "(?i)\\b(?:kombination|kombify-systems)/(?:dev|prd|prd_servers|stg)\\b"
+    },
+    {
+      "id": "provider-origin",
+      "pattern": "(?i)https?://[^\\s<>()\\\"']+\\.(?:onrender\\.com|pages\\.dev|run\\.app|workers\\.dev)(?:[/:?#]|$)"
+    },
+    {
+      "id": "live-credential-assignment",
+      "pattern": "(?im)\\b(?:access[_-]?token|api[_-]?key|client[_-]?secret|password)\\b\\s*[:=]\\s*(?![\\\"']?(?:<|\\$\\{|\\{\\{|example|redacted|replace|your[-_]|x{3,}))[\\\"']?[A-Za-z0-9_./+=-]{12,}"
+    }
+  ],
+  "localSmokePaths": [
+    "/",
+    "/stackkits/quickstart"
+  ],
+  "remoteForbiddenPaths": [
+    "/internal",
+    "/operations",
+    "/review/audience-workflow",
+    "/runbooks"
+  ],
+  "remoteForbiddenMarkers": [
+    "Documentation review workflow",
+    "organization-members",
+    "AUTH0_MCP_BEARER",
+    "DOPPLER_TOKEN",
+    "REPO_SYNC_PAT"
+  ]
+}

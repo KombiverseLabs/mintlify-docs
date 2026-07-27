@@ -1,5 +1,3 @@
-> **Customize this file**: Tailor this template to your project by noting specific contribution types you're looking for, adding a Code of Conduct, or adjusting the writing guidelines to match your style.
-
 # Contribute to the documentation
 
 Thank you for your interest in contributing to our documentation! This guide will help you get started.
@@ -15,14 +13,18 @@ Thank you for your interest in contributing to our documentation! This guide wil
 ### Option 2: Local development
 
 1. Fork and clone this repository
-2. Install the Mintlify CLI: `npm i -g mint`
+2. Install [mise](https://mise.jdx.dev/) and run `mise install`
 3. Create a branch for your changes
-4. Make changes
-5. Navigate to the docs directory and run `mint dev`
-6. Preview your changes at `http://localhost:3000`
+4. Make changes and register each new page in `docs.json`
+5. Run `mise run check`
+6. Run `mise run local:e2e` for the real HTTP preview gate
 7. Commit your changes and submit a pull request
 
-For more details on local development, see our [development guide](development.mdx).
+## Public-only rule
+
+Every file in this repository is treated as anonymously publishable. Do not add review-only or internal pages and rely on hidden navigation, `public: false`, group frontmatter, or provider authentication. Direct routes, search, `llms.txt`, MCP projections, and previews can expose the file.
+
+Keep unfinished or internal material in its owning product repository. Move it here only after it is sanitized, customer-facing, registered in `docs.json`, and ready for anonymous publication.
 
 ## Writing guidelines
 
@@ -32,3 +34,4 @@ For more details on local development, see our [development guide](development.m
 - **Lead with the goal**: Start instructions with what the user wants to accomplish
 - **Use consistent terminology**: Don't alternate between synonyms for the same concept
 - **Include examples**: Show, don't just tell
+- **Keep examples public-safe**: Never include operator secret names, private origins, internal runbooks, customer data, or live credentials
