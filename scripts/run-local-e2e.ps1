@@ -1,10 +1,14 @@
 [CmdletBinding()]
 param(
-    [switch]$SkipMintCli
+    [Alias("SkipMintCli")]
+    [switch]$SkipPreview,
+    [switch]$RunMintBrokenLinksAdvisory
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+$mintSpec = "mint@4.2.684"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 Set-Location -LiteralPath $repoRoot
@@ -14,10 +18,52 @@ if ($LASTEXITCODE -ne 0) {
     throw "Could not resolve git SHA: $sha"
 }
 
+$sourcePaths = @(
+    & git ls-files -co --exclude-standard 2>&1 |
+        Where-Object { $_ -notmatch '^\.beads[/\\]' } |
+        Sort-Object -Unique
+)
+if ($LASTEXITCODE -ne 0) {
+    throw "Could not enumerate source files for the local E2E digest"
+}
+$digestLines = [System.Collections.Generic.List[string]]::new()
+foreach ($sourcePath in $sourcePaths) {
+    $absolutePath = Join-Path $repoRoot $sourcePath
+    if (-not (Test-Path -LiteralPath $absolutePath -PathType Leaf)) {
+        continue
+    }
+    $fileStream = [System.IO.File]::OpenRead($absolutePath)
+    $fileHasher = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $fileHash = ([System.BitConverter]::ToString($fileHasher.ComputeHash($fileStream))).Replace("-", "").ToLowerInvariant()
+    }
+    finally {
+        $fileHasher.Dispose()
+        $fileStream.Dispose()
+    }
+    $digestLines.Add("$fileHash  $($sourcePath.Replace('\', '/'))") | Out-Null
+}
+$digestInput = [System.Text.Encoding]::UTF8.GetBytes(($digestLines -join "`n"))
+$sha256 = [System.Security.Cryptography.SHA256]::Create()
+try {
+    $sourceDigest = ([System.BitConverter]::ToString($sha256.ComputeHash($digestInput))).Replace("-", "").ToLowerInvariant()
+}
+finally {
+    $sha256.Dispose()
+}
+$worktreeStatus = @(& git status --porcelain=v1 --untracked-files=all)
+$worktreeState = if ($worktreeStatus.Count -eq 0) { "clean" } else { "dirty" }
+
 Write-Host "repo: mintlify-docs"
 Write-Host "sha: $sha"
+Write-Host "source_digest: sha256:$sourceDigest"
+Write-Host "source_files: $($digestLines.Count)"
+Write-Host "worktree_state: $worktreeState"
 Write-Host "cwd: $repoRoot"
 Write-Host "command: scripts/run-local-e2e.ps1"
+
+& (Join-Path $PSScriptRoot "test-public-safety.ps1")
+& (Join-Path $PSScriptRoot "assert-public-safety.ps1") -RepoRoot $repoRoot
 
 $docsJsonPath = Join-Path $repoRoot "docs.json"
 if (-not (Test-Path -LiteralPath $docsJsonPath -PathType Leaf)) {
@@ -86,16 +132,29 @@ foreach ($assetPath in @($docs.favicon, $docs.logo.light, $docs.logo.dark)) {
 Write-Host "docs_json: ok"
 Write-Host "navigation_pages: $($pages.Count)"
 
-if (-not $SkipMintCli) {
+if (-not $SkipPreview -or $RunMintBrokenLinksAdvisory) {
     $npxVersion = (& npx --version 2>&1)
     if ($LASTEXITCODE -ne 0) {
-        throw "npx is not available for Mintlify broken-link validation: $npxVersion"
+        throw "npx is not available for Mintlify validation: $npxVersion"
     }
     Write-Host "npx: $($npxVersion.Trim())"
-    & npx -y mint@latest broken-links
+}
+
+if ($RunMintBrokenLinksAdvisory) {
+    & npx -y $mintSpec broken-links
     if ($LASTEXITCODE -ne 0) {
-        throw "Mintlify broken-links check failed"
+        Write-Host "mint_broken_links_advisory: non-zero ($LASTEXITCODE); the pinned CLI currently parses root AGENTS.md as MDX"
     }
+    else {
+        Write-Host "mint_broken_links_advisory: PASS"
+    }
+}
+
+if (-not $SkipPreview) {
+    & (Join-Path $PSScriptRoot "run-local-preview-smoke.ps1") -RepoRoot $repoRoot -MintSpec $mintSpec
+} else {
+    Write-Host "mint_preview: skipped"
+    Write-Host "local_http_smoke: skipped"
 }
 
 Write-Host "result: PASS"

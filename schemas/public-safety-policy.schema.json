@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docs.kombify.io/schemas/public-safety-policy.schema.json",
+  "title": "Kombify public documentation safety policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "publicationMode",
+    "excludedDirectories",
+    "forbiddenPathPrefixes",
+    "forbiddenFrontmatterKeys",
+    "forbiddenContentPatterns",
+    "localSmokePaths",
+    "remoteForbiddenPaths",
+    "remoteForbiddenMarkers"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "const": 1 },
+    "publicationMode": { "const": "public-only" },
+    "excludedDirectories": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "forbiddenPathPrefixes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "/$" }
+    },
+    "forbiddenFrontmatterKeys": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" }
+    },
+    "forbiddenContentPatterns": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "pattern"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "pattern": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "localSmokePaths": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^/" }
+    },
+    "remoteForbiddenPaths": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^/" }
+    },
+    "remoteForbiddenMarkers": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}
