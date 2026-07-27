@@ -7,6 +7,11 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+# Mintlify deployment statuses set environment_url to a changed PAGE
+# (e.g. https://<preview>.mintlify.site/CONTRIBUTING), not the site origin.
+# Normalize to the origin so route joins below are deterministic.
+$BaseUrl = [uri]("{0}://{1}" -f $BaseUrl.Scheme, $BaseUrl.Authority)
+
 if ([string]::IsNullOrWhiteSpace($PolicyPath)) {
     $PolicyPath = Join-Path (Resolve-Path (Join-Path $PSScriptRoot "..")).Path "public-safety-policy.json"
 }
@@ -19,13 +24,20 @@ if ([string]$policy.publicationMode -ne "public-only") {
 }
 
 function Get-Response {
-    param([Parameter(Mandatory = $true)][uri]$Uri)
+    param(
+        [Parameter(Mandatory = $true)][uri]$Uri,
+        [switch]$FollowRedirects
+    )
 
+    # Public/projection routes may legitimately redirect (e.g. the site root
+    # 308s to a landing page); forbidden-route checks stay strict (no follow)
+    # so a redirect can never mask a leaked page.
+    $maxRedirect = if ($FollowRedirects) { 5 } else { 0 }
     try {
         return Invoke-WebRequest `
             -Uri $Uri `
             -UseBasicParsing `
-            -MaximumRedirection 0 `
+            -MaximumRedirection $maxRedirect `
             -TimeoutSec 15
     }
     catch {
@@ -60,7 +72,7 @@ function Assert-NoForbiddenProjection {
 
 $base = $BaseUrl.AbsoluteUri.TrimEnd("/")
 $publicUri = [uri]($base + "/")
-$publicResponse = Get-Response -Uri $publicUri
+$publicResponse = Get-Response -Uri $publicUri -FollowRedirects
 if ([int]$publicResponse.StatusCode -ne 200) {
     throw "Expected public route $publicUri to return 200; got $($publicResponse.StatusCode)"
 }
@@ -76,7 +88,7 @@ foreach ($path in @($policy.remoteForbiddenPaths)) {
 }
 
 $llmsUri = [uri]($base + "/llms.txt")
-$llmsResponse = Get-Response -Uri $llmsUri
+$llmsResponse = Get-Response -Uri $llmsUri -FollowRedirects
 if ([int]$llmsResponse.StatusCode -ne 200) {
     throw "Expected $llmsUri to return 200; got $($llmsResponse.StatusCode)"
 }
@@ -84,7 +96,7 @@ Assert-NoForbiddenProjection -ProjectionName "llms.txt" -Content ([string]$llmsR
 Write-Host "remote_llms_projection: safe"
 
 $sitemapUri = [uri]($base + "/sitemap.xml")
-$sitemapResponse = Get-Response -Uri $sitemapUri
+$sitemapResponse = Get-Response -Uri $sitemapUri -FollowRedirects
 if ([int]$sitemapResponse.StatusCode -eq 200) {
     Assert-NoForbiddenProjection -ProjectionName "sitemap.xml" -Content ([string]$sitemapResponse.Content)
     Write-Host "remote_sitemap_projection: safe"
