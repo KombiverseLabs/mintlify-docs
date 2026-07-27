@@ -39,7 +39,7 @@ Current implementation state only. Future scope belongs in `ROADMAP.md`.
 ## Known Issues
 
 - Product coverage is limited to StackKits, Identity & Access, and Changelog; other kombify products have no public pages yet.
-- Mintlify's `broken-links` command currently tries to parse root `AGENTS.md` as MDX; deterministic local-link validation is blocking, while `mise run links:advisory` records the provider issue.
+- `mint broken-links` is a blocking part of the local gate; the earlier AGENTS.md-as-MDX provider issue is handled by `.mintignore` (PR #22).
 - PR #15 remains blocked because its exact preview serves `/review/audience-workflow` anonymously. Restricted-future pages are incompatible with the current public-only documentation standard.
 
 ## Tests

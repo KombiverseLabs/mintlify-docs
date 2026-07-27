@@ -1,8 +1,7 @@
 [CmdletBinding()]
 param(
     [Alias("SkipMintCli")]
-    [switch]$SkipPreview,
-    [switch]$RunMintBrokenLinksAdvisory
+    [switch]$SkipPreview
 )
 
 Set-StrictMode -Version Latest
@@ -132,21 +131,15 @@ foreach ($assetPath in @($docs.favicon, $docs.logo.light, $docs.logo.dark)) {
 Write-Host "docs_json: ok"
 Write-Host "navigation_pages: $($pages.Count)"
 
-if (-not $SkipPreview -or $RunMintBrokenLinksAdvisory) {
+if (-not $SkipPreview) {
     $npxVersion = (& npx --version 2>&1)
     if ($LASTEXITCODE -ne 0) {
         throw "npx is not available for Mintlify validation: $npxVersion"
     }
     Write-Host "npx: $($npxVersion.Trim())"
-}
-
-if ($RunMintBrokenLinksAdvisory) {
     & npx -y $mintSpec broken-links
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "mint_broken_links_advisory: non-zero ($LASTEXITCODE); the pinned CLI currently parses root AGENTS.md as MDX"
-    }
-    else {
-        Write-Host "mint_broken_links_advisory: PASS"
+        throw "Mintlify broken-links check failed"
     }
 }
 
