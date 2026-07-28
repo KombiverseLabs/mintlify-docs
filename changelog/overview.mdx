@@ -7,6 +7,40 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits release notes on GitHub](https://github.com/kombifyio/StackKits/releases).
 
+<Update label="2026-07-28" description="Week of July 27 – July 28">
+
+## StackKits v0.8.0: account-free Basement, plus a SpeechKit Windows fix
+
+StackKits [v0.8.0](https://github.com/kombifyio/StackKits/releases/tag/v0.8.0) is the first stable release you can run end to end without a Kombify Cloud or TechStack account — a single-node Basement homelab driven entirely by the public `stackkit` CLI, backed by attested GitHub release indexes. It ships after the v0.7.12–v0.7.16 patch series closed out the Cloud and Modern Homelab runtime graduations, and a follow-up [v0.8.0-beta.6](https://github.com/kombifyio/StackKits/releases/tag/v0.8.0-beta.6) fixed a release-index URL casing regression before stable was cut. SpeechKit shipped a Windows reliability patch in [v0.51.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.51.2).
+
+### New
+
+- **Standalone OSS lifecycle for Basement.** `stackkit init --owner-source=local` establishes a local Owner identity and its PocketID, TinyAuth, and step-ca binding without a Kombify Cloud or TechStack account. Local CUE, the canonical ResolvedPlan, Owner custody, and lifecycle evidence are the authoritative Stack state — the default Basement workflow renders and operates the host and Docker baseline, local ingress, PocketID, TinyAuth, step-ca, Coolify, and Hub through `init`, `validate`, `generate`, `apply`, and `verify`. See [Choosing a kit](/guides/stackkits/choosing-a-kit) and [Deploy with the CLI or TechStack](/guides/stackkits/deploy-with-cli-or-techstack).
+- **Day-2 verbs on the local Owner.** Standard `stackkit upgrade`, `stackkit backup`, staged `stackkit backup restore activate`, explicit `stackkit upgrade --recover` and `stackkit backup restore recover --rollback`, and read-only `stackkit drift detect` all run against local Owner authority with signed lifecycle evidence. `stackkit drift reconcile --mode standard --owner-approve` creates a mandatory Kopia snapshot and executor-state checkpoint before every generate, Apply, and Verify.
+- **Attested release-index distribution.** Public GitHub release indexes are the distribution authority for install, offline verification, and explicit `stable`, `beta`, `edge`, or exact SemVer resolution. Every archive ships with an SPDX SBOM and GitHub-OIDC attestations, and stable publication is fail-closed against archive, index, SBOM, and attestation mismatch.
+- **Advanced Mode integration boundary.** Offline verification of `stackkit.advanced-capability/v1`, Owner-pinned trust bundles (`stackkit advanced trust import` / `trust inspect`), deterministic Terramate generation, and signed change-set creation (`stackkit advanced change-set create`) form the optional integration surface for a TechStack orchestration UI — without adding Cloud authority to the standalone lifecycle. Missing Advanced capability surfaces as a structured `advanced_capability_required` denial before any rendering or side effect.
+- **Modern Homelab outbound-control-agent graduation ([v0.7.16](https://github.com/kombifyio/StackKits/releases/tag/v0.7.16)).** The final Modern Homelab federation-control runtime binds the exact CUE action contract, performs bind / reconcile / verify, and records fresh, digest-bound evidence for every selected Home and Cloud node. Modern Homelab remains Preview until the remaining backup, observability, policy, and partition owners graduate.
+
+### Improved
+
+- **Cloud Kit runtimes finished graduating.** The v0.7.12–v0.7.15 patches close out Modern Homelab's `install.sh modern-homelab` selection ([v0.7.12](https://github.com/kombifyio/StackKits/releases/tag/v0.7.12)), plus Cloud host-security ([v0.7.13](https://github.com/kombifyio/StackKits/releases/tag/v0.7.13)), Cloud Public-Edge ([v0.7.14](https://github.com/kombifyio/StackKits/releases/tag/v0.7.14)), and Cloud offsite-backup ([v0.7.15](https://github.com/kombifyio/StackKits/releases/tag/v0.7.15)) runtimes — each provider-free, node-local, and `apply-ready` for its exact generated runtime and Health target.
+- **CLI and release surface are cleanly public.** The public `stackkit` CLI and release surface are structurally separated from private publisher, Admin API, database, internal-host, and service-secret paths. TechStack is now an optional consumer of pinned public StackKits artifacts, structured command results, and lifecycle events.
+
+### Fixed
+
+- **Release-index URL casing ([v0.8.0-beta.6](https://github.com/kombifyio/StackKits/releases/tag/v0.8.0-beta.6)).** Public release-index asset URLs now retain GitHub's repository casing, and standalone resolution treats GitHub owner and repository casing equivalently — so `install.sh` and offline verification no longer fail on case-normalized URLs.
+- **Kopia password handling.** Kopia repository passwords now enter the fixed local backup executor only through sensitive stdin and a child-process environment, removing the terminal-only prompt that previously blocked the exact published-archive restore proof.
+- **Windows dictation under CPU load.** SpeechKit [v0.51.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.51.2) keeps Windows dictation reliable when the machine is busy: capture and helper processes now run at priorities that keep recording responsive, speech pauses are judged from the recorded audio rather than wall-clock time, and the status overlay stays in step with what is actually being captured. A new optional performance settings block lets you turn the priority tuning off if you prefer.
+
+### Known limits
+
+- v0.8.0 supports the governed single-node Basement path. Multi-node rolling upgrades, Photos, Vault, Files, and the broader Modern Homelab profile remain v0.9 scope.
+- Terramate change-set apply, Advanced reconcile, coordinated Advanced rollback, and restore drills remain unavailable — Standard apply, upgrade, backup, restore, drift detection, and Owner-approved standard reconcile are the account-free surface.
+- Provider credentials, server provisioning, and host lifecycle remain outside StackKits and may be orchestrated by TechStack.
+- Candidate, device, provider, browser, and compatibility evidence remains `pending/unverified` for the v0.x line — the release publisher validates source, export, archive, checksum, and asset integrity, not live device compatibility.
+
+</Update>
+
 <Update label="2026-07-24" description="Week of July 20 – July 24">
 
 ## StackKits v0.7 goes stable, plus SpeechKit Unified Voice
