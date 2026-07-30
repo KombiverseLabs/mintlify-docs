@@ -7,6 +7,45 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits release notes on GitHub](https://github.com/kombifyio/StackKits/releases).
 
+<Update label="2026-07-30" description="Week of July 29 – July 30">
+
+## StackKits v0.10.0: unified Operations registry, read-only MCP, Alpine Foundation
+
+Two feature releases and a hotfix landed on top of last week's v0.8.0 standalone lifecycle. [v0.9.0](https://github.com/kombifyio/StackKits/releases/tag/v0.9.0) brings Modern Homelab and the optional TechStack orchestration layer over v0.8's account-free Basement baseline. [v0.9.1](https://github.com/kombifyio/StackKits/releases/tag/v0.9.1) is a storage-defaults hotfix. [v0.10.0](https://github.com/kombifyio/StackKits/releases/tag/v0.10.0) unifies the CLI and MCP surfaces behind one Operations registry, hardens the Foundation baseline for Alpine, and adds `stackkit host attach-conformance`.
+
+### New
+
+- **Unified standalone Operations registry.** A canonical registry now owns `Init`, `Validate`, `Resolve`, `Generate`, `Plan`, `Apply`, `Verify`, `Status`, `Logs`, `Backup`, `Restore`, `Upgrade`, and `Drift` — their identities, command paths, mutation metadata, and approval policy. The public CLI and the native MCP connector bind the same registry, so `Backup`, `Restore`, `Upgrade`, `Drift`, native `Status` / `Logs`, `Validate`, and `Verify` now have full MCP parity through the exact same-build sibling CLI. Use MCP when you want an agent-driven Day-2 workflow that resolves to the same operations you get from the CLI.
+- **Read-only MCP by default.** The native MCP connector refuses mutating operations unless the caller explicitly opts into writes, presents the exact registered operation identity, and clears explicit local Owner approval before the CLI is invoked. The StackKits State Console renders these registered contracts, requests governed approval, and never invokes `Apply` directly.
+- **Alpine Foundation host hardening.** Architecture v2 Foundation host hardening now supports Alpine on OpenRC alongside apt-based hosts, with a canonical daily stable-repository upgrade job, an active `crond`, and the same governed `sysctl` evidence used on Ubuntu and Debian. Alpine host installation waits for the OpenRC-managed Docker daemon through a bounded 30-second readiness loop before grading Docker and Compose v2, and Alpine VM installation now includes `curl` (used by the governed host-routed HTTP verification phase).
+- **`stackkit host attach-conformance`.** Atomically attaches an exact `ExternalHostBinding` and matching `HostConformanceReceipt` to one Inventory node before canonical plan generation. Workspace escapes, malformed JSON, unknown nodes, and post-generation attachment all fail closed. Use it when you provisioned a host outside StackKits and need to bind its conformance receipt to the plan before generate.
+
+    ```bash
+    stackkit host attach-conformance \
+      --node <node-id> \
+      --binding path/to/external-host-binding.json \
+      --receipt path/to/host-conformance-receipt.json
+    ```
+- **Modern Homelab as an explicit topology ([v0.9.0](https://github.com/kombifyio/StackKits/releases/tag/v0.9.0)).** Modern Homelab now resolves an explicit Home-and-Cloud topology with local Owner authority, Owner-specific federation projections, and governed warm-standby placement — without restoring HA as a separate kit. See [Choosing a kit](/guides/stackkits/choosing-a-kit) and [High availability readiness](/guides/stackkits/high-availability-readiness).
+- **Signed execution-channel bundles.** A digest-pinned process executor and signed execution-channel bundles form the offline-verifiable boundary for TechStack Advanced Day-2 and RIL operations. Inventory carries neither credentials nor transport endpoints — the channel bundle is the only thing that authorizes an Advanced runtime call.
+- **Advanced Terramate change-set apply.** Advanced Terramate change sets can now be applied through the published CLI with mandatory capability, Owner, checkpoint, rollback, and verification authority, closing the last Advanced Mode gap after v0.8's offline verification, trust, and change-set creation.
+
+### Fixed
+
+- **Storage roots on Cloud Kit and Modern Homelab ([v0.9.1](https://github.com/kombifyio/StackKits/releases/tag/v0.9.1)).** `#StackSpecV2`'s empty `storage` default previously won over unifying with `#StorageIntentV2`, so kits authoring `storage: {}` shipped a spec with no roots at all. `cloud-kit` and `modern-homelab` were both affected, and `stackkit validate` rejected the CLI's own `stackkit init` output with `resolvedPlan.storage.hostRoots.dataRoot: requires an absolute host storage root`. Every product kit now materializes absolute host storage roots. Basement Kit — which spelled the roots out by hand — was unaffected. If you hit this on v0.9.0, upgrade to v0.9.1 or later.
+- **Advanced drift-reconcile denials expose their reason code.** Structured denials now surface their stable machine-readable reason before rendering or lifecycle side effects, matching the Advanced-capability denial contract.
+- **Execution-channel verification canonicalizes before comparing digests.** Runtime requests are canonicalized and re-sealed before their governed digests are compared, removing a source of false digest mismatches on otherwise equivalent requests.
+- **Native v2 Apply resumes journaled reconciliation cleanly.** `ProductApplyReconcileRequiredError` now resumes through the service-owned recovery authority using only the typed non-empty request digest from the original Apply. Unrelated failures remain fail-closed, persistent reconciliation failures expose only deterministic verified executor/runtime/health contract references and closed `FailureCode` pairs, and no provider authority is introduced.
+- **Alpine VM virtualization detection.** When `systemd-detect-virt` is unavailable, Alpine VM evidence now derives the closed `kvm` virtualization class from QEMU/KVM DMI vendor data. Proxmox OS-matrix clones also disable implicit cloud-init package upgrades so the graded install phase runs against the booted kernel and its matching modules, including Alpine nftables support.
+- **Debian 12/13 Docker install path.** Debian 12/13 host compatibility now installs Engine and Compose v2 from Docker's official signed apt repository, because Bookworm does not publish Ubuntu's `docker-compose-v2` package name.
+
+### Known limits
+
+- The v0.10.0 protected OS matrix drops the retired StackKits host-preparation authority and the removed `--context` / `--force` switches on `stackkit generate`. If you scripted against those flags, migrate to the native transactional `stackkit generate` contract.
+- Candidate, device, provider, browser, and compatibility evidence remains `pending/unverified` for the v0.x line.
+
+</Update>
+
 <Update label="2026-07-28" description="Week of July 27 – July 28">
 
 ## StackKits v0.8.0: account-free Basement, plus a SpeechKit Windows fix
