@@ -158,6 +158,13 @@ async function dispatchWorkflow(step, variables) {
       String(substitute(value, variables)),
     ]),
   );
+  const runNameContains =
+    step.run_name_contains === undefined
+      ? ""
+      : substitute(
+          requireString(step.run_name_contains, "workflow step.run_name_contains"),
+          variables,
+        );
   const startedAt = Date.now();
   const workflowUrl = `https://api.github.com/repos/${owner}/${repository}/actions/workflows/${encodeURIComponent(workflow)}`;
   process.stdout.write(
@@ -167,6 +174,12 @@ async function dispatchWorkflow(step, variables) {
     method: "POST",
     body: JSON.stringify({ ref, inputs }),
   });
+  if (step.wait_for_completion === false) {
+    process.stdout.write(
+      `Workflow ${workflow} dispatch accepted; pre-1.0 activation continues asynchronously in its authoritative run.\n`,
+    );
+    return;
+  }
 
   const timeoutSeconds = Number(step.timeout_seconds ?? 780);
   if (
@@ -189,6 +202,11 @@ async function dispatchWorkflow(step, variables) {
         (entry) =>
           variables.SOURCE_SHA === "" ||
           entry.head_sha === variables.SOURCE_SHA,
+      )
+      .filter(
+        (entry) =>
+          runNameContains === "" ||
+          String(entry.display_title ?? "").includes(runNameContains),
       )
       .sort((left, right) => right.id - left.id);
     run = candidates[0] ?? run;

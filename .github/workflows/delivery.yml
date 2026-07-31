@@ -1,7 +1,3 @@
-# Public-repository adapter for Delivery Platform v2.
-# GitHub does not allow a public repository to call reusable workflows from the
-# internal KombiverseLabs/.github repository. The compiler and fleet snapshot
-# remain immutable and centrally owned by kombify-workspace.
 name: Delivery v2
 
 on:
@@ -21,7 +17,7 @@ on:
         type: boolean
         default: false
       candidate-receipt-b64:
-        description: Exact Candidate receipt for stable publication.
+        description: Exact Candidate receipt for stable adapters that retain the Candidate gate.
         required: false
         type: string
         default: ""
@@ -32,183 +28,12 @@ permissions:
 
 jobs:
   delivery:
-    name: Compile exact plan and execute selected profile
-    runs-on: ${{ vars.DEPOT_FALLBACK_RUNNER || 'ubuntu-24.04' }}
-    timeout-minutes: 15
-    env:
-      CANDIDATE_RECEIPT_B64: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate-receipt-b64 || '' }}
-      EXECUTE_DELIVERY: ${{ github.event_name != 'pull_request' && (github.event_name != 'workflow_dispatch' || inputs.execute) }}
-      GH_TOKEN: ${{ secrets.GH_PAT != '' && secrets.GH_PAT || github.token }}
-      SOURCE_REPOSITORY: mintlify-docs
-      SOURCE_SHA: ${{ github.sha }}
-      STABLE_APPROVED: ${{ github.event_name == 'workflow_dispatch' && inputs.approve-stable }}
-      STANDARDS_REF: 0536e122573125b632bb615522244220f7afa26e
-    steps:
-      - name: Check out exact caller source
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Check out immutable delivery compiler
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-        with:
-          repository: KombiverseLabs/kombify-workspace
-          ref: ${{ env.STANDARDS_REF }}
-          path: standards
-          token: ${{ env.GH_TOKEN }}
-          persist-credentials: false
-
-      - name: Set up Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
-        with:
-          node-version: "24"
-
-      - name: Compile and validate immutable Delivery Plan
-        shell: bash
-        run: |
-          set -euo pipefail
-          VERSION="$(tr -d '\r\n' < .kombify/VERSION)"
-          SOURCE_MAP_JSON="$(node -e 'process.stdout.write(JSON.stringify({[process.env.SOURCE_REPOSITORY]: process.env.SOURCE_SHA}))')"
-          mkdir -p delivery receipts
-          node standards/scripts/delivery-platform.mjs compile \
-            --snapshot \
-            --product docs \
-            --version "$VERSION" \
-            --contract .kombify/delivery.json \
-            --source-json "$SOURCE_MAP_JSON" \
-            --output delivery/delivery-plan.json
-          node standards/scripts/delivery-platform.mjs validate-plan \
-            --plan delivery/delivery-plan.json
-
-      - name: Export exact plan metadata
-        shell: bash
-        run: |
-          set -euo pipefail
-          node <<'NODE'
-          const fs = require("node:fs");
-          const plan = JSON.parse(fs.readFileSync("delivery/delivery-plan.json", "utf8"));
-          const sourceSuffix = process.env.SOURCE_SHA.slice(0, 12);
-          const versionWithoutBuild = plan.version.split("+", 1)[0];
-          const deliveryVersion =
-            plan.profile === "fast-pre-1.0"
-              ? versionWithoutBuild.includes("-")
-                ? `${versionWithoutBuild}.dev.${sourceSuffix}`
-                : `${versionWithoutBuild}-dev.${sourceSuffix}`
-              : versionWithoutBuild;
-          if (
-            !/^(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[0-9A-Za-z.-]+)?$/.test(
-              deliveryVersion,
-            )
-          ) {
-            throw new Error("derived delivery version is not publishable SemVer");
-          }
-          const values = {
-            DELIVERY_ARTIFACT: "public-docs",
-            DELIVERY_PLAN: `${process.env.GITHUB_WORKSPACE}/delivery/delivery-plan.json`,
-            DELIVERY_PLAN_DIGEST: plan.plan_digest,
-            DELIVERY_PROFILE: plan.profile,
-            DELIVERY_RELEASE_ID: plan.release_id,
-            DELIVERY_TAG: `v${deliveryVersion}`,
-            DELIVERY_VERSION: deliveryVersion,
-          };
-          fs.appendFileSync(
-            process.env.GITHUB_ENV,
-            `${Object.entries(values).map(([key, value]) => `${key}=${value}`).join("\n")}\n`,
-          );
-          NODE
-
-      - name: Upload immutable Delivery Plan
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: delivery-plan-${{ github.run_id }}-${{ github.run_attempt }}
-          path: delivery/delivery-plan.json
-          if-no-files-found: error
-          retention-days: 30
-
-      - name: Install pinned mise
-        if: env.EXECUTE_DELIVERY == 'true'
-        uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
-        with:
-          version: "2026.7.5"
-          sha256: 5f7ab76afdf0780d12edeaa67e908094e9ccf7924cfe203e415c1cfb87bbf778
-          install: false
-          env: false
-          cache: true
-
-      - name: Install delivery toolchain
-        if: env.EXECUTE_DELIVERY == 'true'
-        shell: bash
-        env:
-          MISE_YES: "1"
-        run: |
-          set -euo pipefail
-          if [[ -f mise.toml ]]; then
-            mise trust "$PWD/mise.toml"
-          elif [[ -f .mise.toml ]]; then
-            mise trust "$PWD/.mise.toml"
-          fi
-          mise install
-
-      - name: Execute delivery operations and compose receipts
-        if: env.EXECUTE_DELIVERY == 'true'
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          run_operation() {
-            local operation="$1"
-            local blocking="${2:-true}"
-            local started_at
-            local finished_at
-            local status
-            local exit_code
-
-            started_at="$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)"
-            set +e
-            node .kombify/delivery.mjs "$operation"
-            exit_code=$?
-            set -e
-            finished_at="$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)"
-            if [[ "$exit_code" -eq 0 ]]; then
-              status=passed
-            else
-              status=failed
-            fi
-            node standards/scripts/delivery-platform.mjs receipt \
-              --plan delivery/delivery-plan.json \
-              --artifact "$DELIVERY_ARTIFACT" \
-              --operation "$operation" \
-              --status "$status" \
-              --started-at "$started_at" \
-              --finished-at "$finished_at" \
-              --output "receipts/${operation}.json"
-            if [[ "$blocking" == "true" && "$exit_code" -ne 0 ]]; then
-              if [[ "$DELIVERY_PROFILE" == "fast-pre-1.0" ]]; then
-                echo "::warning::delivery operation failed in the pre-1.0 forward-fix profile; the exact failed receipt was uploaded and remaining operations will continue."
-                return 0
-              fi
-              return "$exit_code"
-            fi
-          }
-
-          if [[ "$DELIVERY_PROFILE" == "stable-1.0-plus" ]]; then
-            run_operation build
-            run_operation validate
-          fi
-          if [[ "$DELIVERY_PROFILE" == "fast-pre-1.0" || "$STABLE_APPROVED" == "true" ]]; then
-            run_operation publish
-            run_operation promote
-            run_operation smoke
-          fi
-          run_operation async false
-
-      - name: Upload exact operation receipts
-        if: always() && env.EXECUTE_DELIVERY == 'true'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: delivery-receipts-${{ github.run_id }}-${{ github.run_attempt }}-public-docs
-          path: receipts/*.json
-          if-no-files-found: error
-          retention-days: 30
+    uses: KombiverseLabs/.github/.github/workflows/product-delivery.yml@aea52566d476171afb8d6ec4a3e2ef928bf606c1
+    with:
+      product-id: docs
+      repository-id: mintlify-docs
+      execute: ${{ github.event_name != 'pull_request' && (github.event_name != 'workflow_dispatch' || inputs.execute) }}
+      stable-approved: ${{ github.event_name == 'workflow_dispatch' && inputs.approve-stable }}
+      candidate-receipt-b64: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate-receipt-b64 || '' }}
+      base-sha: ${{ github.event_name == 'push' && github.event.before || github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
+    secrets: inherit
