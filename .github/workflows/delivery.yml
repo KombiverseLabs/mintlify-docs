@@ -1,0 +1,39 @@
+name: Delivery v2
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: Execute the delivery plan instead of compiling it only.
+        required: false
+        type: boolean
+        default: true
+      approve-stable:
+        description: Approve activation for a stable 1.0+ release.
+        required: false
+        type: boolean
+        default: false
+      candidate-receipt-b64:
+        description: Exact Candidate receipt for stable adapters that retain the legacy Candidate gate.
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  delivery:
+    uses: KombiverseLabs/.github/.github/workflows/product-delivery.yml@f67f87907368287c2d0f2fea024b1e2e1decc02c
+    with:
+      product-id: docs
+      repository-id: mintlify-docs
+      execute: ${{ github.event_name != 'pull_request' && (github.event_name != 'workflow_dispatch' || inputs.execute) }}
+      stable-approved: ${{ github.event_name == 'workflow_dispatch' && inputs.approve-stable }}
+      candidate-receipt-b64: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate-receipt-b64 || '' }}
+      base-sha: ${{ github.event_name == 'push' && github.event.before || github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
+    secrets: inherit
