@@ -7,6 +7,46 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits release notes on GitHub](https://github.com/kombifyio/StackKits/releases).
 
+<Update label="2026-07-31" description="Week of July 27 – July 31">
+
+## Standalone OSS lifecycle, Fleet, and three Application Kits
+
+A big week across the platform. StackKits went from v0.7.x to [v0.13.17](https://github.com/kombifyio/StackKits/releases/tag/v0.13.17), unlocking an account-free standalone Basement lifecycle, unified CLI/MCP operations, a reusable Application Kit platform, Fleet lifecycle, and Vault (Vaultwarden) as the third first-class app alongside Photos (Immich) and Files (Cloudreve). SpeechKit shipped [v0.51.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.51.2) with a heavy-load Windows dictation fix, and previewed the new Voice UI Kit web-component library.
+
+### New
+
+- **Stable standalone OSS lifecycle for Basement.** [v0.8.0](https://github.com/kombifyio/StackKits/releases/tag/v0.8.0) makes a single-node Basement homelab installable, upgradable, backed up, restorable, and drift-checked end to end through the public `stackkit` CLI — no Kombify Cloud or TechStack account required. `stackkit init --owner-source=local` establishes local Owner identity with PocketID, TinyAuth, and step-ca. See [Install-only vs managed cloud](/guides/stackkits/install-only-vs-managed-cloud) and [Choosing a kit](/guides/stackkits/choosing-a-kit).
+- **Modern Homelab and optional orchestration.** [v0.9.0](https://github.com/kombifyio/StackKits/releases/tag/v0.9.0) resolves an explicit Home-and-Cloud Modern Homelab topology with governed warm-standby placement, and adds signed execution-channel bundles so TechStack Advanced Day-2 operations run over an offline-verifiable boundary. TechStack remains an optional orchestrator over the same public artifacts. See [Local vs cloud vs hybrid](/guides/stackkits/local-vs-cloud-vs-hybrid) and [High availability readiness](/guides/stackkits/high-availability-readiness).
+- **Unified standalone operations across CLI and MCP.** [v0.10.0](https://github.com/kombifyio/StackKits/releases/tag/v0.10.0) publishes a canonical registry of fourteen operations — Init, Validate, Resolve, Generate, Plan, Apply, Verify, Status, Logs, Backup, Restore, Upgrade, Drift, and Remove — with full MCP parity through the same-build CLI. The native MCP connector is now read-only by default; every mutating call needs explicit write opt-in and local Owner approval. See [Deploy with the CLI or TechStack](/guides/stackkits/deploy-with-cli-or-techstack).
+- **Alpine Linux support.** Foundation host hardening, security baselines, and Docker/Compose install now work on Alpine/OpenRC hosts alongside Ubuntu and Debian, with matching evidence and readiness gates.
+- **Family Photo Vault as the reference vertical.** [v0.11.0](https://github.com/kombifyio/StackKits/releases/tag/v0.11.0) declares the complete Photos install, manage, backup, upgrade, restore, drift, and remove lifecycle behind one CUE-owned contract, and adds `stackkit remove` as the fourteenth standalone operation for Owner-approved workload removal. See [Family photo vault use case](/guides/stackkits/use-cases/family-photo-vault).
+- **Reusable Application Kit lifecycle platform.** [v0.12.0](https://github.com/kombifyio/StackKits/releases/tag/v0.12.0) turns the seven-stage app lifecycle into a shared platform: install, manage, backup, upgrade with explicit migration, restore, drift, and remove. **Files with Cloudreve** ships as the second application vertical on the same contract as Photos with Immich.
+- **Fleet lifecycle and Vault as the third Application Kit.** [v0.13.0](https://github.com/kombifyio/StackKits/releases/tag/v0.13.0) introduces compiler-owned Fleet membership with bounded `add`, `replace`, `drain`, `recover`, and `remove` node mutations, each bound to durable checkpoints and signed evidence. **Vault (Vaultwarden 1.35.4)** is the third native Application Kit and reuses the shared lifecycle. See [Vaultwarden](/guides/stackkits/services/vaultwarden) and [Immich](/guides/stackkits/services/immich).
+- **Voice UI Kit preview.** SpeechKit is previewing `@kombifyio/speechkit-voice-ui`, a framework-neutral web-component library with a dictation/voice-conversation split button, a compact glass conversation overlay with live transcript, an audio-state visualizer, and a fail-closed voice consent gate. Works in plain HTML and in any framework, ships in six languages with right-to-left support, follows light/dark themes via CSS custom properties, and respects reduced motion.
+
+### Improved
+
+- **State Console is now a review and approval adapter.** The Console renders registered operation contracts, requests governed approval, and never invokes Apply directly — the CLI and MCP remain the single execution path, and Standard Mode stays account-free.
+- **ResolvedPlan is the single source of runtime truth.** Runtime topology and application selection are read exclusively from the verified ResolvedPlan after resolution; provider-neutral shared cores now back Immich and Cloudreve rendering, and Inventory carries neither credentials nor transport endpoints.
+- **All three product kits admit the optional Vault workload.** Basement Kit and Cloud Kit Definition contracts advance to 5.1.0 and Modern Homelab advances to 1.1.0-alpha to admit Vaultwarden alongside Photos and Files.
+- **Governed stable upgrades across the v0.8 → v0.13 line.** Each stable upgrade inspects and checkpoints the applied generation through the exact installed, attested predecessor binary, admitting only the published release index, archive, Definition, compiler, renderer, and product-authority tuple before the new CUE authority takes over.
+- **External host attach.** `stackkit host attach-conformance` atomically attaches an external host binding and matching conformance receipt to one Inventory node before canonical plan generation. Workspace escapes, malformed JSON, unknown nodes, and post-generation attachment fail closed.
+
+### Fixed
+
+- **Heavy-load Windows dictation.** SpeechKit [v0.51.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.51.2) stops dictation from cutting out mid-sentence, and the status overlay from getting stuck on "processing", when the machine is under heavy CPU load. SpeechKit now runs capture and helpers at priorities that keep recording responsive, judges speech pauses from the recorded audio itself instead of wall-clock time, and keeps the status overlay in sync with actual capture. A new optional performance settings block lets you turn priority tuning off.
+- **Absolute host storage roots on Cloud Kit and Modern Homelab.** [v0.9.1](https://github.com/kombifyio/StackKits/releases/tag/v0.9.1) fixes `stackkit validate` rejecting the CLI's own `stackkit init` output for `cloud-kit` and `modern-homelab` with `resolvedPlan.storage.hostRoots.dataRoot: requires an absolute host storage root`. Both kits now materialize absolute host storage roots by default. Basement Kit was unaffected.
+- **Alpine on Proxmox.** Alpine 3.24 Proxmox provisioning now matches cloud-init's actual error shape, Alpine VM installation includes the `curl` binary used by governed HTTP verification, Alpine host installs wait for the OpenRC-managed Docker daemon with a 30-second readiness loop before grading Docker and Compose v2, and Alpine evidence derives the KVM virtualization class from QEMU/KVM DMI vendor data when `systemd-detect-virt` is unavailable.
+- **Debian 12/13 Docker install.** Host prerequisites now pull Engine and Compose v2 from Docker's official signed apt repository on Bookworm, which does not publish Ubuntu's `docker-compose-v2` package name.
+- **Advanced drift-reconcile denials.** Denials now expose their stable machine-readable reason code before any rendering or lifecycle side effects run.
+
+### Known limits
+
+- Modern Homelab remains an Owner-authority topology for warm-standby placement; the previously listed remaining runtime owners graduate incrementally.
+- The v0.13.16 and [v0.13.17](https://github.com/kombifyio/StackKits/releases/tag/v0.13.17) patch releases continue to add standalone Compose workload delivery and release-workflow trust plumbing; check the release notes for the exact scope you're picking up.
+
+</Update>
+
 <Update label="2026-07-24" description="Week of July 20 – July 24">
 
 ## StackKits v0.7 goes stable, plus SpeechKit Unified Voice
