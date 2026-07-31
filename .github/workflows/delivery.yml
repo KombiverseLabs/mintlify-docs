@@ -185,6 +185,10 @@ jobs:
               --finished-at "$finished_at" \
               --output "receipts/${operation}.json"
             if [[ "$blocking" == "true" && "$exit_code" -ne 0 ]]; then
+              if [[ "$DELIVERY_PROFILE" == "fast-pre-1.0" ]]; then
+                echo "::warning::delivery operation failed in the pre-1.0 forward-fix profile; the exact failed receipt was uploaded and remaining operations will continue."
+                return 0
+              fi
               return "$exit_code"
             fi
           }
