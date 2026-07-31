@@ -189,8 +189,10 @@ jobs:
             fi
           }
 
-          run_operation build
-          run_operation validate
+          if [[ "$DELIVERY_PROFILE" == "stable-1.0-plus" ]]; then
+            run_operation build
+            run_operation validate
+          fi
           if [[ "$DELIVERY_PROFILE" == "fast-pre-1.0" || "$STABLE_APPROVED" == "true" ]]; then
             run_operation publish
             run_operation promote
