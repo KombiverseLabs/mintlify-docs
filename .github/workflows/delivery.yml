@@ -132,7 +132,7 @@ jobs:
           retention-days: 30
 
       - name: Install pinned mise
-        if: env.EXECUTE_DELIVERY == 'true'
+        if: env.EXECUTE_DELIVERY == 'true' || (github.event_name == 'pull_request' && env.DELIVERY_PROFILE == 'stable-1.0-plus')
         uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
         with:
           version: "2026.7.5"
@@ -142,7 +142,7 @@ jobs:
           cache: true
 
       - name: Install delivery toolchain
-        if: env.EXECUTE_DELIVERY == 'true'
+        if: env.EXECUTE_DELIVERY == 'true' || (github.event_name == 'pull_request' && env.DELIVERY_PROFILE == 'stable-1.0-plus')
         shell: bash
         env:
           MISE_YES: "1"
@@ -154,6 +154,14 @@ jobs:
             mise trust "$PWD/.mise.toml"
           fi
           mise install
+
+      - name: Stable 1.0+ required gate
+        if: github.event_name == 'pull_request' && env.DELIVERY_PROFILE == 'stable-1.0-plus'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node .kombify/delivery.mjs build
+          node .kombify/delivery.mjs validate
 
       - name: Execute delivery operations and compose receipts
         if: env.EXECUTE_DELIVERY == 'true'
