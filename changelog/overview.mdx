@@ -7,6 +7,38 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits release notes on GitHub](https://github.com/kombifyio/StackKits/releases).
 
+<Update label="2026-08-07" description="Week of Aug 3 – Aug 7">
+
+## SpeechKit v0.52.0: dictation reliability
+
+SpeechKit shipped [v0.52.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.0), a dictation reliability release. Holding the dictation shortcut records one unbroken take again, the configured Deepgram speech language is respected end to end, and automatic updates are back with an explicit-confirmation install path and a new update channel setting.
+
+### Fixed
+
+- **Held-shortcut dictation records one unbroken take.** Brief dropouts from chattering keys, KVM switches, and OS accessibility filters no longer tear a held-shortcut dictation into quarter-second fragments — momentary dropouts are absorbed and letting go still ends the take immediately.
+- **Toggle-mode double-tap.** A deliberate quick second press now reliably stops the recording it started instead of being swallowed.
+- **Stuck recording edge case.** A dictation could get stuck recording with no way to stop it short of restarting the app when the two independent key-state sources disagreed; that path is fixed.
+- **Deepgram speech language is respected.** The language you pick in Settings is now the one sent to the provider, instead of being silently coerced to multilingual code-switching. Multilingual code-switching remains the default when no language is set.
+- **Regional variants pass through.** Locale tags like `en-GB` and `de-DE` are no longer rejected, and underscore spellings like `de_DE` are corrected instead of failing the request.
+- **Request-language wins over server-configured language** on both streaming and batch transcription, as documented. Server-side assist also no longer pins transcription to the server's reply language when the caller did not ask for one.
+
+### New
+
+- **Automatic updates are back.** The app finds and offers its own published releases on a scheduled check and can fetch them in the background, but always leaves the install to an explicit confirmation — it never restarts on its own.
+- **`[update] channel` config.** A new `channel = auto | stable | prerelease` setting in `config.example.toml` chooses which releases are offered. `auto` (default) follows the app's own maturity; `stable` and `prerelease` pin the choice.
+
+```toml
+[update]
+# auto (default) follows the app's maturity; stable or prerelease pins the choice.
+channel = "auto"
+```
+
+### Follow-up
+
+- **[v0.52.5](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.5) — provider option matrix refinement.** The published provider capability matrix now honestly reports which STT options each provider actually supports (Ollama and the self-hosted whisper-server VPS adapter are declared alongside the existing set, and stale `timestamps`/`punctuation` claims on OpenAI-compatible endpoints are corrected). No API changes; provider selection and fallback pick the right options for each backend.
+
+</Update>
+
 <Update label="2026-07-31" description="Week of July 27 – July 31">
 
 ## Standalone OSS lifecycle, Fleet, and three Application Kits
