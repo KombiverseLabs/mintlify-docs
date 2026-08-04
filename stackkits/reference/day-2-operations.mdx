@@ -1,0 +1,185 @@
+---
+title: Day-2 operations
+description: Governed upgrade, restore, and drift reconciliation verbs for a running StackKit
+sidebarTitle: Day-2 operations
+icon: wrench
+---
+
+Once your StackKit is running, day-2 operations move it through a **governed local lifecycle**: every mutating verb creates a Kopia snapshot plus an owner-signed executor-state rollback checkpoint, runs generate/apply/verify under an exclusive lifecycle journal, and can be resumed or rolled back by operation ID if it is interrupted.
+
+This page covers the verbs introduced in `v0.8.0`:
+
+- `stackkit upgrade` (and `--recover`)
+- `stackkit backup restore activate` / `stackkit backup restore recover`
+- `stackkit drift reconcile --mode standard --owner-approve`
+
+All of these run entirely against the local Basement — no Kombify account or Cloud service is required.
+
+## Concepts
+
+Each mutating day-2 verb records a **lifecycle operation** with a stable ID and a matching rollback checkpoint:
+
+- **Kopia snapshot** — content-addressed anchor of the live Basement volumes taken before the mutation.
+- **Executor-state snapshot** — owner-signed snapshot of the current generated Plan, artifacts, and Apply evidence.
+- **Operation ID** — the idempotency key used to resume or roll back the exact interrupted operation.
+
+If a mutating phase fails, the lifecycle **automatically** restores the captured executor state and re-applies and verifies the prior release. `--recover` and `backup restore recover` exist to finish or explicitly roll back an operation that was interrupted before that automatic restore could complete.
+
+## `stackkit upgrade`
+
+Resolve a public StackKit release from GitHub, verify its archive, SPDX SBOM, and Sigstore attestation, then install and apply it under `.stackkit/releases/` through the governed lifecycle.
+
+Use it when you want to move a running StackKit to a new release channel or a specific version.
+
+```bash
+# Preview the next stable release without applying it
+stackkit upgrade --to channel:stable --dry-run
+
+# Apply the exact target release
+stackkit upgrade --to v0.8.0
+
+# Emit machine-readable results for automation
+stackkit upgrade --to latest --json
+```
+
+### Flags
+
+| Flag | Default | Description |
+|---|---|---|
+| `--to` | `latest` | Target: `latest`, `vX.Y.Z`, or `channel:stable\|beta\|edge`. |
+| `--dry-run` | `false` | Verify and inspect the target generation in a bounded shadow workspace without applying it. |
+| `--json` | `false` | Emit a `stackkit.command-result/v1` JSON envelope. |
+| `--recover <op-id>` | — | Finish or roll back one exact interrupted upgrade operation. Cannot be combined with `--to` or `--dry-run`. |
+
+### What it mutates
+
+Without `--dry-run`, `stackkit upgrade` will:
+
+1. Inspect the current authoritative generation and the verified target release.
+2. Take a Kopia snapshot of the Basement volumes and stage an executor-state rollback checkpoint (owner-signed, verified but not activated).
+3. Install the target release under `.stackkit/releases/` and run the target `generate` → `apply` → `verify` transaction inside the exclusive lifecycle journal.
+4. On any failure, automatically restore the captured prior executor state, re-apply, and re-verify the prior release.
+
+Kopia data stays isolated in staging; a live-volume cutover is a separately governed step.
+
+### Resuming an interrupted upgrade with `--recover`
+
+If `stackkit upgrade` is interrupted (host reboot, killed process, transient I/O failure), rerun it with the reported operation ID:
+
+```bash
+stackkit upgrade --recover op-2026-07-28-1a2b3c4d
+```
+
+`--recover` opens the exact lifecycle record and does one of:
+
+- If the target transaction had already committed, mark the operation `succeeded` — no rollback required.
+- If it stopped at an unambiguous rollback-start phase, replay the rollback using the recorded Kopia anchor and executor-state snapshot, restoring the prior release.
+- If the operation is already recovered or stopped at an ambiguous phase, exit without replaying — the operator must inspect the journal.
+
+Pair `--recover` with `--json` to feed the result envelope into an automation runbook.
+
+## Restoring a backup snapshot
+
+Backup restore is a **three-step** verb chain so that verifying a snapshot and touching live volumes are separate, owner-approved decisions. Each step is governed and idempotent by operation ID.
+
+<Steps>
+  <Step title="Verify and stage the snapshot">
+    `stackkit backup restore <snapshot-anchor-id> --owner-approve` verifies the content-addressed Kopia snapshot, restores it into the CUE-owned isolated staging volume, and prints a `restore-result-id`. It does not touch the live Basement.
+  </Step>
+  <Step title="Activate into live volumes">
+    `stackkit backup restore activate <restore-result-id> --owner-approve` runs the governed live cutover.
+  </Step>
+  <Step title="Roll back if activation is interrupted">
+    `stackkit backup restore recover <activation-operation-id> --owner-approve --rollback` rolls back one interrupted activation.
+  </Step>
+</Steps>
+
+### `stackkit backup restore activate`
+
+Activate one already-verified staged restore into the live Basement volumes.
+
+Use it after `stackkit backup restore` has produced a `restore-result-id` you are ready to promote.
+
+```bash
+stackkit backup restore activate sha256:<restore-result-id> \
+  --owner-approve \
+  --operation-id restore-2026-07-28-nightly \
+  --json
+```
+
+| Flag | Description |
+|---|---|
+| `--owner-approve` | **Required.** Records explicit local Owner authorization for the live activation. Activation fails closed without it. |
+| `--operation-id` | Stable idempotency key for this activation. Reuse it to safely retry or resume. |
+| `--json` | Emit a `stackkit.command-result/v1` JSON envelope. |
+
+State mutated: the exact live Basement volumes named in the staged restore Plan. The activation is bound to the same Apply authority and local Owner that produced the staged restore result — mismatches fail closed.
+
+### `stackkit backup restore recover`
+
+Roll back one interrupted live restore activation using its Kopia anchor and executor-state checkpoint.
+
+Use it when a live activation was interrupted mid-cutover and you need to return to the pre-activation state.
+
+```bash
+stackkit backup restore recover restore-2026-07-28-nightly \
+  --owner-approve \
+  --rollback
+```
+
+| Flag | Description |
+|---|---|
+| `--owner-approve` | **Required.** Records explicit local Owner authorization for the rollback. |
+| `--rollback` | **Required.** Confirms you want to roll back the exact interrupted activation. |
+| `--json` | Emit a `stackkit.command-result/v1` JSON envelope. |
+
+State mutated: the live Basement volumes are restored from the Kopia anchor and the executor-state snapshot taken at the start of the activation. The rollback is bound to the exact activation `operation-id` — passing an unrelated ID fails closed.
+
+## `stackkit drift reconcile`
+
+`stackkit drift detect` reads the canonical `ResolvedPlan`, generated artifacts, owner-signed Apply evidence, and live Basement Compose runtime and reports drift **without writing anything**.
+
+`stackkit drift reconcile` closes the loop: it re-runs the governed lifecycle to bring the live Basement back to the current authority.
+
+Use it when `stackkit drift detect` reports differences you accept and want to reconcile — for example after a manual container edit or a partial apply.
+
+```bash
+# Detect first (read-only)
+stackkit drift detect --json
+
+# Reconcile with explicit local Owner approval
+stackkit drift reconcile --mode standard --owner-approve --json
+```
+
+### Flags
+
+| Flag | Default | Description |
+|---|---|---|
+| `--mode` | `standard` | Reconcile mode. `standard` is the supported day-2 path. `advanced` is fail-closed until an offline-verified `stackkit.advanced-capability/v1` is supplied. |
+| `--owner-approve` | `false` | **Required for `--mode standard`.** Records explicit local Owner authorization for the reconciliation. |
+| `--json` | `false` | Emit a `stackkit.command-result/v1` JSON envelope. |
+
+### How Owner approval interacts with reconciliation
+
+Standard reconciliation is **owner-gated end to end**. Without `--owner-approve`, `drift reconcile --mode standard` refuses to start — no snapshot is taken, no Plan is regenerated. When `--owner-approve` is set, the CLI:
+
+1. Verifies the current local authority (Plan, generated artifacts, Apply evidence, Owner binding).
+2. Binds the reconciliation to the exact currently installed release receipt. If more than one receipt is present, the command fails closed.
+3. Creates a **mandatory** Kopia snapshot and executor-state rollback checkpoint before touching the runtime.
+4. Runs `generate` → `apply` → `verify` through the exclusive lifecycle journal.
+5. On any failure, automatically restores, re-applies, and re-verifies the captured prior executor state.
+
+`--mode advanced` remains fail-closed for now, so `--owner-approve` alone will not unlock it — you must also supply an offline-verified advanced capability. Treat `--mode standard --owner-approve` as the only supported reconciliation path today.
+
+## Choosing the right verb
+
+| You want to… | Use |
+|---|---|
+| Move to a new release channel or version | `stackkit upgrade --to …` |
+| Finish or roll back an interrupted upgrade | `stackkit upgrade --recover <op-id>` |
+| Bring back data from a prior snapshot | `stackkit backup restore …` → `restore activate` |
+| Undo a half-finished restore activation | `stackkit backup restore recover <op-id> --owner-approve --rollback` |
+| See what drifted from the current authority | `stackkit drift detect` |
+| Reconcile accepted drift back to the current authority | `stackkit drift reconcile --mode standard --owner-approve` |
+
+Every entry in this table takes a Kopia snapshot plus an executor-state rollback checkpoint before mutating anything, so any interrupted operation can be resumed or rolled back by its operation ID.

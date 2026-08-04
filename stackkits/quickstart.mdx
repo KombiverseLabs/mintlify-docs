@@ -1,103 +1,170 @@
 ---
 title: "StackKits quickstart"
-description: "Deploy your first StackKit with the one-line installer or the CLI"
+description: "Deploy your first StackKit on a Basement homelab with the account-free v0.8 lifecycle"
 sidebarTitle: "Quickstart"
 icon: rocket
 ---
 
-The fastest StackKits path is the Install Engine: one short command on the host that should become your homelab. If you want more control, install the CLI only and run the steps yourself.
+StackKits v0.8 ships a **standalone, account-free OSS lifecycle** for the Basement homelab. You install the CLI from an attested GitHub release, run five commands, and get a validated single-node deployment with a local Owner identity bound to PocketID, TinyAuth, and step-ca.
+
+<Note>
+  **No kombify Cloud or TechStack account is required.** The v0.8 OSS lifecycle — install, init, validate, generate, apply, verify — runs entirely against the public GitHub release index. Cloud is an optional projection you can add later.
+</Note>
+
+## Prerequisites
+
+- Linux or macOS host with Docker installed
+- Root or `sudo` access on the target host
+- Run commands **on the target host itself** (SSH in, use the console, or an on-server agent). The default `*.home.localhost` URLs resolve on the host and are not shared LAN links.
 
 ## Fastest path
 
-Run the Base Kit one-liner on a Linux or macOS host with root/sudo access. Without a version pin, this installs the current stable latest release (`v0.4.4`):
+Run the Basement Kit one-liner on the host that should become your homelab:
 
 ```bash
 curl -sSL https://base.stackkit.cc | sh
 ```
 
-This installs the `stackkit` CLI, installs the Base Kit definitions, prepares Docker and OpenTofu, initializes the stack, generates deployment artifacts, applies the stack, and prints the service URLs.
+Unpinned runs install the current stable release (`releases/latest` on GitHub). The installer places `stackkit`, `stackkit-server`, packaged OpenTofu, and the public kit catalog under `~/.stackkits`, then runs the full lifecycle: `init --owner-source=local` → `validate` → `generate` → `apply` → `verify`. When it finishes, it prints the service URLs and the local Owner setup link.
 
-## Public beta path
+## Choose a release channel
 
-Use the pinned beta path when you are testing the current BaseKit beta prerelease (`v0.4.5-beta.1`):
+`stackkit` resolves releases from a signed GitHub **release index** — an attested JSON document listing every published kit archive, its SBOM, and its provenance. You can pick a channel or pin an exact version.
 
-```bash
-export STACKKIT_RELEASE_VERSION=v0.4.5-beta.1
-curl -sSL https://base.stackkit.cc | sh
-```
+| Channel | Meaning | How to select |
+|---------|---------|---------------|
+| `stable` | Default. Current `releases/latest`. | Run the installer with no pin. |
+| `beta` | Prereleases tagged `-beta.N`. | `export STACKKIT_RELEASE_VERSION=v0.8.1-beta.1` |
+| `edge` | Prereleases tagged `-edge.N`. | `export STACKKIT_RELEASE_VERSION=v0.8.1-edge.2` |
+| Exact SemVer | Any published tag. | `export STACKKIT_RELEASE_VERSION=v0.8.0` |
 
-Prerelease pins are explicit by design. Unpinned installers stay on stable latest until the beta evidence and public mirror CI are clean enough for stable promotion.
-
-## Per-kit one-liners
-
-Use a kit-specific one-liner when you already know the StackKit standard:
+Prerelease pins are explicit by design — unpinned installers stay on stable until a candidate is promoted.
 
 ```bash
-curl -sSL https://base.stackkit.cc | sh      # Base Kit stable latest
-curl -sSL https://modern.stackkit.cc | sh    # Modern Homelab preview
-curl -sSL https://ha.stackkit.cc | sh        # High Availability preview
+env STACKKIT_RELEASE_VERSION=v0.8.0 sh -c 'curl -sSL https://base.stackkit.cc | sh'
 ```
 
-| StackKit | Use case | Complexity |
-|----------|----------|------------|
-| `base-kit` | Single-environment homelab | Public beta |
-| `modern-homelab` | Hybrid local + cloud setup | Preview |
-| `ha-kit` | High availability and failover | Preview |
+To browse published releases before installing:
+
+```bash
+stackkit kit list --channel beta --json
+```
 
 ## CLI-only path
 
-Use the CLI-only installer when you want to make the technical choices yourself:
+Install the CLI without running the full lifecycle when you want to make each step yourself:
 
 <Steps>
   <Step title="Install the CLI">
     ```bash
-    curl -sSL install.stackkit.cc | sh
+    curl -sSL https://install.stackkit.cc | sh
+    stackkit version
     ```
+
+    The shared installer works for every published kit; you pick the kit at `init`.
   </Step>
 
-  <Step title="Initialize a StackKit">
+  <Step title="Initialize with a local Owner">
     ```bash
     mkdir my-homelab
     cd my-homelab
-    stackkit init base-kit
+    stackkit init --owner-source=local --non-interactive
     ```
+
+    `init` defaults to `basement-kit`. `--owner-source=local` creates the account-free custody set:
+
+    - A stable `ownerRef` for the deployment
+    - An **Ed25519 evidence key** for signing local rollout evidence
+    - A **step-ca** certificate authority for the runtime PKI
+    - A desired **PocketID** Owner projection, authenticated through **TinyAuth**
+
+    No Cloud profile, no email, no external account is contacted.
   </Step>
 
-  <Step title="Prepare and generate">
+  <Step title="Validate the spec">
     ```bash
-    stackkit prepare
+    stackkit validate
+    ```
+
+    Runs the embedded CUE schemas against `stack-spec.yaml` and rejects anything the release cannot generate.
+  </Step>
+
+  <Step title="Generate rollout artifacts">
+    ```bash
     stackkit generate
     ```
+
+    Produces the hash-bound Compose and OpenTofu artifacts under `.stackkit/runtime/` with pinned images and local-custody references.
   </Step>
 
-  <Step title="Preview and apply">
+  <Step title="Apply the deployment">
     ```bash
-    stackkit plan
     stackkit apply
     ```
+
+    Brings up the Basement single-node graph — Traefik, socket proxy, PocketID, TinyAuth, step-ca, Coolify, and the Node Hub — and binds the PocketID subject through TinyAuth to `ownerRef` and step-ca. Signed evidence is written to `.stackkit/state.yaml`.
   </Step>
 
-  <Step title="Check status">
+  <Step title="Verify the deployment">
     ```bash
-    stackkit status
+    stackkit verify --json
     ```
+
+    Read-only post-deployment checks that confirm the release trust set, the PocketID Owner binding, and every service healthcheck.
   </Step>
 </Steps>
 
+## Local Owner custody
+
+The Owner is the daily admin for PocketID, Coolify, StackKit Server, and Uptime Kuma. `--owner-source=local` keeps that identity entirely on the host:
+
+- The **Ed25519** key signs local Apply evidence — Cloud never sees the private key.
+- **step-ca** issues certificates for internal service-to-service TLS.
+- **PocketID** holds the human directory and passkey login.
+- **TinyAuth** provides the OIDC ForwardAuth middleware in Traefik.
+
+After the first Apply, open the printed Base Hub URL and complete the PocketID Owner setup. Bootstrap-open Base routes stay reachable on `.localhost` until you press **Protect Base Hub** in the Hub to move them behind TinyAuth.
+
+## Per-kit one-liners
+
+Use a kit-specific one-liner once you know which pattern you want:
+
+```bash
+curl -sSL https://base.stackkit.cc | sh      # Basement Kit — verified v0.8 standalone
+curl -sSL https://cloud.stackkit.cc | sh     # Cloud Kit — BYO-VPS, account-free
+curl -sSL https://install.stackkit.cc | sh   # Shared installer, choose kit at init
+```
+
+| StackKit | Use case | Status |
+|----------|----------|--------|
+| `basement-kit` | Single-environment homelab | v0.8 standalone (stable) |
+| `cloud-kit` | Cloud VM / BYO-VPS | v0.8 standalone |
+| `modern-homelab` | Hybrid local + cloud topology | v0.9 preview |
+
 ## What you get
 
-The Base Kit default provisions a homelab foundation with StackKits standards, add-ons, baselines, auth/routing defaults, generated infrastructure artifacts, and a service URL summary.
+Basement Kit's default single-node graph provisions:
+
+- **Traefik v3** with the local-custody TLS chain
+- **PocketID + TinyAuth** for account-free Owner login
+- **step-ca** internal PKI
+- **Coolify** as the PaaS surface (PostgreSQL, Redis, realtime)
+- **Node Hub** with per-service links, protection controls, and setup evidence
+- Attested Compose/OpenTofu artifacts and a signed rollout record
 
 ## Next steps
 
 <CardGroup cols={2}>
-  <Card title="CLI or TechStack" icon="route" href="https://docs.kombify.io/guides/stackkits/deploy-with-cli-or-techstack">
-    Compare the Install Engine, CLI tool, and kombify-TechStack UI.
+  <Card title="CLI or TechStack" icon="route" href="/guides/stackkits/deploy-with-cli-or-techstack">
+    Compare the standalone CLI to the optional kombify TechStack UI.
   </Card>
-  <Card title="Base Kit details" icon="house" href="https://docs.kombify.io/stackkits/kits/base-kit">
-    Learn what Base Kit deploys and how its defaults work.
+  <Card title="Basement Kit details" icon="house" href="/stackkits/kits/base-kit">
+    See exactly what Basement Kit deploys and how its defaults work.
   </Card>
-  <Card title="Node Hub" icon="grid-2" href="https://docs.kombify.io/guides/stackkits/node-hub">
+  <Card title="Node Hub" icon="grid-2" href="/guides/stackkits/node-hub">
     Use the default dashboard at `base.<domain>` after rollout.
+  </Card>
+  <Card title="PocketID" icon="key" href="/guides/stackkits/services/pocketid">
+    Configure the local Owner identity and passkey login.
   </Card>
 </CardGroup>
