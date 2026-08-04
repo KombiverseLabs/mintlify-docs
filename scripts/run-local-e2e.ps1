@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     [Alias("SkipMintCli")]
-    [switch]$SkipPreview
+    [switch]$SkipPreview,
+    [string]$Sha = $env:LOCAL_E2E_SHA
 )
 
 Set-StrictMode -Version Latest
@@ -138,7 +139,6 @@ Write-Host "navigation_pages: $($pages.Count)"
 & (Join-Path $PSScriptRoot "check-internal-links.ps1")
 & (Join-Path $PSScriptRoot "check-content-rules.ps1")
 
-if (-not $SkipMintCli) {
 if (-not $SkipPreview) {
     $npxVersion = (& npx --version 2>&1)
     if ($LASTEXITCODE -ne 0) {

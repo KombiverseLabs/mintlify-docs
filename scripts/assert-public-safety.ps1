@@ -68,7 +68,7 @@ function Add-NavigationPage {
         return
     }
     foreach ($property in $Node.PSObject.Properties) {
-        if ($property.Name -in @("pages", "groups", "tabs")) {
+        if ($property.Name -in @("pages", "groups", "tabs", "root")) {
             Add-NavigationPage -Node $property.Value -Pages $Pages
         }
     }
