@@ -87,7 +87,7 @@ jobs:
           set -euo pipefail
           go run ./cmd/stackkit registry emit-mintlify \
             --input "${RUNNER_TEMP}/registry_snapshot.json" \
-            --output-dir "${GITHUB_WORKSPACE}/guides/stackkits/services"
+            --output-dir "${GITHUB_WORKSPACE}/stackkits/apps"
 
       - name: Validate generated docs ownership
         if: steps.prereq.outputs.ready == 'true'
@@ -95,7 +95,7 @@ jobs:
         run: |
           set -euo pipefail
           fail=0
-          for f in $(grep -rl '^generated: true' guides/stackkits/services/ 2>/dev/null || true); do
+          for f in $(grep -rl '^generated: true' stackkits/apps/ 2>/dev/null || true); do
             for key in generated_by content_hash source_hash; do
               if ! grep -q "^${key}:" "$f"; then
                 echo "::error file=${f}::generated:true file missing required frontmatter '${key}'"
@@ -119,7 +119,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git checkout -B "${branch}"
 
-          paths=(guides/stackkits/services)
+          paths=(stackkits/apps)
           git add -- "${paths[@]}"
 
           if git diff --cached --quiet; then

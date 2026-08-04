@@ -8,18 +8,18 @@ icon: "shuffle"
 StackKits never lock you into a single tool. For each capability there is a **smart default** (what you get if you change nothing) and **alternatives** you can select in `stack-spec.yaml`. Defaults are resolved from your context (local vs cloud), compute tier, and domain — you can always override them.
 
 <Note>
-  This page is the canonical, implementation-backed catalog. The Base Kit ships the **platform services** below; **add-ons** layer optional capabilities on top of any kit.
+  This page is the canonical, implementation-backed catalog. Basement Kit and Cloud Kit ship the **platform services** below; **add-ons** layer optional capabilities on top of any kit — Basement, Cloud, or Modern Homelab.
 </Note>
 
-## Platform services (Base Kit)
+## Platform services
 
-These run in every Base Kit deployment, selected by the resolver per context and compute tier.
+These run in every Basement Kit and Cloud Kit deployment, selected by the resolver per context and compute tier.
 
 | Capability | Smart default | Alternatives you can select |
 |------------|---------------|-----------------------------|
 | **Reverse proxy & TLS** | Traefik v3 | — (standard edge for all kits) |
 | **App platform** | Coolify | Dokploy, Komodo, `standalone-compose` |
-| **Container / compose UI** | Portainer *(high tier)* | Dockge |
+| **Container management UI** | — *(covered by the app platform)* | Portainer *(high tier)*, Dockge |
 | **Forward-auth gateway** | TinyAuth | Authelia *(via `authelia` add-on)* |
 | **Identity / SSO (OIDC)** | PocketID | — |
 | **Internal PKI** | step-ca | — |
@@ -32,13 +32,13 @@ These run in every Base Kit deployment, selected by the resolver per context and
 | **Photos** | Immich | — |
 
 <Note>
-  The app platform is **context-resolved** — the Base Kit release default does not hard-pin Dokploy or Coolify. On standard and low tiers the resolver enables **Coolify**; switch with an explicit override in your spec.
+  The app platform is **context-resolved** — the release default does not hard-pin a PaaS. The resolver enables **Coolify** by default; **Komodo** is a supported drop-in switch, **Dokploy** is in draft, and **Dockge** is an experimental lightweight option. Switch with an explicit override in your spec.
 </Note>
 
 ```yaml stack-spec.yaml
-stackkit: base-kit
+stackkit: basement-kit
 
-# Override a smart default — e.g. use Dokploy instead of Coolify
+# Override a smart default — e.g. use Komodo instead of Coolify
 services:
   platform:
     provider: dokploy   # coolify | dokploy | komodo | standalone-compose
@@ -78,10 +78,14 @@ Add-ons are composable modules you stack on any kit. Each declares its compatibl
 | **Advanced auth** | `authelia` | Advanced auth server (replaces TinyAuth) |
 | **Mesh VPN** | `vpn-overlay` | Mesh VPN overlay |
 | **External access** | `tunnel` | Bypass CGNAT/DS-Lite to expose local services |
-| **High availability** | `ha` | Load balancing, VIP failover, database HA |
+| **High availability** | `ha` | HA overlay: `warm-standby` tier (continuous backup + automated restore to a standby node) or `quorum` tier (live control-plane failover) |
+
+<Note>
+  The `ha` add-on tiers are node-gated as a **technical prerequisite, not a paywall**: `warm-standby` needs at least 2 nodes (downtime = restore time), `quorum` needs at least 3 (odd-numbered) manager nodes for quorum-based failover with near-zero downtime.
+</Note>
 
 ```yaml stack-spec.yaml
-stackkit: base-kit
+stackkit: basement-kit
 
 addons:
   - monitoring       # full observability stack

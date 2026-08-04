@@ -3,7 +3,7 @@ name: Parity Gate
 on:
   pull_request:
     paths:
-      - "guides/stackkits/services/**"
+      - "stackkits/apps/**"
 
 jobs:
   check-generated-ownership:
@@ -20,7 +20,7 @@ jobs:
           fail=0
           changed_generated=()
 
-          for f in $(git diff --name-only origin/main...HEAD -- 'guides/stackkits/services/*.mdx' 2>/dev/null || true); do
+          for f in $(git diff --name-only origin/main...HEAD -- 'stackkits/apps/*.mdx' 2>/dev/null || true); do
             if [ ! -f "$f" ]; then
               continue
             fi

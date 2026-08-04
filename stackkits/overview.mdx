@@ -14,7 +14,7 @@ A StackKit combines three concepts to produce your infrastructure:
 ```mermaid
 graph TB
     subgraph Concepts["Three Concepts"]
-        SK["StackKit<br/>Architecture Pattern<br/>(base-kit, modern-homelab, ha-kit)"]
+        SK["StackKit<br/>Architecture Pattern<br/>(basement-kit, cloud-kit, modern-homelab)"]
         CTX["Node-Context<br/>Runtime Environment<br/>(local, cloud, pi)"]
         AO["Add-Ons<br/>Composable Extensions<br/>(monitoring, backup, ...)"]
     end
@@ -65,7 +65,7 @@ A StackKit is a **smart configuration system** that:
     
     ```yaml stack-spec.yaml
     version: "2.0"
-    stackkit: base-kit
+    stackkit: basement-kit
     domain: homelab.example.com
 
     addons:
@@ -83,41 +83,43 @@ A StackKit is a **smart configuration system** that:
 
 ## Available StackKits
 
-StackKits are **architecture patterns**, not node-count definitions. The public beta scope is Base Kit; Modern Homelab and High Availability remain preview until their own evidence matrices graduate.
+StackKits are **architecture patterns**, not node-count definitions. Basement Kit and Cloud Kit are the installable single-environment kits; Modern Homelab is Preview / Early Access.
 
 <CardGroup cols={3}>
-  <Card title="Base Kit" icon="house" href="https://docs.kombify.io/stackkits/kits/base-kit">
-    **Single-environment pattern**
+  <Card title="Basement Kit" icon="house" href="https://docs.kombify.io/stackkits/kits/basement-kit">
+    **Local single-environment pattern**
 
-    All services in one deployment target. Simple, predictable.
+    All services on your home network — one trust domain, one main node.
 
+    - Contexts `local` and `pi`
     - Coolify default
     - Any node count
-    - Context-aware defaults
   </Card>
 
-  <Card title="Modern Homelab Kit" icon="cloud" href="https://docs.kombify.io/stackkits/kits/modern-homelab">
+  <Card title="Cloud Kit" icon="cloud" href="https://docs.kombify.io/stackkits/kits/cloud-kit">
+    **Cloud single-environment pattern**
+
+    The same node model as Basement, on a VPS you bring.
+
+    - Context `cloud`
+    - Public ingress + Let's Encrypt
+    - BYO-VPS
+  </Card>
+
+  <Card title="Modern Homelab" icon="link" href="https://docs.kombify.io/stackkits/kits/modern-homelab">
     **Hybrid infrastructure pattern**
 
-    Bridges local and cloud environments with VPN overlay.
+    Bridges local and cloud environments through the bridge contract.
 
-    - Multi-environment
-    - Preview
-    - Coolify PaaS
+    - Preview / Early Access
+    - ≥1 local + ≥1 cloud node
     - Public + private services
   </Card>
-
-  <Card title="High Availability Kit" icon="shield-halved" href="https://docs.kombify.io/stackkits/kits/ha-kit">
-    **High-availability pattern**
-
-    Redundancy, failover, and quorum-based consensus.
-
-    - Preview
-    - Docker Swarm cluster
-    - Keepalived VIP
-    - 3+ nodes recommended
-  </Card>
 </CardGroup>
+
+<Note>
+  **High Availability is an add-on, not a kit.** Layer the [`ha` add-on](https://docs.kombify.io/stackkits/addons/high-availability) onto any kit — `warm-standby` (2+ nodes) or `quorum` (3+ odd manager nodes). The node floors are technical prerequisites, never paywalls.
+</Note>
 
 ## The three concepts
 
@@ -127,12 +129,12 @@ A StackKit defines **how services relate to each other**, not how many servers y
 
 | StackKit | Pattern | Example |
 |----------|---------|---------|
-| **base-kit** | Single-environment | 1 Pi running all services, or 3 servers sharing the same stack |
-| **modern-homelab** | Hybrid preview | Home server + cloud VPS connected via VPN |
-| **ha-kit** | HA preview | 3-node Docker Swarm with failover |
+| **basement-kit** | Local single-environment | 1 Pi running all services, or 3 servers in your basement sharing the same stack |
+| **cloud-kit** | Cloud single-environment | 1 VPS (or several cloud nodes) running the whole stack |
+| **modern-homelab** | Hybrid (Preview) | Home server + cloud VPS joined by the bridge contract |
 
 <Tip>
-  A `base-kit` StackKit can run on multiple nodes in the same environment. Preview kits define architecture patterns, not public beta support commitments.
+  A `basement-kit` or `cloud-kit` StackKit can run on multiple nodes in the same environment. Multi-node alone does not make a deployment a Modern Homelab — the bridge contract between local and cloud does.
 </Tip>
 
 ### 2. Node-Context = auto-detected environment
@@ -160,7 +162,7 @@ Add-Ons replace the old monolithic variant system. They are stackable, declare t
 | Compute & dev | `ai-workloads`, `dev-platform` |
 | Identity & access | `authelia`, `remote-desktop` |
 | Networking | `vpn-overlay`, `tunnel` |
-| Reliability | `ha` |
+| Reliability | [`ha`](https://docs.kombify.io/stackkits/addons/high-availability) (tiers: `warm-standby`, `quorum`) |
 | Home | `smart-home` |
 
 ```yaml stack-spec.yaml
@@ -196,9 +198,9 @@ The combination of StackKit × Context produces curated default configurations:
 
 | | local | cloud | pi |
 |---|---|---|---|
-| **base-kit** | Coolify, local `.home.localhost` links | Coolify or Komodo, Let's Encrypt | Lean profile, reduced services |
+| **basement-kit** | Coolify, local `.home.localhost` links | — | Lean profile, reduced services |
+| **cloud-kit** | — | Coolify or Komodo, Let's Encrypt | — |
 | **modern-homelab** | Preview | Preview | Preview |
-| **ha-kit** | Preview | Preview | Preview |
 
 ### Validation flow
 
@@ -233,55 +235,62 @@ sequenceDiagram
 
 ## StackKit comparison
 
-| Feature | base-kit | modern-homelab | ha-kit |
+| Feature | basement-kit | cloud-kit | modern-homelab |
 |---------|------|--------|-----|
-| **Pattern** | Single-environment public beta | Hybrid infrastructure preview | HA cluster preview |
-| **Container runtime** | Docker Compose | Docker + Coolify | Docker Swarm |
-| **Typical nodes** | 1 (supports N) | 2+ (multi-environment) | 3+ (odd for quorum) |
-| **Complexity** | Low | Medium | High |
-| **VPN overlay** | Optional (Add-On) | Built-in | Optional |
-| **Failover** | No | No | Yes |
-| **Best for** | First homelab, single VPS | Hybrid setups, public services | Production workloads |
+| **Pattern** | Local single-environment | Cloud single-environment | Hybrid (Preview / Early Access) |
+| **Contexts** | `local`, `pi` | `cloud` | ≥1 local + ≥1 cloud |
+| **Typical nodes** | 1 (supports N) | 1 (supports N) | 2+ (multi-environment) |
+| **Complexity** | Low | Low | Medium |
+| **Cross-environment link** | — | — | Bridge contract |
+| **Failover** | Via the [`ha` add-on](https://docs.kombify.io/stackkits/addons/high-availability) | Via the [`ha` add-on](https://docs.kombify.io/stackkits/addons/high-availability) | Via the [`ha` add-on](https://docs.kombify.io/stackkits/addons/high-availability) |
+| **Best for** | First homelab, home network | Single VPS, public services | Hybrid setups, local data + public reach |
 
 ## Choosing a StackKit
 
 <AccordionGroup>
   <Accordion title="I'm new to homelabs" icon="seedling">
-    **Use: base-kit**
+    **Use: basement-kit**
     
-    Start simple with a single-environment setup:
+    Start simple with a local single-environment setup:
     - Easy to understand
     - Minimal resource requirements
     - Great for learning
     - Add capabilities later with Add-Ons
   </Accordion>
+
+  <Accordion title="I want a cloud-only stack" icon="cloud">
+    **Use: cloud-kit**
+    
+    The same single-environment model on a VPS you bring:
+    - Public ingress by default
+    - Let's Encrypt certificates
+    - No hardware at home
+  </Accordion>
   
-  <Accordion title="I want local + cloud" icon="cloud">
-    **Use: modern-homelab**
+  <Accordion title="I want local + cloud" icon="link">
+    **Use: modern-homelab** (Preview / Early Access)
     
     For hybrid setups connecting different environments:
-    - VPN overlay connects all nodes
+    - The bridge contract connects local and cloud nodes
     - Public services via cloud nodes
     - Private services stay local
-    - Coolify manages deployments
   </Accordion>
   
   <Accordion title="I need high availability" icon="shield">
-    **Use: ha-kit**
+    **Use: the `ha` add-on** — HA is an add-on, not a kit
     
-    When downtime is unacceptable:
-    - Automatic failover
-    - Database clustering
-    - Load balancing with Keepalived
-    - Requires 3+ nodes (odd number for quorum)
+    When downtime is unacceptable, layer [High Availability](https://docs.kombify.io/stackkits/addons/high-availability) onto any kit:
+    - `warm-standby`: continuous backup + automated restore to a standby node (2+ nodes; downtime = restore time)
+    - `quorum`: etcd live failover (3+ odd manager nodes; near-zero downtime)
+    - Node floors are technical prerequisites, never paywalls
   </Accordion>
 </AccordionGroup>
 
 ## Next steps
 
 <CardGroup cols={2}>
-  <Card title="Base Kit" icon="house" href="https://docs.kombify.io/stackkits/kits/base-kit">
-    Detailed documentation for the single-environment StackKit
+  <Card title="Basement Kit" icon="house" href="https://docs.kombify.io/stackkits/kits/basement-kit">
+    Detailed documentation for the local single-environment StackKit
   </Card>
   <Card title="CUE language basics" icon="code" href="https://docs.kombify.io/stackkits/explanations/cue-architecture">
     Learn the CUE language used in StackKits
