@@ -6,11 +6,36 @@ icon: microchip
 ---
 
 
-The **Modern Homelab Kit** brings multi-node hybrid infrastructure to your homelab. Designed for advanced users who need public-facing services, cloud+local server setups, and full observability across nodes.
+The **Modern Homelab Kit** resolves an explicit **Home-and-Cloud topology** in one StackKit: a local site anchored on your on-premises hardware and a cloud site that carries the public edge, connected over an encrypted VPN overlay.
 
-<Warning>
-  **Schema-only** -- This StackKit has a CUE schema defined but is not yet functional. Use the [Base Kit](https://docs.kombify.io/stackkits/kits/base-kit) for production deployments.
-</Warning>
+Use it when a single-environment [Base Kit](/stackkits/kits/base-kit) does not fit — you need public-facing services on a VPS, applications and data staying at home, and the two halves governed as one stack.
+
+<Note>
+  Modern Homelab became functional in StackKits **v0.9.0** and now sits on the same standalone lifecycle as the Base Kit. If you only need a single-node baseline first, start with the [StackKits quickstart](/stackkits/quickstart) and the [Base Kit](/stackkits/kits/base-kit).
+</Note>
+
+## What v0.9.0 landed
+
+The Modern Homelab Kit is not a schema stub anymore. As of v0.9.0 it is a first-class product kit built on the stable v0.8 standalone lifecycle, with these guarantees:
+
+- **Explicit Home-and-Cloud topology.** The kit resolves a two-site plan — local (home) and cloud (VPS) — instead of overlaying hybrid roles on a single-environment kit.
+- **Local Owner authority.** The Owner authority that signs off on Apply, Upgrade, Backup, Restore, and Drift stays local. Techstack and Kombify Cloud remain optional orchestrators; they never become local lifecycle or Owner authority.
+- **Owner-specific federation projections.** Federation state is projected per Owner, so the cloud edge never sees the home Owner's authority material as its own.
+- **Governed warm-standby placement, no separate HA Kit.** Warm-standby placement for critical services is a governed feature of Modern Homelab itself. There is no separate "HA Kit" to install to get resilient placement across the two sites.
+- **Signed execution-channel bundles + digest-pinned process executor.** Advanced Day-2 and RIL (Remote Instruction Lane) operations run through signed execution-channel bundles executed by a digest-pinned process executor. The bundle signature and digest are the offline-verifiable boundary — you can verify what will run before it runs, without contacting a control plane.
+- **Inventory carries no secrets and no transport.** The Inventory record carries neither credentials nor transport endpoints. Credentials and transport live in the execution channel, not in the plan.
+
+### v0.9.1 storage-defaults fix
+
+If you generated a `stackkit init modern-homelab` scaffold on v0.9.0 exactly, `stackkit validate` rejected its own output with:
+
+```
+resolvedPlan.storage.hostRoots.dataRoot: requires an absolute host storage root
+```
+
+That happened because `#StackSpecV2` defaulted `storage` to `{}`, and the empty default won over unifying with `#StorageIntentV2`. Both `cloud-kit` and `modern-homelab` shipped `storage: {}` and were affected; only `basement-kit`, which spells host roots out by hand, escaped.
+
+**v0.9.1** materializes absolute host storage roots for every product kit. `stackkit validate` now accepts `stackkit init modern-homelab` output as-is. If you still see the error, upgrade the CLI — you are pinned to v0.9.0.
 
 ## Overview
 
@@ -89,7 +114,7 @@ graph TB
 - SSH access to all nodes
 
 <Warning>
-  The Modern Homelab Kit requires both cloud and local infrastructure. If you only need a single environment (local or cloud), use the [Base Kit](https://docs.kombify.io/stackkits/kits/base-kit) instead.
+  The Modern Homelab Kit requires both cloud and local infrastructure. If you only need a single environment (local or cloud), use the [Base Kit](/stackkits/kits/base-kit) instead.
 </Warning>
 
 ## Architecture deep dive
@@ -443,7 +468,7 @@ The StackKit configures firewall rules automatically:
 | **Monitoring** | OTLP collector baseline | OTLP collector + gateway planning | Collector baseline + monitoring-core |
 | **Domain Required** | No | No | Yes |
 | **Complexity** | Low | Medium | High |
-| **Status** | v1.0 (production) | vision-only | schema-only |
+| **Status** | v1.0 (production) | vision-only | v0.9 (functional; preview graduation pending) |
 
 ## Troubleshooting
 
@@ -524,10 +549,16 @@ The StackKit configures firewall rules automatically:
 ## Next steps
 
 <CardGroup cols={2}>
-  <Card title="Monitoring Setup" icon="chart-line" href="https://docs.kombify.io/stackkits/reference/monitoring">
-    Configure the PLG observability stack
+  <Card title="StackKits quickstart" icon="rocket" href="/stackkits/quickstart">
+    Single-node baseline: install the CLI, run `stackkit init`, and validate.
   </Card>
-  <Card title="Coolify Guide" icon="rocket" href="https://docs.kombify.io/guides/stackkits/services/coolify">
-    Deploy applications with Coolify
+  <Card title="Base Kit" icon="house" href="/stackkits/kits/base-kit">
+    The single-environment blueprint to start from before adopting Home-and-Cloud.
+  </Card>
+  <Card title="Monitoring setup" icon="chart-line" href="/stackkits/reference/monitoring">
+    Configure the OTLP collector baseline and optional retention tier.
+  </Card>
+  <Card title="Spec format" icon="file-code" href="/stackkits/reference/spec-format">
+    Reference for `stack-spec.yaml`, including Home-and-Cloud fields.
   </Card>
 </CardGroup>
