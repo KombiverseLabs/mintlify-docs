@@ -54,7 +54,18 @@ function Stop-PreviewProcessTree {
 }
 
 function Get-HttpResponse {
-    param([Parameter(Mandatory = $true)][uri]$Uri)
+    param(
+        [Parameter(Mandatory = $true)][uri]$Uri,
+        # Only the forbidden-route probe may pass this. The mint dev server
+        # answers some absent paths by closing the connection instead of
+        # returning a status, which surfaces as "The request was aborted: The
+        # connection was closed unexpectedly" with a null Response and used to
+        # abort the whole gate. For a route that must NOT exist, a refused or
+        # dropped connection is stronger evidence of absence than a 404, so it
+        # is reported as status 0 and treated as absent. The reachability probe
+        # must never use this: there a dropped connection is a real failure.
+        [switch]$TreatConnectionFailureAsAbsent
+    )
 
     try {
         return Invoke-WebRequest `
@@ -66,6 +77,12 @@ function Get-HttpResponse {
     catch {
         $response = $_.Exception.Response
         if ($null -eq $response) {
+            if ($TreatConnectionFailureAsAbsent) {
+                return [pscustomobject]@{
+                    StatusCode = 0
+                    Content = ""
+                }
+            }
             throw
         }
         return [pscustomobject]@{
@@ -136,11 +153,13 @@ try {
 
     foreach ($path in @($policy.remoteForbiddenPaths)) {
         $uri = [uri]($baseUrl + [string]$path)
-        $response = Get-HttpResponse -Uri $uri
-        if ([int]$response.StatusCode -notin @(404, 410)) {
+        $response = Get-HttpResponse -Uri $uri -TreatConnectionFailureAsAbsent
+        # 0 means the connection was refused or dropped - see Get-HttpResponse.
+        if ([int]$response.StatusCode -notin @(0, 404, 410)) {
             throw "Local preview exposes forbidden route $uri with status $($response.StatusCode)"
         }
-        Write-Host "local_forbidden_route_absent: $uri ($($response.StatusCode))"
+        $observed = if ([int]$response.StatusCode -eq 0) { "connection-refused" } else { [string]$response.StatusCode }
+        Write-Host "local_forbidden_route_absent: $uri ($observed)"
     }
 
     Write-Host "local_http_smoke: PASS"
