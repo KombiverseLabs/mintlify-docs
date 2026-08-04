@@ -1,0 +1,55 @@
+---
+title: "SpeechKit"
+description: "Windows-first open-source voice framework — dictation, voice commands, and realtime voice dialogue for your own products"
+sidebarTitle: "Overview"
+icon: microphone
+---
+
+**SpeechKit** is an open-source, Windows-first voice framework for products that need dictation, voice commands, and realtime voice dialogue — without coupling every use case to one desktop app or one hosted API.
+
+<Note>
+  SpeechKit is in active **beta**. Public APIs, config keys, and defaults can still change between minor releases; use version pins in production. It is 100% open source (Apache 2.0) at [github.com/kombifyio/SpeechKit](https://github.com/kombifyio/SpeechKit) — every feature is available self-hosted, with your own provider keys. There is no hosted SpeechKit service operated by kombify.
+</Note>
+
+## One framework, four modules
+
+| Module | What it is | Use it when |
+| --- | --- | --- |
+| **Local-first Go backend** | Embeddable Go runtime (`pkg/speechkit`) with mode contracts, provider profiles, routing policy, and reusable Dictation, Assist, and Voice Agent services | You want voice features inside your own Go product, internal tool, or automation host |
+| **Self-host Server** | Linux server runtime that wraps the same backend behind HTTP and WebSocket APIs | You need a durable process for your own clients, teams, or centrally managed provider configuration |
+| **Agent tools** | An MCP server and CLI that expose docs, validation, scaffolding, diagnostics, and authenticated server management to coding agents | You want an AI agent to inspect the framework, generate starters, or operate a server |
+| **Windows Client** | Public installer and portable release assets | You want a ready-to-run desktop experience, a provider test bench, or a server-connected workstation |
+
+## Three strict modes
+
+All modules share the same three modes:
+
+| Mode | Purpose | Boundary |
+| --- | --- | --- |
+| **Dictation** | Turn speech into text | STT only — no LLM rewriting, no utilities |
+| **Assist** | Turn speech or text into one useful result | Codeword, utility, or LLM output with optional spoken reply |
+| **Voice Agent** | Run realtime audio-to-audio dialogue | Live conversation for brainstorming, support, and fast follow-ups |
+
+**Hands-Free** is not a fourth mode — it is the activation and voice-output layer over the three modes: wake-word activation, microphone capture, auto-end policy, and optional speaker output. **Words & Replacements** are the customization axis: teach SpeechKit your terms, and define deterministic text, command, snippet, and template transformations. Speaker diarization and identification are add-on capabilities over the same modes.
+
+See [Modes & concepts](/speechkit/modes) for the full picture.
+
+## Platform support
+
+- **Desktop:** Windows 10/11 x64 (WASAPI capture/playback). macOS and Linux desktop packages are not currently supported.
+- **Server:** Linux, as a container image — see the [quickstart](/speechkit/quickstart).
+- **Providers:** local-first by design. Bring your own keys for cloud providers (OpenAI, Google/Gemini, Deepgram, AssemblyAI, Hugging Face, and more), or run local runtimes — your choice per mode.
+
+## Get started
+
+<CardGroup cols={3}>
+  <Card title="Quickstart" icon="rocket" href="/speechkit/quickstart">
+    Install the Windows Client, embed the Go backend, or run the server.
+  </Card>
+  <Card title="Modes & concepts" icon="lightbulb" href="/speechkit/modes">
+    Dictation, Assist, Voice Agent, Hands-Free, and Words & Replacements.
+  </Card>
+  <Card title="Configuration" icon="sliders" href="/speechkit/configuration">
+    config.toml, provider keys, and server settings.
+  </Card>
+</CardGroup>

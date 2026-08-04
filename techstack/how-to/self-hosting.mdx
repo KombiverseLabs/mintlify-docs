@@ -1,0 +1,276 @@
+---
+title: Self-hosting TechStack
+description: Deploy kombify TechStack on your own infrastructure with Docker Compose
+sidebarTitle: Self-Hosting
+icon: server
+---
+
+<Note>
+  **Self-hosting status: planned.** The open-source TechStack distribution (container images and compose files) is **not yet published**. This page describes the intended self-hosting flow so you can evaluate it ahead of the release — commands below will not work until the OSS distribution ships.
+</Note>
+
+Deploy kombify TechStack on your own server using Docker Compose. This will be the recommended self-hosting method.
+
+<Note>
+  **Requirements:** Docker 24+ and Docker Compose v2 on a Linux host. See the [official Docker installation guide](https://docs.docker.com/engine/install/) if not yet installed.
+</Note>
+
+## Quick start
+
+<Steps>
+  <Step title="Create project directory">
+    ```bash
+    mkdir -p ~/techstack && cd ~/techstack
+    mkdir -p data certs
+    ```
+  </Step>
+
+  <Step title="Create Docker Compose file">
+    Create `docker-compose.yml` with the following content:
+
+    ```yaml docker-compose.yml
+    services:
+      techstack-core:
+        image: ghcr.io/kombifyio/techstack:latest
+        container_name: techstack-core
+        restart: unless-stopped
+        ports:
+          - "5260:5260"   # REST API
+          - "5263:5263"   # gRPC (agent communication)
+        environment:
+          - TECHSTACK_PORT=5260
+          - TECHSTACK_GRPC_PORT=5263
+          - TECHSTACK_DATA_DIR=/data
+          - TECHSTACK_LOG_LEVEL=${TECHSTACK_LOG_LEVEL:-info}
+        volumes:
+          - ./data:/data
+          - ./certs:/certs
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://127.0.0.1:5260/api/v1/health"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+
+      techstack-app:
+        image: ghcr.io/kombifyio/techstack-app:latest
+        container_name: techstack-app
+        restart: unless-stopped
+        ports:
+          - "5261:5261"
+        environment:
+          - VITE_API_URL=http://techstack-core:5260
+        depends_on:
+          techstack-core:
+            condition: service_healthy
+    ```
+  </Step>
+
+  <Step title="Create environment file (optional)">
+    Create a `.env` file for customization:
+
+    ```bash .env
+    TECHSTACK_LOG_LEVEL=info
+    ```
+  </Step>
+
+  <Step title="Start services">
+    ```bash
+    docker compose up -d
+    ```
+  </Step>
+
+  <Step title="Access the dashboard">
+    Open `http://your-server:5261` in your browser.
+
+    <Warning>
+      Change the default admin password immediately after first login.
+    </Warning>
+  </Step>
+</Steps>
+
+## Architecture
+
+```mermaid
+graph TB
+    subgraph Docker["Docker Host"]
+        subgraph Compose["docker-compose.yml"]
+            Core["techstack-core<br/>Port: 5260 (API)"]
+            App["techstack-app<br/>Port: 5261 (UI)"]
+            gRPC["gRPC Server<br/>Port: 5263"]
+        end
+
+        subgraph Volumes
+            Data["./data (PocketBase / SQLite)"]
+            Certs["./certs (mTLS certificates)"]
+        end
+
+        Core --> Data
+        Core --> Certs
+        App --> Core
+    end
+
+    subgraph External["External"]
+        Browser["Browser"]
+        Agents["Node Agents (mTLS)"]
+    end
+
+    Browser --> App
+    Agents --> gRPC
+
+    style Docker fill:#1e293b,stroke:#38bdf8,color:#f8fafc
+    style Compose fill:#1e293b,stroke:#38bdf8,color:#f8fafc
+    style Volumes fill:#1e293b,stroke:#4ade80,color:#f8fafc
+    style External fill:#1e293b,stroke:#94a3b8,color:#f8fafc
+```
+
+TechStack uses **PocketBase** (embedded SQLite) as its default database. An optional PostgreSQL connection can be configured for larger deployments. The Docker socket is mounted read-only so TechStack can manage containers on the host.
+
+## Environment variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `TECHSTACK_PORT` | `5260` | REST API port |
+| `TECHSTACK_GRPC_PORT` | `5263` | gRPC server port for agent communication |
+| `TECHSTACK_DATA_DIR` | `/data` | Data directory (PocketBase/SQLite storage) |
+| `TECHSTACK_LOG_LEVEL` | `info` | Log verbosity: `debug`, `info`, `warn`, `error` |
+| `TECHSTACK_PUBLIC_ORIGIN` | - | Canonical external origin when hosted behind a domain |
+
+## Agent installation
+
+To manage remote nodes, install the kombify agent on each target machine. Agents connect to TechStack via gRPC with mTLS authentication.
+
+<Steps>
+  <Step title="Get the registration token">
+    In the TechStack dashboard, go to **Settings > Agents** and copy the registration token.
+  </Step>
+
+  <Step title="Install the agent">
+    On each node you want to manage:
+
+    ```bash
+    curl -fsSL https://install.kombify.io/agent | sudo sh -s -- \
+      --server https://your-stack-server:5263 \
+      --token YOUR_REGISTRATION_TOKEN
+    ```
+  </Step>
+
+  <Step title="Verify connection">
+    The agent should appear in the TechStack dashboard under **Nodes** within a few seconds.
+  </Step>
+</Steps>
+
+<Tip>
+  Agents use mTLS for encrypted communication. Certificates are automatically exchanged during registration and stored in the `/certs` directory on the TechStack host.
+</Tip>
+
+## Production setup with Traefik
+
+For production deployments, put TechStack behind Traefik for automatic TLS via Let's Encrypt.
+
+```yaml docker-compose.yml
+services:
+  techstack-core:
+    image: ghcr.io/kombifyio/techstack:latest
+    restart: unless-stopped
+    environment:
+      - TECHSTACK_PORT=5260
+      - TECHSTACK_GRPC_PORT=5263
+      - TECHSTACK_DATA_DIR=/data
+      - TECHSTACK_LOG_LEVEL=${TECHSTACK_LOG_LEVEL:-info}
+    volumes:
+      - ./data:/data
+      - ./certs:/certs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.stack-api.rule=Host(`api.stack.yourdomain.com`)"
+      - "traefik.http.routers.stack-api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.stack-api.loadbalancer.server.port=5260"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:5260/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  techstack-app:
+    image: ghcr.io/kombifyio/techstack-app:latest
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=http://techstack-core:5260
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.stack-app.rule=Host(`stack.yourdomain.com`)"
+      - "traefik.http.routers.stack-app.tls.certresolver=letsencrypt"
+      - "traefik.http.services.stack-app.loadbalancer.server.port=5261"
+    depends_on:
+      techstack-core:
+        condition: service_healthy
+
+networks:
+  default:
+    external: true
+    name: proxy
+```
+
+<Note>
+  When using Traefik, remove the `ports` mappings from the services -- Traefik handles routing through the Docker network. The gRPC port (5263) still needs to be exposed directly for agent connections since agents use mTLS, not HTTP.
+</Note>
+
+## Verify installation
+
+```bash
+# Check containers are running
+docker compose ps
+
+# Check API health (from the Docker host)
+curl http://127.0.0.1:5260/api/v1/health
+
+# Check logs
+docker compose logs -f techstack-core
+```
+
+A healthy response looks like:
+
+```json
+{"status": "ok"}
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Container fails to start">
+    Check logs for the specific error:
+    ```bash
+    docker compose logs techstack-core
+    ```
+
+    Common causes:
+    - **Port conflict:** Another process is using port 5260, 5261, or 5263. Change the host-side port mapping in `docker-compose.yml`.
+    - **Docker socket permission denied:** Ensure the container user has access to `/var/run/docker.sock`.
+    - **Data directory permissions:** The `/data` mount must be writable by the container process.
+  </Accordion>
+
+  <Accordion title="Dashboard not loading">
+    1. Confirm the `techstack-app` container is running: `docker compose ps`
+    2. Check that port 5261 is open in your firewall
+    3. Verify the `VITE_API_URL` points to the correct core service address
+  </Accordion>
+
+  <Accordion title="Agent cannot connect">
+    1. Ensure port 5263 is reachable from the agent host (check firewalls)
+    2. Verify mTLS certificates in `/certs` are valid and not expired
+    3. Confirm the registration token has not been rotated since the agent was installed
+  </Accordion>
+</AccordionGroup>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Deploying infrastructure" icon="rocket" href="/techstack/how-to/deploying">
+    Create your first infrastructure deployment
+  </Card>
+  <Card title="StackKits" icon="cubes" href="/stackkits/overview">
+    Learn about reusable infrastructure templates
+  </Card>
+</CardGroup>

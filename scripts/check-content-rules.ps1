@@ -24,8 +24,10 @@ $failures = [System.Collections.Generic.List[string]]::new()
 $mdxFiles = Get-ChildItem -Path $repoRoot -Recurse -Include *.mdx -File |
     Where-Object { $_.FullName -notmatch '\\node_modules\\' }
 
+$rootPrefix = $repoRoot.TrimEnd('\') + '\'
+
 foreach ($file in $mdxFiles) {
-    $relativePath = [System.IO.Path]::GetRelativePath($repoRoot, $file.FullName).Replace('\', '/')
+    $relativePath = $file.FullName.Substring($rootPrefix.Length).Replace('\', '/')
     $content = Get-Content -LiteralPath $file.FullName -Raw
 
     foreach ($rule in $rules) {
@@ -34,7 +36,7 @@ foreach ($file in $mdxFiles) {
         }
         $ruleMatches = [regex]::Matches($content, $rule.Pattern)
         if ($ruleMatches.Count -gt 0) {
-            $failures.Add("${relativePath}: '$($ruleMatches[0].Value)' — $($rule.Reason)") | Out-Null
+            $failures.Add("${relativePath}: '$($ruleMatches[0].Value)' - $($rule.Reason)") | Out-Null
         }
     }
 }

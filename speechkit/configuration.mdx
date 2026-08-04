@@ -1,0 +1,48 @@
+---
+title: "Configuration"
+description: "config.toml, provider keys, and server settings for SpeechKit"
+sidebarTitle: "Configuration"
+icon: sliders
+---
+
+SpeechKit is configured through a `config.toml` file plus environment variables for secrets. The same configuration model applies to the Windows Client, the embedded Go backend (`pkg/speechkit/hostconfig`), and the self-hosted server.
+
+## Providers — bring your own keys
+
+SpeechKit is local-first and never requires a kombify account. Enable exactly the providers you want:
+
+| Environment variable | Enables |
+| --- | --- |
+| `OPENAI_API_KEY` | OpenAI STT / LLM / TTS |
+| `GOOGLE_AI_API_KEY` | Gemini Assist + Gemini Live (Voice Agent) |
+| `DEEPGRAM_API_KEY` | Deepgram STT + streaming diarization |
+| `ASSEMBLYAI_API_KEY` | AssemblyAI STT + diarization/identification |
+| `HF_TOKEN` | Hugging Face STT |
+
+All provider keys are optional — local runtimes work without any cloud key. In the Windows Client, providers are set up and validated through the settings UI and test bench.
+
+## Desktop settings
+
+Desktop UI settings live under `[ui]` in `config.toml` and are primarily edited through **Settings → General** in the Windows Client. Example:
+
+```toml
+[ui]
+quick_note_capture_mode = "meetings_notes"
+```
+
+`quick_note_capture_mode` controls what the overlay/dashboard note action does: `meetings_notes` (default) starts a long-running note capture with system audio and Markdown output; `quick_notes` keeps the classic lightweight Quick Notes window.
+
+Hands-Free activation is configured under `[hands_free]` — wake activation, target mode, auto-end behavior, and voice output.
+
+## Server configuration
+
+The self-hosted server reads `/etc/speechkit/config.toml`; start from `deploy/config/server.example.toml` in the repository.
+
+- **Secrets** come from environment variables whose names are referenced in the config file — the server never stores keys in the config itself.
+- **Auth:** bearer-token mode (`SPEECHKIT_SERVER_TOKEN`) or edge-auth mode when running behind your own gateway.
+- **Network:** CORS and origin controls are built in; health (`/healthz`) and readiness routes report per-mode capability, credentials, and model-artifact status.
+- **API contract:** the server ships an OpenAPI specification for the REST endpoints (Dictation, Assist) and uses WebSocket sessions for Voice Agent.
+
+<Note>
+  Readiness is machine-readable by design: intentionally disabled optional features report as ready-neutral, so your monitoring can distinguish "not configured" from "broken".
+</Note>

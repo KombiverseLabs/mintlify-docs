@@ -1,0 +1,432 @@
+---
+title: Spec-Driven Infrastructure
+description: Define your intent in YAML, let kombify handle implementation
+sidebarTitle: Spec-Driven
+---
+
+**Spec-driven infrastructure** is the core principle behind kombify — you describe *what* you want, not *how* it should be implemented.
+
+## The Core Concept
+
+```mermaid
+flowchart LR
+    subgraph Intent["Your Intent"]
+        YAML["stack-spec.yaml<br/><i>~20 lines</i>"]
+    end
+
+    subgraph Kombify["kombify Transforms"]
+        Unifier["Unifier Engine"]
+        CUE["CUE Schemas"]
+        ToFu["OpenTofu"]
+        
+        Unifier --> CUE --> ToFu
+    end
+
+    subgraph Reality["Your Infrastructure"]
+        Docker["Docker Compose<br/><i>~200 lines</i>"]
+        Traefik["Traefik Config<br/><i>~100 lines</i>"]
+        SSL["SSL Certs<br/><i>Auto-managed</i>"]
+        DNS["DNS Records<br/><i>Auto-created</i>"]
+    end
+
+    YAML --> Unifier
+    ToFu --> Docker & Traefik & SSL & DNS
+
+    style Intent fill:#1e293b,stroke:#4ade80,color:#f8fafc
+    style Kombify fill:#1e293b,stroke:#4ade80,color:#f8fafc
+    style Reality fill:#1e293b,stroke:#4ade80,color:#f8fafc
+```
+
+## What You Write
+
+```yaml stack-spec.yaml
+# This is ALL you write
+version: "1.0"
+stackkit: basement-kit
+
+meta:
+  name: my-homelab
+  domain: home.example.com
+
+nodes:
+  - name: proxmox-01
+    type: hypervisor
+    connection:
+      host: 192.168.1.100
+
+services:
+  - traefik      # Reverse proxy
+  - authelia     # Single sign-on
+  - homepage     # Dashboard
+  - immich       # Photo management
+```
+
+## What kombify Generates
+
+<Tabs>
+  <Tab title="Docker Compose">
+    ```yaml docker-compose.yml
+    version: "3.8"
+    
+    services:
+      traefik:
+        image: traefik:v3.0
+        container_name: traefik
+        restart: unless-stopped
+        ports:
+          - "80:80"
+          - "443:443"
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+          - ./traefik:/etc/traefik
+          - ./letsencrypt:/letsencrypt
+        networks:
+          - proxy
+        labels:
+          - "traefik.enable=true"
+          # ... 50+ more lines of configuration
+      
+      authelia:
+        image: authelia/authelia:4.38
+        container_name: authelia
+        restart: unless-stopped
+        depends_on:
+          - traefik
+        volumes:
+          - ./authelia:/config
+        networks:
+          - proxy
+        labels:
+          - "traefik.enable=true"
+          - "traefik.http.routers.authelia.rule=Host(`auth.home.example.com`)"
+          # ... more configuration
+      
+      # ... more services
+    
+    networks:
+      proxy:
+        external: true
+    ```
+  </Tab>
+  <Tab title="Traefik Config">
+    ```yaml traefik/traefik.yml
+    api:
+      dashboard: true
+      insecure: false
+    
+    entryPoints:
+      http:
+        address: ":80"
+        http:
+          redirections:
+            entryPoint:
+              to: https
+              scheme: https
+      https:
+        address: ":443"
+        http:
+          tls:
+            certResolver: letsencrypt
+    
+    certificatesResolvers:
+      letsencrypt:
+        acme:
+          email: admin@home.example.com
+          storage: /letsencrypt/acme.json
+          httpChallenge:
+            entryPoint: http
+    
+    providers:
+      docker:
+        endpoint: "unix:///var/run/docker.sock"
+        exposedByDefault: false
+        network: proxy
+    ```
+  </Tab>
+  <Tab title="OpenTofu">
+    ```hcl main.tf
+    terraform {
+      required_providers {
+        docker = {
+          source  = "kreuzwerker/docker"
+          version = "~> 3.0"
+        }
+      }
+    }
+    
+    resource "docker_network" "proxy" {
+      name = "proxy"
+    }
+    
+    resource "docker_container" "traefik" {
+      name  = "traefik"
+      image = "traefik:v3.0"
+      
+      ports {
+        internal = 80
+        external = 80
+      }
+      
+      ports {
+        internal = 443
+        external = 443
+      }
+      
+      # ... extensive configuration
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## The Unifier Engine
+
+The Unifier is the heart of kombify's spec-driven approach. It transforms your intent into executable infrastructure.
+
+```mermaid
+flowchart TB
+    subgraph Input["Input"]
+        YAML["stack-spec.yaml"]
+        Kit["StackKit Selection"]
+    end
+
+    subgraph Unifier["Unifier Engine"]
+        direction TB
+        Parse["1. Parse<br/><i>YAML → Go structs</i>"]
+        Validate["2. Validate<br/><i>CUE schema check</i>"]
+        Resolve["3. Resolve<br/><i>Defaults + Dependencies</i>"]
+        Generate["4. Generate<br/><i>Create IaC artifacts</i>"]
+        
+        Parse --> Validate --> Resolve --> Generate
+    end
+
+    subgraph Validation["StackKit Schemas"]
+        CUE["CUE Definitions"]
+        Constraints["Constraints"]
+        Defaults["Default Values"]
+    end
+
+    subgraph Output["Generated Artifacts"]
+        TF["main.tf"]
+        Vars["tfvars.json"]
+        Compose["docker-compose.yml"]
+        Configs["Service configs/"]
+    end
+
+    YAML --> Parse
+    Kit --> Validate
+    CUE & Constraints & Defaults --> Validate
+    Generate --> TF & Vars & Compose & Configs
+
+    style Input fill:#1e293b,stroke:#38bdf8,color:#f8fafc
+    style Unifier fill:#1e293b,stroke:#fbbf24,color:#f8fafc
+    style Validation fill:#1e293b,stroke:#f472b6,color:#f8fafc
+    style Output fill:#1e293b,stroke:#4ade80,color:#f8fafc
+```
+
+### Pipeline Stages
+
+<Steps>
+  <Step title="Parse" icon="file-code">
+    The YAML file is parsed into Go structs. Invalid YAML syntax is caught here.
+    
+    ```bash
+    # Example error
+    Error: YAML parse error at line 15
+    Expected string value, got integer
+    ```
+  </Step>
+  
+  <Step title="Validate" icon="check-circle">
+    Configuration is validated against CUE schemas from the selected StackKit.
+    
+    ```bash
+    ✓ Required fields present
+    ✓ Service names valid
+    ✓ Port ranges valid
+    ✓ Dependencies resolvable
+    ```
+  </Step>
+  
+  <Step title="Resolve" icon="wand-magic-sparkles">
+    Missing values are filled with StackKit defaults. Dependencies are resolved.
+    
+    ```yaml
+    # You wrote:
+    services:
+      - authelia
+    
+    # Resolved to:
+    services:
+      authelia:
+        image: authelia/authelia:4.38
+        depends_on: [traefik, redis]
+      traefik:  # Auto-added (dependency)
+        image: traefik:v3.0
+      redis:    # Auto-added (dependency)
+        image: redis:7
+    ```
+  </Step>
+  
+  <Step title="Generate" icon="code">
+    Infrastructure as Code artifacts are generated:
+    - OpenTofu HCL files
+    - Docker Compose configurations
+    - Service-specific configs (Traefik rules, Authelia config, etc.)
+  </Step>
+</Steps>
+
+## Two-File System
+
+kombify uses a clear separation between **user intent** and **system output**:
+
+```mermaid
+graph LR
+    subgraph User["User-Managed"]
+        YAML["stack-spec.yaml<br/><i>Your intent</i>"]
+    end
+
+    subgraph System["System-Generated"]
+        Resolved["resolved-spec.yaml<br/><i>Resolved config</i>"]
+        IaC["Generated IaC/<br/><i>Artifacts</i>"]
+    end
+
+    YAML -->|"Unifier"| Resolved
+    Resolved -->|"Generator"| IaC
+
+    style User fill:#1e293b,stroke:#38bdf8,color:#f8fafc
+    style System fill:#1e293b,stroke:#94a3b8,color:#f8fafc
+```
+
+<Warning>
+  **Never edit generated files directly.** All changes should go through `stack-spec.yaml`. Generated files are overwritten on each deployment.
+</Warning>
+
+| File | Owner | Purpose |
+|------|-------|---------|
+| `stack-spec.yaml` | You | Your infrastructure intent |
+| `resolved-spec.yaml` | Unifier | Resolved, normalized configuration |
+| `generated/*` | Generator | OpenTofu, Compose, configs |
+
+## Validation in Action
+
+```mermaid
+flowchart TD
+    Input["stack-spec.yaml"]
+    
+    Input --> Check1{"YAML valid?"}
+    Check1 -->|No| Err1["Syntax Error"]
+    Check1 -->|Yes| Check2{"Required fields?"}
+    
+    Check2 -->|No| Err2["Missing: 'nodes'"]
+    Check2 -->|Yes| Check3{"Types correct?"}
+    
+    Check3 -->|No| Err3["'port' must be integer"]
+    Check3 -->|Yes| Check4{"Dependencies satisfied?"}
+    
+    Check4 -->|No| Err4["'authelia' requires 'traefik'"]
+    Check4 -->|Yes| Check5{"No conflicts?"}
+    
+    Check5 -->|No| Err5["Port 443 used twice"]
+    Check5 -->|Yes| Success["✓ Validation Passed"]
+
+    style Input fill:#1e293b,stroke:#38bdf8,color:#f8fafc
+    style Success fill:#1e293b,stroke:#4ade80,color:#f8fafc
+    style Err1 fill:#1e293b,stroke:#ef4444,color:#f8fafc
+    style Err2 fill:#1e293b,stroke:#ef4444,color:#f8fafc
+    style Err3 fill:#1e293b,stroke:#ef4444,color:#f8fafc
+    style Err4 fill:#1e293b,stroke:#ef4444,color:#f8fafc
+    style Err5 fill:#1e293b,stroke:#ef4444,color:#f8fafc
+```
+
+### Validation Output
+
+```bash
+$ kombify validate
+
+Validating stack-spec.yaml...
+
+✓ YAML syntax valid
+✓ Version: 1.0 (supported)
+✓ StackKit: basement-kit (found)
+✓ Required fields present
+✓ Node 'proxmox-01': configuration valid
+✓ Service dependencies:
+  ├─ traefik: no dependencies
+  ├─ authelia: depends on [traefik] ✓
+  ├─ homepage: depends on [traefik] ✓
+  └─ immich: depends on [traefik, postgres] ✓
+✓ Port conflicts: none detected
+✓ Network configuration: valid
+
+Validation successful! Ready to deploy.
+```
+
+## Why Spec-Driven?
+
+<Columns cols={3}>
+  <Card title="Reduced Complexity" icon="minimize">
+    **Traditional:** 500+ lines across multiple files
+    
+    **kombify:** 20 lines in one file
+    
+    You describe intent, not implementation.
+  </Card>
+  <Card title="Consistency" icon="equals">
+    Every change goes through the same pipeline:
+    
+    1. Validate
+    2. Resolve
+    3. Generate
+    4. Apply
+    
+    No manual drift.
+  </Card>
+  <Card title="Reproducibility" icon="rotate">
+    Your `stack-spec.yaml` is the single source of truth:
+    
+    - Version-controllable
+    - Shareable
+    - Disaster-recoverable
+  </Card>
+</Columns>
+
+## Example: Adding a Service
+
+<Tabs>
+  <Tab title="Without kombify">
+    1. Research which image to use
+    2. Find compatible configuration examples
+    3. Create Docker Compose entry
+    4. Configure Traefik labels for routing
+    5. Set up SSL certificate
+    6. Configure authentication with Authelia
+    7. Add to Homepage dashboard
+    8. Test everything works together
+    
+    **Time:** 30-60 minutes
+  </Tab>
+  <Tab title="With kombify">
+    ```yaml
+    # Add one line:
+    services:
+      - jellyfin
+    ```
+    
+    ```bash
+    kombify apply
+    ```
+    
+    **Time:** 30 seconds
+  </Tab>
+</Tabs>
+
+## Next Steps
+
+<Columns cols={2}>
+  <Card title="Explore StackKits" icon="boxes-stacked" href="/concepts/stackkits">
+    Learn about the pre-validated blueprints that power spec-driven infrastructure
+  </Card>
+  <Card title="Quick Start" icon="rocket" href="/quickstart">
+    Deploy your first stack in 5 minutes
+  </Card>
+</Columns>

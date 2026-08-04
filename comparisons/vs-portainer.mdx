@@ -1,0 +1,306 @@
+---
+title: "kombify vs Portainer"
+description: "A detailed comparison of kombify and Portainer for homelab and self-hosted infrastructure management"
+sidebarTitle: "vs Portainer"
+icon: "scale-balanced"
+---
+
+
+Both kombify and Portainer help manage containerized infrastructure, but they serve different purposes and excel in different scenarios.
+
+<Note>
+  **TL;DR:** Use kombify for full lifecycle infrastructure management with testing. Use Portainer for quick container visibility and management.
+</Note>
+
+## Quick Comparison
+
+| Feature | kombify | Portainer |
+|---------|---------|-----------|
+| **Primary Focus** | Infrastructure lifecycle | Container management |
+| **Learning Curve** | Guided (wizard-based) | Low |
+| **IaC Support** | Native (CUE + YAML spec) | Limited |
+| **Pre-deployment Testing** | Built-in simulation | No |
+| **Templates** | StackKits (composable) | Stacks (Compose files) |
+| **Multi-node** | All tiers | Business/Enterprise |
+| **Pricing** | Free tier + paid | Free CE + Business |
+
+## Detailed Analysis
+
+### Philosophy & Approach
+
+<Columns cols={2}>
+  <Card title="kombify" icon="wand-magic-sparkles">
+    **Intent-driven & Spec-first**
+    
+    You describe *what* you want, and kombify figures out *how* to deploy it safely. Everything flows from a single `stack-spec.yaml` specification.
+    
+    - Test before deploy
+    - Declarative configuration
+    - Full audit trail
+    - Drift detection
+  </Card>
+  <Card title="Portainer" icon="boxes-stacked">
+    **UI-first & Immediate**
+    
+    You interact directly with containers through a visual interface. Changes are made in real-time through the GUI.
+    
+    - Immediate feedback
+    - Visual management
+    - Lower abstraction
+    - Direct control
+  </Card>
+</Columns>
+
+### Infrastructure as Code
+
+<Tabs>
+  <Tab title="kombify">
+    kombify is built around Infrastructure as Code principles:
+    
+    ```yaml
+    # stack-spec.yaml - Your entire homelab defined
+    stackkit: basement-kit
+    
+    nodes:
+      - name: server-01
+        type: local
+        connection:
+          host: 192.168.1.100
+    
+    services:
+      - traefik
+      - authelia
+      - immich
+      - homepage
+    
+    config:
+      domain: home.example.com
+      email: admin@example.com
+      authelia:
+        default_policy: two_factor
+    ```
+    
+    **Benefits:**
+    - Version controlled (Git)
+    - Reproducible deployments
+    - Easy disaster recovery
+    - Team collaboration via PRs
+    - Automated rollbacks
+  </Tab>
+  <Tab title="Portainer">
+    Portainer uses Compose files as stacks:
+    
+    ```yaml
+    # docker-compose.yml
+    version: '3'
+    services:
+      traefik:
+        image: traefik:v3.0
+        ports:
+          - "80:80"
+        # ... manual configuration
+    ```
+    
+    **Limitations:**
+    - No dependency resolution
+    - Manual service integration
+    - No validation before deploy
+    - State management is manual
+  </Tab>
+</Tabs>
+
+### Pre-Deployment Testing
+
+<AccordionGroup>
+  <Accordion title="kombify: Built-in Simulation">
+    **kombify Simulate** lets you test your entire configuration in virtual environments before touching real infrastructure:
+    
+    ```bash
+    # Create a simulation from your config
+    kombify simulate create --from stack-spec.yaml
+
+    # Run automated tests
+    kombify simulate test
+
+    # SSH in to explore
+    kombify simulate ssh server-01
+    
+    # Satisfied? Deploy to production
+    kombify deploy
+    ```
+    
+    ✅ Catch configuration errors early  
+    ✅ Test service interactions  
+    ✅ Validate networking  
+    ✅ Train without risk
+  </Accordion>
+  
+  <Accordion title="Portainer: No Built-in Simulation">
+    Portainer deploys directly to your infrastructure:
+    
+    - ❌ No staging environment included
+    - ❌ Test in production (risky)
+    - ❌ Rollback requires manual backup
+    
+    You'd need to set up a separate test environment manually.
+  </Accordion>
+</AccordionGroup>
+
+### Templates & Reusability
+
+<Tabs>
+  <Tab title="kombify StackKits">
+    StackKits are **composable, validated templates** that encode best practices:
+    
+    ```text
+    StackKits Available:
+    ├── basement-kit      # Local single-environment
+    ├── cloud-kit         # Cloud single-environment (BYO-VPS)
+    └── modern-homelab    # Hybrid local + cloud (Preview)
+    
+    Each includes:
+    - Pre-configured services
+    - Security defaults
+    - Networking rules
+    - Add-on ecosystem
+    ```
+    
+    **Customization is layered:**
+    ```yaml
+    stackkit: basement-kit  # Kit template
+    
+    services:
+      - +grafana           # Add optional service
+      - -homepage          # Remove default service
+    
+    config:
+      traefik:             # Override specific settings
+        dashboard: true
+    ```
+  </Tab>
+  <Tab title="Portainer Stacks">
+    Portainer uses plain Compose files as templates:
+    
+    - Upload any docker-compose.yml
+    - No validation or best practices
+    - Manual variable substitution
+    - No dependency management
+    
+    **App Templates:** Portainer has a template system, but it's basic:
+    - Single-service focused
+    - No inter-service configuration
+    - No validation
+  </Tab>
+</Tabs>
+
+### Multi-Node Management
+
+| Capability | kombify | Portainer CE | Portainer Business |
+|------------|---------|--------------|-------------------|
+| Manage multiple nodes | ✅ All tiers | ❌ | ✅ |
+| Centralized deployment | ✅ | ❌ | ✅ |
+| Node health monitoring | ✅ | ❌ | ✅ |
+| Cross-node networking | ✅ | ❌ | ✅ |
+| Agent-based | ✅ (gRPC/mTLS) | N/A | ✅ (HTTP) |
+
+<Note>
+  **kombify advantage:** Multi-node is free. Portainer requires Business tier ($110/node/year).
+</Note>
+
+### When to Choose Each
+
+<CardGroup cols={2}>
+  <Card title="Choose kombify when..." icon="check" color="#22c55e">
+    - You're setting up new infrastructure
+    - You want guided, opinionated defaults
+    - Testing before deployment is important
+    - You value Infrastructure as Code
+    - You manage multiple nodes
+    - You want to avoid "configuration drift"
+    - Team collaboration is needed
+  </Card>
+  <Card title="Choose Portainer when..." icon="check" color="#3b82f6">
+    - You have existing containers to manage
+    - You need quick visual oversight
+    - Simple single-node setup
+    - You prefer GUI over YAML
+    - Immediate changes needed
+    - Learning Docker basics
+  </Card>
+</CardGroup>
+
+### Can They Work Together?
+
+Yes! Many users run both:
+
+```yaml
+# stack-spec.yaml
+services:
+  - portainer  # Include Portainer as a service
+  - traefik
+  - authelia
+```
+
+**Common pattern:**
+1. Use **kombify** for infrastructure provisioning and major deployments
+2. Use **Portainer** for day-to-day container monitoring and quick fixes
+3. Sync changes back to `stack-spec.yaml` for consistency
+
+<Warning>
+  If you use both, be careful about drift. Changes made directly in Portainer should be reflected in your `stack-spec.yaml` to maintain consistency.
+</Warning>
+
+## Migration Path
+
+### From Portainer to kombify
+
+<Steps>
+  <Step title="Export existing stacks">
+    In Portainer, download your stack Compose files.
+  </Step>
+  <Step title="Import into kombify">
+    ```bash
+    kombify import docker-compose.yml
+    ```
+    This generates a base `stack-spec.yaml`.
+  </Step>
+  <Step title="Enhance with StackKit">
+    Apply a StackKit for best practices:
+    ```yaml
+    stackkit: basement-kit
+    # Your imported services are preserved
+    ```
+  </Step>
+  <Step title="Test with Sim">
+    ```bash
+    kombify sim create
+    kombify sim test
+    ```
+  </Step>
+  <Step title="Deploy">
+    ```bash
+    kombify deploy
+    ```
+  </Step>
+</Steps>
+
+## Summary
+
+| | kombify | Portainer |
+|---|---------|-----------|
+| **Best for** | Building infrastructure right | Managing existing containers |
+| **Approach** | Spec-driven lifecycle | Real-time GUI management |
+| **Testing** | Built-in simulation | None |
+| **IaC** | First-class citizen | Optional/limited |
+| **Complexity** | Medium (wizard helps) | Low |
+| **Multi-node (free)** | ✅ Yes | ❌ No |
+
+<Tip>
+  **Our recommendation:** Start with kombify to set up your infrastructure properly, then optionally add Portainer for visual monitoring if you prefer GUIs.
+</Tip>
+
+---
+
+<Card title="Ready to try kombify?" icon="rocket" href="/quickstart">
+  Get started in 5 minutes with our quick start guide
+</Card>
