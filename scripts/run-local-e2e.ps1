@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     [Alias("SkipMintCli")]
-    [switch]$SkipPreview
+    [switch]$SkipPreview,
+    [string]$Sha = $env:LOCAL_E2E_SHA
 )
 
 Set-StrictMode -Version Latest
@@ -12,9 +13,11 @@ $mintSpec = "mint@4.2.684"
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 Set-Location -LiteralPath $repoRoot
 
-$sha = (& git rev-parse HEAD 2>&1).Trim()
-if ($LASTEXITCODE -ne 0) {
-    throw "Could not resolve git SHA: $sha"
+if ([string]::IsNullOrWhiteSpace($Sha)) {
+    $Sha = (& git rev-parse HEAD 2>&1).Trim()
+    if ($LASTEXITCODE -ne 0) {
+        $Sha = "unknown-no-git"
+    }
 }
 
 $sourcePaths = @(
@@ -95,6 +98,8 @@ function Add-PageRef {
             Add-PageRef -Node $property.Value -Pages $Pages
         } elseif ($property.Name -in @("groups", "tabs")) {
             Add-PageRef -Node $property.Value -Pages $Pages
+        } elseif ($property.Name -eq "root" -and $property.Value -is [string]) {
+            $Pages.Add($property.Value) | Out-Null
         }
     }
 }
@@ -131,6 +136,9 @@ foreach ($assetPath in @($docs.favicon, $docs.logo.light, $docs.logo.dark)) {
 Write-Host "docs_json: ok"
 Write-Host "navigation_pages: $($pages.Count)"
 
+& (Join-Path $PSScriptRoot "check-internal-links.ps1")
+& (Join-Path $PSScriptRoot "check-content-rules.ps1")
+
 if (-not $SkipPreview) {
     $npxVersion = (& npx --version 2>&1)
     if ($LASTEXITCODE -ne 0) {
@@ -139,7 +147,7 @@ if (-not $SkipPreview) {
     Write-Host "npx: $($npxVersion.Trim())"
     & npx -y $mintSpec broken-links
     if ($LASTEXITCODE -ne 0) {
-        throw "Mintlify broken-links check failed"
+        throw "Mintlify validate failed"
     }
 }
 

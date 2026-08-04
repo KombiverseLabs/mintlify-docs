@@ -1,0 +1,61 @@
+---
+title: Wallet
+description: Use the wallet-first access surface in kombify TechStack
+sidebarTitle: Wallet
+icon: key
+---
+
+The kombify TechStack wallet is an **access surface first**. It helps you open tools, manage identities, and only reveal credentials when the direct access path is not enough.
+
+<Note>
+  The wallet is organized into `Tools`, `Access`, and `Recovery`. Daily use should prefer `Open` or `Manage`; plaintext reveal is the fallback path.
+</Note>
+
+## The three sections
+
+### Tools
+
+Use `Tools` for direct launches and operational entry points.
+
+- Open a service that already uses Pocket ID, TinyAuth, or another direct access path
+- Jump to admin consoles and dashboards
+- Treat the wallet as the operator's launch surface instead of a password list
+
+### Access
+
+Use `Access` for human identities and access-management surfaces.
+
+- Review provisioned users and admin identities
+- Jump to Pocket ID or other management surfaces
+- See which access surfaces StackKits created without forcing a password reveal
+
+### Recovery
+
+Use `Recovery` for emergency material and revealable credentials.
+
+- Break-glass credentials
+- Recovery bundles and related metadata
+- Import / Export actions for revealable wallet material
+- Legacy username/password or token items that still need manual migration
+
+## Common operator flows
+
+| Goal | Section | Typical action |
+|---|---|---|
+| Open a tool | `Tools` | `Open` |
+| Manage a user or access surface | `Access` | `Manage`, `Reset`, or follow the linked portal |
+| Reveal break-glass or export credentials | `Recovery` | `Reveal`, `Download`, or `Import / Export` |
+
+## StackKits integration
+
+StackKits sync user-relevant access inventory into the wallet.
+
+- Tool launch entries surface in `Tools`
+- Human identities and admin surfaces land in `Access`
+- Break-glass and reveal-only material land in `Recovery`
+
+Machine secrets still stay lean and usually remain in StackKits `sops-age` / `secret://...` backends. TechStack surfaces the user-relevant access path rather than turning every deployment secret into a wallet item.
+
+## Recovery note
+
+Break-glass workflows now surface inside the main wallet page under `Recovery`. Older design notes that mention dedicated `/wallet/break-glass` routes describe an earlier plan, not the current UI contract.

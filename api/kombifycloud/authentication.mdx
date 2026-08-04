@@ -1,0 +1,47 @@
+---
+title: Cloud authentication
+description: Auth0 Universal Login and API bearer-token contract
+---
+
+
+<Note>
+  kombify uses two Auth0 domains: `login.kombify.io` is the token issuer users and integrations interact with; `kombify.eu.auth0.com` is the underlying Auth0 tenant domain that appears in backend SDK configurations. Tokens are always issued by `https://login.kombify.io/`.
+</Note>
+
+## User authentication
+
+Users authenticate through Auth0 Universal Login and SSO at `https://login.kombify.io/`. The Cloudflare Edge gateway at `api.kombify.io` accepts Auth0 access tokens with:
+
+- `iss`: `https://login.kombify.io/`
+- `aud`: `https://api.kombify.io`
+
+Send the token on API requests:
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  https://api.kombify.io/v1/me
+```
+
+## Machine-to-machine integrations
+
+Approved service integrations use Auth0 client credentials:
+
+```bash
+TOKEN=$(curl -s -X POST https://login.kombify.io/oauth/token \
+  -H "Content-Type: application/json" \
+  -d '{
+    "grant_type": "client_credentials",
+    "client_id": "YOUR_CLIENT_ID",
+    "client_secret": "YOUR_CLIENT_SECRET",
+    "audience": "https://api.kombify.io"
+  }' | jq -r '.access_token')
+```
+
+## Validate token
+
+Validation happens at `api.kombify.io`. Origins receive signed identity headers from the edge and do not receive the original `Authorization` header.
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  https://api.kombify.io/v1/me
+```

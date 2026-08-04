@@ -1,0 +1,204 @@
+---
+title: Self-hosting Simulate
+description: Deploy kombify Simulate on your own infrastructure with Docker Compose
+sidebarTitle: Self-Hosting
+icon: server
+---
+
+
+<Note>
+  **Status: coming soon.** The self-hosted Simulate distribution is not yet published (the publish gate is pending). This page describes the intended self-hosting flow so you know what to expect — the image and steps below will go live once the distribution ships.
+</Note>
+
+Run kombify Simulate on your own server using Docker Compose. Simulate is a local-first development and training tool.
+
+<Note>
+  **Requirements:** Docker 24+ and Docker Compose v2 on Linux, macOS, or Windows with WSL2.
+</Note>
+
+## Quick start
+
+<Steps>
+  <Step title="Create project directory">
+    ```bash
+    mkdir -p ~/kombifysim && cd ~/kombifysim
+    mkdir -p data
+    ```
+  </Step>
+
+  <Step title="Create Docker Compose file">
+    ```yaml docker-compose.yml
+    services:
+      kombifysim:
+        image: ghcr.io/kombifyio/simulate:latest
+        container_name: kombifysim
+        restart: unless-stopped
+        ports:
+          - "5270:5270"           # REST API
+          - "30000-39999:30000-39999"  # SSH access to simulated nodes
+        environment:
+          - KOMBISIM_PORT=5270
+          - KOMBISIM_DATA_DIR=/data
+          - KOMBISIM_LOG_LEVEL=${KOMBISIM_LOG_LEVEL:-info}
+          - KOMBISIM_ENGINE=${KOMBISIM_ENGINE:-container}
+        volumes:
+          - ./data:/data
+          - /var/run/docker.sock:/var/run/docker.sock
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://127.0.0.1:5270/health"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+    ```
+  </Step>
+
+  <Step title="Start the service">
+    ```bash
+    docker compose up -d
+    ```
+  </Step>
+
+  <Step title="Verify it's running">
+    ```bash
+    curl http://127.0.0.1:5270/health
+    ```
+
+    <Tip>
+      Self-hosted Simulate uses local admin authentication. On first start, open the dashboard and complete the first-run setup to create your admin account.
+    </Tip>
+  </Step>
+</Steps>
+
+## Port mapping
+
+| Port | Purpose |
+|------|---------|
+| `5270` | REST API and web interface |
+| `30000-39999` | SSH access to simulated nodes |
+
+The SSH port range supports up to 10,000 simultaneous simulated nodes. Each node is assigned a unique port within this range when created.
+
+<Warning>
+  The SSH port range is `30000-39999`. Older documentation may reference `2222-2322` -- this is outdated and incorrect.
+</Warning>
+
+## Environment variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `KOMBISIM_PORT` | `5270` | API server port |
+| `KOMBISIM_DATA_DIR` | `/data` | Data directory |
+| `KOMBISIM_LOG_LEVEL` | `info` | Log verbosity: `debug`, `info`, `warn`, `error` |
+| `KOMBISIM_ENGINE` | `container` | Simulation engine: `container`, `qemu`, `external` (see below) |
+| `KOMBISIM_INCUS_ENABLED` | `false` | Enable the Incus engine |
+
+## Engine selection
+
+Simulate supports multiple engines for running simulated nodes. Set the engine via the `KOMBISIM_ENGINE` environment variable.
+
+<Tabs>
+  <Tab title="Docker (default)">
+    Uses Docker containers to simulate nodes. Requires the Docker socket to be mounted.
+
+    ```yaml
+    environment:
+      - KOMBISIM_ENGINE=container
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ```
+
+    Best for: local development, CI/CD pipelines, lightweight simulations.
+  </Tab>
+  <Tab title="Incus">
+    Uses Incus system containers for higher-fidelity simulations.
+
+    ```yaml
+    environment:
+      - KOMBISIM_INCUS_ENABLED=true
+    ```
+
+    Best for: scenarios requiring systemd, full init systems, or closer-to-production behavior.
+  </Tab>
+  <Tab title="QEMU (experimental)">
+    Runs full virtual machines for maximum fidelity. QEMU support is experimental and requires a separate QEMU backend service (`KOMBISIM_QEMU_BACKEND_URL`).
+
+    ```yaml
+    environment:
+      - KOMBISIM_ENGINE=qemu
+    ```
+
+    Best for: kernel-level testing, OS-specific scenarios, hardware simulation.
+  </Tab>
+  <Tab title="Cloud providers">
+    Provisions real cloud VMs (Azure, DigitalOcean) as simulation nodes. Cloud providers are configured in the Simulate dashboard with your provider credentials — no engine environment variable needed.
+
+    Best for: cloud-realistic testing, multi-region scenarios, production-like validation.
+  </Tab>
+</Tabs>
+
+<Note>
+  The Docker engine is the default and requires no additional setup beyond mounting the Docker socket. Cloud providers (Azure, DigitalOcean) require provider credentials configured in Simulate.
+</Note>
+
+## Verify installation
+
+```bash
+# Check the container is running
+docker compose ps
+
+# Check health endpoint
+curl http://127.0.0.1:5270/health
+
+# View logs
+docker compose logs -f kombifysim
+```
+
+## Data persistence
+
+Simulate stores its state under the `/data` directory. The `./data` bind mount ensures data survives container restarts and upgrades.
+
+To back up your Simulate data:
+
+```bash
+# Stop the container first for a consistent backup
+docker compose stop kombifysim
+cp -r ./data ./data-backup-$(date +%Y%m%d)
+docker compose start kombifysim
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Container fails to start">
+    ```bash
+    docker compose logs kombifysim
+    ```
+
+    Common causes:
+    - **Port conflict:** Another process is using port 5270 or ports in the 30000-39999 range.
+    - **Docker socket not available:** Ensure `/var/run/docker.sock` exists and is accessible.
+  </Accordion>
+
+  <Accordion title="Cannot SSH into simulated nodes">
+    1. Confirm the node is running: check the API or web interface
+    2. Verify ports 30000-39999 are not blocked by a firewall
+    3. Use the port shown in the node details, e.g. `ssh -p 30001 root@localhost`
+  </Accordion>
+
+  <Accordion title="Engine not working">
+    - **Docker engine:** Verify the Docker socket is mounted and the Docker daemon is running
+    - **Incus/QEMU:** These engines require the respective tools installed on the host
+    - **Cloud engines:** Check that provider credentials are configured correctly
+  </Accordion>
+</AccordionGroup>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Templates" icon="book" href="/sim/how-to/templates">
+    Use pre-built templates for common simulation setups
+  </Card>
+  <Card title="SSH access" icon="terminal" href="/sim/how-to/ssh-access">
+    Connect to your simulated nodes via SSH
+  </Card>
+</CardGroup>

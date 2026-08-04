@@ -8,10 +8,10 @@ icon: microchip
 
 The **Modern Homelab Kit** resolves an explicit **Home-and-Cloud topology** in one StackKit: a local site anchored on your on-premises hardware and a cloud site that carries the public edge, connected over an encrypted VPN overlay.
 
-Use it when a single-environment [Base Kit](/stackkits/kits/base-kit) does not fit — you need public-facing services on a VPS, applications and data staying at home, and the two halves governed as one stack.
+Use it when a single-environment [Basement Kit](/stackkits/kits/basement-kit) does not fit — you need public-facing services on a VPS, applications and data staying at home, and the two halves governed as one stack.
 
 <Note>
-  Modern Homelab became functional in StackKits **v0.9.0** and now sits on the same standalone lifecycle as the Base Kit. If you only need a single-node baseline first, start with the [StackKits quickstart](/stackkits/quickstart) and the [Base Kit](/stackkits/kits/base-kit).
+  Modern Homelab became functional in StackKits **v0.9.0** and now sits on the same standalone lifecycle as the Basement Kit. If you only need a single-node baseline first, start with the [StackKits quickstart](/stackkits/quickstart) and the [Basement Kit](/stackkits/kits/basement-kit).
 </Note>
 
 ## What v0.9.0 landed
@@ -21,7 +21,7 @@ The Modern Homelab Kit is not a schema stub anymore. As of v0.9.0 it is a first-
 - **Explicit Home-and-Cloud topology.** The kit resolves a two-site plan — local (home) and cloud (VPS) — instead of overlaying hybrid roles on a single-environment kit.
 - **Local Owner authority.** The Owner authority that signs off on Apply, Upgrade, Backup, Restore, and Drift stays local. Techstack and Kombify Cloud remain optional orchestrators; they never become local lifecycle or Owner authority.
 - **Owner-specific federation projections.** Federation state is projected per Owner, so the cloud edge never sees the home Owner's authority material as its own.
-- **Governed warm-standby placement, no separate HA Kit.** Warm-standby placement for critical services is a governed feature of Modern Homelab itself. There is no separate "HA Kit" to install to get resilient placement across the two sites.
+- **Governed warm-standby placement, no separate high-availability kit.** Warm-standby placement for critical services is a governed feature of Modern Homelab itself. There is no separate high-availability kit to install to get resilient placement across the two sites.
 - **Signed execution-channel bundles + digest-pinned process executor.** Advanced Day-2 and RIL (Remote Instruction Lane) operations run through signed execution-channel bundles executed by a digest-pinned process executor. The bundle signature and digest are the offline-verifiable boundary — you can verify what will run before it runs, without contacting a control plane.
 - **Inventory carries no secrets and no transport.** The Inventory record carries neither credentials nor transport endpoints. Credentials and transport live in the execution channel, not in the plan.
 
@@ -114,7 +114,7 @@ graph TB
 - SSH access to all nodes
 
 <Warning>
-  The Modern Homelab Kit requires both cloud and local infrastructure. If you only need a single environment (local or cloud), use the [Base Kit](/stackkits/kits/base-kit) instead.
+  The Modern Homelab Kit requires both cloud and local infrastructure. If you only need a single environment (local or cloud), use the [Basement Kit](/stackkits/kits/basement-kit) instead.
 </Warning>
 
 ## Architecture deep dive
@@ -370,7 +370,7 @@ observability:
 
 ### Coolify -- Multi-node PaaS
 
-Coolify manages deployments across your nodes. While the Base Kit defaults to Coolify for single-environment setups, the Modern Homelab Kit leverages its multi-node capabilities for hybrid topologies:
+Coolify manages deployments across your nodes. While the Basement Kit defaults to Coolify for single-environment setups, the Modern Homelab Kit leverages its multi-node capabilities for hybrid topologies:
 
 - Multi-node deployment via SSH
 - Git-based deployments (push to deploy)
@@ -459,7 +459,7 @@ The StackKit configures firewall rules automatically:
 
 ## Comparison with other StackKits
 
-| Feature | Base Kit | High Availability Kit | Modern Homelab Kit |
+| Feature | Basement Kit | HA add-on | Modern Homelab Kit |
 |---------|-------------|------------|----------------|
 | **Nodes** | 1 | 2+ (local) | 2+ (cloud + local) |
 | **Platform** | Docker + Coolify | Docker Swarm | Docker + Coolify |
@@ -502,7 +502,7 @@ The StackKit configures firewall rules automatically:
   </Accordion>
 </AccordionGroup>
 
-## Migration from the Base Kit
+## Migration from the Basement Kit
 
 <Steps>
   <Step title="Backup all data">
@@ -552,7 +552,7 @@ The StackKit configures firewall rules automatically:
   <Card title="StackKits quickstart" icon="rocket" href="/stackkits/quickstart">
     Single-node baseline: install the CLI, run `stackkit init`, and validate.
   </Card>
-  <Card title="Base Kit" icon="house" href="/stackkits/kits/base-kit">
+  <Card title="Basement Kit" icon="house" href="/stackkits/kits/basement-kit">
     The single-environment blueprint to start from before adopting Home-and-Cloud.
   </Card>
   <Card title="Monitoring setup" icon="chart-line" href="/stackkits/reference/monitoring">

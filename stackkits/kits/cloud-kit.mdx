@@ -1,30 +1,55 @@
 ---
 title: "Cloud Kit"
+<<<<<<< HEAD
 description: "The cloud/VPS derivation of the StackKits base — a public-domain, single-environment homelab on a managed VPS or your own provider server"
+=======
+description: "The cloud adaptation of the single-environment kit — one trust domain, one main node, on your own VPS"
+>>>>>>> origin/docs/stackkits-adr0026-wave1
 sidebarTitle: "Cloud Kit"
 icon: cloud
 ---
 
-The **Cloud Kit** is the cloud/VPS profile of the same shared StackKits foundation used by the local Base Kit. It targets a single cloud server reachable over SSH — a VPS you already lease from any provider (Hetzner, DigitalOcean, Vultr, and similar), or a server provisioned through kombify TechStack — and resolves the base library's defaults for `context: cloud`: Let's Encrypt certificates on a public domain instead of self-signed local TLS, and reverse-proxy access instead of local ports.
+<<<<<<< HEAD
+The **Cloud Kit** is the cloud/VPS profile of the same shared StackKits foundation used by the local Basement Kit. It targets a single cloud server reachable over SSH — a VPS you already lease from any provider (Hetzner, DigitalOcean, Vultr, and similar), or a server provisioned through kombify TechStack — and resolves the base library's defaults for `context: cloud`: Let's Encrypt certificates on a public domain instead of self-signed local TLS, and reverse-proxy access instead of local ports.
 
 <Note>
-  Cloud Kit shares roughly 90% of its definition with the local Base Kit (internally paired as "Basement Kit" for the local/pi context). Only the context-derived defaults differ — TLS, access model, and domain requirement. See [Relationship to the Base Kit](#relationship-to-the-base-kit) below.
+  Cloud Kit shares roughly 90% of its definition with the local Basement Kit (internally paired as "Basement Kit" for the local/pi context). Only the context-derived defaults differ — TLS, access model, and domain requirement. See [Relationship to the Basement Kit](#relationship-to-the-base-kit) below.
+=======
+The **Cloud Kit** is the cloud adaptation of the Basement profile. It uses the exact same single-environment node model — **one trust domain**, **exactly one main node** (the control plane), 1..N nodes with worker/storage nodes joining via a join token — but every node runs in the cloud (`context: cloud`), typically on a VPS you bring yourself.
+
+Its installer lives at `cloud.stackkit.cc`:
+
+```bash
+curl -sSL https://cloud.stackkit.cc | sh
+```
+
+<Note>
+  The Cloud Kit is fully open source and BYO-VPS: you lease the server, StackKits configure it. The kit's public onboarding is younger than the Basement Kit's — in particular the public-IP and custom-domain flow is still being polished. Expect rougher edges than on the Basement path.
+>>>>>>> origin/docs/stackkits-adr0026-wave1
 </Note>
 
 ## Overview
 
 ```mermaid
 graph TB
+<<<<<<< HEAD
     subgraph Env["Cloud Node (single environment, public domain)"]
         subgraph Core["Core Services"]
             Traefik["Traefik v3 / Coolify proxy<br/>Reverse Proxy + Let's Encrypt"]
         end
+=======
+    Internet["Internet"]
+
+    subgraph Env["Cloud environment (your VPS — one trust domain)"]
+        Traefik["Traefik v3<br/>Public ingress + ACME TLS"]
+>>>>>>> origin/docs/stackkits-adr0026-wave1
 
         subgraph Platform["PaaS Platform"]
             Coolify["Coolify<br/>App Platform (default)"]
         end
 
         subgraph Monitoring["Observability"]
+<<<<<<< HEAD
             UptimeKuma["Uptime Kuma<br/>Status Monitoring"]
             Dashboard["Node Hub + Homepage"]
         end
@@ -95,7 +120,7 @@ Cloud Kit resolves two domain access modes. Both use the same service baseline; 
 ## Included services
 
 <Note>
-  The app platform is **context-resolved**, same as the Base Kit. Cloud Kit defaults to **Coolify** and supports **Komodo** as the beta-supported alternative. Dokploy remains draft and is not part of the canonical beta E2E matrix.
+  The app platform is **context-resolved**, same as the Basement Kit. Cloud Kit defaults to **Coolify** and supports **Komodo** as the beta-supported alternative. Dokploy remains draft and is not part of the canonical beta E2E matrix.
 </Note>
 
 <CardGroup cols={2}>
@@ -237,10 +262,95 @@ For explicit CLI control instead:
     ```bash
     stackkit plan   # Preview changes
     stackkit apply  # Deploy
+=======
+            UptimeKuma["Uptime Kuma"]
+            Dozzle["Dozzle"]
+        end
+
+        Workers["Additional nodes (worker / storage)<br/>join the main via join token"]
+    end
+
+    Internet -->|HTTPS| Traefik
+    Traefik --> Platform
+    Traefik --> Monitoring
+    Traefik -.-> Workers
+
+    style Env fill:#1e293b,stroke:#38bdf8,color:#f8fafc
+    style Platform fill:#1e293b,stroke:#4ade80,color:#f8fafc
+    style Monitoring fill:#1e293b,stroke:#a78bfa,color:#f8fafc
+```
+
+## Same model as Basement, cloud defaults
+
+The Cloud Kit is a profile over the same shared node model as the Basement Kit — not a separate architecture. What changes are the context-derived defaults:
+
+| Characteristic | Basement Kit (`local` / `pi`) | Cloud Kit (`cloud`) |
+|----------------|-------------------------------|---------------------|
+| Public access | Private by default | **Public ingress by default** |
+| TLS | Self-signed / local defaults | **ACME (Let's Encrypt) certificates** |
+| Reachability | LAN / home network | **Public IP + your domain** |
+| Node model | 1 trust domain, 1 main, 1..N nodes | Identical |
+
+On top of the shared model, the Cloud Kit may carry a small set (1–2) of cloud-only extensions — for example around public ingress or DNS — which can later be promoted into the shared standard.
+
+## What the Cloud Kit is not
+
+<Warning>
+  The Cloud Kit is **not** the Modern Homelab. All Cloud Kit nodes live in the cloud, inside one trust domain — there is no hybrid bridge to a home network. The moment you want at least one local node **and** at least one cloud node connected by the bridge contract, you are building a [Modern Homelab](https://docs.kombify.io/stackkits/kits/modern-homelab).
+</Warning>
+
+Likewise, node count does not change the kit: a three-VPS deployment in one trust domain is still a Cloud Kit. Redundant control planes are not a Cloud Kit topology either — that is the `ha` add-on's `quorum` tier (at least 3 odd-numbered manager nodes, a technical prerequisite of etcd quorum, not a paywall).
+
+## Requirements
+
+- A VPS (or several) from any provider — the kit is bring-your-own-VPS
+- A public IPv4 address on the main node
+- A domain you control, for public ingress and ACME certificates
+- SSH access to every node
+
+## PaaS adapter
+
+Like the Basement Kit, the app platform is context-resolved:
+
+| Adapter | Status |
+|---------|--------|
+| **Coolify** | Default |
+| **Komodo** | Supported alternative |
+| **Dokploy** | Draft — not part of the supported matrix yet |
+
+## Quick start
+
+<Steps>
+  <Step title="Create your spec file">
+    ```yaml stack-spec.yaml
+    stackkit: cloud-kit
+
+    nodes:
+      - name: main-vps
+        type: cloud
+        connection:
+          host: 203.0.113.10
+          user: root
+          ssh_key: ~/.ssh/id_ed25519
+
+    # Required for public ingress + ACME TLS
+    domain: example.com
+    email: you@example.com
+    ```
+  </Step>
+
+  <Step title="Validate, generate, apply">
+    ```bash
+    stackkit validate
+    stackkit generate
+    stackkit plan
+    stackkit apply
+>>>>>>> origin/docs/stackkits-adr0026-wave1
     ```
   </Step>
 </Steps>
 
+<<<<<<< HEAD
 <Note>
   A managed VPS lease through kombify TechStack is the end-to-end managed path — the release evidence above was produced on provider leases. That flow is in beta hardening; the fully self-service path today is the CLI (or the one-liner) against any provider server you have SSH access to.
 </Note>
@@ -356,7 +466,7 @@ After `stackkit generate`:
 
 | Constraint | Value | Reason |
 |------------|-------|--------|
-| Context | `cloud` only | Local and Pi contexts are Base Kit's job |
+| Context | `cloud` only | Local and Pi contexts are Basement Kit's job |
 | Nodes | Single VPS/server | Current release contract is `multiNode: false` |
 | Domain | Required (own/custom or `kombify.me`) | Public HTTPS routing and ACME need a resolvable name |
 | Traefik/Coolify proxy | Required | All services need routing |
@@ -364,16 +474,16 @@ After `stackkit generate`:
 
 <Warning>
   Cloud Kit is a single-environment, single-server pattern. It does not provide multi-node clustering, automatic failover, or the Terramate-based `advanced` install mode in this release. If you need:
-  - **A local homelab instead** — use the [Base Kit](https://docs.kombify.io/stackkits/kits/base-kit) (local/Basement context).
+  - **A local homelab instead** — use the [Basement Kit](https://docs.kombify.io/stackkits/kits/basement-kit) (local/Basement context).
   - **Hybrid local + cloud** — [Modern Homelab Kit](https://docs.kombify.io/stackkits/kits/modern-homelab) (preview, not yet functional).
-  - **Automatic failover and redundancy** — [High Availability Kit](https://docs.kombify.io/stackkits/kits/ha-kit) (vision-only, not yet implemented).
+  - **Automatic failover and redundancy** — the [high-availability add-on](/stackkits/addons/high-availability).
 </Warning>
 
-## Relationship to the Base Kit
+## Relationship to the Basement Kit
 
-Cloud Kit and the [Base Kit](https://docs.kombify.io/stackkits/kits/base-kit) are derived from the same shared library — internally the local profile is called "Basement Kit" and the cloud profile "Cloud Kit". Only the context-resolved defaults differ:
+Cloud Kit and the [Basement Kit](https://docs.kombify.io/stackkits/kits/basement-kit) are derived from the same shared library — internally the local profile is called "Basement Kit" and the cloud profile "Cloud Kit". Only the context-resolved defaults differ:
 
-| Concern | Base Kit (local/pi context) | Cloud Kit (cloud context) |
+| Concern | Basement Kit (local/pi context) | Cloud Kit (cloud context) |
 |---------|------------------------------|----------------------------|
 | TLS | Self-signed, `*.home.localhost` | Let's Encrypt (ACME) on a real domain |
 | Access | Host ports, private IP | Reverse proxy, public IP |
@@ -381,7 +491,7 @@ Cloud Kit and the [Base Kit](https://docs.kombify.io/stackkits/kits/base-kit) ar
 | Installer | `base.stackkit.cc` | `cloud.stackkit.cc` |
 | Platform baseline, security, and PaaS defaults | Identical | Identical |
 
-If you already deployed the Base Kit locally and want the same defaults reachable from the public internet, Cloud Kit is the matching cloud profile — not a different architecture pattern.
+If you already deployed the Basement Kit locally and want the same defaults reachable from the public internet, Cloud Kit is the matching cloud profile — not a different architecture pattern.
 
 ## Troubleshooting
 
@@ -418,7 +528,7 @@ If you already deployed the Base Kit locally and want the same defaults reachabl
 
 <CardGroup cols={2}>
   <Card title="Choosing a kit" icon="list" href="https://docs.kombify.io/guides/stackkits/choosing-a-kit">
-    Compare Base Kit, Cloud Kit, Modern Homelab, and High Availability Kit.
+    Compare Basement Kit, Cloud Kit, Modern Homelab, and the high-availability add-on.
   </Card>
   <Card title="Rollout paths" icon="route" href="https://docs.kombify.io/guides/stackkits/deploy-with-cli-or-techstack">
     Compare the installer, CLI, and kombify TechStack rollout paths.
@@ -428,5 +538,15 @@ If you already deployed the Base Kit locally and want the same defaults reachabl
   </Card>
   <Card title="Node Hub" icon="grid-2" href="https://docs.kombify.io/guides/stackkits/node-hub">
     Open the `base.<domain>` dashboard and service guide matrix after rollout.
+=======
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Basement Kit" icon="house" href="https://docs.kombify.io/stackkits/kits/basement-kit">
+    The local sibling — same node model, home-network defaults.
+  </Card>
+  <Card title="Modern Homelab" icon="microchip" href="https://docs.kombify.io/stackkits/kits/modern-homelab">
+    Combine local and cloud nodes with the bridge contract (Preview).
+>>>>>>> origin/docs/stackkits-adr0026-wave1
   </Card>
 </CardGroup>
