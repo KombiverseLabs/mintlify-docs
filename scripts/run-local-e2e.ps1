@@ -145,9 +145,28 @@ if (-not $SkipPreview) {
         throw "npx is not available for Mintlify validation: $npxVersion"
     }
     Write-Host "npx: $($npxVersion.Trim())"
-    & npx -y $mintSpec broken-links
+    # `mint validate` rather than `mint broken-links`.
+    #
+    # broken-links does not resolve root-relative targets against this
+    # docs.json: it reported 153 broken links whose 52 distinct targets ALL
+    # exist as .mdx files AND appear in the navigation, and all 52 are linked
+    # root-relative while none of the absolute-URL targets were flagged.
+    # mint@latest reproduces it identically, so it is not a stale pin. Keeping
+    # it meant the release gate could only go green by rewriting correct links
+    # into absolute URLs, which is the reverse of what this repo decided.
+    #
+    # Link coverage does not drop: check-internal-links.ps1 above matches both
+    # markdown links and JSX href attributes and resolves each target against
+    # the navigation and the file tree, which is what broken-links gets wrong.
+    #
+    # What mint is kept for is MDX build validation, which broken-links only
+    # provided as a side effect and which earned its place: it is what caught
+    # five conflict markers that had been committed into cloud-kit.mdx and
+    # shipped live. Verified both directions - injecting a conflict marker
+    # makes `mint validate` exit 1, and removing it exits 0.
+    & npx -y $mintSpec validate
     if ($LASTEXITCODE -ne 0) {
-        throw "Mintlify validate failed"
+        throw "Mintlify build validation failed"
     }
 }
 
