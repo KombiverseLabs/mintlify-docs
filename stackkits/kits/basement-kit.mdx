@@ -291,10 +291,25 @@ Additional nodes carry the `worker` or `storage` role and join the main node via
 
 ### Domain and SSL
 
+A canonical `network.domain.base` is **required** for the Basement Kit — `stackkit init basement-kit` refuses to establish runtime custody without it. The bootstrapped services derive their hostnames from that base:
+
+| Service | URL |
+|---------|-----|
+| Basement Hub | `<domain>` |
+| PocketID | `id.<domain>` |
+| TinyAuth | `auth.<domain>` |
+| Coolify | `coolify.<domain>` |
+| step-ca | `ca.<domain>` |
+
+Pick a real routable domain when you want public TLS, or a local development domain (for example `home.test` or `home.localhost`) that you resolve on your LAN.
+
 <Tabs>
-  <Tab title="With domain">
+  <Tab title="Routable domain">
     ```yaml
-    domain: homelab.example.com
+    network:
+      domain:
+        base: homelab.example.com
+
     email: you@example.com
 
     ssl:
@@ -303,14 +318,17 @@ Additional nodes carry the `worker` or `storage` role and join the main node via
       wildcard: true
     ```
   </Tab>
-  <Tab title="Local only">
+  <Tab title="Local domain">
     ```yaml
-    # No domain — access via IP:port
-    # Coolify will be available at http://IP:8000
+    network:
+      domain:
+        base: home.test
 
     ssl:
       provider: selfsigned
     ```
+
+    Point `home.test` (and each `id.`, `auth.`, `coolify.` subdomain) at your main node — for example through your router's DNS overrides or `/etc/hosts` entries. Self-signed certificates from the embedded step-ca cover `*.<domain>`.
   </Tab>
 </Tabs>
 
@@ -391,6 +409,10 @@ The Basement Kit enforces these rules:
   - **Cloud-only on your own VPS** — [Cloud Kit](https://docs.kombify.io/stackkits/kits/cloud-kit)
   - **Hybrid local + cloud** — [Modern Homelab](https://docs.kombify.io/stackkits/kits/modern-homelab)
   - **Failover and redundancy** — the `ha` add-on (`warm-standby` or `quorum` tier) on top of your kit
+</Warning>
+
+<Warning>
+  **Upgrading from StackKits v0.14.12 or earlier.** The Basement runtime custody manifest moves from `v2` to `v3` and records the resolved domain. On-disk custody written by an older version is rejected on upgrade and must be re-established. Set `network.domain.base` in your spec, remove the existing custody bundle under `.stackkit/custody/basement-runtime/`, then rerun `stackkit init basement-kit` to write a fresh v3 manifest. The domain recorded in custody must match the spec on every subsequent run.
 </Warning>
 
 ## Troubleshooting

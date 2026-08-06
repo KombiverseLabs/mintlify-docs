@@ -9,6 +9,16 @@ Product updates, organized newest first. For deeper details on each release, see
 
 <Update label="2026-08-07" description="Week of Aug 3 – Aug 7">
 
+## StackKits v0.14.13: Basement Kit service domain is configurable
+
+StackKits shipped [v0.14.13](https://github.com/kombifyio/StackKits/releases/tag/v0.14.13), which removes the hardcoded `home.test` domain from the Basement Kit's bootstrapped services. The canonical `network.domain.base` from your StackSpec now flows through the Architecture v2 renderer into the Basement core Docker Compose artifact, so the identity, access, and PaaS surfaces reflect the domain you actually picked.
+
+### Changed
+
+- **Basement services follow `network.domain.base`.** PocketID, TinyAuth, Coolify, and the Basement Hub are now exposed at `id.<domain>`, `auth.<domain>`, `coolify.<domain>`, and `<domain>` respectively. step-ca uses `ca.<domain>` in its DNS names. Environment files (`pocketid.env`, `tinyauth.env`) and the Basement Hub landing page pick up the same domain.
+- **`stackkit init basement-kit` requires `network.domain.base`.** The command refuses to establish runtime custody when the base domain is missing. See the updated [Basement Kit page](/stackkits/kits/basement-kit) for the domain and SSL configuration.
+- **Basement runtime custody manifest is now `v3`.** The manifest records the resolved domain alongside the owner reference. Existing on-disk custody written by v0.14.12 or earlier is rejected on upgrade and must be re-established after setting `network.domain.base`.
+
 ## SpeechKit v0.52.0: dictation reliability
 
 SpeechKit shipped [v0.52.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.0), a dictation reliability release. Holding the dictation shortcut records one unbroken take again, the configured Deepgram speech language is respected end to end, and automatic updates are back with an explicit-confirmation install path and a new update channel setting.
