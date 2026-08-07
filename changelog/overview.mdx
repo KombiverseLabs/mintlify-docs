@@ -9,9 +9,16 @@ Product updates, organized newest first. For deeper details on each release, see
 
 <Update label="2026-08-07" description="Week of Aug 3 – Aug 7">
 
-## SpeechKit v0.52.0: dictation reliability
+## SpeechKit dictation reliability, plus StackKits app backup/restore
 
-SpeechKit shipped [v0.52.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.0), a dictation reliability release. Holding the dictation shortcut records one unbroken take again, the configured Deepgram speech language is respected end to end, and automatic updates are back with an explicit-confirmation install path and a new update channel setting.
+SpeechKit shipped [v0.52.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.0), a dictation reliability release. Holding the dictation shortcut records one unbroken take again, the configured Deepgram speech language is respected end to end, and automatic updates are back with an explicit-confirmation install path and a new update channel setting. StackKits followed with a series of patch releases through [v0.14.19](https://github.com/kombifyio/StackKits/releases/tag/v0.14.19) that turn on end-to-end application backup and restore on standalone Compose and print service access URLs after every apply.
+
+### New
+
+- **Application backup and restore on standalone Compose.** [v0.14.9](https://github.com/kombifyio/StackKits/releases/tag/v0.14.9) enables the shared Application Kit backup/restore capability on the `standalone-compose` adapter for all three verticals — Photos with Immich, Files with Cloudreve, and Vault with Vaultwarden. Kopia now snapshots per-workload Compose volumes as part of the same Owner-approved, content-addressed backup that already covers Basement, and restore quiesces applications before Basement, prepares per-volume rollback copies, activates staged content, starts Basement before applications, and only reports success after a live readback. Coolify, Komodo, and any workload without an explicit compatibility row remain fail-closed. See [Family photo vault use case](/guides/stackkits/use-cases/family-photo-vault) and the [Immich](/stackkits/apps/immich) app page.
+- **Service access summary after every apply.** [v0.14.13](https://github.com/kombifyio/StackKits/releases/tag/v0.14.13) persists a manifest of exposed service URLs at the end of a successful `stackkit apply`, covering Basement Hub, PocketID (`id`), TinyAuth (`auth`), and Coolify (`coolify`) on the configured domain, with `https://` selected automatically on `kombify.me` and on any deployment set to public TLS. Reach for it right after apply to know exactly where each service is reachable. See [Deploy with the CLI or TechStack](/guides/stackkits/deploy-with-cli-or-techstack), [PocketID](/stackkits/apps/pocketid), and [TinyAuth](/stackkits/apps/tinyauth).
+
+## SpeechKit v0.52.0: dictation reliability
 
 ### Fixed
 
@@ -35,7 +42,8 @@ channel = "auto"
 
 ### Follow-up
 
-- **[v0.52.5](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.5) — provider option matrix refinement.** The published provider capability matrix now honestly reports which STT options each provider actually supports (Ollama and the self-hosted whisper-server VPS adapter are declared alongside the existing set, and stale `timestamps`/`punctuation` claims on OpenAI-compatible endpoints are corrected). No API changes; provider selection and fallback pick the right options for each backend.
+- **SpeechKit [v0.52.5](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.5) — provider option matrix refinement.** The published provider capability matrix now honestly reports which STT options each provider actually supports (Ollama and the self-hosted whisper-server VPS adapter are declared alongside the existing set, and stale `timestamps`/`punctuation` claims on OpenAI-compatible endpoints are corrected). No API changes; provider selection and fallback pick the right options for each backend.
+- **StackKits v0.14.4 → [v0.14.19](https://github.com/kombifyio/StackKits/releases/tag/v0.14.19).** Rolling patch stream on the standalone lifecycle. Reconciliation refreshes current resolution before retrying a Product Apply, backup-target readiness now understands the Cloud offsite backup projection, and Basement core rendering wires PocketID, TinyAuth, and Coolify through the same routed-endpoint contract as Basement Hub. Contract and CLI surfaces are unchanged.
 
 </Update>
 
