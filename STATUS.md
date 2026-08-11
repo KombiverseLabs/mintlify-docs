@@ -10,12 +10,19 @@ maturity: alpha
 
 - Mintlify site configured from this repository and published at
   `docs.kombify.io`.
-- Three allowed navigation tabs: Start, StackKits, and Identity & Access.
+- Five allowed navigation tabs: Start, StackKits, Techstack, SpeechKit, and
+  Identity & Access.
 - StackKits content is limited to capabilities verified against the current
   public StackKits release.
-- The publishable tree contains 38 pages, 36 of them in the StackKits tab,
-  including release-backed installation paths, StackSpec examples, lifecycle
-  and recovery how-tos, component boundaries, and four use-case guides.
+- The publishable tree contains 45 pages: 36 in the StackKits tab, three in
+  Techstack, four in SpeechKit, one Start page, and one Identity page.
+- Techstack documents the current product and operating boundary but makes no
+  public installer, public source, or general-availability claim.
+- SpeechKit documentation is pinned to public release `v0.52.14`, its Windows
+  assets, current desktop support, modes, and Go module.
+- The StackKits pages include release-backed installation paths, StackSpec
+  examples, lifecycle and recovery how-tos, component boundaries, and four
+  use-case guides.
 - Identity is a single concise concept page; it does not expose internal
   architecture or security runbooks.
 - No dependency on the retired legacy documentation repository.
@@ -24,9 +31,9 @@ maturity: alpha
 
 - `public-safety-policy.json` is a positive page-scope allowlist.
 - Every MDX page must be both in the approved scope and in `docs.json`.
-- Simulate-as-product, Proxmox, unpublished products, internal paths, secret
+- Simulate-as-product, Proxmox, excluded products, internal paths, secret
   material, and restricted-content markers fail closed.
-- Local E2E uses pinned Mintlify `4.2.684` and verifies all 38 public pages plus
+- Local E2E uses pinned Mintlify `4.2.684` and verifies all 45 public pages plus
   every forbidden route through real HTTP.
 - Remote safety checks verify removed direct routes, `llms.txt`, and sitemap
   projections after deployment.
@@ -46,6 +53,8 @@ maturity: alpha
 | Dependency | Verified State |
 | --- | --- |
 | StackKits | Public release `v0.16.0`, commit `22705dd4bbee9caaa7601bffb4769a7c40314490`. |
+| Techstack | Preview product source `9e5c30e699a482d149d89f9a3383db6718a9e360`; public distribution unavailable. |
+| SpeechKit | Public release `v0.52.14`, commit `46ed2b0580fb7ff412c7b88db96401973a4c7a2e`. |
 | Mintlify CLI | Pinned `mint@4.2.684` through `mise`. |
 | Node | Version 24 through `mise`. |
 | Hosting | Mintlify at `docs.kombify.io`. |
@@ -58,8 +67,10 @@ maturity: alpha
 - Photos and Vault workload contracts validate and generate, but v0.16.0 has no
   safe public post-init command for adding their required owner-bound secret
   custody. Their pages remain descriptive rather than installation recipes.
+- Techstack has no supported public installer or anonymous source distribution;
+  its pages remain preview guidance until official artifacts exist.
 - Additional product documentation remains excluded until an explicit public
-  release decision and evidence-backed content audit expands the allowlist.
+  decision and evidence-backed content audit expands the allowlist.
 
 ## Verification
 
