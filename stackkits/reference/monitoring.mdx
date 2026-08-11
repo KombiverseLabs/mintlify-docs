@@ -5,15 +5,12 @@ sidebarTitle: "Monitoring"
 icon: chart-line
 ---
 
-The released StackKits catalog includes Uptime Kuma for local service monitoring. Use it together with the CLI verification result, not as a substitute for it.
+Uptime Kuma ships as a module contract in StackKits v0.16.0, but the initial native v2 StackSpec does not select it. A fresh Basement or Cloud Kit therefore has no generated Uptime Kuma address and no public monitoring configuration path.
 
-```bash
-stackkit verify --json
-stackkit status --json
-```
+Do not invent a module selection from an older schema. When a released StackSpec exposes monitoring configuration, this page will document the exact fields and setup flow. Until then, use the lifecycle verification described in [Operate a StackKit](/stackkits/reference/day-2-operations) to assess the stack itself.
 
-After a successful rollout, open the Uptime Kuma address generated for your stack and add checks only for routes you are authorized to monitor. For protected routes, configure an intentional health endpoint or expect the configured authentication response instead of assuming every monitor must return HTTP 200.
+For any separately operated monitoring service, add checks only for routes you are authorized to monitor. Protected routes need an intentional health endpoint or an expected authentication response; weakening route protection to obtain HTTP 200 is not a valid monitor setup.
 
 StackKits publishes local observation and verification evidence. It does not require or imply a hosted monitoring service.
 
-See [Uptime Kuma](/stackkits/apps/uptime-kuma) for the application-specific first steps.
+See [Uptime Kuma](/stackkits/apps/uptime-kuma) for the current release boundary.

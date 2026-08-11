@@ -167,10 +167,20 @@ try {
 finally {
     if ($null -ne $process) {
         Stop-PreviewProcessTree -RootProcessId $process.Id
+        Wait-Process -Id $process.Id -Timeout 5 -ErrorAction SilentlyContinue
     }
     foreach ($log in @($stdoutLog, $stderrLog)) {
-        if (Test-Path -LiteralPath $log) {
-            Remove-Item -LiteralPath $log -Force
+        for ($attempt = 1; $attempt -le 10 -and (Test-Path -LiteralPath $log); $attempt++) {
+            try {
+                Remove-Item -LiteralPath $log -Force -ErrorAction Stop
+            }
+            catch [System.IO.IOException] {
+                if ($attempt -eq 10) {
+                    Write-Warning "Could not remove temporary Mint preview log after 10 attempts: $log"
+                    break
+                }
+                Start-Sleep -Milliseconds 200
+            }
         }
     }
 }

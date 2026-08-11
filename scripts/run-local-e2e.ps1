@@ -140,6 +140,8 @@ Write-Host "navigation_pages: $($pages.Count)"
 & (Join-Path $PSScriptRoot "check-content-rules.ps1")
 & (Join-Path $PSScriptRoot "check-stackkits-release-truth.ps1")
 & (Join-Path $PSScriptRoot "check-stackkits-external-links.ps1")
+& (Join-Path $PSScriptRoot "test-code-example-relevance.ps1")
+& (Join-Path $PSScriptRoot "check-code-example-relevance.ps1")
 
 if (-not $SkipPreview) {
     $npxVersion = (& npx --version 2>&1)

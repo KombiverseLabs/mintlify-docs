@@ -74,6 +74,7 @@ mise run local:e2e
 | `mise run public-safety:test` | Run fail-closed policy regression tests. |
 | `scripts/check-stackkits-release-truth.ps1` | Pin installer URLs and prevent known v0.16.0 wording regressions. |
 | `scripts/check-stackkits-external-links.ps1` | Verify the bounded website, installer, and release destinations used by the StackKits quickstart. |
+| `scripts/check-code-example-relevance.ps1` | Allow executable and structured examples only on pages with a topic-specific workflow or configuration. |
 | `mise run local:e2e` | Prove allowed and forbidden routes over real local HTTP. |
 | `mise run remote:public-safety` | Prove the deployed route and projection matrix. |
 | `mise run delivery:wait-exact-live` | Wait for a successful `docs.kombify.io` deployment at exact `SOURCE_SHA`. |

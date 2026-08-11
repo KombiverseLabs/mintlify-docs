@@ -58,6 +58,8 @@ track: v0-public-truth
   the release archive.
 - [x] Prevent generated preview or draft pages from entering public navigation.
 - [x] Add a focused gate for installer URLs and known v0.16.0 truth boundaries.
+- [x] Audit every public command example and reject unrelated lifecycle filler
+  on component, monitoring, and concept pages.
 
 **Exit gate**
 
@@ -79,3 +81,21 @@ change. Repository existence or historical documentation is insufficient.
 - Publishing internal development infrastructure or operator runbooks.
 - Treating Simulate as a standalone product.
 - Generated roadmap synchronization from this document.
+
+<!-- BEGIN GENERATED: open-issues kombify-roadmap-sync -->
+## Open Issues
+
+_Generated from Beads open statuses; milestone sections use
+`milestone:*` / `blocks:*` labels, and unmapped Beads are listed separately — do not edit;
+refresh via `mise run roadmap:update`. Source: `bd list`, 2026-08-11._
+
+### M1 · v0.3.0 — StackKits Content Quality (0 open)
+- none
+
+### Unmapped Beads (3 open)
+- `mintlify-docs-tlw` Reset public Mintlify docs to released StackKits scope (P0, in_progress)
+- `mintlify-docs-8et` Enforce fail-closed public-only Mintlify publication boundary (P1, in_progress)
+- `mintlify-docs-m81` Audit every public docs command example for article relevance (P1, in_progress)
+
+**Total open:** 3
+<!-- END GENERATED: open-issues kombify-roadmap-sync -->
