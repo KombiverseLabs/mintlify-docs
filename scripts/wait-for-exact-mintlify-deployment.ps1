@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$Repository = "KombiverseLabs/mintlify-docs",
-    [Parameter(Mandatory = $true)][string]$CommitSha,
+    [string]$CommitSha = $env:SOURCE_SHA,
     [string]$ExpectedRef = "main",
     [uri]$ExpectedUrl = "https://docs.kombify.io",
     [ValidateRange(1, 300)][int]$TimeoutSeconds = 240

@@ -49,8 +49,6 @@ maturity: alpha
 
 ## Known Issues
 
-- The expanded 38-page surface is not considered live until its exact merged
-  commit deploys successfully and the remote route/projection matrix passes.
 - Cloud Kit is present in the release, but its public v0.16.0 live-runtime
   evidence is pending; the docs make no production-readiness claim.
 - Photos and Vault workload contracts validate and generate, but v0.16.0 has no
