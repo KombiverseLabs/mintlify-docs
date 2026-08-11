@@ -1,121 +1,18 @@
 ---
-title: "Tool alternatives"
-description: "Every service StackKits can deploy, grouped by capability — the default and the alternatives you can switch to"
-sidebarTitle: "Tool alternatives"
-icon: "shuffle"
+title: "Released application platforms"
+description: "The currently documented StackKits delivery choices"
+sidebarTitle: "Application platforms"
+icon: shuffle
 ---
 
-StackKits never lock you into a single tool. For each capability there is a **smart default** (what you get if you change nothing) and **alternatives** you can select in `stack-spec.yaml`. Defaults are resolved from your context (local vs cloud), compute tier, and domain — you can always override them.
+This page intentionally lists only the application-platform choices that the `v0.16.0` StackKits catalog documents as current support.
 
-<Note>
-  This page is the canonical, implementation-backed catalog. Basement Kit and Cloud Kit ship the **platform services** below; **add-ons** layer optional capabilities on top of any kit — Basement, Cloud, or Modern Homelab.
-</Note>
+| Choice | Current status | Use it when |
+| --- | --- | --- |
+| [Coolify](/stackkits/apps/coolify) | Default | You use the released default application platform for the selected StackKits configuration. |
+| [Komodo](/stackkits/apps/komodo) | Supported alternative | You deliberately select the supported Komodo delivery path and validate it in your own workspace. |
+| `standalone-compose` | Supported for selected application workloads | You need the supported local Compose delivery path without a separate application platform. |
 
-## Platform services
+Use one delivery path for a workload and let `stackkit validate` reject incompatible configuration. Do not infer public support for a component that is not listed here.
 
-These run in every Basement Kit and Cloud Kit deployment, selected by the resolver per context and compute tier.
-
-| Capability | Smart default | Alternatives you can select |
-|------------|---------------|-----------------------------|
-| **Reverse proxy & TLS** | Traefik v3 | — (standard edge for all kits) |
-| **App platform** | Coolify | Dokploy, Komodo, `standalone-compose` |
-| **Container management UI** | — *(covered by the app platform)* | Portainer *(high tier)*, Dockge |
-| **Forward-auth gateway** | TinyAuth | Authelia *(via `authelia` add-on)* |
-| **Identity / SSO (OIDC)** | PocketID | — |
-| **Internal PKI** | step-ca | — |
-| **Uptime monitoring** | Uptime Kuma | — |
-| **Server metrics** | Netdata | Beszel, Glances *(low tier)* |
-| **Log viewer** | Dozzle | — |
-| **Full metrics stack** | Prometheus + Grafana *(high tier)* | `monitoring` add-on (VictoriaMetrics + Grafana + Loki + Alloy) |
-| **Password manager** | Vaultwarden | — |
-| **Media server** | Jellyfin | — |
-| **Photos** | Immich | — |
-
-<Note>
-  The app platform is **context-resolved** — the release default does not hard-pin a PaaS. The resolver enables **Coolify** by default; **Komodo** is a supported drop-in switch, **Dokploy** is in draft, and **Dockge** is an experimental lightweight option. Switch with an explicit override in your spec.
-</Note>
-
-```yaml stack-spec.yaml
-stackkit: basement-kit
-
-# Override a smart default — e.g. use Komodo instead of Coolify
-services:
-  platform:
-    provider: dokploy   # coolify | dokploy | komodo | standalone-compose
-```
-
-### When to pick each app platform
-
-Application Kit workloads (Immich, Cloudreve, Vaultwarden) select one delivery adapter. The umbrella delivery class is `application-adapter`, and every adapter delivers the same closed workload bundle:
-
-- **Coolify** — external, authenticated PaaS. Coolify keeps endpoint and credential custody in its own owner and drives lifecycle from its dashboard. Pick it when you already run Coolify (or want its UI) and you're happy for provider lifecycle to live outside StackKits. This is the smart default.
-- **Komodo** — external, authenticated PaaS with a Control-Plane + Periphery split. Pick it when you want Komodo's Core/Periphery model to own worker onboarding and workload lifecycle across nodes.
-- **Dokploy** — draft/non-beta alternative. Documented for preview only; do not use as canonical beta evidence yet.
-- **`standalone-compose`** — no-PaaS, StackKits-owned adapter. It persists a private, digest-pinned Compose project on the target node, resolves owner-signed local secret custody, attaches the entry service to the StackKits routing network, and emits the exact Traefik host/TLS labels — without installing Docker, creating a server, or owning any provider lifecycle. Pick it for single-node or offline delivery where you don't want to run a separate PaaS. Coolify and Komodo remain the choices when you want an external authenticated PaaS to own lifecycle.
-
-All four adapters produce the same route/TLS observation on the workload; see [Workload route selection](/stackkits/reference/workload-routing) for how the compiler chooses which route each workload advertises.
-
-## Add-ons (optional capabilities)
-
-Add-ons are composable modules you stack on any kit. Each declares its compatible StackKits and is enabled in the `addons:` list.
-
-| Capability | Add-on | What it deploys |
-|------------|--------|-----------------|
-| **Observability** | `monitoring` | VictoriaMetrics + Grafana + Loki + Alloy |
-| **Backup** | `backup` | Kopia encrypted backups, DB hooks, 3-2-1 targets |
-| **Backup fan-in** | `backup-repo-server` | Kopia Repository Server (multi-host / multi-tenant) |
-| **Media** | `media` | Jellyfin + *arr stack |
-| **Photos** | `photos` | Immich photo & video management |
-| **Password vault** | `vault` | Vaultwarden (Bitwarden-compatible) |
-| **Smart home** | `smart-home` | Home Assistant + MQTT + Zigbee2MQTT |
-| **AI / LLM** | `ai-workloads` | Ollama + Open WebUI (local inference) |
-| **Dev platform** | `dev-platform` | Gitea + Woodpecker CI |
-| **Calendar / CardDAV** | `calendar` | Radicale + Bloben web UI |
-| **Mail** | `mail` | Stalwart all-in-one (IMAP/JMAP/SMTP + CalDAV) |
-| **File sharing** | `file-sharing` | Self-hosted file sharing and sync |
-| **Remote desktop** | `remote-desktop` | Apache Guacamole (browser-based) |
-| **Game server** | `gameserver` | Self-hosted game server |
-| **Advanced auth** | `authelia` | Advanced auth server (replaces TinyAuth) |
-| **Mesh VPN** | `vpn-overlay` | Mesh VPN overlay |
-| **External access** | `tunnel` | Bypass CGNAT/DS-Lite to expose local services |
-| **High availability** | `ha` | HA overlay: `warm-standby` tier (continuous backup + automated restore to a standby node) or `quorum` tier (live control-plane failover) |
-
-<Note>
-  The `ha` add-on tiers are node-gated as a **technical prerequisite, not a paywall**: `warm-standby` needs at least 2 nodes (downtime = restore time), `quorum` needs at least 3 (odd-numbered) manager nodes for quorum-based failover with near-zero downtime.
-</Note>
-
-```yaml stack-spec.yaml
-stackkit: basement-kit
-
-addons:
-  - monitoring       # full observability stack
-  - backup           # encrypted 3-2-1 backups
-  - media            # Jellyfin + *arr
-```
-
-## How defaults are chosen
-
-The resolver picks each tool from three inputs, in order of precedence:
-
-<Steps>
-  <Step title="Explicit override">
-    Anything you set in `stack-spec.yaml` wins.
-  </Step>
-  <Step title="Context (local / cloud / pi)">
-    Cloud contexts favor public-DNS + Let's Encrypt defaults; `pi` / low-resource contexts drop heavier services (e.g. Glances instead of Netdata, no Prometheus).
-  </Step>
-  <Step title="Compute tier (low / standard / high)">
-    Higher tiers enable more by default — e.g. Portainer, Prometheus, and Grafana are added on the high tier.
-  </Step>
-</Steps>
-
-## Related
-
-<CardGroup cols={2}>
-  <Card title="Choosing a kit" icon="signs-post" href="https://docs.kombify.io/guides/stackkits/choosing-a-kit">
-    Pick the right architecture pattern first.
-  </Card>
-  <Card title="Spec format" icon="file-code" href="https://docs.kombify.io/stackkits/reference/spec-format">
-    Full `stack-spec.yaml` reference.
-  </Card>
-</CardGroup>
+The application pages describe the currently released modules: [Applications](/stackkits/apps/overview).

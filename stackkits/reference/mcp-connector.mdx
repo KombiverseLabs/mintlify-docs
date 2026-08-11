@@ -1,57 +1,21 @@
 ---
-title: MCP connector
-description: Connect an agent or IDE to StackKits through the native stackkit MCP connection
-sidebarTitle: MCP connector
+title: "StackKits MCP connector"
+description: "Connect an MCP client to the released local StackKits lifecycle"
+sidebarTitle: "MCP connector"
 icon: plug
 ---
 
-StackKits exposes one user-facing MCP connection named `stackkit`. Agents and IDEs bind to that single name; StackKits chooses the right runtime form and enforces the same identity and approval policy as the CLI.
+StackKits exposes one user-facing MCP connection named `stackkit`. The local adapter is `stackkit-mcp`; after installation, the same connector can also be served by `stackkit-server` on its protected `/mcp` endpoint.
 
-<Note>
-  Starting in v0.10.0, the CLI and the native MCP connector share a canonical standalone Operations registry. Backup, Restore, Upgrade, Drift, native Status/Logs, Validate, and Verify have full MCP parity with the CLI, and every mutating operation must cite its registered operation identity and receive explicit local Owner approval before the CLI is invoked.
-</Note>
+## Configure a local client
 
-## When to use it
-
-Use the MCP connector when you want a coding agent or IDE to:
-
-- read StackKits docs, API metadata, and OpenAPI in-context;
-- inspect local StackKits state (status, logs, drift, validation, plan preview);
-- stage a Day-2 operation for you to approve locally, instead of running the CLI blind.
-
-Use the CLI directly for scripted rollouts, CI, or anything you would drive from a shell — the connector is not a replacement for the CLI, it is an approval-gated adapter over the same registered operations.
-
-## Runtime forms
-
-There is one `stackkit` connection with two entrypoints. Both share the same tool, resource, and prompt registration.
-
-| Form | Command | Transport | Typical use |
-|---|---|---|---|
-| Local adapter | `stackkit-mcp` | stdio or loopback HTTP | Agents and IDEs launching MCP as a subprocess |
-| Durable endpoint | `stackkit-server` mounts `POST /mcp` and `GET /openmcp.json` | Streamable HTTP | Protected Day-2 access after install |
-
-Both forms support the same modes:
-
-| Mode | What it exposes |
-|---|---|
-| `docs` | Docs search, API overview, OpenAPI mirror |
-| `local` | Local state: status, logs, validate, plan preview |
-| `server` | Durable server-backed operations |
-| `actions` | Registered mutating operations (opt-in, see [Read-only by default](#read-only-by-default)) |
-
-Non-loopback access to `stackkit-server /mcp` is a protected Day-2 posture — put it behind a VPN, SSH tunnel, private network, mTLS reverse proxy, or an OAuth-aware gateway. It is not a first-install path.
-
-## Connect an agent or IDE
-
-Use the CLI helper to print a ready-to-paste client config:
+Generate a client snippet from the installed release:
 
 ```bash
-stackkit agent mcp-config --client codex --mode docs,local,server
+stackkit agent mcp-config --client codex
 ```
 
-The `--client` flag accepts `generic`, `codex`, or `claude`. Pick the modes you want the agent to see — start with `docs,local,server` and add `actions` only when you are ready to gate mutating operations through local approval.
-
-A generic TOML client entry looks like:
+The default local form is:
 
 ```toml
 [mcp_servers.stackkit]
@@ -59,72 +23,18 @@ command = "stackkit-mcp"
 args = ["--mode", "docs,local,server"]
 ```
 
-Once `stackkit-server` is installed, agents on the same host can reach the durable endpoint directly:
+## Safety model
 
-```text
-POST /mcp
-GET  /openmcp.json
-```
-
-Both are served on the loopback interface of the host running
-`stackkit-server`, on port `8082` unless you override it.
-
-## Read-only by default
-
-The connector is read-only by default. Docs and diagnostic tools are always available; mutating tools are not registered until you explicitly enable write mode.
-
-Enable write mode with either of:
-
-- environment variable: `STACKKIT_MCP_ALLOW_WRITE=true`
-- server flag: `stackkit-server --mcp-allow-write`
-
-HTTP auth for the durable endpoint uses:
-
-- environment variable: `STACKKIT_MCP_TOKEN`
-- server flag: `stackkit-server --mcp-token <token>`
-
-When no explicit MCP token is configured, `stackkit-server` falls back to the API key as the local MCP token. Configure an explicit token for anything beyond local loopback.
-
-Example — enable write mode on the local server:
-
-```bash
-STACKKIT_MCP_ALLOW_WRITE=true \
-STACKKIT_MCP_TOKEN=<local-token> \
-stackkit-server --api-key <api-key>
-```
-
-Enabling write mode does not bypass approval. Every mutating tool call must cite the exact registered operation identity from the Operations registry and receive explicit local Owner approval before the sibling CLI is invoked. Unapproved or misidentified requests fail closed.
-
-## Day-2 operations over MCP
-
-As of v0.10.0, the following operations have full MCP parity with the CLI through the exact same-build sibling binary:
-
-| Operation | Read-only | Mutating |
-|---|---|---|
-| Status | ✓ | |
-| Logs | ✓ | |
-| Validate | ✓ | |
-| Verify | ✓ | |
-| Drift | ✓ | |
-| Backup | | ✓ |
-| Restore | | ✓ |
-| Upgrade | | ✓ |
-| Init, Resolve, Generate, Plan, Apply | | ✓ |
-
-Mutating operations are only registered when write mode is enabled and the MCP process cryptographically binds the packaged sibling CLI with the identical version, commit, and startup digest.
-
-<Note>
-  There is no combined MCP rollout macro and no MCP update action. The write-capable tools execute the native, identity-bound CLI operations one at a time so each one carries its own registered identity and approval.
-</Note>
+- Read-only documentation and diagnostic tools are available by default.
+- Write-capable tools require explicit write mode and operation-specific local Owner approval.
+- A remotely reachable endpoint must be deliberately protected; do not expose it directly to the public internet.
+- The connector uses the same local CLI lifecycle and evidence contract as the terminal commands.
 
 ## State Console
 
-The connector embeds the StackKits State Console at `ui://stackkits/state-console.html`. The State Console is a review-and-approval adapter — it renders the registered operation contracts, requests governed Owner approval, and hands the approved request to the agent.
+The optional State Console is a local state-review and operation-approval adapter. It can display a selected workspace, plan, status, logs, and evidence. It does not recommend a kit or implement lifecycle actions itself.
 
-The State Console never invokes Apply directly. It stages an operation for the connected agent, and the agent must present the registered operation for operation-specific confirmation and Owner approval before the connector executes it. Initial authoring is no-replace; updating existing v2 intent requires the exact CUE-normalized `expected_spec_hash` and is idempotent on retry.
+## Related pages
 
-## Related
-
-- [Deploy with the CLI or TechStack](/guides/stackkits/deploy-with-cli-or-techstack) — when to reach for MCP vs. the CLI vs. TechStack.
-- [From intent to StackSpec](/guides/stackkits/from-intent-to-stack-spec) — the authoring flow the State Console renders.
-- [Spec format reference](/stackkits/reference/spec-format) — the contract every registered operation validates against.
+- [Quickstart](/stackkits/quickstart)
+- [Operate a StackKit](/stackkits/reference/day-2-operations)

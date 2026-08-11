@@ -1,66 +1,16 @@
 ---
-title: "Choosing a StackKit"
-description: "Guide to selecting the right infrastructure blueprint for your needs"
-sidebarTitle: "Choosing a kit"
+title: "Choose a StackKit"
+description: "Choose between the currently supported local and VPS StackKits profiles"
+sidebarTitle: "Choose a kit"
 ---
 
-StackKits are pre-built infrastructure blueprints that define what services to run, how to configure them, and how they work together.
+The public StackKits `v0.16.0` catalog currently documents two supported kits. Choose the one that matches the single environment you already operate.
 
-## Available StackKits
+| If you operate... | Choose | Why |
+| --- | --- | --- |
+| local hardware on a home or private network | [Basement Kit](/stackkits/kits/basement-kit) | It is the released local, LAN-first profile. |
+| an existing VPS or cloud host with a domain you control | [Cloud Kit](/stackkits/kits/cloud-kit) | It is the released public-domain profile for that host. |
 
-<CardGroup cols={3}>
-  <Card title="Basement Kit" icon="house" href="https://docs.kombify.io/stackkits/kits/basement-kit">
-    **Best for getting started**
-    
-    Local single-environment pattern. Home network or Raspberry Pi, any node count. Perfect for your first homelab.
-  </Card>
-  <Card title="Cloud Kit" icon="cloud" href="https://docs.kombify.io/stackkits/kits/cloud-kit">
-    **Best for cloud-only stacks**
-    
-    The same single-environment model on a VPS you bring. Public ingress and Let's Encrypt by default.
-  </Card>
-  <Card title="Modern Homelab (Preview)" icon="link" href="https://docs.kombify.io/stackkits/kits/modern-homelab">
-    **Best for hybrid setups**
-    
-    Cloud and local combined — both mandatory, joined by the bridge contract. Multi-node on both ends possible. Preview / Early Access.
-  </Card>
-</CardGroup>
+Start with one environment. StackKits does not provision servers or take custody of provider credentials, so select a kit only after you know which host and domain you control.
 
-## How to choose
-
-| Question | Basement Kit | Cloud Kit | Modern Homelab (Preview) |
-|----------|------|--------|-----|
-| Where does your infra run? | Local hardware or Pi (single environment) | Cloud VPS (single environment) | Cloud and local (both required, bridge contract) |
-| Want AI/ML services? | Optional | Optional | Yes |
-| Experience level? | Beginner | Beginner | Intermediate |
-| Typical use case | First homelab, simple setups | Single VPS, public services | Hybrid cloud+home, power users |
-
-High availability is **not a kit column** — it is an add-on dimension. If downtime is unacceptable, layer the [`ha` add-on](https://docs.kombify.io/stackkits/addons/high-availability) onto whichever kit fits: `warm-standby` needs 2+ nodes (automated restore to a standby, downtime = restore time), `quorum` needs 3+ odd manager nodes (etcd live failover, near-zero downtime). The node floors are technical prerequisites, never paywalls.
-
-## Add-ons
-
-Every StackKit can be extended with **add-ons** — composable modules you mix and match. A few common ones:
-
-- **Media** (`media`) — Jellyfin + *arr stack
-- **Photos** (`photos`) — Immich
-- **Observability** (`monitoring`) — VictoriaMetrics + Grafana + Loki + Alloy
-- **Backup** (`backup`) — Kopia encrypted backups, 3-2-1 targets
-- **AI / LLM** (`ai-workloads`) — Ollama + Open WebUI
-- **Dev platform** (`dev-platform`) — Gitea + Woodpecker CI
-- **Advanced auth** (`authelia`) — replaces TinyAuth
-- **High availability** (`ha`) — `warm-standby` or `quorum` failover tiers, see [High Availability](https://docs.kombify.io/stackkits/addons/high-availability)
-
-<Tip>
-  Start with the Basement Kit and add what you need — you can add add-ons later without rebuilding your stack. See the full catalog and per-capability alternatives in [tool alternatives](https://docs.kombify.io/stackkits/reference/tool-alternatives).
-</Tip>
-
-## What's next?
-
-<CardGroup cols={2}>
-  <Card title="Customize your kit" icon="pen" href="https://docs.kombify.io/stackkits/explanations/cue-architecture">
-    Learn how to modify StackKit settings and add-ons.
-  </Card>
-  <Card title="Browse kit details" icon="list" href="https://docs.kombify.io/stackkits/overview">
-    See full specifications for each StackKit.
-  </Card>
-</CardGroup>
+Once chosen, create the workspace with `stackkit init`, validate it, and review generated output before applying it. See the [Quickstart](/stackkits/quickstart).

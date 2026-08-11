@@ -1,115 +1,52 @@
 ---
-title: "Identity & Access — Explained Simply"
-description: "A plain-language tour of how signing in, plans, and permissions work at kombify."
-icon: "door-open"
+title: "Identity in StackKits"
+description: "How local owner identity and optional hosted sign-in remain separate."
+icon: "shield-halved"
 ---
 
-<Note>
-This is the friendly, no-jargon version. For the engineering view see
-[Architecture](/identity/architecture); for the strategy view see
-[Trust & Security](/identity/trust-and-security).
-</Note>
+# Identity in StackKits
 
-<Info>
-There is exactly **one Kombify account** for every Kombify-hosted app and tool.
-Auth0 Universal Login at `login.kombify.io` is the only production login
-provider. Opening another Kombify product never requires another registration
-or product-specific account.
-</Info>
+StackKits keeps the owner of a local homelab authoritative. Installing and
+operating a stack does not require a hosted account.
 
-## The 30-second version
+## Local owner identity
 
-Think of kombify like a **secure office building**:
+The released local identity baseline uses:
 
-1. **Reception (Login).** You sign in once at the front desk — `login.kombify.io`.
-   You prove who you are (password, passkey, or a second factor). Reception hands
-   you a **badge**.
-2. **The badge (Token).** Your badge says who you are and which **plan** you're on.
-   It expires, so it can't be reused forever, and it's stamped so it can't be faked.
-3. **The doors (Gateway).** Every room checks your badge at the door
-   (`api.kombify.io`). No badge, no entry — the door stays shut by default.
-4. **Floor access (Plan & permissions).** Your badge opens the doors your plan
-   includes. Higher plans open more doors. Some special rooms do an extra check
-   right at the door.
+- **PocketID** as the OpenID Connect identity provider for the homelab owner;
+- **TinyAuth** as the forward-auth broker in front of protected applications;
+- explicit owner approval for lifecycle operations that change the stack.
 
-That's the whole idea: **sign in once, carry a tamper-proof badge, and every door
-checks it.**
-
-```mermaid
-flowchart LR
-  You([You]) -->|sign in once| Reception[Reception\nlogin.kombify.io]
-  Reception -->|gives you a badge| Badge[Your badge\nwho you are + your plan]
-  Badge -->|shown at every door| Doors[The doors\napi.kombify.io]
-  Doors -->|opens what your plan includes| Rooms[Features & AI]
-```
-
-## What happens when you sign in
-
-<Steps>
-  <Step title="You open a kombify app">
-    The Cloud dashboard, the Workbench, or the mobile app.
-  </Step>
-  <Step title="You're sent to reception">
-    The app redirects you to the kombify login page. You never type your password
-    into the app itself — only into the official login page. That's deliberate and
-    safer.
-  </Step>
-  <Step title="You prove who you are">
-    Password, passkey, or multi-factor. kombify uses a managed identity provider
-    (Auth0) so this part follows the same rules banks and enterprises use.
-  </Step>
-  <Step title="You get your badge">
-    The app receives a short-lived, signed token. It's kept safe on the server side,
-    not left lying around in your browser.
-  </Step>
-  <Step title="You use the product">
-    From now on the app quietly shows your badge at each door. You don't notice it —
-    it just works.
-  </Step>
-</Steps>
-
-## Why can't I use feature X?
-
-Because your **plan** decides which doors open. When something is not included, you
-won't get a confusing dead-end. You get a clear message that says:
-
-- **what** you tried to do,
-- **why** it's not available (which plan or feature is needed), and
-- **what to do next** (e.g. "upgrade to unlock this").
-
-We treat a "no" as a helpful signpost, not a wall.
-
-## The three kinds of "you"
-
-kombify keeps these clearly separate:
-
-| Who | Example | What they can do |
-| --- | --- | --- |
-| **A customer** | You, using the product | Whatever your plan includes |
-| **A staff member** | A kombify team member | Operational tools, kept separate from customer plans |
-| **An AI agent acting for you** | An assistant doing a task on your behalf | Only what *you* are allowed to do — never more |
-
-That last one matters: when an AI agent does something for you, it inherits **your**
-permissions and nothing extra. It can't quietly do more than you could yourself.
-
-## Good to know
+Identity data and credentials stay under the local owner's control. Removing
+an optional hosted connection must not remove local access or prevent the
+standalone lifecycle.
 
 <CardGroup cols={2}>
-  <Card title="One sign-in" icon="key">
-    Sign in once; the same identity works across kombify products.
+  <Card title="PocketID" icon="fingerprint" href="/stackkits/apps/pocketid">
+    Passkey-first local identity for the homelab owner.
   </Card>
-  <Card title="Closed by default" icon="lock">
-    If anything is unclear or a token is missing, the answer is "no". Safety first.
-  </Card>
-  <Card title="Short-lived badges" icon="clock">
-    Tokens expire, so a leaked one stops working quickly.
-  </Card>
-  <Card title="Clear denials" icon="circle-info">
-    Every "not available" comes with the reason and the next step.
+  <Card title="TinyAuth" icon="key" href="/stackkits/apps/tinyauth">
+    Forward authentication for applications that do not provide their own
+    compatible sign-in flow.
   </Card>
 </CardGroup>
 
+## Optional hosted identity
+
+When a user deliberately connects to a hosted kombify service, interactive
+sign-in uses the official `login.kombify.io` domain. That hosted identity is
+an optional convenience layer; it does not replace or outrank the local owner.
+
+## Security behavior
+
+- Missing or ambiguous identity information denies access.
+- Tokens are short-lived and scoped to their intended audience.
+- Protected routes do not become public when an identity service is
+  unavailable.
+- An assistant acting for a user cannot receive more authority than that user.
+
 <Note>
-Want the details? Continue to the
-[technical architecture](/identity/architecture).
+This page describes the public identity concept. Internal routing, tenant,
+billing, deployment, and operator architecture are intentionally not part of
+the public StackKits documentation.
 </Note>

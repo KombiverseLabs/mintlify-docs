@@ -29,7 +29,7 @@ $docsRaw = Get-Content -LiteralPath $DocsConfigPath -Raw
 $docs = $docsRaw | ConvertFrom-Json
 $policy = Get-Content -LiteralPath $PolicyPath -Raw | ConvertFrom-Json
 
-if ([int]$policy.version -ne 1) {
+if ([int]$policy.version -ne 2) {
     throw "Unsupported public-safety policy version '$($policy.version)'"
 }
 if ([string]$policy.publicationMode -ne "public-only") {
@@ -174,6 +174,35 @@ if ([regex]::IsMatch($docsRaw, '(?im)"(?:audience|authentication|restricted)"\s*
 $navigationPages = [System.Collections.Generic.List[string]]::new()
 Add-NavigationPage -Node $docs.navigation -Pages $navigationPages
 $publicPages = @($navigationPages | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Sort-Object -Unique)
+$navigationTabs = @(
+    $docs.navigation.tabs |
+        ForEach-Object { [string]$_.tab } |
+        Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+)
+$allowedNavigationTabs = @($policy.allowedNavigationTabs | ForEach-Object { [string]$_ })
+foreach ($tab in $navigationTabs) {
+    if ($tab -notin $allowedNavigationTabs) {
+        $errors.Add("navigation tab '$tab' is outside the approved public scope") | Out-Null
+    }
+}
+$allowedExactPageSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+foreach ($page in @($policy.allowedExactPages)) {
+    $null = $allowedExactPageSet.Add((Normalize-PagePath -PathValue ([string]$page)))
+}
+$allowedPagePrefixes = @(
+    $policy.allowedPagePrefixes |
+        ForEach-Object { (Normalize-PagePath -PathValue ([string]$_)).TrimEnd("/") + "/" }
+)
+foreach ($page in $publicPages) {
+    $allowedByPrefix = @(
+        $allowedPagePrefixes |
+            Where-Object { $page.StartsWith($_, [System.StringComparison]::OrdinalIgnoreCase) }
+    ).Count -gt 0
+    if (-not $allowedExactPageSet.Contains($page) -and -not $allowedByPrefix) {
+        $errors.Add("public page '$page.mdx' is outside the approved public scope") | Out-Null
+    }
+}
+
 $publicPageSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 foreach ($page in $publicPages) {
     $null = $publicPageSet.Add($page)
@@ -291,6 +320,7 @@ if ($errors.Count -gt 0) {
 }
 
 Write-Host "publication_mode: public-only"
+Write-Host "approved_navigation_tabs: $($allowedNavigationTabs.Count)"
 Write-Host "public_allowlist_pages: $($publicPages.Count)"
 Write-Host "direct_hidden_pages: 0"
 Write-Host "forbidden_content_findings: 0"

@@ -1,49 +1,56 @@
 ---
 title: mintlify-docs Status
-last_verified: 2026-07-19
+last_verified: 2026-08-11
 maturity: alpha
 ---
 
 # mintlify-docs Status
 
-Current implementation state only. Future scope belongs in `ROADMAP.md`.
+## Public Surface
 
-## Features
+- Mintlify site configured from this repository and published at
+  `docs.kombify.io`.
+- Three allowed navigation tabs: Start, StackKits, and Identity & Access.
+- StackKits content is limited to capabilities verified against the current
+  public StackKits release.
+- Identity is a single concise concept page; it does not expose internal
+  architecture or security runbooks.
+- No dependency on the retired legacy documentation repository.
 
-- Mintlify documentation site configured by `docs.json`.
-- Public landing page at `index.mdx`.
-- StackKits overview, quickstart, kit, service, explanation, and reference sections.
-- Identity & Access tab with `identity/overview`, `identity/architecture`, and `identity/trust-and-security`.
-- Changelog tab with `changelog/overview`.
-- Site branding, favicon, logo, search prompt, navbar, contextual actions, and footer configured in `docs.json`.
-- `docs.json` is enforced as the complete public MDX allowlist; direct hidden and restricted pages fail closed.
-- Public-safety policy scans high-risk internal content and verifies local links across every publishable page.
-- Local E2E starts pinned Mintlify `4.2.684` and proves public and forbidden routes over HTTP.
+## Safety And Delivery
 
-## Deployment
+- `public-safety-policy.json` is a positive page-scope allowlist.
+- Every MDX page must be both in the approved scope and in `docs.json`.
+- Simulate-as-product, Proxmox, unpublished products, internal paths, secret
+  material, and restricted-content markers fail closed.
+- Local E2E uses pinned Mintlify `4.2.684` and verifies allowed and forbidden
+  routes through real HTTP.
+- Remote safety checks verify removed direct routes, `llms.txt`, and sitemap
+  projections after deployment.
+- Promotion waits for a successful Mintlify deployment bound to the exact full
+  source commit before the live smoke can satisfy delivery.
 
-| Surface | Current State |
-|---|---|
-| Public docs | Mintlify-hosted site configured from this repo. |
-| Preview | Mintlify local preview through pinned `mint@4.2.684` via `mise run dev`. |
+## Verified Dependencies
 
-## Dependencies
-
-- Mintlify `docs.json` schema.
-- Node 24 for local CLI execution through `mise`.
-- Pinned `mint@4.2.684` for local preview and provider-advisory link validation.
-- `kombify-StackKits` as the verification source for all StackKits pages.
-- The legacy kombify docs repository as the upstream extraction source.
-- Mintlify hosting for `docs.kombify.io`; PostHog for page analytics via `docs.json`.
+| Dependency | Verified State |
+| --- | --- |
+| StackKits | Public release `v0.16.0`, commit `22705dd4bbee9caaa7601bffb4769a7c40314490`. |
+| Mintlify CLI | Pinned `mint@4.2.684` through `mise`. |
+| Node | Version 24 through `mise`. |
+| Hosting | Mintlify at `docs.kombify.io`. |
+| Analytics | PostHog through `e.kombify.io`; session recording disabled. |
 
 ## Known Issues
 
-- Product coverage is limited to StackKits, Identity & Access, and Changelog; other kombify products have no public pages yet.
-- `mint broken-links` is a blocking part of the local gate; the earlier AGENTS.md-as-MDX provider issue is handled by `.mintignore` (PR #22).
-- PR #15 remains blocked because its exact preview serves `/review/audience-workflow` anonymously. Restricted-future pages are incompatible with the current public-only documentation standard.
+- The reduced surface is not considered live until the cleanup commit has been
+  merged, its exact Mintlify deployment has succeeded, and the remote route and
+  projection matrix passes.
+- Additional product documentation remains excluded until an explicit public
+  release decision and evidence-backed content audit expands the allowlist.
 
-## Tests
+## Verification
 
-- `mise run check` runs eight focused publication-boundary tests, validates all MDX against `docs.json`, scans forbidden content, and resolves local links.
-- `mise run local:e2e` adds real HTTP checks against the pinned Mintlify preview.
-- Exact-head CI checks forbidden direct routes plus `llms.txt` and sitemap projections before publication.
+- `mise run check` validates policy, navigation, content, and local links.
+- `mise run public-safety:test` proves representative forbidden content fails.
+- `mise run local:e2e` exercises the local Mintlify runtime.
+- `mise run remote:public-safety` exercises the deployed anonymous surface.

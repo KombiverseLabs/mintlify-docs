@@ -59,7 +59,12 @@ function Assert-NoForbiddenProjection {
     )
 
     foreach ($path in @($policy.remoteForbiddenPaths)) {
-        if ($Content -match [regex]::Escape([string]$path)) {
+        $escapedPath = [regex]::Escape([string]$path)
+        # Match a relative link or an absolute URL with this exact path. A raw
+        # substring check would incorrectly flag /stackkits/quickstart when the
+        # retired route is /quickstart.
+        $pathPattern = "(?im)(?:^|[\s`"'(>])(?:https?://[^/\s<>`"')]+)?$escapedPath(?:[/#?\s<>`"')]|$)"
+        if ($Content -match $pathPattern) {
             throw "$ProjectionName exposes forbidden path '$path'"
         }
     }
@@ -71,12 +76,14 @@ function Assert-NoForbiddenProjection {
 }
 
 $base = $BaseUrl.AbsoluteUri.TrimEnd("/")
-$publicUri = [uri]($base + "/")
-$publicResponse = Get-Response -Uri $publicUri -FollowRedirects
-if ([int]$publicResponse.StatusCode -ne 200) {
-    throw "Expected public route $publicUri to return 200; got $($publicResponse.StatusCode)"
+foreach ($path in @($policy.localSmokePaths)) {
+    $publicUri = [uri]($base + [string]$path)
+    $publicResponse = Get-Response -Uri $publicUri -FollowRedirects
+    if ([int]$publicResponse.StatusCode -ne 200) {
+        throw "Expected public route $publicUri to return 200; got $($publicResponse.StatusCode)"
+    }
+    Write-Host "remote_public_ok: $publicUri"
 }
-Write-Host "remote_public_ok: $publicUri"
 
 foreach ($path in @($policy.remoteForbiddenPaths)) {
     $uri = [uri]($base + [string]$path)

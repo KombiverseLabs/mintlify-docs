@@ -18,6 +18,7 @@ function New-TestFixture {
         [hashtable]$Pages = @{
             "index.mdx" = "---`ntitle: Test`ndescription: Safe public page`n---`n`n# Test`n"
         },
+        [string]$TabName = "Start",
         [switch]$RestrictedNavigation
     )
 
@@ -34,7 +35,7 @@ function New-TestFixture {
     }
     $docs = [ordered]@{
         navigation = [ordered]@{
-            tabs = @([ordered]@{ tab = "Docs"; groups = @($group) })
+            tabs = @([ordered]@{ tab = $TabName; groups = @($group) })
         }
     }
     $docs | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $root "docs.json") -Encoding utf8
@@ -109,6 +110,15 @@ try {
     $restrictedNavigation = New-TestFixture -Name "restricted-navigation" -RestrictedNavigation
     Assert-Case -Name "public false navigation fails" -Fixture $restrictedNavigation -ShouldPass $false -ExpectedMessage "contains public:false"
 
+    $unapprovedTab = New-TestFixture -Name "unapproved-tab" -TabName "Simulate"
+    Assert-Case -Name "unapproved navigation tab fails" -Fixture $unapprovedTab -ShouldPass $false -ExpectedMessage "outside the approved public scope"
+
+    $unapprovedPage = New-TestFixture -Name "unapproved-page" -NavigationPages @("index", "sim/overview") -Pages @{
+        "index.mdx" = "---`ntitle: Test`ndescription: Safe public page`n---`n`n# Test`n"
+        "sim/overview.mdx" = "---`ntitle: Test`ndescription: Out of scope page`n---`n`n# Test`n"
+    }
+    Assert-Case -Name "unapproved public page fails" -Fixture $unapprovedPage -ShouldPass $false -ExpectedMessage "outside the approved public scope"
+
     $secret = New-TestFixture -Name "secret" -Pages @{
         "index.mdx" = "---`ntitle: Test`ndescription: Unsafe operator secret name`n---`n`nAUTH0_MCP_BEARER must never be public.`n"
     }
@@ -118,6 +128,16 @@ try {
         "index.mdx" = "---`ntitle: Test`ndescription: Unsafe origin`n---`n`nUse https://internal-service.workers.dev/path.`n"
     }
     Assert-Case -Name "provider origin fails" -Fixture $origin -ShouldPass $false -ExpectedMessage "provider-origin"
+
+    $proxmox = New-TestFixture -Name "proxmox" -Pages @{
+        "index.mdx" = "---`ntitle: Test`ndescription: Internal development infrastructure`n---`n`nProxmox setup guide.`n"
+    }
+    Assert-Case -Name "internal Proxmox content fails" -Fixture $proxmox -ShouldPass $false -ExpectedMessage "internal-proxmox"
+
+    $unreleasedProduct = New-TestFixture -Name "unreleased-product" -Pages @{
+        "index.mdx" = "---`ntitle: Test`ndescription: Unreleased product surface`n---`n`nUse kombify Techstack to operate this stack.`n"
+    }
+    Assert-Case -Name "unreleased product content fails" -Fixture $unreleasedProduct -ShouldPass $false -ExpectedMessage "unreleased-product-surface"
 
     $escapedLink = New-TestFixture -Name "escaped-link" -Pages @{
         "index.mdx" = "---`ntitle: Test`ndescription: Escaped local link`n---`n`n[Outside](../outside.txt)`n"

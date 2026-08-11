@@ -1,70 +1,69 @@
 ---
 title: mintlify-docs Roadmap
-last_verified: 2026-06-03
+last_verified: 2026-08-11
 roadmap_standard: kombify-roadmap@v1
-track: v0-expansion
+track: v0-public-truth
 ---
 
 # mintlify-docs Roadmap
 
 ## Current Focus
 
-- **Target:** v0.2.0 - Public Docs Baseline
-- **Outcome:** The Mintlify repo has correct root metadata, navigation validation, and public-doc boundaries for the current StackKits-focused surface.
-- **Exit gate:** Standards report no longer flags missing root files or missing local docs gate for this repo.
-- **Blocking bugs:** Beads label `blocks:v0.2.0`
+- **Target:** v0.2.0 - Released Public Truth
+- **Outcome:** `docs.kombify.io` contains only the released StackKits surface
+  and its minimal identity context.
+- **Exit gate:** Local checks, exact-source deployment proof, and the live
+  route/projection matrix pass with all retired pages absent.
+- **Blocking bugs:** Beads label `blocks:v0.2.0`.
 
-## Expansion Track
+## Milestones
 
 | Version | Stage | State | Outcome |
-|---|---|---|---|
-| v0.1.0 | Mintlify Starter | done | Mintlify site scaffold and StackKits navigation exist. |
-| v0.2.0 | Public Docs Baseline | current | Root metadata, local validation, and public-doc boundaries are in place. |
-| v0.3.0 | StackKits Content Quality | planned | StackKits guides are checked for accuracy, naming, and link health. |
-| v0.4.0 | Product Coverage Expansion | planned | Additional kombify product docs are added only from verified product repo sources. |
-| v0.5.0 | API Reference Integration | planned | Public API references are generated or imported from approved OpenAPI sources. |
+| --- | --- | --- | --- |
+| v0.1.0 | Mintlify Starter | done | Initial Mintlify site and StackKits navigation. |
+| v0.2.0 | Released Public Truth | current | Legacy imports are removed and release-backed positive scope is enforced. |
+| v0.3.0 | StackKits Content Quality | planned | Remaining pages are continuously checked against public releases. |
 
-## v0.2.0 - Public Docs Baseline
+## v0.2.0 - Released Public Truth
 
 **Scope**
 
-- [ ] Maintain `README.md`, `STATUS.md`, `ROADMAP.md`, `AGENTS.md`, `CLAUDE.md`, and `mise.toml`.
-- [ ] Keep `docs.json` as the navigation source of truth.
-- [ ] Add a local docs gate that validates navigation targets.
-- [ ] Keep internal standards and implementation detail out of public MDX pages.
+- [x] Reduce navigation to Start, StackKits, and Identity & Access.
+- [x] Remove standalone Simulate, Proxmox, unpublished product, comparison,
+  generic platform, and internal-development content.
+- [x] Replace denylist-only checks with a positive publication scope.
+- [x] Require exact-source Mintlify deployment evidence before live smoke.
+- [x] Verify all remaining StackKits pages against public release `v0.16.0`.
+- [x] Pass local policy, validation, and HTTP gates.
+- [ ] Merge and prove the exact deployed commit at `docs.kombify.io`.
 
 **Exit gate**
 
-- [ ] `mise run check` passes.
-- [ ] `mise run local:e2e` passes or records the external Mintlify CLI blocker.
+- [x] `mise run check` passes.
+- [x] `mise run local:e2e` passes.
+- [ ] Exact-source deployment wait passes for the merged full commit SHA.
+- [ ] `mise run remote:public-safety` passes.
 - [ ] No open P0/P1 Beads bugs with `blocks:v0.2.0`.
 
 ## v0.3.0 - StackKits Content Quality
 
 **Scope**
 
-- [ ] Verify every StackKits page against the current `kombify-StackKits` repo.
-- [ ] Remove starter copy or placeholder prose from active docs.
-- [ ] Confirm service guide links and examples.
-- [ ] Keep brand naming consistent.
+- [ ] Re-audit StackKits pages on every public release.
+- [ ] Keep commands, kit/module availability, and lifecycle wording aligned to
+  immutable public artifacts.
+- [ ] Prevent generated preview or draft pages from entering public navigation.
 
-**Exit gate**
+## Expansion Boundary
 
-- [ ] StackKits content has source-repo references or explicit verification notes.
-- [ ] Navigation page targets remain valid.
-
-## V1 Definition
-
-- **State:** Uncommitted.
-- **Known prerequisites:** Stable validation, current StackKits docs, product coverage decision, and API reference source workflow.
-- **Open questions:** Which product surfaces are public in this Mintlify repo versus the broader `docs` repo.
-
-## Later
-
-- **v0.4.0:** Expand public docs from verified product repo sources.
-- **v0.5.0:** Wire approved OpenAPI sources into public API reference.
+Additional products, APIs, comparisons, integrations, or architecture material
+are not scheduled by default. Any expansion requires an explicit public-release
+decision, an authoritative source, a content audit, and a deliberate allowlist
+change. Repository existence or historical documentation is insufficient.
 
 ## Not Planned
 
-- **Internal docs merge:** Core internal docs and operator runbooks stay outside public Mintlify docs.
-- **Generated roadmap sync:** Execution details stay out of `ROADMAP.md`.
+- Restoring or migrating the retired legacy documentation tree.
+- Publishing internal development infrastructure or operator runbooks.
+- Treating Simulate as a standalone product.
+- Generated roadmap synchronization from this document.

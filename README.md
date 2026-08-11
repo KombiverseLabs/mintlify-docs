@@ -2,163 +2,94 @@
 
 [![Maturity: alpha](https://img.shields.io/badge/maturity-alpha-orange.svg)](STATUS.md)
 
-This repository is the canonical public documentation and API reference surface
-for kombify. It is built with Mintlify, configured entirely by `docs.json`, and
-published at `https://docs.kombify.io`. It is the extraction target of the older
-kombify documentation repository: content moves here, not the other way around,
-and this repository is the successor for anything a reader can reach without
-signing in.
+This repository is the single source of truth for Kombify's anonymous public
+documentation at `https://docs.kombify.io`. Its current scope is deliberately
+narrow: released StackKits capabilities and the identity concept needed to use
+them safely.
 
-> Local testing standard: run `mise run local:e2e` before any publication. The
-> gate is described under [Local Gate](#local-gate).
+## Public Scope
 
-## Scope
+This repository owns the published MDX tree, Mintlify navigation, positive
+publication allowlist, and the local and live gates for `docs.kombify.io`.
 
-This repository owns:
-
-- every publicly readable kombify documentation page, as MDX;
-- `docs.json`, which is both the Mintlify navigation and the public-content
-  allowlist;
-- the public-safety policy that keeps non-public material out of the published
-  site;
-- the local and CI gates that prove the published surface before release.
-
-This repository does not own:
-
-- product architecture, standards, or internal runbooks — those stay in the
-  owning product repositories and the workspace root;
-- repo-local implementation documentation, which stays in each product repo's
-  `docs/` folder;
-- the systems it documents; pages are written against verified product-repo
-  sources, never invented here.
-
-## Publication Boundary
-
-This repository is public-only documentation. `docs.json` is the allowlist:
-
-- every `.mdx` file must appear in its navigation;
-- hidden, draft, restricted, organization-member, group-gated, `internal/`,
-  `operations/`, `review/`, and `runbooks/` content is rejected;
-- operator secret names, internal secret-store paths, private provider origins,
-  and credential-shaped values are rejected before preview;
-- a page that is not ready for anonymous readers stays outside this repository
-  until it is sanitized and publishable.
-
-Mintlify authentication or navigation hiding cannot turn a directly reachable
-file into acceptable public content. The exact-head CI preview verifies that
-forbidden routes are absent from direct URLs, `llms.txt`, and the sitemap.
-
-## Current Surface
-
-`docs.json` currently defines four navigation tabs:
+The public surface has three tabs:
 
 | Tab | Content |
 | --- | --- |
-| Guides | Landing page at `index.mdx`. |
-| Identity & Access | `identity/overview`, `identity/architecture`, `identity/trust-and-security`. |
-| Changelog | `changelog/overview`. |
-| StackKits | Overview, quickstart, kits, how-to and use-case guides, per-service guides, explanations, and reference. |
+| Start | The StackKits-focused landing page. |
+| StackKits | Released kits, modules, workflows, CLI, and MCP documentation. |
+| Identity & Access | The small identity boundary relevant to StackKits. |
 
-## Runtime And Stack
+Content for Cloud, Techstack, Simulate, AI, SpeechKit, unreleased components,
+internal infrastructure, comparisons, operator runbooks, and generic platform
+architecture is outside the current public scope. Simulate is not a standalone
+product and must not appear as one.
+
+## Publication Boundary
+
+`public-safety-policy.json` is the explicit positive allowlist. A public page
+must match an approved exact path or prefix, appear in `docs.json`, and pass the
+forbidden-content checks. Navigation hiding and Mintlify authentication do not
+make a directly reachable file safe to publish.
+
+StackKits pages are accepted only when they describe the current public
+StackKits release. Repository presence, draft metadata, preview status, or an
+internal development workflow is not release evidence.
+
+The old Kombify documentation repository is not an upstream source and must
+not be used for migration or content recovery. Product repositories and their
+public release artifacts are the verification sources.
+
+## Runtime And Dependencies
 
 | Concern | Choice |
 | --- | --- |
-| Site framework | Mintlify, configured by `docs.json` |
-| Content format | MDX, committed in this repository |
-| Toolchain | `mise` with Node 24; pinned `mint@4.2.684` via `npx` |
-| Validation | PowerShell gates in `scripts/`, policy in `public-safety-policy.json` |
-| Reader authentication | none; the site is anonymous by design |
+| Site | Mintlify configured by `docs.json` |
+| Content | English MDX committed in this repository |
+| Toolchain | `mise`, Node 24, pinned `mint@4.2.684` |
+| Validation | PowerShell gates plus `public-safety-policy.json` |
 | Delivery | Mintlify hosting at `docs.kombify.io` |
-| Analytics | PostHog, configured in `docs.json` (`e.kombify.io`, session recording off) |
-
-There are no code dependencies — no `go.mod`, no `package.json`. The real
-dependencies are editorial and delivery ones: StackKits pages are written and
-verified against the `kombify-StackKits` repository, the legacy kombify docs
-repository is the upstream extraction source, Mintlify hosts the published site,
-and PostHog receives page analytics.
-
-Current verified dependency state: [STATUS.md](STATUS.md).
-
-## Repository Context
-
-<!-- generated: repo-context v2026-07-19; source: PLATFORM-ARCHITECTURE-TARGET.md ownership map -->
+| Analytics | PostHog via `e.kombify.io`, session recording disabled |
 
 ```mermaid
 flowchart LR
-  SK["kombify-StackKits"] -- "content source" --> Docs["mintlify-docs"]
-  Legacy["legacy kombify docs repo"] -- "extraction source" --> Docs
-  GW["kombify-Gateway"] -- "identity and access subject" --> Docs
+  SK["Released kombify-StackKits"] --> Docs["mintlify-docs"]
   Docs --> Mint["Mintlify hosting"]
   Mint --> Site["docs.kombify.io"]
   Site --> PH["PostHog analytics"]
 ```
 
-## Quick Start
+## Local Workflow
 
 ```powershell
 mise install
-mise run dev
-```
-
-`mise run dev` starts the repository-pinned Mintlify preview. Edit any `.mdx`
-file, add it to `docs.json`, and re-run the checks below before opening a pull
-request.
-
-## Common Commands
-
-| Command | Purpose |
-| --- | --- |
-| `mise run dev` | Local Mintlify preview on the pinned CLI version. |
-| `mise run check` | Deterministic navigation, content-boundary, and local-link checks. |
-| `mise run public-safety` | Assert the whole tree is public-safe. |
-| `mise run public-safety:test` | Focused fail-closed publication-boundary tests. |
-| `mise run local:e2e` | Full local gate, including the live preview. |
-
-`mise.toml` remains the authority for the task surface.
-
-## Local Gate
-
-```powershell
+mise run check
 mise run local:e2e
 ```
 
-The gate starts the pinned Mintlify runtime and proves both public and forbidden
-routes over real HTTP. It must pass before publication.
-
-`mint broken-links` runs blocking inside `mise run local:e2e`; the earlier
-provider issue (parsing root `AGENTS.md` as MDX) is solved via `.mintignore`
-(PR #22).
-
-## Standards
-
-This repository is governed by the kombify workspace standards, which live in
-the workspace root and in `kombify-Core/standards/` rather than being copied
-here:
-
-- `DOCUMENTATION-STANDARD.md` — documentation tiers, ownership, and supersession.
-- `REPO-FILE-SCHEMA.md` — required root files and their contracts.
-- `LANGUAGE-LOCALIZATION-STANDARD.md` — English for technical documentation.
-- `LOCAL-E2E-DEPLOYMENT-STANDARD.md` — the local gate before any publish.
-
-Copying standard text into this repository is prohibited. Link to the owning
-document instead.
-
-## Documentation
-
-| Document | Purpose |
+| Command | Purpose |
 | --- | --- |
-| [STATUS.md](STATUS.md) | Current implementation state and verified dependencies. |
-| [ROADMAP.md](ROADMAP.md) | Milestones and release gates. |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution workflow. |
-| [AGENTS.md](AGENTS.md) / [CLAUDE.md](CLAUDE.md) | AI-agent instructions. |
-| [docs.json](docs.json) | Navigation and public-content allowlist. |
-| [public-safety-policy.json](public-safety-policy.json) | Fail-closed paths, patterns, and smoke routes. |
-| [schemas/public-safety-policy.schema.json](schemas/public-safety-policy.schema.json) | Policy contract. |
-| [identity/architecture.mdx](identity/architecture.mdx) | Published identity and access architecture, including current diagrams. |
-| [openwiki/](openwiki/) | Generated agent documentation — non-authoritative. |
+| `mise run dev` | Start the pinned local Mintlify preview. |
+| `mise run check` | Validate the positive scope, navigation, content, and local links. |
+| `mise run public-safety:test` | Run fail-closed policy regression tests. |
+| `mise run local:e2e` | Prove allowed and forbidden routes over real local HTTP. |
+| `mise run remote:public-safety` | Prove the deployed route and projection matrix. |
+| `mise run delivery:wait-exact-live` | Wait for a successful `docs.kombify.io` deployment at exact `SOURCE_SHA`. |
 
-Generated agent documentation never overrides this README, `STATUS.md`, or the
-workspace standards.
+The local gate runs `mint validate` and the repository-owned route checks. It
+must pass before publication.
+
+## Authority
+
+- `docs.json` defines the Mintlify navigation.
+- `public-safety-policy.json` defines the permitted public page scope and live
+  smoke matrix.
+- `kombify-StackKits` public release artifacts define released StackKits truth.
+- Workspace standards define documentation and delivery policy; they are not
+  copied into public pages.
+
+See [STATUS.md](STATUS.md), [ROADMAP.md](ROADMAP.md), and
+[CONTRIBUTING.md](CONTRIBUTING.md) for current state and contribution rules.
 
 ## Issue Tracking
 

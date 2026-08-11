@@ -1,7 +1,20 @@
 {
   "$schema": "./schemas/public-safety-policy.schema.json",
-  "version": 1,
+  "version": 2,
   "publicationMode": "public-only",
+  "allowedNavigationTabs": [
+    "Start",
+    "StackKits",
+    "Identity & Access"
+  ],
+  "allowedExactPages": [
+    "index",
+    "identity/overview"
+  ],
+  "allowedPagePrefixes": [
+    "guides/stackkits/",
+    "stackkits/"
+  ],
   "excludedDirectories": [
     ".git",
     ".mintlify",
@@ -36,23 +49,57 @@
     {
       "id": "live-credential-assignment",
       "pattern": "(?im)\\b(?:access[_-]?token|api[_-]?key|client[_-]?secret|password)\\b\\s*[:=]\\s*(?![\\\"']?(?:<|\\$\\{|\\{\\{|example|redacted|replace|your[-_]|x{3,}))[\\\"']?[A-Za-z0-9_./+=-]{12,}"
+    },
+    {
+      "id": "internal-proxmox",
+      "pattern": "(?i)\\bproxmox\\b"
+    },
+    {
+      "id": "retired-simulate-product",
+      "pattern": "(?i)\\bkombify[ -]?simulate\\b|\\bkombifysim\\b|(?:^|[\\\"'(])/?sim/"
+    },
+    {
+      "id": "unreleased-product-surface",
+      "pattern": "(?i)\\bkombify[ -]?(?:cloud|techstack|ai|speechkit|workbench|companion)\\b|\\b(?:techstack|speechkit)\\b"
     }
   ],
   "localSmokePaths": [
     "/",
-    "/stackkits/quickstart"
+    "/stackkits/quickstart",
+    "/identity/overview"
   ],
   "remoteForbiddenPaths": [
     "/internal",
     "/operations",
     "/review/audience-workflow",
-    "/runbooks"
+    "/runbooks",
+    "/sim/overview",
+    "/api/kombifysim/overview",
+    "/techstack/overview",
+    "/cloud/overview",
+    "/api/kombifycloud/overview",
+    "/ai/overview",
+    "/speechkit/overview",
+    "/platform/overview",
+    "/journeys/overview",
+    "/comparisons/vs-proxmox",
+    "/integrations/proxmox",
+    "/quickstart",
+    "/quickstart-selfhosted",
+    "/changelog/overview"
   ],
   "remoteForbiddenMarkers": [
     "Documentation review workflow",
     "organization-members",
     "AUTH0_MCP_BEARER",
     "DOPPLER_TOKEN",
-    "REPO_SYNC_PAT"
+    "REPO_SYNC_PAT",
+    "kombify Simulate",
+    "kombify Cloud",
+    "kombify Techstack",
+    "kombify AI",
+    "SpeechKit",
+    "Proxmox integration",
+    "kombify vs Proxmox"
   ]
 }

@@ -1,156 +1,24 @@
 ---
-title: Spec format reference
-description: Complete reference for the stack-spec.yaml specification format
-sidebarTitle: Spec format
+title: "StackSpec"
+description: "Create and validate the current StackKits configuration through the released CLI"
+sidebarTitle: "StackSpec"
 icon: file-code
 ---
 
-The `stack-spec.yaml` file (also accepted as `kombination.yaml`) is your deployment contract. This reference documents all available fields and their valid values.
-
-## Top-level fields
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `version` | string | Yes | Spec version (currently `"1.0"`) |
-| `stackkit` | string | Yes | StackKit to use (`basement-kit`, `cloud-kit`, `modern-homelab`) |
-| `meta` | object | Yes | Metadata about your homelab |
-| `nodes` | array | Yes | Server definitions |
-| `services` | array/object | Yes | Services to deploy |
-
-## Meta section
-
-```yaml
-meta:
-  name: my-homelab          # Required: unique name
-  domain: home.example.com  # Required: base domain
-  email: you@example.com    # Optional: for Let's Encrypt
-```
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | Yes | Unique homelab identifier (alphanumeric, hyphens) |
-| `domain` | string | Yes | Base domain for services |
-| `email` | string | No | Email for TLS certificate generation |
-
-## Nodes section
-
-```yaml
-nodes:
-  - name: server-1
-    type: hypervisor
-    connection:
-      host: 192.168.1.100
-      user: root
-      ssh_key: ~/.ssh/id_ed25519
-    resources:
-      cpu: 4
-      memory: 16384
-```
-
-### Node fields
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `name` | string | Yes | Unique node identifier |
-| `type` | string | Yes | Node type: `hypervisor`, `docker`, `bare-metal` |
-| `connection` | object | Yes | How to reach this node |
-| `resources` | object | No | Resource constraints |
-
-### Connection fields
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `host` | string | Yes | IP address or hostname |
-| `port` | int | No | SSH port (default: `22`) |
-| `user` | string | No | SSH user (default: `root`) |
-| `ssh_key` | string | No | Path to SSH private key |
-
-## Services section
-
-Services can be specified as a simple list or as detailed objects:
-
-```yaml
-# Simple: enable with defaults
-services:
-  - traefik
-  - immich
-  - vaultwarden
-
-# Detailed: customize per service
-services:
-  traefik:
-    enabled: true
-    config:
-      dashboard: true
-      log_level: INFO
-  immich:
-    enabled: true
-    config:
-      upload_limit: 10GB
-```
-
-## Environment variables
-
-Services support environment variable overrides:
-
-```yaml
-services:
-  immich:
-    enabled: true
-    env:
-      UPLOAD_LOCATION: /data/photos
-      DB_PASSWORD: "${IMMICH_DB_PASSWORD}"
-```
-
-<Warning>
-  Never hardcode secrets in your `stack-spec.yaml`. Use environment variable references with `${VAR_NAME}` syntax.
-</Warning>
-
-## Validation
-
-Validate your spec before deployment:
+The StackSpec is the configuration input for a StackKits workspace. Generate it with the released CLI instead of copying an old field table or hand-assembling generated files.
 
 ```bash
+stackkit init basement-kit --owner-source=local
 stackkit validate
+stackkit resolve
 ```
 
-The validator checks:
-- Required fields are present
-- Types match the CUE schema
-- Node connections are reachable
-- Service dependencies are satisfied
-- No port conflicts exist
+For a VPS you operate, initialize a Cloud Kit with a domain you control:
 
-## Example: Complete spec
-
-```yaml
-version: "1.0"
-stackkit: basement-kit
-
-meta:
-  name: family-cloud
-  domain: home.example.com
-  email: admin@example.com
-
-nodes:
-  - name: main-server
-    type: docker
-    connection:
-      host: 192.168.1.100
-      user: deploy
-      ssh_key: ~/.ssh/id_ed25519
-
-services:
-  traefik:
-    enabled: true
-    config:
-      dashboard: true
-  vaultwarden:
-    enabled: true
-  immich:
-    enabled: true
-    config:
-      upload_limit: 50GB
-  homepage:
-    enabled: true
+```bash
+stackkit init cloud-kit --domain example.com --owner-source=local
 ```
+
+`validate` is authoritative for the installed release. When you change intent, edit the StackSpec, validate it, and regenerate artifacts. Do not place provider credentials, server procurement details, or generated rollout state in the StackSpec.
+
+See [CUE and StackKits](/stackkits/explanations/cue-architecture) for the validation model.

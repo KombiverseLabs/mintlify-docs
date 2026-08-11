@@ -1,100 +1,28 @@
 ---
-title: CUE and StackKits architecture
-description: How CUE schemas power the StackKits validation and generation system
-sidebarTitle: CUE architecture
+title: "CUE and StackKits"
+description: "How CUE validates StackKits intent before generated artifacts are applied"
+sidebarTitle: "CUE"
 icon: cubes
 ---
 
-StackKits use CUE as their schema language. Understanding this architecture helps you customize kits and create your own.
+StackKits uses CUE as the source of truth for kit contracts. Your StackSpec is checked against that contract before artifacts are generated or a target is changed.
 
-## Why CUE?
+## The workflow
 
-CUE (Configure, Unify, Execute) provides something that YAML and JSON Schema cannot: **types, constraints, and composition** in a single language.
-
-```cue
-// CUE catches errors that YAML cannot
-#Service: {
-    name:    string & =~"^[a-z][a-z0-9-]*$"
-    port:    int & >0 & <65536
-    enabled: bool | *true  // default: true
-}
+```bash
+stackkit init basement-kit --owner-source=local
+stackkit validate
+stackkit generate
 ```
 
-**Key advantages:**
-- **Type safety** — Catch configuration errors before deployment
-- **Composable** — Kits can extend and override each other
-- **Defaults** — Sensible defaults reduce configuration burden
-- **Constraints** — Express rules like "port must be > 1024" or "domain must be valid"
+`validate` rejects incompatible values and incomplete intent. `generate` produces disposable outputs from the validated input. When a setting changes, update the StackSpec, validate it again, and regenerate; do not edit generated files directly.
 
-## Three-layer architecture
+## Boundary
 
-Every StackKit follows a three-layer model:
+The standalone StackSpec describes StackKits intent. Provider credentials, provider lifecycle, and server procurement stay outside that contract. A StackKits workspace remains usable without a hosted kombify dependency.
 
-```mermaid
-graph TB
-    subgraph App["Application Layer"]
-        S1["Traefik"]
-        S2["Immich"]
-        S3["Authelia"]
-    end
+## Related pages
 
-    subgraph Platform["Platform Layer"]
-        Docker["Docker Compose"]
-        Networks["Networks"]
-        Volumes["Volumes"]
-    end
-
-    subgraph OS["Foundation Layer"]
-        Ubuntu["Ubuntu Baseline"]
-        Security["Security Hardening"]
-        Networking["Networking"]
-    end
-
-    App --> Platform --> OS
-
-    style App fill:#1e293b,stroke:#38bdf8,color:#f8fafc
-    style Platform fill:#1e293b,stroke:#fbbf24,color:#f8fafc
-    style OS fill:#1e293b,stroke:#4ade80,color:#f8fafc
-```
-
-1. **Foundation Layer** — Operating system / host configuration, security hardening, networking
-2. **Platform Layer** — Container runtime (Docker Compose), standard networks, volumes
-3. **Application Layer** — Modular services that users select and configure
-
-## How validation works
-
-When you run `stackkit validate`, your `stack-spec.yaml` is checked against the CUE schema of your selected StackKit:
-
-<Steps>
-  <Step title="Schema loading">
-    The StackKit's CUE schema is loaded, including all layer definitions and constraints.
-  </Step>
-  <Step title="Unification">
-    Your configuration is unified with the schema. CUE checks that every value satisfies its type and constraints.
-  </Step>
-  <Step title="Default resolution">
-    Missing optional values are filled with CUE defaults.
-  </Step>
-  <Step title="Error reporting">
-    Any validation errors are reported with clear messages indicating what went wrong and where.
-  </Step>
-</Steps>
-
-## Extending kits
-
-StackKits are designed to be extended. You can:
-
-- **Override defaults** — Change any default value in your `stack-spec.yaml`
-- **Add services** — Include additional services beyond the kit's defaults
-- **Customize layers** — Modify foundation or platform settings for your environment
-
-## Further reading
-
-<CardGroup cols={2}>
-  <Card title="Spec-driven design" icon="file-code" href="https://docs.kombify.io/stackkits/reference/spec-format">
-    The philosophy behind declarative infrastructure
-  </Card>
-  <Card title="Available kits" icon="boxes-stacked" href="https://docs.kombify.io/stackkits/overview">
-    Browse the StackKit catalog
-  </Card>
-</CardGroup>
+- [Spec format](/stackkits/reference/spec-format)
+- [Basement Kit](/stackkits/kits/basement-kit)
+- [Cloud Kit](/stackkits/kits/cloud-kit)

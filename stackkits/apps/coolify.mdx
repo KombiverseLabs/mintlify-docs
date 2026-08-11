@@ -1,53 +1,23 @@
 ---
 title: "Coolify"
-description: "Use Coolify as an optional app platform on StackKits"
+description: "The default released StackKits application platform"
 sidebarTitle: "Coolify"
 icon: cloud-upload
 ---
 
-Coolify is an optional app platform at `coolify.<domain>`.
+Coolify is the default application platform in the released StackKits `v0.16.0` catalog. When it is part of the validated configuration, the generated rollout owns its bootstrap and routes it at `coolify.<domain>`.
 
-## Prerequisites
+## Use it safely
 
-<Note>
-  Use one app platform path per workload. Do not configure the same app in Coolify and Dokploy at the same time.
-</Note>
-
-## Steps
-
-<Steps>
-  <Step title="Open Coolify">
-    Open `https://coolify.<domain>` from the Node Hub.
-  </Step>
-  <Step title="Complete first-run setup">
-    Create the owner account and verify the server resource limits before adding workloads.
-  </Step>
-  <Step title="Deploy a small app first">
-    Start with a low-risk app route to confirm DNS, TLS, and container networking.
-  </Step>
-</Steps>
+1. Complete the StackKits lifecycle first: `validate`, `generate`, `apply`, then `verify`.
+2. Open the generated Coolify URL from the Node Hub or the StackKits output.
+3. Use one application delivery path per workload; do not create competing generated routes by hand.
+4. Keep application credentials and recovery material under the local owner's control.
 
 ## Verify
 
-- Coolify can start a simple service.
-- The route resolves through Traefik.
-- Resource usage remains within the server budget.
+- The generated Coolify route opens at the address reported by the rollout.
+- The application platform and its configured routes show healthy after `stackkit verify --json`.
+- The StackKits workspace remains the source of configuration intent.
 
-## Next steps
-
-<CardGroup cols={2}>
-  <Card title="Dokploy" icon="rocket" href="https://docs.kombify.io/stackkits/apps/dokploy">
-    Compare the default app deployment surface.
-  </Card>
-  <Card title="Uptime Kuma" icon="chart-line" href="https://docs.kombify.io/stackkits/apps/uptime-kuma">
-    Add monitors for app routes.
-  </Card>
-</CardGroup>
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Coolify and Dokploy both try to own the same route">
-    Pick one app platform for that route and remove the duplicate configuration from the other platform.
-  </Accordion>
-</AccordionGroup>
+For the supported alternative, see [Komodo](/stackkits/apps/komodo). For the public catalog, see [Applications](/stackkits/apps/overview).
