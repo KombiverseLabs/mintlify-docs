@@ -13,6 +13,9 @@ maturity: alpha
 - Three allowed navigation tabs: Start, StackKits, and Identity & Access.
 - StackKits content is limited to capabilities verified against the current
   public StackKits release.
+- The publishable tree contains 38 pages, 36 of them in the StackKits tab,
+  including release-backed installation paths, StackSpec examples, lifecycle
+  and recovery how-tos, component boundaries, and four use-case guides.
 - Identity is a single concise concept page; it does not expose internal
   architecture or security runbooks.
 - No dependency on the retired legacy documentation repository.
@@ -27,6 +30,10 @@ maturity: alpha
   routes through real HTTP.
 - Remote safety checks verify removed direct routes, `llms.txt`, and sitemap
   projections after deployment.
+- A focused release-truth gate pins the singular `stackkit.cc` website,
+  installer endpoints, exact v0.16.0 commands, local-domain wording, and the
+  boundary that one-line installers never perform Apply. A bounded external
+  link gate checks the website, installer, and immutable release destinations.
 - Promotion waits for a successful Mintlify deployment bound to the exact full
   source commit before the live smoke can satisfy delivery.
 
@@ -42,9 +49,13 @@ maturity: alpha
 
 ## Known Issues
 
-- The reduced surface is not considered live until the cleanup commit has been
-  merged, its exact Mintlify deployment has succeeded, and the remote route and
-  projection matrix passes.
+- The expanded 38-page surface is not considered live until its exact merged
+  commit deploys successfully and the remote route/projection matrix passes.
+- Cloud Kit is present in the release, but its public v0.16.0 live-runtime
+  evidence is pending; the docs make no production-readiness claim.
+- Photos and Vault workload contracts validate and generate, but v0.16.0 has no
+  safe public post-init command for adding their required owner-bound secret
+  custody. Their pages remain descriptive rather than installation recipes.
 - Additional product documentation remains excluded until an explicit public
   release decision and evidence-backed content audit expands the allowlist.
 

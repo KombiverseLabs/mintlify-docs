@@ -5,28 +5,28 @@ sidebarTitle: "Overview"
 icon: grid-2
 ---
 
-This catalog contains only applications and platform components with current public support in the StackKits `v0.16.0` source and release catalog. The enabled set is determined by the validated StackSpec and the selected kit.
+This catalog separates what the native v0.16.0 StackSpec selects today from additional module contracts that merely ship in the release. A file in the release archive is not proof that the initial StackSpec enables it.
 
-## Identity and routing
+## Current core runtime
 
-- [PocketID](/stackkits/apps/pocketid) — default local identity provider
-- [TinyAuth](/stackkits/apps/tinyauth) — default forward-auth entrypoint
-- [Traefik](/stackkits/apps/traefik) — default reverse proxy
-- [Whoami](/stackkits/apps/whoami) — default routing diagnostic
+- [PocketID](/stackkits/apps/pocketid) — local owner identity
+- [TinyAuth](/stackkits/apps/tinyauth) — forward-auth entrypoint
+- [Traefik](/stackkits/apps/traefik) — routing implementation in the generated core
+- [Coolify](/stackkits/apps/coolify) — selected-provider platform in the current core
 
-## Platform and visibility
+## Optional native v2 workloads
 
-- [Coolify](/stackkits/apps/coolify) — default application platform
-- [Komodo](/stackkits/apps/komodo) — supported application-platform alternative
-- [Homepage](/stackkits/apps/homepage) — default service start page
-- [Uptime Kuma](/stackkits/apps/uptime-kuma) — default uptime monitoring
-- [Dozzle](/stackkits/apps/dozzle) — opt-in container log viewer
-- [kombify Point DNS](/stackkits/apps/kombify-point) — opt-in local DNS component
+- [Cloudreve](/stackkits/apps/cloudreve) — released `files` alternative
+- [Immich](/stackkits/apps/immich) — released `photos` alternative
+- [Vaultwarden](/stackkits/apps/vaultwarden) — released `vault` alternative
 
-## Applications
+None of these workloads is enabled by the initial Basement or Cloud StackSpec. Files has a validated public configuration example. Photos and Vault require owner-bound secret custody for which v0.16.0 has no safe public post-init authoring command.
 
-- [Immich](/stackkits/apps/immich) — default photo and video application
-- [Vaultwarden](/stackkits/apps/vaultwarden) — default password-vault application
-- [Jellyfin](/stackkits/apps/jellyfin) — opt-in media server
+## Additional released module contracts
 
-Use `stackkit validate` before changing application intent. Do not edit generated deployment files or treat an unlisted component as public support.
+- [Komodo](/stackkits/apps/komodo) — beta workload adapter
+- [Homepage](/stackkits/apps/homepage), [Uptime Kuma](/stackkits/apps/uptime-kuma), [Whoami](/stackkits/apps/whoami), and [Dozzle](/stackkits/apps/dozzle) — visibility modules not selected by the initial native v2 StackSpec
+- [kombify Point DNS](/stackkits/apps/kombify-point) — local DNS module without a current public native v2 how-to
+- [Jellyfin](/stackkits/apps/jellyfin) — media module without a current native v2 workload selector
+
+Use `stackkit app compatibility --json` for the workload adapter matrix and `stackkit validate` before changing intent. Do not edit generated deployment files or infer enablement from archive presence.

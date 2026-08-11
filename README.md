@@ -72,6 +72,8 @@ mise run local:e2e
 | `mise run dev` | Start the pinned local Mintlify preview. |
 | `mise run check` | Validate the positive scope, navigation, content, and local links. |
 | `mise run public-safety:test` | Run fail-closed policy regression tests. |
+| `scripts/check-stackkits-release-truth.ps1` | Pin installer URLs and prevent known v0.16.0 wording regressions. |
+| `scripts/check-stackkits-external-links.ps1` | Verify the bounded website, installer, and release destinations used by the StackKits quickstart. |
 | `mise run local:e2e` | Prove allowed and forbidden routes over real local HTTP. |
 | `mise run remote:public-safety` | Prove the deployed route and projection matrix. |
 | `mise run delivery:wait-exact-live` | Wait for a successful `docs.kombify.io` deployment at exact `SOURCE_SHA`. |

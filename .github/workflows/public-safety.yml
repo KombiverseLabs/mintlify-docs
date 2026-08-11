@@ -9,6 +9,8 @@ on:
       - "schemas/public-safety-policy.schema.json"
       - "scripts/assert-public-safety.ps1"
       - "scripts/assert-remote-public-safety.ps1"
+      - "scripts/check-stackkits-external-links.ps1"
+      - "scripts/check-stackkits-release-truth.ps1"
       - "scripts/run-local-e2e.ps1"
       - "scripts/run-local-preview-smoke.ps1"
       - "scripts/test-public-safety.ps1"
@@ -44,6 +46,14 @@ jobs:
       - name: Validate the complete publishable tree
         shell: pwsh
         run: ./scripts/assert-public-safety.ps1
+
+      - name: Check released StackKits claims
+        shell: pwsh
+        run: ./scripts/check-stackkits-release-truth.ps1
+
+      - name: Check public StackKits destinations
+        shell: pwsh
+        run: ./scripts/check-stackkits-external-links.ps1
 
   exact-preview:
     name: Prove forbidden routes absent from exact preview

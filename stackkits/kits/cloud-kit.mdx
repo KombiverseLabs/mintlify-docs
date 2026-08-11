@@ -1,11 +1,15 @@
 ---
 title: "Cloud Kit"
-description: "The released single-environment StackKits profile for a VPS or cloud host you operate"
+description: "The released StackKits definition for an existing cloud host and owned domain"
 sidebarTitle: "Cloud Kit"
 icon: cloud
 ---
 
-Cloud Kit is the stable cloud-host profile in the public `v0.16.0` release. It uses the same standalone StackKits lifecycle as Basement Kit, but is intended for one existing VPS or cloud environment with public DNS and TLS under your control.
+Cloud Kit is included in the public `v0.16.0` release. It uses the same standalone authoring lifecycle as Basement Kit, but is intended for one existing cloud host with public DNS and TLS under your control.
+
+<Note>
+  The release includes the Cloud Kit definition and installer, but its public v0.16.0 live-runtime evidence is still pending. This page documents configuration bootstrap and product boundaries, not production-readiness proof.
+</Note>
 
 ## Before you start
 
@@ -19,6 +23,15 @@ StackKits validates and applies its own system definition to that host. It does 
 
 ## Start a Cloud Kit
 
+Bootstrap the released workspace on Linux or macOS:
+
+```bash
+curl -sSL https://cloud.stackkit.cc | STACKKIT_RELEASE_VERSION=0.16.0 DOMAIN=example.com sh
+cd ~/my-cloud-homelab
+```
+
+Or initialize it with an already installed CLI:
+
 ```bash
 mkdir my-cloud-stack
 cd my-cloud-stack
@@ -26,8 +39,9 @@ cd my-cloud-stack
 stackkit init cloud-kit --domain example.com --owner-source=local
 stackkit validate
 stackkit generate
+stackkit plan --json
 stackkit apply
-stackkit verify --json
+stackkit verify --http --json
 ```
 
 Use a domain you own in place of `example.com`. Keep the StackSpec and verification output with the workspace, and change only the StackSpec before regenerating artifacts.

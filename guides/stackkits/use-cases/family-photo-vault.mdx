@@ -1,11 +1,11 @@
 ---
 title: "Family Photo Vault"
-description: "Run the released Immich application on a StackKits host you control"
+description: "Plan the released optional Photos workload without overstating its current authoring path"
 sidebarTitle: "Family Photo Vault"
 icon: camera-retro
 ---
 
-A Family Photo Vault is a self-hosted Immich installation on a StackKits host you control. The public StackKits `v0.16.0` catalog lists Immich as a default application.
+A Family Photo Vault is the optional native v2 `photos` workload with Immich on a host you control. It is present in the public `v0.16.0` catalog but is not selected by the initial StackSpec.
 
 ## Choose the host
 
@@ -14,22 +14,27 @@ A Family Photo Vault is a self-hosted Immich installation on a StackKits host yo
 
 Plan storage and backups before importing a family library. Photos and videos often become the largest data set in a homelab.
 
-## Deploy and verify
+## Current release boundary
 
-```bash
-stackkit init basement-kit --owner-source=local
-stackkit validate
-stackkit generate
-stackkit apply
-stackkit verify --json
-```
+The released contract requires:
 
-Open the generated Immich address only after verification succeeds. Create the application owner account, connect clients, and begin with a small backup set so you can confirm storage growth and recovery expectations.
+- the `photos` workload with the `immich` alternative
+- explicit site and node placement
+- a supported workload adapter
+- an opaque `database-password` secret reference backed by local owner custody
+
+The v0.16.0 CLI can validate and generate that contract, but the initial CUE-authored StackSpec contains no Photos workload. Local secret custody is created during `init`, and the release exposes no safe public post-init command to add it later.
+
+<Warning>
+  Do not use a copied secret reference as a password and do not run a generic apply recipe from this page. Until the release provides a complete public authoring flow, this use case is planning guidance rather than an end-to-end install path.
+</Warning>
 
 ## Keep it maintainable
 
 - Keep the StackSpec and verification output with the workspace.
 - Change the StackSpec rather than generated application files.
-- Confirm backups before relying on the service for irreplaceable photos.
+- Size primary and backup storage for photo and video growth.
+- Confirm a staged restore before relying on the service for irreplaceable photos.
+- Create Immich accounts only after a future complete rollout verifies.
 
 For the application-level steps, see [Immich](/stackkits/apps/immich).

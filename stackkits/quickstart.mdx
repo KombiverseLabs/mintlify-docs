@@ -1,22 +1,40 @@
 ---
 title: "StackKits quickstart"
-description: "Install the released StackKits CLI and create a local Basement Kit workspace"
+description: "Bootstrap, inspect, and explicitly apply a released Basement Kit"
 sidebarTitle: "Quickstart"
 icon: rocket
 ---
 
-This quickstart uses the released StackKits `v0.16.0` lifecycle. Run it in a new directory on a host you control. `apply` changes that host, so stop before it if you only want to inspect the generated output.
+This quickstart uses the released StackKits `v0.16.0` lifecycle. The [StackKits website](https://stackkit.cc/getting-started) helps you choose an installation path, while the CLI remains the local execution authority.
 
-## Install the CLI
+## Bootstrap a Basement Kit
+
+On Linux or macOS, the Basement installer creates `~/my-homelab`, installs the released artifacts, initializes local owner custody, and validates the generated StackSpec:
 
 ```bash
-curl -sSL https://install.stackkit.cc | sh
+curl -sSL https://base.stackkit.cc | STACKKIT_RELEASE_VERSION=0.16.0 sh
+cd ~/my-homelab
 stackkit version
+stackkit validate
 ```
 
-The installer resolves the public StackKits release and installs the CLI together with its packaged catalog.
+<Warning>
+  The one-liner does not install Docker, prepare a host, run `generate`, or run `apply`. It bootstraps and validates the workspace; changing the host remains an explicit local decision.
+</Warning>
 
-## Create and validate a workspace
+Prefer to install only the toolchain and full public catalog?
+
+```bash
+curl -sSL https://install.stackkit.cc | STACKKIT_RELEASE_VERSION=0.16.0 sh
+```
+
+The shell installers support Linux and macOS on `amd64` and `arm64`. Windows users can download the `windows_amd64` ZIP from the [v0.16.0 release](https://github.com/kombifyio/StackKits/releases/tag/v0.16.0). See the [CLI walkthrough](https://stackkit.cc/getting-started/cli) for the website-guided path.
+
+## Review the generated intent
+
+Inspect `stack-spec.yaml` before generating output. In particular, review the absolute storage roots, the `home.test` local domain, site and node identities, and the empty optional workload selection.
+
+If you used the toolchain-only installer, create the workspace yourself:
 
 ```bash
 mkdir my-homelab
@@ -24,24 +42,45 @@ cd my-homelab
 
 stackkit init basement-kit --owner-source=local
 stackkit validate
-stackkit generate
 ```
 
-The generated StackSpec is the configuration input. CUE remains the validation authority and generated rollout files are outputs, not files to edit by hand.
+The StackSpec is the configuration input. CUE remains the validation authority and generated rollout files are outputs, not files to edit by hand. See [Configure a StackSpec](/guides/stackkits/configure-stack-spec) for current examples.
 
-## Apply and verify
+## Generate and inspect the plan
+
+```bash
+stackkit generate
+stackkit plan --json
+```
+
+Confirm that generation and apply readiness are both `ready`, then review the selected workloads and artifact paths.
+
+## Apply explicitly and verify
 
 ```bash
 stackkit apply
-stackkit verify --json
+stackkit verify --http --json
 stackkit status --json
 ```
 
 Keep the verification output with the workspace. It is the record of what the local lifecycle observed after the apply.
 
 <Warning>
-  StackKits never creates a server or obtains provider credentials. For a Cloud Kit, prepare the VPS, domain, and DNS ownership yourself before applying a stack.
+  StackKits does not provision a server or obtain provider credentials. For a Cloud Kit, prepare the host, domain, and DNS ownership yourself before applying a stack.
 </Warning>
+
+<Accordion title="Bootstrap a Cloud Kit workspace">
+  The released Cloud installer requires a domain you control and, like the Basement installer, stops after initialization and validation:
+
+  ```bash
+  curl -sSL https://cloud.stackkit.cc | STACKKIT_RELEASE_VERSION=0.16.0 DOMAIN=example.com sh
+  cd ~/my-cloud-homelab
+  stackkit generate
+  stackkit plan --json
+  ```
+
+  Public v0.16.0 Cloud runtime evidence is still pending, so treat this as a configuration bootstrap rather than a production-readiness claim.
+</Accordion>
 
 ## Continue
 
@@ -52,7 +91,7 @@ Keep the verification output with the workspace. It is the record of what the lo
   <Card title="Cloud Kit" icon="cloud" href="/stackkits/kits/cloud-kit">
     Use the same standalone lifecycle on a VPS you operate.
   </Card>
-  <Card title="MCP connector" icon="plug" href="/stackkits/reference/mcp-connector">
-    Use the released connector with a local coding agent.
+  <Card title="Apply safely" icon="clipboard-check" href="/guides/stackkits/review-plan-and-apply">
+    Review readiness and generated artifacts before changing the host.
   </Card>
 </CardGroup>
