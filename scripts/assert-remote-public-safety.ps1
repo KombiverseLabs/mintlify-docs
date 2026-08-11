@@ -71,12 +71,14 @@ function Assert-NoForbiddenProjection {
 }
 
 $base = $BaseUrl.AbsoluteUri.TrimEnd("/")
-$publicUri = [uri]($base + "/")
-$publicResponse = Get-Response -Uri $publicUri -FollowRedirects
-if ([int]$publicResponse.StatusCode -ne 200) {
-    throw "Expected public route $publicUri to return 200; got $($publicResponse.StatusCode)"
+foreach ($path in @($policy.localSmokePaths)) {
+    $publicUri = [uri]($base + [string]$path)
+    $publicResponse = Get-Response -Uri $publicUri -FollowRedirects
+    if ([int]$publicResponse.StatusCode -ne 200) {
+        throw "Expected public route $publicUri to return 200; got $($publicResponse.StatusCode)"
+    }
+    Write-Host "remote_public_ok: $publicUri"
 }
-Write-Host "remote_public_ok: $publicUri"
 
 foreach ($path in @($policy.remoteForbiddenPaths)) {
     $uri = [uri]($base + [string]$path)

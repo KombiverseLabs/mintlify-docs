@@ -11,8 +11,12 @@
         "public-docs"
       ],
       "paths": [
-        "**/*.md",
+        "**/*.mdx",
         "docs.json",
+        "public-safety-policy.json",
+        "schemas/public-safety-policy.schema.json",
+        "scripts/**",
+        "mise.toml",
         ".kombify/**"
       ],
       "operations": {
@@ -61,6 +65,9 @@
         "promote": {
           "fast": [
             {
+              "task": "delivery:wait-exact-live"
+            },
+            {
               "satisfied": {
                 "by": "public-docs/publish",
                 "reason": "The immutable artifact was activated by the group's authoritative publish adapter."
@@ -68,6 +75,9 @@
             }
           ],
           "stable": [
+            {
+              "task": "delivery:wait-exact-live"
+            },
             {
               "satisfied": {
                 "by": "public-docs/publish",
@@ -79,18 +89,12 @@
         "smoke": {
           "fast": [
             {
-              "http": "https://docs.kombify.io",
-              "expected_statuses": [
-                200
-              ]
+              "task": "remote:public-safety"
             }
           ],
           "stable": [
             {
-              "http": "https://docs.kombify.io",
-              "expected_statuses": [
-                200
-              ]
+              "task": "remote:public-safety"
             }
           ]
         },

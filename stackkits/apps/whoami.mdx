@@ -1,52 +1,18 @@
 ---
 title: "Whoami"
-description: "Use Whoami to verify routing and auth headers"
+description: "The released StackKits routing diagnostic"
 sidebarTitle: "Whoami"
 icon: bug
 ---
 
-Whoami is a small diagnostic service at `whoami.<domain>`. Use it to confirm routing, headers, and auth behavior before debugging larger apps.
+Whoami is the default StackKits routing diagnostic. Use its generated address to check the hostname, proxy headers, and expected authentication behavior before investigating a larger application.
 
-## Prerequisites
+If the result is unexpected, inspect the rollout first:
 
-<Note>
-  Whoami is useful only when the reverse proxy and auth layer are enabled.
-</Note>
+```bash
+stackkit verify --json
+stackkit status --json
+stackkit logs list --json
+```
 
-## Steps
-
-<Steps>
-  <Step title="Open Whoami">
-    Open the Whoami row from the Node Hub.
-  </Step>
-  <Step title="Inspect headers">
-    Check the forwarded host, scheme, and identity headers after signing in.
-  </Step>
-  <Step title="Compare routes">
-    Use the result as the baseline when another service route behaves differently.
-  </Step>
-</Steps>
-
-## Verify
-
-- The page shows the expected hostname.
-- Protected access redirects through TinyAuth before the response appears.
-
-## Next steps
-
-<CardGroup cols={2}>
-  <Card title="Traefik" icon="route" href="https://docs.kombify.io/stackkits/apps/traefik">
-    Compare the router and middleware state.
-  </Card>
-  <Card title="TinyAuth" icon="lock-keyhole" href="https://docs.kombify.io/stackkits/apps/tinyauth">
-    Confirm the auth redirect path.
-  </Card>
-</CardGroup>
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="Whoami is reachable without login">
-    Confirm that the service is meant to be protected and check the Traefik middleware for the Whoami router.
-  </Accordion>
-</AccordionGroup>
+Do not change generated router configuration in response to one diagnostic request. Update validated StackKits intent and regenerate the rollout instead.

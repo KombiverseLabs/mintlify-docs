@@ -1,59 +1,26 @@
 ---
 title: "StackKits Node Hub"
-description: "Use the standard Node Hub on base.<domain> after a StackKits rollout"
+description: "Use the generated local service overview after a verified StackKits rollout"
 sidebarTitle: "Node Hub"
 icon: grid-2
 ---
 
-The StackKits Node Hub is the first page to open after a Basement Kit rollout. It lives at `base.<domain>` and points to setup steps, important links, service URLs, and the public guide for each installed service.
+The StackKits Node Hub is the generated local service overview. After a successful rollout, open the `base.<domain>` address printed by the CLI or shown in the verified output.
 
-## Prerequisites
+## What to check
 
-<Note>
-  You need a completed StackKits rollout and the domain or local DNS name printed by the installer or CLI.
-</Note>
+- The page identifies the current StackKits workspace.
+- Only services selected by the validated configuration are visible.
+- Each listed service uses the generated address for that rollout.
 
-## Steps
+If the Node Hub does not open or a route looks incorrect, inspect the local evidence before changing configuration:
 
-<Steps>
-  <Step title="Open the Node Hub">
-    Open `https://base.<domain>` when HTTPS is enabled, or `http://base.<domain>` for local-only HTTP deployments.
-  </Step>
-  <Step title="Follow Getting Started">
-    Complete the top checklist first: sign in through TinyAuth, create the first PocketID passkey, then verify status before exposing services outside the LAN.
-  </Step>
-  <Step title="Open a service">
-    Use the service table to open the installed tool. Disabled services are intentionally hidden from the Node Hub.
-  </Step>
-  <Step title="Use the how-to link">
-    Each row links to the public guide for that service. Open the guide before changing first-run admin, DNS, or access settings.
-  </Step>
-</Steps>
+```bash
+stackkit verify --json
+stackkit status --json
+stackkit logs list --json
+```
 
-## Verify
+Change the StackSpec and regenerate artifacts rather than editing the generated Node Hub or router configuration.
 
-- The page title is `StackKits Node Hub`.
-- The service table only lists enabled services.
-- Every visible service row has a service URL and a how-to link.
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="base.<domain> does not resolve">
-    Check whether the rollout used local DNS, kombify Point, or public DNS. If local DNS is expected, confirm the server LAN IP and resolver settings printed by StackKits.
-  </Accordion>
-  <Accordion title="A service is missing">
-    Missing rows usually mean the service is disabled in the generated StackKits variables or the module was not part of the selected kit.
-  </Accordion>
-</AccordionGroup>
-
-## Next steps
-
-<CardGroup cols={2}>
-  <Card title="Basement Kit" icon="house" href="https://docs.kombify.io/stackkits/kits/basement-kit">
-    See what the default kit deploys.
-  </Card>
-  <Card title="Rollout paths" icon="route" href="https://docs.kombify.io/guides/stackkits/deploy-with-cli-or-techstack">
-    Compare installer, CLI, and TechStack rollout paths.
-  </Card>
-</CardGroup>
+See [Released applications](/stackkits/apps/overview) for the public catalog.

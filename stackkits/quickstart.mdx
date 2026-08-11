@@ -1,170 +1,58 @@
 ---
 title: "StackKits quickstart"
-description: "Deploy your first StackKit on a Basement homelab with the account-free v0.8 lifecycle"
+description: "Install the released StackKits CLI and create a local Basement Kit workspace"
 sidebarTitle: "Quickstart"
 icon: rocket
 ---
 
-StackKits v0.8 ships a **standalone, account-free OSS lifecycle** for the Basement homelab. You install the CLI from an attested GitHub release, run five commands, and get a validated single-node deployment with a local Owner identity bound to PocketID, TinyAuth, and step-ca.
+This quickstart uses the released StackKits `v0.16.0` lifecycle. Run it in a new directory on a host you control. `apply` changes that host, so stop before it if you only want to inspect the generated output.
 
-<Note>
-  **No kombify Cloud or TechStack account is required.** The v0.8 OSS lifecycle — install, init, validate, generate, apply, verify — runs entirely against the public GitHub release index. Cloud is an optional projection you can add later.
-</Note>
-
-## Prerequisites
-
-- Linux or macOS host with Docker installed
-- Root or `sudo` access on the target host
-- Run commands **on the target host itself** (SSH in, use the console, or an on-server agent). The default `*.home.localhost` URLs resolve on the host and are not shared LAN links.
-
-## Fastest path
-
-Run the Basement Kit one-liner on the host that should become your homelab:
+## Install the CLI
 
 ```bash
-curl -sSL https://base.stackkit.cc | sh
+curl -sSL https://install.stackkit.cc | sh
+stackkit version
 ```
 
-Unpinned runs install the current stable release (`releases/latest` on GitHub). The installer places `stackkit`, `stackkit-server`, packaged OpenTofu, and the public kit catalog under `~/.stackkits`, then runs the full lifecycle: `init --owner-source=local` → `validate` → `generate` → `apply` → `verify`. When it finishes, it prints the service URLs and the local Owner setup link.
+The installer resolves the public StackKits release and installs the CLI together with its packaged catalog.
 
-## Choose a release channel
-
-`stackkit` resolves releases from a signed GitHub **release index** — an attested JSON document listing every published kit archive, its SBOM, and its provenance. You can pick a channel or pin an exact version.
-
-| Channel | Meaning | How to select |
-|---------|---------|---------------|
-| `stable` | Default. Current `releases/latest`. | Run the installer with no pin. |
-| `beta` | Prereleases tagged `-beta.N`. | `export STACKKIT_RELEASE_VERSION=v0.8.1-beta.1` |
-| `edge` | Prereleases tagged `-edge.N`. | `export STACKKIT_RELEASE_VERSION=v0.8.1-edge.2` |
-| Exact SemVer | Any published tag. | `export STACKKIT_RELEASE_VERSION=v0.8.0` |
-
-Prerelease pins are explicit by design — unpinned installers stay on stable until a candidate is promoted.
+## Create and validate a workspace
 
 ```bash
-env STACKKIT_RELEASE_VERSION=v0.8.0 sh -c 'curl -sSL https://base.stackkit.cc | sh'
+mkdir my-homelab
+cd my-homelab
+
+stackkit init basement-kit --owner-source=local
+stackkit validate
+stackkit generate
 ```
 
-To browse published releases before installing:
+The generated StackSpec is the configuration input. CUE remains the validation authority and generated rollout files are outputs, not files to edit by hand.
+
+## Apply and verify
 
 ```bash
-stackkit kit list --channel beta --json
+stackkit apply
+stackkit verify --json
+stackkit status --json
 ```
 
-## CLI-only path
+Keep the verification output with the workspace. It is the record of what the local lifecycle observed after the apply.
 
-Install the CLI without running the full lifecycle when you want to make each step yourself:
+<Warning>
+  StackKits never creates a server or obtains provider credentials. For a Cloud Kit, prepare the VPS, domain, and DNS ownership yourself before applying a stack.
+</Warning>
 
-<Steps>
-  <Step title="Install the CLI">
-    ```bash
-    curl -sSL https://install.stackkit.cc | sh
-    stackkit version
-    ```
+## Continue
 
-    The shared installer works for every published kit; you pick the kit at `init`.
-  </Step>
-
-  <Step title="Initialize with a local Owner">
-    ```bash
-    mkdir my-homelab
-    cd my-homelab
-    stackkit init --owner-source=local --non-interactive
-    ```
-
-    `init` defaults to `basement-kit`. `--owner-source=local` creates the account-free custody set:
-
-    - A stable `ownerRef` for the deployment
-    - An **Ed25519 evidence key** for signing local rollout evidence
-    - A **step-ca** certificate authority for the runtime PKI
-    - A desired **PocketID** Owner projection, authenticated through **TinyAuth**
-
-    No Cloud profile, no email, no external account is contacted.
-  </Step>
-
-  <Step title="Validate the spec">
-    ```bash
-    stackkit validate
-    ```
-
-    Runs the embedded CUE schemas against `stack-spec.yaml` and rejects anything the release cannot generate.
-  </Step>
-
-  <Step title="Generate rollout artifacts">
-    ```bash
-    stackkit generate
-    ```
-
-    Produces the hash-bound Compose and OpenTofu artifacts under `.stackkit/runtime/` with pinned images and local-custody references.
-  </Step>
-
-  <Step title="Apply the deployment">
-    ```bash
-    stackkit apply
-    ```
-
-    Brings up the Basement single-node graph — Traefik, socket proxy, PocketID, TinyAuth, step-ca, Coolify, and the Node Hub — and binds the PocketID subject through TinyAuth to `ownerRef` and step-ca. Signed evidence is written to `.stackkit/state.yaml`.
-  </Step>
-
-  <Step title="Verify the deployment">
-    ```bash
-    stackkit verify --json
-    ```
-
-    Read-only post-deployment checks that confirm the release trust set, the PocketID Owner binding, and every service healthcheck.
-  </Step>
-</Steps>
-
-## Local Owner custody
-
-The Owner is the daily admin for PocketID, Coolify, StackKit Server, and Uptime Kuma. `--owner-source=local` keeps that identity entirely on the host:
-
-- The **Ed25519** key signs local Apply evidence — Cloud never sees the private key.
-- **step-ca** issues certificates for internal service-to-service TLS.
-- **PocketID** holds the human directory and passkey login.
-- **TinyAuth** provides the OIDC ForwardAuth middleware in Traefik.
-
-After the first Apply, open the printed Base Hub URL and complete the PocketID Owner setup. Bootstrap-open Base routes stay reachable on `.localhost` until you press **Protect Base Hub** in the Hub to move them behind TinyAuth.
-
-## Per-kit one-liners
-
-Use a kit-specific one-liner once you know which pattern you want:
-
-```bash
-curl -sSL https://base.stackkit.cc | sh      # Basement Kit — verified v0.8 standalone
-curl -sSL https://cloud.stackkit.cc | sh     # Cloud Kit — BYO-VPS, account-free
-curl -sSL https://install.stackkit.cc | sh   # Shared installer, choose kit at init
-```
-
-| StackKit | Use case | Status |
-|----------|----------|--------|
-| `basement-kit` | Single-environment homelab | v0.8 standalone (stable) |
-| `cloud-kit` | Cloud VM / BYO-VPS | v0.8 standalone |
-| `modern-homelab` | Hybrid local + cloud topology | v0.9 preview |
-
-## What you get
-
-Basement Kit's default single-node graph provisions:
-
-- **Traefik v3** with the local-custody TLS chain
-- **PocketID + TinyAuth** for account-free Owner login
-- **step-ca** internal PKI
-- **Coolify** as the PaaS surface (PostgreSQL, Redis, realtime)
-- **Node Hub** with per-service links, protection controls, and setup evidence
-- Attested Compose/OpenTofu artifacts and a signed rollout record
-
-## Next steps
-
-<CardGroup cols={2}>
-  <Card title="CLI or TechStack" icon="route" href="/guides/stackkits/deploy-with-cli-or-techstack">
-    Compare the standalone CLI to the optional kombify TechStack UI.
+<CardGroup cols={3}>
+  <Card title="Basement Kit" icon="house" href="/stackkits/kits/basement-kit">
+    Learn about the local, single-environment kit.
   </Card>
-  <Card title="Basement Kit details" icon="house" href="/stackkits/kits/basement-kit">
-    See exactly what Basement Kit deploys and how its defaults work.
+  <Card title="Cloud Kit" icon="cloud" href="/stackkits/kits/cloud-kit">
+    Use the same standalone lifecycle on a VPS you operate.
   </Card>
-  <Card title="Node Hub" icon="grid-2" href="/guides/stackkits/node-hub">
-    Use the default dashboard at `base.<domain>` after rollout.
-  </Card>
-  <Card title="PocketID" icon="key" href="/stackkits/apps/pocketid">
-    Configure the local Owner identity and passkey login.
+  <Card title="MCP connector" icon="plug" href="/stackkits/reference/mcp-connector">
+    Use the released connector with a local coding agent.
   </Card>
 </CardGroup>

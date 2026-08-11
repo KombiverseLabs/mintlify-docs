@@ -1,100 +1,35 @@
 ---
 title: "Family Photo Vault"
-description: "Run your family's own photo cloud with Immich on a kombify StackKit"
+description: "Run the released Immich application on a StackKits host you control"
 sidebarTitle: "Family Photo Vault"
 icon: camera-retro
 ---
 
-A Family Photo Vault is Immich running on your own StackKit: your family's photos, searchable and shared, without handing them to someone else's cloud.
+A Family Photo Vault is a self-hosted Immich installation on a StackKits host you control. The public StackKits `v0.16.0` catalog lists Immich as a default application.
 
-## Why your own photo vault
+## Choose the host
 
-Every photo your phone takes normally ends up on someone else's servers, under someone else's storage limits and someone else's terms. A Family Photo Vault flips that around: Immich runs on hardware you own, or on a server you lease and control, so the storage behind your photos is yours — not a shared, multi-tenant photo service.
+- Use [Basement Kit](/stackkits/kits/basement-kit) for local hardware and LAN-first access.
+- Use [Cloud Kit](/stackkits/kits/cloud-kit) for an existing VPS or cloud host with a domain you control.
 
-There's no per-photo cloud subscription creeping up as your library grows. You pay for the compute and storage you already have, or a fixed server lease — not a recurring per-gigabyte photo bill.
+Plan storage and backups before importing a family library. Photos and videos often become the largest data set in a homelab.
 
-## What you get
+## Deploy and verify
 
-- **Immich** at `photos.<domain>` — a kombify.me address if you're on managed cloud, or `photos.home.localhost` if you're running the local Basement Kit (listed in this catalog as Basement Kit) on your own hardware.
-- **Mobile backup apps** for iOS and Android that upload new photos and videos automatically.
-- **ML-powered search** — find photos by what's in them, not just by folder or date.
-- **Shared family albums** so everyone adds to and sees the same library instead of five separate camera rolls.
+```bash
+stackkit init basement-kit --owner-source=local
+stackkit validate
+stackkit generate
+stackkit apply
+stackkit verify --json
+```
 
-<Note>
-  Photo and video libraries grow faster than most other homelab data, especially once the whole family backs up full-resolution originals. Check [sizing your StackKit](https://docs.kombify.io/guides/stackkits/sizing-your-stackkit) before you commit to a server or storage tier.
-</Note>
+Open the generated Immich address only after verification succeeds. Create the application owner account, connect clients, and begin with a small backup set so you can confirm storage growth and recovery expectations.
 
-## The lifecycle at a glance
+## Keep it maintainable
 
-| Phase | What happens | Where you do it |
-|---|---|---|
-| Decide | Pick local, managed cloud, or hybrid, and pick a kit | This site's how-to guides, kombify-TechStack dashboard |
-| Set up | Roll out the kit, claim your owner passkey, open Immich | TechStack dashboard or CLI, then Node Hub |
-| Live with it | Back up photos, search, browse, share albums | Immich app and mobile app |
-| Protect | Keep the stack's backups covering your photo storage | Node Hub, your stack spec |
-| Move or leave | Switch exposure, pause, or remove the service | Node Hub, your PaaS dashboard |
+- Keep the StackSpec and verification output with the workspace.
+- Change the StackSpec rather than generated application files.
+- Confirm backups before relying on the service for irreplaceable photos.
 
-## Choose your setup
-
-Two decisions shape this before you deploy anything:
-
-- **Where it runs.** Local hardware keeps everything on a machine you own, reachable on your LAN by default. A managed VPS lease through kombify Cloud gets you a public address without touching a server yourself. See [local vs. cloud vs. hybrid](https://docs.kombify.io/guides/stackkits/local-vs-cloud-vs-hybrid).
-- **How hands-on you stay afterward.** Install-only gives you a working baseline you operate yourself from the CLI. Managed with kombify Cloud keeps recommendations, status, and future changes visible in a dashboard. See [install only or managed with kombify Cloud](https://docs.kombify.io/guides/stackkits/install-only-vs-managed-cloud).
-
-Not sure which kit fits at all? Start with [choosing a kit](https://docs.kombify.io/guides/stackkits/choosing-a-kit).
-
-## Set it up
-
-<Steps>
-  <Step title="Deploy your kit">
-    Roll out through [the installer, CLI, or kombify-TechStack](https://docs.kombify.io/guides/stackkits/deploy-with-cli-or-techstack). Photos (Immich) is part of the default rollout — you don't need to enable anything extra.
-  </Step>
-  <Step title="Open the Node Hub">
-    Open the [Node Hub](https://docs.kombify.io/guides/stackkits/node-hub) at `base.<domain>` and complete the first-run checklist.
-  </Step>
-  <Step title="Claim your owner account">
-    Rollout creates your PocketID owner record and prepares the matching Immich owner account for you automatically. You finish by claiming the one-time passkey link from the Node Hub — there's no separate Immich sign-up form to fill in.
-  </Step>
-</Steps>
-
-## Bring the family in
-
-<Steps>
-  <Step title="Create accounts for family members">
-    Add each family member as an Immich user from the admin panel.
-  </Step>
-  <Step title="Connect the mobile app">
-    Each person installs the Immich mobile app and signs in with their account. See the [Immich guide](/stackkits/apps/immich) for the mobile connect steps.
-  </Step>
-  <Step title="Create shared albums">
-    Set up shared albums so everyone contributes to and sees the same family library.
-  </Step>
-</Steps>
-
-## Everyday use and getting help
-
-Most day-to-day questions have an answer close by:
-
-- This docs site covers the surrounding how-tos beyond this lifecycle guide.
-- The [Immich service guide](/stackkits/apps/immich) covers the app itself — first-run setup, mobile backup, troubleshooting.
-- The [monitoring reference](https://docs.kombify.io/stackkits/reference/monitoring) explains how StackKits watches your services, including Immich's route and background jobs, so you notice a stalled backup before your photos do.
-
-## Local-only or public
-
-A Family Photo Vault can be reachable from anywhere or stay inside your home network — the choice comes from how you set up domain and context, not from a separate Immich setting.
-
-- **Public**: a kombify.me address or your own custom domain puts `photos.<domain>` on the open internet behind Traefik, TinyAuth, and PocketID login, so family members can back up and browse from mobile data, not just Wi-Fi.
-- **Local-only**: on a local Basement Kit without a public domain, Immich only answers on your LAN at `photos.home.localhost` (or the server IP) — nobody outside your network can reach it, but neither can you when you're away from home.
-
-See [local vs. cloud vs. hybrid](https://docs.kombify.io/guides/stackkits/local-vs-cloud-vs-hybrid) if you're still deciding between these.
-
-## Next steps
-
-<CardGroup cols={2}>
-  <Card title="Immich" icon="images" href="/stackkits/apps/immich">
-    First-run setup, mobile backup, and troubleshooting for the app itself.
-  </Card>
-  <Card title="Choosing a kit" icon="list" href="https://docs.kombify.io/guides/stackkits/choosing-a-kit">
-    Compare Basement Kit, Modern Homelab, and high-availability add-on.
-  </Card>
-</CardGroup>
+For the application-level steps, see [Immich](/stackkits/apps/immich).

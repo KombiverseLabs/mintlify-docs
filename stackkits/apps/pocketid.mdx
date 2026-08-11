@@ -1,53 +1,12 @@
 ---
 title: "PocketID"
-description: "Create the first passkey and use PocketID as the StackKits identity provider"
+description: "The released default local identity provider for StackKits"
 sidebarTitle: "PocketID"
 icon: fingerprint
 ---
 
-PocketID is the default passkey identity provider for StackKits services. It usually lives at `id.<domain>`.
+PocketID is the default local identity provider in the released StackKits catalog. A Basement Kit rollout uses it for local owner custody and normally exposes it at `id.<domain>`.
 
-## Prerequisites
+After the rollout verifies successfully, open the generated address and create the first local owner passkey. Keep recovery material outside the server and do not use a shared identity for the owner.
 
-<Note>
-  Open the Node Hub first and keep the generated admin information available until the first passkey is created.
-</Note>
-
-## Steps
-
-<Steps>
-  <Step title="Open setup">
-    Open `https://id.<domain>/setup` from the Node Hub.
-  </Step>
-  <Step title="Create the first admin">
-    Register the first admin user and passkey. Use a real operator identity, not a shared team mailbox.
-  </Step>
-  <Step title="Verify OIDC clients">
-    Keep the generated TinyAuth client enabled so protected service routes can use the login layer.
-  </Step>
-</Steps>
-
-## Verify
-
-- `id.<domain>` loads the PocketID UI.
-- The first admin can sign in with a passkey.
-- TinyAuth login redirects to PocketID when OIDC is enabled.
-
-## Next steps
-
-<CardGroup cols={2}>
-  <Card title="TinyAuth" icon="lock-keyhole" href="https://docs.kombify.io/stackkits/apps/tinyauth">
-    Connect protected routes to the login layer.
-  </Card>
-  <Card title="Node Hub" icon="grid-2" href="https://docs.kombify.io/guides/stackkits/node-hub">
-    Return to first-run setup.
-  </Card>
-</CardGroup>
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title="The setup page says the instance is already claimed">
-    Sign in with the existing admin account. If ownership is unknown, use the recovery material from the StackKits rollout output.
-  </Accordion>
-</AccordionGroup>
+TinyAuth uses the generated PocketID integration for protected StackKits routes. See [TinyAuth](/stackkits/apps/tinyauth) for the entrypoint behavior.

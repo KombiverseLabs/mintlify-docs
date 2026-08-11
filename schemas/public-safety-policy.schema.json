@@ -7,6 +7,9 @@
   "required": [
     "version",
     "publicationMode",
+    "allowedNavigationTabs",
+    "allowedExactPages",
+    "allowedPagePrefixes",
     "excludedDirectories",
     "forbiddenPathPrefixes",
     "forbiddenFrontmatterKeys",
@@ -17,8 +20,26 @@
   ],
   "properties": {
     "$schema": { "type": "string" },
-    "version": { "const": 1 },
+    "version": { "const": 2 },
     "publicationMode": { "const": "public-only" },
+    "allowedNavigationTabs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "allowedExactPages": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "allowedPagePrefixes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "/$" }
+    },
     "excludedDirectories": {
       "type": "array",
       "minItems": 1,

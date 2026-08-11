@@ -22,3 +22,11 @@ run = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-local-e2e
 [tasks."local:e2e"]
 description = "Run the local docs gate"
 run = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-local-e2e.ps1"
+
+[tasks."delivery:wait-exact-live"]
+description = "Wait for the exact merged Mintlify deployment on docs.kombify.io"
+run = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/wait-for-exact-mintlify-deployment.ps1 -CommitSha $env:SOURCE_SHA"
+
+[tasks."remote:public-safety"]
+description = "Verify the live public scope, forbidden routes, and generated projections"
+run = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/assert-remote-public-safety.ps1 -BaseUrl https://docs.kombify.io"
