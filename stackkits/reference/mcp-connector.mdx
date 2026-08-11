@@ -95,6 +95,31 @@ stackkit-server --api-key <api-key>
 
 Enabling write mode does not bypass approval. Every mutating tool call must cite the exact registered operation identity from the Operations registry and receive explicit local Owner approval before the sibling CLI is invoked. Unapproved or misidentified requests fail closed.
 
+## Structured results and correlation IDs
+
+CLI-backed MCP tools publish their machine-readable payload through the MCP `structuredContent` field. Clients read the parsed JSON directly instead of scraping text. The envelope is the same `stackkit.command-result/v1` document the CLI writes to stdout under `--json` — see [CLI JSON output](/stackkits/reference/cli-json-output) for the full contract.
+
+- `stackkit_apply` returns `stackkit.apply-result/v2`.
+- `stackkit_status` returns `stackkit.status/v2`.
+- `stackkit_verify` returns runtime evidence bound to the last signed Apply result.
+- `stackkit_logs_list` and `stackkit_log_get` return `stackkit.log-list/v1` and `stackkit.log-run/v1` with digest-bound cursors.
+- Adapter or CLI failures surface `stackkit.actionable-error/v1` under `error_details` alongside the structured payload, so evidence is preserved even on a non-zero result.
+
+Every CLI-backed tool input accepts an optional `correlation_id`. When set, the connector forwards it as `--correlation-id` on the sibling CLI so the local run and its rollout events are tagged with one validated caller ID. The correlation ID is evidence correlation only — it grants no authority, does not bypass Owner approval, and is validated before being bound to the collision-resistant local run identity.
+
+```json
+{
+  "tool": "stackkit_apply",
+  "arguments": {
+    "workspace": "/srv/basement",
+    "operation_id": "apply-2026-08-11-photos",
+    "correlation_id": "req-9f8c1d0a"
+  }
+}
+```
+
+Structured values returned through MCP are recursively redacted before delivery, providing defense-in-depth for legacy log files and subprocess diagnostics.
+
 ## Day-2 operations over MCP
 
 As of v0.10.0, the following operations have full MCP parity with the CLI through the exact same-build sibling binary:
