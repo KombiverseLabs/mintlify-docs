@@ -53,6 +53,14 @@ Once the compiler picks the route, its identity is baked into the workload bundl
 
 After Apply, the adapter must return exactly those fields in its readback. Coolify, Komodo, and `standalone-compose` all consume the same descriptor and are checked against it — no adapter can quietly rewrite the host or drop TLS.
 
+## Kit-owned core workloads
+
+Some workloads are declared by the kit itself rather than by your spec, and their routes are frozen by the kit — the route-selection rules above do not apply.
+
+Cloud Kit's required `cloud-core` workload is the current example. It renders `base`, `auth`, `id`, and `coolify` on the plan-owned public TLS domain (`base.<domain>`, `auth.<domain>`, `id.<domain>`, and the router-published Coolify host). You cannot declare additional routes for these services or override their exposure; the Cloud core project is executed as one digest-pinned Compose project by the local runtime owner.
+
+Everything below still applies to Application Kit workloads (Immich, Cloudreve, Vaultwarden, and similar) that you enable in `services:`.
+
 ## Workloads with no declared route
 
 If you don't declare any route for a workload, that's supported — the workload is still delivered and remains reachable **through its adapter's internal network** (for example, on the StackKits routing network on the same node). It just advertises no StackKits-owned subdomain and gets no Traefik host/TLS labels.
