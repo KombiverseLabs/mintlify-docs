@@ -1,0 +1,118 @@
+---
+title: "stackkit service"
+description: Owner-approved runtime control for one StackKits-managed Cloud Core service at a time
+sidebarTitle: stackkit service
+icon: sliders
+---
+
+`stackkit service` is a narrow, owner-gated verb that mutates or reads one StackKits-managed Cloud Core service at a time. It was introduced in `v0.16.0` to give operators a targeted lever between full-plan verbs like `stackkit apply` and read-only verbs like `stackkit status`.
+
+Use it when you need to restart a single control-plane component, pause the Coolify PaaS during maintenance, or pull bounded, redacted logs — without regenerating artifacts or re-applying the whole resolved plan.
+
+## Subcommands
+
+| Subcommand | Purpose | Owner approval |
+|---|---|---|
+| `stackkit service start <service-key>` | Set desired state to `running` and start the service's components | Required (`--owner-approve`) |
+| `stackkit service stop <service-key>` | Set desired state to `stopped` and stop the service's components | Required (`--owner-approve`); only allowed for `coolify` |
+| `stackkit service restart <service-key>` | Restart the service's components in place; leaves desired state unchanged | Required (`--owner-approve`) |
+| `stackkit service logs <service-key>` | Return a bounded, redacted page of log entries | Not required |
+
+## Service keys
+
+Only the following Cloud Core service keys are addressable. Application workloads deployed through Coolify or other PaaS surfaces are out of scope.
+
+| Key | Components | Actions |
+|---|---|---|
+| `base` | `router`, `socket-proxy`, `step-ca`, `hub`, `kopia-agent` | `start`, `restart`, `logs` |
+| `auth` | `tinyauth` | `start`, `restart`, `logs` |
+| `id` | `pocketid` | `start`, `restart`, `logs` |
+| `coolify` | `coolify`, `coolify-postgres`, `coolify-redis`, `coolify-realtime` | `start`, `stop`, `restart`, `logs` |
+
+`stop` is refused for `base`, `auth`, and `id` with reason code `critical_control_plane`. Only `coolify` can be stopped.
+
+## Flags
+
+### Mutation subcommands (`start`, `stop`, `restart`)
+
+| Flag | Default | Description |
+|---|---|---|
+| `--owner-approve` | `false` | **Required.** Records explicit local Owner authorization for the mutation. Without it the command exits with reason code `owner_approval_required` and does not touch the runtime. |
+| `--json` | `false` | Emit the versioned `stackkit.service-action-result/v1` envelope on stdout instead of a human line. |
+
+### `stackkit service logs`
+
+| Flag | Default | Description |
+|---|---|---|
+| `--tail` | `100` | Number of redacted log entries to return. Must be between `1` and `200`. |
+| `--cursor` | — | Opaque cursor from a previous result's `nextCursor`. Pass it through verbatim to fetch the next page — do not construct or edit it. |
+| `--json` | `false` | Emit the versioned `stackkit.service-logs/v1` envelope on stdout instead of one line per entry. |
+
+## Examples
+
+Restart the base control plane after a transient failure:
+
+```bash
+stackkit service restart base --owner-approve
+```
+
+Pause Coolify during a database maintenance window, then bring it back:
+
+```bash
+stackkit service stop coolify --owner-approve
+# … perform maintenance …
+stackkit service start coolify --owner-approve
+```
+
+Tail the last 50 redacted log entries from the identity service as JSON, then page:
+
+```bash
+stackkit service logs id --tail 50 --json
+stackkit service logs id --tail 50 --cursor sha256:<opaque> --json
+```
+
+## JSON envelopes
+
+Both envelopes are versioned. Treat the `apiVersion` field as the stable contract and ignore fields you do not recognize.
+
+### `stackkit.service-action-result/v1`
+
+Emitted by `start`, `stop`, and `restart` when `--json` is set.
+
+| Field | Description |
+|---|---|
+| `apiVersion` | Always `stackkit.service-action-result/v1`. |
+| `action` | `start`, `stop`, or `restart`. |
+| `serviceKey` | Normalized service key (`base`, `auth`, `id`, `coolify`). |
+| `desiredState` | `running` or `stopped` after the mutation. |
+| `observedState` | Live runtime state observed after the action ran. |
+| `revision` | Monotonically increasing desired-state revision. |
+| `checks` | Ordered list of `{name, status, detail}` checks (`owner_approval`, `runtime_action`, `runtime_observation`). |
+| `reasonCode` | Present on failure — e.g. `owner_approval_required`, `critical_control_plane`, `unknown_service`, `service_runtime_unavailable`. |
+| `retryable` | `true` when the caller can retry the same command as-is. |
+| `evidenceRef` | On-disk path under `.stackkit/service-control/evidence/` for the signed evidence entry. |
+
+### `stackkit.service-logs/v1`
+
+Emitted by `logs` when `--json` is set.
+
+| Field | Description |
+|---|---|
+| `apiVersion` | Always `stackkit.service-logs/v1`. |
+| `serviceKey` | Normalized service key. |
+| `entries` | Array of `{timestamp, message}` — messages are redacted before they leave the host. |
+| `nextCursor` | Opaque token to pass back as `--cursor` for the next page. Omitted on the last page. |
+| `truncated` | `true` when more entries were available than the requested `--tail`. |
+| `evidenceRef` | On-disk path under `.stackkit/service-control/evidence/` for the log-read evidence entry. |
+
+## Relationship to `stackkit apply` and `stackkit status`
+
+`stackkit service` writes owner-signed desired state and per-action evidence under `.stackkit/service-control/`. It does not edit `stack-spec.yaml`, regenerate artifacts, or re-run `stackkit apply`.
+
+- Use `stackkit apply` when the resolved plan changed and you want the runtime to match it.
+- Use `stackkit status` to read the live runtime, plan, and evidence without mutating anything.
+- Use `stackkit service` when you want to nudge one Cloud Core service in place — a restart, a pause, or a redacted log tail — without touching the rest of the plan.
+
+The next `stackkit apply` still reconciles from the resolved plan, so a service that was manually stopped through `stackkit service stop coolify --owner-approve` will be started again if the plan's desired state says it should run. Treat `stackkit service` as a runtime lever, not a spec change.
+
+See [Day-2 operations](/stackkits/reference/day-2-operations#stackkit-service) for how this verb fits alongside `stackkit upgrade`, `backup restore`, and `drift reconcile`.

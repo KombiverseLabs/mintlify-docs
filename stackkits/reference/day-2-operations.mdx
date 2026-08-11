@@ -171,6 +171,65 @@ Standard reconciliation is **owner-gated end to end**. Without `--owner-approve`
 
 `--mode advanced` remains fail-closed for now, so `--owner-approve` alone will not unlock it — you must also supply an offline-verified advanced capability. Treat `--mode standard --owner-approve` as the only supported reconciliation path today.
 
+## `stackkit service`
+
+`stackkit service` controls one StackKits-managed Cloud Core service at a time. It is a **narrow, owner-gated runtime lever** — not a replacement for `stackkit apply` or `stackkit status`, which remain the source of truth for the resolved plan and evidence.
+
+Use it when a Cloud Core service needs to be nudged in place — restarting a hung component, pausing the Coolify PaaS during maintenance, or pulling bounded, redacted logs — without regenerating or re-applying the whole plan.
+
+Introduced in `v0.16.0`. See the full flag matrix on the [CLI reference](/stackkits/reference/cli-service).
+
+```bash
+# Restart the base control plane (router, socket-proxy, step-ca, hub, kopia-agent)
+stackkit service restart base --owner-approve
+
+# Pause Coolify during a maintenance window
+stackkit service stop coolify --owner-approve
+
+# Tail the last 100 redacted log entries from the identity service
+stackkit service logs id --tail 100
+```
+
+### Scope and boundaries
+
+- **Cloud Core services only.** Valid service keys are `base`, `auth`, `id`, and `coolify`. Application workloads deployed through Coolify or other PaaS surfaces are not addressable through this verb.
+- **Owner-bound mutations.** Every `start`, `stop`, and `restart` requires the explicit `--owner-approve` flag. Without it the command exits with reason code `owner_approval_required` and does not touch the runtime.
+- **Critical control-plane protection.** `stop` is refused for `base`, `auth`, and `id` with reason code `critical_control_plane`. Only `coolify` can be stopped. All four services accept `start`, `restart`, and `logs`.
+- **No plan changes.** `stackkit service` writes owner-signed desired state and per-action evidence under `.stackkit/service-control/`. It does not edit `stack-spec.yaml`, regenerate artifacts, or re-run `stackkit apply`. The next `stackkit apply` still reconciles from the resolved plan.
+
+### Relationship to `stackkit apply` and `stackkit status`
+
+| Verb | What it changes | When to reach for it |
+|---|---|---|
+| `stackkit apply` | Reconciles the whole resolved plan against the runtime | Spec or release changed; you want the runtime to match the plan |
+| `stackkit status` | Reads live runtime, plan, and evidence — writes nothing | You want to know what is running and whether it drifted |
+| `stackkit service` | One Cloud Core service's runtime desired state and log tail | You want to restart, pause, or inspect one managed service without a full apply |
+
+### Logs
+
+`stackkit service logs <service-key>` returns bounded, redacted log entries for one managed service. It writes nothing to the runtime and does not require `--owner-approve`.
+
+```bash
+# First page
+stackkit service logs coolify --tail 50 --json
+
+# Next page, using the opaque cursor from the previous result's nextCursor
+stackkit service logs coolify --tail 50 --cursor sha256:… --json
+```
+
+- `--tail` bounds the page size between 1 and 200 (default 100).
+- `--cursor` is an opaque token returned as `nextCursor` on the previous page. Do not construct or edit it — pass it through verbatim.
+- Log messages are redacted through the same allowlist used by the rest of the CLI before they leave the host.
+
+### JSON output and evidence
+
+All four subcommands accept `--json` and emit a versioned envelope:
+
+- `start`, `stop`, `restart` emit `stackkit.service-action-result/v1` with the action, service key, desired and observed states, revision, per-check status, and an `evidenceRef` pointing at the on-disk evidence entry under `.stackkit/service-control/evidence/`.
+- `logs` emits `stackkit.service-logs/v1` with the entries, `nextCursor`, and a `truncated` flag.
+
+Feed the JSON envelope into automation instead of parsing stdout — the human wording is not a stable contract.
+
 ## Choosing the right verb
 
 | You want to… | Use |
@@ -181,5 +240,7 @@ Standard reconciliation is **owner-gated end to end**. Without `--owner-approve`
 | Undo a half-finished restore activation | `stackkit backup restore recover <op-id> --owner-approve --rollback` |
 | See what drifted from the current authority | `stackkit drift detect` |
 | Reconcile accepted drift back to the current authority | `stackkit drift reconcile --mode standard --owner-approve` |
+| Restart or pause one Cloud Core service | `stackkit service start\|stop\|restart <service-key> --owner-approve` |
+| Read bounded, redacted logs from one Cloud Core service | `stackkit service logs <service-key> --tail N` |
 
-Every entry in this table takes a Kopia snapshot plus an executor-state rollback checkpoint before mutating anything, so any interrupted operation can be resumed or rolled back by its operation ID.
+Every mutating entry in this table records evidence before touching the runtime. `stackkit upgrade`, `backup restore`, and `drift reconcile` also take a Kopia snapshot plus an executor-state rollback checkpoint so any interrupted operation can be resumed or rolled back by its operation ID.
