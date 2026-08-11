@@ -22,14 +22,16 @@ $expectedOrigin = "{0}://{1}" -f $ExpectedUrl.Scheme, $ExpectedUrl.Authority
 $lastState = "no deployment"
 
 do {
-    $deployments = @(
-        gh api "repos/$Repository/deployments?sha=$CommitSha&per_page=50" |
-            ConvertFrom-Json |
-            Sort-Object { [datetime]$_.created_at } -Descending
-    )
+    $deploymentJson = gh api "repos/$Repository/deployments?sha=$CommitSha&per_page=50"
     if ($LASTEXITCODE -ne 0) {
         throw "Could not query GitHub deployments for $Repository@$CommitSha"
     }
+    $deploymentResult = $deploymentJson | ConvertFrom-Json
+    $deploymentItems = @()
+    foreach ($deploymentItem in $deploymentResult) {
+        $deploymentItems += $deploymentItem
+    }
+    $deployments = @($deploymentItems | Sort-Object { [datetime]$_.created_at } -Descending)
 
     foreach ($deployment in $deployments) {
         if ([string]$deployment.sha -ne $CommitSha) {
@@ -38,12 +40,17 @@ do {
         if ([string]$deployment.ref -ne $ExpectedRef) {
             continue
         }
-        $statuses = @(
-            gh api "repos/$Repository/deployments/$($deployment.id)/statuses?per_page=20" |
-                ConvertFrom-Json |
-                Sort-Object { [datetime]$_.created_at } -Descending
-        )
-        if ($LASTEXITCODE -ne 0 -or $statuses.Count -eq 0) {
+        $statusJson = gh api "repos/$Repository/deployments/$($deployment.id)/statuses?per_page=20"
+        if ($LASTEXITCODE -ne 0) {
+            continue
+        }
+        $statusResult = $statusJson | ConvertFrom-Json
+        $statusItems = @()
+        foreach ($statusItem in $statusResult) {
+            $statusItems += $statusItem
+        }
+        $statuses = @($statusItems | Sort-Object { [datetime]$_.created_at } -Descending)
+        if ($statuses.Count -eq 0) {
             continue
         }
         $status = $statuses[0]
