@@ -59,7 +59,12 @@ function Assert-NoForbiddenProjection {
     )
 
     foreach ($path in @($policy.remoteForbiddenPaths)) {
-        if ($Content -match [regex]::Escape([string]$path)) {
+        $escapedPath = [regex]::Escape([string]$path)
+        # Match a relative link or an absolute URL with this exact path. A raw
+        # substring check would incorrectly flag /stackkits/quickstart when the
+        # retired route is /quickstart.
+        $pathPattern = "(?im)(?:^|[\s`"'(>])(?:https?://[^/\s<>`"')]+)?$escapedPath(?:[/#?\s<>`"')]|$)"
+        if ($Content -match $pathPattern) {
             throw "$ProjectionName exposes forbidden path '$path'"
         }
     }
