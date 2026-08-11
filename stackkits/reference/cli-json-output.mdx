@@ -1,0 +1,160 @@
+---
+title: CLI JSON output
+description: Machine-readable contract for stackkit apply, status, verify, and logs
+sidebarTitle: CLI JSON output
+icon: brackets-curly
+---
+
+The StackKits CLI publishes a stable, versioned JSON contract for every command that takes `--json`. Automation, MCP clients, and TechStack read structured payloads instead of scraping human output. This page documents the envelope, the per-command payloads, correlation IDs, and the bounded reader for structured logs.
+
+## When to use `--json`
+
+Use `--json` when you need a machine consumer:
+
+- CI or a script that must decide the next step from the exact result.
+- An agent driving StackKits through the MCP connector, which forwards the same payloads through `structuredContent`.
+- TechStack or another external orchestrator that needs identity-bound evidence for a rollout.
+
+For interactive shells, keep the default human output — `--json` reserves stdout exclusively for one JSON document and suppresses the banner and progress text.
+
+## Envelope: `stackkit.command-result/v1`
+
+Every `--json` invocation writes exactly one `stackkit.command-result/v1` document to stdout. Successes and failures share the same envelope so a parser never has to branch on exit code before reading the payload.
+
+- **Success.** The envelope carries the versioned command result (for example `stackkit.apply-result/v2`) plus any evidence links.
+- **Early failure or authorization denial.** The envelope carries a `stackkit.actionable-error/v1` record with a stable reason code and concrete recovery steps. Exit status stays non-zero.
+- **Stdout is reserved.** `--progress-jsonl -` cannot share stdout with `--json` on the same command. Redirect one to a file or a different stream.
+
+### Actionable errors
+
+`stackkit.actionable-error/v1` gives automation a stable recovery contract:
+
+| Field | Description |
+|---|---|
+| `schemaVersion` | Always `stackkit.actionable-error/v1`. |
+| `code` | Stable machine-readable code. |
+| `reasonCode` | Stable classification for retry logic. |
+| `message` | One-line human explanation. |
+| `userGuidance` | Ordered recovery actions the caller can run locally. |
+| `retryable` | Whether the same request can be retried without changes. |
+
+Follow `userGuidance` first — the recovery path is local and does not depend on a hosted agent.
+
+## `stackkit apply --json`
+
+`apply --json` returns `stackkit.apply-result/v2` inside the envelope. The result binds the applied plan to the exact Stack, ResolvedPlan, signed Apply result, run ID, Site, node, and execution channel, and includes secret-free `stackkit.runtime-observation/v2` records for the services that were applied.
+
+Runtime source classification:
+
+| `source` | Meaning |
+|---|---|
+| `local-runtime` | Direct local Basement observation. |
+| `standard-process` | Observed through a configured Standard process channel. |
+| `verified-apply-evidence` | Projected from the last signed Apply result. `live` is `false`. |
+
+```bash
+stackkit apply \
+  --auto-approve \
+  --verify \
+  --json \
+  --correlation-id req-9f8c1d0a
+```
+
+### `--correlation-id`
+
+`stackkit apply` accepts `--correlation-id` (also available as a global flag). Pass one validated caller ID and StackKits binds it to the collision-resistant local run and every event that run emits.
+
+- The ID is validated before it is accepted; malformed IDs fail closed with an actionable error.
+- It is evidence correlation only. It does not grant authority and does not replace Owner approval.
+- One correlation ID binds to one local run. Retrying the same request with a different ID starts a new run.
+
+The MCP connector forwards its optional `correlation_id` tool input to this flag, so an agent-driven Apply and a follow-up CLI `logs` inspection can share one caller ID.
+
+## `stackkit status --json`
+
+`status --json` returns `stackkit.status/v2`. It reads the verified local Plan, lifecycle state, signed Apply result, service access manifest, and provider-neutral runtime projection. The payload includes `applyState`, the exact runtime mode, and `stackkit.runtime-observation/v2` records.
+
+Status is read-only. Historical signed Apply evidence is surfaced with `source: verified-apply-evidence` and `live: false` rather than fabricated current health. Consumers must display that freshness state and must not promote it to live health.
+
+If Apply evidence is absent or invalid, the envelope still carries the Plan plus a `stackkit.actionable-error/v1` recovery contract instead of leaving the operator at a dead end.
+
+```bash
+stackkit status --json
+```
+
+## `stackkit verify --json`
+
+`verify --json` returns the same envelope with `stackkit.runtime-observation/v2` records for the checks that ran. Local Basement probes that actually executed appear as `source: local-runtime` with `live: true`. When Verify can prove only the signed Apply observation, it reports `source: verified-apply-evidence` and `live: false` instead of inventing current service health.
+
+HTTP verification treats `2xx`, `3xx`, `401`, and `403` as reachable because authenticated services are expected.
+
+```bash
+stackkit verify --json --http
+```
+
+## `stackkit logs`
+
+`stackkit logs` reads content-addressed structured deploy logs from `.stackkit/logs/` (unless configured otherwise). The v0.15.8 command tree exposes three explicit subcommands plus a compatibility form:
+
+| Subcommand | Purpose |
+|---|---|
+| `logs list [--json]` | Enumerate runs with digests, sizes, and evidence links. Returns `stackkit.log-list/v1`. |
+| `logs get <run-id> [--json]` | Read events for one exact run ID. Returns `stackkit.log-run/v1`. |
+| `logs latest [--json]` | Read events for the most recent run. Returns `stackkit.log-run/v1`. |
+| `logs [run-id] [--jsonl]` | Compatibility display or raw JSONL form. |
+
+### Listing runs
+
+Use `logs list --json` to discover the latest run and any run IDs you want to fetch. Every entry includes evidence links so the caller can jump directly to the signed rollout bundle.
+
+```bash
+stackkit logs list --json
+```
+
+Run IDs are the exact basenames returned here. Traversal attempts and unknown IDs fail with `stackkit.actionable-error/v1` guidance. Current runs use a UTC nanosecond timestamp plus a cryptographic nonce and exclusive file creation; legacy timestamp-only IDs remain readable.
+
+### Reading events
+
+`logs get <run-id> --json` and `logs latest --json` return bounded pages:
+
+| Flag | Default | Maximum |
+|---|---|---|
+| `--max-events` | `200` events | `2000` events |
+| `--max-bytes` | `256 KiB` | `1 MiB` |
+| `--cursor` | — | Digest-bound resume cursor. |
+
+Every page returns `cursor`, optional `next_cursor`, and `truncated`. Follow `next_cursor` while `truncated` is `true`; stop when `truncated` is `false`.
+
+```bash
+# Fetch the tail of the latest run.
+stackkit logs latest --json --max-events 500
+
+# Resume a previous read for a specific run.
+stackkit logs get op-2026-08-11-1a2b3c4d --json --cursor <cursor-from-previous-response>
+```
+
+### Digest-bound cursors
+
+A cursor is bound to the exact run ID and the complete file digest at read time. If evidence is appended or replaced between requests, the stale cursor fails closed — restart the read without it. This makes structured reads safe against races with active logging.
+
+### Redaction
+
+Secret-shaped keys and inline credentials are redacted before write and again during structured reads. MCP also recursively redacts returned structured values as defense-in-depth. Evidence links point to the content-addressed local bundle, not to raw log excerpts.
+
+## Correlation across commands
+
+The `--correlation-id` global flag is accepted by any command that emits rollout events. Combined with the log reader, one caller ID connects an Apply, its rollout events, and any follow-up Status, Verify, or Logs read into a single audit trail — without granting the caller any additional authority.
+
+```bash
+CID=req-9f8c1d0a
+
+stackkit apply --auto-approve --json --correlation-id "$CID"
+stackkit status --json --correlation-id "$CID"
+stackkit logs latest --json --correlation-id "$CID"
+```
+
+## Related
+
+- [Day-2 operations](/stackkits/reference/day-2-operations) — governed upgrade, restore, and drift verbs that share this envelope.
+- [MCP connector](/stackkits/reference/mcp-connector) — how these payloads reach agents through `structuredContent`.
+- [Monitoring](/stackkits/reference/monitoring) — the OTLP baseline alongside structured CLI evidence.
