@@ -85,8 +85,8 @@ track: v0-expansion
 
 - [x] `mise run check` passes for the expanded tree.
 - [x] `mise run local:e2e` passes for all public and forbidden routes.
-- [ ] Exact-source deployment wait passes for the merged full commit SHA.
-- [ ] `mise run remote:public-safety` passes.
+- [x] Exact-source deployment wait passes for the merged full commit SHA.
+- [x] `mise run remote:public-safety` passes.
 - [x] No open P0/P1 Beads bugs with `blocks:v0.4.0`.
 
 ## Expansion Boundary
@@ -124,12 +124,12 @@ _Generated from Beads open statuses; milestone sections use
 `milestone:*` / `blocks:*` labels, and unmapped Beads are listed separately — do not edit;
 refresh via `mise run roadmap:update`. Source: `bd list`, 2026-08-11._
 
-### M1 · v0.4.0 — Techstack And SpeechKit Public Docs (1 open)
-- `mintlify-docs-uw3` Publish truthful Techstack and SpeechKit documentation (P1, in_progress)
+### M1 · v0.4.0 — Techstack And SpeechKit Public Docs (0 open)
+- none
 
 ### Unmapped Beads (2 open)
 - `mintlify-docs-tlw` Reset public Mintlify docs to released StackKits scope (P0, in_progress)
 - `mintlify-docs-8et` Enforce fail-closed public-only Mintlify publication boundary (P1, in_progress)
 
-**Total open:** 3
+**Total open:** 2
 <!-- END GENERATED: open-issues kombify-roadmap-sync -->
