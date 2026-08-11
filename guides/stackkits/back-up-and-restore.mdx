@@ -1,0 +1,60 @@
+---
+title: "Back up and restore a Basement Kit"
+description: "Create owner-bound Kopia snapshots and stage a restore before live activation"
+sidebarTitle: "Back up and restore"
+icon: clock-rotate-left
+---
+
+The released Basement Kit includes a local, owner-controlled Kopia backup lifecycle. Run it only from the applied StackKits workspace whose data you intend to protect.
+
+## Configure and check the repository
+
+```bash
+stackkit backup configure --json
+stackkit backup status --json
+```
+
+The repository, source set, exclusions, and local custody are derived from the resolved plan. Do not point the command at an arbitrary volume or bypass owner custody.
+
+## Create an idempotent snapshot
+
+```bash
+stackkit backup run --operation-id before-upgrade-2026-08-11 --json
+```
+
+Store the returned content-addressed snapshot anchor with your verification evidence. Reusing the same operation ID returns the existing operation instead of creating an accidental duplicate.
+
+## Restore into isolated staging
+
+```bash
+stackkit backup restore sha256:<snapshot-anchor-id> \
+  --owner-approve \
+  --operation-id restore-check-2026-08-11 \
+  --json
+```
+
+This verifies and extracts the snapshot into CUE-owned staging. It does not replace live data. Review the returned restore-result ID before continuing.
+
+## Activate the verified restore
+
+```bash
+stackkit backup restore activate sha256:<restore-result-id> \
+  --owner-approve \
+  --operation-id restore-activation-2026-08-11 \
+  --json
+```
+
+Activation creates the required safety snapshot, switches the exact plan-owned volume set, restarts the runtime, and verifies the owner binding and services.
+
+If activation is interrupted, recover the exact operation explicitly:
+
+```bash
+stackkit backup restore recover restore-activation-2026-08-11 \
+  --owner-approve \
+  --rollback \
+  --json
+```
+
+<Warning>
+  A successful backup is not recovery proof. Practice the staged restore with non-critical data before relying on the stack for irreplaceable files.
+</Warning>

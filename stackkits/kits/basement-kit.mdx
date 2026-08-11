@@ -1,20 +1,20 @@
 ---
 title: "Basement Kit"
-description: "The released local, single-environment StackKits profile"
+description: "The released local StackKits profile and its explicit lifecycle"
 sidebarTitle: "Basement Kit"
 icon: house
 ---
 
-Basement Kit is the stable local StackKits profile in the public `v0.16.0` release. Use it for a homelab on hardware you already control, with one local environment and a local owner.
+Basement Kit is the current local profile in the public `v0.16.0` release. Use it for a homelab on hardware you already control, with one home site and a local owner.
 
 ## What it provides
 
 - a CUE-validated StackSpec and local `stackkit` lifecycle
 - local owner custody with PocketID and TinyAuth
 - a Node Hub at the generated `base.<domain>` address
-- the released platform and application modules selected by your validated configuration
+- the released core runtime plus optional workloads selected by your validated configuration
 
-The local default uses browser-native `*.home.localhost` addresses. Use an explicit domain and DNS arrangement only when you intend to expose services beyond that local context.
+The v0.16.0 authoring default is `home.test`. Make sure clients use a DNS path you control before treating a generated route as reachable; StackKits does not silently modify every client or router.
 
 ## Start a Basement Kit
 
@@ -25,8 +25,9 @@ cd my-homelab
 stackkit init basement-kit --owner-source=local
 stackkit validate
 stackkit generate
+stackkit plan --json
 stackkit apply
-stackkit verify --json
+stackkit verify --http --json
 ```
 
 Run the commands from the StackKits workspace. Do not modify generated rollout files; change the StackSpec and re-run validation instead.
@@ -42,6 +43,6 @@ Choose [Cloud Kit](/stackkits/kits/cloud-kit) when the single environment is an 
     Open the generated local service overview after a successful rollout.
   </Card>
   <Card title="Released applications" icon="grid-2" href="/stackkits/apps/overview">
-    Review the current public app and platform catalog.
+    Review current core, optional workloads, and module-contract boundaries.
   </Card>
 </CardGroup>

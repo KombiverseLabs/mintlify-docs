@@ -1,12 +1,24 @@
 ---
 title: "Vaultwarden"
-description: "The released default StackKits password-vault application"
+description: "Understand the released optional Vault workload and its current authoring boundary"
 sidebarTitle: "Vaultwarden"
 icon: vault
 ---
 
-Vaultwarden is the default password-vault application in the released StackKits catalog. When it is enabled, use the generated `vault.<domain>` address only after the StackKits rollout has verified successfully.
+Vaultwarden is the released alternative for the optional native v2 `vault` workload. It is not enabled by the initial Basement or Cloud StackSpec.
+
+| Property | v0.16.0 value |
+| --- | --- |
+| Workload | `vault` |
+| Alternative | `vaultwarden` |
+| Data class | secret |
+| Required secret reference | `admin-token` |
+| Supported standalone adapter | `standalone-compose` |
+
+<Warning>
+  The release exposes no safe public post-init command for creating the owner-bound secret custody required by a newly added Vault workload. Do not treat an opaque `secret://` reference as a value or use this page as a complete installation recipe.
+</Warning>
 
 Create the application owner account, store recovery material separately, and choose the registration policy before adding real secrets. Confirm that your backup and recovery approach covers the Vaultwarden data volume.
 
-Change StackKits integration through the StackSpec and lifecycle commands; do not edit generated application configuration on the target.
+For an already admitted workload, change StackKits intent through the StackSpec and lifecycle commands; do not edit generated application configuration on the target.

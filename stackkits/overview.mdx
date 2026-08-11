@@ -1,6 +1,6 @@
 ---
 title: "StackKits"
-description: "The standalone StackKits lifecycle and the currently supported kits"
+description: "The standalone lifecycle and current released StackKits definitions"
 sidebarTitle: "Overview"
 icon: boxes-stacked
 ---
@@ -9,14 +9,14 @@ StackKits is the standalone, open homelab standard. It provides portable kit def
 
 The public documentation currently describes the released `v0.16.0` catalog only. StackKits works against a host you already control; it does not require a kombify account or a hosted kombify endpoint.
 
-## Supported kits
+## Released kits
 
 <CardGroup cols={2}>
   <Card title="Basement Kit" icon="house" href="/stackkits/kits/basement-kit">
-    A stable local, single-environment kit for hardware on your home or private network.
+    The current local, single-environment kit for hardware on your home or private network.
   </Card>
   <Card title="Cloud Kit" icon="cloud" href="/stackkits/kits/cloud-kit">
-    A stable single-environment kit for an existing VPS or cloud host that you operate.
+    A released single-environment definition for an existing VPS or cloud host that you operate.
   </Card>
 </CardGroup>
 
@@ -28,8 +28,9 @@ Both kits are released through the public `v0.16.0` release index. Choose the ki
 stackkit init basement-kit --owner-source=local
 stackkit validate
 stackkit generate
+stackkit plan --json
 stackkit apply
-stackkit verify --json
+stackkit verify --http --json
 ```
 
 `init` writes the initial StackSpec. `validate` checks it against the embedded CUE contract, `generate` creates disposable rollout artifacts, and `apply` changes the target. Review the generated plan and keep the StackKits workspace under your control; do not hand-edit generated artifacts.
@@ -48,9 +49,9 @@ stackkit verify --json
     Install the released CLI and create a first Basement Kit workspace.
   </Card>
   <Card title="Applications" icon="grid-2" href="/stackkits/apps/overview">
-    Browse the released application and platform catalog.
+    Separate current core, optional workloads, and additional module contracts.
   </Card>
-  <Card title="MCP connector" icon="plug" href="/stackkits/reference/mcp-connector">
-    Connect a local coding agent to the same lifecycle.
+  <Card title="How-to guides" icon="list-check" href="/guides/stackkits/configure-stack-spec">
+    Configure intent, inspect a plan, apply, verify, and practice recovery.
   </Card>
 </CardGroup>

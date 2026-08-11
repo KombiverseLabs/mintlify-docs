@@ -19,8 +19,20 @@ Keep their output with the workspace so you can compare the current observed sta
 
 1. Update the StackSpec, not generated artifacts.
 2. Run `stackkit validate` and `stackkit generate`.
-3. Review the output and obtain the local owner's approval before a mutating command.
-4. Run `stackkit verify --json` after the change.
+3. Inspect `stackkit plan --json` and stop on any readiness blocker.
+4. Review the output and obtain the local owner's approval before a mutating command.
+5. Run `stackkit verify --http --json` after the change.
+
+## Common workflows
+
+<CardGroup cols={2}>
+  <Card title="Change StackSpec intent" icon="sliders" href="/guides/stackkits/configure-stack-spec">
+    Edit released intent and regenerate governed output.
+  </Card>
+  <Card title="Back up and restore" icon="clock-rotate-left" href="/guides/stackkits/back-up-and-restore">
+    Create an idempotent snapshot and practice staged recovery.
+  </Card>
+</CardGroup>
 
 The exact command surface is versioned with the release. Use `stackkit --help` and the command-specific help for the installed version before performing a backup, restore, upgrade, or removal.
 
