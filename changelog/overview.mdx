@@ -7,6 +7,39 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits release notes on GitHub](https://github.com/kombifyio/StackKits/releases).
 
+<Update label="2026-08-10" description="Week of Aug 3 – Aug 10">
+
+## StackKits v0.16.0: service-controllable rollouts, machine-readable operations, provider-neutral Cloud core
+
+StackKits rolled from v0.14.19 to [v0.16.0](https://github.com/kombifyio/StackKits/releases/tag/v0.16.0) this week. Cloud Kit gained a provider-neutral Cloud core contract, Architecture v2 exposes runtime listeners for product-owned application delivery, `apply`, `status`, and `verify` now emit fully machine-readable output alongside structured deploy logs, and a new `stackkit service` command controls a rolled-out service directly. SpeechKit shipped [v0.52.9](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.9) through [v0.52.14](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.14) to put numeric pre-1.0 releases back on the public download and update surfaces and to relaunch its own updater silently.
+
+### New
+
+- **Provider-neutral Cloud core.** [v0.14.28](https://github.com/kombifyio/StackKits/releases/tag/v0.14.28) and [v0.15.0](https://github.com/kombifyio/StackKits/releases/tag/v0.15.0) make Cloud Kit resolve a required `cloud-core` workload that renders one digest-pinned Compose project for `base`, `auth`, `id`, and `coolify` and executes it through a closed local runtime owner on an externally supplied host. Cloud runtime custody stores only service-scoped PocketID, TinyAuth, and Coolify material — provider credentials, server credentials, leases, inventory, and provider lifecycle stay outside StackKits. Compose is the native default generation target; IONOS, centron, BYO-VPS, and local-host selection remain TechStack concerns. See [Cloud Kit](/stackkits/kits/cloud-kit) and [Local vs cloud vs hybrid](/guides/stackkits/local-vs-cloud-vs-hybrid).
+- **Architecture v2 runtime listeners for product-owned application delivery.** [v0.15.3](https://github.com/kombifyio/StackKits/releases/tag/v0.15.3) exposes runtime listeners on Architecture v2 catalog projections so applications can drive their own delivery without moving lifecycle authority out of StackKits. See [Day 2 operations](/stackkits/reference/day-2-operations).
+- **Full machine-readable output on apply, status, and verify.** [v0.15.8](https://github.com/kombifyio/StackKits/releases/tag/v0.15.8) keeps `stackkit apply --json`, `stackkit status --json`, and `stackkit verify --json` parseable on success, denial, and failure, and the MCP connector exposes the same structured evidence alongside human-readable presentation. Wire these into CI, dashboards, or the MCP connector when you need a stable machine surface. See [MCP connector](/stackkits/reference/mcp-connector) and [Monitoring](/stackkits/reference/monitoring).
+
+```bash
+stackkit apply --json | jq '.result.services[] | {name, health, url}'
+```
+
+- **Structured deploy log listing and retrieval.** Also in [v0.15.8](https://github.com/kombifyio/StackKits/releases/tag/v0.15.8), `stackkit logs` returns redacted, bounded pages with digest-bound cursors and explicit truncation metadata, and identity-bound runtime observations cover services, endpoints, health, probes, freshness, and supporting evidence. Use `--tail` and `--cursor` to page a long rollout without losing ordering. See [Monitoring](/stackkits/reference/monitoring).
+- **`stackkit service` command for post-rollout control.** [v0.16.0](https://github.com/kombifyio/StackKits/releases/tag/v0.16.0) adds `stackkit service start|stop|restart <service-key>` and `stackkit service logs <service-key>` for StackKits-managed Cloud core services. Mutations require `--owner-approve`, and `--json` returns a versioned action result. Reach for it when you need to bounce or inspect one service between full applies.
+
+```bash
+stackkit service restart coolify --owner-approve --json
+stackkit service logs auth --tail 100
+```
+
+## SpeechKit v0.52.9 – v0.52.14: releases and updater path
+
+### Fixed
+
+- **Numeric pre-1.0 releases are back on the public surfaces.** [v0.52.9](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.9) publishes numeric `v0.x` releases as normal GitHub releases and advances the canonical `latest` alias so the website, installer mirror, and the in-app update resolver all agree on the newest published build instead of selecting an older prerelease state. [v0.52.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.10) restores the missing public release notes for v0.51.37 through v0.52.9 from their exact source revisions, and [v0.52.14](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.14) restores one monotonic version line above packages left behind by the retired direct-publish path.
+- **Silent, self-relaunched updater.** [v0.52.11](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.11) installs updates silently instead of opening a wizard that could not complete on modern Windows, and [v0.52.12](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.12) has SpeechKit relaunch itself after install instead of trusting the installer to bring the app back up.
+
+</Update>
+
 <Update label="2026-08-07" description="Week of Aug 3 – Aug 7">
 
 ## SpeechKit dictation reliability, plus StackKits app backup/restore
