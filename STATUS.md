@@ -26,14 +26,18 @@ maturity: alpha
 - Every MDX page must be both in the approved scope and in `docs.json`.
 - Simulate-as-product, Proxmox, unpublished products, internal paths, secret
   material, and restricted-content markers fail closed.
-- Local E2E uses pinned Mintlify `4.2.684` and verifies allowed and forbidden
-  routes through real HTTP.
+- Local E2E uses pinned Mintlify `4.2.684` and verifies all 38 public pages plus
+  every forbidden route through real HTTP.
 - Remote safety checks verify removed direct routes, `llms.txt`, and sitemap
   projections after deployment.
 - A focused release-truth gate pins the singular `stackkit.cc` website,
   installer endpoints, exact v0.16.0 commands, local-domain wording, and the
   boundary that one-line installers never perform Apply. A bounded external
   link gate checks the website, installer, and immutable release destinations.
+- Every public page is checked for example relevance. Executable and structured
+  blocks are limited to pages with a topic-specific workflow or configuration;
+  component and concept pages use prose when no supported example explains the
+  topic.
 - Promotion waits for a successful Mintlify deployment bound to the exact full
   source commit before the live smoke can satisfy delivery.
 
