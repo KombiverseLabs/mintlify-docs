@@ -37,13 +37,41 @@ function Get-Response {
         return Invoke-WebRequest `
             -Uri $Uri `
             -UseBasicParsing `
+            -DisableKeepAlive `
             -MaximumRedirection $maxRedirect `
             -TimeoutSec 15
     }
     catch {
         $response = $_.Exception.Response
         if ($null -eq $response) {
-            throw "Remote public-safety request failed for $Uri`: $($_.Exception.Message)"
+            if ($FollowRedirects) {
+                throw "Remote public-safety request failed for $Uri`: $($_.Exception.Message)"
+            }
+
+            # Windows PowerShell 5 can surface Mintlify's 404 response as a
+            # connection-close WebException with no Response object after a
+            # successful request on the same process. Re-probe the forbidden
+            # route with curl and accept only its explicit HTTP status. A curl
+            # transport failure remains a hard failure.
+            $curlName = if ($env:OS -eq "Windows_NT") { "curl.exe" } else { "curl" }
+            $curl = Get-Command $curlName -ErrorAction Stop
+            $nullDevice = if ($env:OS -eq "Windows_NT") { "NUL" } else { "/dev/null" }
+            $statusText = & $curl.Source `
+                --silent `
+                --show-error `
+                --output $nullDevice `
+                --write-out "%{http_code}" `
+                --max-redirs 0 `
+                --connect-timeout 15 `
+                --max-time 15 `
+                $Uri.AbsoluteUri
+            if ($LASTEXITCODE -ne 0 -or [string]$statusText -notmatch '^\d{3}$') {
+                throw "Remote public-safety fallback failed for $Uri after: $($_.Exception.Message)"
+            }
+            return [pscustomobject]@{
+                StatusCode = [int]$statusText
+                Content = ""
+            }
         }
         return [pscustomobject]@{
             StatusCode = [int]$response.StatusCode

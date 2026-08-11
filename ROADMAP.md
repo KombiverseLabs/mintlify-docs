@@ -63,8 +63,8 @@ track: v0-public-truth
 
 - [x] `mise run check` passes for the expanded tree.
 - [x] `mise run local:e2e` passes for the expanded tree.
-- [ ] Exact-source deployment wait passes for the merged full commit SHA.
-- [ ] `mise run remote:public-safety` passes.
+- [x] Exact-source deployment wait passes for the merged full commit SHA.
+- [x] `mise run remote:public-safety` passes.
 
 ## Expansion Boundary
 
