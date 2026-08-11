@@ -30,7 +30,8 @@ $executableExamplePages = [System.Collections.Generic.HashSet[string]]::new(
     "stackkits/quickstart.mdx",
     "stackkits/reference/day-2-operations.mdx",
     "stackkits/reference/mcp-connector.mdx",
-    "stackkits/reference/spec-format.mdx"
+    "stackkits/reference/spec-format.mdx",
+    "speechkit/framework.mdx"
 ) | ForEach-Object { $executableExamplePages.Add($_) | Out-Null }
 
 $allowedInlineCommands = @{

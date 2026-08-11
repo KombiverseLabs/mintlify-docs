@@ -135,7 +135,7 @@ try {
     Assert-Case -Name "internal Proxmox content fails" -Fixture $proxmox -ShouldPass $false -ExpectedMessage "internal-proxmox"
 
     $unreleasedProduct = New-TestFixture -Name "unreleased-product" -Pages @{
-        "index.mdx" = "---`ntitle: Test`ndescription: Unreleased product surface`n---`n`nUse kombify Techstack to operate this stack.`n"
+        "index.mdx" = "---`ntitle: Test`ndescription: Unreleased product surface`n---`n`nUse kombify Cloud to operate this stack.`n"
     }
     Assert-Case -Name "unreleased product content fails" -Fixture $unreleasedProduct -ShouldPass $false -ExpectedMessage "unreleased-product-surface"
 

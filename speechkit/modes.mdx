@@ -1,0 +1,52 @@
+---
+title: "SpeechKit modes and data paths"
+description: "Understand Dictation, Assist, Voice Agent, and provider boundaries"
+sidebarTitle: "Modes and data paths"
+icon: "waveform-lines"
+---
+
+SpeechKit uses three strict modes. Choose the smallest mode that matches the
+task so the expected processing and output stay clear.
+
+## Dictation
+
+Dictation turns speech into text. It does not perform LLM rewriting, execute
+utilities, or generate spoken replies. Use it for notes, forms, messages, and
+other direct transcription tasks.
+
+## Assist
+
+Assist turns speech or text into one bounded result. That result may come from
+a deterministic replacement, a utility, or an LLM, and may optionally be read
+aloud. Use it when you want transformation or a single answer rather than a
+live conversation.
+
+## Voice Agent
+
+Voice Agent is a realtime audio conversation. It is intended for interactive
+brainstorming, support, and follow-up questions where turn detection and spoken
+output matter.
+
+## Hands-Free and customization
+
+Hands-Free controls activation, microphone capture, automatic end-of-speech,
+and optional speaker output over the three modes. Words teach SpeechKit terms
+to recognize; Replacements apply deterministic text, command, snippet,
+synonym, or template transformations.
+
+## Local and external providers
+
+Provider choice determines the data path:
+
+| Provider type | Data boundary |
+| --- | --- |
+| Local STT or local model | Processing can remain on the device or your own server. |
+| Self-hosted SpeechKit server | Data travels to the server you operate. |
+| External voice provider | Audio, text, or both may be sent to that provider under its terms. |
+
+SpeechKit does not make an external provider local. Review provider
+configuration and privacy terms before sending sensitive audio.
+
+<Card title="Install the Windows client" icon="windows" href="/speechkit/install-windows">
+  Download and verify the current public beta.
+</Card>
