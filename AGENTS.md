@@ -1,5 +1,30 @@
 # AGENTS.md - mintlify-docs
 
+<!-- BEGIN GENERATED: elastic-development-throughput kombify-throughput-policy-sync -->
+> Generated from the canonical `## Elastic Development Throughput Policy` section in the workspace
+> root `AGENTS.md`. Do not edit this block in a product repository; update
+> the root policy and run `mise run agents:throughput:sync`.
+
+## Elastic Development Throughput Policy
+
+- Authority:
+  [DEVELOPMENT-THROUGHPUT-STANDARD.md](https://github.com/KombiverseLabs/kombify-workspace/blob/main/DEVELOPMENT-THROUGHPUT-STANDARD.md).
+- The primary orchestrator owns decomposition, authority, integration,
+  exact-source evidence, activation, and cleanup.
+- Scale independent lanes elastically. Never invent a fixed numeric ceiling;
+  contract only for observed capacity, rate, credential, entitlement, budget,
+  isolation, ownership, or cleanup constraints. Keep useful work moving and
+  isolate remediation.
+- Dispatch requires verified `gpt-5.6-luna` with `max` reasoning; otherwise keep
+  the lane with the primary or use an explicitly bound Luna task. Expand in
+  observable batches and clean failed setups before replacement.
+- Cost-bearing/provider lanes use unique `run_id`, isolated non-personal test
+  identity, exact source/artifact identity, resource ledger, and terminal
+  cleanup receipt. Fresh infrastructure is the acceptance baseline.
+- Only affected and registered sensitive checks block pre-1.0 merge; broader
+  fleets run asynchronously unless required for the current claim.
+<!-- END GENERATED: elastic-development-throughput kombify-throughput-policy-sync -->
+
 <!-- BEGIN GENERATED: planning-policy kombify-agent-policy-sync -->
 > Generated from `AGENTS.md` in the kombify workspace root. Do not edit this
 > block in child repos; update the root policy and run
@@ -7,50 +32,56 @@
 
 ## Planning System Policy
 
-- The workspace root `AGENTS.md` `## Planning System Policy` section is the
-  canonical source for generated planning-policy blocks in repo-local
-  `AGENTS.md` files. Edit the workspace root policy first, then run
-  `mise run agents:planning:sync`. Do not hand-edit the generated blocks in
-  child repos.
-- GitHub Projects is the canonical portfolio and roadmap planning system: high-level epics, cross-repo priorities, phase gates, ownership, and blockers. It is the single source of truth for what to build and when. Full taxonomy and workflow: `GITHUB-PROJECTS-PLANNING-STANDARD.md`. Migrated from Linear 2026-08-10; Linear stays reachable as a read-only historical archive, no new planning work there.
-- Org: KombiverseLabs, private Projects 4 (Development) / 5 (kombify-AI) / 6 (Go-to-Market & Branding) / 7 (Personal), items stored as draft issues (not repo-linked GitHub Issues — several kombify repos are public). Every Development-project item carries exactly one `Area` value; detailed AI component tracking lives in the separate kombify-AI project via `Component`.
-- Altitude discipline: only genuine cross-repo priorities/decisions/blockers belong in GitHub Projects — single-repo implementation epics stay Beads-only, even substantial ones.
-- Repo-local `ROADMAP.md` and optional `docs/roadmap/v0.x.0-*.md` files remain the canonical repo milestone scope and release-gate documents.
-- Beads is the canonical execution tracker inside each repo. Keep detailed tasks, subtasks, bugs, bugfixes, dependencies, and technical-depth follow-ups in Beads only.
-- GitHub Projects and Beads are cross-referenced, not synced: a Project item may cite Beads IDs in its `Beads` field and a Beads issue may cite the origin in `external_ref`. Either can exist without the other.
-- Check/update GitHub Projects at session boundaries (start and end), not on every Beads operation. Do not recreate one-way or bidirectional roadmap syncs between Beads, GitHub Projects, and repo docs beyond the sanctioned generated read view below.
-- Sanctioned one-way read view (User-Decision 2026-06-10, see `STANDARDS_ENFORCEMENT.md`): `roadmap-open-issues` renders open Beads issues into the marked `## Open Issues` block inside ROADMAP.md — a derived view, never edit it manually, never sync back.
-- **`roadmap-sync` (ROADMAP.md milestone → `roadmap:milestone` issue) is NOT YET migrated off Linear** — tracked in Beads `platform-o4ql1`. Until rebuilt, `mise run roadmap:update -- -Repo <repo> -Sync` still writes to Linear, not GitHub Projects. The plain (non-`-Sync`) form that refreshes the ROADMAP.md Open-Issues block is unaffected and stays canonical.
-- Session close with milestone-relevant work: update the Scope/Exit-gate checkboxes in the touched repo's repo-local `ROADMAP.md`, then run `mise run roadmap:update -- -Repo <repo>` from the workspace root.
+- Authority:
+  [GITHUB-PROJECTS-PLANNING-STANDARD.md](https://github.com/KombiverseLabs/kombify-workspace/blob/main/GITHUB-PROJECTS-PLANNING-STANDARD.md).
+  This section is the source for generated repo blocks; update it here, then run
+  `mise --cd <workspace-root> run agents:planning:sync`.
+- GitHub Projects owns cross-repo priorities, decisions, blockers, and phase
+  gates. Repo `ROADMAP.md` owns milestones; Beads owns all executable detail.
+  Cross-reference them; do not synchronize them bidirectionally.
+- Check Projects at session boundaries. `roadmap-open-issues` is a one-way Beads
+  view; never hand-edit or sync its generated block back. Until
+  `platform-o4ql1` closes, `roadmap:update -Sync` still writes to archived
+  Linear; ordinary `roadmap:update` remains valid.
+- At milestone-relevant close, update repo roadmap gates and run
+  `mise --cd <workspace-root> run roadmap:update -- -Repo <repo>`.
 <!-- END GENERATED: planning-policy kombify-agent-policy-sync -->
 
-Generic AI-agent instructions for Codex, Copilot, Gemini, Claude, and other coding agents.
+This repository is the Tier-1 public Mintlify documentation surface at
+`https://docs.kombify.io`.
 
-## Normative Sources
+## Public authority
 
-Use workspace-root standards and `../kombify-Core/standards/`:
+- `docs.json` is the Mintlify navigation source of truth.
+- `public-safety-policy.json` is the positive anonymous-publication allowlist;
+  every page must satisfy both before it is publishable.
+- Workspace `DOCUMENTATION-STANDARD.md`, `LANGUAGE-LOCALIZATION-STANDARD.md`,
+  `PLATFORM-STRATEGY.md`, and delivery standards remain authoritative; read the
+  task-relevant source instead of duplicating it here.
+- Product release artifacts and owning product authorities are the evidence for
+  public claims. Repository presence, draft metadata, preview status, and
+  internal workflows are not release evidence.
 
-- `../DOCUMENTATION-STANDARD.md` (workspace root, binding) for the documentation tier model and Tier-1 public docs rules.
-- `../kombify-Core/standards/REPO-FILE-SCHEMA.md` for root metadata.
-- `../LINEAR-PLANNING-STANDARD.md` (workspace root) for Linear / Roadmap / Beads separation.
-- `../PLATFORM-STRATEGY.md` (workspace root) for product naming and public/internal boundaries.
-- Repo gates: `.github/workflows/public-safety.yml` (public allowlist enforcement) and `.github/workflows/parity-gate.yml` (generated-MDX frontmatter).
+## Working rules
 
-## Repo Context
+- Keep every committed file safe for anonymous publication: no secrets, private
+  customer data, operator-only details, internal runbooks, or unsupported claims.
+- Add each new MDX page to `docs.json` and verify every navigation target exists.
+- Keep implementation-specific documentation in its owning product repository.
+- Use lowercase `kombify` unless quoting a proper name or code identifier.
+- Follow the localization standard: engineering/source documentation and
+  identifiers are English; use the supported customer-language contract without
+  claiming locale coverage that is not evidenced.
 
-This repo is the public Mintlify documentation surface for kombify. `docs.json` is the navigation source of truth. Pages are MDX files.
+## Gates and persistence
 
-## Working Rules
-
-- Register every new page in `docs.json`.
-- Keep public docs public: no internal-only server access, secrets, operator-only MCP details, or private customer data.
-- Use lowercase `kombify` for the brand unless quoting a proper name or code identifier.
-- Do not duplicate Core standards; link to them when internal agents need context.
-- Keep implementation-specific docs in the owning product repo, not here.
-- Keep roadmap scope in `ROADMAP.md`; keep tasks and bug lists in the execution tracker.
-
-## Verification
-
-- Run `mise run check` for config/path validation.
-- Run `mise run local:e2e` before claiming this docs repo is ready to publish.
-- When changing navigation, verify every page target exists as an `.mdx` file.
+- Run `mise run check` and `mise run local:e2e` before publication.
+- Preserve the gates in `.github/workflows/public-safety.yml`,
+  `.github/workflows/parity-gate.yml`, and `.github/workflows/delivery.yml`.
+- For live claims, wait for the exact `SOURCE_SHA` with
+  `mise run delivery:wait-exact-live`, then run
+  `mise run remote:public-safety`.
+- Track executable work and bugs in Beads (`bd`); keep milestone scope and exit
+  gates in `ROADMAP.md`.
+- Preserve unrelated work with isolated worktrees and path-scoped staging.
+  Completion requires relevant gates, a commit, and a successful push.
