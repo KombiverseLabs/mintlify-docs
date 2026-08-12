@@ -1,5 +1,19 @@
 # AGENTS.md - mintlify-docs
 
+<!-- BEGIN GENERATED: elastic-development-throughput kombify-throughput-policy-sync -->
+> Generated from the canonical `## Kombify Development Standard` section in the workspace
+> root `AGENTS.md`. Do not edit this block in a product repository; update
+> the root policy and run `mise run agents:throughput:sync`.
+
+## Kombify Development Standard
+
+- For implementation, bug fixing, test selection or cleanup, local live testing, and pre-1.0 merge or activation decisions, use `$kombify-fast-development` from the internal `kombify-plugin`.
+- Repository rules may add narrower product commands and sensitive-boundary checks but must not weaken or contradict that skill.
+- Ordinary pre-1.0 work uses only the affected deterministic gate; stable 1.0+ promotion uses the detailed release standards.
+- `DEVELOPMENT-THROUGHPUT-STANDARD.md` and `LOCAL-E2E-DEPLOYMENT-STANDARD.md` are on-demand references for orchestration, infrastructure, activation, and release work, not mandatory startup context for ordinary development.
+- Update only this root router, then run `mise run agents:throughput:sync`; generated repository copies must not be edited manually.
+<!-- END GENERATED: elastic-development-throughput kombify-throughput-policy-sync -->
+
 <!-- BEGIN GENERATED: planning-policy kombify-agent-policy-sync -->
 > Generated from `AGENTS.md` in the kombify workspace root. Do not edit this
 > block in child repos; update the root policy and run
@@ -7,21 +21,19 @@
 
 ## Planning System Policy
 
-- The workspace root `AGENTS.md` `## Planning System Policy` section is the
-  canonical source for generated planning-policy blocks in repo-local
-  `AGENTS.md` files. Edit the workspace root policy first, then run
-  `mise run agents:planning:sync`. Do not hand-edit the generated blocks in
-  child repos.
-- GitHub Projects is the canonical portfolio and roadmap planning system: high-level epics, cross-repo priorities, phase gates, ownership, and blockers. It is the single source of truth for what to build and when. Full taxonomy and workflow: `GITHUB-PROJECTS-PLANNING-STANDARD.md`. Migrated from Linear 2026-08-10; Linear stays reachable as a read-only historical archive, no new planning work there.
-- Org: KombiverseLabs, private Projects 4 (Development) / 5 (kombify-AI) / 6 (Go-to-Market & Branding) / 7 (Personal), items stored as draft issues (not repo-linked GitHub Issues — several kombify repos are public). Every Development-project item carries exactly one `Area` value; detailed AI component tracking lives in the separate kombify-AI project via `Component`.
-- Altitude discipline: only genuine cross-repo priorities/decisions/blockers belong in GitHub Projects — single-repo implementation epics stay Beads-only, even substantial ones.
-- Repo-local `ROADMAP.md` and optional `docs/roadmap/v0.x.0-*.md` files remain the canonical repo milestone scope and release-gate documents.
-- Beads is the canonical execution tracker inside each repo. Keep detailed tasks, subtasks, bugs, bugfixes, dependencies, and technical-depth follow-ups in Beads only.
-- GitHub Projects and Beads are cross-referenced, not synced: a Project item may cite Beads IDs in its `Beads` field and a Beads issue may cite the origin in `external_ref`. Either can exist without the other.
-- Check/update GitHub Projects at session boundaries (start and end), not on every Beads operation. Do not recreate one-way or bidirectional roadmap syncs between Beads, GitHub Projects, and repo docs beyond the sanctioned generated read view below.
-- Sanctioned one-way read view (User-Decision 2026-06-10, see `STANDARDS_ENFORCEMENT.md`): `roadmap-open-issues` renders open Beads issues into the marked `## Open Issues` block inside ROADMAP.md — a derived view, never edit it manually, never sync back.
-- **`roadmap-sync` (ROADMAP.md milestone → `roadmap:milestone` issue) is NOT YET migrated off Linear** — tracked in Beads `platform-o4ql1`. Until rebuilt, `mise run roadmap:update -- -Repo <repo> -Sync` still writes to Linear, not GitHub Projects. The plain (non-`-Sync`) form that refreshes the ROADMAP.md Open-Issues block is unaffected and stays canonical.
-- Session close with milestone-relevant work: update the Scope/Exit-gate checkboxes in the touched repo's repo-local `ROADMAP.md`, then run `mise run roadmap:update -- -Repo <repo>` from the workspace root.
+- Authority:
+  [GITHUB-PROJECTS-PLANNING-STANDARD.md](https://github.com/KombiverseLabs/kombify-workspace/blob/main/GITHUB-PROJECTS-PLANNING-STANDARD.md).
+  This section is the source for generated repo blocks; update it here, then run
+  `mise --cd <workspace-root> run agents:planning:sync`.
+- GitHub Projects owns cross-repo priorities, decisions, blockers, and phase
+  gates. Repo `ROADMAP.md` owns milestones; Beads owns all executable detail.
+  Cross-reference them; do not synchronize them bidirectionally.
+- Check Projects at session boundaries. `roadmap-open-issues` is a one-way Beads
+  view; never hand-edit or sync its generated block back. Until
+  `platform-o4ql1` closes, `roadmap:update -Sync` still writes to archived
+  Linear; ordinary `roadmap:update` remains valid.
+- At milestone-relevant close, update repo roadmap gates and run
+  `mise --cd <workspace-root> run roadmap:update -- -Repo <repo>`.
 <!-- END GENERATED: planning-policy kombify-agent-policy-sync -->
 
 Generic AI-agent instructions for Codex, Copilot, Gemini, Claude, and other coding agents.
