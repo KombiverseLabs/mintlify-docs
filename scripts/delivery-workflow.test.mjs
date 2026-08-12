@@ -11,7 +11,17 @@ const delivery = read(".github/workflows/delivery.yml");
 const postLocal = read(".github/workflows/post-local.yml");
 const miseUpdate = read(".github/workflows/mise-toolchain-update.yml");
 const dependabotMerge = read(".github/workflows/dependabot-auto-merge.yml");
+const mise = read("mise.toml");
 const operations = JSON.parse(read(".kombify/delivery-operations.json"));
+
+const miseTask = (name) => {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = mise.match(
+    new RegExp(`\\[tasks\\."${escaped}"\\]\\r?\\n([\\s\\S]*?)(?=\\r?\\n\\[tasks\\.|$)`),
+  );
+  assert.ok(match, `missing mise task: ${name}`);
+  return match[1];
+};
 
 test("all workflow action references are immutable", () => {
   for (const workflow of [
@@ -32,12 +42,19 @@ test("all workflow action references are immutable", () => {
 
 test("public fleet adapters retain exact central provenance without inaccessible callers", () => {
   for (const workflow of [postLocal, miseUpdate, dependabotMerge]) {
-    assert.match(workflow, /KombiverseLabs\/\.github@4312c7250169b242e69ce76a4c7111a3c6c968c6/);
+    assert.match(workflow, /KombiverseLabs\/\.github@fedaa2443f9b0615e4459936ce699e000b8ab1c1/);
     assert.doesNotMatch(workflow, /uses:\s*KombiverseLabs\/\.github\/\.github\/workflows\//);
   }
   assert.doesNotMatch(postLocal, /mise run (?:ci:fast|check|local:e2e)/);
   assert.match(postLocal, /Report repository lint findings[\s\S]*continue-on-error: true/);
   assert.match(postLocal, /Report repository security findings[\s\S]*continue-on-error: true/);
+});
+
+test("fleet task aliases separate nonblocking findings from post-live evidence", () => {
+  assert.match(miseTask("ci:lint"), /run = "mise run check"/);
+  assert.match(miseTask("ci:security"), /run = "mise run public-safety"/);
+  assert.match(miseTask("ci:async"), /run = "mise run local:e2e"/);
+  assert.doesNotMatch(postLocal, /mise run ci:async/);
 });
 
 test("same-repository access uses github token and cross-repository writes use the purpose token", () => {
