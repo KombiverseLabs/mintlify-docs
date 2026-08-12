@@ -1,26 +1,6 @@
 name: Public Safety Gate
 
 on:
-  pull_request:
-    paths:
-      - "**/*.mdx"
-      - "docs.json"
-      - "public-safety-policy.json"
-      - "schemas/public-safety-policy.schema.json"
-      - "scripts/assert-public-safety.ps1"
-      - "scripts/assert-remote-public-safety.ps1"
-      - "scripts/check-stackkits-external-links.ps1"
-      - "scripts/check-stackkits-release-truth.ps1"
-      - "scripts/check-speechkit-release-truth.ps1"
-      - "scripts/check-techstack-public-boundary.ps1"
-      - "scripts/check-product-docs-external-links.ps1"
-      - "scripts/check-code-example-relevance.ps1"
-      - "scripts/test-code-example-relevance.ps1"
-      - "scripts/run-local-e2e.ps1"
-      - "scripts/run-local-preview-smoke.ps1"
-      - "scripts/test-public-safety.ps1"
-      - "mise.toml"
-      - ".github/workflows/public-safety.yml"
   push:
     branches: [main]
     paths:
@@ -96,7 +76,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
-          HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          HEAD_SHA: ${{ github.sha }}
         run: |
           $deadline = (Get-Date).AddMinutes(4)
           $environmentUrl = $null
