@@ -43,7 +43,9 @@ jobs:
       SOURCE_REPOSITORY: mintlify-docs
       SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       STABLE_APPROVED: ${{ github.event_name == 'workflow_dispatch' && inputs.approve-stable }}
-      STANDARDS_REF: 834bbc43820b074d0e2832a12637766a09c4997e
+      # Public repositories cannot read the private-visibility organization
+      # variable, so this adapter pins the currently published green snapshot.
+      STANDARDS_REF: b57345af8b216bd101325940f223751a2cf0fefb
       STANDARDS_TOKEN: ${{ secrets.REPO_SYNC_PAT }}
     steps:
       - name: Check out exact caller source

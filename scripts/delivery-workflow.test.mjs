@@ -49,8 +49,8 @@ test("same-repository access uses github token and cross-repository writes use t
   assert.match(postLocal, /GITHUB_TOKEN: \$\{\{ github\.token \}\}/);
 });
 
-test("custom delivery uses the current immutable workspace compiler and exact PR head", () => {
-  assert.match(delivery, /STANDARDS_REF: 834bbc43820b074d0e2832a12637766a09c4997e/);
+test("custom delivery uses the published immutable workspace compiler and exact PR head", () => {
+  assert.match(delivery, /STANDARDS_REF: b57345af8b216bd101325940f223751a2cf0fefb/);
   assert.match(delivery, /SOURCE_SHA: \$\{\{ github\.event\.pull_request\.head\.sha \|\| github\.sha \}\}/);
   assert.doesNotMatch(delivery, /FAIL_CLOSED_FAST/);
 });
