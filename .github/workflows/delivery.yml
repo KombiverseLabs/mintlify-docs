@@ -228,11 +228,11 @@ jobs:
             report_nonblocking_operation publish || true
             if report_nonblocking_operation promote; then
               report_nonblocking_operation smoke || true
+              report_nonblocking_operation build || true
+              report_nonblocking_operation validate || true
             else
-              echo "::notice::exact live activation is pending/unverified; smoke was not run against an unproven revision."
+              echo "::notice::exact live activation is pending/unverified; smoke and functional evidence were not run against an unproven revision."
             fi
-            report_nonblocking_operation build || true
-            report_nonblocking_operation validate || true
             report_nonblocking_operation async || true
           fi
 

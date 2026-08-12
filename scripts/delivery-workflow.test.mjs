@@ -62,7 +62,7 @@ test("fast activation evidence is post-live and nonblocking while stable remains
   );
   assert.match(
     delivery,
-    /report_nonblocking_operation publish \|\| true[\s\S]*if report_nonblocking_operation promote; then[\s\S]*report_nonblocking_operation smoke \|\| true[\s\S]*fi[\s\S]*report_nonblocking_operation build \|\| true[\s\S]*report_nonblocking_operation validate \|\| true/,
+    /report_nonblocking_operation publish \|\| true[\s\S]*if report_nonblocking_operation promote; then[\s\S]*report_nonblocking_operation smoke \|\| true[\s\S]*report_nonblocking_operation build \|\| true[\s\S]*report_nonblocking_operation validate \|\| true/,
   );
   assert.match(delivery, /exact live activation is pending\/unverified/);
 });
@@ -73,13 +73,8 @@ test("delivery operations no longer recurse through a delivery-prefixed task", (
   const group = operations.groups.find((entry) => entry.id === "public-docs");
   assert.equal(group.operations.promote.fast[0].task, "postlive:wait-exact-live");
   assert.equal(group.operations.promote.stable[0].task, "postlive:wait-exact-live");
-  assert.deepEqual(group.operations.build.fast[0].assert_files, [
-    "docs.json",
-    "public-safety-policy.json",
-  ]);
-  assert.deepEqual(group.operations.validate.fast[0].assert_files, [
-    "schemas/public-safety-policy.schema.json",
-  ]);
+  assert.equal(group.operations.build.fast[0].task, "check");
+  assert.equal(group.operations.validate.fast[0].task, "local:e2e");
   assert.equal(group.operations.build.stable[0].task, "check");
   assert.equal(group.operations.validate.stable[0].task, "local:e2e");
 });
