@@ -1,0 +1,139 @@
+# Public-repository adapter synchronized from KombiverseLabs/.github@4312c7250169b242e69ce76a4c7111a3c6c968c6.
+# Public repositories cannot call reusable workflows from an internal repository.
+name: Post-Local
+
+on:
+  pull_request:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: post-local-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fast:
+    name: Focused fast gate
+    runs-on: ${{ vars.DEPOT_FALLBACK_RUNNER || 'depot-ubuntu-24.04' }}
+    timeout-minutes: 5
+    env:
+      CI: "true"
+      MISE_YES: "1"
+      GITHUB_TOKEN: ${{ github.token }}
+      NODE_AUTH_TOKEN: ${{ github.token }}
+      KOMBIFY_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before || '' }}
+    steps:
+      - name: Validate exact source revision
+        env:
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "::error::source SHA must be a lowercase full commit SHA"
+            exit 1
+          }
+      - name: Check out exact caller source
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
+          fetch-depth: 0
+      - name: Restore pinned mise and tool cache
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: |
+            ~/.cache/mise
+            ~/.local/share/mise
+          key: post-local-mise-${{ runner.os }}-${{ runner.arch }}-2026.7.5-${{ hashFiles('mise.toml', '.mise.toml', 'mise.lock', '.mise.lock') }}
+          restore-keys: |
+            post-local-mise-${{ runner.os }}-${{ runner.arch }}-2026.7.5-
+      - name: Install exact mise binary when absent
+        env:
+          MISE_ASSET_API: https://api.github.com/repos/jdx/mise/releases/assets/471759882
+          MISE_SHA256: 5f7ab76afdf0780d12edeaa67e908094e9ccf7924cfe203e415c1cfb87bbf778
+        shell: bash
+        run: |
+          set -euo pipefail
+          mise_bin="$HOME/.local/share/mise/bin/mise"
+          if [[ -x "$mise_bin" ]] && echo "$MISE_SHA256  $mise_bin" | sha256sum --check --status; then
+            echo "Using checksum-verified mise from the GitHub cache."
+          else
+            mkdir -p "$(dirname "$mise_bin")"
+            download="$(mktemp)"
+            trap 'rm -f "$download"' EXIT
+            curl --fail --silent --show-error --location \
+              --connect-timeout 10 --max-time 60 \
+              --header "Accept: application/octet-stream" \
+              --header "Authorization: Bearer $GITHUB_TOKEN" \
+              --header "X-GitHub-Api-Version: 2022-11-28" \
+              "$MISE_ASSET_API" --output "$download"
+            echo "$MISE_SHA256  $download" | sha256sum --check
+            install -m 0755 "$download" "$mise_bin"
+          fi
+          dirname "$mise_bin" >> "$GITHUB_PATH"
+          "$mise_bin" --version
+      - name: Prepare repository lint and security tooling
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          mise trust "$PWD/mise.toml"
+          mise install
+          task_names="$(mise tasks ls --local --name-only)"
+          if grep -Fxq 'ci:bootstrap' <<<"$task_names"; then
+            mise run ci:bootstrap
+          fi
+      - name: Report repository lint findings
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          task_names="$(mise tasks ls --local --name-only)"
+          if grep -Fxq 'ci:lint' <<<"$task_names"; then
+            mise run ci:lint
+          elif grep -Fxq 'lint' <<<"$task_names"; then
+            mise run lint
+          else
+            echo "::notice::repository has no ci:lint or legacy lint task; no lint finding was produced"
+          fi
+      - name: Report repository security findings
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          task_names="$(mise tasks ls --local --name-only)"
+          if grep -Fxq 'ci:security' <<<"$task_names"; then
+            mise run ci:security
+          else
+            echo "::notice::repository has no ci:security task; dependency review remains the security finding"
+          fi
+
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ${{ vars.DEPOT_FALLBACK_RUNNER || 'depot-ubuntu-24.04' }}
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Review dependency changes
+        continue-on-error: true
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4.7.3
+        with:
+          fail-on-severity: high
+
+  passed:
+    name: post-local-passed
+    runs-on: ${{ vars.DEPOT_FALLBACK_RUNNER || 'depot-ubuntu-24.04' }}
+    timeout-minutes: 2
+    steps:
+      - name: Report informational post-local results
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "::notice::post-local lint, security, and dependency findings run independently and never delay or block pre-1.0 rollout"

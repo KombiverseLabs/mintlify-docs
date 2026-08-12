@@ -29,6 +29,7 @@ on:
 permissions:
   actions: write
   contents: read
+  deployments: read
 
 jobs:
   delivery:
@@ -38,20 +39,19 @@ jobs:
     env:
       CANDIDATE_RECEIPT_B64: ${{ github.event_name == 'workflow_dispatch' && inputs.candidate-receipt-b64 || '' }}
       EXECUTE_DELIVERY: ${{ github.event_name != 'pull_request' && (github.event_name != 'workflow_dispatch' || inputs.execute) }}
-      # Public documentation scope regressions are externally visible. Unlike a
-      # normal forward-fix fast path, publish/promotion/smoke failures must stop
-      # this adapter instead of producing a green warning-only run.
-      FAIL_CLOSED_FAST: "true"
-      GH_TOKEN: ${{ secrets.GH_PAT != '' && secrets.GH_PAT || github.token }}
+      GH_TOKEN: ${{ github.token }}
       SOURCE_REPOSITORY: mintlify-docs
-      SOURCE_SHA: ${{ github.sha }}
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       STABLE_APPROVED: ${{ github.event_name == 'workflow_dispatch' && inputs.approve-stable }}
-      STANDARDS_REF: 77fe8b24768c9a601a7f3845da6a2a4e68100956
+      # Public repositories cannot read the private-visibility organization
+      # variable, so this adapter pins the currently published green snapshot.
+      STANDARDS_REF: b57345af8b216bd101325940f223751a2cf0fefb
+      STANDARDS_TOKEN: ${{ secrets.REPO_SYNC_PAT }}
     steps:
       - name: Check out exact caller source
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ env.SOURCE_SHA }}
           fetch-depth: 0
           persist-credentials: false
 
@@ -61,7 +61,7 @@ jobs:
           repository: KombiverseLabs/kombify-workspace
           ref: ${{ env.STANDARDS_REF }}
           path: standards
-          token: ${{ env.GH_TOKEN }}
+          token: ${{ env.STANDARDS_TOKEN }}
           persist-credentials: false
 
       - name: Set up Node.js
@@ -175,7 +175,6 @@ jobs:
 
           run_operation() {
             local operation="$1"
-            local blocking="${2:-true}"
             local started_at
             local finished_at
             local status
@@ -200,25 +199,42 @@ jobs:
               --started-at "$started_at" \
               --finished-at "$finished_at" \
               --output "receipts/${operation}.json"
-            if [[ "$blocking" == "true" && "$exit_code" -ne 0 ]]; then
-              if [[ "$DELIVERY_PROFILE" == "fast-pre-1.0" && "$FAIL_CLOSED_FAST" != "true" ]]; then
-                echo "::warning::delivery operation failed in the pre-1.0 forward-fix profile; the exact failed receipt was uploaded and remaining operations will continue."
-                return 0
-              fi
-              return "$exit_code"
+            return "$exit_code"
+          }
+
+          report_nonblocking_operation() {
+            local operation="$1"
+            if run_operation "$operation"; then
+              return 0
             fi
+            echo "::warning::fast post-live operation '$operation' failed; its exact failed receipt remains visible and does not block the already-started Mintlify activation."
+            return 1
           }
 
           if [[ "$DELIVERY_PROFILE" == "stable-1.0-plus" ]]; then
             run_operation build
             run_operation validate
+            if [[ "$STABLE_APPROVED" == "true" ]]; then
+              run_operation publish
+              run_operation promote
+              run_operation smoke
+            fi
+            run_operation async
+          else
+            # Mintlify observes the merged main revision independently of this
+            # workflow. Record publication immediately, then collect exact-live
+            # and functional evidence only after activation and never turn that
+            # already-started fast rollout into a red gate.
+            report_nonblocking_operation publish || true
+            if report_nonblocking_operation promote; then
+              report_nonblocking_operation smoke || true
+              report_nonblocking_operation build || true
+              report_nonblocking_operation validate || true
+            else
+              echo "::notice::exact live activation is pending/unverified; smoke and functional evidence were not run against an unproven revision."
+            fi
+            report_nonblocking_operation async || true
           fi
-          if [[ "$DELIVERY_PROFILE" == "fast-pre-1.0" || "$STABLE_APPROVED" == "true" ]]; then
-            run_operation publish
-            run_operation promote
-            run_operation smoke
-          fi
-          run_operation async false
 
       - name: Upload exact operation receipts
         if: always() && env.EXECUTE_DELIVERY == 'true'

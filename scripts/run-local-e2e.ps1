@@ -2,6 +2,7 @@
 param(
     [Alias("SkipMintCli")]
     [switch]$SkipPreview,
+    [switch]$SkipExternalLinks,
     [string]$Sha = $env:LOCAL_E2E_SHA
 )
 
@@ -139,12 +140,17 @@ Write-Host "navigation_pages: $($pages.Count)"
 & (Join-Path $PSScriptRoot "check-internal-links.ps1")
 & (Join-Path $PSScriptRoot "check-content-rules.ps1")
 & (Join-Path $PSScriptRoot "check-stackkits-release-truth.ps1")
-& (Join-Path $PSScriptRoot "check-stackkits-external-links.ps1")
 & (Join-Path $PSScriptRoot "check-speechkit-release-truth.ps1")
 & (Join-Path $PSScriptRoot "check-techstack-public-boundary.ps1")
-& (Join-Path $PSScriptRoot "check-product-docs-external-links.ps1")
 & (Join-Path $PSScriptRoot "test-code-example-relevance.ps1")
 & (Join-Path $PSScriptRoot "check-code-example-relevance.ps1")
+
+if (-not $SkipExternalLinks) {
+    & (Join-Path $PSScriptRoot "check-stackkits-external-links.ps1")
+    & (Join-Path $PSScriptRoot "check-product-docs-external-links.ps1")
+} else {
+    Write-Host "external_links: skipped"
+}
 
 if (-not $SkipPreview) {
     $npxVersion = (& npx --version 2>&1)

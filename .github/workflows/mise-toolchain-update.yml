@@ -1,0 +1,78 @@
+# Public-repository adapter synchronized from KombiverseLabs/.github@4312c7250169b242e69ce76a4c7111a3c6c968c6.
+# REPO_SYNC_PAT is repository-owned and used only when an update PR must be written.
+name: Mise Toolchain Update
+
+on:
+  schedule:
+    - cron: '17 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    name: Propose current mise toolchain
+    runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'depot-ubuntu-24.04' }}
+    timeout-minutes: 10
+    env:
+      CI: "true"
+      MISE_YES: "1"
+      UPDATE_BRANCH: automation/mise-toolchain-update
+    steps:
+      - name: Check out default branch
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install pinned mise updater
+        uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
+        with:
+          version: "2026.7.5"
+          sha256: 5f7ab76afdf0780d12edeaa67e908094e9ccf7924cfe203e415c1cfb87bbf778
+          install: false
+          env: false
+      - name: Update declared versions and lock metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          mise trust "$PWD/mise.toml"
+          mise upgrade --bump --yes
+          mise lock --yes
+      - name: Open or refresh the automation pull request
+        env:
+          GH_TOKEN: ${{ secrets.REPO_SYNC_PAT }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "Toolchain is current."
+            exit 0
+          fi
+          if [[ -z "${GH_TOKEN:-}" ]]; then
+            echo "::error::REPO_SYNC_PAT is required only when a mise update must write the repository-owned automation PR."
+            exit 1
+          fi
+          gh auth setup-git
+          git config user.name "kombify-automation"
+          git config user.email "automation@kombify.dev"
+          git switch -C "$UPDATE_BRANCH"
+          git add -A
+          git commit -m "chore(toolchain): update mise versions and lock"
+          remote_sha="$(git ls-remote --heads origin "refs/heads/$UPDATE_BRANCH" | awk '{print $1}')"
+          if [[ -n "$remote_sha" ]]; then
+            git push --force-with-lease="refs/heads/$UPDATE_BRANCH:$remote_sha" origin "$UPDATE_BRANCH"
+          else
+            git push origin "$UPDATE_BRANCH"
+          fi
+          existing="$(gh pr list --head "$UPDATE_BRANCH" --base main --state open --json url --jq '.[0].url // empty')"
+          if [[ -z "$existing" ]]; then
+            gh pr create \
+              --base main \
+              --head "$UPDATE_BRANCH" \
+              --title "chore(toolchain): update mise versions and lock" \
+              --body "Automated mise toolchain refresh. Sensitive or major changes remain review-required; repository gates decide merge eligibility."
+          else
+            echo "Refreshed $existing"
+          fi
