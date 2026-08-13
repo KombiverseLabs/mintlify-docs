@@ -1,6 +1,6 @@
 ---
 title: mintlify-docs Status
-last_verified: 2026-08-11
+last_verified: 2026-08-13
 maturity: alpha
 ---
 
@@ -8,13 +8,21 @@ maturity: alpha
 
 ## Public Surface
 
+- StackKits use cases, OS compatibility, and application delivery now have
+  dedicated public pages plus a strict release-manifest consumer. The consumer
+  accepts only published release assets with matching schema, tag, private and
+  public source SHAs, canonical digests, and public release URL; it rejects
+  internal gate fields and positive OS rows without public receipt evidence.
+  A repository-dispatch and weekly reconciliation opens a generated-only PR,
+  while a release without both assets remains visibly `DocsSyncPending`.
+
 - Mintlify site configured from this repository and published at
   `docs.kombify.io`.
 - Five allowed navigation tabs: Start, StackKits, Techstack, SpeechKit, and
   Identity & Access.
 - StackKits content is limited to capabilities verified against the current
   public StackKits release.
-- The publishable tree contains 45 pages: 36 in the StackKits tab, three in
+- The publishable tree contains 47 pages: 38 in the StackKits tab, three in
   Techstack, four in SpeechKit, one Start page, and one Identity page.
 - Techstack documents the current product and operating boundary but makes no
   public installer, public source, or general-availability claim.
@@ -33,7 +41,7 @@ maturity: alpha
 - Every MDX page must be both in the approved scope and in `docs.json`.
 - Simulate-as-product, Proxmox, excluded products, internal paths, secret
   material, and restricted-content markers fail closed.
-- Local E2E uses pinned Mintlify `4.2.684` and verifies all 45 public pages plus
+- Local E2E uses pinned Mintlify `4.2.684` and verifies all 47 public pages plus
   every forbidden route through real HTTP.
 - Remote safety checks verify removed direct routes, `llms.txt`, and sitemap
   projections after deployment.

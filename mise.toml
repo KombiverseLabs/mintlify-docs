@@ -37,7 +37,10 @@ run = "mise run local:e2e"
 
 [tasks.check]
 description = "Validate public scope, docs.json, content, and local links"
-run = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-local-e2e.ps1 -SkipPreview -SkipExternalLinks"
+run = [
+  "node --test scripts/sync-stackkits-release-docs.test.mjs",
+  "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-local-e2e.ps1 -SkipPreview -SkipExternalLinks",
+]
 
 [tasks."local:e2e"]
 description = "Run the local docs gate"
