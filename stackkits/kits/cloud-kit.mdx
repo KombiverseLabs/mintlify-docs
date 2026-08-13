@@ -11,6 +11,10 @@ Cloud Kit is included in the public `v0.16.0` release. It uses the same standalo
   The release includes the Cloud Kit definition and installer, but its public v0.16.0 live-runtime evidence is still pending. This page documents configuration bootstrap and product boundaries, not production-readiness proof.
 </Note>
 
+<Note>
+  `v0.16.1` moves the `offsite-object-backup` capability from Cloud Kit's required set to its optional set. Existing Cloud Kit plans keep working, but by default they no longer emit a `BackupTargetRequirementV1` or demand an `ExternalBackupTargetBindingV1` at Apply or Verify. See [Offsite backup is opt-in](#offsite-backup-is-opt-in-in-v0-16-1) below to keep the previous behavior.
+</Note>
+
 ## Before you start
 
 Prepare these outside StackKits:
@@ -45,6 +49,25 @@ stackkit verify --http --json
 ```
 
 Use a domain you own in place of `example.com`. Keep the StackSpec and verification output with the workspace, and change only the StackSpec before regenerating artifacts.
+
+## Offsite backup is opt-in in v0.16.1
+
+Cloud Kit v0.16.0 listed `offsite-object-backup` under `capabilities.required`, so every generated Cloud rollout emitted a `BackupTargetRequirementV1` and refused to Apply or Verify until an `ExternalBackupTargetBindingV1` satisfied it.
+
+In v0.16.1 the capability moves to `capabilities.optional`. Cloud Kit no longer emits that requirement or its binding check by default, and it no longer wires the Cloud offsite backup runtime module (or its evidence) into the plan. Nothing in the runtime is removed; the module is gated on the capability selection.
+
+To keep the v0.16.0 behavior, opt the capability back in from your StackSpec:
+
+```yaml
+capabilities:
+  enable:
+    - offsite-object-backup
+  disable: []
+```
+
+With `offsite-object-backup` selected, Cloud Kit re-emits `BackupTargetRequirementV1`, blocks Apply and Verify until you provide an `ExternalBackupTargetBindingV1`, and includes the Cloud offsite backup runtime module and its evidence in the generated plan.
+
+Leave the capability out to run Cloud Kit without an offsite backup target. The local Kopia backup lifecycle documented in [Back up and restore](/guides/stackkits/back-up-and-restore) is unaffected.
 
 ## Compare with Basement Kit
 
