@@ -7,11 +7,16 @@
 
 ## Kombify Development Standard
 
-- For implementation, bug fixing, test selection or cleanup, local live testing, and pre-1.0 merge or activation decisions, use `$kombify-fast-development` from the internal `kombify-plugin`.
-- Repository rules may add narrower product commands and sensitive-boundary checks but must not weaken or contradict that skill.
-- Ordinary pre-1.0 work uses only the affected deterministic gate; stable 1.0+ promotion uses the detailed release standards.
-- `DEVELOPMENT-THROUGHPUT-STANDARD.md` and `LOCAL-E2E-DEPLOYMENT-STANDARD.md` are on-demand references for orchestration, infrastructure, activation, and release work, not mandatory startup context for ordinary development.
-- Update only this root router, then run `mise run agents:throughput:sync`; generated repository copies must not be edited manually.
+1. Phase determines rigor: product SemVer below 1.0.0 selects `fast-pre-1.0` — the affected deterministic gate is the only synchronous gate, and broad suites are 1.0-promotion evidence, never development gates. Route implementation, bug fixing, test selection or cleanup, local live testing, and pre-1.0 merge or activation decisions through `$kombify-fast-development` from the internal `kombify-plugin`; repository rules may narrow it but never weaken it.
+2. Test behavior at public boundaries (CLI contracts, HTTP/OpenAPI, CUE schemas, cross-repo fixtures); black-box tests are the default, and a white-box test needs a stated reason.
+3. A new test needs one of three reasons — reproduced regression, stable core invariant, or registered sensitive boundary (auth, billing, migrations, provider control, signing) — otherwise none.
+4. Never assert structure: no exact error strings, element or field counts, source-text greps, or internal snapshots; assert the effect. Golden files only for genuine external contracts.
+5. One behavior, one test: no duplicated axes (backend twins, unit+integration twins, per-version copies); when two tests cover one behavior without distinct risk, delete one.
+6. Coverage percentage and test count are never goals or gates pre-1.0; sensitive areas are protected by named behavior tests, not percentage floors.
+7. A test that breaks on a behavior-preserving refactor is a defective test: fix or delete the test, never contort the code to keep it green.
+8. The running app is the primary feedback surface: every product repo maintains a documented one-command hot-reload dev loop (edit to observable in seconds; Docker optional, never required), and the affected test slice stays below 2 minutes target, 5 minutes hard.
+9. Delete, don't hoard: skipped, never-running, or superseded tests and dead code are removed in the same slice that obsoletes them; suite reduction runs as its own measured slice; git history is the archive.
+10. Claims tier to evidence: implemented, locally verified, merged, deployed, live, and release-ready are distinct claims, and missing evidence is pending, never passed. Update only this root section, then run `mise run agents:throughput:sync`; generated repository copies must not be edited manually.
 <!-- END GENERATED: elastic-development-throughput kombify-throughput-policy-sync -->
 
 <!-- BEGIN GENERATED: planning-policy kombify-agent-policy-sync -->
