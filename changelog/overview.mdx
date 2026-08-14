@@ -1,0 +1,58 @@
+---
+title: "Changelog"
+description: "What's new in StackKits and the kombify platform"
+icon: "newspaper"
+mode: "center"
+---
+
+Product updates, organized newest first. For deeper details on each release, see the [StackKits](https://github.com/kombifyio/stackKits/releases) and [SpeechKit](https://github.com/kombifyio/SpeechKit/releases) release notes on GitHub.
+
+<Update label="2026-08-14" description="Week of Aug 10 – Aug 14">
+
+## StackKits v0.15.0 – v0.18.1: guided installer, service-controllable rollouts, and a provider-neutral Cloud core
+
+StackKits rolled from v0.14.28 to [v0.18.1](https://github.com/kombifyio/stackKits/releases/tag/v0.18.1) this week. A new guided installer takes an unprepared machine to a running homelab in three modes. Cloud Kit gained a provider-neutral Cloud core, public TLS route ownership, and opt-in offsite backup. `apply`, `status`, `verify`, and `logs` are fully machine-readable on every outcome, and a new `stackkit service` command controls individual services between full applies.
+
+## SpeechKit v0.53.0 – v0.57.0: one voice assistant everywhere, Android Voice Agent, hosted web assistant
+
+SpeechKit shipped [v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0). The Android app now holds a real spoken conversation and reaches the assistant straight from the SpeechKit keyboard. Every SpeechKit server exposes a ready-to-use `/assistant` web page. The same animated assistant renders identically on Android, in the Windows overlay, and on the web, driven by a single shared library. Deepgram Flux v2 is now selectable across realtime, speech-to-text, and text-to-speech.
+
+### New features
+
+- **Guided installer to a running homelab.** [StackKits v0.17.0](https://github.com/kombifyio/stackKits/releases/tag/v0.17.0) ships a full guided installation with three modes and a `v2 init` flow that accepts `--use-case`, `--platform`, and `--enable`. The installer bootstraps Docker and storage roots directly, works safely under `sudo`, and prints truthful native credentials. See [Quickstart](/stackkits/quickstart) and [Choosing a kit](/guides/stackkits/choosing-a-kit).
+- **Provider-neutral Cloud core with public TLS routes.** [StackKits v0.15.0](https://github.com/kombifyio/stackKits/releases/tag/v0.15.0) resolves a required `cloud-core` workload for `base`, `auth`, `id`, and `coolify`, renders one digest-pinned Compose project, and executes it through a closed local runtime owner on an externally supplied host. [v0.18.0](https://github.com/kombifyio/stackKits/releases/tag/v0.18.0) makes Cloud Kit own and materialize public TLS routes end to end. Cloud runtime custody stores only service-scoped PocketID, TinyAuth, and Coolify material. Provider credentials, server credentials, leases, and inventory stay outside StackKits. See [Cloud Kit](/stackkits/kits/cloud-kit).
+- **`stackkit service` command for post-rollout control.** [v0.16.0](https://github.com/kombifyio/stackKits/releases/tag/v0.16.0) adds `stackkit service start|stop|restart <service-key>` and `stackkit service logs <service-key>` for StackKits-managed Cloud core services. Mutations require `--owner-approve`, and `--json` returns a versioned action result. Use it to bounce or inspect one service between full applies. See [Day 2 operations](/stackkits/reference/day-2-operations).
+
+```bash
+stackkit service restart coolify --owner-approve --json
+stackkit service logs auth --tail 100
+```
+
+- **Full machine-readable output on apply, status, verify, and logs.** [v0.15.8](https://github.com/kombifyio/stackKits/releases/tag/v0.15.8) keeps `stackkit apply --json`, `stackkit status --json`, and `stackkit verify --json` parseable on success, denial, and failure. `stackkit logs` returns redacted, bounded pages with digest-bound cursors and explicit truncation metadata. The MCP connector exposes the same structured evidence. See [MCP connector](/stackkits/reference/mcp-connector) and [Monitoring](/stackkits/reference/monitoring).
+- **Architecture v2 runtime listeners for product-owned application delivery.** [v0.15.3](https://github.com/kombifyio/stackKits/releases/tag/v0.15.3) exposes runtime listeners on Architecture v2 catalog projections so applications can drive their own delivery without moving lifecycle authority out of StackKits. See [Application delivery](/guides/stackkits/application-delivery).
+- **Android Voice Agent client.** [SpeechKit v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0) adds a real-time Voice Agent to the Android app. Press to talk, hear the answer, and watch the transcript build as you speak. The SpeechKit keyboard opens the assistant in place, so a conversation stays out of the text field while dictation still writes into it. See [SpeechKit modes](/speechkit/modes).
+- **Hosted `/assistant` web page on every SpeechKit server.** [v0.55.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.55.0) serves a ready-to-use Voice Assistant page. Open it in any browser, connect, and start talking. See [SpeechKit overview](/speechkit/overview).
+- **Voice Assistant appearance settings and one visual language everywhere.** [v0.55.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.55.0) adds Settings to pick the animation (Aura orb or Waveform), the centre logo, and whether the live transcript shows by default, with a live preview. [v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0) publishes the shared orb so the Android app, Windows overlay, and hosted web page draw the same assistant from a single source. See [SpeechKit framework](/speechkit/framework).
+- **Deepgram Flux v2 across all voice paths.** [v0.54.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.10) makes Deepgram Flux v2 available for realtime Voice Agent, speech-to-text, and text-to-speech.
+- **Local Box media lifecycle.** [v0.54.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.0) plays media through the local device agent on a paired Kombify Box, so the audio path stays on your own network.
+
+### Updates
+
+- **Cloud Kit offsite backup is now opt-in.** [v0.16.1](https://github.com/kombifyio/stackKits/releases/tag/v0.16.1) makes offsite backup an explicit choice on Cloud Kit. See [Back up and restore](/guides/stackkits/back-up-and-restore).
+- **Traefik admin API stays localhost-only on Cloud Kit.** [v0.18.1](https://github.com/kombifyio/stackKits/releases/tag/v0.18.1) keeps the Traefik admin API bound to localhost in both product and public release contracts.
+- **Rebuilt Windows Voice Agent overlay.** [SpeechKit v0.56.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.56.0) turns the overlay into one dark, readable panel centred on the animation and the conversation. Controls appear only when you reach for them. Quick Note moved to the overlay, and every overlay icon has a tooltip.
+- **Silent updater with a distinct verification phase.** [v0.52.11](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.11) installs updates silently, [v0.52.12](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.12) has SpeechKit relaunch itself after install, and [v0.54.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.10) shows a distinct verification phase instead of appearing to stall at 100%.
+- **Numeric pre-1.0 releases are back on the public surfaces.** [v0.52.9](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.9) publishes numeric `v0.x` releases as normal GitHub releases and advances the canonical `latest` alias so the website, installer mirror, and in-app updater agree on the newest build. [v0.52.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.10) restores the missing public release notes for v0.51.37 through v0.52.9.
+
+### Bug fixes
+
+- **Apply binds mutation to the expected plan hash.** [StackKits v0.17.0](https://github.com/kombifyio/stackKits/releases/tag/v0.17.0) prevents apply from running against a plan that changed underneath it. See [Review, plan, and apply](/guides/stackkits/review-plan-and-apply).
+- **Authenticated public runtime image pulls.** [v0.16.8](https://github.com/kombifyio/stackKits/releases/tag/v0.16.8) authenticates the public runtime image pulls that a fresh install performs.
+- **Held-to-talk release ends the conversation.** [SpeechKit v0.56.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.56.0) closes the dialog when hold-to-talk is released. A short window still lets an immediate second press pick up where you left off.
+- **Launching SpeechKit opens SpeechKit.** [v0.56.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.56.0) brings up the window from the taskbar or Start menu and returns to the running app on a repeat click.
+- **Android keyboard setup detects our own keyboard.** [v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0) stops the setup flow from claiming a step is done before it is.
+- **Transcripts keep their own language.** [v0.54.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.0) no longer labels transcripts as German regardless of what was spoken, so custom vocabulary and replacements apply to the language you actually used. Silent-recording drops also stop: when a recording produces no text because the spoken language did not match the configured one, SpeechKit says so instead of dropping it.
+- **Server keeps running through a transient probe failure.** [v0.54.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.1) stops a single failed probe from killing the SpeechKit server, and unlatches the local Whisper ready flag when it recovers.
+- **Model setup retries transient Whisper downloads.** [v0.54.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.10) retries instead of failing the install on a transient network error.
+
+</Update>
