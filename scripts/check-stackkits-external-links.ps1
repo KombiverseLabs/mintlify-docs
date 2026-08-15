@@ -10,7 +10,7 @@ $destinations = @(
     "https://install.stackkit.cc",
     "https://base.stackkit.cc",
     "https://cloud.stackkit.cc",
-    "https://github.com/kombifyio/StackKits/releases/tag/v0.16.0"
+    "https://github.com/kombifyio/StackKits/releases/latest"
 )
 
 $errors = [System.Collections.Generic.List[string]]::new()
