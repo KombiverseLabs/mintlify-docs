@@ -37,22 +37,23 @@ notice before opening the installer.
 
 1. Start Techstack and choose **Use locally**. A kombify Cloud account is not
    required for this mode.
-2. To connect a server that already has Basement Kit, choose **Connect my
-   server** and enter its local SSH details.
-3. The Creation Wizard also exposes **Give me a one-liner** for a new Ubuntu
-   server. See the Alpha limitation below before using that path.
-4. Keep the Windows client running while the server downloads its LAN agent
-   and registers with the local Techstack runtime.
-5. Confirm that the server and its StackKits services appear in the local UI.
+2. For a fresh Ubuntu server, choose **Give me a one-liner**, select
+   **Basement Kit**, and complete the local Owner/Admin bootstrap fields.
+3. Copy the generated pairing command and run it once on the Ubuntu server.
+   Keep the Windows client running and reachable on the local subnet while the
+   server downloads its agent and sends the first Guard heartbeat.
+4. Wait until Techstack changes the server from **Not connected yet** to the
+   connected state, then continue with the StackKit rollout.
+5. For a server that already runs Basement Kit, choose **Connect my server**
+   instead and enter its local SSH details.
 
-<Warning>
-In Windows Alpha `v0.7.95`, the local client, device Admin, dashboard, and both
-server choices are available. Creating the Basement Kit through **Give me a
-one-liner** currently stops before command generation because the controller
-package does not yet include the Basement Kit catalog. For the first-user
-handoff, install Basement Kit with the standalone one-liner below, then use
-**Connect my server** in Techstack.
-</Warning>
+<Note>
+Windows Alpha `v0.7.96` bundles the pinned Basement Kit catalog, its Windows
+validator, and the Linux rollout payload. The installer also creates a
+Windows Firewall exception for TCP `5264` limited to the local subnet so the
+generated command can reach the client even when Windows classifies the home
+network as Public.
+</Note>
 
 <Note>
 Cloud sync and connected operation require a separate account later. They are
@@ -60,6 +61,6 @@ not prerequisites for the local Alpha path.
 </Note>
 
 <Card title="Install Basement Kit directly" icon="terminal" href="/stackkits/quickstart">
-  Use the standalone StackKits one-liner first when you want to prepare the
-  server independently and attach it to Techstack afterwards.
+  Use the standalone StackKits one-liner when you want to prepare the server
+  independently and attach it through **Connect my server** afterwards.
 </Card>
