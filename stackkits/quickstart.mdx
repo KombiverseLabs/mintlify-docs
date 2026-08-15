@@ -9,17 +9,23 @@ This quickstart follows the current public StackKits release. The [StackKits web
 
 ## Bootstrap a Basement Kit
 
-On Linux or macOS, the Basement installer creates `~/my-homelab`, installs the released artifacts, initializes local owner custody, and validates the generated StackSpec:
+On a supported Ubuntu server, the Basement installer creates `~/my-homelab`,
+installs the released artifacts and required runtime, initializes local owner
+custody, bootstraps the local Admin/PocketID access, validates the generated
+StackSpec, and applies the default Basement services:
 
 ```bash
 curl -sSL https://base.stackkit.cc | sh
 cd ~/my-homelab
 stackkit version
-stackkit validate
+stackkit logs latest --json
+cat .stackkit/access.json
 ```
 
 <Warning>
-  The one-liner does not install Docker, prepare a host, run `generate`, or run `apply`. It bootstraps and validates the workspace; changing the host remains an explicit local decision.
+  A kombify Cloud account is not required. StackKits itself still requires a
+  local Owner/Admin, which this bootstrap creates automatically. Keep the
+  generated access details private.
 </Warning>
 
 Prefer to install only the toolchain and full public catalog?
@@ -30,7 +36,7 @@ curl -sSL https://install.stackkit.cc | sh
 
 The shell installers resolve the current public release and support Linux and macOS on `amd64` and `arm64`. Windows users can download the `windows_amd64` ZIP from the [latest release](https://github.com/kombifyio/StackKits/releases/latest). See the [CLI walkthrough](https://stackkit.cc/getting-started/cli) for the website-guided path.
 
-## Review the generated intent
+## Review or change the generated intent
 
 Inspect `stack-spec.yaml` before generating output. In particular, review the absolute storage roots, the `home.test` local domain, site and node identities, and the empty optional workload selection.
 
@@ -46,7 +52,7 @@ stackkit validate
 
 The StackSpec is the configuration input. CUE remains the validation authority and generated rollout files are outputs, not files to edit by hand. See [Configure a StackSpec](/guides/stackkits/configure-stack-spec) for current examples.
 
-## Generate and inspect the plan
+## Generate and inspect a changed plan
 
 ```bash
 stackkit generate
@@ -55,15 +61,17 @@ stackkit plan --json
 
 Confirm that generation and apply readiness are both `ready`, then review the selected workloads and artifact paths.
 
-## Apply explicitly and verify
+## Apply an intentional change
 
 ```bash
 stackkit apply
-stackkit verify --http --json
-stackkit status --json
+stackkit logs latest --json
+cat .stackkit/access.json
 ```
 
-Keep the verification output with the workspace. It is the record of what the local lifecycle observed after the apply.
+The Basement one-liner already performs the initial apply. Run these lifecycle
+commands only after you intentionally change `stack-spec.yaml`. Keep the local
+logs and access record with the workspace.
 
 <Warning>
   StackKits does not provision a server or obtain provider credentials. For a Cloud Kit, prepare the host, domain, and DNS ownership yourself before applying a stack.
