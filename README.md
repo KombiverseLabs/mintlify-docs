@@ -81,7 +81,7 @@ mise run local:e2e
 | `mise run dev` | Start the pinned local Mintlify preview. |
 | `mise run check` | Validate the positive scope, navigation, content, and local links. |
 | `mise run public-safety:test` | Run fail-closed policy regression tests. |
-| `scripts/check-stackkits-release-truth.ps1` | Pin installer URLs and prevent known v0.16.0 wording regressions. |
+| `scripts/check-stackkits-release-truth.ps1` | Keep installer commands on the current public release and prevent stale lifecycle wording. |
 | `scripts/check-stackkits-external-links.ps1` | Verify the bounded website, installer, and release destinations used by the StackKits quickstart. |
 | `scripts/check-speechkit-release-truth.ps1` | Pin SpeechKit version, platform, module, and Windows assets to the public release. |
 | `scripts/check-techstack-public-boundary.ps1` | Prevent synthetic Techstack installation or availability claims. |
