@@ -18,6 +18,34 @@ The v0.16.0 authoring default is `home.test`. Make sure clients use a DNS path y
 
 ## Start a Basement Kit
 
+The Basement installer is a full guided installation that takes an unprepared
+Linux or macOS host all the way to a running homelab. Pick a mode with
+`STACKKIT_INSTALL_MODE`:
+
+```bash
+# auto: defaults everywhere, straight to a running homelab
+curl -sSL https://base.stackkit.cc | sh
+
+# guided: prompts for workspace, domain, admin email, owner, one apply confirm
+STACKKIT_INSTALL_MODE=guided curl -sSL https://base.stackkit.cc | sh
+
+# expert: guided plus use cases, stack name, platform adapter, per-phase apply
+STACKKIT_INSTALL_MODE=expert curl -sSL https://base.stackkit.cc | sh
+```
+
+On a TTY, the installer opens an interactive menu. Non-TTY runs always use
+`auto`. Environment overrides (`HOMELAB_DIR`, `DOMAIN`, `STACKKIT_NAME`,
+`STACKKIT_ADMIN_EMAIL`, `STACKKIT_BOOTSTRAP_OWNER`, `STACKKIT_OWNER_USERNAME`,
+`STACKKIT_USE_CASES`, `STACKKIT_PLATFORM`) pre-seed decisions and are never
+re-asked. See the [Quickstart](/stackkits/quickstart) for the full list.
+
+The installer bootstraps Docker and pre-creates the spec-declared storage
+roots directly, so you do not need to run those steps by hand. It prints the
+native-v2 credentials at the end: create the PocketID owner passkey at
+`id.<domain>/setup`, then sign in at `auth.<domain>`.
+
+Or run the same lifecycle by hand once the CLI is installed:
+
 ```bash
 mkdir my-homelab
 cd my-homelab
@@ -28,6 +56,17 @@ stackkit generate
 stackkit plan --json
 stackkit apply
 stackkit verify --http --json
+```
+
+To reproduce a `guided` or `expert` selection non-interactively, pass the
+authoring flags to `init`:
+
+```bash
+stackkit init basement-kit \
+  --owner-source=local \
+  --use-case=photos,files,vault \
+  --platform=coolify \
+  --enable=lan-dns,internal-pki
 ```
 
 Run the commands from the StackKits workspace. Do not modify generated rollout files; change the StackSpec and re-run validation instead.

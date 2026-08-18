@@ -13,4 +13,21 @@ The public StackKits `v0.16.0` release contains two current kit definitions. Cho
 
 Start with one environment. StackKits does not provision servers or take custody of provider credentials, so select a kit only after you know which host and domain you control.
 
+## How much guidance do you want during install?
+
+Both kits share the same guided installer. Select a mode with
+`STACKKIT_INSTALL_MODE` before running the `curl … | sh` bootstrap:
+
+| Mode | Choose when… |
+| --- | --- |
+| `auto` | You want defaults everywhere and the shortest path to a running homelab. This is also what non-TTY runs use. |
+| `guided` | You want to confirm workspace, domain, admin email, and owner account, then approve one apply. |
+| `expert` | You want to pick optional use cases (`photos,files,vault`), stack name, and platform adapter (`coolify` or `komodo`), and confirm each apply phase. |
+
+Environment variables like `HOMELAB_DIR`, `DOMAIN`, `STACKKIT_ADMIN_EMAIL`,
+`STACKKIT_USE_CASES`, and `STACKKIT_PLATFORM` pre-seed individual decisions
+and are never re-asked, so the same command runs unattended when you supply
+the values up front. The equivalent authoring flags on the CLI are
+`stackkit init --use-case`, `--platform`, and `--enable`.
+
 Once chosen, follow the [Quickstart](/stackkits/quickstart) to create the workspace, validate it, and review generated output before applying it.
