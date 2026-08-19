@@ -127,7 +127,7 @@ async function githubRequest(token, url, options = {}) {
       "content-type": "application/json",
       "user-agent": "kombify-delivery-v2",
       "x-github-api-version": "2022-11-28",
-      ...(options.headers ?? {}),
+      ...options.headers,
     },
   });
   if (!response.ok) {
