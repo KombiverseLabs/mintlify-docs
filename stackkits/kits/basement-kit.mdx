@@ -1,0 +1,47 @@
+---
+title: "Basement Kit"
+description: "The released local, single-environment StackKits profile"
+sidebarTitle: "Basement Kit"
+icon: house
+---
+
+Basement Kit is the stable local StackKits profile in the public `v0.16.0` release. Use it for a homelab on hardware you already control, with one local environment and a local owner.
+
+## What it provides
+
+- a CUE-validated StackSpec and local `stackkit` lifecycle
+- local owner custody with PocketID and TinyAuth
+- a Node Hub at the generated `base.<domain>` address
+- the released platform and application modules selected by your validated configuration
+
+The local default uses browser-native `*.home.localhost` addresses. Use an explicit domain and DNS arrangement only when you intend to expose services beyond that local context.
+
+## Start a Basement Kit
+
+```bash
+mkdir my-homelab
+cd my-homelab
+
+stackkit init basement-kit --owner-source=local
+stackkit validate
+stackkit generate
+stackkit apply
+stackkit verify --json
+```
+
+Run the commands from the StackKits workspace. Do not modify generated rollout files; change the StackSpec and re-run validation instead.
+
+## When to use another kit
+
+Choose [Cloud Kit](/stackkits/kits/cloud-kit) when the single environment is an existing VPS or cloud host with a domain you operate. StackKits does not provision that host.
+
+## Related pages
+
+<CardGroup cols={2}>
+  <Card title="Node Hub" icon="grid-2" href="/guides/stackkits/node-hub">
+    Open the generated local service overview after a successful rollout.
+  </Card>
+  <Card title="Released applications" icon="grid-2" href="/stackkits/apps/overview">
+    Review the current public app and platform catalog.
+  </Card>
+</CardGroup>

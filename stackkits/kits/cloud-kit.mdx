@@ -1,0 +1,44 @@
+---
+title: "Cloud Kit"
+description: "The released single-environment StackKits profile for a VPS or cloud host you operate"
+sidebarTitle: "Cloud Kit"
+icon: cloud
+---
+
+Cloud Kit is the stable cloud-host profile in the public `v0.16.0` release. It uses the same standalone StackKits lifecycle as Basement Kit, but is intended for one existing VPS or cloud environment with public DNS and TLS under your control.
+
+## Before you start
+
+Prepare these outside StackKits:
+
+- an already-available host you are authorized to operate
+- a domain and DNS records you control
+- a host and network posture appropriate for public services
+
+StackKits validates and applies its own system definition to that host. It does not provision a server, select a provider, or keep provider credentials.
+
+## Start a Cloud Kit
+
+```bash
+mkdir my-cloud-stack
+cd my-cloud-stack
+
+stackkit init cloud-kit --domain example.com --owner-source=local
+stackkit validate
+stackkit generate
+stackkit apply
+stackkit verify --json
+```
+
+Use a domain you own in place of `example.com`. Keep the StackSpec and verification output with the workspace, and change only the StackSpec before regenerating artifacts.
+
+## Compare with Basement Kit
+
+<CardGroup cols={2}>
+  <Card title="Basement Kit" icon="house" href="/stackkits/kits/basement-kit">
+    Use local hardware and a LAN-first environment.
+  </Card>
+  <Card title="Application catalog" icon="grid-2" href="/stackkits/apps/overview">
+    Review the released platform and application modules.
+  </Card>
+</CardGroup>

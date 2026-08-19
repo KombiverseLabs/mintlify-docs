@@ -1,0 +1,58 @@
+---
+title: "StackKits quickstart"
+description: "Install the released StackKits CLI and create a local Basement Kit workspace"
+sidebarTitle: "Quickstart"
+icon: rocket
+---
+
+This quickstart uses the released StackKits `v0.16.0` lifecycle. Run it in a new directory on a host you control. `apply` changes that host, so stop before it if you only want to inspect the generated output.
+
+## Install the CLI
+
+```bash
+curl -sSL https://install.stackkit.cc | sh
+stackkit version
+```
+
+The installer resolves the public StackKits release and installs the CLI together with its packaged catalog.
+
+## Create and validate a workspace
+
+```bash
+mkdir my-homelab
+cd my-homelab
+
+stackkit init basement-kit --owner-source=local
+stackkit validate
+stackkit generate
+```
+
+The generated StackSpec is the configuration input. CUE remains the validation authority and generated rollout files are outputs, not files to edit by hand.
+
+## Apply and verify
+
+```bash
+stackkit apply
+stackkit verify --json
+stackkit status --json
+```
+
+Keep the verification output with the workspace. It is the record of what the local lifecycle observed after the apply.
+
+<Warning>
+  StackKits never creates a server or obtains provider credentials. For a Cloud Kit, prepare the VPS, domain, and DNS ownership yourself before applying a stack.
+</Warning>
+
+## Continue
+
+<CardGroup cols={3}>
+  <Card title="Basement Kit" icon="house" href="/stackkits/kits/basement-kit">
+    Learn about the local, single-environment kit.
+  </Card>
+  <Card title="Cloud Kit" icon="cloud" href="/stackkits/kits/cloud-kit">
+    Use the same standalone lifecycle on a VPS you operate.
+  </Card>
+  <Card title="MCP connector" icon="plug" href="/stackkits/reference/mcp-connector">
+    Use the released connector with a local coding agent.
+  </Card>
+</CardGroup>

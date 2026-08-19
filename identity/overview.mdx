@@ -1,0 +1,52 @@
+---
+title: "Identity in StackKits"
+description: "How local owner identity and optional hosted sign-in remain separate."
+icon: "shield-halved"
+---
+
+# Identity in StackKits
+
+StackKits keeps the owner of a local homelab authoritative. Installing and
+operating a stack does not require a hosted account.
+
+## Local owner identity
+
+The released local identity baseline uses:
+
+- **PocketID** as the OpenID Connect identity provider for the homelab owner;
+- **TinyAuth** as the forward-auth broker in front of protected applications;
+- explicit owner approval for lifecycle operations that change the stack.
+
+Identity data and credentials stay under the local owner's control. Removing
+an optional hosted connection must not remove local access or prevent the
+standalone lifecycle.
+
+<CardGroup cols={2}>
+  <Card title="PocketID" icon="fingerprint" href="/stackkits/apps/pocketid">
+    Passkey-first local identity for the homelab owner.
+  </Card>
+  <Card title="TinyAuth" icon="key" href="/stackkits/apps/tinyauth">
+    Forward authentication for applications that do not provide their own
+    compatible sign-in flow.
+  </Card>
+</CardGroup>
+
+## Optional hosted identity
+
+When a user deliberately connects to a hosted kombify service, interactive
+sign-in uses the official `login.kombify.io` domain. That hosted identity is
+an optional convenience layer; it does not replace or outrank the local owner.
+
+## Security behavior
+
+- Missing or ambiguous identity information denies access.
+- Tokens are short-lived and scoped to their intended audience.
+- Protected routes do not become public when an identity service is
+  unavailable.
+- An assistant acting for a user cannot receive more authority than that user.
+
+<Note>
+This page describes the public identity concept. Internal routing, tenant,
+billing, deployment, and operator architecture are intentionally not part of
+the public StackKits documentation.
+</Note>

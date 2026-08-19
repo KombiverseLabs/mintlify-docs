@@ -1,0 +1,31 @@
+---
+title: "Operate a StackKit"
+description: "Use the released CLI to inspect a running StackKits workspace before making changes"
+sidebarTitle: "Operations"
+icon: wrench
+---
+
+Start day-to-day work with the read-only commands from the same released CLI that created the workspace:
+
+```bash
+stackkit status --json
+stackkit verify --json
+stackkit logs list --json
+```
+
+Keep their output with the workspace so you can compare the current observed state with the last successful apply.
+
+## Before a change
+
+1. Update the StackSpec, not generated artifacts.
+2. Run `stackkit validate` and `stackkit generate`.
+3. Review the output and obtain the local owner's approval before a mutating command.
+4. Run `stackkit verify --json` after the change.
+
+The exact command surface is versioned with the release. Use `stackkit --help` and the command-specific help for the installed version before performing a backup, restore, upgrade, or removal.
+
+<Warning>
+  StackKits does not provide an unattended hosted-operations workflow in Standard Mode. Treat every mutating command as a local operation on a host you control.
+</Warning>
+
+For an agent-connected workflow, see the [MCP connector](/stackkits/reference/mcp-connector).
