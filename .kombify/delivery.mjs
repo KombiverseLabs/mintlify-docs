@@ -174,29 +174,14 @@ async function dispatchWorkflow(step, variables) {
     method: "POST",
     body: JSON.stringify({ ref, inputs }),
   });
-  if (step.wait_for_completion === false) {
-    process.stdout.write(
-      `Workflow ${workflow} dispatch accepted; pre-1.0 activation continues asynchronously in its authoritative run.\n`,
-    );
-    return;
-  }
 
-  const timeoutSeconds = Number(step.timeout_seconds ?? 780);
-  if (
-    !Number.isInteger(timeoutSeconds) ||
-    timeoutSeconds < 1 ||
-    timeoutSeconds > 840
-  ) {
-    fail("workflow timeout_seconds must be an integer between 1 and 840");
-  }
-  const deadline = startedAt + timeoutSeconds * 1000;
-  let run = null;
-  while (Date.now() < deadline) {
+  /** The newest run this dispatch could plausibly have created, or null. */
+  async function findRun(previous) {
     const runs = await githubRequest(
       token,
       `${workflowUrl}/runs?event=workflow_dispatch&branch=${encodeURIComponent(ref)}&per_page=25`,
     );
-    const candidates = (runs.workflow_runs ?? [])
+    const candidates = (runs?.workflow_runs ?? [])
       .filter((entry) => Date.parse(entry.created_at) >= startedAt - 10_000)
       .filter(
         (entry) =>
@@ -209,7 +194,80 @@ async function dispatchWorkflow(step, variables) {
           String(entry.display_title ?? "").includes(runNameContains),
       )
       .sort((left, right) => right.id - left.id);
-    run = candidates[0] ?? run;
+    return candidates[0] ?? previous;
+  }
+
+  /*
+   * `wait_for_completion: false` means "do not wait for the deploy to FINISH".
+   * It used to also mean "never look again", and that is how CMO stayed dead
+   * for nine days: every adapter run ended in `startup_failure` — no job, no
+   * logs — while Delivery reported success, because a dispatch the API accepted
+   * was the entire success criterion. Delivery was reporting that the message
+   * was delivered, not that anything happened.
+   *
+   * So a fire-and-forget dispatch now still confirms IGNITION: the run exists
+   * and has not already died. That is the one failure class an accepted
+   * dispatch cannot rule out, it is decided within seconds, and it costs the
+   * fast profile a few seconds rather than the minutes that waiting would.
+   */
+  if (step.wait_for_completion === false) {
+    const ignitionSeconds = Number(step.ignition_timeout_seconds ?? 90);
+    if (
+      !Number.isInteger(ignitionSeconds) ||
+      ignitionSeconds < 1 ||
+      ignitionSeconds > 300
+    ) {
+      fail(
+        "workflow ignition_timeout_seconds must be an integer between 1 and 300",
+      );
+    }
+    const ignitionDeadline = Date.now() + ignitionSeconds * 1000;
+    let run = null;
+    while (Date.now() < ignitionDeadline) {
+      run = await findRun(run);
+      if (run) {
+        if (run.status !== "completed") {
+          process.stdout.write(
+            `Workflow ${workflow} ignited (${run.status}); pre-1.0 activation continues asynchronously in its authoritative run: ${run.html_url}\n`,
+          );
+          return;
+        }
+        process.stdout.write(
+          `Workflow ${workflow} completed as ${run.conclusion}: ${run.html_url}\n`,
+        );
+        if (run.conclusion !== "success") {
+          throw new Error(
+            `workflow ${owner}/${repository}/${workflow} concluded ${run.conclusion} before it could run asynchronously`,
+          );
+        }
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 5_000));
+    }
+    throw new Error(
+      `workflow ${owner}/${repository}/${workflow} was dispatched but produced no run within ${ignitionSeconds}s — an accepted dispatch that never ignites is the silent failure this check exists for`,
+    );
+  }
+
+  // The wait is bounded by the delivery job's own timeout-minutes; this
+  // number only decides how long the adapter is willing to watch. It used to
+  // default to 780s and reject anything above 840s, which put the ceiling
+  // BELOW the runtime of the operation it waits on: SpeechKit's v0.58.0
+  // publish took 18m39s (16:10:48 -> 16:29:27) and the adapter gave up at
+  // 16:23:52, reporting "authoritative publish operation failed" and blocking
+  // activation for a release that then completed successfully and was never
+  // in doubt. A second, tighter ceiling than the job's own cannot prevent a
+  // hang - it can only manufacture that false verdict - so the upper bound is
+  // gone and the default now clears a real Windows publish with room to
+  // spare.
+  const timeoutSeconds = Number(step.timeout_seconds ?? 2700);
+  if (!Number.isInteger(timeoutSeconds) || timeoutSeconds < 1) {
+    fail("workflow timeout_seconds must be a positive integer");
+  }
+  const deadline = startedAt + timeoutSeconds * 1000;
+  let run = null;
+  while (Date.now() < deadline) {
+    run = await findRun(run);
     if (run?.status === "completed") {
       process.stdout.write(
         `Workflow ${workflow} completed as ${run.conclusion}: ${run.html_url}\n`,
