@@ -1,0 +1,28 @@
+name: Post-Local
+
+on:
+  pull_request:
+    branches: [main]
+  merge_group:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: post-local-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    uses: KombiverseLabs/.github/.github/workflows/post-local.yml@d4da2c5e466639f614943675a4d2576b38f96a02
+    permissions:
+      contents: read
+      packages: read
+    with:
+      source-sha: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
+      base-sha: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before || '' }}
+      runner: ${{ vars.DEPOT_FALLBACK_RUNNER || 'depot-ubuntu-24.04' }}
+    secrets:
+      GH_PAT: ${{ secrets.GH_PAT }}

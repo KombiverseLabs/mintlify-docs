@@ -1,0 +1,31 @@
+---
+title: "Recovery-first Homelab"
+description: "Treat restore evidence as part of the StackKits setup instead of a later task"
+sidebarTitle: "Recovery-first Homelab"
+icon: life-ring
+---
+
+A recovery-first homelab is operated around recoverable state, not only a successful first apply. The Basement Kit release provides owner-bound backup and staged restore operations for that workflow.
+
+## Establish the baseline
+
+1. Apply and verify the Basement Kit.
+2. Confirm that primary data and backup roots are separate.
+3. Configure the CUE-governed Kopia repository.
+4. Create an idempotent snapshot before importing important data.
+5. Restore that snapshot into isolated staging and review the result.
+
+```bash
+stackkit backup configure --json
+stackkit backup status --json
+stackkit backup run --operation-id recovery-baseline --json
+```
+
+## Keep recovery explicit
+
+- A staged restore does not replace live volumes.
+- Live activation requires local owner approval and creates a safety snapshot.
+- Interrupted activation has an explicit rollback command bound to its operation ID.
+- Verification after recovery matters as much as snapshot creation.
+
+Use [Back up and restore](/guides/stackkits/back-up-and-restore) for the exact command sequence. Repeat the exercise after material storage, workload, or release changes.
