@@ -1,0 +1,129 @@
+name: Public Safety Gate
+
+on:
+  pull_request:
+    paths:
+      - "**/*.mdx"
+      - "docs.json"
+      - "public-safety-policy.json"
+      - "schemas/public-safety-policy.schema.json"
+      - "scripts/assert-public-safety.ps1"
+      - "scripts/assert-remote-public-safety.ps1"
+      - "scripts/check-stackkits-external-links.ps1"
+      - "scripts/check-stackkits-release-truth.ps1"
+      - "scripts/check-speechkit-release-truth.ps1"
+      - "scripts/check-techstack-public-boundary.ps1"
+      - "scripts/check-product-docs-external-links.ps1"
+      - "scripts/check-code-example-relevance.ps1"
+      - "scripts/test-code-example-relevance.ps1"
+      - "scripts/run-local-e2e.ps1"
+      - "scripts/run-local-preview-smoke.ps1"
+      - "scripts/test-public-safety.ps1"
+      - "mise.toml"
+      - ".github/workflows/public-safety.yml"
+  push:
+    branches: [main]
+    paths:
+      - "**/*.mdx"
+      - "docs.json"
+      - "public-safety-policy.json"
+      - "schemas/public-safety-policy.schema.json"
+      - "scripts/**"
+      - "mise.toml"
+      - ".github/workflows/public-safety.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    name: Reject non-public or directly hidden content
+    runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'ubuntu-24.04' }}
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Run focused public-safety tests
+        shell: pwsh
+        run: ./scripts/test-public-safety.ps1
+
+      - name: Validate the complete publishable tree
+        shell: pwsh
+        run: ./scripts/assert-public-safety.ps1
+
+      - name: Check released StackKits claims
+        shell: pwsh
+        run: ./scripts/check-stackkits-release-truth.ps1
+
+      - name: Check public StackKits destinations
+        shell: pwsh
+        run: ./scripts/check-stackkits-external-links.ps1
+
+      - name: Check released SpeechKit claims
+        shell: pwsh
+        run: ./scripts/check-speechkit-release-truth.ps1
+
+      - name: Check Techstack public boundary
+        shell: pwsh
+        run: ./scripts/check-techstack-public-boundary.ps1
+
+      - name: Check Techstack and SpeechKit destinations
+        shell: pwsh
+        run: ./scripts/check-product-docs-external-links.ps1
+
+      - name: Reject unrelated command examples
+        shell: pwsh
+        run: |
+          ./scripts/test-code-example-relevance.ps1
+          ./scripts/check-code-example-relevance.ps1
+
+  exact-preview:
+    name: Prove forbidden routes absent from exact preview
+    needs: static
+    runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'ubuntu-24.04' }}
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      deployments: read
+    steps:
+      - name: Checkout exact source
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Wait for exact-head Mintlify deployment
+        id: preview
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          $deadline = (Get-Date).AddMinutes(4)
+          $environmentUrl = $null
+          do {
+            $deployments = gh api "repos/$env:REPOSITORY/deployments?sha=$env:HEAD_SHA&per_page=20" | ConvertFrom-Json
+            $deployment = @($deployments | Sort-Object { [datetime]$_.created_at } -Descending | Select-Object -First 1)
+            if ($deployment.Count -gt 0) {
+              $statuses = gh api "repos/$env:REPOSITORY/deployments/$($deployment[0].id)/statuses?per_page=20" | ConvertFrom-Json
+              $status = @($statuses | Sort-Object { [datetime]$_.created_at } -Descending | Select-Object -First 1)
+              if ($status.Count -gt 0 -and $status[0].state -eq "success" -and -not [string]::IsNullOrWhiteSpace([string]$status[0].environment_url)) {
+                $environmentUrl = [string]$status[0].environment_url
+                break
+              }
+              if ($status.Count -gt 0 -and $status[0].state -in @("failure", "error", "inactive")) {
+                throw "Mintlify deployment reached terminal state '$($status[0].state)' for exact head $env:HEAD_SHA"
+              }
+            }
+            Start-Sleep -Seconds 10
+          } while ((Get-Date) -lt $deadline)
+          if ([string]::IsNullOrWhiteSpace($environmentUrl)) {
+            throw "No successful Mintlify deployment with environment_url found for exact head $env:HEAD_SHA within four minutes"
+          }
+          "url=$environmentUrl" >> $env:GITHUB_OUTPUT
+          Write-Host "preview_url: $environmentUrl"
+
+      - name: Assert exact preview stays public-only
+        shell: pwsh
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.url }}
+        run: ./scripts/assert-remote-public-safety.ps1 -BaseUrl $env:PREVIEW_URL
