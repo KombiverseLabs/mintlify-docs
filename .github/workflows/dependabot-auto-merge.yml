@@ -1,0 +1,44 @@
+# Public-repository adapter synchronized from KombiverseLabs/.github@fedaa2443f9b0615e4459936ce699e000b8ab1c1.
+name: Dependabot Safe Auto-Merge
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  evaluate:
+    name: Evaluate safe dependency update
+    if: >-
+      github.actor == 'dependabot[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      startsWith(github.event.pull_request.head.ref, 'dependabot/')
+    runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'depot-ubuntu-24.04' }}
+    timeout-minutes: 5
+    steps:
+      - name: Read verified Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@21025c705c08248db411dc16f3619e6b5f9ea21a # v2.4.0
+        with:
+          github-token: ${{ github.token }}
+      - name: Enable auto-merge only for non-sensitive patch updates
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+          DEPENDENCIES: ${{ steps.metadata.outputs.dependency-names }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$UPDATE_TYPE" != "version-update:semver-patch" ]]; then
+            echo "Review required: only patch updates are eligible for auto-merge."
+            exit 0
+          fi
+          if grep -Eiq '(^|[,[:space:]])(node|pnpm|npm|bun|go|python|rust|mise|vite|vitest|rollup|rolldown|auth0|stripe|fga|terraform|wrangler|cloudflare)([,[:space:]]|$)' <<<"$DEPENDENCIES"; then
+            echo "Review required: sensitive toolchain, runtime, identity, billing, or provider dependency."
+            exit 0
+          fi
+          gh pr merge --auto --squash "$PR_URL"

@@ -1,0 +1,105 @@
+name: StackKits Release Docs
+
+on:
+  repository_dispatch:
+    types: [stackkits-docs-release]
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Published StackKits tag; empty reconciles public latest"
+        required: false
+        type: string
+
+concurrency:
+  group: stackkits-release-docs
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  reconcile:
+    if: github.repository == 'KombiverseLabs/mintlify-docs'
+    runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'ubuntu-24.04' }}
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.REPO_SYNC_PAT || github.token }}
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+      - name: Resolve published immutable assets
+        id: release
+        env:
+          GH_TOKEN: ${{ secrets.REPO_SYNC_PAT || github.token }}
+          DISPATCH_TAG: ${{ github.event.client_payload.tag }}
+          INPUT_TAG: ${{ inputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${DISPATCH_TAG:-${INPUT_TAG:-}}"
+          if [ -z "$tag" ]; then tag="$(gh api repos/kombifyio/StackKits/releases/latest --jq .tag_name)"; fi
+          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          release="$(gh api "repos/kombifyio/StackKits/releases/tags/$tag")"
+          [ "$(jq -r .draft <<<"$release")" = false ]
+          [ "$(jq -r .prerelease <<<"$release")" = false ]
+          names="$(jq -r '.assets[].name' <<<"$release")"
+          available=true
+          for name in stackkits-use-case-catalog-v1.json stackkits-compatibility-v1.json; do
+            grep -Fxq "$name" <<<"$names" || available=false
+          done
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "available=$available" >> "$GITHUB_OUTPUT"
+          if [ "$available" != true ]; then
+            echo "## DocsSyncPending" >> "$GITHUB_STEP_SUMMARY"
+            echo "$tag does not yet contain both StackKits documentation manifests." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Download, validate and render
+        if: steps.release.outputs.available == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.REPO_SYNC_PAT || github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+          EXPECTED_CATALOG_DIGEST: ${{ github.event.client_payload.catalog_digest }}
+          EXPECTED_COMPATIBILITY_DIGEST: ${{ github.event.client_payload.compatibility_digest }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/stackkits-docs
+          gh release download "$TAG" --repo kombifyio/StackKits --dir .tmp/stackkits-docs \
+            --pattern stackkits-use-case-catalog-v1.json --pattern stackkits-compatibility-v1.json
+          catalog_digest="$(jq -r .contentDigest .tmp/stackkits-docs/stackkits-use-case-catalog-v1.json)"
+          compatibility_digest="$(jq -r .contentDigest .tmp/stackkits-docs/stackkits-compatibility-v1.json)"
+          if [ -n "${EXPECTED_CATALOG_DIGEST:-}" ]; then [ "$catalog_digest" = "$EXPECTED_CATALOG_DIGEST" ]; fi
+          if [ -n "${EXPECTED_COMPATIBILITY_DIGEST:-}" ]; then [ "$compatibility_digest" = "$EXPECTED_COMPATIBILITY_DIGEST" ]; fi
+          node scripts/sync-stackkits-release-docs.mjs --from-dir .tmp/stackkits-docs --tag "$TAG" --write
+      - name: Open or update generated-only PR
+        if: steps.release.outputs.available == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.REPO_SYNC_PAT || github.token }}
+          BRANCH: bot/stackkits-release-docs
+          TAG: ${{ steps.release.outputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- data/stackkits guides/stackkits/use-cases/overview.mdx stackkits/reference/os-compatibility.mdx stackkits/reference/application-delivery-compatibility.mdx; then
+            echo "No public snapshot drift."
+            exit 0
+          fi
+          unexpected="$(git status --short | awk '{print $2}' | grep -Ev '^(data/stackkits/|guides/stackkits/use-cases/overview\.mdx$|stackkits/reference/(os|application-delivery)-compatibility\.mdx$)' || true)"
+          [ -z "$unexpected" ] || { echo "::error::unexpected generated paths: $unexpected"; exit 1; }
+          git config user.name "stackkits-docs[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin "refs/heads/$BRANCH:refs/remotes/origin/$BRANCH" || true
+          git checkout -B "$BRANCH"
+          git add data/stackkits guides/stackkits/use-cases/overview.mdx stackkits/reference/os-compatibility.mdx stackkits/reference/application-delivery-compatibility.mdx
+          git commit -m "docs(stackkits): sync $TAG release manifests"
+          git push --force-with-lease origin "$BRANCH"
+          if ! gh pr view "$BRANCH" >/dev/null 2>&1; then
+            gh pr create --base main --head "$BRANCH" --title "docs(stackkits): sync $TAG release manifests" --body "Automated projection from immutable public StackKits release assets."
+          fi
+          gh pr merge "$BRANCH" --auto --squash
