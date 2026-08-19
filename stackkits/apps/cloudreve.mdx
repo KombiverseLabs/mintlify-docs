@@ -1,0 +1,46 @@
+---
+title: "Cloudreve"
+description: "Use the released Cloudreve alternative for the optional Files workload"
+sidebarTitle: "Cloudreve"
+icon: folder-cloud
+---
+
+Cloudreve is the default alternative inside the optional v0.16.0 `files` workload contract. It is not enabled by the initial StackSpec; select the workload deliberately after planning storage and backups.
+
+## Released role
+
+| Property | v0.16.0 value |
+| --- | --- |
+| Workload | `files` |
+| Alternative | `cloudreve` |
+| Data class | personal |
+| Route | generated Files service route |
+| Standalone adapter | `standalone-compose` |
+
+## Configure
+
+```json
+{
+  "workloads": {
+    "files": {
+      "alternative": "cloudreve",
+      "runtimeAdapterRef": "standalone-compose",
+      "placement": {
+        "siteRefs": ["home"],
+        "nodeRefs": ["main"]
+      }
+    }
+  }
+}
+```
+
+Run `stackkit validate`, `generate`, and `plan --json`. Confirm that the resolved plan selects the intended site, node, and adapter before applying.
+
+## Operate
+
+- Keep the primary and backup roots on storage you control.
+- Create the application owner only after StackKits verification succeeds.
+- Do not edit the generated Cloudreve workload bundle or Compose environment.
+- Verify recovery before relying on the service for the only copy of a file.
+
+Continue with the [Private File Library](/guides/stackkits/use-cases/private-file-library) use case.

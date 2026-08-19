@@ -1,0 +1,34 @@
+---
+title: "Immich"
+description: "Understand the released optional Photos workload and its current authoring boundary"
+sidebarTitle: "Immich"
+icon: images
+---
+
+Immich is the released alternative for the optional native v2 `photos` workload. The initial Basement and Cloud StackSpecs do not enable it.
+
+## Released contract
+
+| Property | v0.16.0 value |
+| --- | --- |
+| Workload | `photos` |
+| Alternative | `immich` |
+| Data class | personal |
+| Required secret reference | `database-password` |
+| Supported standalone adapter | `standalone-compose` |
+
+The released CLI validates and generates this workload contract, including persistent photo and database allocations and a generated Photos route.
+
+<Warning>
+  Do not use an invented database password or copy an opaque reference as if it were secret material. v0.16.0 establishes workload secret custody during `init`, but its initial StackSpec selects no Photos workload and it exposes no safe public post-init authoring command for adding that custody. This page is therefore not an end-to-end installation recipe.
+</Warning>
+
+## First use
+
+1. Complete `stackkit verify --http --json` after a rollout that already has valid owner-bound custody.
+2. Open the generated Immich address from the Node Hub or rollout output.
+3. Create the application owner account and connect clients only after you have confirmed storage capacity and backups.
+
+Photo libraries grow quickly. Keep the storage and backup responsibility with the host you operate, and verify the StackKits workspace after any configuration change.
+
+See [Family Photo Vault](/guides/stackkits/use-cases/family-photo-vault) for storage, recovery, and current-release planning guidance.

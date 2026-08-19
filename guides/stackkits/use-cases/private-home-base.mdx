@@ -1,0 +1,42 @@
+---
+title: "Private Home Base"
+description: "Build a local StackKits control and identity baseline on a host you own"
+sidebarTitle: "Private Home Base"
+icon: house-lock
+---
+
+A Private Home Base is the smallest useful Basement Kit: one home site, one local node, local owner custody, routing, identity, the Node Hub, and local backup policy. Add optional workloads only after this baseline verifies.
+
+## Bootstrap the workspace
+
+On Linux or macOS:
+
+```bash
+curl -sSL https://base.stackkit.cc | STACKKIT_RELEASE_VERSION=0.16.0 sh
+cd ~/my-homelab
+```
+
+The installer stops after `init` and `validate`. Review `stack-spec.yaml`, especially the storage roots and `home.test` domain, before continuing.
+
+## Inspect and apply
+
+```bash
+stackkit generate
+stackkit plan --json
+stackkit apply
+stackkit verify --http --json
+```
+
+## Complete the local baseline
+
+1. Open the generated Node Hub address from the verification output.
+2. Complete the local PocketID owner setup.
+3. Confirm protected routes redirect through TinyAuth.
+4. Use the Node Hub protection action after the owner exists.
+5. Configure and test the local backup repository.
+
+The baseline remains standalone. The website helps you choose and bootstrap a path, but it does not operate the host.
+
+## Add the first workload
+
+Start with the released Files workload because its v0.16.0 standalone selection requires no operator-authored secret reference. See [Private File Library](/guides/stackkits/use-cases/private-file-library).

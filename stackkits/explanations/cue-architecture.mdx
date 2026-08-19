@@ -1,0 +1,28 @@
+---
+title: "CUE and StackKits"
+description: "How CUE validates StackKits intent before generated artifacts are applied"
+sidebarTitle: "CUE"
+icon: cubes
+---
+
+StackKits uses CUE as the source of truth for kit contracts. Your StackSpec is checked against that contract before artifacts are generated or a target is changed.
+
+## The workflow
+
+```bash
+stackkit init basement-kit --owner-source=local
+stackkit validate
+stackkit generate
+```
+
+`validate` rejects incompatible values and incomplete intent. `generate` produces disposable outputs from the validated input. When a setting changes, update the StackSpec, validate it again, and regenerate; do not edit generated files directly.
+
+## Boundary
+
+The standalone StackSpec describes StackKits intent. Provider credentials, provider lifecycle, and server procurement stay outside that contract. A StackKits workspace remains usable without a hosted kombify dependency.
+
+## Related pages
+
+- [Spec format](/stackkits/reference/spec-format)
+- [Basement Kit](/stackkits/kits/basement-kit)
+- [Cloud Kit](/stackkits/kits/cloud-kit)

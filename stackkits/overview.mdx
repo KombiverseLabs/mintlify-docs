@@ -1,0 +1,57 @@
+---
+title: "StackKits"
+description: "The standalone lifecycle and current released StackKits definitions"
+sidebarTitle: "Overview"
+icon: boxes-stacked
+---
+
+StackKits is the standalone, open homelab standard. It provides portable kit definitions, the `stackkit` CLI and MCP connector, and a local lifecycle for validating, generating, applying, and verifying a stack.
+
+The public documentation currently describes the released `v0.16.0` catalog only. StackKits works against a host you already control; it does not require a kombify account or a hosted kombify endpoint.
+
+## Released kits
+
+<CardGroup cols={2}>
+  <Card title="Basement Kit" icon="house" href="/stackkits/kits/basement-kit">
+    The current local, single-environment kit for hardware on your home or private network.
+  </Card>
+  <Card title="Cloud Kit" icon="cloud" href="/stackkits/kits/cloud-kit">
+    A released single-environment definition for an existing VPS or cloud host that you operate.
+  </Card>
+</CardGroup>
+
+Both kits are released through the public `v0.16.0` release index. Choose the kit by the environment you control, not by the number of services you want to run.
+
+## Standalone lifecycle
+
+```bash
+stackkit init basement-kit --owner-source=local
+stackkit validate
+stackkit generate
+stackkit plan --json
+stackkit apply
+stackkit verify --http --json
+```
+
+`init` writes the initial StackSpec. `validate` checks it against the embedded CUE contract, `generate` creates disposable rollout artifacts, and `apply` changes the target. Review the generated plan and keep the StackKits workspace under your control; do not hand-edit generated artifacts.
+
+## What StackKits does not do
+
+- create or buy a server for you
+- hold provider credentials or manage provider resources
+- require a hosted control plane for Standard Mode
+- replace the local owner and evidence produced by the standalone lifecycle
+
+## Next steps
+
+<CardGroup cols={3}>
+  <Card title="Quickstart" icon="rocket" href="/stackkits/quickstart">
+    Install the released CLI and create a first Basement Kit workspace.
+  </Card>
+  <Card title="Applications" icon="grid-2" href="/stackkits/apps/overview">
+    Separate current core, optional workloads, and additional module contracts.
+  </Card>
+  <Card title="How-to guides" icon="list-check" href="/guides/stackkits/configure-stack-spec">
+    Configure intent, inspect a plan, apply, verify, and practice recovery.
+  </Card>
+</CardGroup>
