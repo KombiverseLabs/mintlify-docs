@@ -34,9 +34,9 @@
   gates. Repo `ROADMAP.md` owns milestones; Beads owns all executable detail.
   Cross-reference them; do not synchronize them bidirectionally.
 - Check Projects at session boundaries. `roadmap-open-issues` is a one-way Beads
-  view; never hand-edit or sync its generated block back. Until
-  `platform-o4ql1` closes, `roadmap:update -Sync` still writes to archived
-  Linear; ordinary `roadmap:update` remains valid.
+  view; never hand-edit or sync its generated block back. Do not run
+  `roadmap:update -Sync`: it still writes to the Linear archive and is not a
+  planning path. Ordinary `roadmap:update` remains valid.
 - At milestone-relevant close, update repo roadmap gates and run
   `mise --cd <workspace-root> run roadmap:update -- -Repo <repo>`.
 <!-- END GENERATED: planning-policy kombify-agent-policy-sync -->
