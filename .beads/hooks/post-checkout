@@ -1,4 +1,54 @@
 #!/usr/bin/env sh
+# --- BEGIN KOMBIFY BEADS MERGE GUARD (platform-qsts1) ---
+# KOMBIFY BEADS HOOK SAFETY VERSION: 1
+# Import records that exist only in the working-tree .beads/issues.jsonl before
+# beads exports the local DB over that file. `git pull --rebase` fires no
+# post-merge hook, so a pull's records would otherwise be deleted silently.
+# Managed by the kombify-workspace development-fleet projection.
+# Deliberately OUTSIDE the beads section markers: `bd hooks install` preserves
+# out-of-marker content (verified against bd 1.0.3, including --force).
+
+# A linked worktree may inherit a shared bd database whose repo_root is another
+# checkout. Never let its hook write there. Source-only operations skip just the
+# managed beads section; staging .beads/** fails closed until run from the
+# checkout that owns the resolved beads directory.
+_kb_skip_beads_hook=0
+if command -v bd >/dev/null 2>&1; then
+  _kb_git_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
+  _kb_beads_dir="$(bd --readonly where 2>/dev/null | sed -n '1p' || true)"
+  _kb_realpath() { (cd "$1" 2>/dev/null && pwd -P); }
+  _kb_git_root_real="$(_kb_realpath "$_kb_git_root" || true)"
+  _kb_beads_root_real="$(_kb_realpath "$_kb_beads_dir/.." || true)"
+  _kb_staged_beads=0
+  git diff --cached --quiet -- .beads 2>/dev/null || _kb_staged_beads=1
+
+  if [ -z "$_kb_git_root_real" ] || [ -z "$_kb_beads_root_real" ] || [ "$_kb_git_root_real" != "$_kb_beads_root_real" ]; then
+    if [ "$_kb_staged_beads" -eq 1 ]; then
+      echo >&2 "beads target safety: refusing staged .beads/** from this checkout."
+      echo >&2 "  current worktree: ${_kb_git_root_real:-unresolved}"
+      echo >&2 "  writable target:  ${_kb_beads_root_real:-unresolved}"
+      echo >&2 "  Run the tracker sync from the checkout that owns the writable target."
+      exit 1
+    fi
+    echo >&2 "beads target safety: skipping beads hook; writable target belongs to another checkout."
+    echo >&2 "  current worktree: ${_kb_git_root_real:-unresolved}"
+    echo >&2 "  writable target:  ${_kb_beads_root_real:-unresolved}"
+    _kb_skip_beads_hook=1
+  fi
+fi
+
+_kb_guard=""
+for _kb_candidate in "scripts/beads-hook-precommit.sh" "../scripts/beads-hook-precommit.sh"; do
+  if [ -f "$_kb_candidate" ]; then _kb_guard="$_kb_candidate"; break; fi
+done
+if [ "$_kb_skip_beads_hook" -eq 0 ] && [ -n "$_kb_guard" ]; then
+  sh "$_kb_guard" || exit $?
+elif [ "$_kb_skip_beads_hook" -eq 0 ]; then
+  echo >&2 "beads merge guard: scripts/beads-hook-precommit.sh not found; pulled tracker records may be dropped by the beads export (platform-qsts1)."
+fi
+# --- END KOMBIFY BEADS MERGE GUARD (platform-qsts1) ---
+# --- BEGIN KOMBIFY BEADS TARGET WRAPPER (platform-qsts1) ---
+if [ "${_kb_skip_beads_hook:-0}" -ne 1 ]; then
 # --- BEGIN BEADS INTEGRATION v1.0.3 ---
 # This section is managed by beads. Do not remove these markers.
 if command -v bd >/dev/null 2>&1; then
@@ -22,3 +72,5 @@ if command -v bd >/dev/null 2>&1; then
   if [ $_bd_exit -ne 0 ]; then exit $_bd_exit; fi
 fi
 # --- END BEADS INTEGRATION v1.0.3 ---
+fi
+# --- END KOMBIFY BEADS TARGET WRAPPER (platform-qsts1) ---
