@@ -1,0 +1,88 @@
+---
+title: "Configure a StackSpec"
+description: "Change released StackKits intent without editing generated deployment files"
+sidebarTitle: "Configure a StackSpec"
+icon: sliders
+---
+
+`stack-spec.yaml` is the desired-intent document for one StackKits workspace. Let the released CLI create the complete document, then change only the intent you understand.
+
+```bash
+stackkit init basement-kit --owner-source=local
+stackkit validate
+```
+
+The v0.16.0 CLI writes a canonical `stackkit/v2alpha1` document and establishes local owner custody outside the StackSpec. Do not start from an old minimal example: fields, defaults, and constraints are owned by the CUE contracts embedded in the installed release.
+
+## Common fields to review
+
+| Intent | Current field | Guidance |
+| --- | --- | --- |
+| Workspace identity | `metadata.name` | Keep it DNS-compatible and stable after the first apply. |
+| Kit | `kit.slug` | Use `basement-kit` for a home site or `cloud-kit` for an existing cloud host. |
+| Generated output | `generation.outputRoot` | Keep generated artifacts separate from the StackSpec. |
+| Persistent data | `storage.dataRoot` | Use an absolute path on storage you operate and back up. |
+| Backups | `storage.backupRoot` | Keep it separate from the primary data root. |
+| Stack data | `storage.stacksRoot` | Use an absolute path owned by the local operator. |
+| Local domain | `network.domain.base` | The Basement Kit release default is `home.test`; use a domain whose resolution you control. |
+
+This is an excerpt, not a replacement for the complete generated document:
+
+```json
+{
+  "metadata": { "name": "family-home" },
+  "kit": { "slug": "basement-kit" },
+  "generation": {
+    "outputRoot": "deploy",
+    "strategy": "kit-template",
+    "target": "compose"
+  },
+  "storage": {
+    "dataRoot": "/opt/stackkit/data",
+    "backupRoot": "/opt/stackkit/backups",
+    "stacksRoot": "/opt/stackkit/stacks",
+    "volumeDriver": "local"
+  },
+  "network": {
+    "mode": "private",
+    "domain": { "base": "home.test" }
+  }
+}
+```
+
+## Select the released Files workload
+
+The v0.16.0 Basement and Cloud Kit contracts expose `files` as an optional workload. This selection was validated and generated with the released CLI:
+
+```json
+{
+  "workloads": {
+    "files": {
+      "alternative": "cloudreve",
+      "runtimeAdapterRef": "standalone-compose",
+      "placement": {
+        "siteRefs": ["home"],
+        "nodeRefs": ["main"]
+      }
+    }
+  }
+}
+```
+
+Merge the `workloads` object into the complete StackSpec produced by `init`. The `home` site and `main` node are the released Basement defaults; use identifiers already present in your generated document.
+
+<Warning>
+  Do not copy this selection for Photos or Vault and invent secret values. Those workloads require owner-bound secret custody. v0.16.0 does not expose a safe public post-init command for adding that custody, so their component pages are descriptive rather than end-to-end installation recipes.
+</Warning>
+
+## Validate every change
+
+```bash
+stackkit validate
+stackkit generate
+stackkit plan --json
+```
+
+`validate` checks the current StackSpec, `generate` creates governed output, and `plan` inspects the exact resolved plan without invoking an executor. If any command fails, fix the StackSpec; do not patch files below `deploy/`.
+
+Continue with [Review, apply, and verify](/guides/stackkits/review-plan-and-apply).

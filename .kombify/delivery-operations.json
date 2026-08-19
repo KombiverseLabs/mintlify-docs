@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "product_id": "docs",
+  "repository_id": "mintlify-docs",
+  "groups": [
+    {
+      "id": "public-docs",
+      "source_repository": "mintlify-docs",
+      "primary_artifact": "public-docs",
+      "artifacts": [
+        "public-docs"
+      ],
+      "paths": [
+        "**/*.mdx",
+        "docs.json",
+        "public-safety-policy.json",
+        "schemas/public-safety-policy.schema.json",
+        "scripts/**",
+        "mise.toml",
+        ".kombify/**"
+      ],
+      "operations": {
+        "build": {
+          "fast": [
+            {
+              "task": "check"
+            }
+          ],
+          "stable": [
+            {
+              "task": "check"
+            }
+          ]
+        },
+        "validate": {
+          "fast": [
+            {
+              "task": "local:e2e"
+            }
+          ],
+          "stable": [
+            {
+              "task": "local:e2e"
+            }
+          ]
+        },
+        "publish": {
+          "fast": [
+            {
+              "satisfied": {
+                "by": "mintlify:KombiverseLabs/mintlify-docs",
+                "reason": "Mintlify's repository integration starts publication; promote independently verifies the exact merged main deployment."
+              }
+            }
+          ],
+          "stable": [
+            {
+              "satisfied": {
+                "by": "mintlify:KombiverseLabs/mintlify-docs",
+                "reason": "Mintlify's repository integration starts publication; promote independently verifies the exact merged main deployment."
+              }
+            }
+          ]
+        },
+        "promote": {
+          "fast": [
+            {
+              "task": "postlive:wait-exact-live"
+            },
+            {
+              "satisfied": {
+                "by": "public-docs/publish",
+                "reason": "The immutable artifact was activated by the group's authoritative publish adapter."
+              }
+            }
+          ],
+          "stable": [
+            {
+              "task": "postlive:wait-exact-live"
+            },
+            {
+              "satisfied": {
+                "by": "public-docs/publish",
+                "reason": "The immutable artifact was activated by the group's authoritative publish adapter."
+              }
+            }
+          ]
+        },
+        "smoke": {
+          "fast": [
+            {
+              "task": "remote:public-safety"
+            }
+          ],
+          "stable": [
+            {
+              "task": "remote:public-safety"
+            }
+          ]
+        },
+        "async": {
+          "fast": [
+            {
+              "satisfied": {
+                "by": "scheduled-asynchronous-gates",
+                "reason": "Broad compatibility, device, provider, and soak findings remain non-blocking and run in their dedicated scheduled workflows."
+              }
+            }
+          ],
+          "stable": [
+            {
+              "satisfied": {
+                "by": "scheduled-asynchronous-gates",
+                "reason": "Broad compatibility, device, provider, and soak findings remain non-blocking and run in their dedicated scheduled workflows."
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
