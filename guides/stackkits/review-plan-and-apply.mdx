@@ -1,0 +1,55 @@
+---
+title: "Review, apply, and verify"
+description: "Inspect generated StackKits intent before changing a host"
+sidebarTitle: "Apply safely"
+icon: clipboard-check
+---
+
+Use the same workspace and released CLI from configuration through verification. Generated files are evidence-bearing outputs; the StackSpec remains the editable input.
+
+## 1. Validate and generate
+
+```bash
+stackkit validate
+stackkit generate
+```
+
+Generation writes the resolved plan, generation manifest, receipt, and governed artifacts below the configured output root.
+
+## 2. Inspect the plan
+
+```bash
+stackkit plan --json
+```
+
+Before applying, confirm:
+
+- the plan and spec hashes are present
+- `readiness.generation.status` is `ready`
+- `readiness.apply.status` is `ready`
+- the selected workloads, sites, nodes, and adapter match your intent
+- every generated artifact has an owner and expected path
+
+`plan` inspects the native v2 closure without invoking an executor. A ready plan is necessary, but it is not proof that a host has already changed.
+
+## 3. Apply explicitly
+
+```bash
+stackkit apply
+```
+
+Review the local approval prompt. `apply` is the step that changes the host; neither the website nor the one-line installers perform it.
+
+## 4. Verify the result
+
+```bash
+stackkit verify --http --json
+stackkit status --json
+stackkit logs list --json
+```
+
+Keep the JSON output with the workspace. It binds the observed result to the local lifecycle rather than to a screenshot or an edited Compose file.
+
+<Warning>
+  Stop when the resolved plan reports an apply blocker. Do not bypass it with direct Docker, Compose, or generated-file edits; correct the StackSpec or the target host and generate again.
+</Warning>
