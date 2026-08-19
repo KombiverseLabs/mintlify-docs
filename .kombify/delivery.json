@@ -1,0 +1,43 @@
+{
+  "$schema": "https://kombify.io/schemas/product-delivery-contract.v1.json",
+  "schema_version": 1,
+  "product_id": "docs",
+  "release_policy": {
+    "strategy": "semver",
+    "stable_at": "1.0.0"
+  },
+  "participating_repositories": [
+    "mintlify-docs"
+  ],
+  "artifacts": [
+    {
+      "id": "public-docs",
+      "class": "documentation",
+      "source_repository": "mintlify-docs",
+      "routes": {
+        "fast": {
+          "channel": "production",
+          "target_ref": "mintlify-docs-production"
+        },
+        "stable": {
+          "channel": "production",
+          "target_ref": "mintlify-docs-production"
+        }
+      },
+      "tasks": {
+        "build": "mise://delivery:build",
+        "validate": "mise://delivery:validate",
+        "publish": "mise://delivery:publish",
+        "promote": "mise://delivery:promote",
+        "smoke": "mise://delivery:smoke",
+        "async": "mise://delivery:async"
+      },
+      "recovery": {
+        "fast": "forward-fix",
+        "stable": "rollback"
+      },
+      "secret_bindings": [],
+      "telemetry_service": "docs.public"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+---
+title: "Choose application delivery"
+description: "Select a released workload adapter without creating competing application routes"
+sidebarTitle: "Application delivery"
+icon: route
+---
+
+StackKits v0.16.0 keeps application choice separate from application delivery. A workload such as Files chooses its application alternative, while `runtimeAdapterRef` chooses how that one workload is delivered.
+
+Inspect the matrix embedded in your installed release:
+
+```bash
+stackkit app compatibility --json
+```
+
+## Released adapter matrix
+
+| Adapter | v0.16.0 maturity | Deployment | Route and TLS evidence | Backup and restore |
+| --- | --- | --- | --- | --- |
+| `standalone-compose` | supported | yes | yes | yes |
+| `coolify` | supported | yes | yes | no |
+| `komodo` | beta | yes | yes | no |
+
+The matrix applies to the released `files`, `photos`, and `vault` workload contracts. It is catalog compatibility, not proof that your host is healthy.
+
+For a standalone Basement Kit, start with `standalone-compose` unless you intentionally operate one of the application platforms:
+
+```json
+{
+  "workloads": {
+    "files": {
+      "alternative": "cloudreve",
+      "runtimeAdapterRef": "standalone-compose",
+      "placement": {
+        "siteRefs": ["home"],
+        "nodeRefs": ["main"]
+      }
+    }
+  }
+}
+```
+
+## Keep one owner per workload
+
+- Do not route the same workload through Coolify and standalone Compose at the same time.
+- Do not add Docker labels or generated routes by hand.
+- Treat Komodo as a beta choice in this release, not as the default alternative.
+- Validate the changed intent and inspect the resolved plan before applying a different adapter.
+
+See [Applications](/stackkits/apps/overview) for the current catalog and [Configure a StackSpec](/guides/stackkits/configure-stack-spec) for the complete editing workflow.
