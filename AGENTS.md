@@ -34,9 +34,9 @@
   gates. Repo `ROADMAP.md` owns milestones; Beads owns all executable detail.
   Cross-reference them; do not synchronize them bidirectionally.
 - Check Projects at session boundaries. `roadmap-open-issues` is a one-way Beads
-  view; never hand-edit or sync its generated block back. Until
-  `platform-o4ql1` closes, `roadmap:update -Sync` still writes to archived
-  Linear; ordinary `roadmap:update` remains valid.
+  view; never hand-edit or sync its generated block back. Do not run
+  `roadmap:update -Sync`: it still writes to the Linear archive and is not a
+  planning path. Ordinary `roadmap:update` remains valid.
 - At milestone-relevant close, update repo roadmap gates and run
   `mise --cd <workspace-root> run roadmap:update -- -Repo <repo>`.
 <!-- END GENERATED: planning-policy kombify-agent-policy-sync -->
@@ -71,3 +71,50 @@ This repo is the public Mintlify documentation surface for kombify. `docs.json` 
 - Run `mise run check` for config/path validation.
 - Run `mise run local:e2e` before claiming this docs repo is ready to publish.
 - When changing navigation, verify every page target exists as an `.mdx` file.
+
+<!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
+## Beads Issue Tracker
+
+This project uses **bd (beads)** for issue tracking. Run `bd prime` to see full workflow context and commands.
+
+### Quick Reference
+
+```bash
+bd ready              # Find available work
+bd show <id>          # View issue details
+bd update <id> --claim  # Claim work
+bd close <id>         # Complete work
+```
+
+### Rules
+
+- Use `bd` for ALL task tracking — do NOT use TodoWrite, TaskCreate, or markdown TODO lists
+- Run `bd prime` for detailed command reference and session close protocol
+- Use `bd remember` for persistent knowledge — do NOT use MEMORY.md files
+
+## Session Completion
+
+**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
+
+**MANDATORY WORKFLOW:**
+
+1. **File issues for remaining work** - Create issues for anything that needs follow-up
+2. **Run quality gates** (if code changed) - Tests, linters, builds
+3. **Update issue status** - Close finished work, update in-progress items
+4. **PUSH TO REMOTE** - This is MANDATORY:
+   ```bash
+   git pull --rebase
+   bd dolt push
+   git push
+   git status  # MUST show "up to date with origin"
+   ```
+5. **Clean up** - Clear stashes, prune remote branches
+6. **Verify** - All changes committed AND pushed
+7. **Hand off** - Provide context for next session
+
+**CRITICAL RULES:**
+- Work is NOT complete until `git push` succeeds
+- NEVER stop before pushing - that leaves work stranded locally
+- NEVER say "ready to push when you are" - YOU must push
+- If push fails, resolve and retry until it succeeds
+<!-- END BEADS INTEGRATION -->
