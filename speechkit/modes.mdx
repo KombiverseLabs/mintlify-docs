@@ -27,12 +27,48 @@ Voice Agent is a realtime audio conversation. It is intended for interactive
 brainstorming, support, and follow-up questions where turn detection and spoken
 output matter.
 
+## Meetings
+
+Meetings are a capture surface on top of the modes, not a fourth mode. On
+Windows, SpeechKit notices when a calling app takes the microphone and offers
+to take notes. Nothing records until you accept. Microphone and system audio
+stay on separate tracks, meeting audio is never kept, and the finished meeting
+is written up from the transcript plus your own notes with citations back to
+what was said. See [Meetings](/speechkit/meetings).
+
 ## Hands-Free and customization
 
 Hands-Free controls activation, microphone capture, automatic end-of-speech,
 and optional speaker output over the three modes. Words teach SpeechKit terms
 to recognize; Replacements apply deterministic text, command, snippet,
 synonym, or template transformations.
+
+## Overlay and keyboard controls
+
+From v0.59.0 the Windows overlay is a configurable control strip. Set
+`speech.overlay_actions` in `config.toml` to choose which actions sit on it;
+the default strip is `copy`, `note`, `language`, and `meeting`:
+
+```toml
+[speech]
+# Actions on the overlay strip, in display order.
+overlay_actions = ["copy", "note", "language", "meeting"]
+# The locale the language switch rotates back to after English.
+main_language = "de"
+```
+
+- `copy` copies the latest result.
+- `note` opens the note pane.
+- `language` rotates the speech language: multilanguage, then English, then
+  your `speech.main_language`, then back.
+- `meeting` starts [meeting capture](/speechkit/meetings).
+
+An empty `overlay_actions` list means the default strip, not an empty one.
+
+On Android, the keyboard's mode actions moved into the toolbar as icons, and
+you can pick the glyph each SpeechKit key is drawn with. The server connection
+is configured in Settings. Actions that need a paired SpeechKit server say so
+on the keyboard instead of failing when pressed.
 
 ## Local and external providers
 

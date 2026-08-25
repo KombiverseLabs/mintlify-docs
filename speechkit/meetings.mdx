@@ -1,0 +1,110 @@
+---
+title: "SpeechKit Meetings"
+description: "Consent-first meeting capture with notes-led write-ups on Windows"
+sidebarTitle: "Meetings"
+icon: "users"
+---
+
+Meetings turn a call into a transcript, your own notes, and a cited write-up.
+The feature ships in the SpeechKit Windows client from v0.59.0. Nothing is
+recorded until you accept, and meeting audio is never kept.
+
+## Prerequisites
+
+- SpeechKit v0.59.0 or later on Windows 10/11 x64
+- a local model or configured provider for transcription and write-ups
+
+## How a meeting starts
+
+SpeechKit notices when a calling application takes the microphone and offers to
+take notes. The check reads process names only. It stores nothing and sends
+nothing, and it says nothing about who is on the call or what is said.
+
+- Detection covers common clients such as Teams, Zoom, Slack, Discord, and
+  Webex, plus browsers, so browser-based calls like Google Meet are included.
+- Recording starts only after you accept the offer. Declining a call does not
+  cause repeat prompts; the same application is only announced again after its
+  microphone has been free for a while.
+- You can also start a meeting manually from the overlay control strip. See
+  [overlay and keyboard controls](/speechkit/modes#overlay-and-keyboard-controls).
+
+Configure detection in `config.toml`:
+
+```toml
+[meeting]
+# Offer to take notes when a calling app takes the microphone (default: true).
+auto_detect = true
+# Replace the built-in application list. Empty uses the built-in list.
+auto_detect_apps = ["ms-teams.exe", "zoom.exe", "chrome.exe"]
+# Write the meeting up as soon as it ends (default: true).
+auto_enhance = true
+```
+
+## Notes during the call
+
+Accepting a meeting opens a meeting notepad window. Notes you type there
+autosave while the meeting runs and are stored with the point in the meeting
+they were written at. These notes are kept apart from the transcript and from
+generated text, and they lead the write-up later.
+
+## Two tracks, speaker labels for free
+
+A meeting records two separate sources: your microphone and your computer's
+system audio output, which is what the other participants are heard through.
+Because the channels never mix, the transcript can label your words and the
+other side's words without speaker-diarization guesswork. A meeting stays live
+when one of its two channels drops.
+
+<Warning>
+The system-audio track captures whatever is playing on your machine while the
+meeting runs. Recording other people may require their knowledge or consent
+where you live; SpeechKit does not judge that for you.
+</Warning>
+
+## Privacy and retention
+
+Meetings record people other than you, so they are handled more strictly than
+dictation:
+
+- Meeting audio is never saved, regardless of the `save_audio` setting. This is
+  enforced in the capture pipeline rather than by a setting, so it cannot be
+  switched off. A meeting keeps what was said, not the sound of anyone saying
+  it.
+- Transcripts and notes are stored locally and kept until you delete them.
+- Set `store.meeting_retention_days` to discard finished meetings automatically
+  after that many days. Pin an individual meeting to keep it past the sweep.
+
+```toml
+[store]
+# Discard finished meetings after 30 days. 0 keeps them until you delete them.
+meeting_retention_days = 30
+```
+
+## The write-up
+
+When the meeting ends, SpeechKit writes it up from the transcript and the notes
+you typed, using a template that says what this kind of meeting needs written
+down. With `auto_enhance = true` (the default) this happens as soon as the
+meeting ends; otherwise you trigger it from the dashboard.
+
+- Your notes are anchors, not raw material. A bullet that came from one of your
+  notes keeps your own words verbatim.
+- Every generated bullet cites the transcript segments it came from, so you can
+  check any claim against what was actually said. A bullet without a citation
+  is one the model could not ground.
+- Action-item owners and due dates are filled only when the conversation named
+  them; they stay empty rather than being guessed.
+- A local model can produce the write-up, so meetings do not require an
+  external provider.
+
+Read a meeting as its write-up in the dashboard, alongside the transcript and
+your hand-written notes.
+
+<CardGroup cols={2}>
+  <Card title="Modes and data paths" icon="waveform-lines" href="/speechkit/modes">
+    See where Meetings sits next to Dictation, Assist, and Voice Agent.
+  </Card>
+  <Card title="Install on Windows" icon="windows" href="/speechkit/install-windows">
+    Download and verify the current public beta.
+  </Card>
+</CardGroup>
