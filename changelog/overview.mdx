@@ -7,6 +7,38 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits](https://github.com/kombifyio/stackKits/releases), [SpeechKit](https://github.com/kombifyio/SpeechKit/releases), and [Techstack](https://github.com/kombifyio/TechStack/releases) release notes on GitHub.
 
+<Update label="2026-08-25" description="Week of Aug 18 – Aug 25">
+
+## StackKits v0.21.10 – v0.21.22: secrets custody, safe workload removal, and public addresses; SpeechKit v0.59 meeting notes
+
+StackKits reached [v0.21.22](https://github.com/kombifyio/stackKits/releases/tag/v0.21.22) with a new `stackkit secrets materialize` command, owner-approved removal of a single workload placement with portable removal evidence, and a secret-free address-plan and bind contract that routes managed public kombify.me service names through the generated TLS entrypoint. Cloud host-security hardening now keeps a non-root execution account reachable and evaluates the sshd policy first. [SpeechKit v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) ships notes-first meeting capture with two-track audio that is never kept, call-start detection, and write-ups that cite the transcript.
+
+### New features
+
+- **Meetings that start from what you wrote down.** [SpeechKit v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) adds a meeting notepad window. Your notes lead, the transcript fills in the rest, and the write-up cites the words it came from instead of inventing a summary. SpeechKit writes a meeting up as soon as it ends, and you read a meeting as its write-up in the dashboard. See [SpeechKit modes](/speechkit/modes).
+- **Two-track call audio that is never kept.** [v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) records microphone and system audio on separate tracks, so speaker labels come for free. Meeting audio is never stored, and meetings can expire.
+- **A call starting is enough to offer notes.** [v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) notices when a calling app takes the microphone and waits for you to accept before it records anything.
+- **`stackkit secrets materialize` establishes custody after the fact.** [StackKits v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) adds an explicit, idempotent path for an existing standalone homelab to establish owner-bound secret custody after selecting a new workload, without re-running or replacing its initial StackSpec. See [Configure your stack spec](/guides/stackkits/configure-stack-spec).
+
+```bash
+stackkit secrets materialize
+```
+
+- **Owner-approved removal of one exact workload placement.** [v0.21.12](https://github.com/kombifyio/stackKits/releases/tag/v0.21.12) lets owner-approved workload removal select one exact site, node, and execution-channel placement from a verified multi-node Apply result, preserving node-local absence evidence. [v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) exposes hash-bound applied workload identities in the verified Apply summary and emits bounded, portable removal evidence, so orchestrators and pinned cross-repo consumers can verify the outcome without parsing StackKits-owned Plan state. [v0.21.13](https://github.com/kombifyio/stackKits/releases/tag/v0.21.13) keeps every absence receipt correlated to the same verified Apply result. See [Day 2 operations](/stackkits/reference/day-2-operations).
+- **Secret-free public addresses through `stackkit address`.** [v0.21.21](https://github.com/kombifyio/stackKits/releases/tag/v0.21.21) adds `stackkit address plan` to emit the account-free address registration plan and `stackkit address bind` to bind an allocated prefix into canonical public routes. Cloud core routes render from the validated subdomain prefix, and [v0.21.22](https://github.com/kombifyio/stackKits/releases/tag/v0.21.22) routes managed public kombify.me service names through the generated TLS entrypoint so they reach the runtime instead of the unused cleartext listener. See [Cloud Kit](/stackkits/kits/cloud-kit).
+- **The overlay is the control strip.** [SpeechKit v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) lets you choose which actions sit on the Windows overlay, rotate the speech language, and start a meeting from it. See [SpeechKit framework](/speechkit/framework).
+- **Android keyboard actions as toolbar icons with pickable glyphs.** [v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) moves the keyboard actions into the toolbar as icons and lets you pick the glyph for each keyboard mode. The server connection moved into Settings, and the keyboard says when it needs a server instead of looking finished.
+
+### Bug fixes
+
+- **Hardening no longer locks you out.** [StackKits v0.21.10](https://github.com/kombifyio/stackKits/releases/tag/v0.21.10) preserves a non-root key-authenticated execution-channel account before Cloud host-security disables `PermitRootLogin`, so Product Apply can still reach the node after hardening.
+- **The sshd policy is evaluated first.** [v0.21.17](https://github.com/kombifyio/stackKits/releases/tag/v0.21.17) makes the Cloud host-security sshd policy the first drop-in evaluated and removes its superseded late-order file during Apply, so provider or cloud-init defaults cannot keep root key login enabled after hardening.
+- **Idempotent Apply reuses ports 80 and 443 only with proof.** [v0.21.18](https://github.com/kombifyio/stackKits/releases/tag/v0.21.18) lets a repeat Apply reuse ports 80 and 443 only when Docker proves they belong to the exact current workspace's Cloud core Compose definition. Foreign, stale, and unverified listeners remain blocking. See [Review, plan, and apply](/guides/stackkits/review-plan-and-apply).
+- **Meeting capture keeps both channels.** [SpeechKit v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) stops one capture channel from discarding the other, keeps the call audio out of the notes, and lets the local model finish writing a meeting up. [v0.59.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.1) fixes the Windows installer build.
+- **Android Settings are always reachable.** [v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) makes Settings reachable whether or not onboarding finished.
+
+</Update>
+
 <Update label="2026-08-21" description="Week of Aug 15 – Aug 21">
 
 ## Techstack open-source Alpha, SpeechKit on the Android keyboard, StackKits Cloud core
