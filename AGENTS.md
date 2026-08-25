@@ -99,7 +99,7 @@ bd close <id>         # Complete work
 **MANDATORY WORKFLOW:**
 
 1. **File issues for remaining work** - Create issues for anything that needs follow-up
-2. **Run the affected gate** (if code changed) - follow `-fast-development`; do not expand to broad suites by default
+2. **Run the affected gate** (if code changed) - follow `$kombify-fast-development`; do not expand to broad suites by default
 3. **Update issue status** - Close finished work, update in-progress items
 4. **PUSH TO REMOTE** - This is MANDATORY:
    ```bash
@@ -118,3 +118,4 @@ bd close <id>         # Complete work
 - NEVER say "ready to push when you are" - YOU must push
 - If push fails, resolve and retry until it succeeds
 <!-- END BEADS INTEGRATION -->
+
