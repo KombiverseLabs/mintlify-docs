@@ -40,11 +40,11 @@ jobs:
       EXECUTE_DELIVERY: ${{ github.event_name != 'pull_request' && (github.event_name != 'workflow_dispatch' || inputs.execute) }}
       FAIL_CLOSED_FAST: "false"
       REQUIRE_FAST_PREFLIGHT: "false"
-      GH_TOKEN: ${{ secrets.MINTLIFY_DELIVERY_READ_TOKEN }}
+      GH_TOKEN: ${{ secrets.MINTLIFY_DELIVERY_READ_TOKEN != '' && secrets.MINTLIFY_DELIVERY_READ_TOKEN || secrets.GH_PAT }}
       SOURCE_REPOSITORY: mintlify-docs
       SOURCE_SHA: ${{ github.sha }}
       STABLE_APPROVED: ${{ github.event_name == 'workflow_dispatch' && inputs.approve-stable }}
-      STANDARDS_REF: 35aeef8b9d989f64bce7feb900ec5f0b30a3d288
+      STANDARDS_REF: f6c73bdee0b3a3c4b764ad22fc84ec31f7373707
     steps:
       - name: Check out exact caller source
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
