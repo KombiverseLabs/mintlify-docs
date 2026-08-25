@@ -5,7 +5,41 @@ icon: "newspaper"
 mode: "center"
 ---
 
-Product updates, organized newest first. For deeper details on each release, see the [StackKits](https://github.com/kombifyio/stackKits/releases) and [SpeechKit](https://github.com/kombifyio/SpeechKit/releases) release notes on GitHub.
+Product updates, organized newest first. For deeper details on each release, see the [StackKits](https://github.com/kombifyio/stackKits/releases), [SpeechKit](https://github.com/kombifyio/SpeechKit/releases), and [Techstack](https://github.com/kombifyio/TechStack/releases) release notes on GitHub.
+
+<Update label="2026-08-21" description="Week of Aug 15 – Aug 21">
+
+## Techstack open-source Alpha, SpeechKit on the Android keyboard, StackKits Cloud core
+
+Techstack is now public: an unsigned Windows Alpha and an open-source client you can install on your own machine to operate a local server without a kombify Cloud account. SpeechKit ships its own Android keyboard so dictation and the Voice Agent are one tap above the keys, with a choice of on-device, SpeechKit server, Deepgram, AssemblyAI, or GPT. StackKits [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) rounds out ten first-class use cases and lands the provider-neutral Cloud core runtime, followed by a series of Cloud Apply and Verify fixes through [v0.21.9](https://github.com/kombifyio/stackKits/releases/tag/v0.21.9).
+
+### New features
+
+- **Techstack Windows Alpha, open source.** The Techstack open-core client is now published under AGPL-3.0 at [kombifyio/TechStack](https://github.com/kombifyio/TechStack), and the unsigned Windows Alpha is available for local-server feedback. Techstack is the optional orchestration and operator experience on top of StackKits, and this Alpha supports the account-free local path. See [Techstack overview](/techstack/overview), [availability](/techstack/availability), and [Install Techstack Alpha on Windows](/techstack/install-windows).
+- **Dictation and Voice Agent, one tap above the keys.** [SpeechKit v0.58.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.58.0) adds a row above the Android keyboard to dictate on device or through your SpeechKit server, or talk to Deepgram, AssemblyAI, or GPT. Actions that need a server say so instead of failing when pressed. See [SpeechKit modes](/speechkit/modes).
+- **SpeechKit ships its own Android keyboard.** [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) replaces the borrowed IME with a SpeechKit-branded keyboard (a HeliBoard fork). Tap the voice key and the dictation panel opens inside the keyboard, where you were typing, without an app switch or a lost cursor. The complete corresponding source is published alongside the release.
+- **Ten first-class use cases in StackKits.** [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) completes the CUE authorities for all ten use cases, including Vault, Media, and draft AI/Dev/Remote, plus post-1.0 draft Mail and Game. Existing Basement and Cloud Kit roles are bound to them. See [Choosing a kit](/guides/stackkits/choosing-a-kit).
+- **Provider-neutral Cloud core runtime.** [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) implements the provider-neutral Cloud core runtime with a guarded local Product Apply, live Verify observation, and the exact access-manifest v2 projection for `base`, `auth`, `id`, and `coolify`. Provider and credential custody stay in Techstack. See [Cloud Kit](/stackkits/kits/cloud-kit).
+- **Configure a SpeechKit mode before you turn it on.** [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) keeps Transcribe, Assist, and Voice Agent settings open and editable while the mode is switched off, and no longer throws you out of the page when you toggle a mode off. See [SpeechKit framework](/speechkit/framework).
+
+### Updates
+
+- **Desktop shell branded "SpeechKit UI".** [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) gives the desktop window the SpeechKit mark and title so it no longer identifies itself as a generic shell.
+- **`foundation` replaces the `base` schema package.** [StackKits v0.18.22](https://github.com/kombifyio/stackKits/releases/tag/v0.18.22) renames the shared CUE schema package from `base` to `foundation` and requires `foundation/stackkit.cue` in published archives. Product kits are unchanged and still extend `#FoundationStackKit`.
+- **Retired the `base-kit` installer argument.** [v0.18.22](https://github.com/kombifyio/stackKits/releases/tag/v0.18.22) rejects the retired `base-kit` slug instead of silently rewriting it to `basement-kit`. Use `basement-kit`. See [Quickstart](/stackkits/quickstart).
+
+### Bug fixes
+
+- **Cloud Apply reaches the posture it declares on a stock Ubuntu host.** [StackKits v0.21.9](https://github.com/kombifyio/stackKits/releases/tag/v0.21.9) installs the packages backing Cloud host-security units and its ruleset instead of failing on absent `nft` and `fail2ban`, and only reloads a running `sshd` while ensuring the privilege-separation directory on socket-activated hosts.
+- **Cloud host-security failures now name the failing unit.** [v0.21.8](https://github.com/kombifyio/stackKits/releases/tag/v0.21.8) retains the bounded command and process output when Cloud host-security reconciliation fails, so a live target reports the exact failing unit.
+- **Exact Cloud core Verify handles the socket proxy and health-checked services.** [v0.21.6](https://github.com/kombifyio/stackKits/releases/tag/v0.21.6) accepts the `not-configured` observation for the intentionally healthcheck-less socket proxy, and [v0.21.7](https://github.com/kombifyio/stackKits/releases/tag/v0.21.7) retains exact runtime-owned public-route health outcomes after validating them against Cloud core module probes.
+- **Cloud Kit Apply stops failing closed on dispatcher metadata.** [v0.21.4](https://github.com/kombifyio/stackKits/releases/tag/v0.21.4) accepts dispatcher plan-class metadata on Cloud Kit owners and host-admission so Product Apply no longer fails with `health:stackkits-host-admission=executor-failed`. [v0.21.5](https://github.com/kombifyio/stackKits/releases/tag/v0.21.5) executes all-local Cloud Kit owners through their exact local router. See [Review, plan, and apply](/guides/stackkits/review-plan-and-apply).
+- **Verify and Status reject stale Cloud service projections.** [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) rejects stale, foreign, or mutated Cloud service projections during Verify and Status readback.
+- **No more duplicate SpeechKit launcher icons on Android.** [v0.58.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.58.0) stops the keyboard fork from adding a second launcher that opened the keyboard's settings instead of the app.
+- **The voice key is there when you install SpeechKit.** [v0.58.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.58.0) makes the voice key visible without enabling a second input method, and the dictation panel now opens over the keys instead of at the top of the screen.
+- **Voice Agent status is truthful on Android.** [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) stops advertising the Voice Agent as unreleased and lets the SpeechKit keyboard actually appear, with the dictation panel mounted inside its input view.
+
+</Update>
 
 <Update label="2026-08-14" description="Week of Aug 10 – Aug 14">
 
