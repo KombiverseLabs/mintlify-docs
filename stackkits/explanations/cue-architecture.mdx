@@ -11,6 +11,28 @@ StackKits uses CUE as the source of truth for kit contracts. Your StackSpec is c
 
 Initialization creates a complete StackSpec for the selected kit. Validation checks that intent against the release's CUE contracts. Generation then derives disposable rollout artifacts from the validated input. When a setting changes, update the StackSpec and repeat validation and generation; do not edit generated files directly.
 
+## Shared schema package
+
+Kit contracts share one CUE schema package: `foundation`, imported as `github.com/kombifyio/stackkits/foundation`. It defines `#FoundationStackKit`, the shared contract that platform and kit schemas extend with their own services and constraints.
+
+```cue
+import "github.com/kombifyio/stackkits/foundation"
+
+#DockerPlatform: foundation.#FoundationStackKit & {
+	platform: "docker"
+}
+```
+
+Published archives and the installer ship the package as `foundation/`, with the shared kit contract at `foundation/stackkit.cue`.
+
+<Note>
+  Before StackKits v0.18.22 this package was named `base` and exposed a
+  `#BaseStackKit` alias. Both are retired. If you author a kit or tooling that
+  imports `github.com/kombifyio/stackkits/base` or extends `#BaseStackKit`,
+  switch the import to `foundation` and extend `#FoundationStackKit`. Product
+  kits themselves are unchanged.
+</Note>
+
 ## Boundary
 
 The standalone StackSpec describes StackKits intent. Provider credentials, provider lifecycle, and server procurement stay outside that contract. A StackKits workspace remains usable without a hosted kombify dependency.
