@@ -89,10 +89,10 @@ If you are running the CLI directly against your own VPS, you are effectively pl
 1. **Generated artifact** — the exact Compose project rendered by `generate`, addressed by its digest.
 2. **Authenticated execution channel** — the enrolled host channel that carried Apply.
 3. **Nine-service image graph** — `router`, `socket-proxy`, `pocketid`, `tinyauth`, `coolify`, `coolify-postgres`, `coolify-redis`, `coolify-realtime`, and `hub`, each pinned by image digest.
-4. **Five post-apply health conditions** — the runtime owner does not report success until the five Cloud core service groups (`router`, `pocketid`, `tinyauth`, `coolify`, and `hub`) all pass their health probes.
-5. **Access manifest** — the generated manifest exposes the four Cloud core services (`base`, `auth`, `id`, `coolify`) over the plan-owned public TLS domain.
+4. **Five post-apply health conditions** — Apply itself waits (up to 5 minutes) for the five Cloud core service groups (`router`, `pocketid`, `tinyauth`, `coolify`, and `hub`) to all pass their health probes. If readiness stalls, Apply exits with the pending service list rather than reporting success.
+5. **Access manifest v2** — the generated `stackkit.access-manifest/v2` manifest is bound to the plan digest and the Apply-result digest, records the kit slug and version, and exposes the four Cloud core services (`base`, `auth`, `id`, `coolify`) over the plan-owned public TLS domain. Every Cloud service route must be a default-closed public HTTPS route that terminates at the edge on a plan-domain hostname; any other route shape is rejected at build time.
 
-Verify recomputes the same bindings against the live host and rejects any drift — a rewritten host label, a swapped image tag, or a health condition that never reached ready will fail Verify rather than be silently accepted.
+Verify runs `docker compose ps` and health probes against the live host through the same enrolled channel, recomputes the manifest bindings, and rejects any drift — a rewritten host label, a swapped image tag, a stale or mutated Cloud service projection, or a health condition that never reached ready fails Verify rather than being silently accepted.
 
 ## Common starting profiles
 
@@ -373,16 +373,16 @@ Secrets for the Cloud core services are generated during `stackkit generate` and
 | Mode | Engine | Status | When to use |
 |------|--------|--------|-------------|
 | **Bare** | Compose-only, no Node Hub or setup automation | Scaffolding — renders `cloud-core` and generates, no automated verification cell yet | Not for production yet |
-| **Bootstrapped** | `cloud-core` Compose project plus Node Hub, identity, monitoring, and setup actions | **Supported** — SK-S2 (managed `kombify.me` subdomain, Komodo) and SK-S3 (provider-leased custom domain, Coolify) passed live on the `v0.5.1` release commit (production run `28881686758`) | Default and the only supported public path today |
+| **Bootstrapped** | `cloud-core` Compose project plus Node Hub, identity, monitoring, and setup actions | **Preview** — provider-neutral Cloud core, guarded Product Apply, and live Verify observation are implemented; historical SK-S2 (managed `kombify.me`, Komodo) and SK-S3 (provider-leased custom domain, Coolify) runs on `v0.5.1` were recorded against the pre-native path and do not promote current source. Graduation is pending an exact released Product Apply + Verify against a prepared Cloud host with Techstack reading back all four Cloud core services. | Default path today, with the understanding that Cloud Kit is Preview until the graduation gate closes |
 | **Advanced** | Terramate Plus orchestration, runtime/frontend intelligence | Scaffolding — static template without composition rendering, no E2E cell | Not yet — do not use for production |
 
 ```yaml
-# Default and only supported mode
+# Default mode
 mode: bootstrapped
 ```
 
 <Warning>
-  Only `bootstrapped` is a proven, supported install mode for Cloud Kit. `bare` and `advanced` exist as code but have no automated verification cell yet — don't rely on them for a real deployment.
+  Cloud Kit is currently **Preview**. `bootstrapped` is the only implemented install mode with a live Product Apply and Verify path; `bare` and `advanced` exist as code but have no automated verification cell yet. Historical SK-S2 / SK-S3 gate runs on `v0.5.1` were recorded against the pre-native Cloud path and do not promote the current provider-neutral Cloud core — treat Cloud Kit as Preview until the exact-release Product Apply + Verify graduation gate closes.
 </Warning>
 
 ## File structure
@@ -462,9 +462,9 @@ If you already deployed the Basement Kit locally and want the same defaults reac
   </Accordion>
 
   <Accordion title="Apply or Verify fails a post-apply health condition">
-    `stackkit apply` waits for the five Cloud core health groups (`router`, `pocketid`, `tinyauth`, `coolify`, `hub`) to report healthy before returning. If one keeps failing:
-    1. Inspect that group's container health with `docker compose -p stackkit-cloud-core ps`.
-    2. Re-run `stackkit verify` — it recomputes the artifact digest, execution channel, image graph, and health conditions and prints the first mismatch.
+    `stackkit apply` polls the enrolled host with `docker compose ps` and health probes for up to 5 minutes before returning. If any of the five Cloud core groups (`router`, `pocketid`, `tinyauth`, `coolify`, `hub`) is not ready in that window, Apply exits with the pending service list instead of succeeding. If one keeps failing:
+    1. Inspect that group's container health on the enrolled host with `docker compose -p stackkit-cloud-core ps`.
+    2. Re-run `stackkit verify` — it re-observes the live host, recomputes the artifact digest, execution channel, image graph, and manifest v2 bindings, and prints the first mismatch.
   </Accordion>
 
   <Accordion title="No SSH access to the target server">
