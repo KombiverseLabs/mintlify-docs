@@ -85,6 +85,10 @@ $inlineCommandCount = 0
 
 foreach ($file in $mdxFiles) {
     $relative = $file.FullName.Substring($RepoRoot.Length).TrimStart("\", "/").Replace("\", "/")
+    # Release history records shipped CLI contracts; it is not a topic workflow.
+    if ($relative -eq "changelog/overview.mdx") {
+        continue
+    }
     $lines = Get-Content -LiteralPath $file.FullName
     $content = $lines -join "`n"
     $inFence = $false
