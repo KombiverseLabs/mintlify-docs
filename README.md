@@ -84,7 +84,7 @@ mise run local:e2e
 | `scripts/check-stackkits-release-truth.ps1` | Keep installer commands on the current public release and prevent stale lifecycle wording. |
 | `scripts/check-stackkits-external-links.ps1` | Verify the bounded website, installer, and release destinations used by the StackKits quickstart. |
 | `scripts/check-speechkit-release-truth.ps1` | Pin SpeechKit version, platform, module, and Windows assets to the public release. |
-| `scripts/check-techstack-public-boundary.ps1` | Prevent synthetic Techstack installation or availability claims. |
+| `scripts/check-techstack-public-boundary.ps1` | Keep the released Techstack Windows Alpha links and pre-1.0 availability boundary truthful. |
 | `scripts/check-product-docs-external-links.ps1` | Verify the public Techstack entry and SpeechKit release destinations. |
 | `scripts/check-code-example-relevance.ps1` | Allow executable and structured examples only on pages with a topic-specific workflow or configuration. |
 | `mise run local:e2e` | Prove allowed and forbidden routes over real local HTTP. |
