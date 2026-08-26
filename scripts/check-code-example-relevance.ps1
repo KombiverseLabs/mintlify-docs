@@ -35,6 +35,9 @@ $executableExamplePages = [System.Collections.Generic.HashSet[string]]::new(
 ) | ForEach-Object { $executableExamplePages.Add($_) | Out-Null }
 
 $allowedInlineCommands = @{
+    "guides/stackkits/configure-stack-spec.mdx" = @(
+        "stackkit secrets materialize"
+    )
     "guides/stackkits/use-cases/private-file-library.mdx" = @(
         "stackkit init"
     )
@@ -42,9 +45,12 @@ $allowedInlineCommands = @{
         "stackkit app compatibility --json"
     )
     "stackkits/reference/day-2-operations.mdx" = @(
+        "stackkit init",
         "stackkit validate",
+        "stackkit secrets materialize",
         "stackkit generate",
         "stackkit plan --json",
+        "stackkit remove",
         "stackkit verify --http --json",
         "stackkit --help"
     )
