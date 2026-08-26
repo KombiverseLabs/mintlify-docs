@@ -10,11 +10,13 @@ run = "npx -y mint@4.2.684 dev --no-open"
 
 [tasks."public-safety"]
 description = "Validate that the complete Mintlify tree is public-safe"
-run = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/assert-public-safety.ps1"
+run = "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/assert-public-safety.ps1"
+run_windows = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/assert-public-safety.ps1"
 
 [tasks."public-safety:test"]
 description = "Run focused fail-closed publication-boundary tests"
-run = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-public-safety.ps1"
+run = "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/test-public-safety.ps1"
+run_windows = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-public-safety.ps1"
 
 [tasks."ci:bootstrap"]
 description = "Confirm the mise-provided docs runtime"
@@ -40,17 +42,24 @@ run = "mise run local:e2e"
 description = "Validate public scope, docs.json, content, and local links"
 run = [
   "node --test scripts/sync-stackkits-release-docs.test.mjs",
+  "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/run-local-e2e.ps1 -SkipPreview -SkipExternalLinks",
+]
+run_windows = [
+  "node --test scripts/sync-stackkits-release-docs.test.mjs",
   "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-local-e2e.ps1 -SkipPreview -SkipExternalLinks",
 ]
 
 [tasks."local:e2e"]
 description = "Run the local docs gate"
-run = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-local-e2e.ps1"
+run = "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/run-local-e2e.ps1"
+run_windows = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-local-e2e.ps1"
 
 [tasks."postlive:wait-exact-live"]
 description = "Wait for the exact merged Mintlify deployment on docs.kombify.io"
-run = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/wait-for-exact-mintlify-deployment.ps1"
+run = "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/wait-for-exact-mintlify-deployment.ps1"
+run_windows = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/wait-for-exact-mintlify-deployment.ps1"
 
 [tasks."remote:public-safety"]
 description = "Verify the live public scope, forbidden routes, and generated projections"
-run = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/assert-remote-public-safety.ps1 -BaseUrl https://docs.kombify.io"
+run = "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/assert-remote-public-safety.ps1 -BaseUrl https://docs.kombify.io"
+run_windows = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/assert-remote-public-safety.ps1 -BaseUrl https://docs.kombify.io"
