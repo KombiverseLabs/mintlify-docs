@@ -58,3 +58,16 @@ stackkit backup restore recover restore-activation-2026-08-11 \
 <Warning>
   A successful backup is not recovery proof. Practice the staged restore with non-critical data before relying on the stack for irreplaceable files.
 </Warning>
+
+## Cloud Kit offsite backup is opt-in
+
+The local Kopia lifecycle above is independent of the Cloud Kit `offsite-object-backup` capability. In v0.16.1, that capability moved from Cloud Kit's required set to its optional set, so a Cloud rollout no longer emits `BackupTargetRequirementV1` or requires an `ExternalBackupTargetBindingV1` by default. To keep the previous behavior and re-enable the Cloud offsite backup runtime module and its evidence, select the capability in your StackSpec:
+
+```yaml
+capabilities:
+  enable:
+    - offsite-object-backup
+  disable: []
+```
+
+See [Cloud Kit](/stackkits/kits/cloud-kit#offsite-backup-is-opt-in-in-v0-16-1) for the full behavior change.
