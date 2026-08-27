@@ -11,8 +11,8 @@ This quickstart follows the current public StackKits release. The [StackKits web
 
 On a supported Ubuntu server, the Basement installer creates `~/my-homelab`,
 installs the released artifacts and required runtime, initializes local owner
-custody, bootstraps the local Admin/PocketID access, validates the generated
-StackSpec, and applies the default Basement services:
+custody, bootstraps Docker and the spec-declared storage roots, validates the
+generated StackSpec, and applies the default Basement services:
 
 ```bash
 curl -sSL https://base.stackkit.cc | sh
@@ -22,11 +22,56 @@ stackkit logs latest --json
 cat .stackkit/access.json
 ```
 
+The installer bootstraps Docker itself, pre-creates the `/opt`, `/srv`, `/mnt`,
+`/media`, and `/var/lib/stackkits` storage roots as the invoking user (safe
+under `sudo`), and prints the truthful native-v2 credentials at the end: on
+native v2 there is no shared admin password, only the PocketID passkey you
+create at `id.<domain>/setup`.
+
 <Warning>
   A hosted kombify account is not required. StackKits itself still requires a
   local Owner/Admin, which this bootstrap creates automatically. Keep the
   generated access details private.
 </Warning>
+
+### Choose an installer mode
+
+The Basement installer is a real guided installer that takes an unprepared
+machine all the way to a running homelab. It offers three modes, selected via
+`STACKKIT_INSTALL_MODE`:
+
+| Mode | What it does |
+| --- | --- |
+| `auto` | Quick Install: defaults everywhere, straight to a running homelab. |
+| `guided` | Prompts for workspace, domain, admin email, and owner account, then asks for one apply confirmation. |
+| `expert` | Everything `guided` covers plus use cases, stack name, platform adapter, and per-phase apply confirmation. |
+
+On a TTY, the installer shows an interactive menu. Non-TTY runs (piped `sh`,
+CI) always use `auto`. Any environment variable that pre-seeds a decision is
+never re-asked, so the same command runs unattended when you supply the
+values up front:
+
+```bash
+STACKKIT_INSTALL_MODE=guided \
+DOMAIN=home.example.com \
+STACKKIT_ADMIN_EMAIL=me@example.com \
+curl -sSL https://base.stackkit.cc | sh
+```
+
+The following environment overrides pre-seed one decision each:
+
+| Variable | Decision |
+| --- | --- |
+| `HOMELAB_DIR` | Workspace directory (default `$HOME/my-homelab`). |
+| `DOMAIN` | Own domain (default is the kit's `home.test`). |
+| `STACKKIT_NAME` | Deployment contract ID (default: workspace name). |
+| `STACKKIT_ADMIN_EMAIL` | Admin/owner email (falls back to `KOMBIFY_USER_EMAIL`). |
+| `STACKKIT_BOOTSTRAP_OWNER` | `true`/`false`: preconfigure the PocketID owner account. |
+| `STACKKIT_OWNER_USERNAME` | Owner username (default: derived from email). |
+| `STACKKIT_USE_CASES` | Comma-separated optional workloads: `photos,files,vault`. |
+| `STACKKIT_PLATFORM` / `STACKKIT_PAAS` | Workload runtime adapter: `coolify` or `komodo`. |
+| `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_EMAIL` | DNS credentials for a custom public domain. |
+| `STACKKIT_PLATFORM_*` / `COOLIFY_*` / `KOMODO_*` / `DOKPLOY_*` | Advanced overrides to target an existing external PaaS. |
 
 Prefer to install only the toolchain and full public catalog?
 
@@ -63,6 +108,23 @@ stackkit init basement-kit --owner-source=local
 stackkit validate
 ```
 
+To script the same authoring choices that `guided` and `expert` modes make
+interactively, pass them as flags to `stackkit init`:
+
+```bash
+stackkit init basement-kit \
+  --owner-source=local \
+  --use-case=photos,files,vault \
+  --platform=coolify \
+  --enable=lan-dns,internal-pki
+```
+
+| Flag | Purpose |
+| --- | --- |
+| `--use-case` | Native v2 only: comma-separated optional kit workloads to enable with their governed default alternative (for example `photos,files,vault`). Mirrors `STACKKIT_USE_CASES`. |
+| `--platform` | Native v2 only: selected-provider platform adapter (`coolify` or `komodo`) for the chosen use cases. Mirrors `STACKKIT_PLATFORM`. |
+| `--enable` | Native v2 only: optional kit capabilities to enable (for example `lan-dns,internal-pki`). |
+
 The StackSpec is the configuration input. CUE remains the validation authority and generated rollout files are outputs, not files to edit by hand. See [Configure a StackSpec](/guides/stackkits/configure-stack-spec) for current examples.
 
 ## Generate and inspect a changed plan
@@ -91,7 +153,7 @@ logs and access record with the workspace.
 </Warning>
 
 <Accordion title="Bootstrap a Cloud Kit workspace">
-  The released Cloud installer requires a domain you control and, like the Basement installer, stops after initialization and validation:
+  The released Cloud installer requires a domain you control and, like the Basement installer, supports the same `auto`, `guided`, and `expert` modes:
 
   ```bash
   curl -sSL https://cloud.stackkit.cc | DOMAIN=example.com sh
@@ -100,7 +162,7 @@ logs and access record with the workspace.
   stackkit plan --json
   ```
 
-  Public Cloud runtime evidence remains explicit per release, so treat this as a configuration bootstrap unless the current release notes include matching live evidence.
+  Set `STACKKIT_INSTALL_MODE=guided` (or `expert`) on a TTY to review workspace, admin email, owner account, and platform choices before the apply confirmation. Public Cloud runtime evidence remains explicit per release, so treat this as a configuration bootstrap unless the current release notes include matching live evidence.
 </Accordion>
 
 ## Continue

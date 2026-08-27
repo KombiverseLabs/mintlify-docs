@@ -23,12 +23,28 @@ StackKits validates and applies its own system definition to that host. It does 
 
 ## Start a Cloud Kit
 
-Bootstrap the released workspace on Linux or macOS:
+Bootstrap the released workspace on Linux or macOS. The Cloud installer
+supports the same three guided modes (`auto`, `guided`, `expert`) via
+`STACKKIT_INSTALL_MODE`. Non-TTY runs always use `auto`:
 
 ```bash
+# auto: defaults everywhere, straight to a running Cloud homelab
 curl -sSL https://cloud.stackkit.cc | DOMAIN=example.com sh
+
+# guided: workspace, admin email, owner, one apply confirmation
+STACKKIT_INSTALL_MODE=guided \
+DOMAIN=example.com \
+CLOUDFLARE_API_TOKEN=... \
+CLOUDFLARE_EMAIL=you@example.com \
+curl -sSL https://cloud.stackkit.cc | sh
+
 cd ~/my-cloud-homelab
 ```
+
+Cloudflare DNS credentials for a custom public domain stay
+environment-driven (`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_EMAIL`). To target an
+existing external PaaS, set the `STACKKIT_PLATFORM_*` /
+`COOLIFY_*` / `KOMODO_*` overrides.
 
 Or initialize it with an already installed CLI:
 
@@ -36,7 +52,11 @@ Or initialize it with an already installed CLI:
 mkdir my-cloud-stack
 cd my-cloud-stack
 
-stackkit init cloud-kit --domain example.com --owner-source=local
+stackkit init cloud-kit \
+  --domain example.com \
+  --owner-source=local \
+  --platform=coolify \
+  --use-case=photos,files,vault
 stackkit validate
 stackkit generate
 stackkit plan --json
@@ -44,7 +64,7 @@ stackkit apply
 stackkit verify --http --json
 ```
 
-Use a domain you own in place of `example.com`. Keep the StackSpec and verification output with the workspace, and change only the StackSpec before regenerating artifacts.
+Use a domain you own in place of `example.com`. Keep the StackSpec and verification output with the workspace, and change only the StackSpec before regenerating artifacts. The `--use-case`, `--platform`, and `--enable` flags mirror the guided/expert selections and let you script the same authoring choices.
 
 ## Compare with Basement Kit
 
