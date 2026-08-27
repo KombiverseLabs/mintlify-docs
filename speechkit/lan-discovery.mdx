@@ -1,0 +1,67 @@
+---
+title: "Discover a SpeechKit server on your LAN"
+description: "Let devices find a self-hosted SpeechKit server without typing an address"
+sidebarTitle: "LAN discovery"
+icon: "wifi"
+---
+
+SpeechKit `v0.60.0` and later can announce a self-hosted server on the local
+network via mDNS/DNS-SD under the service type `_speechkit._tcp`. Devices on
+the same LAN can then find a homelab server and fill in its URL instead of
+typing an address by hand.
+
+Use LAN discovery when you run SpeechKit on a homelab machine and connect to
+it from the Windows desktop app, the Android app, or the CLI on the same
+network.
+
+## Off by default
+
+Discovery is strictly opt-in. A hosted or public instance has no reason to
+multicast its presence on someone else's network, so the server stays silent
+unless you enable the announcement in its configuration.
+
+The announcement carries no secrets. The DNS-SD TXT record contains the URL
+clients should dial, the enabled modes, and the server version. It never
+contains tokens or other credentials. Discovery only says where to knock:
+after a device picks the discovered URL, authentication applies unchanged and
+the device still signs in.
+
+## Enable the announcement
+
+On a self-hosted server, add a `[server.discovery]` section to the server
+configuration and set `enabled`:
+
+```toml
+[server.discovery]
+enabled = true
+# instance_name = "wohnzimmer"                # default: host name
+# advertise_url = "http://192.168.1.20:8080"  # default: public_base_url, then http://<hostname>:<port>
+```
+
+- `instance_name` is the human-readable name devices see, published as
+  `<name>._speechkit._tcp`. When empty, SpeechKit uses the host name.
+- `advertise_url` is the base URL devices should dial. When empty, SpeechKit
+  falls back to `public_base_url`, then to `http://<hostname>:<listen-port>`.
+
+After a restart, the server answers DNS-SD queries for `_speechkit._tcp` on
+the local network.
+
+## Find the server from a device
+
+- **Windows desktop**: Settings can scan the LAN and fill in the server URL of
+  a discovered instance.
+- **Android**: Settings browses the same service type and fills in the server
+  URL.
+- **CLI**: list SpeechKit servers on the LAN from any machine on the same
+  network:
+
+```bash
+speechkitctl discover
+```
+
+The command prints the instance name and URL of each server it finds. Pass
+`--timeout` to change how long it waits for replies (default 2 seconds), or
+`--json` for machine-readable output.
+
+In every case the discovery result only pre-fills the URL. You still enter the
+token, and the server still authenticates the device after it connects.
