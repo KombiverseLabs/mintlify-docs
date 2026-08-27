@@ -1,6 +1,6 @@
 ---
 title: "Operate a StackKit"
-description: "Use the released CLI to inspect a running StackKits workspace before making changes"
+description: "Inspect a running StackKits workspace, then add or remove a workload with the released CLI"
 sidebarTitle: "Operations"
 icon: wrench
 ---
@@ -34,9 +34,7 @@ stackkit generate
 stackkit apply
 ```
 
-StackKits v0.21.11 adds `stackkit secrets materialize` as the explicit step between selecting a workload and running `generate`. The command validates the current StackSpec against the embedded CUE authority, then creates or reuses owner-signed, owner-only custody for every `secret://` reference the StackSpec declares. It is idempotent, so re-running it reuses the custody that already exists.
-
-The command never prints secret locators or material. It refuses tampered or foreign custody instead of replacing it. `generate` remains deterministic and `apply` remains read-only toward secret custody; neither mints keys silently. If the StackSpec declares no local secret references, the command reports that and exits successfully.
+StackKits v0.21.11 adds `stackkit secrets materialize` as the explicit step between selecting a workload and running `generate`. Establish custody, then generate and apply; do not invent secret values.
 
 ## Remove an applied workload
 
@@ -64,15 +62,7 @@ stackkit remove --workload photos \
 
 The named placement must match exactly one entry in the verified apply result. Every node-local absence receipt stays correlated to the same original apply through the shared `appliedRequestDigest`.
 
-### Terminal absence evidence
-
-Pass `--terminal-evidence-json` to emit `stackkit.workload-removal-evidence/v1` on stdout:
-
-```bash
-stackkit remove --workload photos --auto-approve --terminal-evidence-json
-```
-
-The evidence record is a bounded, canonical projection of the exact workload, placement, execution channel, owner authorization, and terminal result. It omits applied artifact content, and `--json` keeps its existing result contract. Pinned cross-repo consumers can validate removal requests and evidence with the public `pkg/workloadremoval` Go package instead of maintaining a second implementation. The evidence digest is an integrity binding, not a new trust root: remote consumers still authenticate the pinned StackKits producer channel and the retained owner authorization.
+Add `--terminal-evidence-json` when you need a machine-readable removal record on stdout.
 
 ## Common workflows
 
