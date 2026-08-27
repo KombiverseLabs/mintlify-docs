@@ -1,0 +1,62 @@
+---
+title: "SpeechKit on Android"
+description: "Set up the SpeechKit Keyboard and transcribe or summarize voice notes"
+sidebarTitle: "Android"
+icon: "android"
+---
+
+SpeechKit `v0.60.0` ships the Android app as a voice keyboard with a
+Gboard-style more-page. Voice dictation, Voice Agent, and voice-note
+transcription all run from the keyboard once setup is complete.
+
+## Keyboard setup
+
+Setup has two steps, and they are the whole setup:
+
+1. Enable SpeechKit Keyboard in Android's system keyboard settings.
+2. Select SpeechKit Keyboard as the active input method.
+
+Voice Agent is a key on the keyboard, not a system-assistant role. You do not
+assign SpeechKit as the device assistant to use it.
+
+First-run dictation does not ask for a Hugging Face token. On-device
+recognition is the zero-config floor: the voice key dictates with the
+on-device recognizer until you pair a SpeechKit server, which upgrades the
+processing tier.
+
+## Transcribe or summarize a voice note
+
+You can turn a WhatsApp or Telegram voice note into text, or into a short
+summary, from two entry points:
+
+- **Share sheet**: share the voice note from the messenger and choose the
+  SpeechKit transcribe entry, or the separate summarize entry.
+- **Keyboard more-page**: open the more-page on the keyboard and tap
+  **Transcribe audio** or **Summarize audio**. This opens an audio file
+  picker, and the result is inserted into the active editor.
+
+Both paths copy the result to the clipboard. Share-from-messenger has no
+editor to insert into, so the clipboard copy is the delivery there.
+
+### How processing works
+
+The system recognizer cannot read audio files, so both actions require a
+paired SpeechKit server:
+
+1. The paired SpeechKit server transcribes the audio file.
+2. For summarize, Assist runs on that transcript on the same server. No new
+   cloud path is involved.
+3. If Assist has no model configured, SpeechKit falls back to the transcript
+   and copies it to the clipboard, so the share never ends empty.
+
+If no server is paired, the action stops with a message that a server is
+required.
+
+<CardGroup cols={2}>
+  <Card title="Understand modes" icon="waveform-lines" href="/speechkit/modes">
+    Learn what each mode does and how provider choice changes the data path.
+  </Card>
+  <Card title="Release notes" icon="clock-rotate-left" href="https://github.com/kombifyio/SpeechKit/releases/tag/v0.60.0">
+    Review the exact release and all published assets.
+  </Card>
+</CardGroup>
