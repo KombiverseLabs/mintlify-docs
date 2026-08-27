@@ -71,8 +71,10 @@ The v0.16.0 Basement and Cloud Kit contracts expose `files` as an optional workl
 
 Merge the `workloads` object into the complete StackSpec produced by `init`. The `home` site and `main` node are the released Basement defaults; use identifiers already present in your generated document.
 
+Since v0.21.11, the `placement` block is optional. A workload selected without one receives the governed empty-placement defaults from the embedded CUE contracts, so programmatic StackSpec authors no longer need CLI-specific boilerplate.
+
 <Warning>
-  Do not copy this selection for Photos or Vault and invent secret values. Those workloads require owner-bound secret custody. v0.16.0 does not expose a safe public post-init command for adding that custody, so their component pages are descriptive rather than end-to-end installation recipes.
+  Do not copy this selection for Photos or Vault and invent secret values. Those workloads require owner-bound secret custody. Since v0.21.11, run [`stackkit secrets materialize`](/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace) after selecting such a workload and before `generate` to establish that custody explicitly.
 </Warning>
 
 ## Validate every change

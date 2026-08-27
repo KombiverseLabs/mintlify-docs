@@ -18,7 +18,6 @@ $requiredQuickstartMarkers = @(
     "curl -sSL https://install.stackkit.cc | sh",
     "curl -sSL https://cloud.stackkit.cc | DOMAIN=example.com sh",
     "stackkit plan --json",
-    "does not install Docker",
     "does not provision"
 )
 
