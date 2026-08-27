@@ -9,9 +9,9 @@ Product updates, organized newest first. For deeper details on each release, see
 
 <Update label="2026-08-25" description="Week of Aug 18 – Aug 25">
 
-## StackKits v0.21.10 – v0.21.22: secrets custody, safe workload removal, and public addresses; SpeechKit v0.59 meeting notes
+## StackKits v0.21.10 – v0.21.24: secrets custody, safe workload removal, and public addresses; SpeechKit v0.59 meeting notes
 
-StackKits reached [v0.21.22](https://github.com/kombifyio/stackKits/releases/tag/v0.21.22) with a new `stackkit secrets materialize` command, owner-approved removal of a single workload placement with portable removal evidence, and a secret-free address-plan and bind contract that routes managed public kombify.me service names through the generated TLS entrypoint. Cloud host-security hardening now keeps a non-root execution account reachable and evaluates the sshd policy first. [SpeechKit v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) ships notes-first meeting capture with two-track audio that is never kept, call-start detection, and write-ups that cite the transcript.
+StackKits reached [v0.21.24](https://github.com/kombifyio/stackKits/releases/tag/v0.21.24) with a new `stackkit secrets materialize` command, owner-approved removal of a single workload placement with portable removal evidence, and a secret-free address-plan and bind contract that routes managed public kombify.me service names through the generated TLS entrypoint. Cloud host-security hardening now keeps a non-root execution account reachable and evaluates the sshd policy first. [SpeechKit v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) ships notes-first meeting capture with two-track audio that is never kept, call-start detection, and write-ups that cite the transcript.
 
 ### New features
 
@@ -34,6 +34,8 @@ stackkit secrets materialize
 - **Hardening no longer locks you out.** [StackKits v0.21.10](https://github.com/kombifyio/stackKits/releases/tag/v0.21.10) preserves a non-root key-authenticated execution-channel account before Cloud host-security disables `PermitRootLogin`, so Product Apply can still reach the node after hardening.
 - **The sshd policy is evaluated first.** [v0.21.17](https://github.com/kombifyio/stackKits/releases/tag/v0.21.17) makes the Cloud host-security sshd policy the first drop-in evaluated and removes its superseded late-order file during Apply, so provider or cloud-init defaults cannot keep root key login enabled after hardening.
 - **Idempotent Apply reuses ports 80 and 443 only with proof.** [v0.21.18](https://github.com/kombifyio/stackKits/releases/tag/v0.21.18) lets a repeat Apply reuse ports 80 and 443 only when Docker proves they belong to the exact current workspace's Cloud core Compose definition. Foreign, stale, and unverified listeners remain blocking. See [Review, plan, and apply](/guides/stackkits/review-plan-and-apply).
+- **Managed certificates validate behind the Cloudflare gateway.** [v0.21.23](https://github.com/kombifyio/stackKits/releases/tag/v0.21.23) issues managed Cloud Kit certificates with ACME HTTP-01 so the Cloudflare gateway can validate origin TLS while normal service traffic remains HTTPS.
+- **Certificate verification tolerates login redirects.** [v0.21.24](https://github.com/kombifyio/stackKits/releases/tag/v0.21.24) verifies a valid managed-service TLS certificate without following or rejecting an application's expected HTTPS login redirect.
 - **Meeting capture keeps both channels.** [SpeechKit v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) stops one capture channel from discarding the other, keeps the call audio out of the notes, and lets the local model finish writing a meeting up. [v0.59.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.1) fixes the Windows installer build.
 - **Android Settings are always reachable.** [v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) makes Settings reachable whether or not onboarding finished.
 
