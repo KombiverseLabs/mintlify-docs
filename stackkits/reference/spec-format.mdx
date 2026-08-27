@@ -19,12 +19,34 @@ For a VPS you operate, initialize a Cloud Kit with a domain you control:
 stackkit init cloud-kit --domain example.com --owner-source=local
 ```
 
+## Compute tier and hardware profile
+
+Two init flags declare hardware sizing intent in the StackSpec:
+
+- `--compute-tier` writes `install.computeTier` (`low` | `standard` | `high`, default `standard`). The value selects a module graph the kit declares. Basement Kit publishes all three graphs; Cloud Kit and Modern Home Lab publish only `standard` and `high`. A tier the kit does not declare fails closed at init and compile. Apply executes the selected graph; it does not choose it, and inventory does not rewrite it.
+- `--hardware-profile` writes `nodes[0].hardware.profile` (`standard` | `pi` | `gpu` | `storage`). `pi` means a constrained homelab device class such as an SBC or a low-RAM mini-PC, not a Raspberry Pi specifically. It is a device class, not an architecture, and it does not imply `computeTier: low`.
+
+```bash
+stackkit init basement-kit --owner-source=local --compute-tier low --hardware-profile pi
+```
+
+On a multi-node StackSpec, `stackkit generate` accepts `--local-site` and `--local-node` to name the node whose local inventory is attested. This is the same binding Apply uses.
+
+## Runtime capacity admission
+
+Core runtimes declare minimum attested CPU, RAM, and disk floors. Apply attests the local inventory before resolve and admits the selected graph against those facts before any side effects:
+
+- `inventory-fact-unverified` blocks Apply when a required inventory fact is missing.
+- `runtime-capacity-unsatisfied` blocks Apply when the attested host is undersized for the selected graph.
+
+Generation can still succeed while Apply is blocked. Correct the host or select a tier the host satisfies, then regenerate and apply.
+
 `validate` is authoritative for the installed release. When you change intent, edit the complete StackSpec created by `init`, validate it, regenerate artifacts, and inspect `stackkit plan --json`. Do not place provider credentials, plaintext secrets, server procurement details, or generated rollout state in the StackSpec.
 
 The current document is `stackkit/v2alpha1`. Its main intent groups are:
 
 - `metadata`, `kit`, and `source` for identity and lineage
-- `install` and `generation` for lifecycle and output strategy
+- `install` and `generation` for lifecycle, compute tier, and output strategy
 - `storage`, `container`, and `network` for local runtime intent
 - `sites`, `nodes`, and `controlPlane` for placement
 - `capabilities`, `workloads`, and `modules` for governed selections

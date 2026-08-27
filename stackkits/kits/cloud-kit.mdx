@@ -46,6 +46,18 @@ stackkit verify --http --json
 
 Use a domain you own in place of `example.com`. Keep the StackSpec and verification output with the workspace, and change only the StackSpec before regenerating artifacts.
 
+Re-running the Cloud installer on a workspace that already carries deployment intent skips initialization and resumes `stackkit apply` from the apply journal instead of failing.
+
+## Compute tiers
+
+Cloud Kit declares the `standard` and `high` compute tier graphs. It does not declare `low`, so `stackkit init cloud-kit --compute-tier low` fails closed at init and compile. `high` adds the `telemetry-collection` capability to the `standard` graph:
+
+```bash
+stackkit init cloud-kit --domain example.com --owner-source=local --compute-tier high
+```
+
+Before Apply changes the host, the compiler attests the local CPU, RAM, and disk inventory against the selected graph's capacity floors. Missing facts block Apply with `inventory-fact-unverified`; an undersized host blocks it with `runtime-capacity-unsatisfied`. See [Compute tiers on Basement Kit](/stackkits/kits/basement-kit#compute-tiers) for the tier model.
+
 ## Compare with Basement Kit
 
 <CardGroup cols={2}>

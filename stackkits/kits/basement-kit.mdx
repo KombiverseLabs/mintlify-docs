@@ -5,7 +5,7 @@ sidebarTitle: "Basement Kit"
 icon: house
 ---
 
-Basement Kit is the current local profile in the public `v0.16.0` release. Use it for a homelab on hardware you already control, with one home site and a local owner.
+Basement Kit is the current local profile in the public `v0.22.0` release. Use it for a homelab on hardware you already control, with one home site and a local owner.
 
 ## What it provides
 
@@ -14,7 +14,7 @@ Basement Kit is the current local profile in the public `v0.16.0` release. Use i
 - a Node Hub at the generated `base.<domain>` address
 - the released core runtime plus optional workloads selected by your validated configuration
 
-The v0.16.0 authoring default is `home.test`. Make sure clients use a DNS path you control before treating a generated route as reachable; StackKits does not silently modify every client or router.
+The authoring default domain is `home.test`. Make sure clients use a DNS path you control before treating a generated route as reachable; StackKits does not silently modify every client or router.
 
 ## Start a Basement Kit
 
@@ -31,6 +31,26 @@ stackkit verify --http --json
 ```
 
 Run the commands from the StackKits workspace. Do not modify generated rollout files; change the StackSpec and re-run validation instead.
+
+## Compute tiers
+
+`install.computeTier` selects one of the module graphs Basement Kit declares. Set it with `stackkit init basement-kit --compute-tier <tier>`; the default is `standard`. Apply executes the selected graph and never chooses or rewrites it.
+
+| Tier | Module graph | Minimum host |
+| --- | --- | --- |
+| `low` | Standalone Compose with the core-lite runtime, no Coolify, Immich without machine learning | 2 CPU cores, 2 GB RAM, 10 GB disk |
+| `standard` | Coolify PaaS plus Immich with machine learning | 2 CPU cores, 4 GB RAM, 20 GB disk |
+| `high` | `standard` plus the `telemetry-collection` capability | 2 CPU cores, 4 GB RAM, 20 GB disk |
+
+Use `low` for constrained hardware such as an SBC or a low-RAM mini-PC:
+
+```bash
+stackkit init basement-kit --owner-source=local --compute-tier low --hardware-profile pi
+```
+
+Use-case selections declare per-tier fits on the graph. On `low`, Photos is Immich without the machine-learning worker, Vault remains available as an idle-resident service, and Media is omitted until a lite runtime exists. A use case without a declared fit for the selected tier fails closed at init and compile.
+
+Host preflight and compiler admission use the selected graph's capacity floors. Apply attests the local CPU, RAM, and disk inventory first and blocks with `inventory-fact-unverified` or `runtime-capacity-unsatisfied` when facts are missing or the host is undersized.
 
 ## When to use another kit
 

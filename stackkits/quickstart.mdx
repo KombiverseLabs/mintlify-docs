@@ -63,6 +63,14 @@ stackkit init basement-kit --owner-source=local
 stackkit validate
 ```
 
+On constrained hardware, declare the tier and device class at init:
+
+```bash
+stackkit init basement-kit --owner-source=local --compute-tier low --hardware-profile pi
+```
+
+`--compute-tier` writes `install.computeTier` (`low` | `standard` | `high`, default `standard`) and selects a module graph the kit declares. Basement Kit publishes all three tiers; Cloud Kit and Modern Home Lab publish only `standard` and `high`, so `--compute-tier low` on those kits fails closed at init and compile. `--hardware-profile` writes `nodes[0].hardware.profile`. The `pi` profile means a constrained homelab device class such as an SBC or low-RAM mini-PC, not a Raspberry Pi specifically, and it does not imply `computeTier: low`. See [Compute tiers](/stackkits/kits/basement-kit#compute-tiers) for what each Basement graph includes.
+
 The StackSpec is the configuration input. CUE remains the validation authority and generated rollout files are outputs, not files to edit by hand. See [Configure a StackSpec](/guides/stackkits/configure-stack-spec) for current examples.
 
 ## Generate and inspect a changed plan
@@ -73,6 +81,17 @@ stackkit plan --json
 ```
 
 Confirm that generation and apply readiness are both `ready`, then review the selected workloads and artifact paths.
+
+On a multi-node StackSpec, pass `--local-site` and `--local-node` to `stackkit generate` to name the node whose local inventory is attested. This is the same binding Apply uses. A multi-node generate without a bound local node fails closed instead of probing nothing.
+
+## Runtime capacity admission
+
+Apply attests the local CPU, RAM, and disk inventory before it resolves the plan. Core runtimes declare minimum capacity floors, and the compiler admits the selected compute tier graph against the attested facts before any side effects:
+
+- A missing inventory fact blocks Apply with `inventory-fact-unverified`.
+- An attested undersized host blocks Apply with `runtime-capacity-unsatisfied`.
+
+Generation can still succeed while Apply is blocked. Fix the host or select a smaller tier, then generate and apply again. A failed Product Apply ends with retry, `stackkit status --json`, and `stackkit logs latest --json` guidance, plus the Run-ID when a local rollout run exists.
 
 ## Apply an intentional change
 
@@ -85,6 +104,11 @@ cat .stackkit/access.json
 The Basement one-liner already performs the initial apply. Run these lifecycle
 commands only after you intentionally change `stack-spec.yaml`. Keep the local
 logs and access record with the workspace.
+
+Re-running the Basement or Cloud installer on a workspace that already carries
+deployment intent skips initialization and resumes `stackkit apply` from the
+apply journal instead of failing. Use a different workspace directory for a
+second deployment.
 
 <Warning>
   StackKits does not provision a server or obtain provider credentials. For a Cloud Kit, prepare the host, domain, and DNS ownership yourself before applying a stack.
