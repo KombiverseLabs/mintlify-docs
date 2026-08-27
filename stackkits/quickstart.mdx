@@ -5,7 +5,9 @@ sidebarTitle: "Quickstart"
 icon: rocket
 ---
 
-This quickstart follows the current public StackKits release. The [StackKits website](https://stackkit.cc/getting-started) helps you choose an installation path, while the CLI remains the local execution authority.
+This quickstart is the first successful path on the current public StackKits
+release: a released Basement Kit on a supported Ubuntu server you already
+operate. The CLI remains the local execution authority.
 
 ## Bootstrap a Basement Kit
 
@@ -28,42 +30,21 @@ cat .stackkit/access.json
   generated access details private.
 </Warning>
 
-Prefer to install only the toolchain and full public catalog?
-
-```bash
-curl -sSL https://install.stackkit.cc | sh
-```
-
-To install only one kit's definitions alongside the CLI, pass its name to the toolchain installer:
-
-```bash
-curl -sSL https://install.stackkit.cc | sh -s -- basement-kit
-```
-
-You can pass `cloud-kit` or `modern-homelab` the same way.
-
-<Note>
-  The retired `base-kit` name is rejected. Update scripts that still pass it to
-  use `basement-kit`.
-</Note>
-
-The shell installers resolve the current public release and support Linux and macOS on `amd64` and `arm64`. Windows users can download the `windows_amd64` ZIP from the [latest release](https://github.com/kombifyio/StackKits/releases/latest). See the [CLI walkthrough](https://stackkit.cc/getting-started/cli) for the website-guided path.
+Need a different installer? Use [Choose a kit](/guides/stackkits/choosing-a-kit)
+for the toolchain-only path, [Cloud Kit](/stackkits/kits/cloud-kit) for a VPS
+you already operate, or the [CLI walkthrough](https://stackkit.cc/getting-started/cli)
+on Windows.
 
 ## Review or change the generated intent
 
-Inspect `stack-spec.yaml` before generating output. In particular, review the absolute storage roots, the `home.test` local domain, site and node identities, and the empty optional workload selection.
+Inspect `stack-spec.yaml` before generating output. In particular, review the
+absolute storage roots, the `home.test` local domain, site and node identities,
+and the empty optional workload selection.
 
-If you used the toolchain-only installer, create the workspace yourself:
-
-```bash
-mkdir my-homelab
-cd my-homelab
-
-stackkit init basement-kit --owner-source=local
-stackkit validate
-```
-
-The StackSpec is the configuration input. CUE remains the validation authority and generated rollout files are outputs, not files to edit by hand. See [Configure a StackSpec](/guides/stackkits/configure-stack-spec) for current examples.
+The StackSpec is the configuration input. CUE remains the validation authority
+and generated rollout files are outputs, not files to edit by hand. See
+[Configure a StackSpec](/guides/stackkits/configure-stack-spec) for current
+examples.
 
 ## Generate and inspect a changed plan
 
@@ -72,7 +53,8 @@ stackkit generate
 stackkit plan --json
 ```
 
-Confirm that generation and apply readiness are both `ready`, then review the selected workloads and artifact paths.
+Confirm that generation and apply readiness are both `ready`, then review the
+selected workloads and artifact paths.
 
 ## Apply an intentional change
 
@@ -85,23 +67,6 @@ cat .stackkit/access.json
 The Basement one-liner already performs the initial apply. Run these lifecycle
 commands only after you intentionally change `stack-spec.yaml`. Keep the local
 logs and access record with the workspace.
-
-<Warning>
-  StackKits does not provision a server or obtain provider credentials. For a Cloud Kit, prepare the host, domain, and DNS ownership yourself before applying a stack.
-</Warning>
-
-<Accordion title="Bootstrap a Cloud Kit workspace">
-  The released Cloud installer requires a domain you control and, like the Basement installer, stops after initialization and validation:
-
-  ```bash
-  curl -sSL https://cloud.stackkit.cc | DOMAIN=example.com sh
-  cd ~/my-cloud-homelab
-  stackkit generate
-  stackkit plan --json
-  ```
-
-  Public Cloud runtime evidence remains explicit per release, so treat this as a configuration bootstrap unless the current release notes include matching live evidence.
-</Accordion>
 
 ## Continue
 

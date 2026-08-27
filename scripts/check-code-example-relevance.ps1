@@ -19,6 +19,7 @@ $executableExamplePages = [System.Collections.Generic.HashSet[string]]::new(
 @(
     "guides/stackkits/application-delivery.mdx",
     "guides/stackkits/back-up-and-restore.mdx",
+    "guides/stackkits/choosing-a-kit.mdx",
     "guides/stackkits/configure-stack-spec.mdx",
     "guides/stackkits/review-plan-and-apply.mdx",
     "guides/stackkits/use-cases/private-file-library.mdx",

@@ -13,4 +13,33 @@ The public StackKits `v0.16.0` release contains two current kit definitions. Cho
 
 Start with one environment. StackKits does not provision servers or take custody of provider credentials, so select a kit only after you know which host and domain you control.
 
-Once chosen, follow the [Quickstart](/stackkits/quickstart) to create the workspace, validate it, and review generated output before applying it.
+The first successful Basement path is the [Quickstart](/stackkits/quickstart). For a VPS you already operate, use [Cloud Kit](/stackkits/kits/cloud-kit). The [StackKits website](https://stackkit.cc/getting-started) can also help you choose.
+
+## Install only the toolchain
+
+To install the CLI and the full public catalog without the Basement one-liner:
+
+```bash
+curl -sSL https://install.stackkit.cc | sh
+```
+
+To install only one kit's definitions alongside the CLI, pass its name:
+
+```bash
+curl -sSL https://install.stackkit.cc | sh -s -- basement-kit
+```
+
+You can pass `cloud-kit` or `modern-homelab` the same way.
+
+<Note>
+  The retired `base-kit` name is rejected. Update scripts that still pass it to
+  use `basement-kit`.
+</Note>
+
+The shell installers resolve the current public release and support Linux and
+macOS on `amd64` and `arm64`. Windows users can download the `windows_amd64`
+ZIP from the [latest release](https://github.com/kombifyio/StackKits/releases/latest).
+
+After a toolchain-only install, initialize the workspace on
+[Basement Kit](/stackkits/kits/basement-kit) or
+[Configure a StackSpec](/guides/stackkits/configure-stack-spec).
