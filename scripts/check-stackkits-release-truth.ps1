@@ -5,26 +5,47 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$quickstartPath = Join-Path $repoRoot "stackkits/quickstart.mdx"
-$quickstart = Get-Content -LiteralPath $quickstartPath -Raw
 
-$requiredQuickstartMarkers = @(
-    "https://stackkit.cc/getting-started",
-    "https://stackkit.cc/getting-started/cli",
-    "https://install.stackkit.cc",
-    "https://base.stackkit.cc",
-    "https://cloud.stackkit.cc",
-    "curl -sSL https://base.stackkit.cc | sh",
-    "curl -sSL https://install.stackkit.cc | sh",
-    "curl -sSL https://cloud.stackkit.cc | DOMAIN=example.com sh",
-    "stackkit plan --json",
-    "does not provision"
+$requiredMarkersByPage = @(
+    @{
+        Path = "stackkits/quickstart.mdx"
+        Markers = @(
+            "https://stackkit.cc/getting-started/cli",
+            "https://base.stackkit.cc",
+            "curl -sSL https://base.stackkit.cc | sh",
+            "stackkit plan --json"
+        )
+    },
+    @{
+        Path = "guides/stackkits/choosing-a-kit.mdx"
+        Markers = @(
+            "https://stackkit.cc/getting-started",
+            "https://install.stackkit.cc",
+            "curl -sSL https://install.stackkit.cc | sh"
+        )
+    },
+    @{
+        Path = "stackkits/kits/cloud-kit.mdx"
+        Markers = @(
+            "https://cloud.stackkit.cc",
+            "curl -sSL https://cloud.stackkit.cc | DOMAIN=example.com sh",
+            "does not provision"
+        )
+    }
 )
 
 $errors = [System.Collections.Generic.List[string]]::new()
-foreach ($marker in $requiredQuickstartMarkers) {
-    if ($quickstart.IndexOf($marker, [System.StringComparison]::Ordinal) -lt 0) {
-        $errors.Add("quickstart is missing release-truth marker '$marker'") | Out-Null
+foreach ($page in $requiredMarkersByPage) {
+    $pagePath = Join-Path $repoRoot $page.Path
+    if (-not (Test-Path -LiteralPath $pagePath -PathType Leaf)) {
+        $errors.Add("missing release-truth page: $($page.Path)") | Out-Null
+        continue
+    }
+    $content = Get-Content -LiteralPath $pagePath -Raw
+    foreach ($marker in $page.Markers) {
+        if ($content.IndexOf($marker, [System.StringComparison]::Ordinal) -lt 0) {
+            $errors.Add("$($page.Path) is missing release-truth marker '$marker'") | Out-Null
+        }
     }
 }
 
