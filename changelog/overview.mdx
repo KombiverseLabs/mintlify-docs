@@ -7,6 +7,46 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits](https://github.com/kombifyio/stackKits/releases), [SpeechKit](https://github.com/kombifyio/SpeechKit/releases), and [Techstack](https://github.com/kombifyio/TechStack/releases) release notes on GitHub.
 
+<Update label="2026-08-28" description="Week of Aug 22 – Aug 28">
+
+## SpeechKit meeting notes and LAN discovery, StackKits public addresses and compute tiers
+
+SpeechKit rolled from [v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) to [v0.64.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.64.0): meeting notes that start from what you wrote down, LAN discovery so devices find your homelab server without typing an address, and tap-to-interrupt on every client. StackKits shipped [v0.21.10](https://github.com/kombifyio/stackKits/releases/tag/v0.21.10) through [v0.22.0](https://github.com/kombifyio/stackKits/releases/tag/v0.22.0): managed public service addresses with automatic TLS on Cloud Kit, and compute tiers that match a kit to the hardware you actually have.
+
+### New features
+
+- **Meeting notes that start from your own notes.** [SpeechKit v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) adds a meeting notepad: your notes lead, the transcript fills in the rest, and the write-up cites the words it came from. Microphone and system audio stay on separate tracks, so speaker labels come for free and the audio is never kept. SpeechKit notices when a calling app takes the microphone and offers to take notes; nothing is recorded until you accept. The write-up lands in the dashboard as soon as the meeting ends. See [SpeechKit modes](/speechkit/modes).
+- **Find your SpeechKit server on the home network.** [v0.60.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.60.0) lets a homelab server announce itself over mDNS/DNS-SD, so the desktop app, the Android app, and `speechkitctl discover` find it without typing an address. Discovery is opt-in and off by default, so a hosted instance stays silent, and the announcement only says where to knock: devices still sign in after they connect. See [SpeechKit overview](/speechkit/overview).
+- **Managed public addresses with automatic TLS on Cloud Kit.** [StackKits v0.21.20](https://github.com/kombifyio/stackKits/releases/tag/v0.21.20) through [v0.21.24](https://github.com/kombifyio/stackKits/releases/tag/v0.21.24) give Cloud Kit services managed public kombify.me addresses: a secret-free address plan, routes rendered from your validated subdomain prefix, and certificates issued with ACME HTTP-01 so the Cloudflare gateway can validate origin TLS while service traffic stays HTTPS. See [Cloud Kit](/stackkits/kits/cloud-kit).
+- **Compute tiers match the kit to your hardware.** [StackKits v0.22.0](https://github.com/kombifyio/stackKits/releases/tag/v0.22.0) adds `low`, `standard`, and `high` compute tiers per kit. Apply attests local CPU, RAM, and disk before resolving, and blocks with a clear reason instead of deploying onto an undersized host. See [Choosing a kit](/guides/stackkits/choosing-a-kit) and [Review, plan, and apply](/guides/stackkits/review-plan-and-apply).
+- **Interrupt the assistant from any client.** [SpeechKit v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) brings tap-to-stop for a spoken answer to the web and Android clients, not only the desktop app. Transcripts on web and Android carry speaker labels when speaker recognition is on, and each client shows which speech backend is serving the session. See [SpeechKit modes](/speechkit/modes).
+- **Voice-note transcription and summaries on Android.** [v0.60.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.60.0) transcribes voice notes and summarizes WhatsApp and Telegram voice messages from the SpeechKit app.
+- **Add secrets custody to an existing homelab.** [StackKits v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) adds an explicit, idempotent `stackkit secrets materialize` command so a standalone homelab can establish owner-bound custody after selecting a new workload, without re-running its initial StackSpec. See [Day 2 operations](/stackkits/reference/day-2-operations).
+
+### Updates
+
+- **Words and Replacements are manageable.** [SpeechKit v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) makes custom Words and Replacements searchable, paged, and deletable in Settings. Several spoken forms can rewrite to one term, and aliases apply in Dictation, Assist, and Voice Agent.
+- **Pick your dictation engine in one control.** [v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) switches Deepgram Nova-3 and AssemblyAI Universal 3.5 in one Dictation setting, and AssemblyAI's LLM Gateway is a native backend using the same API key as speech-to-text.
+- **The overlay is the control strip.** [v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) lets you choose which actions sit on the Windows overlay, rotate the speech language, and start a meeting from it. See [SpeechKit framework](/speechkit/framework).
+- **One Go package per speech provider.** [v0.64.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.64.0) splits every speech and realtime voice provider into its own SDK package, so an app that talks to one backend stops compiling the rest. Old names still work through v0.64 with a migration table and are removed in v0.65.0. The model catalog is now single-sourced, and entries carry a `modality` field.
+- **Owner-approved removal targets one node.** [StackKits v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) through [v0.21.13](https://github.com/kombifyio/stackKits/releases/tag/v0.21.13) let owner-approved workload removal select one exact node placement from a verified multi-node Apply result, with absence evidence still correlated to the same Apply.
+- **Richer access manifest.** [v0.21.16](https://github.com/kombifyio/stackKits/releases/tag/v0.21.16) extends the native access manifest to v3 with application grouping, display names, lifecycle impact, and secret-free internal addresses for running services.
+
+### Bug fixes
+
+- **Cloud hardening can no longer lock you out.** [StackKits v0.21.10](https://github.com/kombifyio/stackKits/releases/tag/v0.21.10) preserves a non-root key-authenticated account before Cloud host-security disables root login, and [v0.21.17](https://github.com/kombifyio/stackKits/releases/tag/v0.21.17) makes the hardened sshd policy win over provider and cloud-init defaults, so root key login stays disabled.
+- **Re-running Apply on ports 80 and 443 is safe.** [v0.21.18](https://github.com/kombifyio/stackKits/releases/tag/v0.21.18) lets an idempotent Apply reuse ports 80 and 443 only when Docker proves they belong to the current workspace's Cloud core. Foreign or stale listeners still block.
+- **Workloads without a placement block just work.** [v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) applies the governed placement defaults when a StackSpec author selects a workload without a `placement` block. See [Configure a stack spec](/guides/stackkits/configure-stack-spec).
+- **A failed Apply tells you what to do next.** [v0.22.0](https://github.com/kombifyio/stackKits/releases/tag/v0.22.0) ends a failed Product Apply with retry, `status`, and `logs` guidance plus the Run-ID, and the installers resume an existing workspace instead of dying.
+- **A refused voice session explains itself.** [SpeechKit v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) makes a refused Voice Agent session name the one thing to change, and every error carries the id support needs to find the request.
+- **Spoken numbers come out as digits.** [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) writes spoken numbers as digits and strips German filler words like äh and ähm, including when the language is set to all languages.
+- **The assistant stops interrupting itself.** [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) rejects the agent's own voice as barge-in, stops a hung provider close from leaving a session stuck ending, and plays the reply at the correct 24 kHz rate.
+- **Windows shows the real version after an update.** [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) makes Install and restart display the published version instead of the previous one.
+- **Full-capture Dictation respects your engine choice.** [v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) uses the selected speech engine instead of always trying Deepgram first.
+- **The keyboard behaves on Android.** [v0.60.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.60.0) puts SpeechKit on the Gboard suggestion strip and restores the provider buttons on the keyboard, and [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) keeps a tester connection working until you explicitly switch to kombify Cloud.
+
+</Update>
+
 <Update label="2026-08-21" description="Week of Aug 15 – Aug 21">
 
 ## Techstack open-source Alpha, SpeechKit on the Android keyboard, StackKits Cloud core
