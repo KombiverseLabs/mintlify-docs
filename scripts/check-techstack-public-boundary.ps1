@@ -7,17 +7,18 @@ $ErrorActionPreference = "Stop"
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $requirements = @{
     "techstack/overview.mdx" = @(
-        "Techstack is currently a preview",
-        "No public Techstack installer or anonymous source distribution is available today",
-        "https://techstack.kombify.io"
+        @{ Pattern = '(?i)\b(?:alpha|preview)\b'; Reason = "missing pre-1.0 availability label" }
     )
     "techstack/operating-modes.mdx" = @(
-        "The local Techstack distribution is still part of the preview and is not a public download yet",
-        "Techstack does not become a second renderer or bypass StackKits validation"
+        @{ Pattern = '(?i)\bStackKits\b'; Reason = "missing StackKits execution boundary" }
     )
     "techstack/availability.mdx" = @(
-        "its open-core distribution has not been released",
-        "There is no supported public Techstack installation path until an official release is published"
+        @{ Pattern = '(?i)\bWindows Alpha\b'; Reason = "missing released Windows Alpha status" }
+    )
+    "techstack/install-windows.mdx" = @(
+        @{ Pattern = '(?i)https://github\.com/kombifyio/TechStack'; Reason = "missing official public source link" },
+        @{ Pattern = '(?i)releases/latest/download/kombify-Techstack-Setup\.exe'; Reason = "missing official Windows Alpha asset" },
+        @{ Pattern = '(?i)\bunsigned\b'; Reason = "missing unsigned-build warning" }
     )
 }
 
@@ -29,10 +30,9 @@ foreach ($relativePath in $requirements.Keys) {
         continue
     }
     $content = Get-Content -LiteralPath $fullPath -Raw
-    $normalizedContent = [regex]::Replace($content, '\s+', ' ')
-    foreach ($requiredText in $requirements[$relativePath]) {
-        if ($normalizedContent.IndexOf($requiredText, [System.StringComparison]::Ordinal) -lt 0) {
-            $errors.Add("$relativePath is missing public-boundary text '$requiredText'") | Out-Null
+    foreach ($requirement in $requirements[$relativePath]) {
+        if ($content -notmatch $requirement.Pattern) {
+            $errors.Add("$relativePath $($requirement.Reason)") | Out-Null
         }
     }
 }
@@ -45,8 +45,6 @@ foreach ($file in $techstackFiles) {
     $relative = $file.FullName.Substring($repoRoot.Length).TrimStart("\", "/").Replace("\", "/")
     $content = Get-Content -LiteralPath $file.FullName -Raw
     foreach ($rule in @(
-        @{ Pattern = '(?i)github\.com/(?:KombiverseLabs/kombify-Techstack|kombifyio/techstack)'; Reason = "non-public Techstack repository link" },
-        @{ Pattern = '(?im)^\s*```(?:bash|sh|shell|console|powershell|pwsh)\s*$'; Reason = "synthetic Techstack installation or lifecycle command" },
         @{ Pattern = '(?i)\b(?:generally available|production-ready|GA release)\b'; Reason = "unsupported availability claim" }
     )) {
         if ($content -match $rule.Pattern) {
@@ -63,6 +61,6 @@ if ($errors.Count -gt 0) {
     throw "Techstack public-boundary validation failed"
 }
 
-Write-Host "techstack_public_docs_source_sha: 9e5c30e699a482d149d89f9a3383db6718a9e360"
+Write-Host "techstack_public_release: windows-alpha"
 Write-Host "techstack_public_boundary_files_checked: $($techstackFiles.Count)"
 Write-Host "techstack_public_boundary: ok"

@@ -1,6 +1,6 @@
 ---
 title: "Operate a StackKit"
-description: "Use the released CLI to inspect a running StackKits workspace before making changes"
+description: "Inspect a running StackKits workspace, then add or remove a workload with the released CLI"
 sidebarTitle: "Operations"
 icon: wrench
 ---
@@ -22,6 +22,47 @@ Keep their output with the workspace so you can compare the current observed sta
 3. Inspect `stackkit plan --json` and stop on any readiness blocker.
 4. Review the output and obtain the local owner's approval before a mutating command.
 5. Run `stackkit verify --http --json` after the change.
+
+## Add a workload to an existing workspace
+
+Selecting a new workload does not require re-running `stackkit init` or replacing the initial StackSpec. Edit the `workloads` block of the existing StackSpec, then establish secret custody before regenerating:
+
+```bash
+stackkit validate
+stackkit secrets materialize
+stackkit generate
+stackkit apply
+```
+
+StackKits v0.21.11 adds `stackkit secrets materialize` as the explicit step between selecting a workload and running `generate`. Establish custody, then generate and apply; do not invent secret values.
+
+## Remove an applied workload
+
+`stackkit remove` removes one exact applied workload with the local owner's approval:
+
+```bash
+stackkit remove --workload photos
+stackkit remove --workload photos --auto-approve --json
+```
+
+The CLI verifies the current plan, generation, apply result, and owner authority, then dispatches an owner-signed removal request that stays valid for five minutes through the digest-pinned Standard execution channel. Success requires an `absent` readback for the exact requirement, instance, and applied artifact digest. The request, result, and bounded terminal evidence are persisted below `.stackkit/evidence/removal/`.
+
+### Target one placement on a multi-node result
+
+The verified apply summary exposes `planHash`, `appliedRequestDigest`, and a secret-free `appliedWorkloads` list. Each entry is a deterministic, hash-bound identity that binds the workload, runtime owner, placements, execution channel, and referenced artifact digests. Use it to identify what a later removal should target; it is neither removal authorization nor absence evidence on its own.
+
+Since v0.21.12, when the apply result placed a workload on more than one Site or node, name the one exact placement this removal owns. Take the values from the `appliedWorkloads` entry:
+
+```bash
+stackkit remove --workload photos \
+  --local-site <site-ref> \
+  --local-node <node-ref> \
+  --local-execution-channel <channel-ref>
+```
+
+The named placement must match exactly one entry in the verified apply result. Every node-local absence receipt stays correlated to the same original apply through the shared `appliedRequestDigest`.
+
+Add `--terminal-evidence-json` when you need a machine-readable removal record on stdout.
 
 ## Common workflows
 
