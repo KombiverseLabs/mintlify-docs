@@ -20,19 +20,99 @@ credentials instead of depending on a separate SpeechKit server.
 Pin the current public release explicitly:
 
 ```bash
-go get github.com/kombifyio/SpeechKit@v0.52.14
+go get github.com/kombifyio/SpeechKit@v0.65.1
 ```
 
 Use only the packages required by your host. The public project includes
 separate packages for Dictation, wake activation, text-to-speech, Voice
 Companion hosts, speaker-aware applications, and server-connected clients.
 
+## Import one provider, not all of them
+
+Since v0.65.0, every speech-to-text provider and every realtime Voice Agent
+provider lives in its own Go package. Importing a provider package pulls in
+only that backend's dependencies. An application that talks only to Deepgram
+compiles 49 external packages instead of 286 and never pulls the Google Cloud
+or gRPC stack.
+
+Import the provider you use and pass it to the provider-neutral contracts in
+`pkg/speechkit/stt`:
+
+```go
+import (
+    "github.com/kombifyio/SpeechKit/pkg/speechkit/stt"
+    "github.com/kombifyio/SpeechKit/pkg/speechkit/stt/deepgram"
+)
+
+func newProvider(apiKey string) stt.STTProvider {
+    return deepgram.New(apiKey, "nova-3")
+}
+```
+
+The speech-to-text provider packages are `assemblyai`, `deepgram`, `google`,
+`huggingface`, `local`, `openaicompat`, `openrouter`, and `vps`, all under
+`pkg/speechkit/stt/`. The realtime Voice Agent providers split the same way
+under `pkg/speechkit/voiceagent/live/`: `assemblyai`, `deepgram`, `gemini`,
+and `openai`.
+
+When your host offers a provider choice at runtime, import the batteries
+package instead. `pkg/speechkit/stt/allproviders` bundles every shipped
+provider and exports `Build`, `Register`, `BuildRouter`, and
+`EnabledProviders` plus the per-provider option structs.
+`pkg/speechkit/voiceagent/live/allproviders` does the same for the realtime
+providers.
+
+## Migrate from pre-v0.64 imports
+
+The provider names that used to live directly in `pkg/speechkit/stt` and
+`pkg/speechkit/voiceagent/live` were deprecated in v0.64.0 and removed in
+v0.65.0. Each name moved to the package its v0.64.0 deprecation note points
+to, for example `stt.NewDeepgramProvider` became `deepgram.New` and
+`live.NewGeminiLive` became `gemini.New`. See the
+[v0.64.0 release notes](https://github.com/kombifyio/SpeechKit/releases/tag/v0.64.0)
+for the full migration table.
+
+The contracts did not move. `STTProvider`, `TranscribeOpts`, `Result`,
+`Router`, and `AsTranscriber` stay in `pkg/speechkit/stt`, and the session
+runtime and the `LiveProvider` contract stay in
+`pkg/speechkit/voiceagent/live`. Code already on the new import paths needs no
+change.
+
+## Embedding helpers
+
+The helpers a provider or host needs are part of the public surface:
+
+- Microphone and system-loopback capture ships in the framework at
+  `pkg/speechkit/audio/capture`. Its `Session` satisfies
+  `speechkit.AudioRecorder`, so an embedding app no longer implements
+  recording itself. Builds without a native backend report
+  `ErrBackendUnavailable`.
+- WAV framing and PCM extraction, the shared secret resolver, the speech
+  capability baseline, speaker-count bounds, the WebSocket close predicate,
+  and the microphone upsampler are public for custom provider
+  implementations.
+- `RecordOutcome` takes SpeechKit's own attribute type instead of
+  OpenTelemetry types, so reporting a framework outcome no longer puts a
+  tracing vendor in your signatures.
+
+## Client SDKs
+
+The same public project distributes client SDKs without credentials:
+
+- The five Apache-2.0 Android modules (`core`, `net`, `domain`,
+  `voice-ui-compose`, `coinstall-contract`) publish as AARs that resolve
+  anonymously through [JitPack](https://jitpack.io) under the
+  `com.github.kombifyio.SpeechKit` group.
+- The TypeScript client packages (`@kombifyio/speechkit-client`,
+  `@kombifyio/speechkit-voice-ui`, `@kombifyio/speechkit-voiceagent-client`)
+  install from the public npm registry without authentication.
+
 ## Continue with public examples
 
-- [Framework API](https://github.com/kombifyio/SpeechKit/blob/v0.52.14/docs/speechkit-framework-api.md)
-- [Voice Companion](https://github.com/kombifyio/SpeechKit/blob/v0.52.14/docs/voice-companion.md)
-- [Runnable examples](https://github.com/kombifyio/SpeechKit/tree/v0.52.14/examples)
-- [SDK surface boundary](https://github.com/kombifyio/SpeechKit/blob/v0.52.14/docs/architecture/sdk-surface-boundary.md)
+- [Framework API](https://github.com/kombifyio/SpeechKit/blob/v0.65.1/docs/speechkit-framework-api.md)
+- [Voice Companion](https://github.com/kombifyio/SpeechKit/blob/v0.65.1/docs/voice-companion.md)
+- [Runnable examples](https://github.com/kombifyio/SpeechKit/tree/v0.65.1/examples)
+- [SDK surface boundary](https://github.com/kombifyio/SpeechKit/blob/v0.65.1/docs/architecture/sdk-surface-boundary.md)
 
 <Note>
 The framework is beta. Keep the module version pinned and review the changelog
