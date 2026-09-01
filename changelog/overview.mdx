@@ -7,6 +7,29 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits](https://github.com/kombifyio/stackKits/releases), [SpeechKit](https://github.com/kombifyio/SpeechKit/releases), and [Techstack](https://github.com/kombifyio/TechStack/releases) release notes on GitHub.
 
+<Update label="2026-08-30" description="Week of Aug 26 – Aug 30">
+
+## SpeechKit v0.62 – v0.66.10: cross-client Voice Agent controls, per-provider SDK packages, and kombify Cloud sign-in
+
+SpeechKit moved from v0.59.1 to [v0.66.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.66.10). Tapping to interrupt a spoken answer now works from the web and Android clients. The SDK splits every speech and realtime voice provider into its own Go package, so an app that talks to one backend stops compiling the rest. The five Apache-2.0 Android modules resolve anonymously through JitPack, and the desktop app signs in to kombify Cloud from a Connect button without your password ever entering the app.
+
+### New features
+
+- **Interrupt the assistant from any client.** [SpeechKit v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) makes tapping to stop a spoken answer work in the web and Android clients, not only in the desktop app. Transcripts carry the speaker's label and name when speaker recognition is on, and clients read which speech backend is serving the session before the first word. See [SpeechKit modes](/speechkit/modes).
+- **Build on SpeechKit without writing glue.** [v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) lets any speech provider plug straight into the runtime, ships microphone capture as part of the framework, and lets the embeddable settings loader take a public configuration file. A golden example file for the Voice Agent wire contract is verified by the Go server, the web client, and the Android client, so a rename on one side fails the build. See [SpeechKit framework](/speechkit/framework).
+- **Manageable Words and Replacements.** [v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) makes Words and Replacements in Settings searchable, paged, and deletable. Several spoken forms can rewrite to the same word, and duplicate terms are merged on save.
+- **Depend on the one speech backend you actually use.** [v0.64.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.64.0) gives every speech provider and every realtime voice provider its own Go package and marks the old names deprecated, with a migration table for each. [v0.65.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.65.0) removes the deprecated names: a Deepgram-only application compiles 49 external packages instead of 286 and never pulls the Google Cloud or gRPC stack. Catalog entries gain a `modality` field so a host can tell a speech model from a text or embedding model, and there is one model catalog instead of two.
+- **Android modules resolve anonymously.** [v0.66.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.66.0) publishes `core`, `net`, and `domain` as Apache-2.0 AARs alongside `voice-ui-compose` and `coinstall-contract`, with JitPack as the public channel. A fresh clone builds the framework without the GPL keyboard submodule, and the four local device-agent routes are documented in the API description with their real request and response shapes.
+- **Sign in to kombify Cloud from Server settings.** [v0.66.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.66.10) makes the Connect button open the kombify sign-in page in your browser, show the code to confirm there, and point the device at the hosted service once you are signed in. Your password never enters the app, and the session is kept in the operating system's credential store. A signed-in device shows which account it uses and can sign out again.
+
+### Bug fixes
+
+- **A refused voice session explains itself.** [v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) makes a refused Voice Agent session say what to change to get in, and every error carries the id support needs to find the request.
+- **Full-capture Dictation uses the selected engine.** [v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) stops full-capture Dictation from always trying Deepgram first.
+- **The Connect button tells the truth.** [v0.66.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.66.10) stops the Connect button from reporting a ready hosted connection it never established, and Android now says when the Companion app turns down the connection because the two installed apps do not match.
+
+</Update>
+
 <Update label="2026-08-25" description="Week of Aug 18 – Aug 25">
 
 ## StackKits v0.21.10 – v0.21.24: secrets custody, safe workload removal, and public addresses; SpeechKit v0.59 meeting notes
