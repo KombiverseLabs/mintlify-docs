@@ -62,7 +62,7 @@ export function validateCatalog(document, tag) {
   if (!Array.isArray(document.catalog.useCases)) throw new Error('catalog.useCases must be an array')
   sortedUnique(document.catalog.useCases.map(item => item.id), 'catalog use-case IDs')
   for (const useCase of document.catalog.useCases) {
-    keys(useCase, ['id', 'title', 'description', 'components'], `useCase ${useCase.id ?? '?'}`)
+    keys(useCase, ['id', 'title', 'description', 'components', 'computeTiers'], `useCase ${useCase.id ?? '?'}`)
     string(useCase.id, 'useCase.id', /^[a-z][a-z0-9-]+$/)
     string(useCase.title, `${useCase.id}.title`)
     string(useCase.description, `${useCase.id}.description`)
@@ -75,8 +75,43 @@ export function validateCatalog(document, tag) {
       if (!['primary', 'alternative', 'supporting', 'connector', 'bridge'].includes(component.role)) throw new Error(`invalid component role ${component.role}`)
       if (!['application', 'module', 'service', 'connector', 'bridge'].includes(component.kind)) throw new Error(`invalid component kind ${component.kind}`)
     }
+    validateComputeTiers(useCase)
   }
   return document
+}
+
+const COMPUTE_TIERS = ['high', 'low', 'standard']
+
+/**
+ * `computeTiers` is the Unifier-readable fit of a package on one
+ * install.computeTier graph (StackKits internal/usecasecatalog UseCase). It is
+ * validated here so the pipeline binds to the real contract rather than
+ * allowlisting an opaque key, but it is deliberately not rendered: the axis was
+ * superseded by module-local profiles on 2026-09-01, and public docs must not
+ * publish a concept the product is retiring.
+ */
+function validateComputeTiers(useCase) {
+  if (useCase.computeTiers === undefined) return
+  const label = `${useCase.id}.computeTiers`
+  keys(useCase.computeTiers, COMPUTE_TIERS, label)
+  for (const [tier, fit] of Object.entries(useCase.computeTiers)) {
+    keys(fit, ['included', 'functions', 'load', 'moduleSlug', 'reason', 'notes'], `${label}.${tier}`)
+    if (typeof fit.included !== 'boolean') throw new Error(`${label}.${tier}.included must be a boolean`)
+    if (fit.functions !== undefined) {
+      if (!Array.isArray(fit.functions)) throw new Error(`${label}.${tier}.functions must be an array`)
+      for (const entry of fit.functions) string(entry, `${label}.${tier}.functions entry`)
+    }
+    if (fit.notes !== undefined) {
+      if (!Array.isArray(fit.notes)) throw new Error(`${label}.${tier}.notes must be an array`)
+      for (const entry of fit.notes) string(entry, `${label}.${tier}.notes entry`)
+    }
+    if (fit.moduleSlug !== undefined) string(fit.moduleSlug, `${label}.${tier}.moduleSlug`, /^[a-z][a-z0-9-]+$/)
+    if (fit.reason !== undefined) string(fit.reason, `${label}.${tier}.reason`)
+    if (fit.load !== undefined) {
+      keys(fit.load, ['residency', 'baseline', 'burst'], `${label}.${tier}.load`)
+      for (const field of ['residency', 'baseline', 'burst']) string(fit.load[field], `${label}.${tier}.load.${field}`)
+    }
+  }
 }
 
 export function validateCompatibility(document, tag, useCaseIDs) {
