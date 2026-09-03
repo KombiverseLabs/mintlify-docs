@@ -1,0 +1,476 @@
+{
+  "schemaVersion": "stackkits-use-case-catalog/v1",
+  "release": {
+    "tag": "v0.24.27",
+    "version": "0.24.27",
+    "sourceSha": "7f802289d057cbedb60e291bff8dd25083f180c9",
+    "publicSourceSha": "e2c612805f9d978a530c745e4cda13284e4184ae",
+    "releaseUrl": "https://github.com/kombifyio/StackKits/releases/tag/v0.24.27"
+  },
+  "generatedAt": "2026-09-03T06:36:35Z",
+  "generatorVersion": "0.24.27",
+  "catalog": {
+    "useCases": [
+      {
+        "id": "ai",
+        "title": "Private AI",
+        "description": "Private AI workloads, local model serving, and user-facing AI workbench intent.",
+        "components": [
+          {
+            "id": "ollama",
+            "name": "Ollama",
+            "role": "primary",
+            "kind": "application"
+          },
+          {
+            "id": "open-webui",
+            "name": "Open WebUI",
+            "role": "supporting",
+            "kind": "application"
+          }
+        ],
+        "computeTiers": {
+          "high": {
+            "included": false,
+            "reason": "Same as standard until SK-M5 ships. High is the intended graph (GPU node + burst interactive inference)."
+          },
+          "low": {
+            "included": false,
+            "reason": "Local inference is GPU/RAM heavy and has no lite graph substitution yet."
+          },
+          "standard": {
+            "included": false,
+            "reason": "SK-M5: Ollama/Open WebUI modules and runtime are not executable. When they are, residency is on-demand burst inference, not 24/7 training."
+          }
+        }
+      },
+      {
+        "id": "dev",
+        "title": "Developer Platform",
+        "description": "Private source control, developer collaboration, and delivery-platform intent.",
+        "components": [
+          {
+            "id": "gitea",
+            "name": "Gitea",
+            "role": "primary",
+            "kind": "application"
+          }
+        ],
+        "computeTiers": {
+          "high": {
+            "included": false,
+            "reason": "Same as standard until SK-M5. CI batch bursts belong on high headroom, not on low."
+          },
+          "low": {
+            "included": false,
+            "reason": "Gitea+CI is not on the Basement low graph."
+          },
+          "standard": {
+            "included": false,
+            "reason": "SK-M5: Gitea module is not executable. Intended load is always-on idle git host with interactive and batch CI bursts."
+          }
+        }
+      },
+      {
+        "id": "files",
+        "title": "File Storage and Documents",
+        "description": "Private file storage, sharing, collaboration, and document-management workflows.",
+        "components": [
+          {
+            "id": "cloudreve",
+            "name": "Cloudreve",
+            "role": "primary",
+            "kind": "application"
+          },
+          {
+            "id": "nextcloud",
+            "name": "Nextcloud",
+            "role": "alternative",
+            "kind": "application"
+          }
+        ],
+        "computeTiers": {
+          "high": {
+            "included": true,
+            "functions": [
+              "files",
+              "document-storage",
+              "file-sharing"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "cloudreve",
+            "notes": [
+              "A high profile does not add collaboration or DMS. Those need their own admitted workload and lifecycle contracts."
+            ]
+          },
+          "low": {
+            "included": true,
+            "functions": [
+              "files",
+              "document-storage",
+              "file-sharing"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "cloudreve",
+            "notes": [
+              "Lightweight sharing. Nextcloud is not a native workload on any profile."
+            ]
+          },
+          "standard": {
+            "included": true,
+            "functions": [
+              "files",
+              "document-storage",
+              "file-sharing"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "cloudreve",
+            "notes": [
+              "Nextcloud remains planned product intent, not a selectable native alternative."
+            ]
+          }
+        }
+      },
+      {
+        "id": "game",
+        "title": "Game Server",
+        "description": "Self-hosted multiplayer game-server intent for a household or community.",
+        "components": [
+          {
+            "id": "gameserver",
+            "name": "Game Server Runtime",
+            "role": "primary",
+            "kind": "application"
+          }
+        ],
+        "computeTiers": {
+          "high": {
+            "included": false,
+            "reason": "Post-1.0. Same as standard; dedicated always-on game hosts would be a later high-graph choice."
+          },
+          "low": {
+            "included": false,
+            "reason": "Post-1.0. Game servers are on-demand session load, not a low-graph resident."
+          },
+          "standard": {
+            "included": false,
+            "reason": "Post-1.0. Intended load is on-demand: idle none, burst interactive while a session runs."
+          }
+        }
+      },
+      {
+        "id": "mail",
+        "title": "Private Mail",
+        "description": "Private mail delivery, mailbox, and communication intent.",
+        "components": [
+          {
+            "id": "stalwart",
+            "name": "Stalwart Mail Server",
+            "role": "primary",
+            "kind": "application"
+          }
+        ],
+        "computeTiers": {
+          "high": {
+            "included": false,
+            "reason": "Post-1.0. Same functions as standard; reputation/filter extras would be high-graph substitutions."
+          },
+          "low": {
+            "included": false,
+            "reason": "Mail is post-1.0. A mail stack is always-on active-resident (SMTP/IMAP) and does not fit low until a lite contract exists."
+          },
+          "standard": {
+            "included": false,
+            "reason": "Post-1.0. Intended load is 24/7 inbound/outbound with interactive bursts when reading mail."
+          }
+        }
+      },
+      {
+        "id": "media",
+        "title": "Media Library",
+        "description": "Private media library and streaming intent for household media collections.",
+        "components": [
+          {
+            "id": "jellyfin",
+            "name": "Jellyfin",
+            "role": "primary",
+            "kind": "application"
+          }
+        ],
+        "computeTiers": {
+          "high": {
+            "included": true,
+            "functions": [
+              "media-server",
+              "video-stream"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "jellyfin",
+            "notes": [
+              "Same functions as standard until a high-graph media substitution exists."
+            ]
+          },
+          "low": {
+            "included": false,
+            "reason": "Jellyfin library + transcode is not on the Basement low graph. Needs a lite substitution before it can be included."
+          },
+          "standard": {
+            "included": true,
+            "functions": [
+              "media-server",
+              "video-stream"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "jellyfin",
+            "notes": [
+              "Library waits; playback and transcode are the spike. Catalog alternative jellyfin on standard/high."
+            ]
+          }
+        }
+      },
+      {
+        "id": "photos",
+        "title": "Photos and Memories",
+        "description": "Family photo and video vault with mobile backup, search, and shared memories.",
+        "components": [
+          {
+            "id": "immich",
+            "name": "Immich",
+            "role": "primary",
+            "kind": "application"
+          }
+        ],
+        "computeTiers": {
+          "high": {
+            "included": true,
+            "functions": [
+              "photos",
+              "photo-management",
+              "media-backup",
+              "ai-search"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "active-resident",
+              "burst": "ingest"
+            },
+            "moduleSlug": "immich",
+            "notes": [
+              "Same photo functions as standard until a high-graph substitution exists. Extra headroom is kit high, not extra Immich features."
+            ]
+          },
+          "low": {
+            "included": true,
+            "functions": [
+              "photos",
+              "photo-management",
+              "media-backup"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "ingest"
+            },
+            "moduleSlug": "immich-lite",
+            "notes": [
+              "No ML search. Catalog alternative immich-lite on standalone-compose. Kit graph also substitutes stackkits-immich-lite-runtime. Mobile backup is the spike; the library otherwise waits."
+            ]
+          },
+          "standard": {
+            "included": true,
+            "functions": [
+              "photos",
+              "photo-management",
+              "media-backup",
+              "ai-search"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "active-resident",
+              "burst": "ingest"
+            },
+            "moduleSlug": "immich",
+            "notes": [
+              "ML worker is resident base load. Ingest and interactive search are bursts on top."
+            ]
+          }
+        }
+      },
+      {
+        "id": "remote",
+        "title": "Remote Desktop",
+        "description": "Private remote desktop and browser-accessible workspace intent.",
+        "components": [
+          {
+            "id": "guacamole",
+            "name": "Apache Guacamole",
+            "role": "primary",
+            "kind": "application"
+          }
+        ],
+        "computeTiers": {
+          "high": {
+            "included": false,
+            "reason": "Same as standard until SK-M5."
+          },
+          "low": {
+            "included": false,
+            "reason": "Guacamole is SK-M5 and not on the low graph."
+          },
+          "standard": {
+            "included": false,
+            "reason": "SK-M5: no executable module. Intended load is always-on idle gateway with interactive session bursts."
+          }
+        }
+      },
+      {
+        "id": "smart-home",
+        "title": "Smart Home",
+        "description": "Home automation centered on Home Assistant, native product interfaces, and optional local device adjacency.",
+        "components": [
+          {
+            "id": "home-assistant",
+            "name": "Home Assistant",
+            "role": "primary",
+            "kind": "application"
+          }
+        ],
+        "computeTiers": {
+          "high": {
+            "included": true,
+            "functions": [
+              "smart-home-hub",
+              "native-product-mcp",
+              "assist-api",
+              "automation"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "active-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "home-assistant",
+            "notes": [
+              "Same OSS functions as standard. Managed/hybrid profiles are realization, not a kit graph."
+            ]
+          },
+          "low": {
+            "included": true,
+            "functions": [
+              "smart-home-hub",
+              "automation"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "active-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "home-assistant",
+            "notes": [
+              "24/7 radio/state loop is the base load. Classic constrained-device resident. Native MCP and extra bridges stay optional."
+            ]
+          },
+          "standard": {
+            "included": true,
+            "functions": [
+              "smart-home-hub",
+              "native-product-mcp",
+              "assist-api",
+              "automation"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "active-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "home-assistant"
+          }
+        }
+      },
+      {
+        "id": "vault",
+        "title": "Password Vault",
+        "description": "Private password and secure-note vault with owner-controlled lifecycle and recovery.",
+        "components": [
+          {
+            "id": "vaultwarden",
+            "name": "Vaultwarden",
+            "role": "primary",
+            "kind": "application"
+          }
+        ],
+        "computeTiers": {
+          "high": {
+            "included": true,
+            "functions": [
+              "password-manager",
+              "secure-notes",
+              "totp"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "vaultwarden",
+            "notes": [
+              "No extra vault functions on high until a graph substitution exists."
+            ]
+          },
+          "low": {
+            "included": true,
+            "functions": [
+              "password-manager",
+              "secure-notes",
+              "totp"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "vaultwarden",
+            "notes": [
+              "Always resident for unlock/sync; almost no idle CPU. Fits the low graph."
+            ]
+          },
+          "standard": {
+            "included": true,
+            "functions": [
+              "password-manager",
+              "secure-notes",
+              "totp"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "vaultwarden"
+          }
+        }
+      }
+    ]
+  },
+  "contentDigest": "sha256:a3d21606ebb48f1f26ef2c4852d6d4866cbe9ef85ca8ffb50d05c79a14a133f3"
+}
