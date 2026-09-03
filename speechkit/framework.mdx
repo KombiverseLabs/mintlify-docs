@@ -20,7 +20,7 @@ credentials instead of depending on a separate SpeechKit server.
 Pin the current public release explicitly:
 
 ```bash
-go get github.com/kombifyio/SpeechKit@v0.65.1
+go get github.com/kombifyio/SpeechKit@v0.67.14
 ```
 
 Use only the packages required by your host. The public project includes
@@ -62,6 +62,29 @@ provider and exports `Build`, `Register`, `BuildRouter`, and
 `pkg/speechkit/voiceagent/live/allproviders` does the same for the realtime
 providers.
 
+## Root package holds contracts only
+
+Since v0.67.x, the root package `speechkit` contains only contracts and value
+types. Interfaces such as `AudioRecorder`, `Transcriber`, and
+`TranscriptOutput`, value types such as `Transcript` and `Submission`, the
+`Runtime`, the event bus, and the policy helpers stay in the root.
+Implementations moved one level down:
+
+- `pkg/speechkit/pipeline` owns the capture-to-transcript engine:
+  `RecordingController`, `TranscriptionWorker`, `TranscriptionRunner`, the
+  dictation segmenters, and the `LiveCommit*` policy helpers.
+- `pkg/speechkit/catalog` owns the shipped provider and model data:
+  `Catalog`, `DefaultCatalog`, the provider and model id constants, and the
+  model registry. `catalog.DefaultCatalog().With(profile...)` returns an
+  immutable catalog extended with your own provider profiles, validated
+  against the mode contracts.
+
+Importing the root no longer pulls in the provider catalog or the capture
+pipeline. Migration is a mechanical import rewrite: replace `speechkit.X` with
+`pipeline.X` or `catalog.X`, and the compiler flags every remaining call site.
+The `dictation`, `assist`, `tts`, `voiceagent`, `companion`, and `client`
+packages are unaffected.
+
 ## Migrate from pre-v0.64 imports
 
 The provider names that used to live directly in `pkg/speechkit/stt` and
@@ -94,6 +117,22 @@ The helpers a provider or host needs are part of the public surface:
 - `RecordOutcome` takes SpeechKit's own attribute type instead of
   OpenTelemetry types, so reporting a framework outcome no longer puts a
   tracing vendor in your signatures.
+- STT hooks are per instance instead of process-wide since v0.67.x.
+  `stt.Router.OnProviderSelected` replaces the global
+  `stt.SetProviderSelectedObserver`, and `stt.SecretResolver` is set per
+  router or provider (`allproviders.EnabledProviders.Secrets`,
+  `google.Provider.SecretResolver`) instead of through
+  `stt.SetSecretResolver`. Two routers in one process no longer share hidden
+  state. The old globals remain as deprecated fallbacks.
+- The voice-agent and assist layers expose shared sentinel errors. All
+  `voiceagent/live` providers wrap `live.ErrNotConnected`,
+  `live.ErrSessionNotReady`, `live.ErrMissingAPIKey`,
+  `live.ErrMissingEndpoint`, and `live.ErrNoResumableSession`, so hosts
+  branch with `errors.Is` instead of matching provider-specific message
+  text.
+- The wake-word surface compiles with `CGO_ENABLED=0`. `wakeword.NewPipeline`
+  and `wakeword.ErrCgoRequired` exist in every build, so a host learns about
+  a missing native engine at runtime instead of failing to compile.
 
 ## Client SDKs
 
@@ -109,10 +148,12 @@ The same public project distributes client SDKs without credentials:
 
 ## Continue with public examples
 
-- [Framework API](https://github.com/kombifyio/SpeechKit/blob/v0.65.1/docs/speechkit-framework-api.md)
-- [Voice Companion](https://github.com/kombifyio/SpeechKit/blob/v0.65.1/docs/voice-companion.md)
-- [Runnable examples](https://github.com/kombifyio/SpeechKit/tree/v0.65.1/examples)
-- [SDK surface boundary](https://github.com/kombifyio/SpeechKit/blob/v0.65.1/docs/architecture/sdk-surface-boundary.md)
+- [SDK quickstart](https://github.com/kombifyio/SpeechKit/blob/v0.67.14/docs/sdk/README.md)
+- [Custom provider guide](https://github.com/kombifyio/SpeechKit/blob/v0.67.14/docs/sdk/custom-provider.md)
+- [Framework API](https://github.com/kombifyio/SpeechKit/blob/v0.67.14/docs/speechkit-framework-api.md)
+- [Voice Companion](https://github.com/kombifyio/SpeechKit/blob/v0.67.14/docs/voice-companion.md)
+- [Runnable examples](https://github.com/kombifyio/SpeechKit/tree/v0.67.14/examples)
+- [SDK surface boundary](https://github.com/kombifyio/SpeechKit/blob/v0.67.14/docs/architecture/sdk-surface-boundary.md)
 
 <Note>
 The framework is beta. Keep the module version pinned and review the changelog
