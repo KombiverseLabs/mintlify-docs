@@ -19,16 +19,38 @@ For a VPS you operate, initialize a Cloud Kit with a domain you control:
 stackkit init cloud-kit --domain example.com --owner-source=local
 ```
 
-## Compute tier and hardware profile
+## Module-local compute profiles
 
-Two init flags declare hardware sizing intent in the StackSpec:
+Native `stackkit/v2alpha2` sizes each selected module independently instead of declaring one kit-wide tier:
 
-- `--compute-tier` writes `install.computeTier` (`low` | `standard` | `high`, default `standard`). The value selects a module graph the kit declares. Basement Kit publishes all three graphs; Cloud Kit and Modern Home Lab publish only `standard` and `high`. A tier the kit does not declare fails closed at init and compile. Apply executes the selected graph; it does not choose it, and inventory does not rewrite it.
-- `--hardware-profile` writes `nodes[0].hardware.profile` (`standard` | `pi` | `gpu` | `storage`). `pi` means a constrained homelab device class such as an SBC or a low-RAM mini-PC, not a Raspberry Pi specifically. It is a device class, not an architecture, and it does not imply `computeTier: low`.
+- `--use-case-alternative use-case-id=alternative` writes `workloads.<use_case_id>.alternative`. It selects the workload implementation, including required core workloads. Native authoring never silently replaces an unavailable alternative.
+- `--module-compute-profile module-id=profile` writes `modules.<module_id>.computeProfile`. Every selected resource-bearing module requires an explicit selection; `standard` is not an implicit fallback, and undeclared profiles fail closed. Profile names such as `low`, `standard`, and `high` are module-scoped identifiers, not a kit-wide quality promise.
+- `--module-storage-profile` and `--module-accelerator-profile` select independently declared storage and accelerator dimensions on modules that declare them.
 
 ```bash
-stackkit init basement-kit --owner-source=local --compute-tier low --hardware-profile pi
+stackkit init basement-kit --owner-source=local \
+  --use-case photos \
+  --use-case-alternative basement-core=standalone-lite \
+  --use-case-alternative photos=immich \
+  --module-compute-profile stackkits-basement-core-lite-runtime=low \
+  --module-compute-profile stackkits-immich-runtime=standard
 ```
+
+A profile refines an already selected module. It cannot enable another workload, choose a device class, or be inferred from inventory. A low core profile with a standard Immich profile is a valid mixed selection.
+
+## Legacy compute tier (v2alpha1)
+
+The kit-wide `install.computeTier` graph (`low` | `standard` | `high`, default `standard`) remains available only through the explicit `stackkit/v2alpha1` compatibility adapter. `--compute-tier` is accepted only with `--api-version stackkit/v2alpha1`:
+
+```bash
+stackkit init basement-kit --owner-source=local --api-version stackkit/v2alpha1 --compute-tier low
+```
+
+Basement Kit declares all three legacy graphs; Cloud Kit and Modern Home Lab declare only `standard` and `high`. A tier the kit does not declare fails closed at init and compile. Apply executes the selected graph; it does not choose it, and inventory does not rewrite it. Adopting `v2alpha2` requires explicit native selections, not relabeling an existing spec.
+
+## Hardware profile
+
+`--hardware-profile` writes `nodes[0].hardware.profile` (`standard` | `pi` | `gpu` | `storage`). `pi` means a constrained homelab device class such as an SBC or a low-RAM mini-PC, not a Raspberry Pi specifically. It is a device class, not an architecture, and it is independent of compute profiles and the legacy `computeTier`.
 
 On a multi-node StackSpec, `stackkit generate` accepts `--local-site` and `--local-node` to name the node whose local inventory is attested. This is the same binding Apply uses.
 
@@ -39,17 +61,19 @@ Core runtimes declare minimum attested CPU, RAM, and disk floors. Apply attests 
 - `inventory-fact-unverified` blocks Apply when a required inventory fact is missing.
 - `runtime-capacity-unsatisfied` blocks Apply when the attested host is undersized for the selected graph.
 
-Generation can still succeed while Apply is blocked. Correct the host or select a tier the host satisfies, then regenerate and apply.
+Generation can still succeed while Apply is blocked. Correct the host or select profiles the host satisfies, then regenerate and apply.
+
+The compiler aggregates only declared CPU, RAM, and storage facts per target node: host floors use the maximum across selected modules, reservations add, and missing facts stay unknown rather than being treated as zero or `standard`. Required host facts must be observed in inventory before Apply, not inferred from declared hardware intent.
 
 `validate` is authoritative for the installed release. When you change intent, edit the complete StackSpec created by `init`, validate it, regenerate artifacts, and inspect `stackkit plan --json`. Do not place provider credentials, plaintext secrets, server procurement details, or generated rollout state in the StackSpec.
 
-The current document is `stackkit/v2alpha1`. Its main intent groups are:
+The current document is `stackkit/v2alpha2`. Existing `stackkit/v2alpha1` files continue through the explicit compatibility adapter. The main intent groups are:
 
 - `metadata`, `kit`, and `source` for identity and lineage
-- `install` and `generation` for lifecycle, compute tier, and output strategy
+- `install` and `generation` for lifecycle and output strategy
 - `storage`, `container`, and `network` for local runtime intent
 - `sites`, `nodes`, and `controlPlane` for placement
-- `capabilities`, `workloads`, and `modules` for governed selections
+- `capabilities`, `workloads`, and `modules` for governed selections, workload alternatives, and module profiles
 - `backupPolicy` and `driftPolicy` for evidence policy
 
 See [Configure a StackSpec](/guides/stackkits/configure-stack-spec) for release-validated excerpts.

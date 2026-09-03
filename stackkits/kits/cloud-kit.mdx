@@ -48,15 +48,16 @@ Use a domain you own in place of `example.com`. Keep the StackSpec and verificat
 
 Re-running the Cloud installer on a workspace that already carries deployment intent skips initialization and resumes `stackkit apply` from the apply journal instead of failing.
 
-## Compute tiers
+## Compute sizing
 
-Cloud Kit declares the `standard` and `high` compute tier graphs. It does not declare `low`, so `stackkit init cloud-kit --compute-tier low` fails closed at init and compile. `high` adds the `telemetry-collection` capability to the `standard` graph:
+Native `stackkit/v2alpha2` sizes each selected module with an explicit `--module-compute-profile`; undeclared profiles fail closed. On the legacy `stackkit/v2alpha1` adapter, Cloud Kit declares only the `standard` and `high` kit-wide tier graphs. It does not declare `low`, so `--api-version stackkit/v2alpha1 --compute-tier low` fails closed at init and compile. Legacy `high` adds the `telemetry-collection` capability to the `standard` graph:
 
 ```bash
-stackkit init cloud-kit --domain example.com --owner-source=local --compute-tier high
+stackkit init cloud-kit --domain example.com --owner-source=local \
+  --api-version stackkit/v2alpha1 --compute-tier high
 ```
 
-Before Apply changes the host, the compiler attests the local CPU, RAM, and disk inventory against the selected graph's capacity floors. Missing facts block Apply with `inventory-fact-unverified`; an undersized host blocks it with `runtime-capacity-unsatisfied`. See [Compute tiers on Basement Kit](/stackkits/kits/basement-kit#compute-tiers) for the tier model.
+Before Apply changes the host, the compiler attests the local CPU, RAM, and disk inventory against the selected profiles' capacity floors. Missing facts block Apply with `inventory-fact-unverified`; an undersized host blocks it with `runtime-capacity-unsatisfied`. See [Compute sizing on Basement Kit](/stackkits/kits/basement-kit#compute-sizing) for the profile model.
 
 ## Compare with Basement Kit
 

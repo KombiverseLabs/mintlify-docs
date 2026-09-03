@@ -5,7 +5,7 @@ sidebarTitle: "Basement Kit"
 icon: house
 ---
 
-Basement Kit is the current local profile in the public `v0.22.0` release. Use it for a homelab on hardware you already control, with one home site and a local owner.
+Basement Kit is the current local profile in the public `v0.23.0` release. Use it for a homelab on hardware you already control, with one home site and a local owner.
 
 ## What it provides
 
@@ -32,25 +32,30 @@ stackkit verify --http --json
 
 Run the commands from the StackKits workspace. Do not modify generated rollout files; change the StackSpec and re-run validation instead.
 
-## Compute tiers
+## Compute sizing
 
-`install.computeTier` selects one of the module graphs Basement Kit declares. Set it with `stackkit init basement-kit --compute-tier <tier>`; the default is `standard`. Apply executes the selected graph and never chooses or rewrites it.
+Native `stackkit/v2alpha2` sizes each module independently. Select a workload alternative per use case and an explicit compute profile per selected module; undeclared profiles fail closed and `standard` is never filled in silently. For constrained hardware such as an SBC or a low-RAM mini-PC, select the standalone core-lite runtime with its `low` profile:
+
+```bash
+stackkit init basement-kit --owner-source=local --hardware-profile pi \
+  --use-case photos \
+  --use-case-alternative basement-core=standalone-lite \
+  --use-case-alternative photos=immich \
+  --module-compute-profile stackkits-basement-core-lite-runtime=low \
+  --module-compute-profile stackkits-immich-runtime=standard
+```
+
+Core Lite `low` means standalone Compose without Coolify. It does not force Photos or Media to the same profile: a low core with a standard Immich profile is a valid mixed selection, and Immich Lite (Immich without machine learning) is a separate workload alternative rather than an implicit consequence of selecting Core Lite. Jellyfin (Media) declares module-local `standard` and `high` profiles.
+
+The legacy kit-wide `install.computeTier` graphs remain available with `--api-version stackkit/v2alpha1 --compute-tier <tier>`:
 
 | Tier | Module graph | Minimum host |
 | --- | --- | --- |
-| `low` | Standalone Compose with the core-lite runtime, no Coolify, Immich without machine learning | 2 CPU cores, 2 GB RAM, 10 GB disk |
+| `low` | Standalone Compose with the core-lite runtime, no Coolify, Immich without machine learning, no Media | 2 CPU cores, 2 GB RAM, 10 GB disk |
 | `standard` | Coolify PaaS plus Immich with machine learning | 2 CPU cores, 4 GB RAM, 20 GB disk |
 | `high` | `standard` plus the `telemetry-collection` capability | 2 CPU cores, 4 GB RAM, 20 GB disk |
 
-Use `low` for constrained hardware such as an SBC or a low-RAM mini-PC:
-
-```bash
-stackkit init basement-kit --owner-source=local --compute-tier low --hardware-profile pi
-```
-
-Use-case selections declare per-tier fits on the graph. On `low`, Photos is Immich without the machine-learning worker, Vault remains available as an idle-resident service, and Media is omitted until a lite runtime exists. A use case without a declared fit for the selected tier fails closed at init and compile.
-
-Host preflight and compiler admission use the selected graph's capacity floors. Apply attests the local CPU, RAM, and disk inventory first and blocks with `inventory-fact-unverified` or `runtime-capacity-unsatisfied` when facts are missing or the host is undersized.
+Host preflight and compiler admission use the selected profiles' capacity floors. Apply attests the local CPU, RAM, and disk inventory first and blocks with `inventory-fact-unverified` or `runtime-capacity-unsatisfied` when facts are missing or the host is undersized. See [StackSpec](/stackkits/reference/spec-format) for the full profile and admission semantics.
 
 ## When to use another kit
 
