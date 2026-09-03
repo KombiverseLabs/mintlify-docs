@@ -7,6 +7,48 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits](https://github.com/kombifyio/stackKits/releases), [SpeechKit](https://github.com/kombifyio/SpeechKit/releases), and [Techstack](https://github.com/kombifyio/TechStack/releases) release notes on GitHub.
 
+<Update label="2026-09-03" description="Week of Aug 29 – Sep 3">
+
+## StackKits recoverable Homelab lifecycle, SpeechKit kombify Cloud sign-in
+
+StackKits rolled from v0.23.0 to [v0.24.27](https://github.com/kombifyio/stackKits/releases/tag/v0.24.27). The headline is the recoverable Homelab lifecycle in [v0.24.2](https://github.com/kombifyio/stackKits/releases/tag/v0.24.2): owner-approved scheduled backups, an age-encrypted emergency archive you can restore without the original host, signed restore abandonment and activation recovery, a checkpointed `stackkit upgrade`, `stackkit drift reconcile`, guided owner onboarding with `stackkit setup <workload>`, and a per-application experience view in `stackkit status`. SpeechKit shipped [v0.66.25](https://github.com/kombifyio/SpeechKit/releases/tag/v0.66.25) through [v0.67.15](https://github.com/kombifyio/SpeechKit/releases/tag/v0.67.15): sign in to kombify Cloud from the desktop Connect button, plus meeting fixes in the v0.67.x patches.
+
+### New features
+
+- **Owner-approved scheduled backups.** [StackKits v0.24.2](https://github.com/kombifyio/stackKits/releases/tag/v0.24.2) adds `stackkit backup schedule enable --owner-approve`, which binds a local systemd timer to the current Plan, Apply, CLI, and CUE cadence. `backup schedule status --json` separates authorization, timer state, and the last signed snapshot, and `backup schedule disable --owner-approve` revokes dispatch before stopping the timer. A CUE schedule alone grants no unattended execution authority. See [Back up and restore](/guides/stackkits/back-up-and-restore).
+- **Emergency export and restore that work off-host.** `stackkit backup emergency-export` writes an age-encrypted portable archive with a checksummed manifest and a restore runbook, and `stackkit backup emergency-restore` authenticates and stages that archive on any machine with only the CLI and your age identity file. No Kopia repository or original host is required. See [Recovery-first Homelab](/guides/stackkits/use-cases/recovery-first-homelab).
+
+```bash
+stackkit backup emergency-export \
+  --recipient age1PUBLIC_RECIPIENT \
+  --source config=/opt/stacks \
+  --target /backup/emergency-export --json
+```
+
+- **Signed restore abandonment and activation recovery.** `stackkit backup restore abandon <restore-operation-id> --owner-approve` signs terminal abandonment of an exact pending or staged restore without changing repository data or live volumes. `stackkit backup restore recover <activation-operation-id> --owner-approve --rollback` resumes an interrupted activation: before commit it rolls back and verifies the prior runtime, after commit it preserves activated data and finishes cleanup. See [Back up and restore](/guides/stackkits/back-up-and-restore).
+- **Guided owner onboarding with `stackkit setup <workload>`.** One command creates or verifies the application owner on an applied workload from a private credential file, then records a secret-free, Plan-bound setup receipt. Photos, Files, Media, Vault, and Smart Home are supported, and the equivalent MCP tool is `stackkit_setup`. See [Operate a StackKit](/stackkits/reference/day-2-operations).
+
+```bash
+stackkit setup photos \
+  --credentials-file .stackkit/setup/owner.json \
+  --owner-approve \
+  --complete-onboarding \
+  --json
+```
+
+- **Checkpointed `stackkit upgrade`.** `stackkit upgrade` is now the canonical public command for a verified whole-Kit release. An already-authorized operation that was interrupted recovers through its signed lifecycle journal and checkpoint instead of fresh-upgrade admission, and [v0.24.24](https://github.com/kombifyio/stackKits/releases/tag/v0.24.24) requires verified data activation before any prior-runtime restart.
+- **Reconcile drift, not just detect it.** `stackkit drift reconcile --mode standard|advanced` repairs verified drift through the shared checkpointed lifecycle transaction. Standard mode requires local owner approval and a mandatory checkpoint before Generate, Apply, and Verify run. `stackkit drift detect` stays read-only.
+- **See each application's experience in `stackkit status`.** The new `applications` projection reports installation, client access, initial setup, usability, and recovery per selected workload, each with its own state, reason, timestamp, and evidence reference. See [Monitoring](/stackkits/reference/monitoring).
+- **Sign in to kombify Cloud from the SpeechKit desktop app.** [SpeechKit v0.66.25](https://github.com/kombifyio/SpeechKit/releases/tag/v0.66.25) makes the Connect button in Server settings open the kombify sign-in page in your browser, show the code to confirm there, and point the device at the hosted service once you are signed in. Your password never enters the app, and the session is kept in the operating system's credential store. A signed-in device shows which account it is using and can sign out again. See [SpeechKit overview](/speechkit/overview).
+
+### Bug fixes
+
+- **Meeting transcription stays out of dictation.** [SpeechKit v0.67.12](https://github.com/kombifyio/SpeechKit/releases/tag/v0.67.12) runs meeting transcription on its own pipeline, fully separated from dictation. What is said in a call no longer flashes the dictation overlay, fills the dictation history, or becomes the "last transcription" that the copy and insert shortcuts reuse.
+- **Multi-language write-up progress is truthful.** [v0.67.12](https://github.com/kombifyio/SpeechKit/releases/tag/v0.67.12) makes write-up progress follow the language that is actually running instead of a queued job stuck at 0%, showing the real preparation, generation, and persistence phases.
+- **The meeting screenshot picker appears.** [v0.67.15](https://github.com/kombifyio/SpeechKit/releases/tag/v0.67.15) fixes the picked-window screenshot picker, which never appeared and ended every camera-button click in "Screenshot cancelled." Picker setup failures are now reported as errors instead of cancellations.
+
+</Update>
+
 <Update label="2026-08-28" description="Week of Aug 22 – Aug 28">
 
 ## SpeechKit meeting notes and LAN discovery, StackKits public addresses and compute tiers
