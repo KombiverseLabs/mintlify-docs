@@ -19,6 +19,7 @@ $executableExamplePages = [System.Collections.Generic.HashSet[string]]::new(
 @(
     "guides/stackkits/application-delivery.mdx",
     "guides/stackkits/back-up-and-restore.mdx",
+    "guides/stackkits/choosing-a-kit.mdx",
     "guides/stackkits/configure-stack-spec.mdx",
     "guides/stackkits/review-plan-and-apply.mdx",
     "guides/stackkits/use-cases/private-file-library.mdx",
@@ -35,6 +36,9 @@ $executableExamplePages = [System.Collections.Generic.HashSet[string]]::new(
 ) | ForEach-Object { $executableExamplePages.Add($_) | Out-Null }
 
 $allowedInlineCommands = @{
+    "guides/stackkits/configure-stack-spec.mdx" = @(
+        "stackkit secrets materialize"
+    )
     "guides/stackkits/use-cases/private-file-library.mdx" = @(
         "stackkit init"
     )
@@ -42,9 +46,12 @@ $allowedInlineCommands = @{
         "stackkit app compatibility --json"
     )
     "stackkits/reference/day-2-operations.mdx" = @(
+        "stackkit init",
         "stackkit validate",
+        "stackkit secrets materialize",
         "stackkit generate",
         "stackkit plan --json",
+        "stackkit remove",
         "stackkit verify --http --json",
         "stackkit --help"
     )
@@ -85,6 +92,10 @@ $inlineCommandCount = 0
 
 foreach ($file in $mdxFiles) {
     $relative = $file.FullName.Substring($RepoRoot.Length).TrimStart("\", "/").Replace("\", "/")
+    # Release history records shipped CLI contracts; it is not a topic workflow.
+    if ($relative -eq "changelog/overview.mdx") {
+        continue
+    }
     $lines = Get-Content -LiteralPath $file.FullName
     $content = $lines -join "`n"
     $inFence = $false

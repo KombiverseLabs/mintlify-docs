@@ -41,6 +41,35 @@ test('rejects internal fields and positive OS claims without evidence', () => {
   assert.throws(() => validateCompatibility(compatibility, 'v9.9.9', new Set(['files'])), Error)
 })
 
+test('accepts the published compute-tier fit and still rejects a malformed one', () => {
+  // StackKits publishes `computeTiers` on every use case since v0.22.0
+  // (internal/usecasecatalog UseCase.ComputeTiers). The consumer rejected it as
+  // an unknown field, so every release sync since then failed and the public
+  // docs stayed pinned to an old tag.
+  const { catalog } = fixture()
+  catalog.catalog.useCases[0].computeTiers = {
+    high: { included: true, functions: ['sync', 'share'], moduleSlug: 'cloudreve', load: { residency: 'always-on', baseline: 'low', burst: 'medium' } },
+    low: { included: false, reason: 'Not part of the low graph.', notes: ['Revisit after SK-M5.'] },
+    standard: { included: true },
+  }
+  catalog.contentDigest = canonicalDigest(catalog)
+  assert.equal(validateCatalog(catalog, 'v9.9.9'), catalog)
+
+  // The field is validated against its real shape, not allowlisted: an unknown
+  // tier, an unknown fit key, or a non-boolean `included` must still fail.
+  for (const mutate of [
+    doc => { doc.catalog.useCases[0].computeTiers.gigantic = { included: true } },
+    doc => { doc.catalog.useCases[0].computeTiers.standard.gates = [] },
+    doc => { doc.catalog.useCases[0].computeTiers.standard.included = 'yes' },
+    doc => { doc.catalog.useCases[0].computeTiers.high.load.residency = '' },
+  ]) {
+    const broken = structuredClone(catalog)
+    mutate(broken)
+    broken.contentDigest = canonicalDigest(broken)
+    assert.throws(() => validateCatalog(broken, 'v9.9.9'), Error)
+  }
+})
+
 test('is idempotent and never downgrades latest', () => {
   const temp = mkdtempSync(path.join(tmpdir(), 'stackkits-docs-'))
   const input = path.join(temp, 'input'), oldInput = path.join(temp, 'old'), repo = path.join(temp, 'repo')

@@ -7,7 +7,7 @@
 
 ## Kombify Development Standard
 
-1. Phase determines rigor: product SemVer below 1.0.0 selects `fast-pre-1.0` — the affected deterministic gate is the only synchronous gate, and broad suites are 1.0-promotion evidence, never development gates. Route implementation, bug fixing, test selection or cleanup, local live testing, and pre-1.0 merge or activation decisions through `$kombify-fast-development` from the internal `kombify-plugin`; repository rules may narrow it but never weaken it.
+1. Phase determines rigor: product SemVer below 1.0.0 selects `fast-pre-1.0` — the affected deterministic gate is the only synchronous gate, and broad suites are 1.0-promotion evidence, never development gates. Route implementation, bug fixing, test selection or cleanup, local live testing, and pre-1.0 merge or activation decisions through `$kombify-fast-development` from the internal `kombify-development` plugin; repository rules may narrow it but never weaken it.
 2. Test behavior at public boundaries (CLI contracts, HTTP/OpenAPI, CUE schemas, cross-repo fixtures); black-box tests are the default, and a white-box test needs a stated reason.
 3. A new test needs one of three reasons — reproduced regression, stable core invariant, or registered sensitive boundary (auth, billing, migrations, provider control, signing) — otherwise none.
 4. Never assert structure: no exact error strings, element or field counts, source-text greps, or internal snapshots; assert the effect. Golden files only for genuine external contracts.
@@ -99,7 +99,7 @@ bd close <id>         # Complete work
 **MANDATORY WORKFLOW:**
 
 1. **File issues for remaining work** - Create issues for anything that needs follow-up
-2. **Run quality gates** (if code changed) - Tests, linters, builds
+2. **Run the affected gate** (if code changed) - follow `$kombify-fast-development`; do not expand to broad suites by default
 3. **Update issue status** - Close finished work, update in-progress items
 4. **PUSH TO REMOTE** - This is MANDATORY:
    ```bash

@@ -1,5 +1,3 @@
-#!/usr/bin/env sh
-# --- BEGIN KOMBIFY BEADS MERGE GUARD (platform-qsts1) ---
 # KOMBIFY BEADS HOOK SAFETY VERSION: 1
 # Import records that exist only in the working-tree .beads/issues.jsonl before
 # beads exports the local DB over that file. `git pull --rebase` fires no
@@ -66,31 +64,3 @@ if [ "$_kb_skip_beads_hook" -eq 0 ] && [ -n "$_kb_guard" ]; then
 elif [ "$_kb_skip_beads_hook" -eq 0 ]; then
   echo >&2 "beads merge guard: scripts/beads-hook-precommit.sh not found; pulled tracker records may be dropped by the beads export (platform-qsts1)."
 fi
-# --- END KOMBIFY BEADS MERGE GUARD (platform-qsts1) ---
-# --- BEGIN KOMBIFY BEADS TARGET WRAPPER (platform-qsts1) ---
-if [ "${_kb_skip_beads_hook:-0}" -ne 1 ]; then
-# --- BEGIN BEADS INTEGRATION v1.0.3 ---
-# This section is managed by beads. Do not remove these markers.
-if command -v bd >/dev/null 2>&1; then
-  export BD_GIT_HOOK=1
-  _bd_timeout=${BEADS_HOOK_TIMEOUT:-300}
-  if command -v timeout >/dev/null 2>&1; then
-    timeout "$_bd_timeout" bd hooks run post-checkout "$@"
-    _bd_exit=$?
-    if [ $_bd_exit -eq 124 ]; then
-      echo >&2 "beads: hook 'post-checkout' timed out after ${_bd_timeout}s — continuing without beads"
-      _bd_exit=0
-    fi
-  else
-    bd hooks run post-checkout "$@"
-    _bd_exit=$?
-  fi
-  if [ $_bd_exit -eq 3 ]; then
-    echo >&2 "beads: database not initialized — skipping hook 'post-checkout'"
-    _bd_exit=0
-  fi
-  if [ $_bd_exit -ne 0 ]; then exit $_bd_exit; fi
-fi
-# --- END BEADS INTEGRATION v1.0.3 ---
-fi
-# --- END KOMBIFY BEADS TARGET WRAPPER (platform-qsts1) ---

@@ -90,7 +90,12 @@ jobs:
             echo "No public snapshot drift."
             exit 0
           fi
-          unexpected="$(git status --short | awk '{print $2}' | grep -Ev '^(data/stackkits/|guides/stackkits/use-cases/overview\.mdx$|stackkits/reference/(os|application-delivery)-compatibility\.mdx$)' || true)"
+          # --untracked-files=all is required: plain `git status --short` collapses a
+          # wholly untracked directory into one entry, so the first sync of
+          # data/stackkits/ reported `data/` and tripped this guard. cut -c4- takes
+          # the path from the porcelain record instead of awk's second field, which
+          # broke on any path containing a space.
+          unexpected="$(git status --porcelain --untracked-files=all | cut -c4- | grep -Ev '^(data/stackkits/|guides/stackkits/use-cases/overview\.mdx$|stackkits/reference/(os|application-delivery)-compatibility\.mdx$)' || true)"
           [ -z "$unexpected" ] || { echo "::error::unexpected generated paths: $unexpected"; exit 1; }
           git config user.name "stackkits-docs[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
