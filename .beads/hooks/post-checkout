@@ -17,7 +17,27 @@
 export BEADS_NO_DAEMON="${BEADS_NO_DAEMON:-1}"
 
 _kb_skip_beads_hook=0
-if command -v bd >/dev/null 2>&1; then
+# A non-migrated, versioned tracker is a Git source, not an export from a DB.
+# Do not import/export it through a shared Dolt owner in a linked worktree.
+# Any metadata, redirect or other staged tracker state retains the strict path.
+if [ -f .beads/issues.jsonl ] && [ ! -L .beads/issues.jsonl ] &&
+   [ ! -e .beads/metadata.json ] && [ ! -e .beads/redirect ] &&
+   git cat-file -e HEAD:.beads/issues.jsonl 2>/dev/null &&
+   ! git cat-file -e HEAD:.beads/metadata.json 2>/dev/null &&
+   ! git cat-file -e HEAD:.beads/redirect 2>/dev/null &&
+   git diff --cached --quiet -- .beads ':(exclude).beads/issues.jsonl' 2>/dev/null; then
+  echo >&2 "beads target safety: versioned JSONL authority; no database synchronization"
+  _kb_skip_beads_hook=1
+fi
+if [ "$_kb_skip_beads_hook" -eq 0 ] && command -v bd >/dev/null 2>&1; then
+  _kb_staged_beads=0
+  # Hook scripts and their repository docs are source, not tracker state. Keep
+  # every other .beads path fail-closed even if target discovery is unavailable.
+  git diff --cached --quiet -- .beads \
+    ':(exclude).beads/hooks/**' \
+    ':(exclude).beads/README.md' \
+    ':(exclude).beads/.gitignore' \
+    2>/dev/null || _kb_staged_beads=1
   _kb_git_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
   if command -v timeout >/dev/null 2>&1; then
     _kb_beads_dir="$(timeout 10 bd --readonly where 2>/dev/null | sed -n '1p' || true)"
@@ -27,20 +47,14 @@ if command -v bd >/dev/null 2>&1; then
   _kb_realpath() { (cd "$1" 2>/dev/null && pwd -P); }
   _kb_git_root_real="$(_kb_realpath "$_kb_git_root" || true)"
   if [ -z "$_kb_beads_dir" ]; then
+    if [ "$_kb_staged_beads" -eq 1 ]; then
+      echo >&2 "beads target safety: refusing staged tracker state; writable target could not be verified."
+      exit 1
+    fi
     echo >&2 "beads target safety: bd where failed; skipping beads hook"
     _kb_skip_beads_hook=1
   else
   _kb_beads_root_real="$(_kb_realpath "$_kb_beads_dir/.." || true)"
-  _kb_staged_beads=0
-  # Hook scripts and their repository docs are source, not tracker state. Keep
-  # every other .beads path fail-closed so new database/export files are safe
-  # by default without blocking the projected hook bundle itself.
-  git diff --cached --quiet -- .beads \
-    ':(exclude).beads/hooks/**' \
-    ':(exclude).beads/README.md' \
-    ':(exclude).beads/.gitignore' \
-    2>/dev/null || _kb_staged_beads=1
-
   if [ -z "$_kb_git_root_real" ] || [ -z "$_kb_beads_root_real" ] || [ "$_kb_git_root_real" != "$_kb_beads_root_real" ]; then
     if [ "$_kb_staged_beads" -eq 1 ]; then
       echo >&2 "beads target safety: refusing staged tracker state from this checkout."
@@ -55,6 +69,29 @@ if command -v bd >/dev/null 2>&1; then
     _kb_skip_beads_hook=1
   fi
   fi
+fi
+
+if [ "$_kb_skip_beads_hook" -eq 0 ] && command -v bd >/dev/null 2>&1; then
+  _kb_authority_helper=""
+  for _kb_candidate in "scripts/beads-hook-authority.mjs" "../scripts/beads-hook-authority.mjs"; do
+    if [ -f "$_kb_candidate" ]; then _kb_authority_helper="$_kb_candidate"; break; fi
+  done
+  if [ -z "$_kb_authority_helper" ] || ! command -v node >/dev/null 2>&1; then
+    echo >&2 "beads target safety: authority helper unavailable; refusing legacy tracker writes"
+    exit 1
+  fi
+  _kb_authority="$(node "$_kb_authority_helper" "$_kb_git_root" "$_kb_beads_dir")" || exit 1
+  case "$_kb_authority" in
+    remote)
+      echo >&2 "beads target safety: remote-backed tracker; mutations use mise run beads:write"
+      _kb_skip_beads_hook=1
+      ;;
+    legacy) ;;
+    *)
+      echo >&2 "beads target safety: invalid authority result; refusing legacy tracker writes"
+      exit 1
+      ;;
+  esac
 fi
 
 _kb_guard=""
