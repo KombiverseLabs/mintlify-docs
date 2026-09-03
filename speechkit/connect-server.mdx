@@ -1,0 +1,64 @@
+---
+title: "Connect the desktop app to a server"
+description: "Sign in to kombify Cloud or point SpeechKit at a self-hosted server"
+sidebarTitle: "Connect to a server"
+icon: "cloud"
+---
+
+The SpeechKit Windows app runs local-first. When a mode should run against a
+remote SpeechKit server instead, connect the device in Server settings. Two
+targets are available:
+
+| Target | How you connect |
+| --- | --- |
+| Hosted kombify Cloud | Sign in with your kombify account from the Connect button. |
+| Self-hosted SpeechKit server | Enter the server URL and a bearer token you manage. |
+
+The hosted sign-in flow requires SpeechKit `v0.66.25` or later.
+
+## Sign in to kombify Cloud
+
+Prerequisites: a kombify account and a browser on the same machine.
+
+1. Open **Server settings** in the SpeechKit desktop app.
+2. Select **Connect**. SpeechKit opens the kombify sign-in page in your
+   browser and shows a confirmation code in the app.
+3. Confirm that the browser shows the same code, then complete the sign-in.
+4. After you sign in, SpeechKit points the device at the hosted service.
+
+Your password never enters the desktop app. SpeechKit keeps the session in the
+operating system's credential store, not in a configuration file.
+
+## Check the account or sign out
+
+A signed-in device shows in Server settings which kombify account it is using.
+Select **Sign out** to end the session. Signing out also releases the hosted
+connection, so modes that routed through kombify Cloud fall back to their local
+configuration.
+
+Signing out does not affect a self-hosted server. A server you host yourself
+keeps its own credentials either way.
+
+## Connect to a self-hosted server
+
+For a server you operate, configure the connection with a URL and a bearer
+token instead of a kombify account. The `[server_connection]` section in
+`config.toml` carries the URL and the name of the environment variable that
+holds the token. SpeechKit never reads the token value from the file:
+
+```toml
+[server_connection]
+enabled = true
+url = "https://speechkit.example.com"
+auth_mode = "bearer"                         # bearer sends an Authorization header
+bearer_token_env = "SPEECHKIT_SERVER_TOKEN"  # env var name; the value stays out of the file
+fallback_to_local = true                     # retry locally when a server call fails
+```
+
+The connection is only used by modes whose source is set to the server. See
+[modes and data paths](/speechkit/modes) for what routing through a server
+means for your data.
+
+<Card title="Install the Windows client" icon="windows" href="/speechkit/install-windows">
+  Download and verify the current public beta before connecting a server.
+</Card>
