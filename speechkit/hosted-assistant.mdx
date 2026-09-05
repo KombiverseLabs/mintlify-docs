@@ -1,0 +1,74 @@
+---
+title: "Hosted assistant page"
+description: "Open the built-in /assistant Voice Assistant web page any SpeechKit server serves"
+sidebarTitle: "Hosted assistant page"
+icon: "globe"
+---
+
+Every SpeechKit server exposes a ready-to-use Voice Assistant page at
+`/assistant`. Open it in any browser to connect to the server and start a
+realtime voice conversation. This is aimed at self-hosted deployments that
+want a client without shipping a desktop or mobile app.
+
+## When to use it
+
+- You run a SpeechKit server and want authorised users to talk to it from a
+  browser instead of installing the Windows or Android client.
+- You want a quick way to test the server's Voice Agent path end-to-end
+  from any device with a microphone.
+- You want the same animated assistant that the Windows overlay and the
+  Android app render, without embedding the voice UI kit yourself.
+
+## Open the page
+
+Point a browser at `/assistant` on your SpeechKit server (for example
+`https://speechkit.example.com/assistant`). The page runs the same Voice
+Assistant module used elsewhere — microphone in, agent audio out, transcript
+streamed into the UI.
+
+If the server requires authentication, the page prompts for a bearer token
+and stores it per browser. If you configured a demo token on the server, the
+page picks it up automatically.
+
+Press **Start** to begin a session. Press **Stop** to end it. Tap the
+assistant to interrupt a spoken answer. The connection note under the
+assistant shows the current server, version, the speech backend serving the
+session, and diagnostics. When speaker recognition is on, transcripts carry
+the speaker's label and name.
+
+## Choose the appearance
+
+Click the appearance toggle to pick:
+
+- **Animation** — Aura orb or the new Waveform.
+- **Centre mark** — the rosette or the k monogram (or none).
+- **Live transcript** — whether the transcript panel is visible by default.
+
+The choices are stored per browser and override the server's defaults for
+that user. Use **Reset** to fall back to the server's configured defaults.
+
+## Set the server defaults
+
+Server-wide defaults live under `[server.assistant_ui]` in the server
+config. The built-in defaults are the Aura orb, the rosette mark, and
+transcript visible by default:
+
+```toml
+[server.assistant_ui]
+variant = "aura"          # "aura" or "waveform"
+mark = "rosette"          # "rosette", "k", or "none"
+transcript_default = true # show the live transcript by default
+```
+
+The Settings → Voice Assistant screen in the desktop app writes the same
+values with a live preview.
+
+## Availability
+
+The page is served from the same origin as the SpeechKit HTTP API and can
+be disabled by the server operator. If the URL returns 404, check that the
+`/assistant` surface is enabled on your server build.
+
+<Card title="Modes and data paths" icon="waveform-lines" href="/speechkit/modes">
+  Learn how Voice Agent behaves across Windows, Android, and the hosted page.
+</Card>
