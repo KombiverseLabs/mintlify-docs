@@ -19,6 +19,8 @@ Vaultwarden is the released alternative for the optional native v2 `vault` workl
   The release exposes no safe public post-init command for creating the owner-bound secret custody required by a newly added Vault workload. Do not treat an opaque `secret://` reference as a value or use this page as a complete installation recipe.
 </Warning>
 
+Since StackKits v0.24.2, `stackkit setup vault` prepares the owner account on an applied Vault workload: it resolves the administrator token from existing signed Apply-bound local custody and invites the email listed in the private `.stackkit/setup/vault-owner.json` file, recording `owner-invited` or `owner-registered` as preparation. Personal login, encryption keys, and client decryption remain user steps. See [Set up the application owner](/stackkits/reference/day-2-operations#set-up-the-application-owner).
+
 Create the application owner account, store recovery material separately, and choose the registration policy before adding real secrets. Confirm that your backup and recovery approach covers the Vaultwarden data volume.
 
 For an already admitted workload, change StackKits intent through the StackSpec and lifecycle commands; do not edit generated application configuration on the target.

@@ -36,6 +36,84 @@ stackkit apply
 
 StackKits v0.21.11 adds `stackkit secrets materialize` as the explicit step between selecting a workload and running `generate`. Establish custody, then generate and apply; do not invent secret values.
 
+## Set up the application owner
+
+StackKits v0.24.2 adds `stackkit setup <workload>`. The command runs the Plan-declared owner setup action against an already-applied local `standalone-compose` workload: it creates or verifies the application's owner or administrator account, verifies the pinned application version, cleans up its temporary session, and records a secret-free, Plan-bound `setup-result` receipt. Setup shares the local lifecycle-mutation lock with backup, restore, and upgrade.
+
+The command supports five workloads, each with its own workspace-relative private credential file:
+
+| Workload | Private credential file |
+| --- | --- |
+| `photos` | `.stackkit/setup/owner.json` |
+| `files` | `.stackkit/setup/files-owner.json` |
+| `media` | `.stackkit/setup/media-owner.json` |
+| `vault` | `.stackkit/setup/vault-owner.json` (email only) |
+| `smart-home` | `.stackkit/setup/home-assistant-owner.json` |
+
+Create the credential file first. For `photos`, the closed JSON shape is:
+
+```json
+{
+  "email": "<owner email>",
+  "password": "<local password>",
+  "displayName": "<owner display name>"
+}
+```
+
+Keep every credential file private. On Linux and macOS:
+
+```bash
+chmod 600 .stackkit/setup/owner.json
+```
+
+On Windows, remove inherited access and grant the file only to the current account:
+
+```powershell
+$setupOwner = [Security.Principal.WindowsIdentity]::GetCurrent().Name
+icacls .stackkit\setup\owner.json /inheritance:r /grant:r "${setupOwner}:F"
+```
+
+Then run the setup action with explicit owner approval:
+
+```bash
+stackkit setup photos \
+  --credentials-file .stackkit/setup/owner.json \
+  --owner-approve \
+  --complete-onboarding \
+  --json
+```
+
+Flag semantics:
+
+- `--owner-approve` is required. The action is Plan-bound; only an authenticated result for the current Plan and Apply verifies the setup axis.
+- `--complete-onboarding` completes application onboarding after the owner login verifies. Only Photos and Media accept it. Media prepares or verifies the explicit Jellyfin administrator and completes its startup wizard only with this flag. Omitting the flag leaves existing onboarding flags intact; the command never reopens onboarding the owner has already completed.
+- `--operation-id ID` resumes a pending setup operation. Without it, the command resumes the current pending setup or starts a new one.
+- `--credentials-file` points at the workspace-relative private credential JSON file.
+
+Per-workload behavior:
+
+- **Photos** creates or verifies the Immich owner account. First client login remains a separate user step.
+- **Files** uses an existing Cloudreve administrator login unless the private credential JSON explicitly permits first-owner registration.
+- **Media** prepares or verifies the explicit Jellyfin administrator. Libraries, household viewer accounts, and playback remain explicit application setup and client checks.
+- **Vault** resolves its administrator token from existing signed Apply-bound local custody and invites the email in its private input file. It records `owner-invited` or `owner-registered` as preparation. Personal login, encryption keys, and client decryption stay pending.
+- **Smart Home** verifies the native Home Assistant owner login and leaves personal onboarding choices in Home Assistant.
+
+The JSON result contains the selected Plan, workload, runtime instance, application version, and verification facts. It never contains the email, password, or credential file contents.
+
+The matching MCP tool is `stackkit_setup` with `workload_ref`, an optional `credentials_file`, explicit `complete_onboarding`, `operation_confirmation: "stackkit.setup"`, and `owner_approved: true`. MCP receives the credential file path only, never the credential values. See [MCP connector](/stackkits/reference/mcp-connector).
+
+## Check application experience
+
+Since v0.24.2, `stackkit status` includes an additive `applications` projection: one `stackkit.application-experience/v1` view per selected workload, even when Apply or runtime evidence is unavailable. Installation, client access, initial setup, usability, and recovery carry separate states, reasons, timestamps, and evidence references.
+
+The view is scoped application readiness under ADR-0040, so it reports honestly instead of overclaiming:
+
+- An internal healthy probe cannot verify LAN or client access.
+- A staged restore cannot verify live application recovery; the recovery axis still reports the application experience it can attest.
+- `lifecycleVersion` identifies the lifecycle contract, not the deployed application version.
+
+The State Console displays this same view with direct application links and next steps. Changing the selected workspace clears its previous status view.
+
 ## Remove an applied workload
 
 `stackkit remove` removes one exact applied workload with the local owner's approval:
