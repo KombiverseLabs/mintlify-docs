@@ -1,0 +1,107 @@
+---
+title: "Voice Agent provider configuration"
+description: "Configure the Deepgram Voice Agent listen, speak, and turn-detection legs"
+sidebarTitle: "Voice Agent providers"
+icon: "sliders"
+---
+
+Voice Agent runs three legs against an external realtime provider: a listen
+(speech-to-text) leg, a think (LLM) leg, and a speak (text-to-speech) leg. On
+Deepgram, each leg is configured under `[voice_agent]` in your SpeechKit config
+file. This page covers the Deepgram audio legs and Flux turn-detection tuning.
+The think leg is configured separately with the `deepgram_think_*` keys.
+
+## When to configure these keys
+
+Set the keys on this page when you want to:
+
+- Pin the listen model to Deepgram's Flux v2 (default) or fall back to the
+  legacy `nova-3` streaming model.
+- Choose between the multilingual and English-only Flux listen models.
+- Select a specific Aura-2 or Flux TTS voice for the speak leg.
+- Tune Flux end-of-turn behavior instead of relying on client-side voice
+  activity detection.
+
+If you keep the defaults, Deepgram runs Flux v2 for listen with mid-call
+language switching and Aura-2 for speak.
+
+## Listen leg
+
+`deepgram_listen_model` selects the Deepgram streaming model that transcribes
+the caller.
+
+| Value | Behavior |
+| --- | --- |
+| `flux-general-multi` (default) | Flux v2 with mid-call switching across 10 supported languages. |
+| `flux-general-en` | Flux v2 pinned to English. Use when the session is guaranteed English. |
+| `nova-3` | Legacy Nova-3 streaming model. Flux-native turn-detection keys are ignored. |
+
+## Speak leg
+
+`deepgram_speak_model` selects the voice used for spoken replies.
+
+| Value | Behavior |
+| --- | --- |
+| Aura-2 voice, for example `aura-2-thalia-en` (default) | Multilingual Aura-2 voice. Follows the session locale. |
+| Flux TTS voice, for example `flux-kit-en` | English-only Flux voice. Non-English sessions automatically fall back to the locale's Aura-2 voice. |
+
+Aura-2 stays the default on every path. Setting a Flux voice is opt-in and
+only applies to English-pinned sessions.
+
+`deepgram_speak_speed` controls playback rate. Valid values are `0.85` to
+`1.15` in `0.05` steps. Other values snap to the nearest supported step.
+
+## Flux turn detection
+
+Flux performs end-of-turn detection inside the model, so these keys replace
+client-side VAD tuning on the Deepgram Voice Agent provider. They are ignored
+by the `nova-3` listen leg.
+
+| Key | Range | Purpose |
+| --- | --- | --- |
+| `deepgram_listen_eot_threshold` | `0.5`–`0.9` | End-of-turn confidence. Lower values answer sooner and interrupt more. |
+| `deepgram_listen_eager_eot_threshold` | `0` (off) or `0.3`–`0.9` | Emits a speculative end-of-turn signal so the think LLM can start early. Deepgram retracts it with `TurnResumed`, so any speculative work must be cancellable. |
+| `deepgram_listen_eot_timeout_ms` | `500`–`60000` | Silence before Flux forces the turn closed. |
+
+Values of `0` on the threshold keys keep Deepgram's defaults.
+
+## Example configuration
+
+```toml
+[voice_agent]
+provider = "deepgram"
+
+# Listen leg — Flux v2, English only.
+deepgram_listen_model = "flux-general-en"
+
+# Speak leg — Flux TTS voice for English sessions.
+deepgram_speak_model = "flux-kit-en"
+deepgram_speak_speed = 1.05
+
+# Flux-native turn detection.
+deepgram_listen_eot_threshold = 0.7
+deepgram_listen_eager_eot_threshold = 0.5
+deepgram_listen_eot_timeout_ms = 5000
+```
+
+## Provider option matrix
+
+The Deepgram Voice Agent provider surfaces these capabilities in the current
+release:
+
+| Option | Support | Notes |
+| --- | --- | --- |
+| Language | `derived` | Flux takes the session locale through `language_hints` rather than a top-level `agent.language`. |
+| Language hints | `native` | Set on `agent.listen.provider.language_hints`. |
+| Turn detection | `native` | Configured through the Flux end-of-turn thresholds above. |
+| End-of-turn timeout | `native` | Configured through `deepgram_listen_eot_timeout_ms`. |
+| Voice | `native` | Aura-2 or Flux TTS voice on `agent.speak.provider.model`. |
+| Speed | `native` | New in this release; set through `deepgram_speak_speed`. |
+| Keyterms | `native` | Set on `agent.listen.provider.keyterms`. |
+| Context prompt | `native` | Set on `agent.think.prompt`. |
+| Session resume, PII redaction, voice focus | `unsupported` | Not exposed through the current SpeechKit adapter. |
+
+<Note>
+SpeechKit is beta software. Pin your version and review the changelog before
+moving between minor releases; provider option support can change.
+</Note>
