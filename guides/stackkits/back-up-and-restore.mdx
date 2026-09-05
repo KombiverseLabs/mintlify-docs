@@ -1,11 +1,11 @@
 ---
 title: "Back up and restore a Basement Kit"
-description: "Create owner-bound Kopia snapshots and stage a restore before live activation"
+description: "Create owner-bound Kopia snapshots, schedule them, stage and recover restores, and keep an encrypted off-host archive"
 sidebarTitle: "Back up and restore"
 icon: clock-rotate-left
 ---
 
-The released Basement Kit includes a local, owner-controlled Kopia backup lifecycle. Run it only from the applied StackKits workspace whose data you intend to protect.
+Since StackKits v0.24, the released Basement Kit treats backup, restore, and upgrade as one recoverable, owner-governed lifecycle. The native v2 path is backed by a local Kopia repository. Every mutating backup command requires local owner approval and writes signed evidence. Run these commands only from the applied StackKits workspace whose data you intend to protect.
 
 ## Configure and check the repository
 
@@ -16,45 +16,118 @@ stackkit backup status --json
 
 The repository, source set, exclusions, and local custody are derived from the resolved plan. Do not point the command at an arbitrary volume or bypass owner custody.
 
+`stackkit backup status [--json]` reports the age, in seconds, of the owner-signed snapshot and staged-restore receipts for the current source policy, together with the original plan hash. Interpret the fields conservatively:
+
+- Missing history stays `unverified`.
+- An unreadable or invalid history entry reports `history-incomplete` while the latest verifiable receipts remain visible.
+- A receipt timestamp in the future reports `clock-skew` with no usable age.
+
+Receipts are evidence-scoped. A signed snapshot or staged-restore receipt proves that exact operation completed. It is not proof that the application recovers or that a recovery objective is met.
+
 ## Create an idempotent snapshot
 
 ```bash
-stackkit backup run --operation-id before-upgrade-2026-08-11 --json
+stackkit backup run --operation-id before-upgrade-2026-09-03 --json
 ```
 
-Store the returned content-addressed snapshot anchor with your verification evidence. Reusing the same operation ID returns the existing operation instead of creating an accidental duplicate.
+`stackkit backup run` quiesces the governed Core and selected application writers, then creates a crash-consistent snapshot. Retention comes from the CUE `backupPolicy.retention` buckets and applies to ordinary snapshots only. Upgrade checkpoints and restore-safety snapshots are pinned at creation and never expire under retention.
+
+Store the returned content-addressed snapshot anchor with your verification evidence. Reusing the same `--operation-id` resumes an interrupted operation or returns the recorded snapshot receipt instead of creating a duplicate.
+
+## Schedule local backups
+
+The CUE policy declares a daily, hourly, or weekly UTC cadence. The cadence alone grants no execution authority. On a systemd host, bind it to a local timer with an explicit owner approval after the repository is configured:
+
+```bash
+stackkit backup schedule enable --owner-approve --json
+stackkit backup schedule status --json
+stackkit backup schedule disable --owner-approve --json
+```
+
+The signed approval binds the timer to the current plan, apply result, CLI bytes, and CUE cadence. If any of those change, scheduled execution stays blocked until you approve the current binding again. `backup schedule status --json` reports authorization, timer state, and the last signed snapshot as separate facts. An active timer without a completed signed snapshot is not evidence of protected data. `backup schedule disable --owner-approve` revokes dispatch before stopping the timer.
 
 ## Restore into isolated staging
 
 ```bash
 stackkit backup restore sha256:<snapshot-anchor-id> \
   --owner-approve \
-  --operation-id restore-check-2026-08-11 \
+  --operation-id restore-check-2026-09-03 \
   --json
 ```
 
 This verifies and extracts the snapshot into CUE-owned staging. It does not replace live data. Review the returned restore-result ID before continuing.
+
+Staging and its verification must finish inside the original signed owner-approval window. A retry with the same operation ID reuses already staged bytes. If the approval has expired, authorize a new restore operation instead of extending the old grant.
+
+## Abandon a pending restore
+
+If a restore is left pending or staged after its source topology or approval window has changed, close that exact journal explicitly:
+
+```bash
+stackkit backup restore abandon restore-check-2026-09-03 \
+  --owner-approve \
+  --json
+```
+
+Abandonment writes a signed terminal decision. It preserves the original recovery evidence, does not invoke Docker or Kopia, and does not delete snapshots or touch live volumes. The command is idempotent, and any later restore of the same source must use a new operation ID. Deleting the journal by hand is not a supported recovery step.
 
 ## Activate the verified restore
 
 ```bash
 stackkit backup restore activate sha256:<restore-result-id> \
   --owner-approve \
-  --operation-id restore-activation-2026-08-11 \
+  --operation-id restore-activation-2026-09-03 \
   --json
 ```
 
-Activation creates the required safety snapshot, switches the exact plan-owned volume set, restarts the runtime, and verifies the owner binding and services.
+Activation creates a mandatory pinned safety snapshot, switches the exact plan-owned volume set, restarts the runtime, and verifies the owner binding and services before committing.
 
-If activation is interrupted, recover the exact operation explicitly:
+## Recover an interrupted activation
+
+An interrupted activation blocks ordinary lifecycle mutations until you resolve it explicitly:
 
 ```bash
-stackkit backup restore recover restore-activation-2026-08-11 \
+stackkit backup restore recover restore-activation-2026-09-03 \
   --owner-approve \
   --rollback \
   --json
 ```
 
+Recovery reopens the signed activation journal. If the interruption happened before commit, the in-flight volumes are rolled back and the prior runtime must verify. After commit, recovery preserves the activated data and finishes cleanup and application evidence. Retrying a completed recovery returns the original signed result.
+
+## Export an encrypted portable archive
+
+`stackkit backup emergency-export` writes an owner-held, age-encrypted `tar.gz.age` archive from explicitly selected local sources. It is independent of the Kopia repository. Use it to keep a recovery copy off the host:
+
+```bash
+stackkit backup emergency-export \
+  --recipient age1YOUR_PUBLIC_RECIPIENT \
+  --source config=/opt/stacks \
+  --source documents=/srv/documents \
+  --source large-media=/srv/media \
+  --large-media-mode manifest-only \
+  --target /backup/emergency-2026-09-03 \
+  --json
+```
+
+Pass the public age recipient only. Keep the private identity away from the host and the backup storage. Sources are explicit `CLASS=PATH` selections; nothing is scanned implicitly. The target must be a new directory outside all sources. `--large-media-mode manifest-only|include|exclude` controls whether sources labeled `large-media` contribute bytes or only a recorded mapping.
+
+A successful export publishes three files: the encrypted archive, a manifest with the archive digest and per-entry SHA-256 checksums, and a `RESTORE.md` recovery runbook that is also embedded in the archive.
+
+## Restore off-host without the original machine
+
+Copy the archive to a replacement machine and verify it with the separately retained private age identity. No original host, Docker daemon, Kopia repository, or Kombify account is required:
+
+```bash
+stackkit backup emergency-restore \
+  --archive /recovery/stackkit-emergency.tar.gz.age \
+  --identity-file /recovery/private/recovery-key.txt \
+  --target /recovery/staged-2026-09-03 \
+  --json
+```
+
+The command authenticates the entire encrypted stream, compares every extracted file against the embedded manifest, and publishes a new private staging directory only if all checks pass. Decompressed input is bounded to 512 GiB by default; set `--max-bytes` explicitly for larger archives. Staging does not activate services. Follow the embedded runbook to recreate matching versions, restore configuration and secrets, import database dumps, and verify real client access.
+
 <Warning>
-  A successful backup is not recovery proof. Practice the staged restore with non-critical data before relying on the stack for irreplaceable files.
+  A successful backup or a staged-restore receipt is not recovery proof. Practice the staged restore, and an off-host emergency restore, with non-critical data before relying on the stack for irreplaceable files.
 </Warning>
