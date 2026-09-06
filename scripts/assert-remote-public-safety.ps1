@@ -42,7 +42,10 @@ function Get-Response {
             -TimeoutSec 15
     }
     catch {
-        $response = $_.Exception.Response
+        # Transport exceptions need not expose Response. Probe the property
+        # before reading it so StrictMode preserves the status fallback.
+        $responseProperty = $_.Exception.PSObject.Properties['Response']
+        $response = if ($null -ne $responseProperty) { $responseProperty.Value } else { $null }
         if ($null -eq $response) {
             if ($FollowRedirects) {
                 throw "Remote public-safety request failed for $Uri`: $($_.Exception.Message)"
