@@ -62,7 +62,7 @@ export function validateCatalog(document, tag) {
   if (!Array.isArray(document.catalog.useCases)) throw new Error('catalog.useCases must be an array')
   sortedUnique(document.catalog.useCases.map(item => item.id), 'catalog use-case IDs')
   for (const useCase of document.catalog.useCases) {
-    keys(useCase, ['id', 'title', 'description', 'components', 'computeTiers'], `useCase ${useCase.id ?? '?'}`)
+    keys(useCase, ['id', 'title', 'description', 'components', 'computeTiers', 'settings', 'docs'], `useCase ${useCase.id ?? '?'}`)
     string(useCase.id, 'useCase.id', /^[a-z][a-z0-9-]+$/)
     string(useCase.title, `${useCase.id}.title`)
     string(useCase.description, `${useCase.id}.description`)
@@ -76,8 +76,49 @@ export function validateCatalog(document, tag) {
       if (!['application', 'module', 'service', 'connector', 'bridge'].includes(component.kind)) throw new Error(`invalid component kind ${component.kind}`)
     }
     validateComputeTiers(useCase)
+    validateSettings(useCase)
+    if (useCase.docs !== undefined) string(useCase.docs, `${useCase.id}.docs`, /^\/[a-z0-9/-]+$/)
   }
   return document
+}
+
+// Public v0.24.60 foundation/use_case_catalog.cue and internal/usecasecatalog
+// project this metadata. Validate it without expanding the purpose/components
+// page into a settings UI or treating recorded intent as installation support.
+function validateSettings(useCase) {
+  if (useCase.settings === undefined) return
+  const label = `${useCase.id}.settings`
+  if (!Array.isArray(useCase.settings)) throw new Error(`${label} must be an array`)
+  for (const setting of useCase.settings) {
+    keys(setting, ['id', 'name', 'kind', 'group', 'depth', 'help', 'options', 'default', 'placeholder', 'realization'], label)
+    string(setting.id, `${label}.id`, /^[a-z][a-z0-9-]+$/)
+    string(setting.name, `${label}.name`)
+    for (const [field, allowed] of [
+      ['kind', ['choice', 'toggle', 'text']],
+      ['group', ['backend', 'profile', 'storage', 'hardware', 'access', 'features']],
+      ['depth', ['summary', 'advanced']],
+      ['realization', ['install', 'recorded']],
+    ]) {
+      if (!allowed.includes(setting[field])) throw new Error(`${label}.${field} is invalid`)
+    }
+    if (setting.help !== undefined) string(setting.help, `${label}.help`)
+    const defaultType = setting.kind === 'toggle' ? 'boolean' : 'string'
+    if (typeof setting.default !== defaultType) throw new Error(`${label}.default must be ${defaultType}`)
+    if (setting.kind === 'choice') {
+      if (!Array.isArray(setting.options) || setting.options.length < 2) throw new Error(`${label}.options requires choices`)
+      for (const option of setting.options) {
+        keys(option, ['id', 'name', 'note'], `${label}.option`)
+        string(option.id, `${label}.option.id`, /^[a-z][a-z0-9-]+$/)
+        string(option.name, `${label}.option.name`)
+        if (option.note !== undefined) string(option.note, `${label}.option.note`)
+      }
+    } else if (setting.options !== undefined) {
+      throw new Error(`${label}.options requires choice kind`)
+    }
+    if (setting.placeholder !== undefined && (setting.kind !== 'text' || typeof setting.placeholder !== 'string')) {
+      throw new Error(`${label}.placeholder requires text kind and string value`)
+    }
+  }
 }
 
 const COMPUTE_TIERS = ['high', 'low', 'standard']
