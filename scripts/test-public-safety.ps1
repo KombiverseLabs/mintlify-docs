@@ -144,7 +144,11 @@ try {
     }
     Assert-Case -Name "link cannot escape repository" -Fixture $escapedLink -ShouldPass $false -ExpectedMessage "unresolved local link"
 
-    Write-Host "public_safety_tests: PASS ($tests cases)"
+    & node --test (Join-Path $PSScriptRoot "remote-public-safety.test.mjs")
+    if ($LASTEXITCODE -ne 0) {
+        throw "Remote public-safety regression failed"
+    }
+    Write-Host "public_safety_tests: PASS ($tests cases plus remote fallback regression)"
 }
 finally {
     if (Test-Path -LiteralPath $testRoot) {
