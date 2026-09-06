@@ -21,14 +21,29 @@ function writeFixture(root, value) {
   writeFileSync(path.join(root, 'stackkits-compatibility-v1.json'), `${JSON.stringify(value.compatibility, null, 2)}\n`)
 }
 
+// Published v0.24.60 metadata: choice/toggle/text defaults retain their JSON types.
+function settings() {
+  return [
+    { id: 'accelerator', name: 'Accelerator', kind: 'choice', group: 'hardware', depth: 'summary', help: 'Choose hardware.', options: [{ id: 'cpu', name: 'CPU only' }, { id: 'nvidia', name: 'NVIDIA GPU', note: 'Requires a GPU' }], default: 'cpu', realization: 'recorded' },
+    { id: 'ci-runners', name: 'CI runners', kind: 'toggle', group: 'features', depth: 'advanced', default: false, realization: 'install' },
+    { id: 'mail-domain', name: 'Mail domain', kind: 'text', group: 'access', depth: 'summary', default: '', placeholder: 'example.com', realization: 'recorded' },
+  ]
+}
+
 test('validates and renders only public release facts', () => {
   const temp = mkdtempSync(path.join(tmpdir(), 'stackkits-docs-'))
   const input = path.join(temp, 'input'), repo = path.join(temp, 'repo')
-  const value = fixture(); writeFixture(input, value)
+  const value = fixture()
+  value.catalog.catalog.useCases[0].settings = settings()
+  value.catalog.catalog.useCases[0].docs = '/guides/stackkits/use-cases/overview'
+  value.catalog.contentDigest = canonicalDigest(value.catalog)
+  writeFixture(input, value)
   const result = syncRelease({ repoRoot: repo, inputDir: input, tag: 'v9.9.9' })
   assert.equal(result.promoted, true)
   const page = readFileSync(path.join(repo, 'guides/stackkits/use-cases/overview.mdx'), 'utf8')
   assert.ok(page.includes(value.catalog.catalog.useCases[0].components[0].name))
+  // This projection remains purpose/components only, not an installation UI.
+  assert.ok(!page.includes('Choose hardware.'))
 })
 
 test('rejects internal fields and positive OS claims without evidence', () => {
@@ -39,6 +54,26 @@ test('rejects internal fields and positive OS claims without evidence', () => {
   compatibility.compatibility.os[0].status = 'supported'
   compatibility.contentDigest = canonicalDigest(compatibility)
   assert.throws(() => validateCompatibility(compatibility, 'v9.9.9', new Set(['files'])), Error)
+  for (const mutate of [
+    useCase => { useCase.settings = {} },
+    useCase => { useCase.settings[0].gates = [] },
+    useCase => { useCase.settings[0].options[0].secret = 'internal' },
+    useCase => { useCase.settings[0].options = [] },
+    useCase => { useCase.settings[0].kind = 'unknown' },
+    useCase => { useCase.settings[0].group = 'unknown' },
+    useCase => { useCase.settings[0].depth = 'unknown' },
+    useCase => { useCase.settings[0].realization = 'supported' },
+    useCase => { useCase.settings[1].default = 'false' },
+    useCase => { useCase.settings[2].default = false },
+    useCase => { useCase.docs = 'https://internal.example/' },
+  ]) {
+    const broken = fixture().catalog
+    const useCase = broken.catalog.useCases[0]
+    useCase.settings = settings()
+    mutate(useCase)
+    broken.contentDigest = canonicalDigest(broken)
+    assert.throws(() => validateCatalog(broken, 'v9.9.9'), Error)
+  }
 })
 
 test('accepts the published compute-tier fit and still rejects a malformed one', () => {
