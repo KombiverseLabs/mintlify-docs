@@ -200,7 +200,7 @@ function provenance(title, description, icon, catalog) {
 export function renderPages(catalog, compatibility) {
   const release = catalog.release
   let useCases = provenance('Use cases', `Components declared by StackKits ${release.tag}`, 'diagram-project', catalog)
-  useCases += `This page is generated from the immutable [${release.tag} release](${release.releaseUrl}). It lists only the product purpose and components declared by that release.\n\n`
+  useCases += `This page is generated from the published [${release.tag} release](${release.releaseUrl}). It lists only the product purpose and components declared by that release.\n\n`
   for (const useCase of catalog.catalog.useCases) {
     useCases += `## ${md(useCase.title)}\n\n${md(useCase.description)}\n\n| Component | Role | Kind |\n| --- | --- | --- |\n`
     for (const component of useCase.components) useCases += `| ${md(component.name)} (\`${md(component.id)}\`) | ${md(component.role)} | ${md(component.kind)} |\n`
