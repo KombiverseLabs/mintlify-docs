@@ -172,9 +172,14 @@ export function validateCompatibility(document, tag, useCaseIDs) {
   const deliveryKeys = delivery.map(row => `${row.useCaseRef}/${row.workloadRef}/${row.adapterRef}`)
   sortedUnique(deliveryKeys, 'application-delivery rows')
   for (const row of delivery) {
-    keys(row, ['useCaseRef', 'workloadRef', 'adapterRef', 'adapterName', 'status', 'capabilities'], 'application-delivery row')
+    keys(row, ['useCaseRef', 'workloadRef', 'adapterRef', 'adapterName', 'status', 'capabilities', 'defaultAlternativeRef', 'defaultModuleRef'], 'application-delivery row')
     if (!useCaseIDs.has(row.useCaseRef)) throw new Error(`unknown useCaseRef ${row.useCaseRef}`)
     for (const field of ['useCaseRef', 'workloadRef', 'adapterRef', 'adapterName', 'status']) string(row[field], `applicationDelivery.${field}`)
+    // Public v0.24.63 projects optional #ContractID values from the workload
+    // default and its module; they are catalog intent, not deployment evidence.
+    for (const field of ['defaultAlternativeRef', 'defaultModuleRef']) {
+      if (row[field] !== undefined) string(row[field], `applicationDelivery.${field}`, /^[a-z][a-z0-9-]*$/)
+    }
     if (!['unsupported', 'supported', 'preview', 'beta'].includes(row.status)) throw new Error(`invalid delivery status ${row.status}`)
     keys(row.capabilities, ['deployment', 'routeTLS', 'statusEvidence', 'backupRestore'], 'delivery capabilities')
     for (const field of ['deployment', 'routeTLS', 'statusEvidence', 'backupRestore']) {

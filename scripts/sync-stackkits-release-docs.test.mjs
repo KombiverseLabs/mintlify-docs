@@ -37,6 +37,10 @@ test('validates and renders only public release facts', () => {
   value.catalog.catalog.useCases[0].settings = settings()
   value.catalog.catalog.useCases[0].docs = '/guides/stackkits/use-cases/overview'
   value.catalog.contentDigest = canonicalDigest(value.catalog)
+  // v0.24.63 projects the workload's declared default, not an observed install.
+  value.compatibility.compatibility.applicationDelivery[0].defaultAlternativeRef = 'cloudreve'
+  value.compatibility.compatibility.applicationDelivery[0].defaultModuleRef = 'cloudreve-runtime'
+  value.compatibility.contentDigest = canonicalDigest(value.compatibility)
   writeFixture(input, value)
   const result = syncRelease({ repoRoot: repo, inputDir: input, tag: 'v9.9.9' })
   assert.equal(result.promoted, true)
@@ -73,6 +77,14 @@ test('rejects internal fields and positive OS claims without evidence', () => {
     mutate(useCase)
     broken.contentDigest = canonicalDigest(broken)
     assert.throws(() => validateCatalog(broken, 'v9.9.9'), Error)
+  }
+  for (const field of ['defaultAlternativeRef', 'defaultModuleRef']) {
+    for (const invalid of [false, '', 'Not-a-contract-id', '../internal']) {
+      const broken = fixture().compatibility
+      broken.compatibility.applicationDelivery[0][field] = invalid
+      broken.contentDigest = canonicalDigest(broken)
+      assert.throws(() => validateCompatibility(broken, 'v9.9.9', new Set(['files'])), Error)
+    }
   }
 })
 
