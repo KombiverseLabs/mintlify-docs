@@ -1,0 +1,42 @@
+---
+title: "Publish a service on kombify.me"
+description: "Give a publicly reachable homelab service a stable HTTPS name"
+sidebarTitle: "Public addresses"
+icon: "lock"
+---
+
+Use this path when the service already answers on a public HTTP(S) URL. kombify.me
+terminates TLS and proxies the browser to that origin. Private, loopback, and
+link-local targets are rejected on this path.
+
+## Before you start
+
+- The origin must be reachable from the internet over HTTP or HTTPS.
+- A signed-in kombify account registers names through
+  [api.kombify.io](https://api.kombify.io). Self-hosted installs register with
+  an API key after email verification.
+- Connected StackKits and Techstack flows can register first-party kit names
+  for you.
+
+## Give the service a name
+
+1. Register a base name for the homelab. Hosted accounts get
+   `{homelab}-{you}.kombify.me`. Self-hosted installs get
+   `sh-{homelab}-{device}.kombify.me`.
+2. Register the service under that base. First-party kit slugs such as `auth`,
+   `id`, and `coolify` always become `{base}-{service}.kombify.me`.
+3. Point the service at the public origin URL.
+4. Expose the service route. Unexposed service names stay unpublished.
+
+Then open `https://{base}-{service}.kombify.me` in a browser.
+
+Reserved apex names such as `auth.kombify.me` stay unused. Kit login still
+lands on `{your-lab}-auth.kombify.me`.
+
+## If the origin is not public
+
+Stop here and follow [Reach a private service](/kombify-me/private-targets).
+Do not publish a localhost or LAN-only URL on the public proxy.
+
+Local-only names stay on the homelab resolver that StackKits installs. They
+are not kombify.me names.

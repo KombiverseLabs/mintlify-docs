@@ -1,6 +1,6 @@
 ---
 title: mintlify-docs Roadmap
-last_verified: 2026-08-11
+last_verified: 2026-09-07
 roadmap_standard: kombify-roadmap@v1
 track: v0-expansion
 ---
@@ -9,12 +9,12 @@ track: v0-expansion
 
 ## Current Focus
 
-- **Target:** v0.4.0 - Techstack And SpeechKit Public Docs
-- **Outcome:** `docs.kombify.io` adds truthful Techstack preview guidance and
-  release-backed SpeechKit installation, mode, and framework documentation.
-- **Exit gate:** Local checks, exact-source deployment proof, and the live
-  route/projection matrix pass for the expanded tree.
-- **Blocking bugs:** Beads label `blocks:v0.4.0`
+- **Target:** v0.5.0 - kombify.me Public Docs
+- **Outcome:** `docs.kombify.io` documents live kombify.me public HTTPS names
+  and the optional private HTTP relay without hosted LAN DNS claims.
+- **Exit gate:** Local checks pass for the expanded tree; hosted LAN DNS stays
+  unpublished as a working resolver.
+- **Blocking bugs:** Beads label `blocks:v0.5.0`
 
 ## Expansion Track
 
@@ -23,7 +23,8 @@ track: v0-expansion
 | v0.1.0 | Mintlify Starter | done | Initial Mintlify site and StackKits navigation. |
 | v0.2.0 | Released Public Truth | done | Legacy imports are removed and release-backed positive scope is enforced. |
 | v0.3.0 | StackKits Content Quality | done | Practical pages and focused release-truth checks stay aligned with public artifacts. |
-| v0.4.0 | Techstack And SpeechKit Public Docs | current | Add both product areas without restoring legacy or unsupported claims. |
+| v0.4.0 | Techstack And SpeechKit Public Docs | done | Add both product areas without restoring legacy or unsupported claims. |
+| v0.5.0 | kombify.me Public Docs | current | Document live public HTTPS names and the optional private relay. |
 
 ## v0.2.0 - Released Public Truth
 
@@ -88,6 +89,23 @@ track: v0-expansion
 - [x] Exact-source deployment wait passes for the merged full commit SHA.
 - [x] `mise run remote:public-safety` passes.
 - [x] No open P0/P1 Beads bugs with `blocks:v0.4.0`.
+
+## v0.5.0 - kombify.me Public Docs
+
+**Scope**
+
+- [x] Add kombify.me overview, public-address, and private-target pages.
+- [x] Keep hosted LAN DNS unpublished as a working resolver.
+- [x] Expand the positive allowlist, navigation, and route smoke for the tab.
+- [x] Update the workspace publication scope together with the allowlist.
+
+**Exit gate**
+
+- [ ] `mise run check` passes for the expanded tree.
+- [ ] `mise run local:e2e` passes for the expanded tree.
+- [ ] Exact-source deployment wait passes for the merged full commit SHA.
+- [ ] `mise run remote:public-safety` passes.
+- [x] No open P0/P1 Beads bugs with `blocks:v0.5.0`.
 
 ## Expansion Boundary
 
