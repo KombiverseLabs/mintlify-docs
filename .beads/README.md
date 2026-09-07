@@ -1,81 +1,29 @@
-# Beads - AI-Native Issue Tracking
+# Kombify Beads tracker
 
-Welcome to Beads! This repository uses **Beads** for issue tracking - a modern, AI-native tool designed to live directly in your codebase alongside your code.
+The owning Dolt remote is the collaboration authority. The local embedded Dolt
+store is a working copy. Git-tracked issues.jsonl files are derived exports;
+never use them to decide current task status, initialize a second tracker, or
+restore an old export over a current database.
 
-## What is Beads?
+Read focused tasks with bd show <id>, bd search <term>, or bd ready. Workspace
+fleet reports resolve the manifest's Git owners and redirects, then read the
+Dolt working copies. Missing stores fail the report; an offline export is not
+a successful fallback. beads:fleet checks local schema and remote-tracking
+history; remote writes require the publish/read-back receipt below.
 
-Beads is issue tracking that lives in your repo, making it perfect for AI coding agents and developers who want their issues close to their code. No web UI required - everything works through the CLI and integrates seamlessly with git.
+Run mutations through the owning workspace:
 
-**Learn more:** [github.com/steveyegge/beads](https://github.com/steveyegge/beads)
-
-## Quick Start
-
-### Essential Commands
-
-```bash
-# Create new issues
-bd create "Add user authentication"
-
-# View all issues
-bd list
-
-# View issue details
-bd show <issue-id>
-
-# Update issue status
-bd update <issue-id> --claim
-bd update <issue-id> --status done
-
-# Sync with Dolt remote
-bd dolt push
+```powershell
+mise --cd <workspace-root> run beads:write --repo mintlify-docs -- update <id> --status in_progress
+mise --cd <workspace-root> run beads:write --repo mintlify-docs -- close <id>
 ```
 
-### Working with Issues
+Success requires BEADS_REMOTE_WRITE_OK. If publishing fails, preserve the
+mutation and run beads:publish --repo mintlify-docs; never repeat a create.
+Fresh checkouts adopt the existing remote through beads:bootstrap. Only the
+designated canonical migrator upgrades a shared schema.
 
-Issues in Beads are:
-- **Git-native**: Stored in Dolt database with version control and branching
-- **AI-friendly**: CLI-first design works perfectly with AI coding agents
-- **Branch-aware**: Issues can follow your branch workflow
-- **Always in sync**: Auto-syncs with your commits
-
-## Why Beads?
-
-✨ **AI-Native Design**
-- Built specifically for AI-assisted development workflows
-- CLI-first interface works seamlessly with AI coding agents
-- No context switching to web UIs
-
-🚀 **Developer Focused**
-- Issues live in your repo, right next to your code
-- Works offline, syncs when you push
-- Fast, lightweight, and stays out of your way
-
-🔧 **Git Integration**
-- Automatic sync with git commits
-- Branch-aware issue tracking
-- Dolt-native three-way merge resolution
-
-## Get Started with Beads
-
-Try Beads in your own projects:
-
-```bash
-# Install Beads
-curl -sSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash
-
-# Initialize in your repo
-bd init
-
-# Create your first issue
-bd create "Try out Beads"
-```
-
-## Learn More
-
-- **Documentation**: [github.com/steveyegge/beads/docs](https://github.com/steveyegge/beads/tree/main/docs)
-- **Quick Start Guide**: Run `bd quickstart`
-- **Examples**: [github.com/steveyegge/beads/examples](https://github.com/steveyegge/beads/tree/main/examples)
-
----
-
-*Beads: Issue tracking that moves at the speed of thought* ⚡
+See [Beads Remote Write Standard](https://github.com/KombiverseLabs/kombify-workspace/blob/main/BEADS-REMOTE-WRITE-STANDARD.md) for routing,
+recovery, schema migration and lossless reconciliation. Install the checkout's
+hook guard before its first Beads operation. The guard's legacy compatibility
+branch does not authorize a local-only tracker for an active repository.
