@@ -217,7 +217,7 @@ export function renderPages(catalog, compatibility) {
 
   let delivery = provenance('Application delivery compatibility', `Declared workload adapter capabilities in StackKits ${release.tag}`, 'route', compatibility)
   delivery += `This is the product capability declared by [${release.tag}](${release.releaseUrl}); it is not evidence that an adapter was deployed on a real host.\n\n`
-  delivery += '| Use case | Workload | Adapter | Status | Deploy | Route/TLS | Status evidence | Backup/restore |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n'
+  delivery += '| Use case | Workload | Adapter | Status | Deploy | Route/TLS | Status evidence | Backup/restore |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n'
   for (const row of compatibility.compatibility.applicationDelivery) {
     const yes = value => value ? 'yes' : 'no'
     delivery += `| \`${md(row.useCaseRef)}\` | \`${md(row.workloadRef)}\` | ${md(row.adapterName)} (\`${md(row.adapterRef)}\`) | \`${md(row.status)}\` | ${yes(row.capabilities.deployment)} | ${yes(row.capabilities.routeTLS)} | ${yes(row.capabilities.statusEvidence)} | ${yes(row.capabilities.backupRestore)} |\n`
