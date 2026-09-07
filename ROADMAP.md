@@ -96,7 +96,8 @@ track: v0-expansion
 
 - [x] Add kombify.me overview, public-address, and private-target pages.
 - [x] Keep hosted LAN DNS unpublished as a working resolver.
-- [x] Expand the positive allowlist, navigation, and route smoke for the tab.
+- [x] Expand the positive allowlist, navigation, and route smoke for the
+      Techstack subsection.
 - [x] Update the workspace publication scope together with the allowlist.
 
 **Exit gate**
