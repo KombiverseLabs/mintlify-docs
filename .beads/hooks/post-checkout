@@ -10,8 +10,8 @@
 
 # A linked worktree may inherit a shared bd database whose repo_root is another
 # checkout. Never let its hook write there. Source-only operations skip just the
-# managed beads section; staging .beads/** fails closed until run from the
-# checkout that owns the resolved beads directory.
+# managed beads section. All tracker state under .beads/** fails closed until
+# that owner is verified; source docs are exempted below.
 # Force embedded/direct mode before any bd call. Windows: bd 1.2.2 RPC daemon
 # deadlocks on leftover Dolt noms LOCK files. Harmless on Linux.
 export BEADS_NO_DAEMON="${BEADS_NO_DAEMON:-1}"
@@ -31,11 +31,13 @@ if [ -f .beads/issues.jsonl ] && [ ! -L .beads/issues.jsonl ] &&
 fi
 if [ "$_kb_skip_beads_hook" -eq 0 ] && command -v bd >/dev/null 2>&1; then
   _kb_staged_beads=0
-  # Hook scripts and their repository docs are source, not tracker state. Keep
-  # every other .beads path fail-closed even if target discovery is unavailable.
+  # Hook scripts and repository docs (README.md, PRIME.md, .gitignore) are
+  # source, not tracker state. Keep every other .beads path fail-closed even if
+  # target discovery is unavailable.
   git diff --cached --quiet -- .beads \
     ':(exclude).beads/hooks/**' \
     ':(exclude).beads/README.md' \
+    ':(exclude).beads/PRIME.md' \
     ':(exclude).beads/.gitignore' \
     2>/dev/null || _kb_staged_beads=1
   _kb_git_root="$(git rev-parse --show-toplevel 2>/dev/null || true)"
