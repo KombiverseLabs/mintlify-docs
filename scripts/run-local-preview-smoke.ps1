@@ -8,6 +8,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+Add-Type -AssemblyName System.Net.Http
 
 if ([string]::IsNullOrWhiteSpace($RepoRoot)) {
     $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
@@ -55,40 +56,27 @@ function Stop-PreviewProcessTree {
 
 function Get-HttpResponse {
     param(
-        [Parameter(Mandatory = $true)][uri]$Uri,
-        # Only the forbidden-route probe may pass this. The mint dev server
-        # answers some absent paths by closing the connection instead of
-        # returning a status, which surfaces as "The request was aborted: The
-        # connection was closed unexpectedly" with a null Response and used to
-        # abort the whole gate. For a route that must NOT exist, a refused or
-        # dropped connection is stronger evidence of absence than a 404, so it
-        # is reported as status 0 and treated as absent. The reachability probe
-        # must never use this: there a dropped connection is a real failure.
-        [switch]$TreatConnectionFailureAsAbsent
+        [Parameter(Mandatory = $true)][uri]$Uri
     )
 
+    # Windows PowerShell's Invoke-WebRequest can lose the preview's HTTP 404
+    # response. HttpClient preserves it without treating transport failure as
+    # evidence that a forbidden route is absent.
+    $handler = [System.Net.Http.HttpClientHandler]::new()
+    $handler.AllowAutoRedirect = $false
+    $client = [System.Net.Http.HttpClient]::new($handler)
+    $client.Timeout = [TimeSpan]::FromSeconds(8)
+    $response = $null
     try {
-        return Invoke-WebRequest `
-            -Uri $Uri `
-            -UseBasicParsing `
-            -MaximumRedirection 0 `
-            -TimeoutSec 8
-    }
-    catch {
-        $response = $_.Exception.Response
-        if ($null -eq $response) {
-            if ($TreatConnectionFailureAsAbsent) {
-                return [pscustomobject]@{
-                    StatusCode = 0
-                    Content = ""
-                }
-            }
-            throw
-        }
+        $response = $client.GetAsync($Uri).GetAwaiter().GetResult()
         return [pscustomobject]@{
             StatusCode = [int]$response.StatusCode
-            Content = ""
+            Content = $response.Content.ReadAsStringAsync().GetAwaiter().GetResult()
         }
+    }
+    finally {
+        if ($null -ne $response) { $response.Dispose() }
+        $client.Dispose()
     }
 }
 
@@ -153,13 +141,11 @@ try {
 
     foreach ($path in @($policy.remoteForbiddenPaths)) {
         $uri = [uri]($baseUrl + [string]$path)
-        $response = Get-HttpResponse -Uri $uri -TreatConnectionFailureAsAbsent
-        # 0 means the connection was refused or dropped - see Get-HttpResponse.
-        if ([int]$response.StatusCode -notin @(0, 404, 410)) {
+        $response = Get-HttpResponse -Uri $uri
+        if ([int]$response.StatusCode -notin @(404, 410)) {
             throw "Local preview exposes forbidden route $uri with status $($response.StatusCode)"
         }
-        $observed = if ([int]$response.StatusCode -eq 0) { "connection-refused" } else { [string]$response.StatusCode }
-        Write-Host "local_forbidden_route_absent: $uri ($observed)"
+        Write-Host "local_forbidden_route_absent: $uri ($($response.StatusCode))"
     }
 
     Write-Host "local_http_smoke: PASS"
