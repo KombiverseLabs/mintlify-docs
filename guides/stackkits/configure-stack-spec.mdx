@@ -14,6 +14,16 @@ stackkit validate
 
 The v0.16.0 CLI writes a canonical `stackkit/v2alpha1` document and establishes local owner custody outside the StackSpec. Do not start from an old minimal example: fields, defaults, and constraints are owned by the CUE contracts embedded in the installed release.
 
+### Accept the catalog defaults at init
+
+Since v0.24.63, `stackkit init <kit> --catalog-defaults` materializes the release's CUE catalog defaults into explicit native `v2alpha2` intent:
+
+```bash
+stackkit init basement-kit --catalog-defaults --owner-source=local
+```
+
+The flag persists the declared default alternatives and compute profiles for omitted choices, so the resulting StackSpec records what the catalog resolved instead of leaving those fields empty. Individual explicit selections such as `--use-case-alternative` take precedence over the materialized defaults. The flag cannot be combined with a persisted candidate spec and does not migrate an existing installation. An omitted adapter choice resolves to `standalone-compose`.
+
 ## Common fields to review
 
 | Intent | Current field | Guidance |
