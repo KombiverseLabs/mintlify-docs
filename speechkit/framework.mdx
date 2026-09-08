@@ -20,7 +20,7 @@ credentials instead of depending on a separate SpeechKit server.
 Pin the current public release explicitly:
 
 ```bash
-go get github.com/kombifyio/SpeechKit@v0.67.14
+go get github.com/kombifyio/SpeechKit@v0.68.0
 ```
 
 Use only the packages required by your host. The public project includes
@@ -123,7 +123,11 @@ The helpers a provider or host needs are part of the public surface:
   router or provider (`allproviders.EnabledProviders.Secrets`,
   `google.Provider.SecretResolver`) instead of through
   `stt.SetSecretResolver`. Two routers in one process no longer share hidden
-  state. The old globals remain as deprecated fallbacks.
+  state. v0.68.0 removed the old globals: replace `stt.SetSecretResolver`
+  with a per-provider `SecretResolver` field or
+  `allproviders.EnabledProviders.Secrets`, and
+  `stt.SetProviderSelectedObserver` with `stt.Router.OnProviderSelected` or
+  `allproviders.RouterConfig.OnProviderSelected`.
 - The voice-agent and assist layers expose shared sentinel errors. All
   `voiceagent/live` providers wrap `live.ErrNotConnected`,
   `live.ErrSessionNotReady`, `live.ErrMissingAPIKey`,
@@ -133,6 +137,14 @@ The helpers a provider or host needs are part of the public surface:
 - The wake-word surface compiles with `CGO_ENABLED=0`. `wakeword.NewPipeline`
   and `wakeword.ErrCgoRequired` exist in every build, so a host learns about
   a missing native engine at runtime instead of failing to compile.
+- `speechkit.OutputTarget` is the typed contract for the `Target` values
+  delivered to `TranscriptOutput.Deliver` since v0.68.0. Implement
+  `TargetKind()` on your own target types or use
+  `speechkit.TargetRef{Kind, ID}`; `speechkit.TargetKind(any)` classifies any
+  value and reports `"opaque"` for legacy untyped targets. Well-known kinds
+  are `window`, `editor`, and `clipboard`. The `Target any` fields keep
+  accepting untyped values for one minor release and become `OutputTarget`
+  in v0.69.0.
 
 ## Client SDKs
 
@@ -148,12 +160,12 @@ The same public project distributes client SDKs without credentials:
 
 ## Continue with public examples
 
-- [SDK quickstart](https://github.com/kombifyio/SpeechKit/blob/v0.67.14/docs/sdk/README.md)
-- [Custom provider guide](https://github.com/kombifyio/SpeechKit/blob/v0.67.14/docs/sdk/custom-provider.md)
-- [Framework API](https://github.com/kombifyio/SpeechKit/blob/v0.67.14/docs/speechkit-framework-api.md)
-- [Voice Companion](https://github.com/kombifyio/SpeechKit/blob/v0.67.14/docs/voice-companion.md)
-- [Runnable examples](https://github.com/kombifyio/SpeechKit/tree/v0.67.14/examples)
-- [SDK surface boundary](https://github.com/kombifyio/SpeechKit/blob/v0.67.14/docs/architecture/sdk-surface-boundary.md)
+- [SDK quickstart](https://github.com/kombifyio/SpeechKit/blob/v0.68.0/docs/sdk/README.md)
+- [Custom provider guide](https://github.com/kombifyio/SpeechKit/blob/v0.68.0/docs/sdk/custom-provider.md)
+- [Framework API](https://github.com/kombifyio/SpeechKit/blob/v0.68.0/docs/speechkit-framework-api.md)
+- [Voice Companion](https://github.com/kombifyio/SpeechKit/blob/v0.68.0/docs/voice-companion.md)
+- [Runnable examples](https://github.com/kombifyio/SpeechKit/tree/v0.68.0/examples)
+- [SDK surface boundary](https://github.com/kombifyio/SpeechKit/blob/v0.68.0/docs/architecture/sdk-surface-boundary.md)
 
 <Note>
 The framework is beta. Keep the module version pinned and review the changelog
