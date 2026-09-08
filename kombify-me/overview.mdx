@@ -1,0 +1,45 @@
+---
+title: "kombify.me"
+description: "Public HTTPS addresses for homelab services that are already reachable, plus an optional private relay"
+sidebarTitle: "Overview"
+icon: "globe"
+---
+
+kombify.me gives a homelab service a stable HTTPS name on `*.kombify.me`. It is
+the optional connected-ingress path: useful when you want a public address,
+and unused when the stack stays on the local network.
+
+<Warning>
+kombify.me is Alpha software. Names, headers, and error shapes can still
+change. Do not treat this as a general-availability release.
+</Warning>
+
+## What you can do
+
+- Open a kit service on a `*.kombify.me` host when the origin is already
+  reachable on the public internet.
+- Keep first-party kit names such as `auth` on `{your-lab}-auth.kombify.me`,
+  never on a reserved apex like `auth.kombify.me`.
+- Relay a private HTTP(S) target through the Techstack node agent when the
+  origin is not public.
+
+kombify.me does not replace StackKits. A local kit still installs, verifies,
+and runs without a kombify.me address.
+
+## How it fits
+
+| Concern | Owner |
+| --- | --- |
+| Kit definitions, local lifecycle, and LAN reachability | StackKits |
+| Orchestration and the node agent for private targets | Techstack |
+| Public HTTPS names, proxy, and private HTTP relay | kombify.me |
+| Sign-in for hosted kombify accounts | `login.kombify.io` |
+
+<CardGroup cols={2}>
+  <Card title="Publish a public service" icon="lock" href="/kombify-me/public-addresses">
+    Register an HTTPS name for a service that is already reachable.
+  </Card>
+  <Card title="Reach a private service" icon="network-wired" href="/kombify-me/private-targets">
+    Use the optional relay when the origin stays on your network.
+  </Card>
+</CardGroup>

@@ -34,11 +34,33 @@
   gates. Repo `ROADMAP.md` owns milestones; Beads owns all executable detail.
   Cross-reference them; do not synchronize them bidirectionally.
 - Check Projects at session boundaries. `roadmap-open-issues` is a one-way Beads
-  view; never hand-edit or sync its generated block back. Do not run
-  `roadmap:update -Sync`: it still writes to the Linear archive and is not a
-  planning path. Ordinary `roadmap:update` remains valid.
+  view; never hand-edit or sync its generated block back. The retired
+  `roadmap:update -Sync` interface fails closed before local or external side
+  effects and is not a planning path. Ordinary `roadmap:update` remains valid.
 - At milestone-relevant close, update repo roadmap gates and run
   `mise --cd <workspace-root> run roadmap:update -- -Repo <repo>`.
+
+## Beads Remote Write Policy
+
+- Authority: `BEADS-REMOTE-WRITE-STANDARD.md`. The remote Dolt history is the
+  collaboration authority; local embedded Dolt is a working copy and
+  `.beads/issues.jsonl` is a derived export.
+- Read current tasks from the manifest-owned Dolt tracker. Git-tracked JSONL,
+  stale worktree stores and historical reports are never a fallback for a
+  missing owner. The planning-policy sync projects this policy and the compact
+  Beads startup guidance; it removes superseded generic Beads instructions.
+- Run every Beads mutation through `mise --cd <workspace-root> run beads:write
+  --repo <manifest-id> -- <bd mutation...>`. Success requires pull, local
+  Dolt commit, blocking `bd dolt push`, a verified remote pull/read round trip,
+  and a `BEADS_REMOTE_WRITE_OK` receipt. The wrapper serializes local writers
+  per tracker authority; never repeat a mutation after a publish failure.
+- `dolt.auto-push`, `no-push`, and `no-git-ops` are forbidden. Auto-push
+  failures are non-blocking warnings and are unsafe for concurrent Git-protocol
+  writers; the central wrapper owns reconciliation and fails closed.
+- Schema upgrades have exactly one designated canonical migrator per
+  repository (`mise run beads:migrate --repo <id> --designated-migrator`).
+  Every other clone adopts the migrated remote with `mise run beads:bootstrap
+  --repo <id>` and never applies the migration independently.
 <!-- END GENERATED: planning-policy kombify-agent-policy-sync -->
 
 Generic AI-agent instructions for Codex, Copilot, Gemini, Claude, and other coding agents.
@@ -71,50 +93,3 @@ This repo is the public Mintlify documentation surface for kombify. `docs.json` 
 - Run `mise run check` for config/path validation.
 - Run `mise run local:e2e` before claiming this docs repo is ready to publish.
 - When changing navigation, verify every page target exists as an `.mdx` file.
-
-<!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
-## Beads Issue Tracker
-
-This project uses **bd (beads)** for issue tracking. Run `bd prime` to see full workflow context and commands.
-
-### Quick Reference
-
-```bash
-bd ready              # Find available work
-bd show <id>          # View issue details
-bd update <id> --claim  # Claim work
-bd close <id>         # Complete work
-```
-
-### Rules
-
-- Use `bd` for ALL task tracking — do NOT use TodoWrite, TaskCreate, or markdown TODO lists
-- Run `bd prime` for detailed command reference and session close protocol
-- Use `bd remember` for persistent knowledge — do NOT use MEMORY.md files
-
-## Session Completion
-
-**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
-
-**MANDATORY WORKFLOW:**
-
-1. **File issues for remaining work** - Create issues for anything that needs follow-up
-2. **Run the affected gate** (if code changed) - follow `$kombify-fast-development`; do not expand to broad suites by default
-3. **Update issue status** - Close finished work, update in-progress items
-4. **PUSH TO REMOTE** - This is MANDATORY:
-   ```bash
-   git pull --rebase
-   bd dolt push
-   git push
-   git status  # MUST show "up to date with origin"
-   ```
-5. **Clean up** - Clear stashes, prune remote branches
-6. **Verify** - All changes committed AND pushed
-7. **Hand off** - Provide context for next session
-
-**CRITICAL RULES:**
-- Work is NOT complete until `git push` succeeds
-- NEVER stop before pushing - that leaves work stranded locally
-- NEVER say "ready to push when you are" - YOU must push
-- If push fails, resolve and retry until it succeeds
-<!-- END BEADS INTEGRATION -->

@@ -62,7 +62,7 @@ export function validateCatalog(document, tag) {
   if (!Array.isArray(document.catalog.useCases)) throw new Error('catalog.useCases must be an array')
   sortedUnique(document.catalog.useCases.map(item => item.id), 'catalog use-case IDs')
   for (const useCase of document.catalog.useCases) {
-    keys(useCase, ['id', 'title', 'description', 'components', 'computeTiers'], `useCase ${useCase.id ?? '?'}`)
+    keys(useCase, ['id', 'title', 'description', 'components', 'computeTiers', 'settings', 'docs'], `useCase ${useCase.id ?? '?'}`)
     string(useCase.id, 'useCase.id', /^[a-z][a-z0-9-]+$/)
     string(useCase.title, `${useCase.id}.title`)
     string(useCase.description, `${useCase.id}.description`)
@@ -76,8 +76,49 @@ export function validateCatalog(document, tag) {
       if (!['application', 'module', 'service', 'connector', 'bridge'].includes(component.kind)) throw new Error(`invalid component kind ${component.kind}`)
     }
     validateComputeTiers(useCase)
+    validateSettings(useCase)
+    if (useCase.docs !== undefined) string(useCase.docs, `${useCase.id}.docs`, /^\/[a-z0-9/-]+$/)
   }
   return document
+}
+
+// Public v0.24.60 foundation/use_case_catalog.cue and internal/usecasecatalog
+// project this metadata. Validate it without expanding the purpose/components
+// page into a settings UI or treating recorded intent as installation support.
+function validateSettings(useCase) {
+  if (useCase.settings === undefined) return
+  const label = `${useCase.id}.settings`
+  if (!Array.isArray(useCase.settings)) throw new Error(`${label} must be an array`)
+  for (const setting of useCase.settings) {
+    keys(setting, ['id', 'name', 'kind', 'group', 'depth', 'help', 'options', 'default', 'placeholder', 'realization'], label)
+    string(setting.id, `${label}.id`, /^[a-z][a-z0-9-]+$/)
+    string(setting.name, `${label}.name`)
+    for (const [field, allowed] of [
+      ['kind', ['choice', 'toggle', 'text']],
+      ['group', ['backend', 'profile', 'storage', 'hardware', 'access', 'features']],
+      ['depth', ['summary', 'advanced']],
+      ['realization', ['install', 'recorded']],
+    ]) {
+      if (!allowed.includes(setting[field])) throw new Error(`${label}.${field} is invalid`)
+    }
+    if (setting.help !== undefined) string(setting.help, `${label}.help`)
+    const defaultType = setting.kind === 'toggle' ? 'boolean' : 'string'
+    if (typeof setting.default !== defaultType) throw new Error(`${label}.default must be ${defaultType}`)
+    if (setting.kind === 'choice') {
+      if (!Array.isArray(setting.options) || setting.options.length < 2) throw new Error(`${label}.options requires choices`)
+      for (const option of setting.options) {
+        keys(option, ['id', 'name', 'note'], `${label}.option`)
+        string(option.id, `${label}.option.id`, /^[a-z][a-z0-9-]+$/)
+        string(option.name, `${label}.option.name`)
+        if (option.note !== undefined) string(option.note, `${label}.option.note`)
+      }
+    } else if (setting.options !== undefined) {
+      throw new Error(`${label}.options requires choice kind`)
+    }
+    if (setting.placeholder !== undefined && (setting.kind !== 'text' || typeof setting.placeholder !== 'string')) {
+      throw new Error(`${label}.placeholder requires text kind and string value`)
+    }
+  }
 }
 
 const COMPUTE_TIERS = ['high', 'low', 'standard']
@@ -131,9 +172,14 @@ export function validateCompatibility(document, tag, useCaseIDs) {
   const deliveryKeys = delivery.map(row => `${row.useCaseRef}/${row.workloadRef}/${row.adapterRef}`)
   sortedUnique(deliveryKeys, 'application-delivery rows')
   for (const row of delivery) {
-    keys(row, ['useCaseRef', 'workloadRef', 'adapterRef', 'adapterName', 'status', 'capabilities'], 'application-delivery row')
+    keys(row, ['useCaseRef', 'workloadRef', 'adapterRef', 'adapterName', 'status', 'capabilities', 'defaultAlternativeRef', 'defaultModuleRef'], 'application-delivery row')
     if (!useCaseIDs.has(row.useCaseRef)) throw new Error(`unknown useCaseRef ${row.useCaseRef}`)
     for (const field of ['useCaseRef', 'workloadRef', 'adapterRef', 'adapterName', 'status']) string(row[field], `applicationDelivery.${field}`)
+    // Public v0.24.63 projects optional #ContractID values from the workload
+    // default and its module; they are catalog intent, not deployment evidence.
+    for (const field of ['defaultAlternativeRef', 'defaultModuleRef']) {
+      if (row[field] !== undefined) string(row[field], `applicationDelivery.${field}`, /^[a-z][a-z0-9-]*$/)
+    }
     if (!['unsupported', 'supported', 'preview', 'beta'].includes(row.status)) throw new Error(`invalid delivery status ${row.status}`)
     keys(row.capabilities, ['deployment', 'routeTLS', 'statusEvidence', 'backupRestore'], 'delivery capabilities')
     for (const field of ['deployment', 'routeTLS', 'statusEvidence', 'backupRestore']) {
@@ -154,7 +200,7 @@ function provenance(title, description, icon, catalog) {
 export function renderPages(catalog, compatibility) {
   const release = catalog.release
   let useCases = provenance('Use cases', `Components declared by StackKits ${release.tag}`, 'diagram-project', catalog)
-  useCases += `This page is generated from the immutable [${release.tag} release](${release.releaseUrl}). It lists only the product purpose and components declared by that release.\n\n`
+  useCases += `This page is generated from the published [${release.tag} release](${release.releaseUrl}). It lists only the product purpose and components declared by that release.\n\n`
   for (const useCase of catalog.catalog.useCases) {
     useCases += `## ${md(useCase.title)}\n\n${md(useCase.description)}\n\n| Component | Role | Kind |\n| --- | --- | --- |\n`
     for (const component of useCase.components) useCases += `| ${md(component.name)} (\`${md(component.id)}\`) | ${md(component.role)} | ${md(component.kind)} |\n`
@@ -171,7 +217,7 @@ export function renderPages(catalog, compatibility) {
 
   let delivery = provenance('Application delivery compatibility', `Declared workload adapter capabilities in StackKits ${release.tag}`, 'route', compatibility)
   delivery += `This is the product capability declared by [${release.tag}](${release.releaseUrl}); it is not evidence that an adapter was deployed on a real host.\n\n`
-  delivery += '| Use case | Workload | Adapter | Status | Deploy | Route/TLS | Status evidence | Backup/restore |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n'
+  delivery += '| Use case | Workload | Adapter | Status | Deploy | Route/TLS | Status evidence | Backup/restore |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n'
   for (const row of compatibility.compatibility.applicationDelivery) {
     const yes = value => value ? 'yes' : 'no'
     delivery += `| \`${md(row.useCaseRef)}\` | \`${md(row.workloadRef)}\` | ${md(row.adapterName)} (\`${md(row.adapterRef)}\`) | \`${md(row.status)}\` | ${yes(row.capabilities.deployment)} | ${yes(row.capabilities.routeTLS)} | ${yes(row.capabilities.statusEvidence)} | ${yes(row.capabilities.backupRestore)} |\n`

@@ -1,0 +1,36 @@
+---
+title: "Reach a private service through kombify.me"
+description: "Relay a private HTTP(S) origin through the Techstack node agent"
+sidebarTitle: "Private targets"
+icon: "network-wired"
+---
+
+Use this path when the service is not reachable from the internet. kombify.me
+does not fetch the private address itself. A Techstack node agent on the
+homelab opens an authenticated connection and forwards bounded HTTP(S)
+requests.
+
+## Before you start
+
+- A Techstack node agent must be running on the homelab that can reach the
+  origin.
+- The route must use the private-target type, not the public proxy.
+- Service exposure still defaults off. Enable it only when you want the public
+  name to accept traffic.
+
+## Open the private name
+
+1. Register the service name the same way as a public address.
+2. Set the target as a private HTTP(S) origin on the homelab.
+3. Keep the Techstack node agent connected.
+4. Expose the service route.
+5. Open `https://{base}-{service}.kombify.me`.
+
+If the agent is disconnected, the public name stays unavailable and asks the
+client to retry. Reconnecting the same owner restores forwarding. Another
+owner's agent cannot serve the route.
+
+## Keep local names local
+
+LAN-only browsing stays on the resolver that StackKits installs on the
+homelab. kombify.me does not publish `*.lan.kombify.me` names.
