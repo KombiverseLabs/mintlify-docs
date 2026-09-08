@@ -87,7 +87,9 @@ to capture the monitor under the cursor immediately.
 Snapshots are stored locally with a meeting-timeline timestamp. They appear as
 markers in the transcript timeline and in the meeting detail gallery, and
 generated Meeting Reviews reference them by their timestamps. Snapshots never
-enter model prompts and never leave the machine.
+enter model prompts and never leave the machine. From v0.68.0, the compact
+overlay briefly unfolds a preview of the saved image after each capture, so you
+know the right window was captured.
 
 ```toml
 [meeting]
@@ -160,6 +162,11 @@ batches without blocking capture. Finishing the meeting produces a durable
 Meeting Review, a five-sentence Executive Brief, and action-item candidates,
 with retry, cancellation, progress, and provider attribution. SpeechKit shows a
 notification when the Meeting Review is ready, or when it failed.
+
+From v0.68.0, Meeting Reviews finish on their own: write-ups interrupted by a
+restart resume afterward, stuck summary steps are retried, and model answers
+are cleaned before they reach your notes. A summary that stalls anyway shows up
+in the activity log with a reason instead of failing quietly.
 
 - Reviews support English, German, Spanish, Simplified Chinese, Hindi, and
   Arabic. Reviews in several languages are written one after another rather
