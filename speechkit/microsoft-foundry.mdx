@@ -1,0 +1,107 @@
+---
+title: "Connect Microsoft Foundry"
+description: "Use one Microsoft Foundry connection for dictation, speech, Assist, and the Voice Agent"
+sidebarTitle: "Microsoft Foundry"
+icon: "microsoft"
+---
+
+SpeechKit [v0.69.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.69.0)
+adds a Microsoft Foundry integration. One Foundry project connection serves
+voice and text across the modes, using Microsoft's own MAI models by default.
+
+The integration card in Settings shows what the connection serves in two
+groups:
+
+| Group | Serves |
+| --- | --- |
+| Voice | Dictation, Speech, Voice Agent |
+| Models | Assist, Utility, Agent |
+
+A single endpoint and sign-in cover both groups. The Advanced dialog keeps a
+tab per mode for overrides.
+
+## Prerequisites
+
+- A Microsoft Foundry project. Copy its project endpoint from the portal, in
+  the form `https://<account>.services.ai.azure.com/api/projects/<project>`.
+- A credential: the resource API key, an Azure CLI sign-in, or a Microsoft
+  app registration from your organisation.
+
+## Three ways to connect
+
+Open the Microsoft Foundry integration card in Settings and choose Connect.
+The dialog offers three paths:
+
+1. **Endpoint and API key.** Paste the project endpoint and the resource API
+   key.
+2. **Azure CLI.** SpeechKit finds the Azure CLI on your machine and reuses its
+   signed-in account. If the CLI is not installed, SpeechKit offers to install
+   it. By default the shared CLI profile is reused; an isolated profile keeps
+   SpeechKit's sign-in separate so it never changes your active `az` account
+   or subscription.
+3. **Your organisation's app registration.** Enter your own Microsoft
+   public-client app registration to sign in through the browser or a device
+   code.
+
+After connecting, run **Test**. The test lists the deployments and MAI voices
+your project actually has. The Advanced pickers offer those names and flag a
+name that is not deployed.
+
+<Note>
+Microsoft serves MAI voices only in some regions. When your resource offers no
+MAI voices, the Connect test says so directly instead of letting the MAI
+speech defaults fail later with a generic error.
+</Note>
+
+## Default models
+
+Only current models are on offer:
+
+| Task | Default | Notes |
+| --- | --- | --- |
+| Dictation | `MAI-Transcribe-2` | Served by the resource without a deployment. |
+| Speech output | `MAI-Voice-2-Flash` | Served by the resource without a deployment. |
+| Assist | `gpt-5.6-terra` | `MAI-Thinking-1` also works as an Assist model. |
+| Utility | `gpt-5.6-luna` | Quick tasks such as title extraction and cleanups. |
+| Agent | `gpt-5.6-terra` | `gpt-5.6-sol` is the reasoning option. |
+
+The GPT-4o transcription and speech entries are gone. A setting that still
+names them resolves to the MAI models.
+
+## Configuration file
+
+The Windows client stores the connection under `[providers.foundry]`. The
+Settings dialog writes these keys; edit them directly only when you manage the
+configuration file yourself:
+
+```toml
+[providers.foundry]
+enabled = true
+project_endpoint = "https://<account>.services.ai.azure.com/api/projects/<project>"
+# "api_key" uses the resource key from api_key_env; "entra" uses the
+# signed-in Microsoft identity.
+auth_mode = "entra"
+# "auto", "azure_cli", "browser", or "device_code"
+entra_credential = "azure_cli"
+# "shared" reuses your own az session; "isolated" keeps SpeechKit's
+# sign-in in a private profile.
+azure_cli_profile = "shared"
+# Per-mode overrides; defaults shown.
+stt_deployment = "MAI-Transcribe-2"
+tts_deployment = "MAI-Voice-2-Flash"
+assist_deployment = "gpt-5.6-terra"
+utility_deployment = "gpt-5.6-luna"
+agent_deployment = "gpt-5.6-terra"
+```
+
+## kombify Cloud as an integration card
+
+Since v0.69.0 the kombify Cloud sign-in is an integration card like every
+other: brand, category, the modes it serves (Dictate, Meeting, Voice Agent),
+its availability in this build, the privacy-scope lock when cloud services are
+blocked, an enable switch, and an account dialog with the sign-in code, the
+bound server, and sign-out. It sits with the other integrations.
+
+<Card title="Modes and data paths" icon="waveform-lines" href="/speechkit/modes">
+  Review what leaves the device when a mode uses an external provider.
+</Card>
