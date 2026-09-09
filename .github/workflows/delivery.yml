@@ -44,17 +44,17 @@ jobs:
       SOURCE_REPOSITORY: mintlify-docs
       SOURCE_SHA: ${{ github.sha }}
       STABLE_APPROVED: ${{ github.event_name == 'workflow_dispatch' && inputs.approve-stable }}
-      STANDARDS_REF: f6c73bdee0b3a3c4b764ad22fc84ec31f7373707
+      STANDARDS_REF: c9657b9c852ea5f3b480e25f07ae470274137a2b
     steps:
       - name: Check out exact caller source
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
 
       - name: Check out immutable delivery compiler
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: KombiverseLabs/kombify-workspace
           ref: ${{ env.STANDARDS_REF }}
@@ -63,7 +63,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "24"
 
@@ -71,22 +71,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          VERSION="$(node --input-type=module <<'NODE'
-          import fs from "node:fs";
-          import { execFileSync } from "node:child_process";
-          const declared = fs.readFileSync(".kombify/VERSION", "utf8").trim();
-          const match = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.exec(declared);
-          if (!match) throw new Error(".kombify/VERSION must be suffix-free MAJOR.MINOR.PATCH SemVer");
-          if (match[1] !== "0") {
-            process.stdout.write(declared);
-          } else {
-            const anchor = execFileSync("git", ["log", "-1", "--format=%H", "--", ".kombify/VERSION"], { encoding: "utf8" }).trim();
-            if (!/^[0-9a-f]{40}$/.test(anchor)) throw new Error("cannot resolve .kombify/VERSION anchor");
-            const distance = BigInt(execFileSync("git", ["rev-list", "--count", "--first-parent", `${anchor}..${process.env.SOURCE_SHA}`], { encoding: "utf8" }).trim());
-            process.stdout.write(`${match[1]}.${match[2]}.${BigInt(match[3]) + distance}`);
-          }
-          NODE
-          )"
+          VERSION="$(node standards/scripts/resolve-delivery-version.mjs --repo-root "$PWD" --source-sha "$SOURCE_SHA")"
           SOURCE_MAP_JSON="$(node -e 'process.stdout.write(JSON.stringify({[process.env.SOURCE_REPOSITORY]: process.env.SOURCE_SHA}))')"
           mkdir -p delivery receipts
           node standards/scripts/delivery-platform.mjs compile \
