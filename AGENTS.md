@@ -71,7 +71,7 @@ Use workspace-root standards and `../kombify-Core/standards/`:
 
 - `../DOCUMENTATION-STANDARD.md` (workspace root, binding) for the documentation tier model and Tier-1 public docs rules.
 - `../kombify-Core/standards/REPO-FILE-SCHEMA.md` for root metadata.
-- `../LINEAR-PLANNING-STANDARD.md` (workspace root) for Linear / Roadmap / Beads separation.
+- `../GITHUB-PROJECTS-PLANNING-STANDARD.md` (workspace root) for portfolio priorities, roadmap milestones, and Beads execution.
 - `../PLATFORM-STRATEGY.md` (workspace root) for product naming and public/internal boundaries.
 - Repo gates: `.github/workflows/public-safety.yml` (public allowlist enforcement) and `.github/workflows/parity-gate.yml` (generated-MDX frontmatter).
 

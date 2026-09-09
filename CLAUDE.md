@@ -1,10 +1,7 @@
 # CLAUDE.md - mintlify-docs
 
-Claude-specific instructions. Keep aligned with `AGENTS.md`.
-
-## Normative Sources
-
-Use the workspace-root `DOCUMENTATION-STANDARD.md` (binding), `LINEAR-PLANNING-STANDARD.md`, and `PLATFORM-STRATEGY.md`, plus `../kombify-Core/standards/REPO-FILE-SCHEMA.md`.
+Read [AGENTS.md](AGENTS.md) first. Its planning, remote tracker, public-safety
+and verification rules also apply to Claude workflows.
 
 ## Repo-Specific Rules
 
@@ -17,19 +14,3 @@ Use the workspace-root `DOCUMENTATION-STANDARD.md` (binding), `LINEAR-PLANNING-S
 ## Verification
 
 Run `mise run check` for config/path validation and `mise run local:e2e` for the docs-local gate.
-
-## Linear (High-Level Planning)
-
-This repo maps to Linear label `area:websites` in the **Development** project.
-Check `list_issues --label area:websites` for active high-level tasks before
-starting significant work. Create Linear issues for cross-repo decisions,
-blockers, or feature-level planning. Granular execution stays in Beads.
-
-Workspace: [Kombiverse Labs](https://linear.app/kombiverse-labs)
-Standard: `LINEAR-PLANNING-STANDARD.md` in the kombify workspace root.
-
-
-## Beads tracking
-
-Follow the remote-write policy in `AGENTS.md` and compact `.beads/PRIME.md`.
-The owning Dolt remote is authoritative; Git JSONL is a derived export.
