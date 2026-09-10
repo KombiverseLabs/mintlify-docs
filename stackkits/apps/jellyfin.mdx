@@ -5,7 +5,7 @@ sidebarTitle: "Jellyfin"
 icon: film
 ---
 
-Jellyfin is the released [Media Library](/guides/stackkits/use-cases/overview) workload: a private streaming server for a household media collection on a standalone-compose host. Set it up after your local baseline works — see [Private Home Base](/guides/stackkits/use-cases/private-home-base). Use `stackkit app compatibility --json` for the workload adapter matrix; do not edit generated deployment files or infer enablement from archive presence.
+Jellyfin provides the [Media Library](/guides/stackkits/use-cases/overview) workload on a Standalone Compose host. Set it up after your local baseline works; see [Private Home Base](/guides/stackkits/use-cases/private-home-base). Use `stackkit app compatibility --json` to inspect the installed release's adapter capabilities.
 
 ## Point the workload at an existing media directory
 
@@ -49,7 +49,7 @@ The flag only finishes the startup wizard. It does not add libraries, change rem
 
 Application configuration and media bytes are custodied separately:
 
-- Jellyfin's configuration and caches live in separate plan-owned volumes and follow the application backup flow.
+- Jellyfin's configuration and transcoding cache live in separate volumes. Check the application backup declaration for included data; writable storage alone does not imply backup coverage.
 - Your media source is not a StackKits backup. Whatever you set for `storage.mediaRoot`, keep an independent recovery source for those bytes and document it outside the stack.
 - Container health and a verified administrator setup do not prove library content or recovery; check both explicitly.
 
