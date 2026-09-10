@@ -1,13 +1,13 @@
 ---
 title: "Vaultwarden"
-description: "Understand the released optional Vault workload and its current authoring boundary"
+description: "Add the released optional Vault workload with Vaultwarden under owner custody"
 sidebarTitle: "Vaultwarden"
 icon: vault
 ---
 
 Vaultwarden is the released alternative for the optional native v2 `vault` workload. It is not enabled by the initial Basement or Cloud StackSpec.
 
-| Property | v0.16.0 value |
+| Property | Value |
 | --- | --- |
 | Workload | `vault` |
 | Alternative | `vaultwarden` |
@@ -16,8 +16,10 @@ Vaultwarden is the released alternative for the optional native v2 `vault` workl
 | Supported standalone adapter | `standalone-compose` |
 
 <Warning>
-  The release exposes no safe public post-init command for creating the owner-bound secret custody required by a newly added Vault workload. Do not treat an opaque `secret://` reference as a value or use this page as a complete installation recipe.
+  The `admin-token` entry above is an opaque secret reference, not a value. Never paste it into application configuration; establish owner-bound custody with [stackkit secrets materialize](/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace) after you select the workload in the StackSpec. A rollout that verifies and an administrator invitation are not a usable vault yet: create the application owner account, choose the registration policy, and confirm each client can sign in before trusting it.
 </Warning>
+
+To add the workload to an existing workspace, choose the workload, placement, and adapter explicitly in the StackSpec, then materialize the `admin-token` custody before regenerate. The complete sequence — validate, generate, inspect the plan, and apply and verify with the normal lifecycle — is documented in [Configure a StackSpec](/guides/stackkits/configure-stack-spec) and [Operate a StackKit](/stackkits/reference/day-2-operations).
 
 Create the application owner account, store recovery material separately, and choose the registration policy before adding real secrets. Confirm that your backup and recovery approach covers the Vaultwarden data volume.
 
