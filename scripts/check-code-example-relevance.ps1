@@ -23,8 +23,10 @@ $executableExamplePages = [System.Collections.Generic.HashSet[string]]::new(
     "guides/stackkits/configure-stack-spec.mdx",
     "guides/stackkits/review-plan-and-apply.mdx",
     "guides/stackkits/use-cases/private-file-library.mdx",
+    "guides/stackkits/use-cases/private-ai.mdx",
     "guides/stackkits/use-cases/private-home-base.mdx",
     "guides/stackkits/use-cases/recovery-first-homelab.mdx",
+    "stackkits/apps/jellyfin.mdx",
     "stackkits/kits/basement-kit.mdx",
     "stackkits/kits/cloud-kit.mdx",
     "stackkits/overview.mdx",
@@ -39,8 +41,14 @@ $allowedInlineCommands = @{
     "guides/stackkits/configure-stack-spec.mdx" = @(
         "stackkit secrets materialize"
     )
+    "guides/stackkits/use-cases/private-ai.mdx" = @(
+        "stackkit secrets materialize"
+    )
     "guides/stackkits/use-cases/private-file-library.mdx" = @(
         "stackkit init"
+    )
+    "stackkits/apps/jellyfin.mdx" = @(
+        "stackkit app compatibility --json"
     )
     "stackkits/apps/overview.mdx" = @(
         "stackkit app compatibility --json"
@@ -77,6 +85,7 @@ $structuredExamplePages = [System.Collections.Generic.HashSet[string]]::new(
     "guides/stackkits/configure-stack-spec.mdx",
     "guides/stackkits/use-cases/private-file-library.mdx",
     "stackkits/apps/cloudreve.mdx",
+    "stackkits/apps/jellyfin.mdx",
     "stackkits/reference/mcp-connector.mdx"
 ) | ForEach-Object { $structuredExamplePages.Add($_) | Out-Null }
 

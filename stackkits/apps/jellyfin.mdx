@@ -1,12 +1,62 @@
 ---
 title: "Jellyfin"
-description: "The released media module and its current native v2 boundary"
+description: "The media library workload with read-only media, native owner setup, and separate recovery paths"
 sidebarTitle: "Jellyfin"
 icon: film
 ---
 
-Jellyfin ships as a public v0.16.0 module contract, but the current native v2 workload catalog exposes only `files`, `photos`, and `vault`. The initial StackSpec has no released Jellyfin selector.
+Jellyfin is the released [Media Library](/guides/stackkits/use-cases/overview) workload: a private streaming server for a household media collection on a standalone-compose host. Set it up after your local baseline works — see [Private Home Base](/guides/stackkits/use-cases/private-home-base). Use `stackkit app compatibility --json` for the workload adapter matrix; do not edit generated deployment files or infer enablement from archive presence.
 
-Do not add a guessed `application.media` or `workloads.jellyfin` object: the installed CUE contract rejects unsupported intent. A future released workload contract must define placement, storage, route, health, and lifecycle before this can become a public installation how-to.
+## Point the workload at an existing media directory
 
-The module archive remains useful release evidence for developers, but archive presence alone is not an operator-facing enablement path.
+To use an existing library, set `storage.mediaRoot` in the StackSpec to the media's absolute directory on the runtime host, for example `/srv/household-media`, before generating and applying the stack:
+
+- StackKits binds that directory at `/media` read-only. Jellyfin can scan and stream those files but cannot edit or delete them.
+- The directory must already exist. StackKits does not create it and does not change its permissions; a missing directory fails delivery, so prepare and guard the host storage yourself.
+- Leave `storage.mediaRoot` absent to keep a named library volume managed by the plan instead.
+- The path names storage on the runtime host, not on the machine running a remote viewer.
+
+## Set up the owner account
+
+Create a private, workspace-relative credential file `.stackkit/setup/media-owner.json`:
+
+```json
+{
+  "username": "<your administrator name>",
+  "password": "<your unique password>"
+}
+```
+
+Restrict that file to its workspace owner and keep its contents out of command arguments and chat messages. Then run:
+
+```bash
+stackkit setup media --credentials-file .stackkit/setup/media-owner.json --owner-approve --json
+```
+
+The command verifies the current plan, the signed Apply, the exact local container, and the pinned Jellyfin version before acting. On first run it sets your chosen administrator credentials — it never uses a default first-user password. On an existing installation it performs a normal login and administrator readback instead. The temporary setup session is revoked before the signed result is recorded.
+
+## Finish the wizard and add libraries
+
+Without further flags, an unfinished Jellyfin startup wizard stays unfinished: open Media at its declared private route and choose library paths, language, and household settings yourself. To complete the startup wizard with the current application settings instead, and configure your libraries afterward, add `--complete-onboarding`:
+
+```bash
+stackkit setup media --credentials-file .stackkit/setup/media-owner.json --owner-approve --complete-onboarding --json
+```
+
+The flag only finishes the startup wizard. It does not add libraries, change remote-access settings, or configure transcoding. When you add a library, follow the plan's media volume mapping — the read-only `/media` mount for an owner-custodied directory. Give household viewers separate non-administrator Jellyfin accounts and connect each player directly to the declared Media URL.
+
+## Recovery limits
+
+Application configuration and media bytes are custodied separately:
+
+- Jellyfin's configuration and caches live in separate plan-owned volumes and follow the application backup flow.
+- Your media source is not a StackKits backup. Whatever you set for `storage.mediaRoot`, keep an independent recovery source for those bytes and document it outside the stack.
+- Container health and a verified administrator setup do not prove library content or recovery; check both explicitly.
+
+## Test a real client
+
+Test playback of one of your own files from an intended client. Check direct play first, and transcoding only when you have explicitly configured it. Client compatibility, bandwidth, and transcoding quality are not proven by a healthy container — verify them on the devices you actually plan to watch on.
+
+## Resume an interrupted setup
+
+If a setup run is interrupted, retry it with the reported `--operation-id`. The command re-checks the application state and never reopens an already completed startup wizard.

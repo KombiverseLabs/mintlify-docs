@@ -1,0 +1,88 @@
+---
+title: "Private AI"
+description: "Run a private local chat workbench with owner custody and explicit model downloads"
+sidebarTitle: "Private AI"
+icon: brain
+---
+
+The Private AI use case runs a local chat workbench on your own Docker host: [Ollama](https://ollama.com) serves a language model and Open WebUI provides the chat interface. Everything stays behind your local owner identity — no Cloud tenant and no SaaS account is required, and public signup is disabled. The use case is experimental; see the generated [Use cases overview](/guides/stackkits/use-cases/overview) for the components the catalog declares for the current release scope.
+
+## Check your host capacity first
+
+The CPU profile has a declared host floor of 4 CPU cores, 12 GiB RAM, and 40 GiB disk; 8 CPU cores, 16 GiB RAM, and 80 GiB disk are recommended. Model size matters on top of that floor:
+
+- Ollama has a declared 6 GiB RAM limit — the downloaded model weights plus the context you use must fit inside it.
+- Open WebUI has a declared 2 GiB RAM limit.
+- Allow disk space for container images and for downloaded model weights together.
+- GPU serving is not enabled; a higher compute tier uses the same CPU runtime.
+
+These are declared scheduling limits, not measured performance. Undersized hosts are blocked at apply with a clear reason, so verify honest capacity — see [Choose a StackKit](/guides/stackkits/choosing-a-kit) for compute tiers.
+
+## Select the AI workload
+
+From an empty owner workspace:
+
+```bash
+stackkit init basement-kit --platform standalone-compose \
+  --use-case ai --use-case-alternative ai=private-ai \
+  --use-case-alternative basement-core=standalone \
+  --module-compute-profile stackkits-basement-core-runtime=standard \
+  --module-compute-profile stackkits-private-ai-runtime=standard \
+  --owner-source=local --non-interactive
+```
+
+To add AI to an existing workspace, change the canonical intent first, then run the existing `stackkit secrets materialize`. The init command creates the two owner-bound secret references for AI. Generation does not mint secrets or download any model. Add the selection to a complete StackSpec and run the usual delivery lifecycle:
+
+```bash
+stackkit validate
+stackkit generate
+stackkit plan --json
+stackkit apply
+stackkit verify
+```
+
+Apply requires the admitted Linux Docker host and its observed inventory; see [Review, plan, and apply](/guides/stackkits/review-plan-and-apply).
+
+## Open the AI route as the owner
+
+After apply, open the generated AI route. Open WebUI creates its initial administrator from the established local owner's identity and the `owner-password` secret that the init command placed in owner custody. The initial password is available only to the owner in the runtime `.env` under `.stackkit/runtime/applications/stackkit-ai-main/` (substitute your selected node for `main`). Treat it like a credential:
+
+- Keep that file private and do not copy it into chats, screenshots, or Git.
+- Change the password inside Open WebUI after the first login. The startup bootstrap does not reset an existing account, so keep your changed administrator password in your own custody.
+
+There is no separate owner-setup command for the AI workload; owner access is through the route described here. The `session-key` secret remains in owner custody.
+
+## Choose and download a model explicitly
+
+No model is selected or pulled for you — not during install, restart, or upgrade. In Open WebUI, open **Admin Settings**, explicitly select an Ollama model, and request its download. Before you pick one, review the upstream model's license, download size, quantization, context length, and RAM requirements.
+
+Start with a small model on the CPU profile. The verified live path used the small model `smollm2:135m` explicitly; it fits the declared limits and answers in a local-language-chat scope. Larger models and longer contexts require additional capacity and a separately governed compute profile.
+
+Ollama's API is only reachable on the workload network — it has no host-published port — so the model server stays private. It has an outbound route only for the downloads you request.
+
+## Ask your first question
+
+Create a new chat in Open WebUI, select the downloaded model, and send a question. The answer runs locally: authenticated inference against your Ollama instance and chat save/readback are the verified behavior. Keep the model small enough to fit the declared limits and judge response quality on your own host.
+
+## What persists where
+
+Storage is split deliberately:
+
+| What | Where | Backup behavior |
+| --- | --- | --- |
+| Chats and Open WebUI data | Persistent `open-webui-data` volume at `/app/backend/data` | Included in the owner backup set |
+| Downloaded model weights | Persistent `ollama-models` volume at `/root/.ollama` | Not a backup source; excluded from backups |
+
+Chats and model weights are retained across container replacement and were retained in verified live tests when both containers were recreated. When planning recovery, plan on reinstalling and re-downloading the model while the chats come back from backup; store the exact model name and digest just like a configuration item. A restore of a complete AI deployment has no verified documented path yet. See [Back up and restore](/guides/stackkits/back-up-and-restore) for the workspace backup lifecycle.
+
+## Troubleshooting
+
+| State | What to do |
+| --- | --- |
+| Apply blocks the host with a capacity reason | Check the host floor above; does the host meet the 4 CPU / 12 GiB / 40 GiB floor and does the model you intend to load fit the 6 GiB Ollama limit? |
+| Initial administrator login fails | Logins are never reset by startup bootstrap; use the owner-only initial password for the first login and change it immediately. Then treat the changed password as your only access path. |
+| No model appears after restart or a reinstalled instance | Downloads are never automatic. Re-select the model in Admin Settings and request the download again; model weights are not part of any backup source. |
+| Responses stall or the container stops | The model plus context likely exceeds the declared 6 GiB RAM limit. Pick a smaller model or shorter context instead of increasing in-place limits. |
+| AI owner secret references missing in an existing workspace | After changing the canonical intent, run the existing `stackkit secrets materialize`; generation alone does not mint secrets. |
+
+If a question is not covered above, check the [Node Hub](/guides/stackkits/node-hub) status for the workload containers before changing anything in the generated runtime directory.
