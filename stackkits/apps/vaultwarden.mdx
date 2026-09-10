@@ -15,12 +15,12 @@ Vaultwarden is the released alternative for the optional native v2 `vault` workl
 | Required secret reference | `admin-token` |
 | Supported standalone adapter | `standalone-compose` |
 
-<Warning>
-  The `admin-token` entry above is an opaque secret reference, not a value. Never paste it into application configuration; establish owner-bound custody with [stackkit secrets materialize](/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace) after you select the workload in the StackSpec. A rollout that verifies and an administrator invitation are not a usable vault yet: create the application owner account, choose the registration policy, and confirm each client can sign in before trusting it.
-</Warning>
-
-To add the workload to an existing workspace, choose the workload, placement, and adapter explicitly in the StackSpec, then materialize the `admin-token` custody before regenerate. The complete sequence — validate, generate, inspect the plan, and apply and verify with the normal lifecycle — is documented in [Configure a StackSpec](/guides/stackkits/configure-stack-spec) and [Operate a StackKit](/stackkits/reference/day-2-operations).
+The `admin-token` slot holds an opaque `secret://` reference; the actual token stays in local owner custody. Choose the workload, placement and adapter in the [StackSpec](/guides/stackkits/configure-stack-spec), then follow [Add a workload](/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace) to validate, establish custody, generate, inspect the plan, apply and verify.
 
 Create the application owner account, store recovery material separately, and choose the registration policy before adding real secrets. Confirm that your backup and recovery approach covers the Vaultwarden data volume.
+
+After accepting an invitation, complete account registration and sign in through
+your Bitwarden client. Create and sync a vault entry to confirm that the account
+is ready; an invitation alone does not complete this setup.
 
 For an already admitted workload, change StackKits intent through the StackSpec and lifecycle commands; do not edit generated application configuration on the target.

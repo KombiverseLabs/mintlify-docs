@@ -1,6 +1,6 @@
 ---
 title: "Family Photo Vault"
-description: "Add the released optional Photos workload with Immich to your stack"
+description: "Add Photos with Immich to your homelab and prepare its recovery"
 sidebarTitle: "Family Photo Vault"
 icon: camera-retro
 ---
@@ -23,11 +23,10 @@ The released contract requires:
 - a supported workload adapter
 - an opaque `database-password` secret reference backed by local owner custody
 
-To add it to an existing workspace, first choose the workload, placement, and adapter explicitly in the StackSpec. The `database-password` reference is opaque, not a password you type: establish owner-bound custody for it before regenerating. The complete workflow — select the workload, run [stackkit secrets materialize](/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace), then validate, generate, inspect the plan, and apply and verify with the normal lifecycle — is documented there and in [Configure a StackSpec](/guides/stackkits/configure-stack-spec).
+Choose the workload, placement and adapter in your [StackSpec](/guides/stackkits/configure-stack-spec). Its `database-password` slot contains an opaque `secret://` reference; the actual password stays in local owner custody. Follow [Add a workload](/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace) to validate the selection, establish that custody, generate the rollout, inspect its plan, apply and verify.
 
-<Warning>
-  A secret reference such as `database-password` is an opaque pointer, not a password. Never copy it into an application configuration, a chat, or a document; owner-bound custody is established with [stackkit secrets materialize](/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace). A rollout that verifies is not recovery evidence — confirm a staged restore before trusting the library to hold irreplaceable photos.
-</Warning>
+Recovery needs both the original photos and videos and the Immich database.
+Practice a staged restore before relying on the service as the only copy of a family library.
 
 ## Keep it maintainable
 
