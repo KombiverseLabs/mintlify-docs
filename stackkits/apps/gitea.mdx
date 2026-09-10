@@ -1,0 +1,55 @@
+---
+title: "Gitea"
+description: "Run the released private Git dev workload with native HTTPS Git and owner custody"
+sidebarTitle: "Gitea"
+icon: code-branch
+---
+
+The dev workload with Gitea runs a private Git server in a rootless container with SQLite on one selected node. Public registration is disabled and new repositories are forced private. It does not expose SSH, install a CI runner, or enable Actions; workflows for additional users and API tokens stay native Gitea operations. The [use-case catalog](/guides/stackkits/use-cases/overview) lists the components the published release declares.
+
+## Select the dev workload explicitly
+
+The published release archive contains the complete example selection at `examples/v2/gitea-standalone.stack-spec.yaml`. It selects the optional `dev` workload with the `gitea` alternative on the `standalone-compose` adapter, binds private `personal`-class data, and declares an HTTPS route (`host`, `port 443`, target port `3000`) plus an internal-PKI capability. Adapt the node identity, home domain, and host storage roots to your host — Gitea generation requires that explicit HTTPS route and data binding so native clients receive a usable governed clone URL.
+
+From a fresh workspace, preserve those selections with a candidate spec:
+
+```bash
+stackkit init basement-kit --candidate-spec ./gitea-standalone.stack-spec.yaml --owner-source local --owner-email owner@example.com --non-interactive
+stackkit generate --local-node main --local-site home
+```
+
+Then follow the normal delivery lifecycle: validate, inspect the plan, and apply and verify as documented in [Review, apply, and verify](/guides/stackkits/review-plan-and-apply). Observed host inventory must satisfy the selected module profiles; the example configuration is not hardware evidence.
+
+## Provide the name and trust the route works
+
+Native HTTPS Git needs two things your host must already satisfy:
+
+- The route's hostname (the example uses `dev.home.test`) must resolve to that host from every client you intend to clone.
+- Git clients must trust the host's internal CA certificate. Without client trust, HTTPS cloning fails before authentication.
+
+## Reveal the owner password and sign in
+
+First startup migrates the SQLite database and creates administrator `owner` before serving traffic; owner email comes from your local owner identity, and the `owner-password` reference is held in existing local secret custody. Read the password in a private terminal:
+
+```bash
+stackkit secrets reveal --workload dev --slot owner-password
+```
+
+The command accepts only slots declared by the current validated StackSpec, writes the value to stdout — never to deployment logs — and neither creates nor resets a password. An existing unmatched administrator or an unowned user database fails delivery without replacing accounts or resetting passwords.
+
+Sign in as `owner`, create a private repository, and use its HTTPS clone URL with your native Git credential storage. Git authenticates directly with Gitea: no browser forward-auth gate intercepts Git requests. Readiness that only reports the HTTP process and SQLite as reachable does not prove you have cloned, pushed, or recovered anything — test an actual push from an intended client.
+
+## Storage and recovery boundary
+
+| Allocation | Container path | Contents |
+| --- | --- | --- |
+| `gitea/data` | `/var/lib/gitea` | SQLite database, repositories, LFS objects, application data |
+| `gitea/config` | `/etc/gitea` | `app.ini` and persisted application keys/configuration |
+
+Both named volumes belong to the workload's data and backup contract. Correct recovery quiesces the application's single writer, captures both volumes, and activates them together with writes stopped — a live copy of the SQLite file alone is not that contract. Follow [Back up and restore](/guides/stackkits/back-up-and-restore) for the workspace lifecycle. Rootless and rootful Gitea use different layouts, so swapping the image is not a storage migration.
+
+## Known limits
+
+- SSH is not exposed; native HTTPS is the documented Git access path.
+- Gitea Actions and CI runners are not installed; runner integration has no documented path yet.
+- Forced container recreation retains owner access, private repository metadata, and the application configuration, but complete Linux host provisioning, real LAN DNS/CA distribution, and a full backup/restore cycle are separate evidence tiers and not proven here.

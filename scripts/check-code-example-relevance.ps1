@@ -26,6 +26,7 @@ $executableExamplePages = [System.Collections.Generic.HashSet[string]]::new(
     "guides/stackkits/use-cases/private-ai.mdx",
     "guides/stackkits/use-cases/private-home-base.mdx",
     "guides/stackkits/use-cases/recovery-first-homelab.mdx",
+    "stackkits/apps/gitea.mdx",
     "stackkits/apps/jellyfin.mdx",
     "stackkits/kits/basement-kit.mdx",
     "stackkits/kits/cloud-kit.mdx",
@@ -46,6 +47,9 @@ $allowedInlineCommands = @{
     )
     "guides/stackkits/use-cases/private-file-library.mdx" = @(
         "stackkit init"
+    )
+    "stackkits/apps/gitea.mdx" = @(
+        "stackkit secrets reveal --workload dev --slot owner-password"
     )
     "stackkits/apps/jellyfin.mdx" = @(
         "stackkit app compatibility --json"
