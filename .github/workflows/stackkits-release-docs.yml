@@ -26,20 +26,10 @@ jobs:
     runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'ubuntu-24.04' }}
     timeout-minutes: 6
     steps:
-      - name: Create repository automation token
-        id: docs-token
-        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
-        with:
-          app-id: ${{ vars.RELEASE_APP_ID }}
-          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
-          owner: KombiverseLabs
-          repositories: mintlify-docs
-          permission-contents: write
-          permission-pull-requests: write
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
-          token: ${{ steps.docs-token.outputs.token }}
+          token: ${{ github.token }}
           persist-credentials: false
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
@@ -91,13 +81,31 @@ jobs:
       - name: Open or update generated-only PR
         if: steps.release.outputs.available == 'true'
         env:
-          GH_TOKEN: ${{ steps.docs-token.outputs.token }}
-          BOT_LOGIN: ${{ steps.docs-token.outputs.app-slug }}[bot]
+          GH_TOKEN: ${{ secrets.REPO_SYNC_PAT }}
           BRANCH: bot/stackkits-release-docs
           TAG: ${{ steps.release.outputs.tag }}
         shell: bash
         run: |
           set -euo pipefail
+          auth_guidance="Repair the scoped REPO_SYNC_PAT identity tracked by mintlify-docs-msct; do not substitute a broad organization credential."
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "::error::REPO_SYNC_PAT is missing. $auth_guidance"
+            exit 1
+          fi
+          if ! writer="$(gh api user 2>/dev/null)"; then
+            echo "::error::REPO_SYNC_PAT authentication was rejected. $auth_guidance"
+            exit 1
+          fi
+          if ! can_push="$(gh api repos/KombiverseLabs/mintlify-docs --jq '.permissions.push' 2>/dev/null)" || [ "$can_push" != true ]; then
+            echo "::error::REPO_SYNC_PAT cannot write KombiverseLabs/mintlify-docs. $auth_guidance"
+            exit 1
+          fi
+          writer_login="$(jq -r '.login // empty' <<<"$writer")"
+          writer_id="$(jq -r '.id // empty' <<<"$writer")"
+          [ -n "$writer_login" ] && [[ "$writer_id" =~ ^[0-9]+$ ]] || {
+            echo "::error::REPO_SYNC_PAT returned an invalid GitHub writer identity. $auth_guidance"
+            exit 1
+          }
           if git diff --quiet -- data/stackkits guides/stackkits/use-cases/overview.mdx stackkits/reference/os-compatibility.mdx stackkits/reference/application-delivery-compatibility.mdx; then
             echo "No public snapshot drift."
             exit 0
@@ -109,10 +117,8 @@ jobs:
           # broke on any path containing a space.
           unexpected="$(git status --porcelain --untracked-files=all | cut -c4- | grep -Ev '^(data/stackkits/|guides/stackkits/use-cases/overview\.mdx$|stackkits/reference/(os|application-delivery)-compatibility\.mdx$)' || true)"
           [ -z "$unexpected" ] || { echo "::error::unexpected generated paths: $unexpected"; exit 1; }
-          bot_id="$(gh api "users/$BOT_LOGIN" --jq .id)"
-          [[ "$bot_id" =~ ^[0-9]+$ ]]
-          git config user.name "$BOT_LOGIN"
-          git config user.email "$bot_id+$BOT_LOGIN@users.noreply.github.com"
+          git config user.name "$writer_login"
+          git config user.email "$writer_id+$writer_login@users.noreply.github.com"
           gh auth setup-git --hostname github.com
           git fetch origin "refs/heads/$BRANCH:refs/remotes/origin/$BRANCH" || true
           git checkout -B "$BRANCH"
