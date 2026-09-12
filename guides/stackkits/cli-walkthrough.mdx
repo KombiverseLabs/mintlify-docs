@@ -1,0 +1,146 @@
+---
+title: "Your first CLI deployment"
+description: "Follow the StackKits CLI from local configuration to application setup and recovery"
+sidebarTitle: "CLI walkthrough"
+icon: terminal
+---
+
+The CLI guides you through separate commands: save your choices, check them,
+review the deployment, apply it, and inspect what still needs attention. Each
+command has its own help. It does not automatically advance through the whole
+deployment or choose a kit for you.
+
+This walkthrough describes the native CLI in the public **v0.26.1** release.
+Standard Mode works without a kombify account or Techstack. Local owner keys
+and deployment evidence stay in your workspace.
+
+## Choose your starting point
+
+| Entry | What happens | Continue with |
+| --- | --- | --- |
+| [Toolchain installer](/guides/stackkits/choosing-a-kit#install-only-the-toolchain) | Installs the CLI and catalog; you configure and apply services separately. | Step 1 below. |
+| [Basement quickstart](/stackkits/quickstart) | On a supported Ubuntu server, installs prerequisites, initializes the workspace and local owner, and applies default Basement services. | Step 5 below, in `~/my-homelab`. |
+
+Run the Basement bootstrap only on the host you intend to configure. For a
+first look at the CLI without installing services, choose the toolchain path.
+Windows users can obtain the CLI from the public release ZIP; that does not
+make Windows a supported native Basement runtime target. Check the
+[OS compatibility reference](/stackkits/reference/os-compatibility) for the
+installation target.
+
+## 1. Check the CLI and create a workspace
+
+After installing the toolchain, open a terminal:
+
+```bash
+stackkit version
+stackkit --help
+mkdir my-homelab
+cd my-homelab
+```
+
+Help groups commands into setup, ongoing care, and reference. Keep one
+deployment directory throughout this walkthrough. Use a fresh directory for
+an experiment rather than replacing an existing configuration.
+
+## 2. Save your choices
+
+For a Basement Kit using its catalog defaults:
+
+```bash
+stackkit init basement-kit --catalog-defaults --owner-source=local
+```
+
+`init` creates `stack-spec.yaml` and local owner custody. It prints the saved
+configuration path and the next `validate` and `generate` commands. It has not
+installed services.
+
+Catalog defaults are recorded as explicit choices. Required input is requested
+when the selected kit needs it. To include the kit's photo workload in a new
+workspace, use this **instead of** the previous init command:
+
+```bash
+stackkit init basement-kit --catalog-defaults --owner-source=local --use-case photos
+```
+
+The photo workload is a selection at this point, not a running photo library.
+Review storage paths, domain, selected applications and node settings in the
+saved file. See [Configure a StackSpec](/guides/stackkits/configure-stack-spec).
+
+For scripts, add `--non-interactive` to `init`. Missing required input then
+fails instead of prompting. This flag does not approve later deployment
+actions. `stackkit init --help` documents the available choices; flags marked
+as legacy compatibility are outside this native walkthrough.
+
+## 3. Validate, generate and review
+
+```bash
+stackkit validate
+stackkit generate
+stackkit plan --json
+```
+
+Validation checks the configuration against the kit contract. Generation
+writes deployment artifacts and evidence. The plan lets you inspect selected
+workloads, paths and readiness before changing the host.
+
+Check `readiness.generation.status` and `readiness.apply.status`, and read any
+blockers. Correct the configuration and generate again if needed. A ready
+plan does not mean that applications are already running.
+
+## 4. Check the target and apply
+
+On the supported target host, with the same workspace:
+
+```bash
+stackkit prepare
+stackkit apply
+```
+
+On the native CLI path, `prepare` checks host prerequisites such as Docker,
+Compose, storage and ports. It does not install missing host packages. Resolve
+reported prerequisites before applying.
+
+`apply` changes the host. Review its approval prompt and the intended changes.
+Follow [Review, apply, and verify](/guides/stackkits/review-plan-and-apply)
+for the detailed lifecycle checks. If you used the Basement bootstrap, the
+initial apply has already happened; do not repeat it merely to finish a tour.
+
+## 5. Find out what is usable
+
+```bash
+stackkit verify --http --json
+stackkit status
+```
+
+Where application evidence is available, text status separates installation,
+reachability, account setup, readiness to use, and recovery. It shows reasons,
+evidence freshness and the next available actions. An address is labelled
+“Open application” only when current evidence confirms reachability; a
+configured address alone is not that confirmation.
+
+Follow the application's setup guide when an account still needs configuring.
+Use `stackkit setup --help` for the supported setup actions. Finish by opening
+the application and performing a small real task, such as adding a test photo
+to your photo library. CLI installation success alone does not prove that
+this task works.
+
+## 6. Resume and troubleshoot
+
+Return to the same deployment directory:
+
+```bash
+stackkit status
+stackkit status --json
+stackkit logs latest --json
+```
+
+Use the reported reason and next action to continue. Preserve the workspace
+when an operation fails; do not restart with `init` or edit generated files
+to bypass a blocker. Keep owner keys and access records private, and review
+diagnostic output before sharing it.
+
+For ongoing care, use [Day-2 operations](/stackkits/reference/day-2-operations)
+and [Back up and restore](/guides/stackkits/back-up-and-restore). Kit selection
+and the guided configuration experience in Techstack are an optional
+continuation; they are not required for this local CLI workflow.
