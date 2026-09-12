@@ -9,12 +9,44 @@ The dev workload with Gitea runs a private Git server in a rootless container wi
 
 ## Select the dev workload explicitly
 
-The published release archive contains the complete example selection at `examples/v2/gitea-standalone.stack-spec.yaml`. It selects the optional `dev` workload with the `gitea` alternative on the `standalone-compose` adapter, binds private `personal`-class data, and declares an HTTPS route (`host`, `port 443`, target port `3000`) plus an internal-PKI capability. Adapt the node identity, home domain, and host storage roots to your host — Gitea generation requires that explicit HTTPS route and data binding so native clients receive a usable governed clone URL.
-
-From a fresh workspace, preserve those selections with a candidate spec:
+From an empty owner workspace, select Gitea and establish its local owner custody:
 
 ```bash
-stackkit init basement-kit --candidate-spec ./gitea-standalone.stack-spec.yaml --owner-source local --owner-email owner@example.com --non-interactive
+stackkit init basement-kit --platform standalone-compose \
+  --use-case dev --use-case-alternative dev=gitea \
+  --use-case-alternative basement-core=standalone \
+  --module-compute-profile stackkits-basement-core-runtime=standard \
+  --module-compute-profile stackkits-gitea-runtime=standard \
+  --owner-source local --owner-email owner@example.com --non-interactive
+```
+
+Before generating, merge the following fields into the existing `capabilities`, `data` and `routes` sections of your [StackSpec](/guides/stackkits/configure-stack-spec). Preserve their other entries. This fragment uses the initial `home` site and `home-private` access policy; adapt those references, the home domain and host storage roots to your actual host.
+
+```yaml
+capabilities:
+  enable: [internal-pki]
+data:
+  bindings:
+    dev:
+      classes: [personal]
+      primarySiteRef: home
+routes:
+  dev:
+    serviceRef: dev
+    moduleRef: stackkits-gitea-runtime
+    exposure: local
+    protocol: https
+    port: 443
+    targetPort: 3000
+    host: dev.home.test
+    path: /
+    accessPolicyRef: home-private
+```
+
+Gitea requires this explicit HTTPS route and data binding for usable native clone URLs. Validate and generate the result:
+
+```bash
+stackkit validate
 stackkit generate --local-node main --local-site home
 ```
 

@@ -89,6 +89,7 @@ $structuredExamplePages = [System.Collections.Generic.HashSet[string]]::new(
     "guides/stackkits/configure-stack-spec.mdx",
     "guides/stackkits/use-cases/private-file-library.mdx",
     "stackkits/apps/cloudreve.mdx",
+    "stackkits/apps/gitea.mdx",
     "stackkits/apps/jellyfin.mdx",
     "stackkits/reference/mcp-connector.mdx"
 ) | ForEach-Object { $structuredExamplePages.Add($_) | Out-Null }
