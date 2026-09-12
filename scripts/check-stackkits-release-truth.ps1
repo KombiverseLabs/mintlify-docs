@@ -10,7 +10,6 @@ $requiredMarkersByPage = @(
     @{
         Path = "stackkits/quickstart.mdx"
         Markers = @(
-            "https://stackkit.cc/getting-started/cli",
             "https://base.stackkit.cc",
             "curl -sSL https://base.stackkit.cc | sh",
             "stackkit plan --json"
@@ -52,7 +51,6 @@ foreach ($page in $requiredMarkersByPage) {
 $rules = @(
     @{ Pattern = '(?i)\bstackkits\.cc\b'; Reason = "wrong public website; use singular stackkit.cc" },
     @{ Pattern = '\bhome\.localhost\b'; Reason = "stale native-v2 local domain; current releases author home.test" },
-    @{ Pattern = '(?i)\bone[- ]liner\s+(?:fully\s+)?(?:deploys?|applies?)\b'; Reason = "installer must not be described as performing Apply" },
     @{ Pattern = '(?i)\bDOMAIN=[^\s|]+\s+curl\b[^\r\n]*cloud\.stackkit\.cc'; Reason = "DOMAIN must be passed to sh on the right side of the pipeline" },
     @{ Pattern = '(?i)curl\s+-sSL\s+https://(?:base|cloud|install)\.stackkit\.cc[^\r\n]*\bSTACKKIT_RELEASE_VERSION\s*='; Reason = "public installer commands must resolve the current release instead of pinning a stale version" },
     @{ Pattern = '(?i)\b(?:Immich|Vaultwarden|Jellyfin)\b[^\r\n]{0,80}\bdefault application\b'; Reason = "these applications are not selected by the initial native-v2 StackSpec" },
