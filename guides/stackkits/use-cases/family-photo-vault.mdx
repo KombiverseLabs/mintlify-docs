@@ -1,11 +1,11 @@
 ---
 title: "Family Photo Vault"
-description: "Plan the released optional Photos workload without overstating its current authoring path"
+description: "Add Photos with Immich to your homelab and prepare its recovery"
 sidebarTitle: "Family Photo Vault"
 icon: camera-retro
 ---
 
-A Family Photo Vault is the optional native v2 `photos` workload with Immich on a host you control. It is present in the public `v0.16.0` catalog but is not selected by the initial StackSpec.
+A Family Photo Vault is the optional native v2 `photos` workload with Immich on a host you control. The [use-case catalog](/guides/stackkits/use-cases/overview) lists it as a declared component of the published release; the initial StackSpec does not select it.
 
 ## Choose the host
 
@@ -14,7 +14,7 @@ A Family Photo Vault is the optional native v2 `photos` workload with Immich on 
 
 Plan storage and backups before importing a family library. Photos and videos often become the largest data set in a homelab.
 
-## Current release boundary
+## Select the workload
 
 The released contract requires:
 
@@ -23,11 +23,10 @@ The released contract requires:
 - a supported workload adapter
 - an opaque `database-password` secret reference backed by local owner custody
 
-The v0.16.0 CLI can validate and generate that contract, but the initial CUE-authored StackSpec contains no Photos workload. Local secret custody is created during `init`, and the release exposes no safe public post-init command to add it later.
+Choose the workload, placement and adapter in your [StackSpec](/guides/stackkits/configure-stack-spec). Its `database-password` slot contains an opaque `secret://` reference; the actual password stays in local owner custody. Follow [Add a workload](/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace) to validate the selection, establish that custody, generate the rollout, inspect its plan, apply and verify.
 
-<Warning>
-  Do not use a copied secret reference as a password and do not run a generic apply recipe from this page. Until the release provides a complete public authoring flow, this use case is planning guidance rather than an end-to-end install path.
-</Warning>
+Recovery needs both the original photos and videos and the Immich database.
+Practice a staged restore before relying on the service as the only copy of a family library.
 
 ## Keep it maintainable
 
@@ -35,6 +34,7 @@ The v0.16.0 CLI can validate and generate that contract, but the initial CUE-aut
 - Change the StackSpec rather than generated application files.
 - Size primary and backup storage for photo and video growth.
 - Confirm a staged restore before relying on the service for irreplaceable photos.
-- Create Immich accounts only after a future complete rollout verifies.
+- Cover both Immich originals and its database when you plan recovery; either part alone is not a complete restore.
+- Create Immich accounts only after the rollout verifies against your own host.
 
 For the application-level steps, see [Immich](/stackkits/apps/immich).

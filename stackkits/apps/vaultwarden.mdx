@@ -1,13 +1,13 @@
 ---
 title: "Vaultwarden"
-description: "Understand the released optional Vault workload and its current authoring boundary"
+description: "Add the released optional Vault workload with Vaultwarden under owner custody"
 sidebarTitle: "Vaultwarden"
 icon: vault
 ---
 
 Vaultwarden is the released alternative for the optional native v2 `vault` workload. It is not enabled by the initial Basement or Cloud StackSpec.
 
-| Property | v0.16.0 value |
+| Property | Value |
 | --- | --- |
 | Workload | `vault` |
 | Alternative | `vaultwarden` |
@@ -15,10 +15,12 @@ Vaultwarden is the released alternative for the optional native v2 `vault` workl
 | Required secret reference | `admin-token` |
 | Supported standalone adapter | `standalone-compose` |
 
-<Warning>
-  The release exposes no safe public post-init command for creating the owner-bound secret custody required by a newly added Vault workload. Do not treat an opaque `secret://` reference as a value or use this page as a complete installation recipe.
-</Warning>
+The `admin-token` slot holds an opaque `secret://` reference; the actual token stays in local owner custody. Choose the workload, placement and adapter in the [StackSpec](/guides/stackkits/configure-stack-spec), then follow [Add a workload](/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace) to validate, establish custody, generate, inspect the plan, apply and verify.
 
 Create the application owner account, store recovery material separately, and choose the registration policy before adding real secrets. Confirm that your backup and recovery approach covers the Vaultwarden data volume.
+
+After accepting an invitation, complete account registration and sign in through
+your Bitwarden client. Create and sync a vault entry to confirm that the account
+is ready; an invitation alone does not complete this setup.
 
 For an already admitted workload, change StackKits intent through the StackSpec and lifecycle commands; do not edit generated application configuration on the target.

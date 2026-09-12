@@ -1,6 +1,6 @@
 ---
 title: "Immich"
-description: "Understand the released optional Photos workload and its current authoring boundary"
+description: "Add the released optional Photos workload with Immich and connect clients safely"
 sidebarTitle: "Immich"
 icon: images
 ---
@@ -9,7 +9,7 @@ Immich is the released alternative for the optional native v2 `photos` workload.
 
 ## Released contract
 
-| Property | v0.16.0 value |
+| Property | Value |
 | --- | --- |
 | Workload | `photos` |
 | Alternative | `immich` |
@@ -17,11 +17,9 @@ Immich is the released alternative for the optional native v2 `photos` workload.
 | Required secret reference | `database-password` |
 | Supported standalone adapter | `standalone-compose` |
 
-The released CLI validates and generates this workload contract, including persistent photo and database allocations and a generated Photos route.
+The released CLI validates and generates this workload contract, including persistent photo and database allocations and a generated Photos route. See the [use-case catalog](/guides/stackkits/use-cases/overview) for the catalog-declared release scope.
 
-<Warning>
-  Do not use an invented database password or copy an opaque reference as if it were secret material. v0.16.0 establishes workload secret custody during `init`, but its initial StackSpec selects no Photos workload and it exposes no safe public post-init authoring command for adding that custody. This page is therefore not an end-to-end installation recipe.
-</Warning>
+The `database-password` slot holds an opaque `secret://` reference; local owner custody holds its password. Choose the workload, placement and adapter in the [StackSpec](/guides/stackkits/configure-stack-spec), then follow [Add a workload](/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace) to validate, establish custody, generate, inspect the plan, apply and verify.
 
 ## First use
 
@@ -29,6 +27,6 @@ The released CLI validates and generates this workload contract, including persi
 2. Open the generated Immich address from the Node Hub or rollout output.
 3. Create the application owner account and connect clients only after you have confirmed storage capacity and backups.
 
-Photo libraries grow quickly. Keep the storage and backup responsibility with the host you operate, and verify the StackKits workspace after any configuration change.
+Photo libraries grow quickly. Keep the storage and backup responsibility with the host you operate, confirm that recovery covers both the originals and the database volumes, and verify the StackKits workspace after any configuration change.
 
 See [Family Photo Vault](/guides/stackkits/use-cases/family-photo-vault) for storage, recovery, and current-release planning guidance.
