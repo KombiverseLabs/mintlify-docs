@@ -45,9 +45,13 @@ Run Apply on the supported Linux host using its observed inventory; see [Review,
 
 ## Open the AI route as the owner
 
-After apply, open the generated AI route. Open WebUI creates its initial administrator from the established local owner's identity and the `owner-password` secret that the init command placed in owner custody. The initial password is available only to the owner in the runtime `.env` under `.stackkit/runtime/applications/stackkit-ai-main/` (substitute your selected node for `main`). Treat it like a credential:
+After apply, open the generated AI route. Open WebUI creates its initial administrator from the established local owner's identity and the `owner-password` secret that the init command placed in owner custody. From your StackKits workspace, retrieve the initial password in a private terminal:
 
-- Keep that file private and do not copy it into chats, screenshots, or Git.
+```bash
+stackkit secrets reveal --workload ai --slot owner-password
+```
+
+- Keep the displayed password private and do not copy it into chats, screenshots, or Git.
 - Change the password inside Open WebUI after the first login. The startup bootstrap does not reset an existing account, so keep your changed administrator password in your own custody.
 
 ## Choose and download a model explicitly
