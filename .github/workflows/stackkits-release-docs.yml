@@ -26,10 +26,20 @@ jobs:
     runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'ubuntu-24.04' }}
     timeout-minutes: 6
     steps:
+      - name: Create repository automation token
+        id: docs-token
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3.0.0
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          owner: KombiverseLabs
+          repositories: mintlify-docs
+          permission-contents: write
+          permission-pull-requests: write
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           fetch-depth: 0
-          token: ${{ github.token }}
+          token: ${{ steps.docs-token.outputs.token }}
           persist-credentials: false
       - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
@@ -37,7 +47,7 @@ jobs:
       - name: Resolve published immutable assets
         id: release
         env:
-          GH_TOKEN: ${{ secrets.REPO_SYNC_PAT || github.token }}
+          GH_TOKEN: ${{ github.token }}
           DISPATCH_TAG: ${{ github.event.client_payload.tag }}
           INPUT_TAG: ${{ inputs.tag }}
         shell: bash
@@ -63,7 +73,7 @@ jobs:
       - name: Download, validate and render
         if: steps.release.outputs.available == 'true'
         env:
-          GH_TOKEN: ${{ secrets.REPO_SYNC_PAT || github.token }}
+          GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.release.outputs.tag }}
           EXPECTED_CATALOG_DIGEST: ${{ github.event.client_payload.catalog_digest }}
           EXPECTED_COMPATIBILITY_DIGEST: ${{ github.event.client_payload.compatibility_digest }}
@@ -81,7 +91,8 @@ jobs:
       - name: Open or update generated-only PR
         if: steps.release.outputs.available == 'true'
         env:
-          GH_TOKEN: ${{ secrets.REPO_SYNC_PAT || github.token }}
+          GH_TOKEN: ${{ steps.docs-token.outputs.token }}
+          BOT_LOGIN: ${{ steps.docs-token.outputs.app-slug }}[bot]
           BRANCH: bot/stackkits-release-docs
           TAG: ${{ steps.release.outputs.tag }}
         shell: bash
@@ -98,8 +109,10 @@ jobs:
           # broke on any path containing a space.
           unexpected="$(git status --porcelain --untracked-files=all | cut -c4- | grep -Ev '^(data/stackkits/|guides/stackkits/use-cases/overview\.mdx$|stackkits/reference/(os|application-delivery)-compatibility\.mdx$)' || true)"
           [ -z "$unexpected" ] || { echo "::error::unexpected generated paths: $unexpected"; exit 1; }
-          git config user.name "stackkits-docs[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          bot_id="$(gh api "users/$BOT_LOGIN" --jq .id)"
+          [[ "$bot_id" =~ ^[0-9]+$ ]]
+          git config user.name "$BOT_LOGIN"
+          git config user.email "$bot_id+$BOT_LOGIN@users.noreply.github.com"
           gh auth setup-git --hostname github.com
           git fetch origin "refs/heads/$BRANCH:refs/remotes/origin/$BRANCH" || true
           git checkout -B "$BRANCH"
