@@ -1,0 +1,58 @@
+# Require this workflow through an organization ruleset bound to a published
+# immutable SHA in this PUBLIC repository. A required check name is insufficient.
+# This is static publication-safety evidence, not complete security/review evidence.
+name: Trusted Public Safety
+on:
+  pull_request:
+  merge_group:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  trusted-public-safety:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
+      PRODUCER_SHA: ${{ github.workflow_sha }}
+    steps:
+      - name: Validate event identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_REPOSITORY" == 'KombiverseLabs/mintlify-docs' ]]
+          [[ "$GITHUB_EVENT_NAME" == 'pull_request' || "$GITHUB_EVENT_NAME" == 'merge_group' ]]
+          [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ && "$PRODUCER_SHA" =~ ^[a-f0-9]{40}$ ]]
+      - name: Checkout ruleset-selected producer
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          repository: KombiverseLabs/mintlify-docs
+          ref: ${{ github.workflow_sha }}
+          path: producer
+          persist-credentials: false
+      - name: Checkout candidate as data
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
+          path: candidate
+          persist-credentials: false
+      - name: Run trusted static publication validator
+        shell: bash
+        run: node producer/scripts/trusted-public-safety.mjs "$GITHUB_WORKSPACE/candidate" "$SOURCE_SHA" "$PRODUCER_SHA"
+      - name: Reject superseded candidate evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
+            number=$(jq -er '.pull_request.number' "$GITHUB_EVENT_PATH")
+            current=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$number" --jq 'select(.state == "open") | .head.sha')
+          else
+            ref=$(jq -er '.merge_group.head_ref | sub("^refs/"; "")' "$GITHUB_EVENT_PATH")
+            current=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/$ref" --jq '.object.sha')
+          fi
+          [[ "$current" == "$SOURCE_SHA" ]]
+          printf 'Trusted static publication safety passed for source `%s`, producer `%s`.\n' "$SOURCE_SHA" "$PRODUCER_SHA" >> "$GITHUB_STEP_SUMMARY"
