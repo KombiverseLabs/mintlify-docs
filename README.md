@@ -29,6 +29,11 @@ standalone product and must not appear as one.
 
 ## Publication Boundary
 
+Pull requests and merge groups run the centrally projected Post-Local checks.
+Repository tasks receive no private credentials or shared writable tool cache.
+The final check requires candidate validation, repository checks and dependency
+review to succeed; missing or cancelled evidence fails the check.
+
 `public-safety-policy.json` is the explicit positive allowlist. A public page
 must match an approved exact path or prefix, appear in `docs.json`, and pass the
 forbidden-content checks. Navigation hiding and Mintlify authentication do not
