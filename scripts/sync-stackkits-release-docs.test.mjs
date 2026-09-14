@@ -8,7 +8,14 @@ import { canonicalDigest, syncRelease, validateCatalog, validateCompatibility } 
 function fixture(tag = 'v9.9.9') {
   const release = { tag, version: tag.slice(1), sourceSha: 'a'.repeat(40), publicSourceSha: 'b'.repeat(40), releaseUrl: `https://github.com/kombifyio/StackKits/releases/tag/${tag}` }
   const base = { release, generatedAt: '2026-08-13T00:00:00Z', generatorVersion: '9.9.9' }
-  const catalog = { schemaVersion: 'stackkits-use-case-catalog/v1', ...base, catalog: { useCases: [{ id: 'files', title: 'Files', description: 'Private file storage.', components: [{ id: 'cloudreve', name: 'Cloudreve', role: 'primary', kind: 'application' }] }] }, contentDigest: '' }
+  // v0.31.0 projects the authoring workload graph: kit cores and per-use-case
+  // alternatives with module-local compute profiles (see validateAlternatives).
+  const alternatives = [{ id: 'cloudreve', name: 'cloudreve', modules: [{ id: 'stackkits-cloudreve-runtime', computeProfiles: ['high', 'low', 'standard'] }] }]
+  const kitCores = [{ id: 'basement-core', defaultAlternative: 'standalone-compose', alternatives: [
+    { id: 'standalone', name: 'standalone', modules: [{ id: 'stackkits-basement-core-runtime', computeProfiles: ['high', 'standard'] }] },
+    { id: 'standalone-compose', name: 'standalone-compose', modules: [{ id: 'stackkits-basement-core-lite-runtime', computeProfiles: ['high', 'low', 'standard'] }] },
+  ] }]
+  const catalog = { schemaVersion: 'stackkits-use-case-catalog/v1', ...base, catalog: { useCases: [{ id: 'files', title: 'Files', description: 'Private file storage.', components: [{ id: 'cloudreve', name: 'Cloudreve', role: 'primary', kind: 'application' }], defaultAlternative: 'cloudreve', alternatives }], kitCores }, contentDigest: '' }
   catalog.contentDigest = canonicalDigest(catalog)
   const compatibility = { schemaVersion: 'stackkits-compatibility/v1', ...base, compatibility: { os: [{ id: 'ubuntu-24.04', name: 'Ubuntu', version: '24.04', architecture: 'amd64/arm64', status: 'unverified', reason: 'receipt missing' }], applicationDelivery: [{ useCaseRef: 'files', workloadRef: 'files', adapterRef: 'standalone-compose', adapterName: 'Standalone Compose', status: 'supported', capabilities: { deployment: true, routeTLS: true, statusEvidence: true, backupRestore: true } }] }, contentDigest: '' }
   compatibility.contentDigest = canonicalDigest(compatibility)
@@ -46,8 +53,11 @@ test('validates and renders only public release facts', () => {
   assert.equal(result.promoted, true)
   const page = readFileSync(path.join(repo, 'guides/stackkits/use-cases/overview.mdx'), 'utf8')
   assert.ok(page.includes(value.catalog.catalog.useCases[0].components[0].name))
-  // This projection remains purpose/components only, not an installation UI.
+  // This projection remains purpose/components only, not an installation UI
+  // or a module graph: settings, kit cores and runtime modules are not rendered.
   assert.ok(!page.includes('Choose hardware.'))
+  assert.ok(!page.includes('basement-core'))
+  assert.ok(!page.includes('stackkits-cloudreve-runtime'))
 })
 
 test('rejects internal fields and positive OS claims without evidence', () => {
@@ -70,11 +80,15 @@ test('rejects internal fields and positive OS claims without evidence', () => {
     useCase => { useCase.settings[1].default = 'false' },
     useCase => { useCase.settings[2].default = false },
     useCase => { useCase.docs = 'https://internal.example/' },
+    useCase => { useCase.alternatives[0].modules[0].gates = [] },
+    useCase => { useCase.defaultAlternative = 'not-declared' },
+    (useCase, doc) => { doc.catalog.kitCores[0].alternatives[0].moduleRef = 'internal' },
+    (useCase, doc) => { doc.catalog.kitCores[0].alternatives[0].modules[0].computeProfiles = [] },
   ]) {
     const broken = fixture().catalog
     const useCase = broken.catalog.useCases[0]
     useCase.settings = settings()
-    mutate(useCase)
+    mutate(useCase, broken)
     broken.contentDigest = canonicalDigest(broken)
     assert.throws(() => validateCatalog(broken, 'v9.9.9'), Error)
   }

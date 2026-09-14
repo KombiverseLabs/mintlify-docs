@@ -58,11 +58,11 @@ function validateEnvelope(document, schema, tag) {
 
 export function validateCatalog(document, tag) {
   validateEnvelope(document, CATALOG_SCHEMA, tag)
-  keys(document.catalog, ['useCases'], 'catalog')
+  keys(document.catalog, ['useCases', 'kitCores'], 'catalog')
   if (!Array.isArray(document.catalog.useCases)) throw new Error('catalog.useCases must be an array')
   sortedUnique(document.catalog.useCases.map(item => item.id), 'catalog use-case IDs')
   for (const useCase of document.catalog.useCases) {
-    keys(useCase, ['id', 'title', 'description', 'components', 'computeTiers', 'settings', 'docs'], `useCase ${useCase.id ?? '?'}`)
+    keys(useCase, ['id', 'title', 'description', 'components', 'computeTiers', 'settings', 'docs', 'defaultAlternative', 'alternatives'], `useCase ${useCase.id ?? '?'}`)
     string(useCase.id, 'useCase.id', /^[a-z][a-z0-9-]+$/)
     string(useCase.title, `${useCase.id}.title`)
     string(useCase.description, `${useCase.id}.description`)
@@ -78,8 +78,53 @@ export function validateCatalog(document, tag) {
     validateComputeTiers(useCase)
     validateSettings(useCase)
     if (useCase.docs !== undefined) string(useCase.docs, `${useCase.id}.docs`, /^\/[a-z0-9/-]+$/)
+    if (useCase.defaultAlternative !== undefined || useCase.alternatives !== undefined) validateAlternatives(useCase, `useCase ${useCase.id}`)
   }
+  validateKitCores(document.catalog.kitCores)
   return document
+}
+
+const CONTRACT_ID = /^[a-z][a-z0-9-]+$/
+
+/**
+ * StackKits v0.31.0 (internal/usecasecatalog AuthoringWorkload) projects the
+ * authoring workload graph into the public catalog: `catalog.kitCores` lists
+ * the service-kind workloads (kit cores), and every use case backed by a
+ * workload carries its `defaultAlternative` and `alternatives`, whose modules
+ * expose the module-local `computeProfiles` that replaced the computeTiers
+ * axis. It is validated against the generator's invariants so the sync binds
+ * to the real contract, but deliberately not rendered: the public pages stay
+ * purpose/components only and publish no installation or module graph.
+ */
+function validateAlternatives(owner, label) {
+  string(owner.defaultAlternative, `${label}.defaultAlternative`, CONTRACT_ID)
+  if (!Array.isArray(owner.alternatives) || owner.alternatives.length === 0) throw new Error(`${label}.alternatives must be non-empty`)
+  sortedUnique(owner.alternatives.map(alternative => alternative.id), `${label} alternative IDs`)
+  for (const alternative of owner.alternatives) {
+    keys(alternative, ['id', 'name', 'modules'], `${label}.alternatives`)
+    string(alternative.id, `${label}.alternatives.id`, CONTRACT_ID)
+    string(alternative.name, `${label}.alternatives.name`)
+    if (!Array.isArray(alternative.modules) || alternative.modules.length === 0) throw new Error(`${label}.alternatives.modules must be non-empty`)
+    for (const module of alternative.modules) {
+      keys(module, ['id', 'computeProfiles'], `${label}.alternatives.modules`)
+      string(module.id, `${label}.alternatives.modules.id`, CONTRACT_ID)
+      if (!Array.isArray(module.computeProfiles) || module.computeProfiles.length === 0) throw new Error(`${label}.alternatives.modules.computeProfiles must be non-empty`)
+      for (const profile of module.computeProfiles) string(profile, `${label}.alternatives.modules.computeProfiles entry`, CONTRACT_ID)
+      sortedUnique(module.computeProfiles, `${label}.alternatives.modules.computeProfiles`)
+    }
+  }
+  if (!owner.alternatives.some(alternative => alternative.id === owner.defaultAlternative)) throw new Error(`${label}.defaultAlternative is not a declared alternative`)
+}
+
+function validateKitCores(kitCores) {
+  if (kitCores === undefined) return
+  if (!Array.isArray(kitCores)) throw new Error('catalog.kitCores must be an array')
+  sortedUnique(kitCores.map(core => core.id), 'catalog kit-core IDs')
+  for (const core of kitCores) {
+    keys(core, ['id', 'defaultAlternative', 'alternatives'], `kitCore ${core.id ?? '?'}`)
+    string(core.id, 'kitCore.id', CONTRACT_ID)
+    validateAlternatives(core, `kitCore ${core.id}`)
+  }
 }
 
 // Public v0.24.60 foundation/use_case_catalog.cue and internal/usecasecatalog
