@@ -76,6 +76,9 @@ $allowedInlineCommands = @{
     "stackkits/reference/spec-format.mdx" = @(
         "stackkit plan --json"
     )
+    "stackkits/reference/os-compatibility.mdx" = @(
+        "stackkit compat"
+    )
     "stackkits/reference/tool-alternatives.mdx" = @(
         "stackkit app compatibility --json"
     )
