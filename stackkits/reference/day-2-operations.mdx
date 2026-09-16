@@ -64,6 +64,27 @@ The named placement must match exactly one entry in the verified apply result. E
 
 Add `--terminal-evidence-json` when you need a machine-readable removal record on stdout.
 
+## Upgrade the whole Kit
+
+Since StackKits v0.24, `stackkit upgrade` is the canonical command for a verified whole-Kit release. It does not upgrade one tool or module independently.
+
+Before any target mutation, the CLI captures a mandatory checkpoint: a pinned Kopia snapshot plus an owner-signed executor-state snapshot of the current release, runtime, and apply evidence. Pinned checkpoints never expire under backup retention. The target release then runs the normal `generate`, `plan`, `apply`, and `verify` sequence.
+
+The upgrade is journaled. If it is interrupted, recover the already-authorized operation through its signed lifecycle journal and checkpoint instead of starting a fresh upgrade. Before the target apply is admitted, rollback restores the prior executor. After apply admission, the CLI blocks a prior-runtime restart until verified prior-data activation exists, so a half-upgraded runtime cannot silently restart on newer data.
+
+## Detect and reconcile drift
+
+`stackkit drift detect [--json]` is read-only. It verifies the canonical plan, generated artifacts, owner-signed apply evidence, owner binding, runtime Compose, services, and probes, and returns `hasDrift: true` for verified runtime deviations. Integrity, authority, and custody failures fail closed instead of being reported as ordinary drift.
+
+`stackkit drift reconcile --mode standard|advanced` repairs drift inside the shared checkpointed lifecycle transaction:
+
+```bash
+stackkit drift detect --json
+stackkit drift reconcile --mode standard
+```
+
+Standard mode requires local owner approval, current authority, and the mandatory Kopia/executor-state checkpoint before it regenerates, applies, and verifies. Advanced mode additionally requires an offline-verifiable capability and an owner-signed change set matching the exact candidate. A failure after apply requires verified data activation before any prior-runtime restart.
+
 ## Common workflows
 
 <CardGroup cols={2}>
@@ -71,7 +92,7 @@ Add `--terminal-evidence-json` when you need a machine-readable removal record o
     Edit released intent and regenerate governed output.
   </Card>
   <Card title="Back up and restore" icon="clock-rotate-left" href="/guides/stackkits/back-up-and-restore">
-    Create an idempotent snapshot and practice staged recovery.
+    Create an idempotent snapshot, schedule it, and practice staged recovery.
   </Card>
 </CardGroup>
 
