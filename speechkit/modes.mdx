@@ -34,19 +34,64 @@ and optional speaker output over the three modes. Words teach SpeechKit terms
 to recognize; Replacements apply deterministic text, command, snippet,
 synonym, or template transformations.
 
+[Meeting](/speechkit/meeting) sits beside the three modes rather than inside
+them. It records a call on its own pipeline and shares only the
+speech-to-text transcriber with Dictation, so call audio never reaches the
+dictation overlay, history, or clipboard shortcuts.
+
 ## Local and external providers
 
 Provider choice determines the data path:
 
 | Provider type | Data boundary |
 | --- | --- |
-| Local STT or local model | Processing can remain on the device or your own server. |
-| Self-hosted SpeechKit server | Data travels to the server you operate. |
+| Local speech-to-text or local model | Processing stays on the device. |
+| Self-hosted SpeechKit server or local runtime | Data travels to the machine you operate. |
 | External voice provider | Audio, text, or both may be sent to that provider under its terms. |
+
+SpeechKit ships adapters for local `whisper.cpp` and Piper, a self-hosted
+`whisper-server`, Ollama and other OpenAI-compatible endpoints, and the
+external providers OpenAI, Groq, Deepgram, AssemblyAI, Hugging Face,
+OpenRouter, Azure Speech, and Microsoft Foundry. Google speech-to-text,
+Google text-to-speech, and Gemini Live were removed; configurations that still
+name them fail closed instead of silently selecting a different provider.
 
 SpeechKit does not make an external provider local. Review provider
 configuration and privacy terms before sending sensitive audio.
 
-<Card title="Install the Windows client" icon="windows" href="/speechkit/install-windows">
-  Download and verify the current public beta.
-</Card>
+## Network Scope
+
+Network Scope is the boundary you set once and the backend enforces
+everywhere — provider assembly, model downloads, updates, telemetry, server
+connections, and integrations.
+
+| Scope | What may be contacted |
+| --- | --- |
+| All networks | Every configured provider and integration, including public cloud endpoints. |
+| Local network only | On-device runtimes plus services on loopback or private addresses, such as an Ollama host on your LAN or your own SpeechKit server. Public endpoints are blocked, including at dial time after DNS resolution. |
+| This device only | Only runtimes SpeechKit itself manages as local child processes. Every external service is blocked, including one on the same machine, because its own egress cannot be attested. |
+
+Choosing a stricter scope suspends incompatible settings instead of deleting
+them, and Settings explains what is disabled and why.
+
+## Retention Scope
+
+Retention Scope is the second, independent axis: it answers what outlives the
+work that produced it.
+
+| Scope | Effect |
+| --- | --- |
+| Retain | Content is durable and disappears only through retention settings, a deletion, or an erasure request. |
+| Zero retention | Raw material is written while the work is in flight, then swept when the session ends. The generated result survives; the transcript behind it does not. Provider surfaces that cannot assert no-store are refused. |
+
+An install with no network access still writes transcripts to disk. Set both
+scopes deliberately.
+
+<CardGroup cols={2}>
+  <Card title="Install the Windows client" icon="windows" href="/speechkit/install-windows">
+    Download and verify the current public beta.
+  </Card>
+  <Card title="Record a meeting" icon="users" href="/speechkit/meeting">
+    Capture a call on two channels and generate a cited write-up.
+  </Card>
+</CardGroup>

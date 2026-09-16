@@ -4,14 +4,21 @@ param()
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+# Mutable `latest` destinations on purpose: the pages link them, so the gate
+# proves the link a reader clicks resolves today, not that some frozen tag
+# still exists. The exact published tag is checked separately by
+# check-speechkit-release-truth.ps1 against data/speechkit/latest.json.
 $destinations = @(
     "https://techstack.kombify.io",
+    "https://speechkit.cc",
     "https://github.com/kombifyio/SpeechKit",
-    "https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.14",
-    "https://github.com/kombifyio/SpeechKit/releases/download/v0.52.14/SpeechKit-Setup.exe",
-    "https://github.com/kombifyio/SpeechKit/releases/download/v0.52.14/SpeechKit-Portable.zip",
-    "https://github.com/kombifyio/SpeechKit/releases/download/v0.52.14/SHA256SUMS.txt",
-    "https://github.com/kombifyio/SpeechKit/releases/download/v0.52.14/UNSIGNED-WINDOWS-RELEASE.txt"
+    "https://github.com/kombifyio/SpeechKit/releases/latest",
+    "https://github.com/kombifyio/SpeechKit/releases/latest/download/SpeechKit-Setup.exe",
+    "https://github.com/kombifyio/SpeechKit/releases/latest/download/SpeechKit-Portable.zip",
+    "https://github.com/kombifyio/SpeechKit/releases/latest/download/SpeechKit-macOS-arm64.zip",
+    "https://github.com/kombifyio/SpeechKit/releases/latest/download/SHA256SUMS.txt",
+    "https://github.com/kombifyio/SpeechKit/releases/latest/download/UNSIGNED-WINDOWS-RELEASE.txt",
+    "https://github.com/kombifyio/SpeechKit/releases/latest/download/UNSIGNED-MACOS-RELEASE.txt"
 )
 
 $errors = [System.Collections.Generic.List[string]]::new()

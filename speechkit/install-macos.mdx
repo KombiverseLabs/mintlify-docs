@@ -1,0 +1,82 @@
+---
+title: "Install SpeechKit on macOS"
+description: "Install the Apple Silicon Dictation beta and understand its limits"
+sidebarTitle: "Install on macOS"
+icon: "apple"
+---
+
+SpeechKit for macOS is an early beta that does Dictation only. It runs on
+macOS 14 or newer on Apple Silicon. Intel Macs are not supported.
+
+{/* speechkit-release:begin */}
+The current public release is [v0.70.3](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.3), published 2026-09-15.
+{/* speechkit-release:end */}
+
+<Warning>
+The macOS bundle is signed ad-hoc, without an Apple Developer ID and without
+notarization. macOS quarantines it and may claim the app is damaged. It is not.
+Removing the quarantine label takes one documented command, described below.
+</Warning>
+
+## Download
+
+<Card title="macOS bundle (Apple Silicon)" icon="download" href="https://github.com/kombifyio/SpeechKit/releases/latest/download/SpeechKit-macOS-arm64.zip">
+  Download `SpeechKit-macOS-arm64.zip` from the newest published release.
+</Card>
+
+Verify the download against
+[SHA256SUMS.txt](https://github.com/kombifyio/SpeechKit/releases/latest/download/SHA256SUMS.txt)
+before opening it. That file lists the Windows assets too, so check only the
+line for the macOS archive:
+
+```bash
+grep SpeechKit-macOS-arm64.zip SHA256SUMS.txt | shasum -a 256 -c
+```
+
+## Install
+
+1. Unzip the download and drag `SpeechKit.app` into your Applications folder.
+   Move it before the next step: macOS runs an app left in Downloads from a
+   hidden read-only copy, and SpeechKit cannot update itself from there.
+2. Remove the quarantine label in Terminal:
+
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/SpeechKit.app
+   ```
+
+   Nothing is printed when it works. The command needs no password and affects
+   only this app.
+3. Open SpeechKit from Applications and grant **Microphone** and
+   **Accessibility** when asked.
+
+Read the full
+[unsigned-release notice](https://github.com/kombifyio/SpeechKit/releases/latest/download/UNSIGNED-MACOS-RELEASE.txt)
+for the reasoning behind each step. Nothing in the procedure asks you to
+disable Gatekeeper system-wide or to run anything as root.
+
+## What works, and what does not
+
+| Capability | macOS beta |
+| --- | --- |
+| Dictation with the bundled local model | Available |
+| Dictation with cloud speech-to-text providers | Available |
+| Microphone capture, text injection, menu-bar item | Available |
+| Global hotkeys and hold-to-talk | Not working in this build |
+| Assist and Voice Agent | Not verified on macOS |
+| Meeting system-audio capture, screen snapshots, wake word, local LLM | Not ported; each refuses with a typed error and its controls are hidden |
+
+The hotkey listener installs but receives no key events, so the menu-bar item
+is the way to start a dictation until that is fixed. Use the
+[Windows client](/speechkit/install-windows) when you need the complete
+feature set.
+
+## Permissions after an update
+
+macOS remembers permission grants against an app's exact signature. Every
+ad-hoc signed build has a different signature, so macOS asks for Microphone
+and Accessibility again after each update, and sometimes for keychain access.
+That is expected for an unsigned beta.
+
+If an update leaves dictation unresponsive, open **System Settings → Privacy &
+Security → Accessibility** and switch SpeechKit back on. It picks the
+permission up while running; no restart is needed.

@@ -36,7 +36,8 @@ $executableExamplePages = [System.Collections.Generic.HashSet[string]]::new(
     "stackkits/reference/day-2-operations.mdx",
     "stackkits/reference/mcp-connector.mdx",
     "stackkits/reference/spec-format.mdx",
-    "speechkit/framework.mdx"
+    "speechkit/framework.mdx",
+    "speechkit/install-macos.mdx"
 ) | ForEach-Object { $executableExamplePages.Add($_) | Out-Null }
 
 $allowedInlineCommands = @{
@@ -96,7 +97,8 @@ $structuredExamplePages = [System.Collections.Generic.HashSet[string]]::new(
     "stackkits/apps/cloudreve.mdx",
     "stackkits/apps/gitea.mdx",
     "stackkits/apps/jellyfin.mdx",
-    "stackkits/reference/mcp-connector.mdx"
+    "stackkits/reference/mcp-connector.mdx",
+    "speechkit/framework.mdx"
 ) | ForEach-Object { $structuredExamplePages.Add($_) | Out-Null }
 
 $errors = [System.Collections.Generic.List[string]]::new()

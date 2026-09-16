@@ -1,13 +1,17 @@
 ---
-title: "Use the SpeechKit Go framework"
-description: "Add the version-pinned local-first voice framework to a Go project"
-sidebarTitle: "Go framework"
+title: "Build with SpeechKit"
+description: "Embed the Go voice kernel, or use the server, Android, and browser targets"
+sidebarTitle: "Framework"
 icon: "code"
 ---
 
 The public SpeechKit module contains the platform-neutral voice kernel. Use it
-when your Go application should own its process, configuration, and provider
+when your application should own its process, configuration, and provider
 credentials instead of depending on a separate SpeechKit server.
+
+{/* speechkit-release:begin */}
+The current public release is [v0.70.3](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.3), published 2026-09-15.
+{/* speechkit-release:end */}
 
 ## Requirements
 
@@ -15,26 +19,74 @@ credentials instead of depending on a separate SpeechKit server.
 - an application that can provide the selected microphone, audio, or text input
 - provider credentials only when you choose an external provider
 
-## Add the released module
-
-Pin the current public release explicitly:
+## Add the module
 
 ```bash
-go get github.com/kombifyio/SpeechKit@v0.52.14
+go get github.com/kombifyio/SpeechKit@latest
 ```
 
-Use only the packages required by your host. The public project includes
-separate packages for Dictation, wake activation, text-to-speech, Voice
-Companion hosts, speaker-aware applications, and server-connected clients.
+`@latest` resolves to the newest published release. Record the exact version
+your build resolved and pin it before shipping: this is beta software, and
+public APIs, configuration keys, and defaults can change between minor
+releases.
 
-## Continue with public examples
+Import only the packages your host needs: `pkg/speechkit/dictation` for
+dictation, `pkg/speechkit/wakeword` for activation, `pkg/speechkit/tts` for
+spoken output, `pkg/speechkit/companion` plus Assist and text-to-speech
+adapters for one-shot hosts, `pkg/speechkit/speaker` for speaker-aware apps,
+`pkg/speechkit/meeting` for recording sessions, and `pkg/speechkit/client` for
+server-connected apps. The root `speechkit` package holds contracts and value
+types only.
 
-- [Framework API](https://github.com/kombifyio/SpeechKit/blob/v0.52.14/docs/speechkit-framework-api.md)
-- [Voice Companion](https://github.com/kombifyio/SpeechKit/blob/v0.52.14/docs/voice-companion.md)
-- [Runnable examples](https://github.com/kombifyio/SpeechKit/tree/v0.52.14/examples)
-- [SDK surface boundary](https://github.com/kombifyio/SpeechKit/blob/v0.52.14/docs/architecture/sdk-surface-boundary.md)
+To drive the framework from a `config.toml` instead of building settings by
+hand, `pkg/speechkit/hostconfig` turns a config file into the public mode
+settings and a starting runtime policy in one call:
+
+```go
+settings, policy, err := hostconfig.Load("config.toml")
+```
+
+A missing file yields the shipped defaults — local only, no cloud keys. The
+desktop client delegates to the same loader, so an embedder and the reference
+app read a `config.toml` identically.
+
+A few packages need cgo (Windows audio capture, the ONNX wake word) or an
+external binary (`whisper-server`). Each fails closed with a sentinel error
+when its dependency is absent rather than pretending to work.
+
+## Other targets
+
+<CardGroup cols={2}>
+  <Card title="Self-hosted server" icon="server" href="https://github.com/kombifyio/SpeechKit/blob/main/docs/server/README.md">
+    A Linux HTTP and WebSocket service over the same kernel, built from public
+    source. It exposes Dictation, Assist, and Voice Agent under one URL.
+  </Card>
+  <Card title="Agent tools" icon="robot" href="https://github.com/kombifyio/SpeechKit/blob/main/docs/mcp/README.md">
+    `speechkit-mcp` and `speechkit-cli` let an agent or operator inspect the
+    framework, scaffold starters, validate payloads, and operate a server.
+  </Card>
+  <Card title="Android modules" icon="android" href="https://github.com/kombifyio/SpeechKit/blob/main/android/README.md">
+    Apache-2.0 Gradle modules for server resolution, capture and turn-taking,
+    the wire protocol, and a Compose voice UI, plus an in-repo reference app.
+  </Card>
+  <Card title="Browser clients" icon="js" href="https://github.com/kombifyio/SpeechKit/tree/main/clients/typescript">
+    TypeScript packages for the server REST API, the Voice Agent WebSocket
+    protocol, and a framework-neutral voice UI kit, published as source in the
+    repository.
+  </Card>
+</CardGroup>
+
+## Continue with public documentation
+
+- [SDK in 10 minutes](https://github.com/kombifyio/SpeechKit/blob/main/docs/sdk/README.md)
+- [Framework API](https://github.com/kombifyio/SpeechKit/blob/main/docs/speechkit-framework-api.md)
+- [Add a custom provider](https://github.com/kombifyio/SpeechKit/blob/main/docs/sdk/custom-provider.md)
+- [Words and Replacements](https://github.com/kombifyio/SpeechKit/blob/main/docs/words-and-replacements-standard.md)
+- [SDK surface boundary](https://github.com/kombifyio/SpeechKit/blob/main/docs/architecture/sdk-surface-boundary.md)
+- [Runnable examples](https://github.com/kombifyio/SpeechKit/tree/main/examples)
 
 <Note>
-The framework is beta. Keep the module version pinned and review the changelog
-before moving to another minor release.
+These links follow the public repository's default branch, so they stay valid
+as the project moves. Pin a tag in the URL when you need the documentation that
+matches one exact release.
 </Note>

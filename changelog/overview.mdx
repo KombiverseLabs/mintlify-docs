@@ -7,6 +7,38 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits](https://github.com/kombifyio/stackKits/releases), [SpeechKit](https://github.com/kombifyio/SpeechKit/releases), and [Techstack](https://github.com/kombifyio/TechStack/releases) release notes on GitHub.
 
+<Update label="2026-09-16" description="Sep 5 – Sep 16">
+
+## SpeechKit on macOS, Google AI retired, and a StackKits installer that picks the kit
+
+SpeechKit rolled from [v0.68.24](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.24) to [v0.70.3](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.3): a first macOS build, Microsoft Foundry as a single connection for voice and models, and the removal of every Google voice adapter. StackKits shipped [v0.25.1](https://github.com/kombifyio/stackKits/releases/tag/v0.25.1) through [v0.32.1](https://github.com/kombifyio/stackKits/releases/tag/v0.32.1): an installer that detects the host and offers the kit, login gates in front of the homelab routes, and household users through PocketID.
+
+### New features
+
+- **SpeechKit runs on a Mac.** [v0.70.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.0) publishes `SpeechKit-macOS-arm64.zip` beside the Windows assets: an ad-hoc signed Dictation beta for macOS 14+ on Apple Silicon, with microphone capture, text injection, a menu-bar item, the bundled local model, and the cloud speech-to-text providers. One known hole ships with it: the global-hotkey listener installs and receives no key events, so hold-to-talk does not work yet and the menu-bar item is the way in. See [Install on macOS](/speechkit/install-macos).
+- **Microsoft Foundry, connected three ways.** [v0.69.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.69.0) adds a Connect dialog with a project endpoint and API key, the Azure CLI account already on your machine, or your organisation's own Microsoft app registration. One connection serves Dictation, speech output, Assist, and the Voice Agent; a Test lists the deployments and voices the project really has.
+- **A Library with one tab per mode.** [v0.70.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.0) gives Transcriptions, Quick Notes, and Voice Sessions their own tabs, loads further back through history a page at a time, expands any row in place, and lets you pin a transcription the way a quick note could already be pinned.
+- **The StackKits installer picks the kit.** [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) makes `install.stackkit.cc` detect the host, choose between Basement and Cloud, ask for the owner and the use cases before every install, and offer to install a StackKit once the CLI is in place. A wrong installer URL recovers instead of failing. See [CLI walkthrough](/guides/stackkits/cli-walkthrough).
+- **Household users without hand-built accounts.** [v0.29.0](https://github.com/kombifyio/stackKits/releases/tag/v0.29.0) provisions household users through PocketID groups, and [v0.30.0](https://github.com/kombifyio/stackKits/releases/tag/v0.30.0) adds `stackkit user add`, `list`, and `remove`. See [PocketID](/stackkits/apps/pocketid).
+
+### Updates
+
+- **Google voice adapters are gone.** [v0.70.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.2) removes Google speech-to-text, Google text-to-speech, and Gemini Live. A configuration that still names one fails closed instead of silently resolving to something else, and an empty device configuration defaults to AssemblyAI. See [Modes and data paths](/speechkit/modes).
+- **The wake word is `hey_kubi`.** [v0.70.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.2) makes it the default and keeps `hey_quby` as an alias, so an existing setup keeps working.
+- **Login gates in front of the homelab routes.** [v0.31.0](https://github.com/kombifyio/stackKits/releases/tag/v0.31.0) puts TinyAuth ahead of the photos, files, vault, media, smart-home, AI, developer, documents, and Coolify routes, and verification accepts the login redirect as healthy instead of reading it as a failure. See [TinyAuth](/stackkits/apps/tinyauth).
+- **Cloud Kit needs no domain of your own.** [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) defaults it to a kombify.me name when no custom domain is given, and mints an execution-channel SSH key before root login is disabled. See [kombify.me](/kombify-me/overview).
+- **Apply waits for the certificate.** [v0.31.5](https://github.com/kombifyio/stackKits/releases/tag/v0.31.5) waits for issuance before verifying public TLS and internal PKI leaves, and [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) shows progress while generate and apply run instead of a silent pause.
+- **These docs follow the current release.** SpeechKit download links now resolve to the newest published release rather than one frozen version, the macOS client and Meeting have their own pages, and the release line each page states is reconciled automatically against the public release.
+
+### Bug fixes
+
+- **A macOS first run starts.** [v0.70.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.0) fixes a fresh install writing a Windows audio backend into its configuration, refusing to open a microphone with it, and exiting with no message, no log, and no crash report.
+- **The Voice Agent no longer boots onto a retired provider.** [v0.70.3](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.3) fixes a server whose baked configuration still selected Gemini Live and therefore failed to start after the Google retirement.
+- **Dictation opens the microphone first.** [v0.70.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.1) opens the device before the live-stream handshake instead of after it, and installing an update relaunches the app exactly once.
+- **Removal cleans up native stacks.** [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) makes `stackkit remove` uninstall native Compose stacks and find the installer workspace, and [v0.31.1](https://github.com/kombifyio/stackKits/releases/tag/v0.31.1) defers application observation to restore activation so a restore no longer checks applications that are not running yet.
+
+</Update>
+
 <Update label="2026-09-07" description="kombify.me public addresses">
 
 ## kombify.me public HTTPS names
