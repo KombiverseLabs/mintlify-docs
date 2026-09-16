@@ -81,49 +81,29 @@ jobs:
       - name: Open or update generated-only PR
         if: steps.release.outputs.available == 'true'
         env:
-          SCOPED_TOKEN: ${{ secrets.REPO_SYNC_PAT }}
-          ORG_TOKEN: ${{ secrets.GH_PAT }}
+          GH_TOKEN: ${{ secrets.REPO_SYNC_PAT }}
           BRANCH: bot/stackkits-release-docs
           TAG: ${{ steps.release.outputs.tag }}
         shell: bash
         run: |
           set -euo pipefail
-          # Writer identity, narrowest usable first. REPO_SYNC_PAT is the scoped
-          # docs writer and stays the intended identity; the organization
-          # credential is reached only when the scoped one is absent or
-          # rejected, and the run says so loudly.
-          #
-          # This fallback exists because the scoped identity died: every
-          # dispatch from 2026-09-14 on failed at `gh api user`, so the public
-          # snapshot sat at v0.31.5 while v0.32.1 shipped. Refusing to publish
-          # is not a safer outcome than publishing with a broader token, and
-          # the token's scope is not what bounds this job. The guard below is:
-          # it refuses to commit anything outside the generated paths.
-          writer=""
-          identity=""
-          for candidate in SCOPED_TOKEN ORG_TOKEN; do
-            token="${!candidate:-}"
-            [ -n "$token" ] || continue
-            candidate_writer="$(GH_TOKEN="$token" gh api user 2>/dev/null)" || continue
-            can_push="$(GH_TOKEN="$token" gh api repos/KombiverseLabs/mintlify-docs --jq '.permissions.push' 2>/dev/null)" || continue
-            [ "$can_push" = true ] || continue
-            writer="$candidate_writer"
-            identity="$candidate"
-            export GH_TOKEN="$token"
-            break
-          done
-          if [ -z "$writer" ]; then
-            echo "::error::No available credential can write KombiverseLabs/mintlify-docs. Rotate the scoped REPO_SYNC_PAT identity."
+          auth_guidance="Repair the scoped REPO_SYNC_PAT identity tracked by mintlify-docs-msct; do not substitute a broad organization credential."
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "::error::REPO_SYNC_PAT is missing. $auth_guidance"
             exit 1
           fi
-          if [ "$identity" != "SCOPED_TOKEN" ]; then
-            echo "::warning::REPO_SYNC_PAT is unusable; this run fell back to the organization credential. Rotate the scoped docs-writer identity."
+          if ! writer="$(gh api user 2>/dev/null)"; then
+            echo "::error::REPO_SYNC_PAT authentication was rejected. $auth_guidance"
+            exit 1
           fi
-          echo "docs_writer_identity: $identity"
+          if ! can_push="$(gh api repos/KombiverseLabs/mintlify-docs --jq '.permissions.push' 2>/dev/null)" || [ "$can_push" != true ]; then
+            echo "::error::REPO_SYNC_PAT cannot write KombiverseLabs/mintlify-docs. $auth_guidance"
+            exit 1
+          fi
           writer_login="$(jq -r '.login // empty' <<<"$writer")"
           writer_id="$(jq -r '.id // empty' <<<"$writer")"
           [ -n "$writer_login" ] && [[ "$writer_id" =~ ^[0-9]+$ ]] || {
-            echo "::error::the docs writer credential returned an invalid GitHub identity"
+            echo "::error::REPO_SYNC_PAT returned an invalid GitHub writer identity. $auth_guidance"
             exit 1
           }
           if git diff --quiet -- data/stackkits guides/stackkits/use-cases/overview.mdx stackkits/reference/os-compatibility.mdx stackkits/reference/application-delivery-compatibility.mdx; then
