@@ -157,14 +157,19 @@ test('renders lifecycle evidence bound to the release and keeps it for later syn
       { id: 'untested-hypervisor', name: 'Untested Hypervisor', grade: 'unverified', reasonCodes: ['no-automated-lane'] },
     ],
     applications: [{ useCase: 'files', adapter: 'standalone-compose', grade: 'supported', reasonCodes: [], lastVerifiedRelease: 'v9.9.9' }],
+    environments: [
+      { kit: 'basement-kit', environment: 'home-lan-vm', name: 'Virtual machine on a home network', grade: 'supported', reasonCodes: [], verifiedPhases: ['install', 'restore', 'lan-access'], lastVerifiedRelease: 'v9.9.9' },
+      { kit: 'cloud-kit', environment: 'public-vps', name: 'Public VPS', grade: 'unverified', reasonCodes: ['no-automated-lane'] },
+    ],
   }
   writeFileSync(path.join(input, EVIDENCE_ASSET), `${JSON.stringify(evidence, null, 2)}\n`)
   syncRelease({ repoRoot: repo, inputDir: input, tag: 'v9.9.9' })
 
   const os = readFileSync(path.join(repo, 'stackkits/reference/os-compatibility.mdx'), 'utf8')
   assert.ok(os.includes('| Ubuntu | 24.04 | amd64 | `supported` |'))
-  assert.ok(os.includes('| Covered Hypervisor | A guest VM is created through the hypervisor API. | `supported` |'))
-  assert.ok(!os.includes('Untested Hypervisor'), 'hypervisors without a lane stay off the docs page')
+  assert.ok(os.includes('| Basement Kit | Virtual machine on a home network | `supported` |'))
+  assert.ok(os.includes('| Cloud Kit | Public VPS | `unverified` |'))
+  assert.ok(!os.includes('Covered Hypervisor') && !os.includes('Untested Hypervisor'), 'hypervisor names stay off the docs page')
   const delivery = readFileSync(path.join(repo, 'stackkits/reference/application-delivery-compatibility.mdx'), 'utf8')
   assert.ok(delivery.includes('| Lifecycle test |'))
   assert.ok(delivery.includes('| yes | `supported` |'))
@@ -172,7 +177,7 @@ test('renders lifecycle evidence bound to the release and keeps it for later syn
   // A later sync without a fresh asset keeps the stored evidence.
   writeFixture(later, value)
   syncRelease({ repoRoot: repo, inputDir: later, tag: 'v9.9.9' })
-  assert.ok(readFileSync(path.join(repo, 'stackkits/reference/os-compatibility.mdx'), 'utf8').includes('| Covered Hypervisor | A guest VM is created through the hypervisor API. | `supported` |'))
+  assert.ok(readFileSync(path.join(repo, 'stackkits/reference/os-compatibility.mdx'), 'utf8').includes('| Basement Kit | Virtual machine on a home network | `supported` |'))
 
   // Evidence bound to another release is rejected.
   writeFileSync(path.join(later, EVIDENCE_ASSET), `${JSON.stringify({ ...evidence, stackkitsVersion: 'v9.9.8' })}\n`)

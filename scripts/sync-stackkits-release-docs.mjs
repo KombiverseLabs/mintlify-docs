@@ -249,21 +249,23 @@ const EVIDENCE_REASONS = {
   'verify-failed': 'Verify phase failed on this release',
   'backup-failed': 'Backup phase failed on this release',
   'restore-failed': 'Restore phase failed on this release',
+  'lan-access-failed': 'Local service addresses were not reachable from the home network',
   'cleanup-failed': 'Cleanup after the lifecycle run failed',
 }
 const EVIDENCE_FIELDS = ['grade', 'reasonCodes', 'verifiedPhases', 'lastVerifiedRelease']
+const EVIDENCE_KITS = { 'basement-kit': 'Basement Kit', 'cloud-kit': 'Cloud Kit', 'modern-homelab': 'Modern Homelab' }
 
 function validateEvidenceRow(row, identity, label) {
   keys(row, [...identity, ...EVIDENCE_FIELDS], label)
   if (!EVIDENCE_GRADES.includes(row.grade)) throw new Error(`${label} has invalid grade ${row.grade}`)
   if (!Array.isArray(row.reasonCodes) || row.reasonCodes.some(code => !(code in EVIDENCE_REASONS))) throw new Error(`${label} has unknown reason codes`)
   if (row.grade === 'supported' ? row.reasonCodes.length !== 0 : row.reasonCodes.length === 0) throw new Error(`${label} reason codes do not match its grade`)
-  for (const phase of row.verifiedPhases ?? []) string(phase, `${label}.verifiedPhases`, /^(install|init|generate|apply|verify|backup|restore|setup-[a-z0-9-]+)$/)
+  for (const phase of row.verifiedPhases ?? []) string(phase, `${label}.verifiedPhases`, /^(install|init|generate|apply|verify|backup|restore|lan-access|setup-[a-z0-9-]+)$/)
   if (row.lastVerifiedRelease !== undefined) string(row.lastVerifiedRelease, `${label}.lastVerifiedRelease`, /^v\d+\.\d+\.\d+$/)
 }
 
 export function validateEvidence(document, tag) {
-  keys(document, ['schemaVersion', 'stackkitsVersion', 'generatedAt', 'results', 'virtualization', 'applications'], 'evidence')
+  keys(document, ['schemaVersion', 'stackkitsVersion', 'generatedAt', 'results', 'virtualization', 'applications', 'environments'], 'evidence')
   if (document.schemaVersion !== 3) throw new Error(`evidence schemaVersion=${document.schemaVersion}, want 3`)
   if (document.stackkitsVersion !== tag) throw new Error(`evidence is bound to ${document.stackkitsVersion}, not ${tag}`)
   string(document.generatedAt, 'evidence.generatedAt', /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/)
@@ -287,10 +289,18 @@ export function validateEvidence(document, tag) {
     string(row.useCase, 'evidence use case', /^[a-z0-9][a-z0-9-]*$/)
     string(row.adapter, 'evidence adapter', /^[a-z0-9][a-z0-9-]*$/)
   }
+  if (document.environments !== undefined && !Array.isArray(document.environments)) throw new Error('evidence.environments must be an array')
+  for (const row of document.environments ?? []) {
+    validateEvidenceRow(row, ['kit', 'environment', 'name'], 'evidence environment row')
+    if (!(row.kit in EVIDENCE_KITS)) throw new Error(`evidence environment row has unknown kit ${row.kit}`)
+    string(row.environment, 'evidence environment id', /^[a-z0-9][a-z0-9-]*$/)
+    string(row.name, 'evidence environment name', /^[^<>|\n]{1,80}$/)
+  }
   return document
 }
 
 function evidenceNote(row) {
+  if (row.grade === 'supported' && row.verifiedPhases?.includes('lan-access')) return 'All lifecycle phases passed; local service addresses answered from the home network'
   if (row.grade === 'supported') return 'All lifecycle phases passed'
   return row.reasonCodes.map(code => EVIDENCE_REASONS[code]).join('; ')
 }
@@ -326,17 +336,19 @@ export function renderPages(catalog, compatibility, evidence = null) {
       const name = row.os.distribution.charAt(0).toUpperCase() + row.os.distribution.slice(1)
       os += `| ${md(name)} | ${md(row.os.version)} | ${md((row.architectures ?? []).join(', ') || '—')} | \`${md(row.grade)}\` | ${md(evidenceNote(row))} | ${md(row.lastVerifiedRelease ?? '—')} |\n`
     }
-    os += '\nEach run installs the operating system fresh in a KVM/QEMU virtual machine.\n'
-    os += '\n## Hypervisors\n\nStackKits run inside a guest VM on your hypervisor, never on the hypervisor host itself. A status covers that rollout end to end: the guest is created on the hypervisor and the StackKit lifecycle runs inside it. It does not certify a vendor product or a server provider.\n\n'
-    const covered = evidence.virtualization.filter(candidate => !withoutLane(candidate))
-    if (covered.length) {
-      os += '| Hypervisor | How the guest is created | Status | Evidence | Last verified |\n| --- | --- | --- | --- | --- |\n'
-      for (const row of covered) {
-        os += `| ${md(row.name)} | ${md(row.rollout ?? '—')} | \`${md(row.grade)}\` | ${md(evidenceNote(row))} | ${md(row.lastVerifiedRelease ?? '—')} |\n`
+    os += '\nEach run installs the operating system fresh in a virtual machine.\n'
+    const environments = evidence.environments ?? []
+    if (environments.length) {
+      os += '\n## Kits by environment\n\nEach kit is graded in the kind of environment it is built for. A home network run also opens the local service addresses from another machine on that network.\n\n'
+      os += '| Kit | Environment | Status | Evidence | Last verified |\n| --- | --- | --- | --- | --- |\n'
+      for (const row of environments) {
+        os += `| ${md(EVIDENCE_KITS[row.kit])} | ${md(row.name)} | \`${md(row.grade)}\` | ${md(evidenceNote(row))} | ${md(row.lastVerifiedRelease ?? '—')} |\n`
       }
-      os += '\n'
     }
-    os += 'Hypervisor rollouts that the automated lifecycle tests do not cover yet are listed on [stackkit.cc/compatibility](https://stackkit.cc/compatibility). Run `stackkit compat` on a host for non-destructive diagnostics and the evidence published for its operating system and hypervisor.\n'
+    // Hypervisor rows name vendor products this site does not publish;
+    // stackkit.cc renders them from the same projection.
+    os += '\n## Hypervisors\n\nStackKits run inside a guest VM on your hypervisor, never on the hypervisor host itself. A status covers that rollout end to end: the guest is created on the hypervisor and the StackKit lifecycle runs inside it. It does not certify a vendor product or a server provider.\n\n'
+    os += 'The hypervisor rollouts and their lifecycle evidence for this release are listed on [stackkit.cc/compatibility](https://stackkit.cc/compatibility). Run `stackkit compat` on a host for non-destructive diagnostics and the evidence published for its operating system and hypervisor.\n'
   } else {
     os += `Rows are generated from [${release.tag}](${release.releaseUrl}). \`unverified\` means no valid receipt for this release; it must not be read as support. \`unsupported\` is emitted only from policy.\n\n`
     os += '| Operating system | Version | Architecture | Status | Evidence or reason |\n| --- | --- | --- | --- | --- |\n'
