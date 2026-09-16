@@ -9,9 +9,20 @@ content_hash: "sha256:f18a53afc3e9261d0c08bdd7c8d48d5a98b470cd656ec5ca50beb57c05
 source_hash: "a4a411c7baec58f39b2913f7dba2b9c679c6e8a3"
 ---
 
-Rows are generated from [v0.32.1](https://github.com/kombifyio/StackKits/releases/tag/v0.32.1). `unverified` means no valid receipt for this release; it must not be read as support. `unsupported` is emitted only from policy.
+Rows are projected from the automated lifecycle runs of [v0.32.1](https://github.com/kombifyio/StackKits/releases/tag/v0.32.1) on fresh virtual machines: install, init, generate, apply, verify, backup and restore. `supported` means every phase passed on this release, `preview` means install through verify passed and a later phase did not, and `unverified` means no passing run for this release. Last lifecycle run: 2026-09-16.
 
-| Operating system | Version | Architecture | Status | Evidence or reason |
-| --- | --- | --- | --- | --- |
-| Debian | 12 | amd64/arm64 | `unverified` | os-policy-not-yet-admitted |
-| Ubuntu | 24.04 | amd64/arm64 | `unverified` | current-candidate-receipt-pending |
+| Operating system | Version | Tested architecture | Status | Evidence | Last verified |
+| --- | --- | --- | --- | --- | --- |
+| Ubuntu | 24.04 | amd64 | `supported` | All lifecycle phases passed | v0.32.1 |
+| Debian | 13 | amd64 | `preview` | Backup phase failed on this release | — |
+| Debian | 12 | — | `unverified` | Not covered by the automated lifecycle tests yet | — |
+
+## Hypervisors
+
+The hypervisor the tested guests ran on. A status states where the lifecycle ran; it does not certify a vendor product or a server provider.
+
+| Hypervisor | Status | Evidence | Last verified |
+| --- | --- | --- | --- |
+| KVM / QEMU | `supported` | All lifecycle phases passed | v0.32.1 |
+
+Hypervisors that the automated lifecycle tests do not cover yet are listed on [stackkit.cc/compatibility](https://stackkit.cc/compatibility). Run `stackkit compat` on a host for non-destructive diagnostics and the evidence published for its operating system and hypervisor.
