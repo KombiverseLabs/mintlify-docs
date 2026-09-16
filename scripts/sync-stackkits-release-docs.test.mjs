@@ -3,7 +3,7 @@ import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
-import { canonicalDigest, syncRelease, validateCatalog, validateCompatibility } from './sync-stackkits-release-docs.mjs'
+import { canonicalDigest, EVIDENCE_ASSET, syncRelease, validateCatalog, validateCompatibility } from './sync-stackkits-release-docs.mjs'
 
 function fixture(tag = 'v9.9.9') {
   const release = { tag, version: tag.slice(1), sourceSha: 'a'.repeat(40), publicSourceSha: 'b'.repeat(40), releaseUrl: `https://github.com/kombifyio/StackKits/releases/tag/${tag}` }
@@ -140,4 +140,41 @@ test('is idempotent and never downgrades latest', () => {
   writeFixture(oldInput, fixture('v9.9.8'))
   assert.equal(syncRelease({ repoRoot: repo, inputDir: oldInput, tag: 'v9.9.8' }).promoted, false)
   assert.equal(JSON.parse(readFileSync(path.join(repo, 'data/stackkits/latest.json'))).tag, 'v9.9.9')
+})
+
+test('renders lifecycle evidence bound to the release and keeps it for later syncs', () => {
+  const temp = mkdtempSync(path.join(tmpdir(), 'stackkits-docs-evidence-'))
+  const input = path.join(temp, 'input'), repo = path.join(temp, 'repo'), later = path.join(temp, 'later')
+  const value = fixture()
+  writeFixture(input, value)
+  const evidence = {
+    schemaVersion: 3,
+    stackkitsVersion: 'v9.9.9',
+    generatedAt: '2026-09-16T12:04:02Z',
+    results: [{ os: { family: 'linux', distribution: 'ubuntu', version: '24.04' }, architectures: ['amd64'], grade: 'supported', reasonCodes: [], verifiedPhases: ['install', 'restore'], lastVerifiedRelease: 'v9.9.9' }],
+    virtualization: [
+      { id: 'kvm-qemu', name: 'KVM / QEMU', grade: 'supported', reasonCodes: [], lastVerifiedRelease: 'v9.9.9' },
+      { id: 'untested-hypervisor', name: 'Untested Hypervisor', grade: 'unverified', reasonCodes: ['no-automated-lane'] },
+    ],
+    applications: [{ useCase: 'files', adapter: 'standalone-compose', grade: 'supported', reasonCodes: [], lastVerifiedRelease: 'v9.9.9' }],
+  }
+  writeFileSync(path.join(input, EVIDENCE_ASSET), `${JSON.stringify(evidence, null, 2)}\n`)
+  syncRelease({ repoRoot: repo, inputDir: input, tag: 'v9.9.9' })
+
+  const os = readFileSync(path.join(repo, 'stackkits/reference/os-compatibility.mdx'), 'utf8')
+  assert.ok(os.includes('| Ubuntu | 24.04 | amd64 | `supported` |'))
+  assert.ok(os.includes('| KVM / QEMU | `supported` |'))
+  assert.ok(!os.includes('Untested Hypervisor'), 'hypervisors without a lane stay off the docs page')
+  const delivery = readFileSync(path.join(repo, 'stackkits/reference/application-delivery-compatibility.mdx'), 'utf8')
+  assert.ok(delivery.includes('| Lifecycle test |'))
+  assert.ok(delivery.includes('| yes | `supported` |'))
+
+  // A later sync without a fresh asset keeps the stored evidence.
+  writeFixture(later, value)
+  syncRelease({ repoRoot: repo, inputDir: later, tag: 'v9.9.9' })
+  assert.ok(readFileSync(path.join(repo, 'stackkits/reference/os-compatibility.mdx'), 'utf8').includes('| KVM / QEMU | `supported` |'))
+
+  // Evidence bound to another release is rejected.
+  writeFileSync(path.join(later, EVIDENCE_ASSET), `${JSON.stringify({ ...evidence, stackkitsVersion: 'v9.9.8' })}\n`)
+  assert.throws(() => syncRelease({ repoRoot: repo, inputDir: later, tag: 'v9.9.9' }), /bound to v9\.9\.8/)
 })

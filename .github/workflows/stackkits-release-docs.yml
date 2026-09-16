@@ -67,12 +67,22 @@ jobs:
           TAG: ${{ steps.release.outputs.tag }}
           EXPECTED_CATALOG_DIGEST: ${{ github.event.client_payload.catalog_digest }}
           EXPECTED_COMPATIBILITY_DIGEST: ${{ github.event.client_payload.compatibility_digest }}
+          EXPECTED_EVIDENCE_DIGEST: ${{ github.event.client_payload.evidence_digest }}
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p .tmp/stackkits-docs
           gh release download "$TAG" --repo kombifyio/StackKits --dir .tmp/stackkits-docs \
             --pattern stackkits-use-case-catalog-v1.json --pattern stackkits-compatibility-v1.json
+          # The lifecycle evidence projection is optional and mutable; it only
+          # exists once receipts for this release were projected.
+          evidence=.tmp/stackkits-docs/stackkits-compatibility-evidence-v3.json
+          if gh release download "$TAG" --repo kombifyio/StackKits --dir .tmp/stackkits-docs \
+            --pattern stackkits-compatibility-evidence-v3.json 2>/dev/null; then
+            if [ -n "${EXPECTED_EVIDENCE_DIGEST:-}" ]; then
+              [ "sha256:$(sha256sum "$evidence" | cut -d' ' -f1)" = "$EXPECTED_EVIDENCE_DIGEST" ]
+            fi
+          fi
           catalog_digest="$(jq -r .contentDigest .tmp/stackkits-docs/stackkits-use-case-catalog-v1.json)"
           compatibility_digest="$(jq -r .contentDigest .tmp/stackkits-docs/stackkits-compatibility-v1.json)"
           if [ -n "${EXPECTED_CATALOG_DIGEST:-}" ]; then [ "$catalog_digest" = "$EXPECTED_CATALOG_DIGEST" ]; fi
