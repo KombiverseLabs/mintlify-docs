@@ -1,0 +1,44 @@
+---
+title: "stackkit generate"
+description: "Generate governed deployment artifacts from a stack specification"
+sidebarTitle: "generate"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Generate governed deployment artifacts from a stack specification.
+
+Aliases: `gen`
+
+Resolve canonical StackSpec v2 intent through the embedded CUE authority, persist the exact ResolvedPlan atomically, and render its governed artifacts transactionally beneath the plan-owned outputRoot.
+
+StackSpec v1 generation is retired. Use a published exact-v0.6 binary for a historical workspace or migrate the intent to StackSpec v2 before generating. Legacy `--force` and `--fragments` switches are rejected by the native v2 path.
+
+```bash
+stackkit generate [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--force, -f` | bool | — | Retired legacy overwrite switch; rejected for StackSpec v2 |
+| `--fragments` | bool | — | Retired legacy fragment switch; rejected for StackSpec v2 |
+| `--inventory` | string | — | Architecture v2 observed Inventory (otherwise one conventional inventory file is selected) |
+| `--local-node` | string | — | Architecture v2 node explicitly owned by this local generate process |
+| `--local-site` | string | — | Architecture v2 Site explicitly owned by this local generate process |
+| `--output, -o` | string | `deploy` | Override the plan-owned output root |
+| `--resolved-plan` | string | — | Architecture v2 canonical ResolvedPlan (default: &lt;outputRoot&gt;/.stackkit/resolved-plan.json) |
+
+**Examples**
+
+```bash
+# Resolve the plan and render deployment artifacts into deploy/
+stackkit generate
+
+# Render into an explicit output root
+stackkit generate --output ./deploy
+
+# Name the Site and node this process owns
+stackkit generate --local-node main --local-site home
+```
+

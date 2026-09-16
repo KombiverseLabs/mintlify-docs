@@ -40,8 +40,9 @@ mkdir my-homelab
 cd my-homelab
 ```
 
-Help groups commands into setup, ongoing care, and reference. Keep one
-deployment directory throughout this walkthrough. Use a fresh directory for
+Help groups commands into setup, ongoing care, and reference; the
+[CLI reference](/stackkits/reference/cli/overview) lists every command with its
+flags and examples. Keep one deployment directory throughout this walkthrough. Use a fresh directory for
 an experiment rather than replacing an existing configuration.
 
 ## 2. Save your choices
@@ -111,14 +112,13 @@ initial apply has already happened; do not repeat it merely to finish a tour.
 
 ```bash
 stackkit verify --http --json
-stackkit status
 ```
 
-Where application evidence is available, text status separates installation,
-reachability, account setup, readiness to use, and recovery. It shows reasons,
-evidence freshness and the next available actions. An address is labelled
-“Open application” only when current evidence confirms reachability; a
-configured address alone is not that confirmation.
+`verify` checks the stack spec, the deployment state, the Docker daemon, the
+StackKit containers and their health, and with `--http` the routes from the
+generated access summary. Each failed check carries its reason. A configured
+address alone does not prove that an application is reachable; a passing HTTP
+check does.
 
 Follow the application's setup guide when an account still needs configuring.
 Use `stackkit setup --help` for the supported setup actions. Finish by opening
@@ -131,12 +131,16 @@ this task works.
 Return to the same deployment directory:
 
 ```bash
-stackkit status
-stackkit status --json
-stackkit logs latest --json
+stackkit verify --json
+stackkit drift detect --json
+stackkit logs list --json
+stackkit logs get <run-id> --json
 ```
 
-Use the reported reason and next action to continue. Preserve the workspace
+`drift detect` checks the live Compose runtime against the resolved plan, the
+generated artifacts and the signed apply evidence without changing anything,
+and `logs get` reads the structured log of one run from `logs list`. Use the
+reported reason and next action to continue. Preserve the workspace
 when an operation fails; do not restart with `init` or edit generated files
 to bypass a blocker. Keep owner keys and access records private, and review
 diagnostic output before sharing it.

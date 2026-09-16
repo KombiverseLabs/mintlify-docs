@@ -1,0 +1,89 @@
+---
+title: "CLI reference"
+description: "Every stackkit command with its flags and examples"
+sidebarTitle: "Overview"
+icon: square-terminal
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Set up and care for your own services with portable StackKits. These pages list every `stackkit` command with its flags and examples. They are generated from the StackKits command definitions; if your installed version is older, `stackkit <command> --help` is authoritative for it.
+
+## Install the CLI
+
+```bash
+curl -sSL https://install.stackkit.cc | STACKKIT_CLI_ONLY=1 sh
+```
+
+With `STACKKIT_CLI_ONLY=1` the installer puts `stackkit`, `stackkit-server`, `stackkit-mcp`, packaged OpenTofu and the public kit catalog into `~/.stackkits` without installing a StackKit. Without it, the installer detects the host and continues into Basement Kit or Cloud Kit.
+
+## Global flags
+
+These flags work with every command.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--chdir, -C` | string | `.` | Change to directory before running |
+| `--correlation-id` | string | — | Validated caller correlation ID recorded in local rollout evidence |
+| `--no-log` | bool | — | Disable structured deploy logging |
+| `--progress-jsonl` | string | — | Write redacted machine-readable rollout progress JSONL to a path, or '-' for stdout |
+| `--quiet, -q` | bool | — | Suppress non-essential output |
+| `--spec, -s` | string | `stack-spec.yaml` | Path to stack specification file (kombination.yaml is accepted when the default is missing) |
+| `--verbose, -v` | bool | — | Enable verbose output |
+
+## Set up your services
+
+| Command | Description |
+| --- | --- |
+| [`stackkit apply`](/stackkits/reference/cli/apply) | Apply infrastructure changes |
+| [`stackkit generate`](/stackkits/reference/cli/generate) | Generate governed deployment artifacts from a stack specification |
+| [`stackkit init`](/stackkits/reference/cli/init) | Initialize a new deployment from a StackKit |
+| [`stackkit plan`](/stackkits/reference/cli/plan) | Preview infrastructure changes |
+| [`stackkit prepare`](/stackkits/reference/cli/prepare) | Prepare a system for StackKit deployment |
+| [`stackkit setup`](/stackkits/reference/cli/setup) | Set up the owner account of an applied application |
+| [`stackkit validate`](/stackkits/reference/cli/validate) | Validate configuration files |
+
+## Check, maintain and recover
+
+| Command | Description |
+| --- | --- |
+| [`stackkit backup`](/stackkits/reference/cli/backup) | Manage backups (Kopia engine) |
+| [`stackkit break-glass`](/stackkits/reference/cli/break-glass) | Manage break-glass recovery accounts and bundles |
+| [`stackkit drift`](/stackkits/reference/cli/drift) | Observe and reconcile local StackKit drift |
+| [`stackkit logs`](/stackkits/reference/cli/logs) | View structured deploy logs |
+| [`stackkit remove`](/stackkits/reference/cli/remove) | Uninstall the local StackKits deployment |
+| [`stackkit service`](/stackkits/reference/cli/service) | Control services declared by the active StackKits plan |
+| [`stackkit upgrade`](/stackkits/reference/cli/upgrade) | Resolve and install a verified StackKit release |
+| [`stackkit user`](/stackkits/reference/cli/user) | Invite and manage household users in local PocketID |
+| [`stackkit verify`](/stackkits/reference/cli/verify) | Run post-deployment verification checks |
+
+## Advanced tools and reference
+
+| Command | Description |
+| --- | --- |
+| [`stackkit address`](/stackkits/reference/cli/address) | Plan and bind secret-free public service addresses |
+| [`stackkit advanced`](/stackkits/reference/cli/advanced) | Manage offline-authorized Advanced lifecycle operations |
+| [`stackkit agent`](/stackkits/reference/cli/agent) | Agent-native helpers for StackKits automation |
+| [`stackkit app`](/stackkits/reference/cli/app) | Inspect StackKits application delivery and manage v0.6 handoffs |
+| [`stackkit cluster`](/stackkits/reference/cli/cluster) | Manage StackKits multi-node cluster membership |
+| [`stackkit compat`](/stackkits/reference/cli/compat) | Show OS support evidence and host conformance diagnostics |
+| [`stackkit completion`](/stackkits/reference/cli/completion) | Generate shell completion scripts |
+| [`stackkit docs`](/stackkits/reference/cli/docs) | Generate deterministic StackKits documentation projections |
+| [`stackkit federation`](/stackkits/reference/cli/federation) | Manage local Federation binding evidence |
+| [`stackkit host`](/stackkits/reference/cli/host) | Provider-neutral host contract operations |
+| [`stackkit identity`](/stackkits/reference/cli/identity) | Manage the standalone local identity plane |
+| [`stackkit kit`](/stackkits/reference/cli/kit) | Published StackKit release operations |
+| [`stackkit migrate`](/stackkits/reference/cli/migrate) | Classify a StackSpec v1 and emit its migration report |
+| [`stackkit module`](/stackkits/reference/cli/module) | Author and validate local CUE modules |
+| [`stackkit operations`](/stackkits/reference/cli/operations) | List the canonical standalone lifecycle operation contracts |
+| [`stackkit output-transaction`](/stackkits/reference/cli/output-transaction) | Inspect explicit Architecture v2 output-transaction lifecycle actions |
+| [`stackkit registry`](/stackkits/reference/cli/registry) | Manage the embedded StackKits registry snapshot |
+| [`stackkit resolve`](/stackkits/reference/cli/resolve) | Resolve Architecture v2 intent into a canonical deployment plan |
+| [`stackkit runtime`](/stackkits/reference/cli/runtime) | Execute authenticated node-side runtime operations |
+| [`stackkit secrets`](/stackkits/reference/cli/secrets) | Manage owner-bound local secret custody |
+| [`stackkit support`](/stackkits/reference/cli/support) | Export redacted local support evidence |
+| [`stackkit use-cases`](/stackkits/reference/cli/use-cases) | Select optional kit use cases |
+| [`stackkit version`](/stackkits/reference/cli/version) | Print version information |
+
+Commands that current releases refuse or replace are listed under [legacy and deprecated commands](/stackkits/reference/cli/legacy).

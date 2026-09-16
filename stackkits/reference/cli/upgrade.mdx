@@ -1,0 +1,42 @@
+---
+title: "stackkit upgrade"
+description: "Resolve and install a verified StackKit release"
+sidebarTitle: "upgrade"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Resolve and install a verified StackKit release.
+
+Resolve a public StackKit release from GitHub, verify its archive, SPDX SBOM, GitHub OIDC/Sigstore attestation, and cached trusted root, then atomically install it under .stackkit/releases/.
+
+With `--dry-run` it generates the verified target only in a bounded shadow workspace and reports a canonical plan/artifact diff. Without `--dry-run` it first inspects that target, creates a native Kopia snapshot plus an owner-signed executor-state recovery checkpoint, stages and verifies the rollback data without activating it, and only then installs and executes the exact target generate/apply/verify transaction. A failed target transaction can restore and verify the prior executor only before target Apply is admitted. After Apply, prior-runtime restart is blocked until verified prior-data activation exists; isolated Kopia staging alone does not authorize it. A completed target commit keeps its success proof for explicit finalization. Fresh upgrades require support in the embedded CUE Kit policy; recovery of an existing operation follows its signed journal and checkpoint.
+
+```bash
+stackkit upgrade [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--dry-run` | bool | — | Verify and inspect target generation in a bounded shadow workspace without applying it. |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON. |
+| `--recover` | string | — | Explicitly recover one exact interrupted lifecycle operation ID. |
+| `--to` | string | `latest` | Target: latest, vX.Y.Z, or channel:stable\|beta\|edge. |
+
+**Examples**
+
+```bash
+# Verify the newest stable release and preview its plan and artifact diff without applying it
+stackkit upgrade --dry-run
+
+# Upgrade to the newest stable release
+stackkit upgrade
+
+# Upgrade to the newest beta prerelease
+stackkit upgrade --to channel:beta
+
+# Recover an interrupted upgrade by its lifecycle operation ID
+stackkit upgrade --recover <operation-id>
+```
+

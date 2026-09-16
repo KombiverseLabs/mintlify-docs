@@ -15,7 +15,9 @@ $rules = @(
     @{ Pattern = '\bBase Homelab\b'; Reason = "retired kit name (ADR-0026)"; Exclude = '^changelog/' },
     @{ Pattern = '\bHA Kit\b'; Reason = "retired marketed kit (ADR-0026: HA is a node-gated add-on)"; Exclude = '^changelog/' },
     @{ Pattern = '\bHigh Availability Kit\b'; Reason = "retired marketed kit (ADR-0026)"; Exclude = '^changelog/' },
-    @{ Pattern = 'localhost:\d'; Reason = "localhost:PORT URLs are not allowed in Tier-1 docs" },
+    # The generated CLI reference shows flag defaults verbatim, such as the local
+    # stackkit-server URL; a default is not a localhost customer journey.
+    @{ Pattern = 'localhost:\d'; Reason = "localhost:PORT URLs are not allowed in Tier-1 docs"; Exclude = '^stackkits/reference/cli/' },
     @{ Pattern = '(?i)doppler'; Reason = "secret-manager references are not allowed in Tier-1 docs" },
     @{ Pattern = '\bplatform-[a-z0-9]*\d[a-z0-9]*(\.\d+)?\b'; Reason = "internal issue-tracker IDs are not allowed in Tier-1 docs" }
 )

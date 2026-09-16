@@ -1,0 +1,53 @@
+---
+title: "stackkit migrate"
+description: "Classify a StackSpec v1 and emit its migration report"
+sidebarTitle: "migrate"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Classify a StackSpec v1 and emit its migration report.
+
+Losslessly classify one StackSpec and run the bounded v1 to v2 migration adapter. The result always includes the complete migration report and, only when deterministic, an architecture-only migration projection.
+
+IMPORTANT: without `--complete-with`, the projection is NOT a CUE-valid StackSpec v2, is NOT a ResolvedPlan, and does NOT authorize generation or deployment. Complete the reported manual actions and pass a full StackSpec v2 through CUE resolution first.
+
+`--complete-with` accepts one full explicit StackSpec v2, never a partial overlay. It reconciles deterministic legacy Site, node and hardware bindings, then uses the embedded governed Architecture v2 authority. A completed result contains the explicit canonical candidate and its ResolvedPlan hash. Generator eligibility is reported independently from CUE validity and follows ResolvedPlan readiness.
+
+`--spec-output` writes the exact completed canonical StackSpec v2 as deterministic JSON. It is valid only with `--complete-with`, never defaults to an in-place rewrite, and refuses to replace an existing canonical target; canonical replacement requires an explicit CAS-authorized StackSpec authoring flow.
+
+A ready-for-shadow-resolution result exits successfully. A blocked result is still emitted as machine-readable output, then the command exits unsuccessfully. Context maps legacy locality and Pi hardware only; it never selects a Kit.
+
+```bash
+stackkit migrate [v1-spec-file] [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--complete-with` | string | — | Full explicit StackSpec v2 candidate to reconcile and resolve with the embedded authority (never a partial overlay) |
+| `--force` | bool | — | Atomically replace an existing migration result output; canonical StackSpec output requires a new path |
+| `--format` | string | `json` | Machine-readable output format: json or yaml |
+| `--output, -o` | string | — | Write the migration result beneath the working directory instead of stdout |
+| `--spec-output` | string | — | Write the completed canonical StackSpec v2 as deterministic JSON beneath the working directory (requires `--complete-with`) |
+| `--target-kit` | string | — | Explicit target KitProfile supported by the authority (never inferred from context) |
+
+**Examples**
+
+```bash
+# Classify a StackSpec v1 and print its migration report
+stackkit migrate stack-spec.yaml
+
+# Report the migration toward an explicit target Kit
+stackkit migrate legacy.yaml --target-kit cloud-kit
+
+# Reconcile with a full StackSpec v2 and write the completed canonical spec
+stackkit migrate legacy.yaml --target-kit basement-kit --complete-with explicit-v2.yaml --spec-output stack-spec.v2.json
+
+# Print the report as YAML
+stackkit migrate legacy.yaml --format yaml
+
+# Write the report to a file beneath the working directory
+stackkit migrate legacy.yaml --output .stackkit/migration-result.json
+```
+

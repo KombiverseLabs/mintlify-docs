@@ -1,0 +1,146 @@
+---
+title: "stackkit federation"
+description: "Manage local Federation binding evidence"
+sidebarTitle: "federation"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Manage local Federation binding evidence.
+
+```bash
+stackkit federation [flags]
+```
+
+Subcommands: [`stackkit federation binding`](#stackkit-federation-binding), [`stackkit federation control`](#stackkit-federation-control), [`stackkit federation link`](#stackkit-federation-link)
+
+## stackkit federation binding
+
+Manage opaque external Federation-link bindings.
+
+```bash
+stackkit federation binding [flags]
+```
+
+Subcommands: [`stackkit federation binding adopt`](#stackkit-federation-binding-adopt), [`stackkit federation binding import`](#stackkit-federation-binding-import)
+
+### stackkit federation binding adopt
+
+Validate, Owner-sign, and atomically adopt an external binding.
+
+Aliases: `approve`
+
+```bash
+stackkit federation binding adopt [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--binding` | string | — | Workspace-confined unsigned external Federation binding JSON |
+| `--inventory` | string | — | Workspace-confined inventory.json to update atomically |
+| `--resolved-plan` | string | — | Workspace-confined canonical ResolvedPlan (otherwise derived beside Inventory) |
+
+### stackkit federation binding import
+
+Admit an Owner-signed opaque binding into local Inventory.
+
+```bash
+stackkit federation binding import [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--admission` | string | — | Workspace-confined Owner-signed Federation binding admission JSON |
+| `--inventory` | string | — | Workspace-confined inventory.json to update atomically |
+| `--resolved-plan` | string | — | Workspace-confined canonical ResolvedPlan (otherwise derived beside Inventory) |
+
+## stackkit federation control
+
+Execute Home-authorized plan and verify at the selected Cloud node.
+
+```bash
+stackkit federation control [flags]
+```
+
+Subcommands: [`stackkit federation control bind`](#stackkit-federation-control-bind), [`stackkit federation control send`](#stackkit-federation-control-send), [`stackkit federation control sign`](#stackkit-federation-control-sign), [`stackkit federation control withdraw`](#stackkit-federation-control-withdraw)
+
+### stackkit federation control bind
+
+Admit exact public Home authority and local receiver custody.
+
+```bash
+stackkit federation control bind [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--file` | string | — | Owner-reviewed receiver custody JSON; no private keys |
+
+### stackkit federation control send
+
+Send the signed action over an exact Home-initiated mTLS connection.
+
+```bash
+stackkit federation control send [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--endpoint-file` | string | — | Local pinned mTLS endpoint and confined credential paths |
+| `--file` | string | — | Home-signed action JSON |
+
+### stackkit federation control sign
+
+Sign one exact short-lived action with current Home custody.
+
+```bash
+stackkit federation control sign [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--file` | string | — | Exact action JSON with plan hash, target and bounded timestamps |
+
+### stackkit federation control withdraw
+
+Persistently withdraw receiver authority, including existing TLS sessions.
+
+```bash
+stackkit federation control withdraw [flags]
+```
+
+## stackkit federation link
+
+Bind and stop the local portion of an external Federation fabric.
+
+```bash
+stackkit federation link [flags]
+```
+
+Subcommands: [`stackkit federation link bind`](#stackkit-federation-link-bind), [`stackkit federation link stop`](#stackkit-federation-link-stop)
+
+### stackkit federation link bind
+
+Adopt external WireGuard handles into local Owner custody.
+
+```bash
+stackkit federation link bind [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--file` | string | — | External fabric custody JSON; contains no private keys |
+
+### stackkit federation link stop
+
+Stop the adopted interface without deleting the external fabric.
+
+```bash
+stackkit federation link stop [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--fabric-ref` | string | — | Exact adopted opaque fabric reference |
+

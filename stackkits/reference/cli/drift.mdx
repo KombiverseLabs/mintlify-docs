@@ -1,0 +1,71 @@
+---
+title: "stackkit drift"
+description: "Observe and reconcile local StackKit drift"
+sidebarTitle: "drift"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Observe and reconcile local StackKit drift.
+
+```bash
+stackkit drift [flags]
+```
+
+Subcommands: [`stackkit drift detect`](#stackkit-drift-detect), [`stackkit drift reconcile`](#stackkit-drift-reconcile)
+
+## stackkit drift detect
+
+Read the authoritative local state and report drift.
+
+Read and verify the canonical ResolvedPlan, generated artifacts, owner-signed Apply evidence, local Owner binding, and live Basement Compose runtime without refreshing runtime state. The content-addressed report is retained as local Owner evidence for every selected Application Kit.
+
+```bash
+stackkit drift detect [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+
+**Examples**
+
+```bash
+# Compare the live deployment with the applied plan
+stackkit drift detect
+
+# The same drift report as JSON
+stackkit drift detect --json
+```
+
+## stackkit drift reconcile
+
+Reconcile drift through the governed local lifecycle.
+
+Standard mode requires explicit local Owner approval, verifies the current local authority, creates a mandatory Kopia and executor-state rollback checkpoint, then runs generate, apply, and verify through the exclusive lifecycle journal. A failed target phase automatically restores, reapplies, and verifies the captured prior executor state. Advanced mode remains fail-closed until an offline-verified capability is supplied.
+
+```bash
+stackkit drift reconcile [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--candidate-spec` | string | — | Advanced: exact Terramate candidate StackSpec |
+| `--capability` | string | — | Advanced: canonical offline capability file |
+| `--change-set` | string | — | Advanced: exact Owner-signed change-set ID |
+| `--expect-sha256` | string | — | Advanced: exact stored change-set byte digest |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+| `--mode` | string | `standard` | Reconcile mode: standard or advanced |
+| `--owner-approve` | bool | — | Record explicit local Owner approval for standard reconciliation |
+
+**Examples**
+
+```bash
+# Reconcile drift in standard mode: checkpoint, then generate, apply, and verify
+stackkit drift reconcile --owner-approve
+
+# The same reconciliation with a JSON result
+stackkit drift reconcile --owner-approve --json
+```
+

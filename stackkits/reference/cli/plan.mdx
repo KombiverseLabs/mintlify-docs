@@ -1,0 +1,39 @@
+---
+title: "stackkit plan"
+description: "Preview infrastructure changes"
+sidebarTitle: "plan"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Preview infrastructure changes.
+
+Inspect the governed Architecture v2 plan or preview v0.6 infrastructure changes.
+
+On native v0.7, this command verifies and inspects the exact ResolvedPlan, generation manifest, receipt, and generated artifact hashes without invoking an executor. Exact v0.6 retains its packaged OpenTofu preview; `--out` and `--destroy` apply only to that preview and are rejected on the native line.
+
+```bash
+stackkit plan [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | Architecture v2 generation manifest (default: &lt;outputRoot&gt;/.stackkit/generation-manifest.json) |
+| `--destroy` | bool | — | Create destroy plan |
+| `--generation-receipt` | string | — | Architecture v2 generation receipt (default: &lt;outputRoot&gt;/.stackkit/generation-receipt.json) |
+| `--inventory` | string | — | Architecture v2 observed Inventory (otherwise one conventional inventory file is selected) |
+| `--json` | bool | — | Emit the native Architecture v2 plan inspection as JSON |
+| `--out, -o` | string | — | Save plan to file |
+| `--resolved-plan` | string | — | Architecture v2 canonical ResolvedPlan (default: &lt;outputRoot&gt;/.stackkit/resolved-plan.json) |
+
+**Examples**
+
+```bash
+# Inspect the generated plan, its readiness, and artifact hashes
+stackkit plan
+
+# The same inspection as JSON
+stackkit plan --json
+```
+

@@ -1,0 +1,38 @@
+---
+title: "stackkit resolve"
+description: "Resolve Architecture v2 intent into a canonical deployment plan"
+sidebarTitle: "resolve"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Resolve Architecture v2 intent into a canonical deployment plan.
+
+Resolve a StackSpec v2 document and optional observed Inventory into the canonical ResolvedPlan consumed by generators and runtimes.
+
+The command is read-only unless `--output` is supplied. File output stays beneath the working directory and can replace only an existing valid ResolvedPlan; it shares the lifecycle mutation lock. StackSpec v1 is never silently upgraded or compiled: it returns the shared typed migration report and requires an explicit migration workflow.
+
+```bash
+stackkit resolve [spec-file] [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--inventory` | string | — | Path to an optional observed Inventory document |
+| `--module-root` | string | — | Architecture authority root containing cue.mod, base, and all kit definitions |
+| `--output, -o` | string | — | Write canonical ResolvedPlan JSON beneath the working directory instead of stdout |
+
+**Examples**
+
+```bash
+# Print the canonical ResolvedPlan for a StackSpec
+stackkit resolve --spec stack-spec.yaml
+
+# Resolve against an observed Inventory
+stackkit resolve stack-spec.yaml --inventory inventory.yaml
+
+# Replace the existing plan file beneath the working directory
+stackkit resolve stack-spec.yaml --output deploy/.stackkit/resolved-plan.json
+```
+
