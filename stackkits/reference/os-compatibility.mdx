@@ -1,26 +1,18 @@
 ---
 title: "OS compatibility"
-description: "Release-bound operating-system evidence for StackKits v0.32.1"
+description: "Release-bound operating-system evidence for StackKits v0.33.0"
 sidebarTitle: "OS compatibility"
 icon: server
 generated: true
 generated_by: "stackkit docs sync-release-manifests"
-content_hash: "sha256:f18a53afc3e9261d0c08bdd7c8d48d5a98b470cd656ec5ca50beb57c055d2a19"
-source_hash: "a4a411c7baec58f39b2913f7dba2b9c679c6e8a3"
+content_hash: "sha256:d1db4816184011be787186f7abf4f1bcd9545d410a2f3ccc3e4d34de03059c17"
+source_hash: "0fc5ac1dc1cdb6b2e458f6968abe8cfeab57b64e"
 ---
 
-Rows are projected from the automated lifecycle runs of [v0.32.1](https://github.com/kombifyio/StackKits/releases/tag/v0.32.1) on fresh virtual machines: install, init, generate, apply, verify, backup and restore. `supported` means every phase passed on this release, `preview` means install through verify passed and a later phase did not, and `unverified` means no passing run for this release. Last lifecycle run: 2026-09-16.
+Rows are generated from [v0.33.0](https://github.com/kombifyio/StackKits/releases/tag/v0.33.0). `unverified` means no valid receipt for this release; it must not be read as support. `unsupported` is emitted only from policy.
 
-| Operating system | Version | Tested architecture | Status | Evidence | Last verified |
-| --- | --- | --- | --- | --- | --- |
-| Ubuntu | 24.04 | amd64 | `supported` | All lifecycle phases passed | v0.32.1 |
-| Debian | 13 | amd64 | `preview` | Backup phase failed on this release | — |
-| Debian | 12 | — | `unverified` | Not covered by the automated lifecycle tests yet | — |
-
-Each run installs the operating system fresh in a KVM/QEMU virtual machine.
-
-## Hypervisors
-
-StackKits run inside a guest VM on your hypervisor, never on the hypervisor host itself. A status covers that rollout end to end: the guest is created on the hypervisor and the StackKit lifecycle runs inside it. It does not certify a vendor product or a server provider.
-
-Hypervisor rollouts that the automated lifecycle tests do not cover yet are listed on [stackkit.cc/compatibility](https://stackkit.cc/compatibility). Run `stackkit compat` on a host for non-destructive diagnostics and the evidence published for its operating system and hypervisor.
+| Operating system | Version | Architecture | Status | Evidence or reason |
+| --- | --- | --- | --- | --- |
+| Debian | 12 | untested | `unverified` | no-automated-lane |
+| Debian | 13 | amd64 | `unverified` | current-release-receipt-pending |
+| Ubuntu | 24.04 | amd64 | `unverified` | current-release-receipt-pending |
