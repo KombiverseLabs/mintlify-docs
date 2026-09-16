@@ -153,7 +153,7 @@ test('renders lifecycle evidence bound to the release and keeps it for later syn
     generatedAt: '2026-09-16T12:04:02Z',
     results: [{ os: { family: 'linux', distribution: 'ubuntu', version: '24.04' }, architectures: ['amd64'], grade: 'supported', reasonCodes: [], verifiedPhases: ['install', 'restore'], lastVerifiedRelease: 'v9.9.9' }],
     virtualization: [
-      { id: 'kvm-qemu', name: 'KVM / QEMU', grade: 'supported', reasonCodes: [], lastVerifiedRelease: 'v9.9.9' },
+      { id: 'covered-hypervisor', name: 'Covered Hypervisor', rollout: 'A guest VM is created through the hypervisor API.', grade: 'supported', reasonCodes: [], lastVerifiedRelease: 'v9.9.9' },
       { id: 'untested-hypervisor', name: 'Untested Hypervisor', grade: 'unverified', reasonCodes: ['no-automated-lane'] },
     ],
     applications: [{ useCase: 'files', adapter: 'standalone-compose', grade: 'supported', reasonCodes: [], lastVerifiedRelease: 'v9.9.9' }],
@@ -163,7 +163,7 @@ test('renders lifecycle evidence bound to the release and keeps it for later syn
 
   const os = readFileSync(path.join(repo, 'stackkits/reference/os-compatibility.mdx'), 'utf8')
   assert.ok(os.includes('| Ubuntu | 24.04 | amd64 | `supported` |'))
-  assert.ok(os.includes('| KVM / QEMU | `supported` |'))
+  assert.ok(os.includes('| Covered Hypervisor | A guest VM is created through the hypervisor API. | `supported` |'))
   assert.ok(!os.includes('Untested Hypervisor'), 'hypervisors without a lane stay off the docs page')
   const delivery = readFileSync(path.join(repo, 'stackkits/reference/application-delivery-compatibility.mdx'), 'utf8')
   assert.ok(delivery.includes('| Lifecycle test |'))
@@ -172,7 +172,7 @@ test('renders lifecycle evidence bound to the release and keeps it for later syn
   // A later sync without a fresh asset keeps the stored evidence.
   writeFixture(later, value)
   syncRelease({ repoRoot: repo, inputDir: later, tag: 'v9.9.9' })
-  assert.ok(readFileSync(path.join(repo, 'stackkits/reference/os-compatibility.mdx'), 'utf8').includes('| KVM / QEMU | `supported` |'))
+  assert.ok(readFileSync(path.join(repo, 'stackkits/reference/os-compatibility.mdx'), 'utf8').includes('| Covered Hypervisor | A guest VM is created through the hypervisor API. | `supported` |'))
 
   // Evidence bound to another release is rejected.
   writeFileSync(path.join(later, EVIDENCE_ASSET), `${JSON.stringify({ ...evidence, stackkitsVersion: 'v9.9.8' })}\n`)

@@ -277,9 +277,10 @@ export function validateEvidence(document, tag) {
     for (const arch of row.architectures ?? []) string(arch, 'evidence OS architecture', /^(amd64|arm64)$/)
   }
   for (const row of document.virtualization) {
-    validateEvidenceRow(row, ['id', 'name'], 'evidence hypervisor row')
+    validateEvidenceRow(row, ['id', 'name', 'rollout'], 'evidence hypervisor row')
     string(row.id, 'evidence hypervisor id', /^[a-z0-9][a-z0-9.-]*$/)
     string(row.name, 'evidence hypervisor name')
+    if (row.rollout !== undefined) string(row.rollout, 'evidence hypervisor rollout', /^[^<>|\n]{1,240}$/)
   }
   for (const row of document.applications) {
     validateEvidenceRow(row, ['useCase', 'adapter'], 'evidence application row')
@@ -325,12 +326,17 @@ export function renderPages(catalog, compatibility, evidence = null) {
       const name = row.os.distribution.charAt(0).toUpperCase() + row.os.distribution.slice(1)
       os += `| ${md(name)} | ${md(row.os.version)} | ${md((row.architectures ?? []).join(', ') || '—')} | \`${md(row.grade)}\` | ${md(evidenceNote(row))} | ${md(row.lastVerifiedRelease ?? '—')} |\n`
     }
-    os += '\n## Hypervisors\n\nThe hypervisor the tested guests ran on. A status states where the lifecycle ran; it does not certify a vendor product or a server provider.\n\n'
-    os += '| Hypervisor | Status | Evidence | Last verified |\n| --- | --- | --- | --- |\n'
-    for (const row of evidence.virtualization.filter(candidate => !withoutLane(candidate))) {
-      os += `| ${md(row.name)} | \`${md(row.grade)}\` | ${md(evidenceNote(row))} | ${md(row.lastVerifiedRelease ?? '—')} |\n`
+    os += '\nEach run installs the operating system fresh in a KVM/QEMU virtual machine.\n'
+    os += '\n## Hypervisors\n\nStackKits run inside a guest VM on your hypervisor, never on the hypervisor host itself. A status covers that rollout end to end: the guest is created on the hypervisor and the StackKit lifecycle runs inside it. It does not certify a vendor product or a server provider.\n\n'
+    const covered = evidence.virtualization.filter(candidate => !withoutLane(candidate))
+    if (covered.length) {
+      os += '| Hypervisor | How the guest is created | Status | Evidence | Last verified |\n| --- | --- | --- | --- | --- |\n'
+      for (const row of covered) {
+        os += `| ${md(row.name)} | ${md(row.rollout ?? '—')} | \`${md(row.grade)}\` | ${md(evidenceNote(row))} | ${md(row.lastVerifiedRelease ?? '—')} |\n`
+      }
+      os += '\n'
     }
-    os += '\nHypervisors that the automated lifecycle tests do not cover yet are listed on [stackkit.cc/compatibility](https://stackkit.cc/compatibility). Run `stackkit compat` on a host for non-destructive diagnostics and the evidence published for its operating system and hypervisor.\n'
+    os += 'Hypervisor rollouts that the automated lifecycle tests do not cover yet are listed on [stackkit.cc/compatibility](https://stackkit.cc/compatibility). Run `stackkit compat` on a host for non-destructive diagnostics and the evidence published for its operating system and hypervisor.\n'
   } else {
     os += `Rows are generated from [${release.tag}](${release.releaseUrl}). \`unverified\` means no valid receipt for this release; it must not be read as support. \`unsupported\` is emitted only from policy.\n\n`
     os += '| Operating system | Version | Architecture | Status | Evidence or reason |\n| --- | --- | --- | --- | --- |\n'
