@@ -1,0 +1,117 @@
+name: SpeechKit Release Docs
+
+on:
+  repository_dispatch:
+    # SpeechKit can push a release here once it carries a scoped docs-writer
+    # credential. Until then the daily schedule is what keeps the stated
+    # release current; the download links on those pages are version-free and
+    # never wait for this run.
+    types: [speechkit-docs-release]
+  schedule:
+    - cron: "41 6 * * *"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Published SpeechKit tag; empty reconciles public latest"
+        required: false
+        type: string
+
+concurrency:
+  group: speechkit-release-docs
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  reconcile:
+    if: github.repository == 'KombiverseLabs/mintlify-docs'
+    runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'ubuntu-24.04' }}
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+          token: ${{ github.token }}
+          persist-credentials: false
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: 24
+      - name: Resolve the published release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DISPATCH_TAG: ${{ github.event.client_payload.tag }}
+          INPUT_TAG: ${{ inputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp
+          tag="${DISPATCH_TAG:-${INPUT_TAG:-}}"
+          if [ -n "$tag" ]; then
+            [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+            gh api "repos/kombifyio/SpeechKit/releases/tags/$tag" > .tmp/speechkit-release.json
+          else
+            gh api repos/kombifyio/SpeechKit/releases/latest > .tmp/speechkit-release.json
+          fi
+          echo "tag=$(jq -r .tag_name .tmp/speechkit-release.json)" >> "$GITHUB_OUTPUT"
+      - name: Project the release into the docs
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Fails closed when the release is a draft, a prerelease, or does not
+          # carry every download the pages link.
+          node scripts/sync-speechkit-release-docs.mjs --release-json .tmp/speechkit-release.json --write
+          node scripts/sync-speechkit-release-docs.mjs --check
+      - name: Open or update generated-only PR
+        env:
+          GH_TOKEN: ${{ secrets.REPO_SYNC_PAT }}
+          BRANCH: bot/speechkit-release-docs
+          TAG: ${{ steps.release.outputs.tag }}
+          GENERATED_PATHS: data/speechkit speechkit
+        shell: bash
+        run: |
+          set -euo pipefail
+          auth_guidance="Repair the scoped REPO_SYNC_PAT identity used by the docs sync workflows; do not substitute a broad organization credential."
+          if [ -z "${GH_TOKEN:-}" ]; then
+            echo "::error::REPO_SYNC_PAT is missing. $auth_guidance"
+            exit 1
+          fi
+          if ! writer="$(gh api user 2>/dev/null)"; then
+            echo "::error::REPO_SYNC_PAT authentication was rejected. $auth_guidance"
+            exit 1
+          fi
+          if ! can_push="$(gh api repos/KombiverseLabs/mintlify-docs --jq '.permissions.push' 2>/dev/null)" || [ "$can_push" != true ]; then
+            echo "::error::REPO_SYNC_PAT cannot write KombiverseLabs/mintlify-docs. $auth_guidance"
+            exit 1
+          fi
+          writer_login="$(jq -r '.login // empty' <<<"$writer")"
+          writer_id="$(jq -r '.id // empty' <<<"$writer")"
+          [ -n "$writer_login" ] && [[ "$writer_id" =~ ^[0-9]+$ ]] || {
+            echo "::error::REPO_SYNC_PAT returned an invalid GitHub writer identity. $auth_guidance"
+            exit 1
+          }
+          if git diff --quiet -- $GENERATED_PATHS; then
+            echo "No public release drift."
+            exit 0
+          fi
+          # --untracked-files=all so a first-sync directory is reported by file
+          # rather than collapsed into its parent, and cut -c4- so a path
+          # containing a space survives the porcelain record.
+          unexpected="$(git status --porcelain --untracked-files=all | cut -c4- | grep -Ev '^(data/speechkit/|speechkit/[a-z0-9-]+\.mdx$)' || true)"
+          [ -z "$unexpected" ] || { echo "::error::unexpected generated paths: $unexpected"; exit 1; }
+          git config user.name "$writer_login"
+          git config user.email "$writer_id+$writer_login@users.noreply.github.com"
+          gh auth setup-git --hostname github.com
+          git fetch origin "refs/heads/$BRANCH:refs/remotes/origin/$BRANCH" || true
+          git checkout -B "$BRANCH"
+          git add $GENERATED_PATHS
+          git commit -m "docs(speechkit): sync $TAG release snapshot"
+          git push --force-with-lease origin "$BRANCH"
+          if ! gh pr view "$BRANCH" >/dev/null 2>&1; then
+            gh pr create --base main --head "$BRANCH" \
+              --title "docs(speechkit): sync $TAG release snapshot" \
+              --body "Automated projection from the public SpeechKit release. Download links in these pages are version-free; only the generated release line moves."
+          fi
+          gh pr merge "$BRANCH" --auto --squash

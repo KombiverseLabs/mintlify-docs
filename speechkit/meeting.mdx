@@ -1,0 +1,80 @@
+---
+title: "Record and review a meeting"
+description: "Dual-channel meeting capture, notes, screenshots, and cited write-ups"
+sidebarTitle: "Meeting"
+icon: "users"
+---
+
+Meeting records a call as two independent channels — your microphone and the
+system loopback — transcribes both into one session, and writes the meeting up
+from the transcript, your own notes, and a template. It is a separate recording
+service, not a fourth mode: it shares only the speech-to-text transcriber with
+Dictation.
+
+<Info>
+Meeting is a Windows desktop capability. System-audio capture is not ported to
+the macOS beta.
+</Info>
+
+## What a meeting produces
+
+- A transcript with both channels, labelled by capture channel. Channel labels
+  say which side of the call a line came from; they are not identification of
+  every remote speaker.
+- Your own notes, reproduced verbatim in the write-up.
+- A durable **Meeting Review**: a five-sentence executive brief, action items,
+  and a body that cites the transcript it came from.
+- Reviews in English, German, Spanish, Chinese, Hindi, and Arabic.
+
+Audio is never persisted. The transcript, notes, and review are what remain,
+and [Retention Scope](/speechkit/modes#retention-scope) decides how long.
+
+## Start and finish a recording
+
+1. Start a meeting from the desktop client, or let call detection offer one
+   when you accept a call. Detection is a suggestion you accept, not an
+   automatic recording.
+2. A compact transparent overlay shows capture health and controls during the
+   call, and can unfold for notes.
+3. Rolling summaries run in batches while capture continues, so a long call
+   does not wait until the end to be digested.
+4. SpeechKit stops shortly after the calling application releases the
+   microphone, and notifies you when the review is ready or why it failed.
+   A recording you started by hand is never stopped automatically.
+
+Exactly one capture holds the microphone at a time. Starting Dictation, Assist,
+or Voice Agent while a meeting records is refused rather than silently taking
+the device.
+
+## Screen snapshots
+
+Press `Ctrl+Alt+S` during a meeting to capture a chosen window or the monitor
+under the cursor. Snapshots appear as markers in the transcript timeline, are
+cited in the generated review, and briefly preview in the meeting pill so you
+can confirm the right window was captured. No image leaves the device.
+
+## Find and export
+
+The meeting list groups sessions by when they happened. Search covers titles,
+transcripts, notes, and write-ups. Notes render as formatted Markdown, and the
+complete write-up offers **Copy Markdown** and **Save .md**.
+
+## Review generation
+
+The local path needs no cloud credentials: the bundled local model generates
+the review on the device. GitHub Copilot is an optional review-generation
+provider behind a separate, revocable transcript-processing grant.
+
+Export connectors and cloud review providers are unavailable under the
+**local network only** and **this device only**
+[Network Scopes](/speechkit/modes#network-scope). A fresh install configures no
+connector, so nothing leaves the machine until you choose it.
+
+<CardGroup cols={2}>
+  <Card title="Install on Windows" icon="windows" href="/speechkit/install-windows">
+    Meeting ships with the Windows desktop client.
+  </Card>
+  <Card title="Modes and data paths" icon="waveform-lines" href="/speechkit/modes">
+    See how provider choice and the two privacy scopes work.
+  </Card>
+</CardGroup>
