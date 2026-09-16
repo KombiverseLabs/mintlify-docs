@@ -63,6 +63,22 @@ test("a synced page names the published release and passes its own check", () =>
   assert.match(run(["--repo-root", root, "--check"]), /speechkit_release_blocks: ok/);
 });
 
+test("re-syncing the release already on record changes no file", () => {
+  const { root, releasePath } = fixture();
+  run(["--repo-root", root, "--release-json", releasePath, "--write"]);
+  const snapshotPath = path.join(root, "data", "speechkit", "latest.json");
+  const pagePath = path.join(root, "speechkit", "overview.mdx");
+  // An old timestamp on record, so a sync that rewrote it could not pass by
+  // happening to run within the same second.
+  const recorded = JSON.parse(readFileSync(snapshotPath, "utf8"));
+  writeFileSync(snapshotPath, `${JSON.stringify({ ...recorded, generatedAt: "2000-01-01T00:00:00Z" }, null, 2)}\n`, "utf8");
+  const before = [readFileSync(snapshotPath, "utf8"), readFileSync(pagePath, "utf8")];
+
+  run(["--repo-root", root, "--release-json", releasePath, "--write"]);
+
+  assert.deepEqual([readFileSync(snapshotPath, "utf8"), readFileSync(pagePath, "utf8")], before);
+});
+
 test("a page whose release line drifted from the snapshot fails the check", () => {
   const { root, releasePath } = fixture();
   run(["--repo-root", root, "--release-json", releasePath, "--write"]);

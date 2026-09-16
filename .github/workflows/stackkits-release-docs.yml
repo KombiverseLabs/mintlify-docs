@@ -87,7 +87,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          auth_guidance="Repair the scoped REPO_SYNC_PAT identity tracked by mintlify-docs-msct; do not substitute a broad organization credential."
+          # REPO_SYNC_PAT is a repository-level copy of the canonical PAT
+          # (kombify-Core/standards/DOPPLER-SECRETS-MAP.md). It is not rotated
+          # with the organization GH_PAT, so a rejection here almost always means
+          # this copy missed a rotation.
+          auth_guidance="Re-set this repository's REPO_SYNC_PAT from its documented custody after the last canonical PAT rotation."
           if [ -z "${GH_TOKEN:-}" ]; then
             echo "::error::REPO_SYNC_PAT is missing. $auth_guidance"
             exit 1

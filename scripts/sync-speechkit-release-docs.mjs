@@ -135,9 +135,30 @@ function readSnapshot(repoRoot) {
   return snapshot;
 }
 
+// A re-sync of the release already on record keeps its generatedAt. Otherwise
+// every scheduled run would rewrite the timestamp and open a PR that changes
+// nothing a reader can see.
+function sameRelease(previous, next) {
+  return (
+    previous?.tag === next.tag &&
+    previous?.publishedAt === next.publishedAt &&
+    JSON.stringify(previous?.assets ?? []) === JSON.stringify(next.assets)
+  );
+}
+
+function readExistingSnapshot(repoRoot) {
+  try {
+    return JSON.parse(readFileSync(path.join(repoRoot, SNAPSHOT_PATH), "utf8"));
+  } catch {
+    return null;
+  }
+}
+
 function write(repoRoot, releaseJsonPath) {
   const release = JSON.parse(readFileSync(releaseJsonPath, "utf8"));
-  const snapshot = buildSnapshot(release);
+  const previous = readExistingSnapshot(repoRoot);
+  const built = buildSnapshot(release);
+  const snapshot = sameRelease(previous, built) ? { ...built, generatedAt: previous.generatedAt } : built;
   const line = renderReleaseLine(snapshot);
 
   mkdirSync(path.join(repoRoot, path.dirname(SNAPSHOT_PATH)), { recursive: true });
