@@ -2,10 +2,9 @@ name: SpeechKit Release Docs
 
 on:
   repository_dispatch:
-    # SpeechKit can push a release here once it carries a scoped docs-writer
-    # credential. Until then the daily schedule is what keeps the stated
-    # release current; the download links on those pages are version-free and
-    # never wait for this run.
+    # SpeechKit does not dispatch here yet; the daily schedule is what keeps
+    # the stated release current. The download links on those pages are
+    # version-free and never wait for this run.
     types: [speechkit-docs-release]
   schedule:
     - cron: "41 6 * * *"
@@ -73,7 +72,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          auth_guidance="Repair the scoped REPO_SYNC_PAT identity used by the docs sync workflows; do not substitute a broad organization credential."
+          # REPO_SYNC_PAT is a repository-level copy of the canonical PAT
+          # (kombify-Core/standards/DOPPLER-SECRETS-MAP.md). It is not rotated
+          # with the organization GH_PAT, so a rejection here almost always means
+          # this copy missed a rotation.
+          auth_guidance="Re-set this repository's REPO_SYNC_PAT from its documented custody after the last canonical PAT rotation."
           if [ -z "${GH_TOKEN:-}" ]; then
             echo "::error::REPO_SYNC_PAT is missing. $auth_guidance"
             exit 1
