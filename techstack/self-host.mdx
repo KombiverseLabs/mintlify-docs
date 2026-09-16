@@ -1,0 +1,124 @@
+---
+title: "Self-host the Techstack control plane"
+description: "Run the open-source Techstack Open Core on your own host with Docker Compose"
+sidebarTitle: "Self-host"
+icon: "server"
+---
+
+The open-source [`kombifyio/TechStack`](https://github.com/kombifyio/TechStack)
+repository ships a self-hostable build of the Techstack control plane called
+**Techstack Open Core**. It runs with `KOMBIFY_EDITION=selfhost-oss` and keeps
+runtime data, identity, credentials, and infrastructure authority on the
+operator's host.
+
+<Warning>
+Techstack releases below `1.0.0` are development releases. Run the self-hosted
+control plane in a homelab or evaluation environment. Do not use it as a
+general-availability production system.
+</Warning>
+
+## When to use it
+
+Self-hosting is the right path when you want to:
+
+- Operate the Techstack control plane inside your own network or VPS.
+- Keep runtime data and provider credentials off any hosted Kombify surface.
+- Pair a self-run [Windows client](/techstack/install-windows) with a control
+  plane you fully own.
+
+The hosted SaaS at [techstack.kombify.io](https://techstack.kombify.io) is
+built and deployed from a separate private repository. Hosted provider
+credentials and hosted-only capabilities are not part of the open-source
+distribution.
+
+<Note>
+The Windows client and the self-hosted control plane are complementary. The
+client pairs with a running Techstack server, whether that server is the
+self-hosted Open Core control plane or the hosted Kombify SaaS.
+</Note>
+
+## Run with Docker Compose
+
+The repository provides a Docker Compose deployment under `deploy/selfhosted`
+that runs the control plane and its PostgreSQL database on a single host.
+
+### Prerequisites
+
+- A Linux host with Docker Engine and the Docker Compose plugin.
+- `openssl` for generating a session secret.
+- A trusted reverse proxy and HTTPS certificate if you plan to expose the
+  service beyond the host.
+
+### Steps
+
+1. Clone the repository and change into the deploy directory.
+
+   ```bash
+   git clone https://github.com/kombifyio/TechStack.git
+   cd TechStack/deploy/selfhosted
+   ```
+
+2. Copy the example environment file.
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Generate a stable session secret and a PostgreSQL password, then set both
+   in `.env`.
+
+   ```bash
+   openssl rand -hex 32
+   ```
+
+   Put the generated value into `TECHSTACK_V2_SESSION_SECRET` and set
+   `POSTGRES_PASSWORD` to a value you keep secret. Both values must stay stable
+   across restarts.
+
+4. Start the stack.
+
+   ```bash
+   docker compose up -d
+   ```
+
+The compose file binds the HTTP port (`5260`) and gRPC port (`5263`) to
+`127.0.0.1` by default, so the service is reachable only from the host until
+you place a reverse proxy in front of it.
+
+## Expose it safely
+
+The self-hosted control plane does not terminate TLS itself. Before you
+expose it beyond the host:
+
+1. Put a trusted reverse proxy (for example Traefik, Caddy, or nginx) in front
+   of the container.
+2. Terminate HTTPS at the proxy with a certificate for your public hostname.
+3. Set `TECHSTACK_PUBLIC_ORIGIN` and `TECHSTACK_CORS_ORIGINS` in `.env` to the
+   HTTPS origin the proxy serves, then restart the stack.
+
+Do not publish the raw HTTP or gRPC ports to the public internet.
+
+## Infrastructure blueprints
+
+The repository also includes OpenTofu blueprints under `tofu/blueprints/` as
+an alternate infrastructure path when you want the host itself provisioned
+declaratively:
+
+- `homelab-local` bootstraps an existing local Ubuntu server for a homelab
+  install.
+- `single-server-complete` provisions a complete single-server stack on
+  Hetzner Cloud with Docker, a firewall, and OpenTofu preinstalled.
+
+Use a blueprint to stand up the host, then follow the Docker Compose steps
+above to run the control plane on it.
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Install the Windows client" icon="windows" href="/techstack/install-windows">
+    Download the Windows Alpha and pair it with your self-hosted control plane.
+  </Card>
+  <Card title="Operating modes" icon="sliders" href="/techstack/operating-modes">
+    Compare standalone, local orchestration, connected, and managed operation.
+  </Card>
+</CardGroup>
