@@ -112,7 +112,9 @@ jobs:
           git add $GENERATED_PATHS
           git commit -m "docs(speechkit): sync $TAG release snapshot"
           git push --force-with-lease origin "$BRANCH"
-          if ! gh pr view "$BRANCH" >/dev/null 2>&1; then
+          # `gh pr view <branch>` also matches merged PRs of the reused bot
+          # branch, so only an open PR counts as already existing.
+          if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq length)" = "0" ]; then
             gh pr create --base main --head "$BRANCH" \
               --title "docs(speechkit): sync $TAG release snapshot" \
               --body "Automated projection from the public SpeechKit release. Download links in these pages are version-free; only the generated release line moves."

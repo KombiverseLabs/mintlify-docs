@@ -139,7 +139,9 @@ jobs:
           git add data/stackkits guides/stackkits/use-cases/overview.mdx stackkits/reference/os-compatibility.mdx stackkits/reference/application-delivery-compatibility.mdx
           git commit -m "docs(stackkits): sync $TAG release manifests"
           git push --force-with-lease origin "$BRANCH"
-          if ! gh pr view "$BRANCH" >/dev/null 2>&1; then
+          # `gh pr view <branch>` also matches merged PRs of the reused bot
+          # branch, so only an open PR counts as already existing.
+          if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq length)" = "0" ]; then
             gh pr create --base main --head "$BRANCH" --title "docs(stackkits): sync $TAG release manifests" --body "Automated projection from immutable public StackKits release assets."
           fi
           gh pr merge "$BRANCH" --auto --squash
