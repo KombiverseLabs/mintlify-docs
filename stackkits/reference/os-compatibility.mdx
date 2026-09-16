@@ -9,10 +9,29 @@ content_hash: "sha256:efc5a0af8e8f99ea0940c5e37453d9c3ac70da8b00d022f3f785383036
 source_hash: "80497083ef8fcad0e5b95b2fd6d8304293733afc"
 ---
 
-Rows are generated from [v0.33.3](https://github.com/kombifyio/StackKits/releases/tag/v0.33.3). `unverified` means no valid receipt for this release; it must not be read as support. `unsupported` is emitted only from policy.
+Rows are projected from the automated lifecycle runs of [v0.33.3](https://github.com/kombifyio/StackKits/releases/tag/v0.33.3) on fresh virtual machines: install, init, generate, apply, verify, backup and restore. `supported` means every phase passed on this release, `preview` means install through verify passed and a later phase did not, and `unverified` means no passing run for this release. Last lifecycle run: 2026-09-16.
 
-| Operating system | Version | Architecture | Status | Evidence or reason |
+| Operating system | Version | Tested architecture | Status | Evidence | Last verified |
+| --- | --- | --- | --- | --- | --- |
+| Ubuntu | 24.04 | amd64 | `supported` | All lifecycle phases passed | v0.33.3 |
+| Debian | 13 | amd64 | `preview` | Backup phase failed on this release | — |
+| Debian | 12 | — | `unverified` | Not covered by the automated lifecycle tests yet | — |
+
+Each run installs the operating system fresh in a virtual machine.
+
+## Kits by environment
+
+Each kit is graded in the kind of environment it is built for. A home network run also opens the local service addresses from another machine on that network.
+
+| Kit | Environment | Status | Evidence | Last verified |
 | --- | --- | --- | --- | --- |
-| Debian | 12 | untested | `unverified` | no-automated-lane |
-| Debian | 13 | amd64 | `unverified` | current-release-receipt-pending |
-| Ubuntu | 24.04 | amd64 | `unverified` | current-release-receipt-pending |
+| Basement Kit | Fresh virtual machine in CI | `supported` | All lifecycle phases passed | v0.33.3 |
+| Basement Kit | Virtual machine on a home network | `supported` | All lifecycle phases passed; local service addresses answered from the home network | v0.33.3 |
+| Cloud Kit | Public VPS with a kombify.me address | `unverified` | Not covered by the automated lifecycle tests yet | — |
+| Modern Homelab | Home virtual machine plus public VPS | `unverified` | Not covered by the automated lifecycle tests yet | — |
+
+## Hypervisors
+
+StackKits run inside a guest VM on your hypervisor, never on the hypervisor host itself. A status covers that rollout end to end: the guest is created on the hypervisor and the StackKit lifecycle runs inside it. It does not certify a vendor product or a server provider.
+
+The hypervisor rollouts and their lifecycle evidence for this release are listed on [stackkit.cc/compatibility](https://stackkit.cc/compatibility). Run `stackkit compat` on a host for non-destructive diagnostics and the evidence published for its operating system and hypervisor.
