@@ -1,0 +1,77 @@
+---
+title: "StackKit Open Spec"
+description: "The thin published contract behind the open homelab standard: architecture snapshot, lifecycle verbs, placement taxonomy, verification evidence"
+sidebarTitle: "Open Spec (v0)"
+icon: file-contract
+---
+
+The StackKit Open Spec is the thin, published contract behind "the open homelab standard". It indexes artifacts that ship with every StackKits release; it introduces no new schema. The spec version follows the release tag it ships with, and changes within v0 are additive. The canonical copy lives in the public repository at [docs/OPEN-SPEC.md](https://github.com/kombifyio/StackKits/blob/main/docs/OPEN-SPEC.md).
+
+Everything in the spec is account-free: Standard Mode needs no kombify account, no hosted kombify endpoint, and no Techstack.
+
+## 1. Architecture snapshot
+
+The facts-only architecture snapshot describes a release: kits, topology, capabilities, placement model, modules, add-ons, and support maturity. CUE is the technical source of truth; the snapshot is a projection of it. A consumer reads the snapshot, never the CUE, and must tolerate additive fields.
+
+| Artifact | Role |
+| --- | --- |
+| [architecture-snapshot.json](https://github.com/kombifyio/StackKits/blob/main/architecture-snapshot.json) | The snapshot for the release |
+| [architecture-snapshot.schema.json](https://github.com/kombifyio/StackKits/blob/main/architecture-snapshot.schema.json) | Closed downstream contract (schema v3): `placement_model`, `stackkits`, `mode_matrix`, `modules`, `addons` |
+| [architecture/v2/authority-manifest.json](https://github.com/kombifyio/StackKits/blob/main/architecture/v2/authority-manifest.json) | Authority manifest for the Architecture v2 kit definitions |
+
+## 2. Lifecycle verbs
+
+Every kit is driven by the same verbs through the `stackkit` CLI and the `stackkit-mcp` connector. Inputs and outputs are documented in the [CLI reference](https://github.com/kombifyio/StackKits/blob/main/docs/CLI.md) and the [CLI walkthrough](/guides/stackkits/cli-walkthrough).
+
+| Verb | Meaning |
+| --- | --- |
+| `init` | Create a StackSpec for a kit with local owner custody (`--owner-source=local`) |
+| `validate` | Validate the StackSpec against the CUE contract |
+| `generate` | Render deterministic rollout artifacts (standalone Docker Compose by default) |
+| `apply` | Execute the generated plan on the target host |
+| `verify` | Check routes, identity and service health after apply |
+| `backup` (`backup run`, `backup restore …`) | Snapshot declared volumes and restore them with verified readback and explicit activation |
+| `upgrade` | Move an installed kit to a newer release with compatibility checks |
+| `remove` | Remove an application or the kit while keeping data explicit |
+
+A verb either completes with evidence or fails with a terminal reason. It never reports success for work it did not do.
+
+## 3. Placement taxonomy
+
+Placement describes where a kit or module may run. The vocabulary is published in [foundation/placement.cue](https://github.com/kombifyio/StackKits/blob/main/foundation/placement.cue):
+
+- `#PlacementMode`: `local-only`, `standard`, `managed-serverless`
+- `#PlacementSupport`: per-module eligibility metadata (which modes a module can run in)
+
+The open-source lifecycle realizes `local-only` and `standard`. `managed-serverless` is eligibility metadata only; its realization is outside StackKits and outside this spec.
+
+## 4. Verification evidence
+
+Maturity words are evidence-backed, never declared. The evidence shapes are public JSON Schemas; the release ships the instances.
+
+| Artifact | Shape |
+| --- | --- |
+| `release-evidence.json` (release asset) | [release-evidence.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/release-evidence.schema.json): per-check `pass`, `pending` or `not_applicable` with a reason |
+| Standalone OSS end-to-end receipt | [standalone-oss-e2e-receipt.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/standalone-oss-e2e-receipt.schema.json) |
+| Compatibility projection | [stackkits-compatibility-v1.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/stackkits-compatibility-v1.schema.json), rendered on [Application delivery compatibility](/stackkits/reference/application-delivery-compatibility) |
+| OS compatibility | [stackkits-os-compatibility-input-v1.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/stackkits-os-compatibility-input-v1.schema.json), rendered on [OS compatibility](/stackkits/reference/os-compatibility) |
+| Use-case runtime evidence | [docs/data/use-case-runtime-evidence](https://github.com/kombifyio/StackKits/tree/main/docs/data/use-case-runtime-evidence): fresh-guest install, setup, verify, backup and restore receipts per use case and release |
+
+Vocabulary:
+
+- Kits: `supported` (a cited verification path exists for the committed cell), `preview` (installs, but verification or recovery evidence is pending), `alpha` (definition only).
+- Operating systems: `unverified` (no valid receipt for this release) or `unsupported` (policy). Absence of evidence is published as `unverified`, never as support.
+- A status widens only when a cited run exists for the exact release.
+
+## 5. Conformance
+
+A tool or service is StackKit-compatible when it
+
+1. consumes the architecture snapshot of the exact release it targets,
+2. drives kits only through the lifecycle verbs above (directly or through the MCP connector) and preserves their evidence,
+3. describes placement with the published taxonomy, and
+4. publishes verification results in the evidence shapes above with the release tag they belong to.
+
+## Status
+
+This is a v0 draft published with the public beta. A separate specification repository with a versioning policy follows after the beta; until then the repository document and the linked artifacts are the spec.
