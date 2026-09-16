@@ -1,0 +1,179 @@
+---
+title: "stackkit identity"
+description: "Manage the standalone local identity plane"
+sidebarTitle: "identity"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Manage the standalone local identity plane.
+
+```bash
+stackkit identity [flags]
+```
+
+Subcommands: [`stackkit identity projection`](#stackkit-identity-projection), [`stackkit identity workload-peer`](#stackkit-identity-workload-peer)
+
+## stackkit identity projection
+
+Inspect and locally approve credential-free desired identity projections.
+
+```bash
+stackkit identity projection [flags]
+```
+
+Subcommands: [`stackkit identity projection apply`](#stackkit-identity-projection-apply), [`stackkit identity projection approve`](#stackkit-identity-projection-approve), [`stackkit identity projection inspect`](#stackkit-identity-projection-inspect), [`stackkit identity projection unlink`](#stackkit-identity-projection-unlink)
+
+### stackkit identity projection apply
+
+Apply one previously approved projection to local PocketID.
+
+```bash
+stackkit identity projection apply [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+| `--owner-approve` | bool | — | Explicitly approve this local identity operation |
+| `--projection-sha256` | string | — | Exact sha256:&lt;hex&gt; of a locally approved projection |
+
+### stackkit identity projection approve
+
+Create the local Owner-signed approval without PocketID mutation.
+
+```bash
+stackkit identity projection approve [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--file` | string | — | Path to a canonical stackkit.desired-identity-projection/v1 document |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+| `--owner-approve` | bool | — | Explicitly approve importing this desired projection into local custody |
+
+### stackkit identity projection inspect
+
+Verify one signed projection without mutation.
+
+```bash
+stackkit identity projection inspect [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--file` | string | — | Path to a canonical stackkit.desired-identity-projection/v1 document |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+
+### stackkit identity projection unlink
+
+Detach optional sync without deleting any local identity.
+
+```bash
+stackkit identity projection unlink [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+| `--owner-approve` | bool | — | Explicitly approve this local identity operation |
+| `--projection-sha256` | string | — | Exact sha256:&lt;hex&gt; of a locally approved projection |
+
+## stackkit identity workload-peer
+
+Exchange owner-approved Cloud workload certificates with Home.
+
+```bash
+stackkit identity workload-peer [flags]
+```
+
+Subcommands: [`stackkit identity workload-peer enroll`](#stackkit-identity-workload-peer-enroll), [`stackkit identity workload-peer install`](#stackkit-identity-workload-peer-install), [`stackkit identity workload-peer probe`](#stackkit-identity-workload-peer-probe), [`stackkit identity workload-peer request`](#stackkit-identity-workload-peer-request), [`stackkit identity workload-peer revoke`](#stackkit-identity-workload-peer-revoke)
+
+### stackkit identity workload-peer enroll
+
+Issue and admit a peer for one installed Home publication.
+
+```bash
+stackkit identity workload-peer enroll [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--address` | string | — | Existing federation loopback socket for the Cloud probe |
+| `--file` | string | — | Public request or credential JSON file |
+| `--home-root-sha256` | string | — | Home root sha256 fingerprint verified through a separate owner-approved channel |
+| `--owner-approve` | bool | — | Explicitly approve this local workload identity operation |
+| `--peer-ref` | string | — | Explicit workload peer identity |
+| `--replace-key` | bool | — | Explicitly replace the selected peer key; revoked keys remain denied |
+| `--server-name` | string | — | Installed Home origin server name |
+
+### stackkit identity workload-peer install
+
+Install a Home-issued certificate using an independently verified root.
+
+```bash
+stackkit identity workload-peer install [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--address` | string | — | Existing federation loopback socket for the Cloud probe |
+| `--file` | string | — | Public request or credential JSON file |
+| `--home-root-sha256` | string | — | Home root sha256 fingerprint verified through a separate owner-approved channel |
+| `--owner-approve` | bool | — | Explicitly approve this local workload identity operation |
+| `--peer-ref` | string | — | Explicit workload peer identity |
+| `--server-name` | string | — | Installed Home origin server name |
+
+### stackkit identity workload-peer probe
+
+Request the origin through an existing federation loopback socket.
+
+```bash
+stackkit identity workload-peer probe [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--address` | string | — | Existing federation loopback socket for the Cloud probe |
+| `--file` | string | — | Public request or credential JSON file |
+| `--home-root-sha256` | string | — | Home root sha256 fingerprint verified through a separate owner-approved channel |
+| `--owner-approve` | bool | — | Explicitly approve this local workload identity operation |
+| `--peer-ref` | string | — | Explicit workload peer identity |
+| `--server-name` | string | — | Installed Home origin server name |
+
+### stackkit identity workload-peer request
+
+Create or reuse a Cloud-held key and export its public CSR.
+
+```bash
+stackkit identity workload-peer request [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--address` | string | — | Existing federation loopback socket for the Cloud probe |
+| `--file` | string | — | Public request or credential JSON file |
+| `--home-root-sha256` | string | — | Home root sha256 fingerprint verified through a separate owner-approved channel |
+| `--owner-approve` | bool | — | Explicitly approve this local workload identity operation |
+| `--peer-ref` | string | — | Explicit workload peer identity |
+| `--rotate-key` | bool | — | Generate a new Cloud key while preserving the active credential until install |
+| `--server-name` | string | — | Installed Home origin server name |
+
+### stackkit identity workload-peer revoke
+
+Withdraw a peer's current Home admission.
+
+```bash
+stackkit identity workload-peer revoke [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--address` | string | — | Existing federation loopback socket for the Cloud probe |
+| `--file` | string | — | Public request or credential JSON file |
+| `--home-root-sha256` | string | — | Home root sha256 fingerprint verified through a separate owner-approved channel |
+| `--owner-approve` | bool | — | Explicitly approve this local workload identity operation |
+| `--peer-ref` | string | — | Explicit workload peer identity |
+| `--server-name` | string | — | Installed Home origin server name |
+

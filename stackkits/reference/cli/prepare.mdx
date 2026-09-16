@@ -1,0 +1,55 @@
+---
+title: "stackkit prepare"
+description: "Prepare a system for StackKit deployment"
+sidebarTitle: "prepare"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Prepare a system for StackKit deployment.
+
+Aliases: `prep`
+
+Prepare a system for StackKit deployment and inspect the selected StackSpec path.
+
+On the native Architecture v2 line this command performs read-only local host validation (Docker, Compose, kernel, resources, storage, and required ports). It never installs or configures host packages and never uses a hosted account. The exact-v0.6 compatibility adapter retains its historical preparation flow.
+
+```text
+This command:
+  1. Selects the versioned StackSpec execution path
+  2. Checks host prerequisites on native Architecture v2
+  3. Retains historical target preparation through the exact-v0.6 compatibility adapter
+```
+
+```bash
+stackkit prepare [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--auto-fix` | bool | `true` | Auto-correct fixable issues (exact-v0.6 only) |
+| `--dry-run` | bool | — | Show what would be done (exact-v0.6 only) |
+| `--force` | bool | — | Continue even with insufficient disk space (exact-v0.6 only) |
+| `--host` | string | `localhost` | Target host IP/hostname (exact-v0.6 only) |
+| `--json` | bool | — | Emit the native-v2 host preflight report as stackkit.command-result/v1 JSON |
+| `--key` | string | — | SSH private key path (exact-v0.6 only) |
+| `--non-interactive` | bool | — | Fail instead of prompting when prepare needs operator input (exact-v0.6 only) |
+| `--port` | int | `22` | SSH port for remote targets (exact-v0.6 only) |
+| `--skip-docker` | bool | — | Skip Docker installation check (exact-v0.6 only) |
+| `--skip-tofu` | bool | — | Skip packaged OpenTofu check (exact-v0.6 only) |
+| `--user` | string | — | SSH username (exact-v0.6 only) |
+
+**Examples**
+
+```bash
+# Check this host's prerequisites for the StackSpec in the current directory
+stackkit prepare
+
+# Check the prerequisites for the deployment in another directory
+stackkit prepare -C my-homelab
+
+# Emit the host preflight report as JSON
+stackkit prepare --json
+```
+

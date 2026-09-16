@@ -1,0 +1,94 @@
+---
+title: "stackkit advanced"
+description: "Manage offline-authorized Advanced lifecycle operations"
+sidebarTitle: "advanced"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Manage offline-authorized Advanced lifecycle operations.
+
+```bash
+stackkit advanced [flags]
+```
+
+Subcommands: [`stackkit advanced change-set`](#stackkit-advanced-change-set), [`stackkit advanced trust`](#stackkit-advanced-trust)
+
+## stackkit advanced change-set
+
+Manage offline-authorized Terramate change sets.
+
+```bash
+stackkit advanced change-set [flags]
+```
+
+Subcommands: [`stackkit advanced change-set apply`](#stackkit-advanced-change-set-apply), [`stackkit advanced change-set create`](#stackkit-advanced-change-set-create)
+
+### stackkit advanced change-set apply
+
+Apply an exact Owner-approved Terramate change set.
+
+```bash
+stackkit advanced change-set apply [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--candidate-spec` | string | — | Path to the exact candidate StackSpec v2 using generation.target=terramate |
+| `--capability` | string | — | Path to the canonical stackkit.advanced-capability/v1 used to create the change set |
+| `--change-set` | string | — | Exact sha256:&lt;hex&gt; Owner-signed change-set content address |
+| `--expect-sha256` | string | — | Required exact sha256:&lt;hex&gt; digest of the canonical stored change-set bytes |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+
+### stackkit advanced change-set create
+
+Create an Owner-signed Terramate change set.
+
+```bash
+stackkit advanced change-set create [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--candidate-spec` | string | — | Path to the candidate StackSpec v2 using generation.target=terramate |
+| `--capability` | string | — | Path to a canonical stackkit.advanced-capability/v1 file |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+
+## stackkit advanced trust
+
+Manage the local Owner-approved Advanced issuer trust.
+
+```bash
+stackkit advanced trust [flags]
+```
+
+Subcommands: [`stackkit advanced trust import`](#stackkit-advanced-trust-import), [`stackkit advanced trust inspect`](#stackkit-advanced-trust-inspect)
+
+### stackkit advanced trust import
+
+Import an exact pinned Advanced issuer trust bundle.
+
+```bash
+stackkit advanced trust import [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--bundle` | string | — | Path to a canonical stackkit.advanced-trust-bundle/v1 file |
+| `--expect-sha256` | string | — | Required exact sha256:&lt;hex&gt; digest of the trust bundle |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+| `--owner-approve` | bool | — | Explicitly approve changing local Advanced issuer trust |
+
+### stackkit advanced trust inspect
+
+Inspect the verified local Advanced issuer trust.
+
+```bash
+stackkit advanced trust inspect [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+

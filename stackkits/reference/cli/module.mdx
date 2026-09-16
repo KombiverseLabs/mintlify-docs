@@ -1,0 +1,57 @@
+---
+title: "stackkit module"
+description: "Author and validate local CUE modules"
+sidebarTitle: "module"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Author and validate local CUE modules.
+
+Render module facts into CUE contracts and validate their deployment configuration.
+
+```bash
+stackkit module [flags]
+```
+
+Subcommands: [`stackkit module lint`](#stackkit-module-lint), [`stackkit module scaffold`](#stackkit-module-scaffold)
+
+## stackkit module lint
+
+Lint module CUE for pin/health/security/access/placement hygiene (ADR-0027 G1/G3).
+
+Run the deterministic module-hygiene gate over one module (`--module`) or the whole tree (`--all`). Checks: image tags pinned (no :latest), daemon healthCheck present (bounded automation jobs use restart=no plus process exit status), security block (noNewPrivileges + capDrop ALL), accessPolicy for routed services, no plaintext secrets, draft modules claim no scenarios, and docker-socket modules are not managed-serverless-eligible.
+
+Single-module runs exit non-zero on any error. `--all` is advisory (exit 0) unless `--strict` is passed.
+
+```bash
+stackkit module lint [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--all` | bool | — | Lint every module under `--modules-dir` |
+| `--json` | bool | — | Emit findings as JSON |
+| `--module` | string | — | Path to a single module directory (containing module.cue) |
+| `--modules-dir` | string | `modules` | Root modules directory (used with `--all`) |
+| `--strict` | bool | — | Exit non-zero on any error finding (implied for single `--module`) |
+
+## stackkit module scaffold
+
+Render module artifacts deterministically from module_facts.json (ADR-0027).
+
+Render modules/&lt;slug&gt;/module.cue, tests/reference-compose.yml and the thin tests/integration_test.sh from a schema-validated module_facts.json. Output is deterministic (gate G0): the same facts always render byte-identical files.
+
+```bash
+stackkit module scaffold [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--catalog` | string | — | Compiled CUE catalog.json for imageSource references |
+| `--facts` | string | — | Path to module_facts.json. Required. |
+| `--force` | bool | — | Overwrite existing files |
+| `--out` | string | — | Output module directory (default modules/&lt;slug&gt;) |
+| `--print` | bool | — | Print rendered artifacts to stdout instead of writing |
+

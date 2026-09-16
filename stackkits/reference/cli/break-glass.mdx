@@ -1,0 +1,95 @@
+---
+title: "stackkit break-glass"
+description: "Manage break-glass recovery accounts and bundles"
+sidebarTitle: "break-glass"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Manage break-glass recovery accounts and bundles.
+
+Manage per-node break-glass recovery accounts and the encrypted bundles that hold their credentials.
+
+Bundles are written by 'stackkit apply' (Phase 1) into /var/lib/stackkit/recovery/. They are encrypted with the recovery passphrase you set during init.
+
+```text
+To recover a node, decrypt the bundle:
+    age -d -o break-glass.txt break-glass-<node>.age
+```
+
+Then follow the RESTORE INSTRUCTIONS section inside the decrypted YAML.
+
+```bash
+stackkit break-glass [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--dir` | string | — | Override the bundle directory (default: /var/lib/stackkit/recovery) |
+
+Subcommands: [`stackkit break-glass list`](#stackkit-break-glass-list), [`stackkit break-glass rotate`](#stackkit-break-glass-rotate), [`stackkit break-glass show-bundle`](#stackkit-break-glass-show-bundle)
+
+## stackkit break-glass list
+
+List break-glass bundles on this host.
+
+```bash
+stackkit break-glass list [flags]
+```
+
+Inherited from `stackkit break-glass`:
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--dir` | string | — | Override the bundle directory (default: /var/lib/stackkit/recovery) |
+
+**Examples**
+
+```bash
+# List the encrypted recovery bundles in /var/lib/stackkit/recovery
+stackkit break-glass list
+
+# List bundles copied to another directory
+stackkit break-glass list --dir ./recovery-copy
+```
+
+## stackkit break-glass rotate
+
+Generate a new break-glass account on this node and re-issue the bundle (Phase 5).
+
+Rotate the per-node break-glass credentials and re-issue the bundle.
+
+This is part of Phase 5 of the owner &amp; break-glass-admin roadmap and is not yet implemented. Until it lands, rotate manually by re-running 'stackkit apply' on the node — the apply orchestrator will regenerate the per-node break-glass admin and write a fresh bundle.
+
+```bash
+stackkit break-glass rotate [flags]
+```
+
+Inherited from `stackkit break-glass`:
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--dir` | string | — | Override the bundle directory (default: /var/lib/stackkit/recovery) |
+
+## stackkit break-glass show-bundle
+
+Print the path to a node's encrypted bundle.
+
+```bash
+stackkit break-glass show-bundle <node> [flags]
+```
+
+Inherited from `stackkit break-glass`:
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--dir` | string | — | Override the bundle directory (default: /var/lib/stackkit/recovery) |
+
+**Examples**
+
+```bash
+# Print the bundle path of a node that stackkit break-glass list showed
+stackkit break-glass show-bundle <node>
+```
+

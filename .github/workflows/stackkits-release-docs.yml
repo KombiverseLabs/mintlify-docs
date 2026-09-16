@@ -68,6 +68,7 @@ jobs:
           EXPECTED_CATALOG_DIGEST: ${{ github.event.client_payload.catalog_digest }}
           EXPECTED_COMPATIBILITY_DIGEST: ${{ github.event.client_payload.compatibility_digest }}
           EXPECTED_EVIDENCE_DIGEST: ${{ github.event.client_payload.evidence_digest }}
+          EXPECTED_CLI_REFERENCE_DIGEST: ${{ github.event.client_payload.cli_reference_digest }}
         shell: bash
         run: |
           set -euo pipefail
@@ -88,6 +89,20 @@ jobs:
           if [ -n "${EXPECTED_CATALOG_DIGEST:-}" ]; then [ "$catalog_digest" = "$EXPECTED_CATALOG_DIGEST" ]; fi
           if [ -n "${EXPECTED_COMPATIBILITY_DIGEST:-}" ]; then [ "$compatibility_digest" = "$EXPECTED_COMPATIBILITY_DIGEST" ]; fi
           node scripts/sync-stackkits-release-docs.mjs --from-dir .tmp/stackkits-docs --tag "$TAG" --write
+          # The CLI reference is immutable per tag and exists only for releases
+          # whose command tree ships the emitter; older tags keep the committed pages.
+          cli_reference=.tmp/stackkits-docs/stackkits-cli-reference-v1.json
+          if gh release download "$TAG" --repo kombifyio/StackKits --dir .tmp/stackkits-docs \
+            --pattern stackkits-cli-reference-v1.json 2>/dev/null; then
+            if [ -n "${EXPECTED_CLI_REFERENCE_DIGEST:-}" ]; then
+              [ "sha256:$(sha256sum "$cli_reference" | cut -d' ' -f1)" = "$EXPECTED_CLI_REFERENCE_DIGEST" ]
+            fi
+            public_source_sha="$(jq -r .release.publicSourceSha .tmp/stackkits-docs/stackkits-use-case-catalog-v1.json)"
+            node scripts/render-stackkits-cli-reference.mjs --from "$cli_reference" --source-sha "$public_source_sha" --write
+          elif [ -n "${EXPECTED_CLI_REFERENCE_DIGEST:-}" ]; then
+            echo "::error::The dispatch names a CLI reference that $TAG does not contain."
+            exit 1
+          fi
       - name: Open or update generated-only PR
         if: steps.release.outputs.available == 'true'
         env:
@@ -120,23 +135,20 @@ jobs:
             echo "::error::REPO_SYNC_PAT returned an invalid GitHub writer identity. $auth_guidance"
             exit 1
           }
-          if git diff --quiet -- data/stackkits guides/stackkits/use-cases/overview.mdx stackkits/reference/os-compatibility.mdx stackkits/reference/application-delivery-compatibility.mdx; then
+          generated=(data/stackkits guides/stackkits/use-cases/overview.mdx stackkits/reference/os-compatibility.mdx stackkits/reference/application-delivery-compatibility.mdx stackkits/reference/cli docs.json)
+          # Untracked files count: a new command adds a CLI reference page.
+          if [ -z "$(git status --porcelain --untracked-files=all -- "${generated[@]}")" ]; then
             echo "No public snapshot drift."
             exit 0
           fi
-          # --untracked-files=all is required: plain `git status --short` collapses a
-          # wholly untracked directory into one entry, so the first sync of
-          # data/stackkits/ reported `data/` and tripped this guard. cut -c4- takes
-          # the path from the porcelain record instead of awk's second field, which
-          # broke on any path containing a space.
-          unexpected="$(git status --porcelain --untracked-files=all | cut -c4- | grep -Ev '^(data/stackkits/|guides/stackkits/use-cases/overview\.mdx$|stackkits/reference/(os|application-delivery)-compatibility\.mdx$)' || true)"
-          [ -z "$unexpected" ] || { echo "::error::unexpected generated paths: $unexpected"; exit 1; }
+          # Fails closed on any changed path outside the generated set.
+          node scripts/stackkits-generated-only-paths.mjs
           git config user.name "$writer_login"
           git config user.email "$writer_id+$writer_login@users.noreply.github.com"
           gh auth setup-git --hostname github.com
           git fetch origin "refs/heads/$BRANCH:refs/remotes/origin/$BRANCH" || true
           git checkout -B "$BRANCH"
-          git add data/stackkits guides/stackkits/use-cases/overview.mdx stackkits/reference/os-compatibility.mdx stackkits/reference/application-delivery-compatibility.mdx
+          git add -- "${generated[@]}"
           git commit -m "docs(stackkits): sync $TAG release manifests"
           git push --force-with-lease origin "$BRANCH"
           # `gh pr view <branch>` also matches merged PRs of the reused bot

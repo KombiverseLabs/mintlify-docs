@@ -11,13 +11,18 @@ test('scratch downloads and collapsed data/ are generated-only, unrelated paths 
     ' M guides/stackkits/use-cases/overview.mdx',
     ' M stackkits/reference/os-compatibility.mdx',
     ' M stackkits/reference/application-delivery-compatibility.mdx',
+    ' M stackkits/reference/cli/init.mdx',
+    '?? stackkits/reference/cli/new-command.mdx',
+    ' D stackkits/reference/cli/retired.mdx',
+    ' M docs.json',
   ].join('\n')
   assert.deepEqual(unexpectedStackkitsReleasePaths(allowed), [])
 
-  const mixed = `${allowed}\n?? README.md\n?? data/other.json`
+  const mixed = `${allowed}\n?? README.md\n?? data/other.json\n?? stackkits/reference/cli/nested/page.mdx`
   const unexpected = unexpectedStackkitsReleasePaths(mixed)
   assert.ok(unexpected.includes('README.md'))
   assert.ok(unexpected.includes('data/other.json'))
+  assert.ok(unexpected.includes('stackkits/reference/cli/nested/page.mdx'))
   assert.ok(!unexpected.includes('.tmp/'))
   assert.ok(!unexpected.includes('data/'))
   assert.ok(!unexpected.includes('data/stackkits/latest.json'))

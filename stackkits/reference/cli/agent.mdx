@@ -1,0 +1,118 @@
+---
+title: "stackkit agent"
+description: "Agent-native helpers for StackKits automation"
+sidebarTitle: "agent"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Agent-native helpers for StackKits automation.
+
+Agent-native helpers emit install plans, self-checks, prompts, and MCP configuration without mutating a rollout.
+
+```bash
+stackkit agent [flags]
+```
+
+Subcommands: [`stackkit agent install-plan`](#stackkit-agent-install-plan), [`stackkit agent mcp-config`](#stackkit-agent-mcp-config), [`stackkit agent prompt`](#stackkit-agent-prompt), [`stackkit agent self-check`](#stackkit-agent-self-check)
+
+## stackkit agent install-plan
+
+Print a non-interactive StackKits install plan.
+
+```bash
+stackkit agent install-plan [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--dir` | string | `my-homelab` | Workspace directory |
+| `--json` | bool | — | Emit JSON |
+| `--kit` | string | `basement-kit` | StackKit to plan for |
+| `--target` | string | `local` | Target kind: local, ssh, vm, or ci |
+
+**Examples**
+
+```bash
+# Print the install steps for a Basement Kit workspace named my-homelab
+stackkit agent install-plan
+
+# A Cloud Kit plan for an agent working over SSH, as JSON
+stackkit agent install-plan --kit cloud-kit --target ssh --dir my-cloud --json
+```
+
+## stackkit agent mcp-config
+
+Print one StackKits MCP client connection config.
+
+Print a ready-to-paste MCP client configuration named "stackkit".
+
+For users this is one StackKits MCP connection. Locally it starts the stackkit-mcp adapter; after install the same connector can also be reached as stackkit-server /mcp when a protected endpoint is explicitly enabled.
+
+```bash
+stackkit agent mcp-config [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--client` | string | `generic` | Client format: generic, codex, or claude |
+| `--mode` | string | `docs,local,server` | MCP modes |
+| `--server-url` | string | `http://localhost:8082` | stackkit-server URL |
+
+**Examples**
+
+```bash
+# Print the connection as Claude mcpServers JSON
+stackkit agent mcp-config --client claude
+
+# Print the Codex config.toml block
+stackkit agent mcp-config --client codex
+```
+
+## stackkit agent prompt
+
+Print a copy-ready StackKits agent prompt.
+
+```bash
+stackkit agent prompt [scenario] [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit JSON |
+| `--list` | bool | — | List available prompt scenarios |
+
+**Examples**
+
+```bash
+# List the available prompt scenarios
+stackkit agent prompt --list
+
+# Print the prompt for diagnosing a failed rollout
+stackkit agent prompt diagnose-failed-rollout
+```
+
+## stackkit agent self-check
+
+Check local agent-facing StackKits prerequisites.
+
+```bash
+stackkit agent self-check [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit JSON |
+| `--server-url` | string | `http://localhost:8082` | stackkit-server URL |
+
+**Examples**
+
+```bash
+# Check that stackkit, stackkit-server, and stackkit-mcp are on PATH
+stackkit agent self-check
+
+# The same checks as JSON
+stackkit agent self-check --json
+```
+

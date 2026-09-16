@@ -1,0 +1,54 @@
+---
+title: "stackkit remove"
+description: "Uninstall the local StackKits deployment"
+sidebarTitle: "remove"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Uninstall the local StackKits deployment.
+
+Uninstall the StackKits runtime on this machine.
+
+With no `--workload`, this is the product uninstall: it stops and deletes every Compose project named stackkit-\* (Basement core, Cloud core, and selected use cases), including their networks and volumes. It looks in the current directory, then ~/my-homelab or ~/my-cloud-homelab.
+
+`--workload` removes one exact Architecture v2 workload through its applied runtime owner. That path keeps application volumes unless `--delete-data` is set.
+
+```bash
+stackkit remove [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | Architecture v2 generation manifest |
+| `--auto-approve` | bool | — | Skip interactive approval |
+| `--delete-data` | bool | — | Delete named volumes owned by this exact applied workload (default keeps application data) |
+| `--force` | bool | — | Force remove even with errors |
+| `--generation-receipt` | string | — | Architecture v2 generation receipt |
+| `--inventory` | string | — | Architecture v2 observed Inventory (otherwise one conventional inventory file is selected) |
+| `--json` | bool | — | Emit the canonical Architecture v2 removal result as JSON |
+| `--local-execution-channel` | string | — | Exact applied execution channel owned by this removal process |
+| `--local-node` | string | — | Exact applied node placement owned by this removal process |
+| `--local-site` | string | — | Exact applied Site placement owned by this removal process |
+| `--purge` | bool | — | Remove all StackKit data including images, state, and deploy directory |
+| `--resolved-plan` | string | — | Architecture v2 canonical ResolvedPlan |
+| `--terminal-evidence-json` | bool | — | Emit bounded canonical Architecture v2 terminal evidence as JSON |
+| `--workload` | string | — | Exact Architecture v2 ResolvedPlan workload ref to remove |
+
+**Examples**
+
+```bash
+# Uninstall the whole local deployment after typing yes
+stackkit remove
+
+# Uninstall without the confirmation prompt
+stackkit remove --auto-approve
+
+# Remove only the Files workload and keep its data volumes
+stackkit remove --workload files
+
+# Remove the Photos workload, delete its data volumes, and print the result as JSON
+stackkit remove --workload photos --delete-data --auto-approve --json
+```
+

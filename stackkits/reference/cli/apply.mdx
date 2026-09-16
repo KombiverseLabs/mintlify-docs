@@ -1,0 +1,53 @@
+---
+title: "stackkit apply"
+description: "Apply infrastructure changes"
+sidebarTitle: "apply"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Apply infrastructure changes.
+
+Apply the planned changes to the infrastructure.
+
+Product Apply executes the canonical ResolvedPlan through its Runtime Owners. Standard Mode uses the persisted CUE-owned local Site/node/channel binding automatically; Advanced Mode may provide an authenticated service/device execution channel. Both paths use the same ResolvedPlan, evidence, and runtime validation, and neither prompts: the plan is approved when it is generated.
+
+```bash
+stackkit apply [plan-file] [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | Architecture v2 generation manifest (default: &lt;outputRoot&gt;/.stackkit/generation-manifest.json) |
+| `--auto-approve` | bool | — | Accepted for compatibility; native Apply never prompts |
+| `--expected-plan-hash` | string | — | Require the canonical ResolvedPlan to match this sha256 digest immediately before Apply |
+| `--generation-receipt` | string | — | Architecture v2 generation receipt (default: &lt;outputRoot&gt;/.stackkit/generation-receipt.json) |
+| `--inventory` | string | — | Architecture v2 observed Inventory (otherwise one conventional inventory file is selected) |
+| `--json` | bool | — | Emit the versioned Apply result and runtime observations as machine-readable JSON |
+| `--local-execution-channel` | string | — | Architecture v2 execution channel explicitly owned by this local process |
+| `--local-node` | string | — | Architecture v2 node explicitly owned by this local execution process |
+| `--local-site` | string | — | Architecture v2 Site explicitly owned by this local execution process |
+| `--preflight` | string | — | Host admission policy before mutation: strict, warn (default), or skip |
+| `--resolved-plan` | string | — | Architecture v2 canonical ResolvedPlan (default: &lt;outputRoot&gt;/.stackkit/resolved-plan.json) |
+| `--skip-platform-apps` | bool | — | No effect: native Apply has no separate platform-app stage |
+| `--verify` | bool | — | No effect: run stackkit verify after Apply instead |
+| `--verify-http` | bool | — | No effect: run stackkit verify `--http` after Apply instead |
+| `--verify-strict` | bool | — | No effect: run stackkit verify after Apply instead |
+
+**Examples**
+
+```bash
+# Apply the plan written by stackkit generate
+stackkit apply
+
+# Emit the versioned Apply result as JSON
+stackkit apply --json
+
+# Refuse to change anything unless the plan still has the hash stackkit plan printed
+stackkit apply --expected-plan-hash sha256:<plan-hash>
+
+# Also refuse on host preflight warnings and unknown facts before any change
+stackkit apply --preflight strict
+```
+

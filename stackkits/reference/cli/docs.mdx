@@ -1,0 +1,76 @@
+---
+title: "stackkit docs"
+description: "Generate deterministic StackKits documentation projections"
+sidebarTitle: "docs"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Generate deterministic StackKits documentation projections.
+
+```bash
+stackkit docs [flags]
+```
+
+Subcommands: [`stackkit docs emit-cli-reference`](#stackkit-docs-emit-cli-reference), [`stackkit docs emit-release-manifests`](#stackkit-docs-emit-release-manifests), [`stackkit docs emit-use-case-overview`](#stackkit-docs-emit-use-case-overview)
+
+## stackkit docs emit-cli-reference
+
+Emit the machine-readable stackkit CLI reference.
+
+Write every visible stackkit command, flag, and example as deterministic JSON.
+
+The stackkit.cc CLI reference renders this file. With `--check` nothing is written; the command fails when the file differs from the current command tree.
+
+```bash
+stackkit docs emit-cli-reference [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--check` | bool | — | Write nothing; fail when the reference file is missing or stale |
+| `--out` | string | `docs/data/cli-reference/latest.json` | Reference JSON path, relative to `--chdir` |
+
+**Examples**
+
+```bash
+# Regenerate the committed reference after changing a command, flag, or example
+stackkit docs emit-cli-reference
+
+# Fail when the committed reference is stale
+stackkit docs emit-cli-reference --check
+```
+
+## stackkit docs emit-release-manifests
+
+Emit release-bound use-case and compatibility manifests.
+
+```bash
+stackkit docs emit-release-manifests [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--output-dir` | string | — | **Required.** manifest output directory |
+| `--public-source-sha` | string | — | **Required.** exact public source SHA |
+| `--release-tag` | string | — | **Required.** published release tag (vX.Y.Z) |
+| `--release-url` | string | — | **Required.** exact public release URL |
+| `--source-sha` | string | — | **Required.** exact private source SHA |
+
+## stackkit docs emit-use-case-overview
+
+Render the internal derived use-case development overview.
+
+```bash
+stackkit docs emit-use-case-overview [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--evidence-output` | string | — | evidence manifest output path |
+| `--output` | string | — | Markdown output path |
+| `--source-sha` | string | — | **Required.** exact source SHA |
+| `--test-receipt` | string | — | source-SHA-bound passed test receipt |
+| `--tests-passed-for-source` | bool | — | mark tests complete after the caller synchronously passed catalog tests for source-sha |
+

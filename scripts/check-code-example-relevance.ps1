@@ -122,6 +122,12 @@ foreach ($file in $mdxFiles) {
     }
     $lines = Get-Content -LiteralPath $file.FullName
     $content = $lines -join "`n"
+    # Generated CLI reference pages show each command's own usage and examples;
+    # the command tree decides their relevance, not a topic workflow.
+    if ($relative -like "stackkits/reference/cli/*.mdx" -and
+        $content -match '(?m)^generated_by: "stackkit docs emit-cli-reference"$') {
+        continue
+    }
     $inFence = $false
     $fenceLanguage = ""
 

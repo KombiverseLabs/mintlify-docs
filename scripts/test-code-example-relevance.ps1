@@ -72,6 +72,27 @@ title: Monitoring
 ---
 Monitoring guidance without a synthetic command example.
 '@
+    Set-FixturePage -RelativePath "stackkits/reference/cli/verify.mdx" -Content @'
+---
+title: stackkit verify
+---
+```bash
+stackkit verify --json
+```
+'@
+    Assert-CheckerFails -ExpectedPattern "Code-example relevance validation failed"
+    Write-Host "test_pass: hand-written page in the CLI reference directory fails"
+
+    Set-FixturePage -RelativePath "stackkits/reference/cli/verify.mdx" -Content @'
+---
+title: stackkit verify
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+---
+```bash
+stackkit verify --json
+```
+'@
     Set-FixturePage -RelativePath "stackkits/reference/day-2-operations.mdx" -Content @'
 ---
 title: Operations
@@ -81,7 +102,7 @@ stackkit status --json
 ```
 '@
     & $checker -RepoRoot $fixtureRoot
-    Write-Host "test_pass: topic-specific executable block passes"
+    Write-Host "test_pass: topic-specific and generated CLI reference examples pass"
 }
 finally {
     $resolvedFixture = [System.IO.Path]::GetFullPath($fixtureRoot)
@@ -91,4 +112,4 @@ finally {
     }
 }
 
-Write-Host "code_example_relevance_tests: PASS (4 cases)"
+Write-Host "code_example_relevance_tests: PASS (5 cases)"

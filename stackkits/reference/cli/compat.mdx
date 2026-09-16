@@ -1,0 +1,53 @@
+---
+title: "stackkit compat"
+description: "Show OS support evidence and host conformance diagnostics"
+sidebarTitle: "compat"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Show OS support evidence and host conformance diagnostics.
+
+Show the published StackKits compatibility evidence for this operating system and its hypervisor, then run non-destructive diagnostics for local container-host prerequisites.
+
+```text
+The host diagnostics check:
+  • Virtualization type (KVM, OpenVZ, LXC, bare metal)
+  • unshare(2) syscall availability
+  • OverlayFS support
+  • Bridge networking support
+  • iptables NAT support
+  • Cgroup version
+```
+
+Published evidence comes from automated lifecycle receipts bound to a release. Host diagnostics do not certify, rank, recommend, or price any server provider.
+
+```bash
+stackkit compat [flags]
+```
+
+**Examples**
+
+```bash
+# Check the published OS and hypervisor evidence and the host container prerequisites
+stackkit compat
+```
+
+Subcommands: [`stackkit compat emit-os-matrix`](#stackkit-compat-emit-os-matrix)
+
+## stackkit compat emit-os-matrix
+
+Render the public OS and virtualization compatibility projection.
+
+```bash
+stackkit compat emit-os-matrix [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--archive-dir` | string | `docs/data/os-compat` | directory holding per-release v\*.json archives |
+| `--docs-out` | string | `docs/OS_COMPATIBILITY.md` | generated markdown output |
+| `--input` | string | `docs/data/os-compat/latest.json` | committed public compatibility projection |
+| `--website-out` | string | `website/public/os-compat.json` | generated website feed output |
+

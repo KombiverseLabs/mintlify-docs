@@ -1,0 +1,117 @@
+---
+title: "stackkit user"
+description: "Invite and manage household users in local PocketID"
+sidebarTitle: "user"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Invite and manage household users in local PocketID.
+
+Create, list, and remove Homelab users in the PocketID household group.
+
+Add prints a one-time passkey setup URL. TinyAuth continues to admit the owners, admins, and household groups already bound on the OIDC client. Owner and admin identities cannot be created or removed here.
+
+```bash
+stackkit user [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+
+**Examples**
+
+```bash
+# Invite a household member; share the printed one-time URL only with them
+stackkit user add alex --email alex@example.com --owner-approve
+
+# List household users
+stackkit user list
+
+# Remove a household user
+stackkit user remove alex --owner-approve
+```
+
+Subcommands: [`stackkit user add`](#stackkit-user-add), [`stackkit user list`](#stackkit-user-list), [`stackkit user remove`](#stackkit-user-remove)
+
+## stackkit user add
+
+Invite a household user with a one-time passkey setup URL.
+
+```bash
+stackkit user add <username> [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--display-name` | string | — | Optional display name |
+| `--email` | string | — | **Required.** Household member email |
+| `--owner-approve` | bool | — | Explicitly approve creating this household user |
+
+Inherited from `stackkit user`:
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+
+**Examples**
+
+```bash
+# Invite a household member and print their one-time passkey setup URL
+stackkit user add alex --email alex@example.com --owner-approve
+
+# Set a display name and return the invitation as JSON
+stackkit user add sam --email sam@example.com --display-name "Sam Doe" --owner-approve --json
+```
+
+## stackkit user list
+
+List household users in local PocketID.
+
+```bash
+stackkit user list [flags]
+```
+
+Inherited from `stackkit user`:
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+
+**Examples**
+
+```bash
+# List household users
+stackkit user list
+
+# The same list as JSON
+stackkit user list --json
+```
+
+## stackkit user remove
+
+Remove a household user from local PocketID.
+
+```bash
+stackkit user remove <username> [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Explicitly approve removing this household user |
+
+Inherited from `stackkit user`:
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+
+**Examples**
+
+```bash
+# Remove a household user
+stackkit user remove alex --owner-approve
+```
+

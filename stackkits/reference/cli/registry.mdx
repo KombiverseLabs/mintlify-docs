@@ -1,0 +1,103 @@
+---
+title: "stackkit registry"
+description: "Manage the embedded StackKits registry snapshot"
+sidebarTitle: "registry"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Manage the embedded StackKits registry snapshot.
+
+Manage the OSS-safe registry snapshot baked into the CLI binary.
+
+The snapshot lives at internal/registry/data/registry_snapshot.json. Inspect the embedded data or reproduce it deterministically from the local CUE tree.
+
+```bash
+stackkit registry [flags]
+```
+
+Subcommands: [`stackkit registry artifacts`](#stackkit-registry-artifacts), [`stackkit registry bake-from-cue`](#stackkit-registry-bake-from-cue), [`stackkit registry emit-cue`](#stackkit-registry-emit-cue), [`stackkit registry emit-mintlify`](#stackkit-registry-emit-mintlify), [`stackkit registry info`](#stackkit-registry-info)
+
+## stackkit registry artifacts
+
+Print registry/generated artifact pathspecs from the ownership manifest.
+
+Print repository pathspecs from the generated-artifact ownership manifest.
+
+The generate-cue workflow and CI parity gate use this command so bot-owned generated files are explicit. Frozen artifacts remain in their existing paths but are not staged or diffed as generated output until their manifest state changes.
+
+```bash
+stackkit registry artifacts [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--kind` | string | `all` | Artifact kind filter (all, cue, snapshot) |
+| `--manifest` | string | `internal/registry/generated_artifacts.json` | Generated artifact ownership manifest |
+| `--state` | string | `generated` | Artifact state filter (all, generated, frozen) |
+
+## stackkit registry bake-from-cue
+
+Produce a registry snapshot from the local Git/CUE tree.
+
+Walk modules/&lt;slug&gt;/module.cue plus the canonical product definitions, compute their contract hashes, and write the resulting Snapshot to internal/registry/data/registry_snapshot.json (or `--output`).
+
+This command is the offline OSS bootstrap path and works on a pure checkout of the public kombifyio/stackKits repo.
+
+```bash
+stackkit registry bake-from-cue [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--modules-dir` | string | `modules` | Directory containing module/&lt;slug&gt;/module.cue |
+| `--output` | string | `internal/registry/data/registry_snapshot.json` | Output path for the snapshot JSON |
+
+## stackkit registry emit-cue
+
+Render foundation/generated CUE artifacts from the registry snapshot.
+
+Render foundation/generated/tool_catalog.cue from the registry snapshot plus the local CUE module tree.
+
+Reads the snapshot JSON (default: internal/registry/data/registry_snapshot.json, refresh it first via 'registry bake-from-cue'), renders deterministically, and writes the artifact. The header records the snapshot's content_hash and generated_at so drift between snapshot and artifact is detectable; CI regenerates from the committed snapshot and diffs.
+
+```bash
+stackkit registry emit-cue [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--input` | string | `internal/registry/data/registry_snapshot.json` | Snapshot JSON to render from |
+| `--modules-dir` | string | `modules` | Directory containing modules/&lt;slug&gt;/module.cue (service catalog source) |
+| `--output-dir` | string | `foundation/generated` | Directory for the rendered CUE files |
+
+## stackkit registry emit-mintlify
+
+Render Mintlify MDX tool documentation from the registry snapshot.
+
+Render guides/stackkits/services/&lt;slug&gt;.mdx for every tool in the snapshot that carries published content (tool.content != null). Tools without content are skipped — their handwritten MDX is left untouched.
+
+Reads the snapshot JSON (default: internal/registry/data/registry_snapshot.json) and renders deterministically. The header carries the content_hash so drift is detectable. CI regenerates from the committed snapshot and diffs.
+
+```bash
+stackkit registry emit-mintlify [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--input` | string | `internal/registry/data/registry_snapshot.json` | Snapshot JSON to render from |
+| `--output-dir` | string | `guides/stackkits/services` | Output directory for generated MDX files |
+
+## stackkit registry info
+
+Show a summary of the embedded registry snapshot.
+
+```bash
+stackkit registry info [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Print the full embedded snapshot as JSON |
+

@@ -1,0 +1,157 @@
+---
+title: "stackkit host"
+description: "Provider-neutral host contract operations"
+sidebarTitle: "host"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:75f77ca5fe0994409d24eb64f6f8c87b46a7437f7d0178f41ad39803a5dd7bc8"
+source_hash: "4c28a1752e2357ab800fb3655a72664238a99622"
+---
+Provider-neutral host contract operations.
+
+```bash
+stackkit host [flags]
+```
+
+Subcommands: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host remediate`](#stackkit-host-remediate)
+
+## stackkit host attach-conformance
+
+Attach exact host evidence to Inventory before plan generation.
+
+```bash
+stackkit host attach-conformance [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--binding` | string | — | **Required.** Workspace-confined ExternalHostBinding JSON |
+| `--inventory` | string | — | **Required.** Workspace-confined inventory.json to update atomically |
+| `--receipt` | string | — | **Required.** Workspace-confined HostConformanceReceipt JSON |
+
+## stackkit host conformance
+
+Produce a provider-neutral conformance receipt on this host.
+
+```bash
+stackkit host conformance [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--binding` | string | — | **Required.** Local ExternalHostBinding JSON file |
+| `--output, -o` | string | `-` | Receipt destination ('-' for JSON on stdout) |
+
+## stackkit host environment
+
+Observe whether this host looks like a home network or a public server.
+
+Detect the network environment of this machine.
+
+This is observation, not kit selection. Installers and init use it to ask before authoring local home addresses on a VPS, or Cloud Kit on a LAN host. STACKKIT_NETWORK_ENV=home|vps|cloud|unknown overrides live detection.
+
+```bash
+stackkit host environment [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit the observation as JSON |
+
+**Examples**
+
+```bash
+# Show whether this host looks like a home network or a public server
+stackkit host environment
+
+# The same observation as JSON
+stackkit host environment --json
+
+# Override a wrong detection for the next command, here Basement Kit init on a home host
+STACKKIT_NETWORK_ENV=home stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com
+```
+
+## stackkit host preflight
+
+Check whether this host can run the selected StackKit.
+
+Measure this host and compare it against the floor the kit declares.
+
+Preflight performs read-only probes only: it never installs, starts, or configures anything. Apply runs the same admission before it mutates the host.
+
+```bash
+stackkit host preflight [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit the versioned preflight report as machine-readable JSON |
+| `--local-node` | string | — | Exact local Node in the supplied ResolvedPlan |
+| `--policy` | string | — | Admission policy: strict, warn (default), or skip |
+| `--resolved-plan` | string | — | Verified canonical ResolvedPlan whose host listeners to check |
+
+**Examples**
+
+```bash
+# Check this host against the kit selected in the current deployment directory
+stackkit host preflight
+
+# Also refuse on warnings and unknown facts, and print the report as JSON
+stackkit host preflight --policy strict --json
+```
+
+## stackkit host prepare
+
+Prepare this host before Cloud Kit apply.
+
+Provision the Cloud execution-channel account and SSH key custody required before host-security disables root login.
+
+Cloud Kit installers and apply call this automatically. The command exists for diagnostics and for converging a workspace after manual interruption. It mints or reuses the workspace-custodied key under .stackkit/cloud-host-security/execution-channel/ and installs the matching public key on the execution-channel Linux account.
+
+```bash
+stackkit host prepare [flags]
+```
+
+**Examples**
+
+```bash
+# Converge the execution-channel account after an interrupted Cloud Kit install (run as root in the Cloud Kit deployment directory)
+cd my-cloud
+stackkit host prepare
+```
+
+## stackkit host remediate
+
+Show or carry out fixes for what host preflight found.
+
+List the fixes that answer this host's preflight findings, or carry one out.
+
+Without `--apply` nothing is changed: the command measures the host and prints what each fix would do, whether it can be undone, and whether it needs root.
+
+With `--apply` &lt;id&gt; `--yes` the named fix runs, and the check that justified it is measured again afterwards so the result states what actually changed rather than that something was attempted.
+
+```bash
+stackkit host remediate [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--apply` | string | — | Carry out the named resolution (requires `--yes`) |
+| `--auto-reversible` | bool | — | Carry out every undoable fix that may run unattended (requires `--yes`) |
+| `--json` | bool | — | Emit the remediation plan or record as machine-readable JSON |
+| `--policy` | string | — | Preflight policy used to find findings: strict or warn (default) |
+| `--yes` | bool | — | Confirm that the named resolution may change this host |
+
+**Examples**
+
+```bash
+# List the fixes for this host's preflight findings without changing anything
+stackkit host remediate
+
+# Carry out one fix by the ID the list printed
+stackkit host remediate --apply <resolution-id> --yes
+
+# Carry out every undoable fix that may run unattended
+stackkit host remediate --auto-reversible --yes
+```
+
