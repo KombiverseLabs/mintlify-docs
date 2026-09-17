@@ -49,7 +49,7 @@ jobs:
             done
 
             generator=$(head -20 "$f" | grep '^generated_by:' | sed 's/^generated_by: *"\{0,1\}\([^"]*\)"\{0,1\}/\1/')
-            if [ -n "$generator" ] && [ "$generator" != "stackkit registry emit-mintlify" ] && [ "$generator" != "stackkit docs sync-release-manifests" ] && [ "$generator" != "stackkit docs emit-cli-reference" ]; then
+            if [ -n "$generator" ] && [ "$generator" != "stackkit docs sync-release-manifests" ] && [ "$generator" != "stackkit docs emit-cli-reference" ]; then
               echo "::error file=${f}::unexpected generated_by value: ${generator}"
               fail=1
             fi

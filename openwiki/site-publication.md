@@ -9,6 +9,8 @@ tags: [mintlify, publication, docs-json, validation, public-documentation]
 # Mintlify site and publication model
 
 > **Generated against:** `fc905e821407cc6f74f0252d7724a9a4dcd7cf81`
+>
+> **Corrected by hand:** 2026-09-17 against `eab170f6ca19c5b135b794d5b8043233cded9ca4`: the generated service-guide pipeline is retired.
 
 ## Content model
 
@@ -23,9 +25,9 @@ The repository stores public documentation as `.mdx` files. [`docs.json`](../doc
 | Guides | `index.mdx` | Public landing page and initial StackKits entry points. |
 | Identity & Access | `identity/*.mdx` | Three audience layers: overview, technical architecture, and trust/security framing. |
 | Changelog | `changelog/overview.mdx` | Dated public product updates. |
-| StackKits | `stackkits/**` and `guides/stackkits/**` | Product overview, kits, user journeys, service guides, explanation, and reference material. |
+| StackKits | `stackkits/**` and `guides/stackkits/**` | Product overview, kits, user journeys, application pages, explanation, and reference material. |
 
-The StackKits tab is broadest and includes kit pages, decision/rollout guides, use cases, per-service pages, and reference material. [StackKits documentation map](stackkits.md) explains how these pages fit together rather than duplicating the file list.
+The StackKits tab is broadest and includes kit pages, decision/rollout guides, use cases, application pages, and reference material. [StackKits documentation map](stackkits.md) explains how these pages fit together rather than duplicating the file list.
 
 ## Site configuration
 
@@ -53,9 +55,9 @@ Use `mise.toml` as the task authority:
 2. Update or add MDX in the appropriate public domain.
 3. Add or adjust its `docs.json` navigation reference if it should be navigable.
 4. Run `mise run check`; run `mise run local:e2e` before publication as required by `README.md`.
-5. If editing a generated StackKits service page, follow the distinct ownership controls in [content operations](content-operations.md#generated-stackkits-service-guides).
+5. If editing a generated StackKits release page, follow the distinct ownership controls in [content operations](content-operations.md#generated-stackkits-release-pages).
 
-The validation process **is maintained through** [content operations](content-operations.md): scheduled refresh and pull-request workflows separate authored docs from generated service-guide refreshes.
+The validation process **is maintained through** [content operations](content-operations.md): scheduled refresh and pull-request workflows separate authored docs from generated StackKits release-page refreshes.
 
 ## Where to investigate next
 
