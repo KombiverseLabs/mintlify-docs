@@ -392,8 +392,8 @@ function renderOperatingSystems(release, compatibility, evidence) {
 
 export function renderPages(catalog, compatibility, evidence = null) {
   const release = catalog.release
-  let useCases = provenance('Use-case catalog', `Use cases and components declared by StackKits ${release.tag}`, 'diagram-project', catalog.contentDigest, release.publicSourceSha)
-  useCases += `This page is generated from the published [${release.tag} release](${release.releaseUrl}). It lists every use case that release declares, with its purpose and components. A declared component is not evidence of an installation or a verified run on a host. [Use cases](/guides/stackkits/use-cases/overview) has the setup guides.\n\n`
+  let useCases = provenance('Use cases', `Components declared by StackKits ${release.tag}`, 'diagram-project', catalog.contentDigest, release.publicSourceSha)
+  useCases += `This page is generated from the published [${release.tag} release](${release.releaseUrl}). It lists only the product purpose and components declared by that release.\n\n`
   for (const useCase of catalog.catalog.useCases) {
     useCases += `## ${md(useCase.title)}\n\n${md(useCase.description)}\n\n| Component | Role | Kind |\n| --- | --- | --- |\n`
     for (const component of useCase.components) useCases += `| ${md(component.name)} (\`${md(component.id)}\`) | ${md(component.role)} | ${md(component.kind)} |\n`
@@ -511,7 +511,7 @@ export function syncRelease({ repoRoot, inputDir, tag }) {
   // pages, and an older incoming projection never displaces a newer stored one.
   const evidence = storedEvidence(releases, shown.catalog.release.tag)
   const pages = renderPages(shown.catalog, shown.compatibility, evidence)
-  writeExact(path.join(repoRoot, 'stackkits', 'reference', 'use-case-catalog.mdx'), pages.useCases)
+  writeExact(path.join(repoRoot, 'guides', 'stackkits', 'use-cases', 'overview.mdx'), pages.useCases)
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'os-compatibility.mdx'), pages.os)
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'application-delivery-compatibility.mdx'), pages.delivery)
   return { promoted, catalog: synced.catalog, compatibility: synced.compatibility, shownTag: shown.catalog.release.tag, evidence }

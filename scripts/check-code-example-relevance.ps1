@@ -23,8 +23,10 @@ $executableExamplePages = [System.Collections.Generic.HashSet[string]]::new(
     "guides/stackkits/cli-walkthrough.mdx",
     "guides/stackkits/configure-stack-spec.mdx",
     "guides/stackkits/review-plan-and-apply.mdx",
-    "guides/stackkits/use-cases/personal-ai.mdx",
-    "stackkits/apps/cloudreve.mdx",
+    "guides/stackkits/use-cases/private-file-library.mdx",
+    "guides/stackkits/use-cases/private-ai.mdx",
+    "guides/stackkits/use-cases/private-home-base.mdx",
+    "guides/stackkits/use-cases/recovery-first-homelab.mdx",
     "stackkits/apps/gitea.mdx",
     "stackkits/apps/jellyfin.mdx",
     "stackkits/kits/basement-kit.mdx",
@@ -46,16 +48,19 @@ $allowedInlineCommands = @{
     "guides/stackkits/configure-stack-spec.mdx" = @(
         "stackkit secrets materialize"
     )
-    "guides/stackkits/use-cases/personal-ai.mdx" = @(
+    "guides/stackkits/use-cases/private-ai.mdx" = @(
         "stackkit secrets materialize"
     )
-    "stackkits/apps/cloudreve.mdx" = @(
+    "guides/stackkits/use-cases/private-file-library.mdx" = @(
         "stackkit init"
     )
     "stackkits/apps/gitea.mdx" = @(
         "stackkit secrets reveal --workload dev --slot owner-password"
     )
     "stackkits/apps/jellyfin.mdx" = @(
+        "stackkit app compatibility --json"
+    )
+    "stackkits/apps/overview.mdx" = @(
         "stackkit app compatibility --json"
     )
     "stackkits/reference/day-2-operations.mdx" = @(
@@ -74,6 +79,9 @@ $allowedInlineCommands = @{
     "stackkits/reference/os-compatibility.mdx" = @(
         "stackkit compat"
     )
+    "stackkits/reference/tool-alternatives.mdx" = @(
+        "stackkit app compatibility --json"
+    )
 }
 
 $executableLanguages = [System.Collections.Generic.HashSet[string]]::new(
@@ -88,6 +96,7 @@ $structuredExamplePages = [System.Collections.Generic.HashSet[string]]::new(
 @(
     "guides/stackkits/application-delivery.mdx",
     "guides/stackkits/configure-stack-spec.mdx",
+    "guides/stackkits/use-cases/private-file-library.mdx",
     "stackkits/apps/cloudreve.mdx",
     "stackkits/apps/gitea.mdx",
     "stackkits/apps/jellyfin.mdx",

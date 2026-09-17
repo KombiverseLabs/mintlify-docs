@@ -1,30 +1,44 @@
 ---
-title: "Platform services"
-description: "The services underneath your use cases: sign-in, routing, application delivery and visibility"
-sidebarTitle: "Platform services"
+title: "Applications"
+description: "The current public StackKits application and platform catalog"
+sidebarTitle: "Overview"
 icon: grid-2
 ---
 
-Platform services run underneath your use cases. They handle sign-in, routing, application delivery and visibility. The applications that provide a use case, such as Immich for Photos, are listed under [Use cases](/guides/stackkits/use-cases/overview).
+StackKits applications are explicitly selected in your StackSpec. Check the
+[release catalog](/guides/stackkits/use-cases/overview) and
+[adapter capabilities](/stackkits/reference/application-delivery-compatibility)
+for the installed release. Catalog presence, successful installation and a
+completed recovery have different meanings.
 
-Catalog presence, a successful installation and a completed recovery mean different things. Check the [application delivery compatibility](/stackkits/reference/application-delivery-compatibility) of the installed release.
+## Current core runtime
 
-## Access and routing
+- [PocketID](/stackkits/apps/pocketid) — local owner identity
+- [TinyAuth](/stackkits/apps/tinyauth) — forward-auth entrypoint
+- [Traefik](/stackkits/apps/traefik) — routing implementation in the generated core
 
-The generated core runtime includes:
+Standalone Compose is the default. [Komodo](/stackkits/apps/komodo) and
+[Coolify](/stackkits/apps/coolify) are explicitly selected platform integrations;
+their lifecycle capabilities are listed in the adapter matrix.
 
-- [PocketID](/stackkits/apps/pocketid), the local owner identity
-- [TinyAuth](/stackkits/apps/tinyauth), the forward-auth entrypoint for protected routes
-- [Traefik](/stackkits/apps/traefik), the reverse proxy for generated routes
+## Optional native v2 workloads
 
-[kombify Point DNS](/stackkits/apps/kombify-point) and the [Whoami](/stackkits/apps/whoami) routing diagnostic ship as module contracts that the initial native v2 StackSpec does not select.
+- [Cloudreve](/stackkits/apps/cloudreve) — released `files` alternative
+- [Immich](/stackkits/apps/immich) — released `photos` alternative
+- [Vaultwarden](/stackkits/apps/vaultwarden) — released `vault` alternative
+- [Gitea](/stackkits/apps/gitea) — released `dev` alternative with native HTTPS Git and owner custody
+- [Jellyfin](/stackkits/apps/jellyfin) — `media` with an explicit library and native owner setup
+- [Private AI](/guides/stackkits/use-cases/private-ai) — Ollama and Open WebUI with explicit model downloads
+- Home Assistant — `smart-home` with native owner setup; HAOS and existing-instance contracts have separate execution paths
 
-## Application platforms
+Choose the workloads you need during initialization or update the
+[StackSpec](/guides/stackkits/configure-stack-spec). A base-only installation
+remains valid. Applications that need credentials use the local owner's private
+custody; follow their setup instructions before treating them as usable.
 
-Standalone Compose delivers workloads by default and needs no application platform. [Coolify](/stackkits/apps/coolify) and [Komodo](/stackkits/apps/komodo) are platform integrations that you select explicitly. [Choose application delivery](/guides/stackkits/application-delivery) compares the three.
+## Additional released module contracts
 
-## Dashboards and monitoring
+- [Homepage](/stackkits/apps/homepage), [Uptime Kuma](/stackkits/apps/uptime-kuma), [Whoami](/stackkits/apps/whoami), and [Dozzle](/stackkits/apps/dozzle) — visibility modules not selected by the initial native v2 StackSpec
+- [kombify Point DNS](/stackkits/apps/kombify-point) — local DNS module without a current public native v2 how-to
 
-The [Node Hub](/guides/stackkits/node-hub) is the generated overview of your services. [Homepage](/stackkits/apps/homepage), [Uptime Kuma](/stackkits/apps/uptime-kuma) and [Dozzle](/stackkits/apps/dozzle) ship as module contracts that the initial native v2 StackSpec does not select.
-
-Do not edit generated deployment files or infer enablement from archive presence.
+Use `stackkit app compatibility --json` for the workload adapter matrix. Do not edit generated deployment files or infer enablement from archive presence.

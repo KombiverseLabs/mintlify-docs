@@ -1,0 +1,67 @@
+---
+title: "Private File Library"
+description: "Add the released Cloudreve Files workload to a Basement Kit"
+sidebarTitle: "Private File Library"
+icon: folder-open
+---
+
+<Info>
+  Evidence state (2026-09-17, v0.35.0): the Files workload with Cloudreve is
+  `supported` on the public v0.35.0 archive. A lifecycle run on Ubuntu 24.04
+  amd64 (Basement Kit, standalone) passed install, init, generate, apply,
+  setup-files, verify, backup, and restore. The restore returned the original
+  bytes (the original and restored checksums match and differ from the mutated
+  copy), activation completed, and the application readback was verified over
+  the guest-local loopback. Vault (Vaultwarden) passed the same lifecycle with
+  its own setup on v0.35.0, and restore activation completed; its
+  application-level readback after restore is pending. Photos (Immich) was
+  last verified through restore activation on v0.33.3, and its
+  application-level readback after restore is pending. Phone, second-device,
+  and LAN acceptance are pending.
+</Info>
+
+A Private File Library adds the released `files` workload with Cloudreve to a verified Basement Kit. Use it for files you want to keep on storage and a host you operate.
+
+## Plan storage first
+
+- Choose an absolute primary data root with enough free space.
+- Keep the backup root separate from primary data.
+- Decide which clients may reach the generated Files route.
+- Practice a restore before placing irreplaceable data in the library.
+
+## Select the workload
+
+Merge this object into the complete StackSpec created by `stackkit init`:
+
+```json
+{
+  "workloads": {
+    "files": {
+      "alternative": "cloudreve",
+      "runtimeAdapterRef": "standalone-compose",
+      "placement": {
+        "siteRefs": ["home"],
+        "nodeRefs": ["main"]
+      }
+    }
+  }
+}
+```
+
+The example was validated and generated with release v0.32.x. If your generated site or node IDs differ, use those exact IDs.
+
+## Deploy and verify
+
+```bash
+stackkit validate
+stackkit generate
+stackkit plan --json
+stackkit apply
+stackkit verify --http --json
+```
+
+Confirm that the resolved plan contains the `files` workload, `cloudreve` alternative, and `standalone-compose` adapter before applying.
+
+After verification succeeds, open the generated Files route and create only the application accounts you need. Keep StackKits configuration changes in the StackSpec rather than editing the generated workload bundle.
+
+See [Cloudreve](/stackkits/apps/cloudreve) for component details and [Back up and restore](/guides/stackkits/back-up-and-restore) for the recovery lifecycle.

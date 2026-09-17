@@ -1,0 +1,55 @@
+---
+title: "Family Photo Vault"
+description: "Add Photos with Immich to your homelab and prepare its recovery"
+sidebarTitle: "Family Photo Vault"
+icon: camera-retro
+---
+
+<Info>
+  Evidence state (2026-09-17, v0.35.0): Photos with Immich has no lifecycle
+  run on v0.35.0 yet and is `unverified` for this release. It was last verified
+  on the public v0.33.3 archive, where a run on Ubuntu 24.04 amd64 (Basement
+  Kit, standalone) passed install, init, generate, apply, owner setup, verify,
+  backup, isolated restore, and restore activation. The application-level
+  readback of the restored Photos data is pending. Cloud Kit is a preview with
+  no automated lifecycle run yet.
+</Info>
+
+A Family Photo Vault is the optional native v2 `photos` workload with Immich on a host you control. The [use-case catalog](/guides/stackkits/use-cases/overview) lists it as a declared component of the published release; the initial StackSpec does not select it.
+
+<Card title="Fotos vom Smartphone sichern" icon="mobile-screen-button" href="/guides/stackkits/use-cases/family-photo-vault/smartphone-backup">
+  Dein Fotoserver läuft bereits? Verbinde die App, wähle deine Alben und prüfe
+  deinen ersten Upload. Mit App-Store-Links und einer bebilderten Klickanleitung.
+</Card>
+
+## Choose the host
+
+- Use [Basement Kit](/stackkits/kits/basement-kit) for local hardware and LAN-first access.
+- Use [Cloud Kit](/stackkits/kits/cloud-kit) for an existing VPS or cloud host with a domain you control.
+
+Plan storage and backups before importing a family library. Photos and videos often become the largest data set in a homelab.
+
+## Select the workload
+
+The released contract requires:
+
+- the `photos` workload with the `immich` alternative
+- explicit site and node placement
+- a supported workload adapter
+- an opaque `database-password` secret reference backed by local owner custody
+
+Choose the workload, placement and adapter in your [StackSpec](/guides/stackkits/configure-stack-spec). Its `database-password` slot contains an opaque `secret://` reference; the actual password stays in local owner custody. Follow [Add a workload](/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace) to validate the selection, establish that custody, generate the rollout, inspect its plan, apply and verify.
+
+Recovery needs both the original photos and videos and the Immich database.
+Practice a staged restore before relying on the service as the only copy of a family library.
+
+## Keep it maintainable
+
+- Keep the StackSpec and verification output with the workspace.
+- Change the StackSpec rather than generated application files.
+- Size primary and backup storage for photo and video growth.
+- Confirm a staged restore before relying on the service for irreplaceable photos.
+- Cover both Immich originals and its database when you plan recovery; either part alone is not a complete restore.
+- Create Immich accounts only after the rollout verifies against your own host.
+
+For the application-level steps, see [Immich](/stackkits/apps/immich).

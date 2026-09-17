@@ -51,7 +51,7 @@ test('validates and renders only public release facts', () => {
   writeFixture(input, value)
   const result = syncRelease({ repoRoot: repo, inputDir: input, tag: 'v9.9.9' })
   assert.equal(result.promoted, true)
-  const page = readFileSync(path.join(repo, 'stackkits/reference/use-case-catalog.mdx'), 'utf8')
+  const page = readFileSync(path.join(repo, 'guides/stackkits/use-cases/overview.mdx'), 'utf8')
   assert.ok(page.includes(value.catalog.catalog.useCases[0].components[0].name))
   // This projection remains purpose/components only, not an installation UI
   // or a module graph: settings, kit cores and runtime modules are not rendered.

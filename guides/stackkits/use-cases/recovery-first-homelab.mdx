@@ -1,0 +1,40 @@
+---
+title: "Recovery-first Homelab"
+description: "Treat restore evidence as part of the StackKits setup instead of a later task"
+sidebarTitle: "Recovery-first Homelab"
+icon: life-ring
+---
+
+<Info>
+  Evidence state (2026-09-17, v0.35.0): for the Files workload (Cloudreve), the
+  byte-level proof stands on the public v0.35.0 archive: the restored bytes
+  match the original, activation completed, and the application readback was
+  verified over the guest-local loopback. The Basement Kit backup and restore
+  cycle passed on fresh Ubuntu 24.04 and Debian 13 virtual machines on
+  v0.35.0. For Vault (Vaultwarden), backup, isolated restore, and restore
+  activation passed on Ubuntu 24.04 amd64 on v0.35.0; for Photos (Immich) they
+  were last verified on v0.33.3. For both, the application-level readback
+  after restore is pending. Vault's owner setup prepares the invitation only; the official client completes the account.
+  Released-archive restore evidence for Media (Jellyfin) and Smart Home (Home
+  Assistant) is pending; AI, Dev (Gitea), and Documents (Paperless-ngx) are
+  experimental with no runtime evidence.
+</Info>
+
+A recovery-first homelab is operated around recoverable state, not only a successful first apply. The Basement Kit release provides owner-bound backup and staged restore operations for that workflow.
+
+## Establish the baseline
+
+1. Apply and verify the Basement Kit.
+2. Confirm that primary data and backup roots are separate.
+3. Configure the CUE-governed Kopia repository.
+4. Create an idempotent snapshot before importing important data.
+5. Restore that snapshot into isolated staging and review the result.
+
+## Keep recovery explicit
+
+- A staged restore does not replace live volumes.
+- Live activation requires local owner approval and creates a safety snapshot.
+- Interrupted activation has an explicit rollback command bound to its operation ID.
+- Verification after recovery matters as much as snapshot creation.
+
+Use [Back up and restore](/guides/stackkits/back-up-and-restore) for the exact command sequence. Repeat the exercise after material storage, workload, or release changes.
