@@ -1,7 +1,7 @@
 ---
 type: Product Documentation Map
 title: StackKits documentation map
-description: Agent-facing guide to StackKits concepts, documented rollout journeys, kit maturity boundaries, and the relationship between public guides, references, and generated service documentation.
+description: Agent-facing guide to StackKits concepts, documented rollout journeys, kit maturity boundaries, and the relationship between public guides, application pages, references, and generated release pages.
 resource: stackkits/overview.mdx
 tags: [stackkits, infrastructure, cue, rollout, public-documentation]
 ---
@@ -9,6 +9,8 @@ tags: [stackkits, infrastructure, cue, rollout, public-documentation]
 # StackKits documentation map
 
 > **Generated against:** `fc905e821407cc6f74f0252d7724a9a4dcd7cf81`
+>
+> **Corrected by hand:** 2026-09-17 against `eab170f6ca19c5b135b794d5b8043233cded9ca4`: the generated service-guide pipeline is retired.
 
 ## Conceptual model
 
@@ -33,7 +35,7 @@ Use the source hierarchy by reader goal rather than treating every page as equal
 5. **Operate** — `guides/stackkits/node-hub.mdx` describes the post-rollout Node Hub, first sign-in, first PocketID passkey, and links to enabled-service how-to pages.
 6. **Follow an outcome lifecycle** — `guides/stackkits/use-cases/overview.mdx` frames use cases as decide → set up → live with it → protect → move or leave. The current catalog has the Family Photo Vault lifecycle only.
 
-Techstack is described as a guided orchestration/control-plane layer: StackKits continues to own standards, defaults, add-ons, and validation, while Techstack evaluates intent/targets, exposes recommendation and job state, and performs post-rollout checks. This rollout relationship **depends on the delivery surface explained in** [site and publication model](site-publication.md), and the operational ownership of generated guides is described in [content operations](content-operations.md).
+Techstack is described as a guided orchestration/control-plane layer: StackKits continues to own standards, defaults, add-ons, and validation, while Techstack evaluates intent/targets, exposes recommendation and job state, and performs post-rollout checks. This rollout relationship **depends on the delivery surface explained in** [site and publication model](site-publication.md), and the operational ownership of generated release pages is described in [content operations](content-operations.md).
 
 ## Current kit and maturity boundaries
 
@@ -77,12 +79,13 @@ When updating, preserve source-specific qualifier language and raise material co
 | Product overview / kit selection | `stackkits/overview.mdx`, `guides/stackkits/choosing-a-kit.mdx`, newest relevant changelog entry | Ensure Cloud/Modern/HA status agrees with verified product evidence. |
 | Installer, CLI, or Techstack rollout | `stackkits/quickstart.mdx`, `guides/stackkits/deploy-with-cli-or-techstack.mdx` | Preserve source distinction between direct execution and guided orchestration. |
 | Spec or CUE explanation | `stackkits/reference/spec-format.mdx`, `stackkits/explanations/cue-architecture.mdx` | Reconcile examples against the source repository before treating them as canonical. |
-| Service guide | `guides/stackkits/services/*.mdx` and its workflow | Check [generated ownership rules](content-operations.md#generated-stackkits-service-guides). |
-| Use case | `guides/stackkits/use-cases/*.mdx` plus linked service guides | Maintain lifecycle language and avoid claiming unavailable use cases. |
+| Application page | `stackkits/apps/*.mdx` | Authored content; verify application facts against the StackKits source repository. |
+| Generated release page | `data/stackkits/`, `stackkits/reference/use-case-catalog.mdx`, `stackkits/reference/*compatibility.mdx`, `stackkits/reference/cli/` | Check [generated ownership rules](content-operations.md#generated-stackkits-release-pages); change the StackKits release source, not the output. |
+| Use case | `guides/stackkits/use-cases/*.mdx` plus linked application pages | Maintain lifecycle language and avoid claiming unavailable use cases. |
 
 ## Related concepts
 
 - [Site and publication model](site-publication.md) — how StackKits MDX paths become the public surface.
-- [Content operations](content-operations.md) — generated-guide provenance, changelog history, and update workflows.
+- [Content operations](content-operations.md) — generated-page provenance, changelog history, and update workflows.
 - [Identity & Access map](identity-access.md) — published platform access model; StackKits’ Node Hub documents a local TinyAuth/PocketID onboarding path but should not be used to infer equivalence with the broader platform architecture.
 - [OpenWiki quickstart](quickstart.md) — authority ordering and repository-wide constraints.

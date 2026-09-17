@@ -9,6 +9,8 @@ tags: [openwiki, mintlify, public-documentation, navigation]
 
 > **Generated against:** `fc905e821407cc6f74f0252d7724a9a4dcd7cf81`  
 > **Scope:** repository documentation map, not a product or policy source of truth.
+>
+> **Corrected by hand:** 2026-09-17 against `eab170f6ca19c5b135b794d5b8043233cded9ca4`: the generated service-guide pipeline is retired.
 
 ## What this repository is
 
@@ -32,7 +34,7 @@ The repository charter at `openwiki/INSTRUCTIONS.md` provides the OpenWiki-speci
 | Domain | What it covers | Start here |
 | --- | --- | --- |
 | Guides | Public landing page and entry points into the current product content. | `index.mdx` |
-| StackKits | The largest domain: architecture blueprints, kit pages, rollout and decision guides, use cases, service guides, explanations, and references. | [StackKits documentation map](stackkits.md) |
+| StackKits | The largest domain: architecture blueprints, kit pages, rollout and decision guides, use cases, application pages, explanations, and references. | [StackKits documentation map](stackkits.md) |
 | Identity & Access | Plain-language, engineering, and stakeholder explanations of the published identity and entitlement architecture. | [Identity & Access map](identity-access.md) |
 | Changelog | Product-update history and maturity context for the public surface. | [Content operations](content-operations.md#changelog-and-maturity-context) |
 
@@ -41,7 +43,7 @@ The [site and publication model](site-publication.md) explains how `docs.json` t
 ## Fast paths
 
 - **Add or revise a public page:** read [site and publication model](site-publication.md) first; navigation entries and their MDX targets must agree.
-- **Change StackKits content:** use [StackKits documentation map](stackkits.md) to identify the reader journey, current support caveats, and generated service-guide boundary.
+- **Change StackKits content:** use [StackKits documentation map](stackkits.md) to identify the reader journey, current support caveats, and generated release-page boundary.
 - **Answer or update the published access model:** start at [Identity & Access map](identity-access.md), then use the audience-specific MDX source page.
 - **Understand why an update exists or what changed recently:** review [content operations](content-operations.md), then `changelog/overview.mdx` and relevant Git history.
 - **Run local documentation checks:** use the checkout-backed commands in [site and publication model](site-publication.md#local-checks); `mise.toml` is the task authority.
@@ -50,7 +52,7 @@ The [site and publication model](site-publication.md) explains how `docs.json` t
 
 - **Public-only content:** `README.md` defines `docs.json` as the navigation and public-content allowlist. Do not add internal, restricted, operator, or credential-bearing material to public MDX.
 - **Evidence before capability claims:** current status comes from `STATUS.md` and the checkout. Keep future scope in `ROADMAP.md`.
-- **Generated service guides:** changes under `guides/stackkits/services/` have a distinct provenance model; see [content operations](content-operations.md#generated-stackkits-service-guides).
+- **Generated StackKits release pages:** `data/stackkits/`, the StackKits use-case catalog and compatibility references, and `stackkits/reference/cli/` are projected from published StackKits releases and have a distinct provenance model; see [content operations](content-operations.md#generated-stackkits-release-pages).
 - **Maturity language:** StackKits source pages mix stable, beta, preview, schema-only, vision-only, and planned material. Use [StackKits documentation map](stackkits.md#support-and-freshness-caveats) to avoid flattening those distinctions.
 
 ## Update this wiki
