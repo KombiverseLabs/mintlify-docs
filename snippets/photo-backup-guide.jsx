@@ -155,3 +155,16 @@ export const PhotoGuideIcon = ({ name }) => {
   };
   return icons[name] || null;
 };
+// Mintlify replaces block-level HTML elements outside its component allowlist with a
+// comment. These pass-throughs render the same element, so the guide keeps its markup.
+// The tag lives in a variable so MDX does not route it through Mintlify's component
+// overrides (figure, for example, would gain an image-zoom wrapper).
+export const PhotoGuideArticle = ({ children, ...props }) => { const Tag = "article"; return <Tag {...props}>{children}</Tag>; };
+export const PhotoGuideAside = ({ children, ...props }) => { const Tag = "aside"; return <Tag {...props}>{children}</Tag>; };
+export const PhotoGuideDetails = ({ children, ...props }) => { const Tag = "details"; return <Tag {...props}>{children}</Tag>; };
+export const PhotoGuideDialog = ({ children, ...props }) => { const Tag = "dialog"; return <Tag {...props}>{children}</Tag>; };
+export const PhotoGuideFigcaption = ({ children, ...props }) => { const Tag = "figcaption"; return <Tag {...props}>{children}</Tag>; };
+export const PhotoGuideFigure = ({ children, ...props }) => { const Tag = "figure"; return <Tag {...props}>{children}</Tag>; };
+export const PhotoGuideFooter = ({ children, ...props }) => { const Tag = "footer"; return <Tag {...props}>{children}</Tag>; };
+export const PhotoGuideStrong = ({ children, ...props }) => { const Tag = "strong"; return <Tag {...props}>{children}</Tag>; };
+export const PhotoGuideSummary = ({ children, ...props }) => { const Tag = "summary"; return <Tag {...props}>{children}</Tag>; };
