@@ -4,8 +4,8 @@ description: "Manage the embedded StackKits registry snapshot"
 sidebarTitle: "registry"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:5377a4f89edc4760c2f1fae4e25dd783664e91d3d2f9b816127c0d296fb7334e"
-source_hash: "0badfb07fdb2462ca921a8b521914643362d6f43"
+content_hash: "sha256:7c685e17e18226d17a4252ef65f2dbce22e5de78abd51ce59ef8e4a3c3fcde12"
+source_hash: "90872bfd17db527baf0c541b4ee96e30acbe8a20"
 ---
 Manage the embedded StackKits registry snapshot.
 
@@ -17,7 +17,7 @@ The snapshot lives at internal/registry/data/registry_snapshot.json. Inspect the
 stackkit registry [flags]
 ```
 
-Subcommands: [`stackkit registry artifacts`](#stackkit-registry-artifacts), [`stackkit registry bake-from-cue`](#stackkit-registry-bake-from-cue), [`stackkit registry emit-cue`](#stackkit-registry-emit-cue), [`stackkit registry emit-mintlify`](#stackkit-registry-emit-mintlify), [`stackkit registry info`](#stackkit-registry-info)
+Subcommands: [`stackkit registry artifacts`](#stackkit-registry-artifacts), [`stackkit registry bake-from-cue`](#stackkit-registry-bake-from-cue), [`stackkit registry emit-cue`](#stackkit-registry-emit-cue), [`stackkit registry info`](#stackkit-registry-info)
 
 ## stackkit registry artifacts
 
@@ -71,23 +71,6 @@ stackkit registry emit-cue [flags]
 | `--input` | string | `internal/registry/data/registry_snapshot.json` | Snapshot JSON to render from |
 | `--modules-dir` | string | `modules` | Directory containing modules/&lt;slug&gt;/module.cue (service catalog source) |
 | `--output-dir` | string | `foundation/generated` | Directory for the rendered CUE files |
-
-## stackkit registry emit-mintlify
-
-Render Mintlify MDX tool documentation from the registry snapshot.
-
-Render guides/stackkits/services/&lt;slug&gt;.mdx for every tool in the snapshot that carries published content (tool.content != null). Tools without content are skipped — their handwritten MDX is left untouched.
-
-Reads the snapshot JSON (default: internal/registry/data/registry_snapshot.json) and renders deterministically. The header carries the content_hash so drift is detectable. CI regenerates from the committed snapshot and diffs.
-
-```bash
-stackkit registry emit-mintlify [flags]
-```
-
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--input` | string | `internal/registry/data/registry_snapshot.json` | Snapshot JSON to render from |
-| `--output-dir` | string | `guides/stackkits/services` | Output directory for generated MDX files |
 
 ## stackkit registry info
 
