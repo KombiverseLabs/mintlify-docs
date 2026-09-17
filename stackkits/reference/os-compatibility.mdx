@@ -1,18 +1,47 @@
 ---
 title: "OS compatibility"
-description: "Release-bound operating-system evidence for StackKits v0.34.0"
+description: "Lifecycle evidence for StackKits v0.33.3"
 sidebarTitle: "OS compatibility"
 icon: server
 generated: true
 generated_by: "stackkit docs sync-release-manifests"
-content_hash: "sha256:285462ceff26d50b3829a720a7b8cc29d0c8a44389fc6b25f8aae2200137d9f0"
+content_hash: "sha256:b98bf27d7ed8355f7b9b9deeb3c84aa3d73b1d32985319cf15cbc813f8dd0ac6"
 source_hash: "baad587b5b79e5f64f9041e4f2e9b631692b02e8"
 ---
 
-Rows are generated from [v0.34.0](https://github.com/kombifyio/StackKits/releases/tag/v0.34.0). `unverified` means no valid receipt for this release; it must not be read as support. `unsupported` is emitted only from policy.
+<Note>
+Lifecycle runs for v0.34.0 are not projected yet; rows show v0.33.3, the newest projected release.
+</Note>
 
-| Operating system | Version | Architecture | Status | Evidence or reason |
+Rows are projected from the automated lifecycle runs of StackKits [v0.33.3](https://github.com/kombifyio/StackKits/releases/tag/v0.33.3) on fresh virtual machines: install, init, generate, apply, verify, backup and restore. Last lifecycle run: 2026-09-16.
+
+- `supported`: Every lifecycle phase passed in the newest run on this release.
+- `preview`: Install through verify passed in the newest run; a later phase failed.
+- `unverified`: No completed run on this release yet, or the newest run failed before verify.
+
+Operating-system and hypervisor rows show the best result across the environments tested on this release; Kits by environment lists each environment on its own.
+
+| Operating system | Version | Tested architecture | Status | Evidence | Last verified |
+| --- | --- | --- | --- | --- | --- |
+| Ubuntu | 24.04 | amd64 | `supported` | All lifecycle phases passed | v0.33.3 |
+| Debian | 13 | amd64 | `preview` | Backup phase failed on this release | — |
+| Debian | 12 | — | `unverified` | Not covered by the automated lifecycle tests yet | — |
+
+Each run installs the operating system fresh in a virtual machine.
+
+## Kits by environment
+
+Each kit is graded in the kind of environment it is built for. A home network run also opens the local service addresses from another machine on that network.
+
+| Kit | Environment | Status | Evidence | Last verified |
 | --- | --- | --- | --- | --- |
-| Debian | 12 | untested | `unverified` | no-automated-lane |
-| Debian | 13 | amd64 | `unverified` | current-release-receipt-pending |
-| Ubuntu | 24.04 | amd64 | `unverified` | current-release-receipt-pending |
+| Basement Kit | Fresh virtual machine in CI | `supported` | All lifecycle phases passed | v0.33.3 |
+| Basement Kit | Virtual machine on a home network | `supported` | All lifecycle phases passed; local service addresses answered from the home network | v0.33.3 |
+| Cloud Kit | Public VPS with a kombify.me address | `unverified` | Not covered by the automated lifecycle tests yet | — |
+| Modern Homelab | Home virtual machine plus public VPS | `unverified` | Not covered by the automated lifecycle tests yet | — |
+
+## Hypervisors
+
+StackKits run inside a guest VM on your hypervisor, never on the hypervisor host itself. A status covers that rollout end to end: the guest is created on the hypervisor and the StackKit lifecycle runs inside it. It does not certify a vendor product or a server provider.
+
+The hypervisor rollouts and their lifecycle evidence for this release are listed on [stackkit.cc/compatibility](https://stackkit.cc/compatibility). Run `stackkit compat` on a host for non-destructive diagnostics and the evidence published for its operating system and hypervisor.

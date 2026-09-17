@@ -347,6 +347,10 @@ function releaseLink(tag) {
   return `[${tag}](https://github.com/kombifyio/StackKits/releases/tag/${tag})`
 }
 
+function gradeMeanings() {
+  return GRADE_MEANINGS.map(([grade, meaning]) => `- \`${grade}\`: ${meaning}\n`).join('')
+}
+
 // Evidence trails the newest release until its lifecycle runs are projected;
 // the pages name the release the rows show instead of re-grading them.
 function pendingProjection(release, evidence) {
@@ -363,8 +367,7 @@ function renderOperatingSystems(release, compatibility, evidence) {
   let page = provenance('OS compatibility', `Lifecycle evidence for StackKits ${evidence.stackkitsVersion}`, 'server', canonicalDigest(evidence), release.publicSourceSha)
   page += pendingProjection(release, evidence)
   page += `Rows are projected from the automated lifecycle runs of StackKits ${releaseLink(evidence.stackkitsVersion)} on fresh virtual machines: install, init, generate, apply, verify, backup and restore. Last lifecycle run: ${evidence.generatedAt.slice(0, 10)}.\n\n`
-  for (const [grade, meaning] of GRADE_MEANINGS) page += `- \`${grade}\`: ${meaning}\n`
-  page += `\n${BEST_ENVIRONMENT}\n\n`
+  page += `${gradeMeanings()}\n${BEST_ENVIRONMENT}\n\n`
   page += '| Operating system | Version | Tested architecture | Status | Evidence | Last verified |\n| --- | --- | --- | --- | --- | --- |\n'
   for (const row of evidence.results) {
     const name = row.os.distribution.charAt(0).toUpperCase() + row.os.distribution.slice(1)
@@ -379,8 +382,9 @@ function renderOperatingSystems(release, compatibility, evidence) {
       page += `| ${md(EVIDENCE_KITS[row.kit])} | ${md(row.name)} | \`${md(row.grade)}\` | ${md(evidenceNote(row))} | ${md(row.lastVerifiedRelease ?? '—')} |\n`
     }
   }
-  // Hypervisor rows name vendor products this site does not publish;
-  // stackkit.cc renders them from the same projection.
+  // The public-safety policy keeps hypervisor names off this site, so the page
+  // points to stackkit.cc, which renders them from the same projection. The
+  // stored projection under data/ keeps them and .mintignore keeps data/ unpublished.
   page += '\n## Hypervisors\n\nStackKits run inside a guest VM on your hypervisor, never on the hypervisor host itself. A status covers that rollout end to end: the guest is created on the hypervisor and the StackKit lifecycle runs inside it. It does not certify a vendor product or a server provider.\n\n'
   page += 'The hypervisor rollouts and their lifecycle evidence for this release are listed on [stackkit.cc/compatibility](https://stackkit.cc/compatibility). Run `stackkit compat` on a host for non-destructive diagnostics and the evidence published for its operating system and hypervisor.\n'
   return page
@@ -402,7 +406,9 @@ export function renderPages(catalog, compatibility, evidence = null) {
   const yes = value => value ? 'yes' : 'no'
   if (evidence) {
     delivery += pendingProjection(release, evidence)
-    delivery += `Status and capabilities are declared by [${release.tag}](${release.releaseUrl}). The **Lifecycle test** column is projected from the automated lifecycle runs of StackKits ${releaseLink(evidence.stackkitsVersion)}: \`supported\` means the use case was installed, set up, backed up and restored on that adapter; \`not tested\` means no automated lane covers the combination yet.\n\n`
+    delivery += `Status and capabilities are declared by [${release.tag}](${release.releaseUrl}). The **Lifecycle test** column is projected from the automated lifecycle runs of StackKits ${releaseLink(evidence.stackkitsVersion)}:\n\n`
+    delivery += gradeMeanings()
+    delivery += '- `not tested`: No automated lifecycle run covers this use case on this adapter yet.\n\n'
     delivery += '| Use case | Workload | Adapter | Status | Deploy | Route/TLS | Status evidence | Backup/restore | Lifecycle test |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n'
   } else {
     delivery += `This is the product capability declared by [${release.tag}](${release.releaseUrl}); it is not evidence that an adapter was deployed on a real host.\n\n`
@@ -451,47 +457,64 @@ function storedEvidence(releases, tag) {
   return document
 }
 
-export function syncRelease({ repoRoot, inputDir, tag }) {
-  string(tag, 'tag', /^v\d+\.\d+\.\d+$/)
-  const catalogBytes = readFileSync(path.join(inputDir, 'stackkits-use-case-catalog-v1.json'), 'utf8')
-  const compatibilityBytes = readFileSync(path.join(inputDir, 'stackkits-compatibility-v1.json'), 'utf8')
+const CATALOG_ASSET = 'stackkits-use-case-catalog-v1.json'
+const COMPATIBILITY_ASSET = 'stackkits-compatibility-v1.json'
+
+// Reads and validates the immutable release manifests in `dir`: a release
+// download or a stored snapshot under data/stackkits/releases/<tag>.
+function readManifests(dir, tag) {
+  const catalogBytes = readFileSync(path.join(dir, CATALOG_ASSET), 'utf8')
+  const compatibilityBytes = readFileSync(path.join(dir, COMPATIBILITY_ASSET), 'utf8')
   const catalog = validateCatalog(JSON.parse(catalogBytes), tag)
   const compatibility = validateCompatibility(JSON.parse(compatibilityBytes), tag, new Set(catalog.catalog.useCases.map(item => item.id)))
   if (JSON.stringify(catalog.release) !== JSON.stringify(compatibility.release)) throw new Error('catalog and compatibility release identity differ')
   if (catalog.generatedAt !== compatibility.generatedAt || catalog.generatorVersion !== compatibility.generatorVersion) throw new Error('manifest generator provenance differs')
+  return { catalogBytes, compatibilityBytes, catalog, compatibility }
+}
+
+export function syncRelease({ repoRoot, inputDir, tag }) {
+  string(tag, 'tag', /^v\d+\.\d+\.\d+$/)
+  const synced = readManifests(inputDir, tag)
   const incomingPath = path.join(inputDir, EVIDENCE_ASSET)
   const incomingBytes = existsSync(incomingPath) ? readFileSync(incomingPath, 'utf8') : null
   const incoming = incomingBytes ? validateEvidence(JSON.parse(incomingBytes), tag) : null
 
   const releases = path.join(repoRoot, 'data', 'stackkits', 'releases')
-  const snapshot = path.join(releases, tag)
-  for (const [name, bytes] of [['stackkits-use-case-catalog-v1.json', catalogBytes], ['stackkits-compatibility-v1.json', compatibilityBytes]]) {
-    const target = path.join(snapshot, name)
+  for (const [name, bytes] of [[CATALOG_ASSET, synced.catalogBytes], [COMPATIBILITY_ASSET, synced.compatibilityBytes]]) {
+    const target = path.join(releases, tag, name)
     if (existsSync(target) && readFileSync(target, 'utf8') !== bytes) throw new Error(`immutable snapshot differs: ${target}`)
     writeExact(target, bytes)
   }
-
   // Evidence is mutable: the incoming projection is the one StackKits publishes
-  // now, so it replaces the stored document for its release and is rendered.
+  // now for its release, so it replaces the stored document of that release.
   if (incoming) writeExact(path.join(releases, incoming.stackkitsVersion, EVIDENCE_ASSET), incomingBytes)
-  const evidence = incoming ?? storedEvidence(releases, tag)
 
   const latestPath = path.join(repoRoot, 'data', 'stackkits', 'latest.json')
   const current = existsSync(latestPath) ? JSON.parse(readFileSync(latestPath, 'utf8')) : null
-  if (current?.tag === tag && (current.catalogDigest !== catalog.contentDigest || current.compatibilityDigest !== compatibility.contentDigest)) throw new Error(`latest ${tag} digest changed`)
-  if (current && compareTags(tag, current.tag) < 0) return { promoted: false, catalog, compatibility, evidence }
-
-  const latest = {
-    schemaVersion: 'stackkits-docs-snapshot/v1', tag,
-    catalogDigest: catalog.contentDigest, compatibilityDigest: compatibility.contentDigest,
-    release: catalog.release, generatedAt: catalog.generatedAt, generatedBy: GENERATOR
+  const promoted = !current || compareTags(tag, current.tag) >= 0
+  const shown = promoted ? synced : readManifests(path.join(releases, current.tag), current.tag)
+  if (current && current.tag === shown.catalog.release.tag && (current.catalogDigest !== shown.catalog.contentDigest || current.compatibilityDigest !== shown.compatibility.contentDigest)) {
+    throw new Error(`latest ${current.tag} digest changed`)
   }
-  writeExact(latestPath, `${JSON.stringify(latest, null, 2)}\n`)
-  const pages = renderPages(catalog, compatibility, evidence)
+  if (promoted) {
+    const latest = {
+      schemaVersion: 'stackkits-docs-snapshot/v1', tag,
+      catalogDigest: synced.catalog.contentDigest, compatibilityDigest: synced.compatibility.contentDigest,
+      release: synced.catalog.release, generatedAt: synced.catalog.generatedAt, generatedBy: GENERATOR
+    }
+    writeExact(latestPath, `${JSON.stringify(latest, null, 2)}\n`)
+  }
+
+  // The pages always show the latest release with the newest stored projection
+  // not newer than it. Rendering from the store, not from the incoming asset,
+  // means a sync for an older tag that updates that projection re-renders the
+  // pages, and an older incoming projection never displaces a newer stored one.
+  const evidence = storedEvidence(releases, shown.catalog.release.tag)
+  const pages = renderPages(shown.catalog, shown.compatibility, evidence)
   writeExact(path.join(repoRoot, 'guides', 'stackkits', 'use-cases', 'overview.mdx'), pages.useCases)
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'os-compatibility.mdx'), pages.os)
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'application-delivery-compatibility.mdx'), pages.delivery)
-  return { promoted: true, catalog, compatibility, evidence }
+  return { promoted, catalog: synced.catalog, compatibility: synced.compatibility, shownTag: shown.catalog.release.tag, evidence }
 }
 
 function main() {
@@ -500,7 +523,7 @@ function main() {
   if (!args.includes('--write') || !value('--from-dir') || !value('--tag')) throw new Error('usage: node sync-stackkits-release-docs.mjs --from-dir <dir> --tag <vX.Y.Z> --write')
   const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
   const result = syncRelease({ repoRoot, inputDir: path.resolve(value('--from-dir')), tag: value('--tag') })
-  process.stdout.write(`stackkits_docs_sync: ${result.promoted ? 'promoted' : 'stored'} ${result.catalog.release.tag}, lifecycle evidence ${result.evidence?.stackkitsVersion ?? 'not published'}\n`)
+  process.stdout.write(`stackkits_docs_sync: ${result.promoted ? 'promoted' : 'stored'} ${result.catalog.release.tag}; pages show ${result.shownTag}, lifecycle evidence ${result.evidence?.stackkitsVersion ?? 'not published'}\n`)
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main()

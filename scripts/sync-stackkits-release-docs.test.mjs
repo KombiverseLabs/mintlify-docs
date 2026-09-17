@@ -164,8 +164,9 @@ function evidence(stackkitsVersion = 'v9.9.9') {
 function syncWithEvidence(repo, dir, tag, document) {
   writeFixture(dir, fixture(tag))
   if (document) writeFileSync(path.join(dir, EVIDENCE_ASSET), `${JSON.stringify(document, null, 2)}\n`)
-  syncRelease({ repoRoot: repo, inputDir: dir, tag })
+  const { promoted } = syncRelease({ repoRoot: repo, inputDir: dir, tag })
   return {
+    promoted,
     os: readFileSync(path.join(repo, 'stackkits/reference/os-compatibility.mdx'), 'utf8'),
     delivery: readFileSync(path.join(repo, 'stackkits/reference/application-delivery-compatibility.mdx'), 'utf8'),
   }
@@ -184,13 +185,23 @@ test('renders operating systems only from the lifecycle evidence document', () =
   assert.ok(os.includes('| Basement Kit | Virtual machine on a home network | `supported` | All lifecycle phases passed; local service addresses answered from the home network |'))
   assert.ok(os.includes('| Cloud Kit | Public VPS | `unverified` |'))
   assert.ok(os.includes('releases/tag/v9.9.9'))
-  // Shared with stackkit.cc/compatibility and StackKits docs/OS_COMPATIBILITY.md.
-  assert.ok(os.includes('Every lifecycle phase passed in the newest run on this release.'))
-  assert.ok(os.includes('Operating-system and hypervisor rows show the best result across the environments tested on this release; Kits by environment lists each environment on its own.'))
   assert.ok(!os.includes('receipt missing'), 'release manifest OS rows are not rendered')
   assert.ok(!os.includes('not projected yet'))
   assert.ok(!os.includes('Covered Hypervisor') && !os.includes('Untested Hypervisor'), 'hypervisor names stay off the docs page')
   assert.ok(delivery.includes('| yes | `supported` |'))
+})
+
+test('defines lifecycle grades with the wording shared by every compatibility surface', () => {
+  const { temp, repo } = tempRepo()
+  const { os, delivery } = syncWithEvidence(repo, path.join(temp, 'input'), 'v9.9.9', evidence())
+
+  // Shared verbatim with stackkit.cc/compatibility and StackKits docs/OS_COMPATIBILITY.md.
+  for (const page of [os, delivery]) {
+    assert.ok(page.includes('- `supported`: Every lifecycle phase passed in the newest run on this release.'))
+    assert.ok(page.includes('- `preview`: Install through verify passed in the newest run; a later phase failed.'))
+    assert.ok(page.includes('- `unverified`: No completed run on this release yet, or the newest run failed before verify.'))
+  }
+  assert.ok(os.includes('Operating-system and hypervisor rows show the best result across the environments tested on this release; Kits by environment lists each environment on its own.'))
 })
 
 test('names the evidence release when it trails the synced tag', () => {
@@ -223,6 +234,30 @@ test('stores evidence under its release, reuses it without an incoming asset and
   pages = syncWithEvidence(repo, path.join(temp, 'fourth'), 'v9.9.9', null)
   assert.ok(pages.os.includes('| Cloud Kit | Public VPS | `supported` |'))
   assert.ok(!pages.os.includes('not projected yet'))
+})
+
+test('keeps a newer stored projection when an older one arrives', () => {
+  const { temp, repo } = tempRepo()
+  syncWithEvidence(repo, path.join(temp, 'current'), 'v9.9.9', evidence('v9.9.9'))
+  const older = evidence('v9.9.8')
+  older.results[0] = { ...older.results[0], grade: 'unverified', reasonCodes: ['current-release-receipt-pending'], lastVerifiedRelease: undefined }
+  const { os } = syncWithEvidence(repo, path.join(temp, 'replayed'), 'v9.9.9', older)
+
+  assert.ok(os.includes('| Ubuntu | 24.04 | amd64 | `supported` |'))
+  assert.ok(!os.includes('not projected yet'))
+})
+
+test('re-renders the latest pages when a sync for an older tag updates the projection they show', () => {
+  const { temp, repo } = tempRepo()
+  syncWithEvidence(repo, path.join(temp, 'latest'), 'v9.9.9', evidence('v9.9.8'))
+  const updated = evidence('v9.9.8')
+  updated.environments[1] = { kit: 'cloud-kit', environment: 'public-vps', name: 'Public VPS', grade: 'supported', reasonCodes: [], lastVerifiedRelease: 'v9.9.8' }
+  const { promoted, os } = syncWithEvidence(repo, path.join(temp, 'older'), 'v9.9.8', updated)
+
+  assert.equal(promoted, false)
+  assert.equal(JSON.parse(readFileSync(path.join(repo, 'data/stackkits/latest.json'), 'utf8')).tag, 'v9.9.9')
+  assert.ok(os.includes('| Cloud Kit | Public VPS | `supported` |'))
+  assert.ok(os.includes('Lifecycle runs for v9.9.9 are not projected yet'))
 })
 
 test('rejects evidence bound to a release newer than the synced tag', () => {
