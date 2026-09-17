@@ -7,7 +7,7 @@
  */
 
 export const STACKKITS_GENERATED_PATH_PATTERN =
-  /^(?:\.tmp(?:\/.*)?|data\/?|data\/stackkits\/.*|guides\/stackkits\/use-cases\/overview\.mdx|stackkits\/reference\/(?:os|application-delivery)-compatibility\.mdx|stackkits\/reference\/cli\/?|stackkits\/reference\/cli\/[a-z0-9-]+\.mdx|docs\.json)$/
+  /^(?:\.tmp(?:\/.*)?|data\/?|data\/stackkits\/.*|stackkits\/reference\/(?:os-compatibility|application-delivery-compatibility|use-case-catalog)\.mdx|stackkits\/reference\/cli\/?|stackkits\/reference\/cli\/[a-z0-9-]+\.mdx|docs\.json)$/
 
 export function porcelainPath(line) {
   if (!line || line.length < 4) return ""

@@ -53,18 +53,23 @@ test('help text renders as literal prose, not MDX', () => {
   assert.doesNotMatch(prose, /(^|[^\\])\*/)
 })
 
-test('navigation update replaces only the CLI reference group', () => {
+test('navigation update replaces only the command pages of the nested CLI group', () => {
+  const cli = { group: 'Commands', icon: 'terminal', root: 'stackkits/reference/cli/overview', pages: ['old'] }
   const docs = {
     navigation: {
       tabs: [
-        { tab: 'StackKits', groups: [{ group: 'Get started', pages: ['a'] }, { group: 'CLI reference', pages: ['old'] }, { group: 'Architecture and reference', pages: ['b'] }] },
-        { tab: 'SpeechKit', groups: [{ group: 'CLI reference', pages: ['speech'] }] },
+        { tab: 'StackKits', groups: [{ group: 'Get started', pages: ['a'] }, { group: 'Reference', pages: [cli, 'b'] }] },
+        { tab: 'SpeechKit', groups: [{ group: 'Reference', pages: ['speech'] }] },
       ],
     },
   }
   const { navigation } = renderCliReference(reference(), { sourceSha: SHA, contentHash: 'sha256:x' })
   const updated = applyNavigation(structuredClone(docs), navigation)
-  assert.deepEqual(updated.navigation.tabs[0].groups.map((group) => group.group), ['Get started', 'CLI reference', 'Architecture and reference'])
-  assert.notDeepEqual(updated.navigation.tabs[0].groups[1].pages, ['old'])
+  const [kept, sibling] = updated.navigation.tabs[0].groups[1].pages
+  assert.equal(kept.group, cli.group)
+  assert.equal(kept.icon, cli.icon)
+  assert.deepEqual(kept.pages, navigation.pages)
+  assert.equal(sibling, 'b')
+  assert.deepEqual(updated.navigation.tabs[0].groups[0], docs.navigation.tabs[0].groups[0])
   assert.deepEqual(updated.navigation.tabs[1], docs.navigation.tabs[1])
 })
