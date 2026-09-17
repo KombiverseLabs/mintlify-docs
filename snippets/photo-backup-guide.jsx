@@ -32,7 +32,7 @@ export const PhotoGuide = ({ children }) => {
       toastTimer = setTimeout(() => { node.hidden = true; }, 3800);
     };
     const updateProgress = () => {
-      $('#kpg-progress-label').textContent = `${completed.filter(Boolean).length} von 4 Schritten abgehakt`;
+      $('#kpg-progress-label').textContent = `${completed.filter(Boolean).length} of 4 steps done`;
       $$('.progress-meter span').forEach((node, i) => node.classList.toggle('done', completed[i]));
       $$('.step-tab').forEach((node, i) => {
         node.classList.toggle('done', completed[i]);
@@ -48,7 +48,7 @@ export const PhotoGuide = ({ children }) => {
       });
       $$('.guide-panel').forEach((node, i) => { node.hidden = i !== current; });
       $('#kpg-prev').disabled = current === 0;
-      $('#kpg-next span').textContent = current === 3 ? (completed[3] ? 'Weitere Themen' : 'Prüfung abschließen') : 'Erledigt · weiter';
+      $('#kpg-next span').textContent = current === 3 ? (completed[3] ? 'More topics' : 'Finish check') : 'Done · next';
       if (focus) $('[data-step="' + current + '"]').focus();
     };
     $$('[data-step]').forEach((node) => listen(node, 'click', () => selectStep(Number(node.dataset.step))));
@@ -63,14 +63,14 @@ export const PhotoGuide = ({ children }) => {
         completed[current] = true;
         save(); updateProgress(); selectStep(current + 1, true);
       } else if (completed[3]) {
-        $('#kpg-mehr').scrollIntoView({ block: 'start' });
+        $('#kpg-more').scrollIntoView({ block: 'start' });
         $('.more-card').focus({ preventScroll: true });
       } else if (verified.every(Boolean)) {
         completed[3] = true;
         save(); updateProgress(); selectStep(3);
-        toast('Deine Prüfung wurde lokal als erledigt markiert.');
+        toast('Your check is marked as done in this browser.');
       } else {
-        toast('Bitte prüfe zuerst die drei Punkte auf deinem Fotoserver.');
+        toast('Check the three points on your photo server first.');
         $('#kpg-verify-' + verified.indexOf(false)).focus();
       }
     });
@@ -87,7 +87,7 @@ export const PhotoGuide = ({ children }) => {
       verified = [false, false, false];
       $$('.verify-list input').forEach((node) => { node.checked = false; });
       save(); updateProgress(); selectStep(0);
-      toast('Dein lokaler Fortschritt wurde zurückgesetzt.');
+      toast('Your progress in this browser was reset.');
     });
     listen($('#kpg-print'), 'click', () => window.print());
     const openDialog = (id) => {
@@ -128,7 +128,7 @@ export const PhotoGuide = ({ children }) => {
       $$('dialog[open]').forEach((dialog) => dialog.close());
     };
   }, []);
-  return <div className="kombify-photo-guide not-prose" lang="de" ref={rootRef}>{children}</div>;
+  return <div className="kombify-photo-guide not-prose" lang="en" ref={rootRef}>{children}</div>;
 };
 export const PhotoGuideIcon = ({ name }) => {
   const icons = {
