@@ -1,11 +1,11 @@
 ---
 title: "Cloudreve"
-description: "Select, deploy and operate Cloudreve for the Files use case"
+description: "Use the released Cloudreve alternative for the optional Files workload"
 sidebarTitle: "Cloudreve"
 icon: folder-cloud
 ---
 
-Cloudreve provides the [Files](/guides/stackkits/use-cases/files) use case. It is the default alternative of the optional `files` workload, and the initial StackSpec does not select it. Plan storage and backups on the Files page before you select it.
+Cloudreve is the default alternative inside the optional `files` workload contract. It is not enabled by the initial StackSpec; select the workload deliberately after planning storage and backups. The [use-case catalog](/guides/stackkits/use-cases/overview) lists the components the published release declares.
 
 ## Released role
 
@@ -17,9 +17,7 @@ Cloudreve provides the [Files](/guides/stackkits/use-cases/files) use case. It i
 | Route | generated Files service route |
 | Standalone adapter | `standalone-compose` |
 
-## Select the workload
-
-Merge this object into the complete StackSpec created by `stackkit init`:
+## Configure
 
 ```json
 {
@@ -36,24 +34,13 @@ Merge this object into the complete StackSpec created by `stackkit init`:
 }
 ```
 
-The example was validated and generated with release v0.32.x. If your generated site or node IDs differ, use those exact IDs.
-
-## Deploy and verify
-
-```bash
-stackkit validate
-stackkit generate
-stackkit plan --json
-stackkit apply
-stackkit verify --http --json
-```
-
-Confirm that the resolved plan contains the `files` workload, `cloudreve` alternative, and `standalone-compose` adapter before applying.
-
-After verification succeeds, open the generated Files route and create only the application accounts you need.
+Confirm that the resolved plan selects the intended site, node, and adapter before applying. The complete validation and rollout sequence is documented in [Private File Library](/guides/stackkits/use-cases/private-file-library).
 
 ## Operate
 
 - Keep the primary and backup roots on storage you control.
-- Keep StackKits configuration changes in the StackSpec. Do not edit the generated Cloudreve workload bundle or Compose environment.
-- Verify recovery before relying on the service for the only copy of a file. See [Back up and restore](/guides/stackkits/back-up-and-restore).
+- Create the application owner only after StackKits verification succeeds.
+- Do not edit the generated Cloudreve workload bundle or Compose environment.
+- Verify recovery before relying on the service for the only copy of a file.
+
+Continue with the [Private File Library](/guides/stackkits/use-cases/private-file-library) use case.
