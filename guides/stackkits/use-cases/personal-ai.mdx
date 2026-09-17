@@ -1,24 +1,31 @@
 ---
-title: "Private AI"
-description: "Run a private local chat workbench with owner custody and explicit model downloads"
-sidebarTitle: "Private AI"
+title: "Personal AI"
+description: "Run a private chat workbench on your host with owner custody and explicit model downloads"
+sidebarTitle: "Personal AI"
 icon: brain
 ---
 
 <Info>
-  Evidence state (2026-09-17, v0.35.0): Private AI is experimental. The current
-  public release declares its components (Ollama and Open WebUI), and no
-  automated lifecycle run covers install, apply, verify, backup, or restore
+  Evidence state (2026-09-17, v0.35.0): Personal AI is experimental. The
+  current public release declares its components (Ollama and Open WebUI), and
+  no automated lifecycle run covers install, apply, verify, backup, or restore
   yet. Runtime evidence is pending.
 </Info>
 
-Private AI runs [Ollama](https://ollama.com) and Open WebUI on your Linux Docker host. Ollama serves the model; Open WebUI provides the chat interface. The local owner receives the initial administrator account, public signup is disabled, and no kombify account is required. The use case is experimental. Check the [release catalog](/guides/stackkits/use-cases/overview) for its declared components.
+Personal AI runs a chat interface for language models on your Linux Docker host. The local owner receives the initial administrator account, public signup is disabled, and no kombify account is required. The release catalog calls this use case Private AI and delivers it as the optional `ai` workload with the `private-ai` alternative.
+
+## Applications
+
+- [Ollama](https://ollama.com) serves the model.
+- Open WebUI provides the chat interface you sign in to.
+
+This page covers both, because they are selected and operated together.
 
 ## Check your host capacity first
 
 The CPU profile has a declared host floor of 4 CPU cores, 12 GiB RAM, and 40 GiB disk; 8 CPU cores, 16 GiB RAM, and 80 GiB disk are recommended. Model size matters on top of that floor:
 
-- Ollama has a declared 6 GiB RAM limit — the downloaded model weights plus the context you use must fit inside it.
+- Ollama has a declared 6 GiB RAM limit. The downloaded model weights plus the context you use must fit inside it.
 - Open WebUI has a declared 2 GiB RAM limit.
 - Allow disk space for container images and for downloaded model weights together.
 - GPU serving is not enabled; a higher compute tier uses the same CPU runtime.
@@ -63,7 +70,7 @@ stackkit secrets reveal --workload ai --slot owner-password
 
 ## Choose and download a model explicitly
 
-No model is selected or pulled for you — not during install, restart, or upgrade. In Open WebUI, open **Admin Settings**, explicitly select an Ollama model, and request its download. Before you pick one, review the upstream model's license, download size, quantization, context length, and RAM requirements.
+No model is selected or pulled for you, not during install, restart, or upgrade. In Open WebUI, open **Admin Settings**, explicitly select an Ollama model, and request its download. Before you pick one, review the upstream model's license, download size, quantization, context length, and RAM requirements.
 
 Start with a small model on the CPU profile. Larger models and longer contexts need more memory. A model that downloads successfully may still exceed the available inference capacity.
 

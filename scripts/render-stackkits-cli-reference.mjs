@@ -201,22 +201,38 @@ export function renderCliReference(reference, { sourceSha, contentHash }) {
   pages.set(`${CLI_PAGE_DIR}/overview.mdx`, overview)
 
   const navigation = {
-    group: 'CLI reference',
+    group: 'CLI',
     icon: 'square-terminal',
-    pages: [`${CLI_PAGE_DIR}/overview`, ...groupPages, ...(retired.length ? [`${CLI_PAGE_DIR}/legacy`] : [])],
+    root: `${CLI_PAGE_DIR}/overview`,
+    pages: [...groupPages, ...(retired.length ? [`${CLI_PAGE_DIR}/legacy`] : [])],
   }
   return { pages, navigation }
+}
+
+// The CLI group is found by its root page wherever docs.json places it, so the
+// committed navigation owns its label, icon and position; only the command
+// pages are regenerated. A tab without it gets the group at the top of Reference.
+function findGroup(entries, root) {
+  for (const entry of entries ?? []) {
+    if (!entry || typeof entry !== 'object') continue
+    if (entry.root === root) return entry
+    const nested = findGroup(entry.pages, root)
+    if (nested) return nested
+  }
+  return null
 }
 
 export function applyNavigation(docs, navigation) {
   const tab = docs.navigation?.tabs?.find((candidate) => candidate.tab === 'StackKits')
   assert(tab, 'docs.json has no StackKits tab')
-  const index = tab.groups.findIndex((group) => group.group === navigation.group)
-  if (index >= 0) tab.groups[index] = navigation
-  else {
-    const reference = tab.groups.findIndex((group) => group.group === 'Architecture and reference')
-    tab.groups.splice(reference >= 0 ? reference : tab.groups.length, 0, navigation)
+  const existing = findGroup(tab.groups, navigation.root)
+  if (existing) {
+    existing.pages = navigation.pages
+    return docs
   }
+  const reference = tab.groups.find((group) => group.group === 'Reference')
+  assert(reference, 'docs.json StackKits tab has no Reference group')
+  reference.pages.unshift(navigation)
   return docs
 }
 

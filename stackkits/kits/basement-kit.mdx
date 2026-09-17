@@ -5,30 +5,46 @@ sidebarTitle: "Basement Kit"
 icon: house
 ---
 
-Basement Kit is the supported local profile of the current public StackKits release (v0.32.x). The [use-case catalog](/guides/stackkits/use-cases/overview) lists the components the published release declares. Use it for a homelab on hardware you already control, with one home site and a local owner.
+<Info>
+  Evidence state (2026-09-17, v0.35.0): Basement Kit is the supported
+  one-command path of the current public release. On the public v0.35.0
+  archive, Basement Kit passed install, init, generate, apply, verify, backup,
+  and restore on fresh Ubuntu 24.04 and Debian 13 virtual machines, and in a
+  virtual machine on a home network, where its local service addresses also
+  answered from another machine on that network. Phone passkey and client
+  certificate trust are pending. Cloud Kit is a preview and Modern Homelab an
+  alpha definition archive, not an install target; neither has an automated
+  lifecycle run yet.
+</Info>
+
+Basement Kit is the supported local profile of the current public StackKits release. Use it for a homelab on hardware you already control, with one home site and a local owner.
 
 ## What it provides
 
+The smallest useful Basement Kit is one home site with one local node. It brings:
+
 - a CUE-validated StackSpec and local `stackkit` lifecycle
 - local owner custody with PocketID and TinyAuth
+- routing through Traefik
 - a Node Hub at the generated `base.<domain>` address
-- the released core runtime plus optional workloads selected by your validated configuration
+- local backup policy with owner-bound restore
 
 The authoring default domain is `home.test`. Make sure clients use a DNS path you control before treating a generated route as reachable; StackKits does not silently modify every client or router.
 
-The first successful path is the [Quickstart](/stackkits/quickstart); change the StackSpec and re-validate rather than editing generated files.
+The baseline stays standalone. The StackKits website helps you choose and bootstrap a path, but it does not operate the host.
+
+## Complete the baseline
+
+1. Bootstrap the kit with the [Quickstart](/stackkits/quickstart).
+2. Finish first-run protection in the [Node Hub](/guides/stackkits/node-hub): create the local PocketID owner and confirm that TinyAuth protects the expected routes.
+3. Configure the local backup repository and practice a restore. See [Back up and restore](/guides/stackkits/back-up-and-restore).
+
+Change the StackSpec and re-validate rather than editing generated files.
+
+## Add use cases
+
+Add workloads only after the baseline verifies. [Files](/guides/stackkits/use-cases/files) is a good first use case, because its standalone selection needs no secret reference. [Use cases](/guides/stackkits/use-cases/overview) lists all documented ones.
 
 ## When to use another kit
 
 Choose [Cloud Kit](/stackkits/kits/cloud-kit) when the single environment is an existing VPS or cloud host with a domain you operate. StackKits does not provision that host.
-
-## Related pages
-
-<CardGroup cols={2}>
-  <Card title="Node Hub" icon="grid-2" href="/guides/stackkits/node-hub">
-    Open the generated local service overview after a successful rollout.
-  </Card>
-  <Card title="Released applications" icon="grid-2" href="/stackkits/apps/overview">
-    Review current core, optional workloads, and module-contract boundaries.
-  </Card>
-</CardGroup>
