@@ -1,6 +1,6 @@
 ---
 title: mintlify-docs Status
-last_verified: 2026-08-13
+last_verified: 2026-09-17
 maturity: alpha
 ---
 
@@ -18,19 +18,21 @@ maturity: alpha
 
 - Mintlify site configured from this repository and published at
   `docs.kombify.io`.
-- Five allowed navigation tabs: Start, StackKits, Techstack, SpeechKit, and
-  Identity & Access.
+- Six allowed navigation tabs: Start, StackKits, Techstack, SpeechKit,
+  Identity & Access, and Changelog.
 - StackKits content is limited to capabilities verified against the current
   public StackKits release.
-- The publishable tree contains 47 pages: 38 in the StackKits tab, three in
-  Techstack, four in SpeechKit, one Start page, and one Identity page.
+- The navigation contains 101 pages: 85 in the StackKits tab (41 of them the
+  generated CLI reference), seven in Techstack, six in SpeechKit, and one each
+  for Start, Identity & Access, and Changelog.
 - Techstack documents the current product and operating boundary but makes no
   public installer, public source, or general-availability claim.
-- SpeechKit documentation is pinned to public release `v0.52.14`, its Windows
-  assets, current desktop support, modes, and Go module.
-- The StackKits pages include release-backed installation paths, StackSpec
-  examples, lifecycle and recovery how-tos, component boundaries, and four
-  use-case guides.
+- SpeechKit documentation describes the current public release through a
+  generated release block and `releases/latest` download links.
+- The StackKits tab groups Get started, Use cases, Guides, Platform services,
+  and Reference. Six use-case guides (Photos, Files, Passwords, Media,
+  Personal AI, Development) each nest the applications that provide them; the
+  CLI reference sits under Reference.
 - Identity is a single concise concept page; it does not expose internal
   architecture or security runbooks.
 - No dependency on the retired legacy documentation repository.
