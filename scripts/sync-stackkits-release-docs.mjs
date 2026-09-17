@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -200,6 +200,12 @@ function validateComputeTiers(useCase) {
   }
 }
 
+/**
+ * `compatibility.os` stays validated so the sync binds to the release manifest
+ * contract, but it is not rendered: operating-system rows come only from the
+ * lifecycle evidence document (see renderPages), the single data basis every
+ * StackKits compatibility surface shares.
+ */
 export function validateCompatibility(document, tag, useCaseIDs) {
   validateEnvelope(document, COMPATIBILITY_SCHEMA, tag)
   keys(document.compatibility, ['os', 'applicationDelivery'], 'compatibility')
@@ -234,10 +240,22 @@ export function validateCompatibility(document, tag, useCaseIDs) {
   return document
 }
 
-// The lifecycle evidence projection is published by StackKits as a mutable
-// release asset: receipts for a release only exist after it was published.
+// The lifecycle evidence projection (StackKits docs/data/os-compat/latest.json)
+// is published as a mutable asset on the release its runs cover. Runs land
+// after a release, so that release may be older than the synced tag.
 export const EVIDENCE_ASSET = 'stackkits-compatibility-evidence-v3.json'
+// StackKits schemas/os-compat-matrix.schema.json $defs/release and $defs/slug.
+const EVIDENCE_RELEASE = /^v(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)$/
+const EVIDENCE_SLUG = /^[a-z0-9][a-z0-9.-]*$/
 const EVIDENCE_GRADES = ['supported', 'preview', 'unverified']
+// Grade wording shared verbatim with stackkit.cc/compatibility and StackKits
+// docs/OS_COMPATIBILITY.md.
+const GRADE_MEANINGS = [
+  ['supported', 'Every lifecycle phase passed in the newest run on this release.'],
+  ['preview', 'Install through verify passed in the newest run; a later phase failed.'],
+  ['unverified', 'No completed run on this release yet, or the newest run failed before verify.'],
+]
+const BEST_ENVIRONMENT = 'Operating-system and hypervisor rows show the best result across the environments tested on this release; Kits by environment lists each environment on its own.'
 const EVIDENCE_REASONS = {
   'current-release-receipt-pending': 'No lifecycle receipt for this release yet',
   'no-automated-lane': 'Not covered by the automated lifecycle tests yet',
@@ -261,13 +279,19 @@ function validateEvidenceRow(row, identity, label) {
   if (!Array.isArray(row.reasonCodes) || row.reasonCodes.some(code => !(code in EVIDENCE_REASONS))) throw new Error(`${label} has unknown reason codes`)
   if (row.grade === 'supported' ? row.reasonCodes.length !== 0 : row.reasonCodes.length === 0) throw new Error(`${label} reason codes do not match its grade`)
   for (const phase of row.verifiedPhases ?? []) string(phase, `${label}.verifiedPhases`, /^(install|init|generate|apply|verify|backup|restore|lan-access|setup-[a-z0-9-]+)$/)
-  if (row.lastVerifiedRelease !== undefined) string(row.lastVerifiedRelease, `${label}.lastVerifiedRelease`, /^v\d+\.\d+\.\d+$/)
+  if (row.lastVerifiedRelease !== undefined) string(row.lastVerifiedRelease, `${label}.lastVerifiedRelease`, EVIDENCE_RELEASE)
 }
 
+/**
+ * Accepts the projection of any release up to `tag`: stackkitsVersion names
+ * the release the runs cover, which trails the newest release until its runs
+ * land. A projection bound to a release newer than the synced tag is rejected.
+ */
 export function validateEvidence(document, tag) {
   keys(document, ['schemaVersion', 'stackkitsVersion', 'generatedAt', 'results', 'virtualization', 'applications', 'environments'], 'evidence')
   if (document.schemaVersion !== 3) throw new Error(`evidence schemaVersion=${document.schemaVersion}, want 3`)
-  if (document.stackkitsVersion !== tag) throw new Error(`evidence is bound to ${document.stackkitsVersion}, not ${tag}`)
+  string(document.stackkitsVersion, 'evidence.stackkitsVersion', EVIDENCE_RELEASE)
+  if (compareTags(document.stackkitsVersion, tag) > 0) throw new Error(`evidence is bound to ${document.stackkitsVersion}, newer than ${tag}`)
   string(document.generatedAt, 'evidence.generatedAt', /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/)
   for (const field of ['results', 'virtualization', 'applications']) {
     if (!Array.isArray(document[field])) throw new Error(`evidence.${field} must be an array`)
@@ -275,25 +299,27 @@ export function validateEvidence(document, tag) {
   for (const row of document.results) {
     validateEvidenceRow(row, ['os', 'architectures'], 'evidence OS row')
     keys(row.os, ['family', 'distribution', 'version'], 'evidence OS identity')
-    for (const field of ['family', 'distribution', 'version']) string(row.os[field], `evidence OS ${field}`)
+    string(row.os.family, 'evidence OS family', EVIDENCE_SLUG)
+    string(row.os.distribution, 'evidence OS distribution', EVIDENCE_SLUG)
+    string(row.os.version, 'evidence OS version', /^[A-Za-z0-9][A-Za-z0-9._-]*$/)
     for (const arch of row.architectures ?? []) string(arch, 'evidence OS architecture', /^(amd64|arm64)$/)
   }
   for (const row of document.virtualization) {
     validateEvidenceRow(row, ['id', 'name', 'rollout'], 'evidence hypervisor row')
-    string(row.id, 'evidence hypervisor id', /^[a-z0-9][a-z0-9.-]*$/)
+    string(row.id, 'evidence hypervisor id', EVIDENCE_SLUG)
     string(row.name, 'evidence hypervisor name')
     if (row.rollout !== undefined) string(row.rollout, 'evidence hypervisor rollout', /^[^<>|\n]{1,240}$/)
   }
   for (const row of document.applications) {
     validateEvidenceRow(row, ['useCase', 'adapter'], 'evidence application row')
-    string(row.useCase, 'evidence use case', /^[a-z0-9][a-z0-9-]*$/)
-    string(row.adapter, 'evidence adapter', /^[a-z0-9][a-z0-9-]*$/)
+    string(row.useCase, 'evidence use case', EVIDENCE_SLUG)
+    string(row.adapter, 'evidence adapter', EVIDENCE_SLUG)
   }
   if (document.environments !== undefined && !Array.isArray(document.environments)) throw new Error('evidence.environments must be an array')
   for (const row of document.environments ?? []) {
     validateEvidenceRow(row, ['kit', 'environment', 'name'], 'evidence environment row')
     if (!(row.kit in EVIDENCE_KITS)) throw new Error(`evidence environment row has unknown kit ${row.kit}`)
-    string(row.environment, 'evidence environment id', /^[a-z0-9][a-z0-9-]*$/)
+    string(row.environment, 'evidence environment id', EVIDENCE_SLUG)
     string(row.name, 'evidence environment name', /^[^<>|\n]{1,80}$/)
   }
   return document
@@ -313,13 +339,56 @@ function md(value) {
   return String(value).replaceAll('|', '\\|').replaceAll('{', '&#123;').replaceAll('}', '&#125;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
 }
 
-function provenance(title, description, icon, catalog) {
-  return `---\ntitle: "${title}"\ndescription: "${description}"\nsidebarTitle: "${title}"\nicon: ${icon}\ngenerated: true\ngenerated_by: "${GENERATOR}"\ncontent_hash: "${catalog.contentDigest}"\nsource_hash: "${catalog.release.publicSourceSha}"\n---\n\n`
+function provenance(title, description, icon, contentHash, sourceHash) {
+  return `---\ntitle: "${title}"\ndescription: "${description}"\nsidebarTitle: "${title}"\nicon: ${icon}\ngenerated: true\ngenerated_by: "${GENERATOR}"\ncontent_hash: "${contentHash}"\nsource_hash: "${sourceHash}"\n---\n\n`
+}
+
+function releaseLink(tag) {
+  return `[${tag}](https://github.com/kombifyio/StackKits/releases/tag/${tag})`
+}
+
+// Evidence trails the newest release until its lifecycle runs are projected;
+// the pages name the release the rows show instead of re-grading them.
+function pendingProjection(release, evidence) {
+  if (evidence.stackkitsVersion === release.tag) return ''
+  return `<Note>\nLifecycle runs for ${release.tag} are not projected yet; rows show ${evidence.stackkitsVersion}, the newest projected release.\n</Note>\n\n`
+}
+
+function renderOperatingSystems(release, compatibility, evidence) {
+  if (!evidence) {
+    let page = provenance('OS compatibility', 'Lifecycle evidence for StackKits operating systems', 'server', compatibility.contentDigest, release.publicSourceSha)
+    page += 'Lifecycle evidence for StackKits is not published yet, so this page lists no operating systems. [stackkit.cc/compatibility](https://stackkit.cc/compatibility) shows the automated lifecycle runs as soon as they are projected. Run `stackkit compat` on a host for non-destructive diagnostics.\n'
+    return page
+  }
+  let page = provenance('OS compatibility', `Lifecycle evidence for StackKits ${evidence.stackkitsVersion}`, 'server', canonicalDigest(evidence), release.publicSourceSha)
+  page += pendingProjection(release, evidence)
+  page += `Rows are projected from the automated lifecycle runs of StackKits ${releaseLink(evidence.stackkitsVersion)} on fresh virtual machines: install, init, generate, apply, verify, backup and restore. Last lifecycle run: ${evidence.generatedAt.slice(0, 10)}.\n\n`
+  for (const [grade, meaning] of GRADE_MEANINGS) page += `- \`${grade}\`: ${meaning}\n`
+  page += `\n${BEST_ENVIRONMENT}\n\n`
+  page += '| Operating system | Version | Tested architecture | Status | Evidence | Last verified |\n| --- | --- | --- | --- | --- | --- |\n'
+  for (const row of evidence.results) {
+    const name = row.os.distribution.charAt(0).toUpperCase() + row.os.distribution.slice(1)
+    page += `| ${md(name)} | ${md(row.os.version)} | ${md((row.architectures ?? []).join(', ') || '—')} | \`${md(row.grade)}\` | ${md(evidenceNote(row))} | ${md(row.lastVerifiedRelease ?? '—')} |\n`
+  }
+  page += '\nEach run installs the operating system fresh in a virtual machine.\n'
+  const environments = evidence.environments ?? []
+  if (environments.length) {
+    page += '\n## Kits by environment\n\nEach kit is graded in the kind of environment it is built for. A home network run also opens the local service addresses from another machine on that network.\n\n'
+    page += '| Kit | Environment | Status | Evidence | Last verified |\n| --- | --- | --- | --- | --- |\n'
+    for (const row of environments) {
+      page += `| ${md(EVIDENCE_KITS[row.kit])} | ${md(row.name)} | \`${md(row.grade)}\` | ${md(evidenceNote(row))} | ${md(row.lastVerifiedRelease ?? '—')} |\n`
+    }
+  }
+  // Hypervisor rows name vendor products this site does not publish;
+  // stackkit.cc renders them from the same projection.
+  page += '\n## Hypervisors\n\nStackKits run inside a guest VM on your hypervisor, never on the hypervisor host itself. A status covers that rollout end to end: the guest is created on the hypervisor and the StackKit lifecycle runs inside it. It does not certify a vendor product or a server provider.\n\n'
+  page += 'The hypervisor rollouts and their lifecycle evidence for this release are listed on [stackkit.cc/compatibility](https://stackkit.cc/compatibility). Run `stackkit compat` on a host for non-destructive diagnostics and the evidence published for its operating system and hypervisor.\n'
+  return page
 }
 
 export function renderPages(catalog, compatibility, evidence = null) {
   const release = catalog.release
-  let useCases = provenance('Use cases', `Components declared by StackKits ${release.tag}`, 'diagram-project', catalog)
+  let useCases = provenance('Use cases', `Components declared by StackKits ${release.tag}`, 'diagram-project', catalog.contentDigest, release.publicSourceSha)
   useCases += `This page is generated from the published [${release.tag} release](${release.releaseUrl}). It lists only the product purpose and components declared by that release.\n\n`
   for (const useCase of catalog.catalog.useCases) {
     useCases += `## ${md(useCase.title)}\n\n${md(useCase.description)}\n\n| Component | Role | Kind |\n| --- | --- | --- |\n`
@@ -327,41 +396,13 @@ export function renderPages(catalog, compatibility, evidence = null) {
     useCases += '\n'
   }
 
-  let os = provenance('OS compatibility', `Release-bound operating-system evidence for StackKits ${release.tag}`, 'server', compatibility)
-  if (evidence) {
-    const lastRun = evidence.generatedAt.slice(0, 10)
-    os += `Rows are projected from the automated lifecycle runs of [${release.tag}](${release.releaseUrl}) on fresh virtual machines: install, init, generate, apply, verify, backup and restore. \`supported\` means every phase passed on this release, \`preview\` means install through verify passed and a later phase did not, and \`unverified\` means no passing run for this release. Last lifecycle run: ${lastRun}.\n\n`
-    os += '| Operating system | Version | Tested architecture | Status | Evidence | Last verified |\n| --- | --- | --- | --- | --- | --- |\n'
-    for (const row of evidence.results) {
-      const name = row.os.distribution.charAt(0).toUpperCase() + row.os.distribution.slice(1)
-      os += `| ${md(name)} | ${md(row.os.version)} | ${md((row.architectures ?? []).join(', ') || '—')} | \`${md(row.grade)}\` | ${md(evidenceNote(row))} | ${md(row.lastVerifiedRelease ?? '—')} |\n`
-    }
-    os += '\nEach run installs the operating system fresh in a virtual machine.\n'
-    const environments = evidence.environments ?? []
-    if (environments.length) {
-      os += '\n## Kits by environment\n\nEach kit is graded in the kind of environment it is built for. A home network run also opens the local service addresses from another machine on that network.\n\n'
-      os += '| Kit | Environment | Status | Evidence | Last verified |\n| --- | --- | --- | --- | --- |\n'
-      for (const row of environments) {
-        os += `| ${md(EVIDENCE_KITS[row.kit])} | ${md(row.name)} | \`${md(row.grade)}\` | ${md(evidenceNote(row))} | ${md(row.lastVerifiedRelease ?? '—')} |\n`
-      }
-    }
-    // Hypervisor rows name vendor products this site does not publish;
-    // stackkit.cc renders them from the same projection.
-    os += '\n## Hypervisors\n\nStackKits run inside a guest VM on your hypervisor, never on the hypervisor host itself. A status covers that rollout end to end: the guest is created on the hypervisor and the StackKit lifecycle runs inside it. It does not certify a vendor product or a server provider.\n\n'
-    os += 'The hypervisor rollouts and their lifecycle evidence for this release are listed on [stackkit.cc/compatibility](https://stackkit.cc/compatibility). Run `stackkit compat` on a host for non-destructive diagnostics and the evidence published for its operating system and hypervisor.\n'
-  } else {
-    os += `Rows are generated from [${release.tag}](${release.releaseUrl}). \`unverified\` means no valid receipt for this release; it must not be read as support. \`unsupported\` is emitted only from policy.\n\n`
-    os += '| Operating system | Version | Architecture | Status | Evidence or reason |\n| --- | --- | --- | --- | --- |\n'
-    for (const row of compatibility.compatibility.os) {
-      const receipt = row.evidenceRef ? `[receipt](${row.evidenceRef})` : md(row.reason || 'No release-bound receipt')
-      os += `| ${md(row.name)} | ${md(row.version)} | ${md(row.architecture)} | \`${md(row.status)}\` | ${receipt} |\n`
-    }
-  }
+  const os = renderOperatingSystems(release, compatibility, evidence)
 
-  let delivery = provenance('Application delivery compatibility', `Declared workload adapter capabilities in StackKits ${release.tag}`, 'route', compatibility)
+  let delivery = provenance('Application delivery compatibility', `Declared workload adapter capabilities in StackKits ${release.tag}`, 'route', compatibility.contentDigest, release.publicSourceSha)
   const yes = value => value ? 'yes' : 'no'
   if (evidence) {
-    delivery += `Status and capabilities are declared by [${release.tag}](${release.releaseUrl}). The **Lifecycle test** column is projected from the automated lifecycle runs of this release: \`supported\` means the use case was installed, set up, backed up and restored on that adapter; \`not tested\` means no automated lane covers the combination yet.\n\n`
+    delivery += pendingProjection(release, evidence)
+    delivery += `Status and capabilities are declared by [${release.tag}](${release.releaseUrl}). The **Lifecycle test** column is projected from the automated lifecycle runs of StackKits ${releaseLink(evidence.stackkitsVersion)}: \`supported\` means the use case was installed, set up, backed up and restored on that adapter; \`not tested\` means no automated lane covers the combination yet.\n\n`
     delivery += '| Use case | Workload | Adapter | Status | Deploy | Route/TLS | Status evidence | Backup/restore | Lifecycle test |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n'
   } else {
     delivery += `This is the product capability declared by [${release.tag}](${release.releaseUrl}); it is not evidence that an adapter was deployed on a real host.\n\n`
@@ -395,6 +436,21 @@ function writeExact(target, content) {
   writeFileSync(target, content)
 }
 
+// The newest stored projection not newer than `tag`. Each one lives under the
+// release it is bound to, so a later sync without an incoming asset renders
+// what the last handover delivered even when that release trails `tag`.
+function storedEvidence(releases, tag) {
+  if (!existsSync(releases)) return null
+  const bound = readdirSync(releases)
+    .filter(name => EVIDENCE_RELEASE.test(name) && compareTags(name, tag) <= 0 && existsSync(path.join(releases, name, EVIDENCE_ASSET)))
+    .sort(compareTags)
+    .at(-1)
+  if (!bound) return null
+  const document = validateEvidence(JSON.parse(readFileSync(path.join(releases, bound, EVIDENCE_ASSET), 'utf8')), tag)
+  if (document.stackkitsVersion !== bound) throw new Error(`stored evidence under ${bound} is bound to ${document.stackkitsVersion}`)
+  return document
+}
+
 export function syncRelease({ repoRoot, inputDir, tag }) {
   string(tag, 'tag', /^v\d+\.\d+\.\d+$/)
   const catalogBytes = readFileSync(path.join(inputDir, 'stackkits-use-case-catalog-v1.json'), 'utf8')
@@ -403,27 +459,27 @@ export function syncRelease({ repoRoot, inputDir, tag }) {
   const compatibility = validateCompatibility(JSON.parse(compatibilityBytes), tag, new Set(catalog.catalog.useCases.map(item => item.id)))
   if (JSON.stringify(catalog.release) !== JSON.stringify(compatibility.release)) throw new Error('catalog and compatibility release identity differ')
   if (catalog.generatedAt !== compatibility.generatedAt || catalog.generatorVersion !== compatibility.generatorVersion) throw new Error('manifest generator provenance differs')
+  const incomingPath = path.join(inputDir, EVIDENCE_ASSET)
+  const incomingBytes = existsSync(incomingPath) ? readFileSync(incomingPath, 'utf8') : null
+  const incoming = incomingBytes ? validateEvidence(JSON.parse(incomingBytes), tag) : null
 
-  const snapshot = path.join(repoRoot, 'data', 'stackkits', 'releases', tag)
+  const releases = path.join(repoRoot, 'data', 'stackkits', 'releases')
+  const snapshot = path.join(releases, tag)
   for (const [name, bytes] of [['stackkits-use-case-catalog-v1.json', catalogBytes], ['stackkits-compatibility-v1.json', compatibilityBytes]]) {
     const target = path.join(snapshot, name)
     if (existsSync(target) && readFileSync(target, 'utf8') !== bytes) throw new Error(`immutable snapshot differs: ${target}`)
     writeExact(target, bytes)
   }
 
-  // Evidence is mutable: a newer projection for the same release replaces the
-  // stored one, and a sync without a fresh asset keeps rendering the last one.
-  const incomingEvidence = path.join(inputDir, EVIDENCE_ASSET)
-  const storedEvidence = path.join(snapshot, EVIDENCE_ASSET)
-  const evidenceSource = existsSync(incomingEvidence) ? incomingEvidence : existsSync(storedEvidence) ? storedEvidence : null
-  const evidenceBytes = evidenceSource ? readFileSync(evidenceSource, 'utf8') : null
-  const evidence = evidenceBytes ? validateEvidence(JSON.parse(evidenceBytes), tag) : null
-  if (evidenceBytes && evidenceSource === incomingEvidence) writeExact(storedEvidence, evidenceBytes)
+  // Evidence is mutable: the incoming projection is the one StackKits publishes
+  // now, so it replaces the stored document for its release and is rendered.
+  if (incoming) writeExact(path.join(releases, incoming.stackkitsVersion, EVIDENCE_ASSET), incomingBytes)
+  const evidence = incoming ?? storedEvidence(releases, tag)
 
   const latestPath = path.join(repoRoot, 'data', 'stackkits', 'latest.json')
   const current = existsSync(latestPath) ? JSON.parse(readFileSync(latestPath, 'utf8')) : null
   if (current?.tag === tag && (current.catalogDigest !== catalog.contentDigest || current.compatibilityDigest !== compatibility.contentDigest)) throw new Error(`latest ${tag} digest changed`)
-  if (current && compareTags(tag, current.tag) < 0) return { promoted: false, catalog, compatibility }
+  if (current && compareTags(tag, current.tag) < 0) return { promoted: false, catalog, compatibility, evidence }
 
   const latest = {
     schemaVersion: 'stackkits-docs-snapshot/v1', tag,
@@ -435,7 +491,7 @@ export function syncRelease({ repoRoot, inputDir, tag }) {
   writeExact(path.join(repoRoot, 'guides', 'stackkits', 'use-cases', 'overview.mdx'), pages.useCases)
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'os-compatibility.mdx'), pages.os)
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'application-delivery-compatibility.mdx'), pages.delivery)
-  return { promoted: true, catalog, compatibility }
+  return { promoted: true, catalog, compatibility, evidence }
 }
 
 function main() {
@@ -444,7 +500,7 @@ function main() {
   if (!args.includes('--write') || !value('--from-dir') || !value('--tag')) throw new Error('usage: node sync-stackkits-release-docs.mjs --from-dir <dir> --tag <vX.Y.Z> --write')
   const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
   const result = syncRelease({ repoRoot, inputDir: path.resolve(value('--from-dir')), tag: value('--tag') })
-  process.stdout.write(`stackkits_docs_sync: ${result.promoted ? 'promoted' : 'stored'} ${result.catalog.release.tag}\n`)
+  process.stdout.write(`stackkits_docs_sync: ${result.promoted ? 'promoted' : 'stored'} ${result.catalog.release.tag}, lifecycle evidence ${result.evidence?.stackkitsVersion ?? 'not published'}\n`)
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main()

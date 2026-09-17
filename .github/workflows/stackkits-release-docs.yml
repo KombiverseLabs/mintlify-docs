@@ -39,6 +39,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           DISPATCH_TAG: ${{ github.event.client_payload.tag }}
+          DISPATCH_EVIDENCE_TAG: ${{ github.event.client_payload.evidence_tag }}
           INPUT_TAG: ${{ inputs.tag }}
         shell: bash
         run: |
@@ -54,7 +55,19 @@ jobs:
           for name in stackkits-use-case-catalog-v1.json stackkits-compatibility-v1.json; do
             grep -Fxq "$name" <<<"$names" || available=false
           done
+          # Lifecycle evidence is attached to the release its runs cover, which
+          # trails the synced tag until runs for that tag are projected.
+          evidence_tag="${DISPATCH_EVIDENCE_TAG:-$tag}"
+          [[ "$evidence_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          if [ "$evidence_tag" != "$tag" ]; then
+            evidence_release="$(gh api "repos/kombifyio/StackKits/releases/tags/$evidence_tag")"
+            if [ "$(jq -r '.draft or .prerelease' <<<"$evidence_release")" != false ]; then
+              echo "::error::Lifecycle evidence release $evidence_tag is not a published release."
+              exit 1
+            fi
+          fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "evidence_tag=$evidence_tag" >> "$GITHUB_OUTPUT"
           echo "available=$available" >> "$GITHUB_OUTPUT"
           if [ "$available" != true ]; then
             echo "## DocsSyncPending" >> "$GITHUB_STEP_SUMMARY"
@@ -65,6 +78,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.release.outputs.tag }}
+          EVIDENCE_TAG: ${{ steps.release.outputs.evidence_tag }}
           EXPECTED_CATALOG_DIGEST: ${{ github.event.client_payload.catalog_digest }}
           EXPECTED_COMPATIBILITY_DIGEST: ${{ github.event.client_payload.compatibility_digest }}
           EXPECTED_EVIDENCE_DIGEST: ${{ github.event.client_payload.evidence_digest }}
@@ -75,14 +89,21 @@ jobs:
           mkdir -p .tmp/stackkits-docs
           gh release download "$TAG" --repo kombifyio/StackKits --dir .tmp/stackkits-docs \
             --pattern stackkits-use-case-catalog-v1.json --pattern stackkits-compatibility-v1.json
-          # The lifecycle evidence projection is optional and mutable; it only
-          # exists once receipts for this release were projected.
+          # The lifecycle evidence projection is optional and mutable. Without an
+          # incoming asset the sync renders the newest stored projection.
           evidence=.tmp/stackkits-docs/stackkits-compatibility-evidence-v3.json
-          if gh release download "$TAG" --repo kombifyio/StackKits --dir .tmp/stackkits-docs \
+          if gh release download "$EVIDENCE_TAG" --repo kombifyio/StackKits --dir .tmp/stackkits-docs \
             --pattern stackkits-compatibility-evidence-v3.json 2>/dev/null; then
             if [ -n "${EXPECTED_EVIDENCE_DIGEST:-}" ]; then
               [ "sha256:$(sha256sum "$evidence" | cut -d' ' -f1)" = "$EXPECTED_EVIDENCE_DIGEST" ]
             fi
+            if [ "$(jq -r .stackkitsVersion "$evidence")" != "$EVIDENCE_TAG" ]; then
+              echo "::error::The lifecycle evidence attached to $EVIDENCE_TAG is bound to another release."
+              exit 1
+            fi
+          elif [ -n "${EXPECTED_EVIDENCE_DIGEST:-}" ]; then
+            echo "::error::The dispatch names lifecycle evidence that $EVIDENCE_TAG does not contain."
+            exit 1
           fi
           catalog_digest="$(jq -r .contentDigest .tmp/stackkits-docs/stackkits-use-case-catalog-v1.json)"
           compatibility_digest="$(jq -r .contentDigest .tmp/stackkits-docs/stackkits-compatibility-v1.json)"
