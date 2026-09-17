@@ -161,6 +161,76 @@ function Test-LocalLinkTarget {
     return $false
 }
 
+# Mintlify serves every repository file it does not ignore at its path, not
+# only pages. Ignore rules follow .gitignore syntax, evaluated in order.
+function ConvertTo-MintIgnoreRule {
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Line)
+
+    $pattern = $Line.Trim()
+    if ($pattern.Length -eq 0 -or $pattern.StartsWith("#")) {
+        return $null
+    }
+    $negated = $pattern.StartsWith("!")
+    if ($negated) {
+        $pattern = $pattern.Substring(1)
+    }
+    $directoryOnly = $pattern.EndsWith("/")
+    $pattern = $pattern.TrimEnd("/")
+    $anchored = $pattern.Contains("/")
+    $pattern = $pattern.TrimStart("/")
+    if ($pattern.Length -eq 0) {
+        return $null
+    }
+
+    $builder = [System.Text.StringBuilder]::new()
+    $index = 0
+    while ($index -lt $pattern.Length) {
+        $character = [string]$pattern[$index]
+        if ($character -eq "*" -and $index + 1 -lt $pattern.Length -and [string]$pattern[$index + 1] -eq "*") {
+            if ($index + 2 -lt $pattern.Length -and [string]$pattern[$index + 2] -eq "/") {
+                $null = $builder.Append("(?:.*/)?")
+                $index += 3
+            }
+            else {
+                $null = $builder.Append(".*")
+                $index += 2
+            }
+            continue
+        }
+        if ($character -eq "*") {
+            $null = $builder.Append("[^/]*")
+        }
+        elseif ($character -eq "?") {
+            $null = $builder.Append("[^/]")
+        }
+        else {
+            $null = $builder.Append([regex]::Escape($character))
+        }
+        $index++
+    }
+    $prefix = if ($anchored) { "^" } else { "(?:^|/)" }
+    $suffix = if ($directoryOnly) { "/" } else { "(?:/|$)" }
+    return [pscustomobject]@{
+        Negated = $negated
+        Regex   = [regex]::new($prefix + $builder.ToString() + $suffix)
+    }
+}
+
+function Test-MintIgnored {
+    param(
+        [Parameter(Mandatory = $true)][string]$RelativePath,
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Rules
+    )
+
+    $ignored = $false
+    foreach ($rule in $Rules) {
+        if ($rule.Regex.IsMatch($RelativePath)) {
+            $ignored = -not $rule.Negated
+        }
+    }
+    return $ignored
+}
+
 $errors = [System.Collections.Generic.List[string]]::new()
 $localLinksChecked = 0
 
@@ -311,6 +381,42 @@ foreach ($file in $mdxFiles) {
     }
 }
 
+# Data, schemas and assets are served as files. The same forbidden-content rules
+# apply to every text file Mintlify publishes.
+$mintIgnoreLines = @(
+    ".git/", ".github/", ".claude/", ".agents/", ".idea/", ".vscode/", ".cursor/", ".mintlify/", "node_modules/",
+    "README.md", "LICENSE.md", "CHANGELOG.md", "CONTRIBUTING.md"
+)
+$mintIgnorePath = Join-Path $RepoRoot ".mintignore"
+if (Test-Path -LiteralPath $mintIgnorePath -PathType Leaf) {
+    $mintIgnoreLines += @(Get-Content -LiteralPath $mintIgnorePath)
+}
+$mintIgnoreRules = @($mintIgnoreLines | ForEach-Object { ConvertTo-MintIgnoreRule -Line ([string]$_) } | Where-Object { $null -ne $_ })
+$publishedTextExtensions = @(".css", ".csv", ".html", ".js", ".json", ".jsonl", ".jsx", ".md", ".svg", ".txt", ".xml", ".yaml", ".yml")
+$publishedFilesChecked = 0
+$publishedFiles = @(
+    Get-ChildItem -LiteralPath $RepoRoot -Recurse -File -Force | Where-Object {
+        $publishedTextExtensions -contains $_.Extension.ToLowerInvariant()
+    }
+)
+foreach ($file in $publishedFiles) {
+    $relative = $file.FullName.Substring($RepoRoot.Length).TrimStart("\", "/").Replace("\", "/")
+    $segments = @($relative -split "/")
+    if (@($segments | Where-Object { $excludedDirectorySet.Contains($_) }).Count -or (Test-MintIgnored -RelativePath $relative -Rules $mintIgnoreRules)) {
+        continue
+    }
+    $publishedFilesChecked++
+    $content = Get-Content -LiteralPath $file.FullName -Raw
+    if ($null -eq $content) {
+        continue
+    }
+    foreach ($rule in @($policy.forbiddenContentPatterns)) {
+        if ([regex]::IsMatch($content, [string]$rule.pattern)) {
+            $errors.Add("published file '$relative' matches forbidden content rule '$($rule.id)'") | Out-Null
+        }
+    }
+}
+
 if ($errors.Count -gt 0) {
     Write-Host "public safety errors:"
     foreach ($errorText in @($errors | Sort-Object -Unique)) {
@@ -325,4 +431,5 @@ Write-Host "public_allowlist_pages: $($publicPages.Count)"
 Write-Host "direct_hidden_pages: 0"
 Write-Host "forbidden_content_findings: 0"
 Write-Host "local_links_checked: $localLinksChecked"
+Write-Host "published_files_checked: $publishedFilesChecked"
 Write-Host "public_safety: PASS"

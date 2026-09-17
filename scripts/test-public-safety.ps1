@@ -19,12 +19,14 @@ function New-TestFixture {
             "index.mdx" = "---`ntitle: Test`ndescription: Safe public page`n---`n`n# Test`n"
         },
         [string]$TabName = "Start",
-        [switch]$RestrictedNavigation
+        [switch]$RestrictedNavigation,
+        [string]$MintIgnore = "public-safety-policy.json"
     )
 
     $root = Join-Path $testRoot $Name
     New-Item -ItemType Directory -Path $root -Force | Out-Null
     Copy-Item -LiteralPath $policySource -Destination (Join-Path $root "public-safety-policy.json")
+    Set-Content -LiteralPath (Join-Path $root ".mintignore") -Value $MintIgnore -Encoding utf8
 
     $group = [ordered]@{
         group = "Test"
@@ -138,6 +140,16 @@ try {
         "index.mdx" = "---`ntitle: Test`ndescription: Unreleased product surface`n---`n`nUse kombify Cloud to operate this stack.`n"
     }
     Assert-Case -Name "unreleased product content fails" -Fixture $unreleasedProduct -ShouldPass $false -ExpectedMessage "unreleased-product-surface"
+
+    $publishedData = @{
+        "index.mdx" = "---`ntitle: Test`ndescription: Safe public page`n---`n`n# Test`n"
+        "data/evidence.json" = "{ `"name`": `"Proxmox VE`" }`n"
+    }
+    $servedData = New-TestFixture -Name "served-data" -Pages $publishedData
+    Assert-Case -Name "published non-page file with forbidden content fails" -Fixture $servedData -ShouldPass $false -ExpectedMessage "internal-proxmox"
+
+    $ignoredData = New-TestFixture -Name "ignored-data" -Pages $publishedData -MintIgnore "public-safety-policy.json`n/data/"
+    Assert-Case -Name "mintignored non-page file is not published" -Fixture $ignoredData -ShouldPass $true
 
     $escapedLink = New-TestFixture -Name "escaped-link" -Pages @{
         "index.mdx" = "---`ntitle: Test`ndescription: Escaped local link`n---`n`n[Outside](../outside.txt)`n"
