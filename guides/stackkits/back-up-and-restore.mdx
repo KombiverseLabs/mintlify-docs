@@ -44,6 +44,20 @@ stackkit backup status --json
 
 The repository, source set, exclusions, and local custody are derived from the resolved plan. Do not point the command at an arbitrary volume or bypass owner custody.
 
+### What a snapshot covers
+
+The plan's `backupPolicy.coverage` selects which classes of data the snapshot takes. There are three nested groups, and a stack with no subscription behind it resolves to `content`:
+
+| Coverage | What it selects |
+| --- | --- |
+| `config` | Stack configuration, secret material, platform state, serverless configuration |
+| `content` | The above plus databases, user content, documents, and telemetry time series |
+| `media` | The above plus photo originals and large media |
+
+Media is chosen, never inherited. Photo and video libraries dominate a repository, so a first seed will not quietly pull one in: select `media` when you want it.
+
+`stackkit backup status` reports the exact volumes and exclusions the configuration actually selected, which is the answer to "what will the next snapshot contain". The coverage group is what the plan asked for; the status output is what one applied configuration resolved to.
+
 ## Create an idempotent snapshot
 
 ```bash
