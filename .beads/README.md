@@ -27,3 +27,18 @@ See [Beads Remote Write Standard](https://github.com/KombiverseLabs/kombify-work
 recovery, schema migration and lossless reconciliation. Install the checkout's
 hook guard before its first Beads operation. The guard's legacy compatibility
 branch does not authorize a local-only tracker for an active repository.
+
+## Connector sessions without native Beads tools
+
+Use the [GitHub → Beads bridge](../BEADS-GITHUB-BRIDGE.md), not a hand-edited
+JSONL export or a second tracker. Submit an immutable typed request under
+`.beads/requests/` in the tracker-owning repository through a protected-main PR.
+The owner workflow executes the canonical writer and reports native IDs and
+remote verification on the merged source PR. A submitted or merged request
+alone is not evidence that its Beads mutations completed.
+
+The workspace and AI Platform have enrolled owner-local workflows. Other owners
+must add the reviewed, commit-pinned caller before submitting requests. No new
+Dolt password or cross-repository write credential is required by this bridge.
+An uncertain operation is reconciled from its durable receipt and retained
+native state, never replayed because the local connector lacks `bd` or `dolt`.
