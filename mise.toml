@@ -41,13 +41,19 @@ run = "mise run local:e2e"
 [tasks.check]
 description = "Validate public scope, docs.json, content, and local links"
 run = [
+  "node scripts/check-localization.mjs",
   "node --test scripts/sync-stackkits-release-docs.test.mjs scripts/stackkits-generated-only-paths.test.mjs scripts/sync-speechkit-release-docs.test.mjs scripts/render-stackkits-cli-reference.test.mjs",
   "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/run-local-e2e.ps1 -SkipPreview -SkipExternalLinks",
 ]
 run_windows = [
+  "node scripts/check-localization.mjs",
   "node --test scripts/sync-stackkits-release-docs.test.mjs scripts/stackkits-generated-only-paths.test.mjs scripts/sync-speechkit-release-docs.test.mjs scripts/render-stackkits-cli-reference.test.mjs",
   "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run-local-e2e.ps1 -SkipPreview -SkipExternalLinks",
 ]
+
+[tasks."localization:check"]
+description = "Validate the Mintlify locale contract and localized Start-page candidates"
+run = "node scripts/check-localization.mjs"
 
 [tasks."local:e2e"]
 description = "Run the local docs gate"
