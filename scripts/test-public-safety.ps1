@@ -37,7 +37,12 @@ function New-TestFixture {
     }
     $docs = [ordered]@{
         navigation = [ordered]@{
-            tabs = @([ordered]@{ tab = $TabName; groups = @($group) })
+            languages = @(
+                [ordered]@{
+                    language = "en"
+                    tabs = @([ordered]@{ tab = $TabName; groups = @($group) })
+                }
+            )
         }
     }
     $docs | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $root "docs.json") -Encoding utf8

@@ -97,7 +97,7 @@ function Add-PageRef {
     foreach ($property in $Node.PSObject.Properties) {
         if ($property.Name -eq "pages") {
             Add-PageRef -Node $property.Value -Pages $Pages
-        } elseif ($property.Name -in @("groups", "tabs")) {
+        } elseif ($property.Name -in @("groups", "tabs", "languages")) {
             Add-PageRef -Node $property.Value -Pages $Pages
         } elseif ($property.Name -eq "root" -and $property.Value -is [string]) {
             $Pages.Add($property.Value) | Out-Null

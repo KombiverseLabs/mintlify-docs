@@ -223,7 +223,9 @@ function findGroup(entries, root) {
 }
 
 export function applyNavigation(docs, navigation) {
-  const tab = docs.navigation?.tabs?.find((candidate) => candidate.tab === 'StackKits')
+  const englishNavigation = docs.navigation?.languages?.find((candidate) => candidate.language === 'en')
+  const tabs = englishNavigation?.tabs ?? docs.navigation?.tabs
+  const tab = tabs?.find((candidate) => candidate.tab === 'StackKits')
   assert(tab, 'docs.json has no StackKits tab')
   const existing = findGroup(tab.groups, navigation.root)
   if (existing) {
