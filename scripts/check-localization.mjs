@@ -20,7 +20,8 @@ function readJson(relativePath) {
 }
 
 function sha256(relativePath) {
-  return createHash('sha256').update(readFileSync(path.join(repoRoot, relativePath))).digest('hex')
+  const canonicalSource = readFileSync(path.join(repoRoot, relativePath), 'utf8').replace(/\r\n?/g, '\n')
+  return createHash('sha256').update(canonicalSource, 'utf8').digest('hex')
 }
 
 function pageRoutes(node, routes = new Set()) {
