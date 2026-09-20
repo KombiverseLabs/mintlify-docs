@@ -68,8 +68,35 @@ function Add-NavigationPage {
         return
     }
     foreach ($property in $Node.PSObject.Properties) {
-        if ($property.Name -in @("pages", "groups", "tabs", "root")) {
+        if ($property.Name -in @("pages", "groups", "tabs", "languages", "root")) {
             Add-NavigationPage -Node $property.Value -Pages $Pages
+        }
+    }
+}
+
+function Add-NavigationTab {
+    param(
+        $Node,
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [System.Collections.Generic.List[string]]$Tabs
+    )
+
+    if ($null -eq $Node -or $Node -is [string]) {
+        return
+    }
+    if ($Node -is [System.Array]) {
+        foreach ($item in $Node) {
+            Add-NavigationTab -Node $item -Tabs $Tabs
+        }
+        return
+    }
+    foreach ($property in $Node.PSObject.Properties) {
+        if ($property.Name -eq "tab" -and $property.Value -is [string]) {
+            $Tabs.Add([string]$property.Value) | Out-Null
+        }
+        elseif ($property.Name -in @("languages", "tabs", "groups")) {
+            Add-NavigationTab -Node $property.Value -Tabs $Tabs
         }
     }
 }
@@ -244,15 +271,28 @@ if ([regex]::IsMatch($docsRaw, '(?im)"(?:audience|authentication|restricted)"\s*
 $navigationPages = [System.Collections.Generic.List[string]]::new()
 Add-NavigationPage -Node $docs.navigation -Pages $navigationPages
 $publicPages = @($navigationPages | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Sort-Object -Unique)
-$navigationTabs = @(
-    $docs.navigation.tabs |
-        ForEach-Object { [string]$_.tab } |
-        Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
-)
+$navigationTabList = [System.Collections.Generic.List[string]]::new()
+Add-NavigationTab -Node $docs.navigation -Tabs $navigationTabList
+$navigationTabs = @($navigationTabList | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
 $allowedNavigationTabs = @($policy.allowedNavigationTabs | ForEach-Object { [string]$_ })
 foreach ($tab in $navigationTabs) {
     if ($tab -notin $allowedNavigationTabs) {
         $errors.Add("navigation tab '$tab' is outside the approved public scope") | Out-Null
+    }
+}
+$navigationLanguages = @(
+    foreach ($property in $docs.navigation.PSObject.Properties) {
+        if ($property.Name -eq "languages") {
+            $property.Value |
+                ForEach-Object { [string]$_.language } |
+                Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
+        }
+    }
+)
+$allowedNavigationLanguages = @($policy.allowedNavigationLanguages | ForEach-Object { [string]$_ })
+foreach ($language in $navigationLanguages) {
+    if ($language -notin $allowedNavigationLanguages) {
+        $errors.Add("navigation language '$language' is outside the approved public scope") | Out-Null
     }
 }
 $allowedExactPageSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)

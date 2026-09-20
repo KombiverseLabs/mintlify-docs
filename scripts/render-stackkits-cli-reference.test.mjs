@@ -57,19 +57,26 @@ test('navigation update replaces only the command pages of the nested CLI group'
   const cli = { group: 'Commands', icon: 'terminal', root: 'stackkits/reference/cli/overview', pages: ['old'] }
   const docs = {
     navigation: {
-      tabs: [
-        { tab: 'StackKits', groups: [{ group: 'Get started', pages: ['a'] }, { group: 'Reference', pages: [cli, 'b'] }] },
-        { tab: 'SpeechKit', groups: [{ group: 'Reference', pages: ['speech'] }] },
+      languages: [
+        {
+          language: 'en',
+          tabs: [
+            { tab: 'StackKits', groups: [{ group: 'Get started', pages: ['a'] }, { group: 'Reference', pages: [cli, 'b'] }] },
+            { tab: 'SpeechKit', groups: [{ group: 'Reference', pages: ['speech'] }] },
+          ],
+        },
+        { language: 'de', tabs: [{ tab: 'Start', groups: [{ group: 'Start', pages: ['de/index'] }] }] },
       ],
     },
   }
   const { navigation } = renderCliReference(reference(), { sourceSha: SHA, contentHash: 'sha256:x' })
   const updated = applyNavigation(structuredClone(docs), navigation)
-  const [kept, sibling] = updated.navigation.tabs[0].groups[1].pages
+  const [kept, sibling] = updated.navigation.languages[0].tabs[0].groups[1].pages
   assert.equal(kept.group, cli.group)
   assert.equal(kept.icon, cli.icon)
   assert.deepEqual(kept.pages, navigation.pages)
   assert.equal(sibling, 'b')
-  assert.deepEqual(updated.navigation.tabs[0].groups[0], docs.navigation.tabs[0].groups[0])
-  assert.deepEqual(updated.navigation.tabs[1], docs.navigation.tabs[1])
+  assert.deepEqual(updated.navigation.languages[0].tabs[0].groups[0], docs.navigation.languages[0].tabs[0].groups[0])
+  assert.deepEqual(updated.navigation.languages[0].tabs[1], docs.navigation.languages[0].tabs[1])
+  assert.deepEqual(updated.navigation.languages[1], docs.navigation.languages[1])
 })

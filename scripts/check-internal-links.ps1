@@ -78,7 +78,7 @@ function Add-PageRef {
     }
 
     foreach ($property in $Node.PSObject.Properties) {
-        if ($property.Name -in @("pages", "groups", "tabs")) {
+        if ($property.Name -in @("pages", "groups", "tabs", "languages")) {
             Add-PageRef -Node $property.Value -Routes $Routes
         }
     }
