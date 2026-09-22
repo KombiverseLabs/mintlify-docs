@@ -21,7 +21,10 @@ mise --cd <workspace-root> run beads:write --repo mintlify-docs -- close <id>
 Success requires BEADS_REMOTE_WRITE_OK. If publishing fails, preserve the
 mutation and run beads:publish --repo mintlify-docs; never repeat a create.
 Fresh checkouts adopt the existing remote through beads:bootstrap. Only the
-designated canonical migrator upgrades a shared schema.
+designated canonical migrator upgrades a shared schema. Use the bd version
+pinned in the workspace `internal/planning/beads-bridge-tools.json` (bd 1.3.0,
+schema v66); an older bd refuses the store until it is upgraded and the clone
+is bootstrapped.
 
 See [Beads Remote Write Standard](https://github.com/KombiverseLabs/kombify-workspace/blob/main/BEADS-REMOTE-WRITE-STANDARD.md) for routing,
 recovery, schema migration and lossless reconciliation. Install the checkout's
