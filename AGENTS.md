@@ -1,5 +1,8 @@
 # AGENTS.md - mintlify-docs
 
+Public Mintlify documentation for kombify (Tier 1). `docs.json` is the
+navigation source of truth; pages are MDX files.
+
 <!-- BEGIN GENERATED: elastic-development-throughput kombify-throughput-policy-sync -->
 > Generated from the canonical `## Kombify Development Standard` section in the workspace
 > root `AGENTS.md`. Do not edit this block in a product repository; update
@@ -7,16 +10,18 @@
 
 ## Kombify Development Standard
 
-1. Phase determines rigor: product SemVer below 1.0.0 selects `fast-pre-1.0` — the affected deterministic gate is the only synchronous gate, and broad suites are 1.0-promotion evidence, never development gates. Route implementation, bug fixing, test selection or cleanup, local live testing, and pre-1.0 merge or activation decisions through `$kombify-fast-development` from the internal `kombify-development` plugin; repository rules may narrow it but never weaken it.
-2. Test behavior at public boundaries (CLI contracts, HTTP/OpenAPI, CUE schemas, cross-repo fixtures); black-box tests are the default, and a white-box test needs a stated reason.
-3. A new test needs one of three reasons — reproduced regression, stable core invariant, or registered sensitive boundary (auth, billing, migrations, provider control, signing) — otherwise none.
-4. Never assert structure: no exact error strings, element or field counts, source-text greps, or internal snapshots; assert the effect. Golden files only for genuine external contracts.
-5. One behavior, one test: no duplicated axes (backend twins, unit+integration twins, per-version copies); when two tests cover one behavior without distinct risk, delete one.
-6. Coverage percentage and test count are never goals or gates pre-1.0; sensitive areas are protected by named behavior tests, not percentage floors.
-7. A test that breaks on a behavior-preserving refactor is a defective test: fix or delete the test, never contort the code to keep it green.
-8. The running app is the primary feedback surface: every product repo maintains a documented one-command hot-reload dev loop (edit to observable in seconds; Docker optional, never required), and the affected test slice stays below 2 minutes target, 5 minutes hard.
-9. Delete, don't hoard: skipped, never-running, or superseded tests and dead code are removed in the same slice that obsoletes them; suite reduction runs as its own measured slice; git history is the archive.
-10. Claims tier to evidence: implemented, locally verified, merged, deployed, live, and release-ready are distinct claims, and missing evidence is pending, never passed. Update only this root section, then run `mise run agents:throughput:sync`; generated repository copies must not be edited manually.
+Binding; `kombify-fast-development` holds the detail.
+
+1. Pre-1.0 (`fast-pre-1.0`): the affected deterministic gate is the only synchronous gate.
+2. Test behavior at public boundaries; black-box by default.
+3. Add a test only for a regression, core invariant or sensitive boundary (auth, billing, migrations, provider control, signing).
+4. Assert effects, never structure (error strings, counts, snapshots).
+5. One behavior, one test.
+6. No coverage or test-count goals pre-1.0.
+7. A test that breaks on a behavior-preserving refactor is fixed or deleted.
+8. The running app is the feedback loop: a one-command hot-reload dev loop; affected tests under 2 minutes.
+9. Delete skipped, dead and superseded tests and code in the slice that obsoletes them.
+10. Claims follow evidence: implemented, merged, deployed and live differ; missing evidence is pending.
 <!-- END GENERATED: elastic-development-throughput kombify-throughput-policy-sync -->
 
 <!-- BEGIN GENERATED: planning-policy kombify-agent-policy-sync -->
@@ -26,70 +31,59 @@
 
 ## Planning System Policy
 
-- Authority:
-  [GITHUB-PROJECTS-PLANNING-STANDARD.md](https://github.com/KombiverseLabs/kombify-workspace/blob/main/GITHUB-PROJECTS-PLANNING-STANDARD.md).
-  This section is the source for generated repo blocks; update it here, then run
-  `mise --cd <workspace-root> run agents:planning:sync`.
-- GitHub Projects owns cross-repo priorities, decisions, blockers, and phase
-  gates. Repo `ROADMAP.md` owns milestones; Beads owns all executable detail.
-  Cross-reference them; do not synchronize them bidirectionally.
-- Check Projects at session boundaries. `roadmap-open-issues` is a one-way Beads
-  view; never hand-edit or sync its generated block back. The retired
-  `roadmap:update -Sync` interface fails closed before local or external side
-  effects and is not a planning path. Ordinary `roadmap:update` remains valid.
-- At milestone-relevant close, update repo roadmap gates and run
-  `mise --cd <workspace-root> run roadmap:update -- -Repo <repo>`.
+- GitHub Projects owns cross-repo priorities, `ROADMAP.md` milestones, Beads
+  executable work; never sync them bidirectionally. Linear is read-only.
+- At a milestone-relevant close run
+  `mise --cd <workspace-root> run roadmap:update -- -Repo <repo>`
+  ([standard](https://github.com/KombiverseLabs/kombify-workspace/blob/main/GITHUB-PROJECTS-PLANNING-STANDARD.md)).
 
 ## Beads Remote Write Policy
 
-- Authority: `BEADS-REMOTE-WRITE-STANDARD.md`. The remote Dolt history is the
-  collaboration authority; local embedded Dolt is a working copy and
-  `.beads/issues.jsonl` is a derived export.
-- Read current tasks from the manifest-owned Dolt tracker. Git-tracked JSONL,
-  stale worktree stores and historical reports are never a fallback for a
-  missing owner. The planning-policy sync projects this policy and the compact
-  Beads startup guidance; it removes superseded generic Beads instructions.
-- Run every Beads mutation through `mise --cd <workspace-root> run beads:write
-  --repo <manifest-id> -- <bd mutation...>`. Success requires pull, local
-  Dolt commit, blocking `bd dolt push`, a verified remote pull/read round trip,
-  and a `BEADS_REMOTE_WRITE_OK` receipt. The wrapper serializes local writers
-  per tracker authority; never repeat a mutation after a publish failure.
-- `dolt.auto-push`, `no-push`, and `no-git-ops` are forbidden. Auto-push
-  failures are non-blocking warnings and are unsafe for concurrent Git-protocol
-  writers; the central wrapper owns reconciliation and fails closed.
-- Schema upgrades have exactly one designated canonical migrator per
-  repository (`mise run beads:migrate --repo <id> --designated-migrator`).
-  Every other clone adopts the migrated remote with `mise run beads:bootstrap
-  --repo <id>` and never applies the migration independently.
+- The remote Dolt history is the tracker authority; `.beads/issues.jsonl` is a
+  derived export, never a fallback.
+- Mutate only through
+  `mise --cd <workspace-root> run beads:write --repo <manifest-id> -- <bd args>`
+  and require `BEADS_REMOTE_WRITE_OK`; after a publish failure run
+  `beads:publish`, never the mutation again.
+- Never enable `dolt.auto-push`, `no-push` or `no-git-ops`. Schema upgrades have
+  one designated migrator; other clones run `beads:bootstrap`
+  ([standard](https://github.com/KombiverseLabs/kombify-workspace/blob/main/BEADS-REMOTE-WRITE-STANDARD.md)).
+
+## Git And Completion
+
+- Track the task in Beads; branch from `origin/main` in your own worktree and
+  stage only your paths.
+- Run the affected gate, then commit, push, open a PR and squash-merge once it
+  is mergeable and green; never park a mergeable PR. Commit as the GitHub
+  identity your token acts as.
+- A merge is not live: ship only through the `kombify-ship` skill
+  (`kombify-workspace/.agents/skills/kombify-ship/SKILL.md`).
+- Close Beads issues after the merge SHA exists; remove only your merged
+  worktree with `git worktree remove`.
+- Report committed, merged, deployed and live state with evidence, plus any
+  exact blocker.
 <!-- END GENERATED: planning-policy kombify-agent-policy-sync -->
 
-Generic AI-agent instructions for Codex, Copilot, Gemini, Claude, and other coding agents.
+## Sources
 
-## Normative Sources
-
-Use workspace-root standards and `../kombify-Core/standards/`:
-
-- `../DOCUMENTATION-STANDARD.md` (workspace root, binding) for the documentation tier model and Tier-1 public docs rules.
-- `../kombify-Core/standards/REPO-FILE-SCHEMA.md` for root metadata.
-- `../GITHUB-PROJECTS-PLANNING-STANDARD.md` (workspace root) for portfolio priorities, roadmap milestones, and Beads execution.
-- `../PLATFORM-STRATEGY.md` (workspace root) for product naming and public/internal boundaries.
-- Repo gates: `.github/workflows/public-safety.yml` (public allowlist enforcement) and `.github/workflows/parity-gate.yml` (generated-MDX frontmatter).
-
-## Repo Context
-
-This repo is the public Mintlify documentation surface for kombify. `docs.json` is the navigation source of truth. Pages are MDX files.
+- Workspace `DOCUMENTATION-STANDARD.md` (tier model, Tier-1 rules, Brand bind)
+  and `PLATFORM-STRATEGY.md` (product naming, public/internal boundaries);
+  `kombify-Core/standards/REPO-FILE-SCHEMA.md` for root metadata.
+- Repository gates: `.github/workflows/public-safety.yml` (public allowlist)
+  and `.github/workflows/parity-gate.yml` (generated-MDX frontmatter).
 
 ## Working Rules
 
-- Register every new page in `docs.json`.
-- Keep public docs public: no internal-only server access, secrets, operator-only MCP details, or private customer data.
-- Use lowercase `kombify` for the brand unless quoting a proper name or code identifier.
-- Do not duplicate Core standards; link to them when internal agents need context.
-- Keep implementation-specific docs in the owning product repo, not here.
-- Keep roadmap scope in `ROADMAP.md`; keep tasks and bug lists in the execution tracker.
+- Register every new page in `docs.json`; verify every navigation target
+  exists as an `.mdx` file.
+- Public only: no internal runbooks, server access, secrets, operator-only MCP
+  details or private customer data.
+- Use lowercase `kombify` unless quoting a proper name or code identifier; keep
+  product names and public URLs consistent with current standards.
+- Link standards instead of copying them; implementation-specific docs stay in
+  the owning product repository.
 
 ## Verification
 
-- Run `mise run check` for config/path validation.
-- Run `mise run local:e2e` before claiming this docs repo is ready to publish.
-- When changing navigation, verify every page target exists as an `.mdx` file.
+Run `mise run check` for config and path validation, and `mise run local:e2e`
+before claiming the docs are ready to publish.
