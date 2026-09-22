@@ -7,6 +7,9 @@ name: Delivery v2
 on:
   push:
     branches: [main]
+    paths:
+      - ".kombify/VERSION"
+      - "**/.kombify/VERSION"
   pull_request:
   workflow_dispatch:
     inputs:
@@ -31,7 +34,127 @@ permissions:
   contents: read
 
 jobs:
+  minor-release:
+    if: github.event_name == 'push'
+    runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'ubuntu-24.04' }}
+    outputs:
+      proceed: ${{ steps.bump.outputs.proceed }}
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 1
+      - name: Fetch the previous main commit
+        continue-on-error: true
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: git fetch --depth=1 origin "$BEFORE"
+      - id: bump
+        env:
+          BEFORE: ${{ github.event.before }}
+          HEAD: ${{ github.sha }}
+        run: |
+          python3 - << 'PY'
+          #!/usr/bin/env python3
+          """Report whether HEAD raises the minor or major line of a .kombify/VERSION.
+
+          A prepared release line is MAJOR.MINOR.PATCH with PATCH 0 through 9. Ordinary
+          merges and patch bumps must not start main delivery. A new minor line
+          (0.4.9 -> 0.5.0) or a new major line (0.9.9 -> 1.0.0) must.
+
+          Prints proceed=true or proceed=false. When GITHUB_OUTPUT is set, writes that
+          line there as an Actions step output.
+          """
+
+          import os
+          import re
+          import subprocess
+          import sys
+
+          SEMVER = re.compile(r"\s*(\d+)\.(\d+)\.(\d+)\s*\Z")
+          ZERO_SHA = re.compile(r"0+\Z")
+
+
+          def parse_version(text):
+              match = SEMVER.fullmatch(text or "")
+              if not match:
+                  return None
+              return tuple(int(part) for part in match.groups())
+
+
+          def is_version_path(path):
+              return path == ".kombify/VERSION" or path.endswith("/.kombify/VERSION")
+
+
+          def line_raised(old, new):
+              """True when new starts a higher minor or major line, or introduces one."""
+              if new is None:
+                  return False
+              if old is None:
+                  return True
+              return (new[0], new[1]) > (old[0], old[1])
+
+
+          def list_versions(rev):
+              """Return {path: text} for one commit, or None when the commit is unreadable."""
+              listing = subprocess.run(
+                  ["git", "ls-tree", "-r", "--name-only", rev],
+                  capture_output=True,
+                  text=True,
+              )
+              if listing.returncode != 0:
+                  return None
+              found = {}
+              for path in listing.stdout.splitlines():
+                  if not is_version_path(path):
+                      continue
+                  shown = subprocess.run(
+                      ["git", "show", f"{rev}:{path}"],
+                      capture_output=True,
+                      text=True,
+                  )
+                  if shown.returncode == 0:
+                      found[path] = shown.stdout
+              return found
+
+
+          def proceed_for(old_versions, new_versions):
+              if old_versions is None or new_versions is None:
+                  return True
+              paths = set(old_versions) | set(new_versions)
+              return any(
+                  line_raised(parse_version(old_versions.get(path)), parse_version(new_versions.get(path)))
+                  for path in paths
+              )
+
+
+          def decide(before, head):
+              if not before or ZERO_SHA.fullmatch(before):
+                  introduced = list_versions(head)
+                  if introduced is None:
+                      return True
+                  return any(parse_version(text) for text in introduced.values())
+              return proceed_for(list_versions(before), list_versions(head))
+
+
+          def main():
+              before = os.environ.get("BEFORE", "").strip()
+              head = os.environ.get("HEAD", "HEAD").strip() or "HEAD"
+              decision = "true" if decide(before, head) else "false"
+              line = f"proceed={decision}\n"
+              output = os.environ.get("GITHUB_OUTPUT", "").strip()
+              if output:
+                  with open(output, "a", encoding="utf-8") as handle:
+                      handle.write(line)
+              sys.stdout.write(line)
+              return 0
+
+
+          if __name__ == "__main__":
+              sys.exit(main())
+          PY
   delivery:
+    needs: [minor-release]
+    if: ${{ always() && (github.event_name != 'push' || needs.minor-release.outputs.proceed == 'true') }}
     name: Compile exact plan and execute selected profile
     runs-on: ${{ vars.DEPOT_FALLBACK_RUNNER || 'ubuntu-24.04' }}
     timeout-minutes: 15
