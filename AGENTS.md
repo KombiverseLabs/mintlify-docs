@@ -16,7 +16,7 @@ Binding; `kombify-fast-development` holds the detail.
 2. Test behavior at public boundaries; black-box by default.
 3. Add a test only for a regression, core invariant or sensitive boundary (auth, billing, migrations, provider control, signing).
 4. Assert effects, never structure (error strings, counts, snapshots).
-5. One behavior, one test.
+5. One behavior, max one test.
 6. No coverage or test-count goals pre-1.0.
 7. A test that breaks on a behavior-preserving refactor is fixed or deleted.
 8. The running app is the feedback loop: a one-command hot-reload dev loop; affected tests under 2 minutes.
@@ -32,10 +32,7 @@ Binding; `kombify-fast-development` holds the detail.
 ## Planning System Policy
 
 - GitHub Projects owns cross-repo priorities, `ROADMAP.md` milestones, Beads
-  executable work; never sync them bidirectionally. Linear is read-only.
-- At a milestone-relevant close run
-  `mise --cd <workspace-root> run roadmap:update -- -Repo <repo>`
-  ([standard](https://github.com/KombiverseLabs/kombify-workspace/blob/main/GITHUB-PROJECTS-PLANNING-STANDARD.md)).
+  executable work.
 
 ## Beads Remote Write Policy
 
