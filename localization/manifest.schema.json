@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://docs.kombify.io/localization/manifest.schema.json",
+  "title": "Kombify public documentation localization manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "sourceLocale", "fallbackLocale", "source", "locales"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": "kombify-public-docs-localization/v1" },
+    "sourceLocale": { "const": "en" },
+    "fallbackLocale": { "const": "en" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "const": "index.mdx" },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "locales": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["locale", "providerLocale", "direction", "path", "reviewState"],
+        "properties": {
+          "locale": { "enum": ["en", "de", "es", "zh-Hans", "hi", "ar"] },
+          "providerLocale": { "enum": ["en", "de", "es", "cn", "hi", "ar"] },
+          "direction": { "enum": ["ltr", "rtl"] },
+          "path": { "type": "string", "pattern": "^(?:index|(?:de|es|cn|hi|ar)/index)\\.mdx$" },
+          "sourceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "reviewState": { "enum": ["source", "machine-assisted-candidate"] }
+        }
+      }
+    }
+  }
+}
