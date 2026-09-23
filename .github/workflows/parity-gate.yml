@@ -2,6 +2,7 @@ name: Parity Gate
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     paths:
       - "stackkits/apps/**"
       - "stackkits/reference/use-case-catalog.mdx"
@@ -11,6 +12,7 @@ on:
 
 jobs:
   check-generated-ownership:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     name: Verify generated docs ownership
     runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'ubuntu-24.04' }}
     timeout-minutes: 3

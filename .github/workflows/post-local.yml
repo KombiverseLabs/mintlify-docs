@@ -3,6 +3,7 @@
 name: Post-Local
 on:
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - main
   merge_group: null
@@ -10,6 +11,7 @@ permissions:
   contents: read
 jobs:
   candidate:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     name: Validate candidate
     runs-on: depot-ubuntu-24.04
     timeout-minutes: 2
@@ -49,6 +51,7 @@ jobs:
             core.setOutput('base', candidate.base);
             core.setOutput('runner', runner);
   fast:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     name: Focused fast gate
     needs: candidate
     runs-on: ${{ needs.candidate.outputs.runner }}
@@ -118,6 +121,7 @@ jobs:
             exit 1
           fi
   dependency-review:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     name: Dependency review
     needs: candidate
     runs-on: ${{ needs.candidate.outputs.runner }}
@@ -175,7 +179,7 @@ jobs:
       - candidate
       - fast
       - dependency-review
-    if: ${{ always() }}
+    if: ${{ (always()) && (github.event_name != 'pull_request' || !github.event.pull_request.draft) }}
     runs-on: depot-ubuntu-24.04
     timeout-minutes: 2
     permissions: {}

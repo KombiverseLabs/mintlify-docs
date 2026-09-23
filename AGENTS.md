@@ -50,9 +50,11 @@ Binding; `kombify-fast-development` holds the detail.
 
 - Track the task in Beads; branch from `origin/main` in your own worktree and
   stage only your paths.
-- Run the affected gate, then commit, push, open a PR and squash-merge once it
-  is mergeable and green; never park a mergeable PR. Commit as the GitHub
-  identity your token acts as.
+- Run the affected gate, then commit, push and open a draft PR (CI skips
+  drafts); mark it ready when the slice is complete, keep dependent slices in
+  one `gh stack` merged from the top, and squash-merge once mergeable and
+  green; never park a mergeable PR. Commit as the GitHub identity your token
+  acts as.
 - A merge is not live: ship only through the `kombify-ship` skill
   (`kombify-workspace/.agents/skills/kombify-ship/SKILL.md`).
 - Close Beads issues after the merge SHA exists; remove only your merged
