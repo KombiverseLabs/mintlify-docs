@@ -447,9 +447,10 @@ function defaultComponentId(useCase) {
   return useCase.components.find(component => component.role === 'primary')?.id ?? null
 }
 
-function renderUseCase(useCase) {
+function renderUseCase(useCase, redirects) {
   let section = `${md(useCase.description)}\n\n`
-  if (useCase.docs) section += `Guide: [Open the guide](${useCase.docs})\n\n`
+  // A release keeps the guide path it shipped with; docs.json redirects name where a moved guide lives now.
+  if (useCase.docs) section += `Guide: [Open the guide](${redirects.get(useCase.docs) ?? useCase.docs})\n\n`
   const defaultId = defaultComponentId(useCase)
   section += '| Component | Role | Kind | Default |\n| --- | --- | --- | --- |\n'
   for (const component of useCase.components) {
@@ -457,12 +458,14 @@ function renderUseCase(useCase) {
   }
   section += '\n'
   if ((useCase.alternatives ?? []).length > 1) {
-    section += `Alternatives: ${useCase.alternatives.map(alternative => md(alternative.name)).join(', ')}\n\n`
+    // A release may carry no display name (name === id); show those as the StackSpec IDs they are.
+    const label = alternative => (alternative.name === alternative.id ? `\`${md(alternative.id)}\`` : md(alternative.name))
+    section += `Alternatives: ${useCase.alternatives.map(label).join(', ')}\n\n`
   }
   return section
 }
 
-export function renderPages(catalog, compatibility, evidence = null) {
+export function renderPages(catalog, compatibility, evidence = null, redirects = new Map()) {
   const release = catalog.release
   let useCases = provenance('Use-case catalog', `Use cases and components declared by StackKits ${release.tag}`, 'diagram-project', catalog.contentDigest, release.publicSourceSha)
   useCases += `This page is generated from the published [${release.tag} release](${release.releaseUrl}). It lists every use case that release declares, grouped by main use case, with its purpose, components and default app. A declared component is not evidence of an installation or a verified run on a host; [OS compatibility](/stackkits/reference/os-compatibility) has the verified lifecycle grades. [Use cases](/guides/stackkits/use-cases/overview) has the setup guides overview.\n\n`
@@ -470,10 +473,10 @@ export function renderPages(catalog, compatibility, evidence = null) {
     useCases += `## ${md(group.title)}\n\n`
     if (group.useCases.length > 1) {
       for (const useCase of group.useCases) {
-        useCases += `### ${md(useCase.title)}\n\n${renderUseCase(useCase)}`
+        useCases += `### ${md(useCase.title)}\n\n${renderUseCase(useCase, redirects)}`
       }
     } else {
-      useCases += renderUseCase(group.useCases[0])
+      useCases += renderUseCase(group.useCases[0], redirects)
     }
   }
 
@@ -549,6 +552,13 @@ function readManifests(dir, tag) {
   return { catalogBytes, compatibilityBytes, catalog, compatibility }
 }
 
+function docsRedirects(repoRoot) {
+  const docsPath = path.join(repoRoot, 'docs.json')
+  if (!existsSync(docsPath)) return new Map()
+  const redirects = JSON.parse(readFileSync(docsPath, 'utf8')).redirects ?? []
+  return new Map(redirects.map(redirect => [redirect.source, redirect.destination]))
+}
+
 export function syncRelease({ repoRoot, inputDir, tag }) {
   string(tag, 'tag', /^v\d+\.\d+\.\d+$/)
   const synced = readManifests(inputDir, tag)
@@ -587,7 +597,7 @@ export function syncRelease({ repoRoot, inputDir, tag }) {
   // means a sync for an older tag that updates that projection re-renders the
   // pages, and an older incoming projection never displaces a newer stored one.
   const evidence = storedEvidence(releases, shown.catalog.release.tag)
-  const pages = renderPages(shown.catalog, shown.compatibility, evidence)
+  const pages = renderPages(shown.catalog, shown.compatibility, evidence, docsRedirects(repoRoot))
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'use-case-catalog.mdx'), pages.useCases)
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'os-compatibility.mdx'), pages.os)
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'application-delivery-compatibility.mdx'), pages.delivery)
