@@ -1,30 +1,55 @@
 ---
-title: "Development"
-description: "Host private Git repositories for your projects with Gitea"
-sidebarTitle: "Development"
+title: "Dev"
+description: "Host private Git repositories with Gitea, with remote desktop and a workspace runtime planned"
+sidebarTitle: "Dev"
 icon: code
 ---
 
 <Info>
-  Evidence state (2026-09-17, v0.35.0): Development with Gitea is
-  experimental. No automated lifecycle run covers it yet, and runtime evidence
-  is pending.
+  Evidence state (2026-09-24, v0.39.7): Repositories with Gitea is `available,
+  not yet lifecycle-verified` — selectable in the catalog, but no automated
+  lifecycle run covers it yet. Remote desktop with Guacamole is `in
+  development`: declared for a future release, not installable yet. A shared
+  development workspace runtime is `planned`, with no release and no
+  committed date.
 </Info>
 
-Development gives your projects private Git repositories on a host you operate. The release catalog calls this use case Developer Platform and delivers it as the optional `dev` workload.
+Dev combines repository, development workspace and remote desktop outcomes
+under one use case: continue a project from another computer without
+assembling a Git server, workspace and access route yourself. Repositories
+and remote desktop stay independently selectable, and CI runners are a
+separate opt-in from ordinary Dev use.
 
 ## Applications
 
-<Card title="Gitea" icon="code-branch" href="/stackkits/apps/gitea">
-  The Git server behind Development: selection, HTTPS route, owner sign-in and the storage boundary.
-</Card>
+<CardGroup cols={2}>
+  <Card title="Gitea" icon="code-branch" href="/stackkits/apps/gitea">
+    The Git server behind Repositories: selection, HTTPS route, owner sign-in and the storage boundary.
+  </Card>
+  <Card title="Guacamole" icon="server">
+    Apache Guacamole is the existing candidate for Remote desktop. In development: declared for the release, not installable yet.
+  </Card>
+</CardGroup>
 
-## Before you start
+## Repositories, today
 
 - Git works over HTTPS only. SSH is not exposed, and no CI runner is installed.
 - Every client needs a DNS name for the Git host and must trust the internal CA certificate of that host.
 - Recovery needs both Gitea volumes, captured while writes are stopped.
 
+## Remote desktop and workspace, planned
+
+- **Remote desktop** is browser-based: [Apache Guacamole](https://guacamole.apache.org/) is the existing candidate, and a session opens through any browser without installing a desktop client. It binds to an explicit, already-supported desktop target; it does not itself provision an OS desktop.
+- **Development workspace** (open, edit and resume a project with its declared toolchain) needs an explicit choice of runtime and is not admitted yet.
+- Both stay under evaluation. Neither changes what Repositories does today, and selecting one does not require the other: a Git-only owner does not need a desktop, and a desktop-only owner does not need a Git server.
+
+## Get the tools
+
+- **Git clients**: use your existing native Git client or IDE integration against the generated HTTPS route.
+- **tea, the Gitea CLI**: for scripted repository, issue and pull-request operations from a terminal, see [gitea.com/gitea/tea](https://gitea.com/gitea/tea).
+- **Guacamole**: no client to install once it ships — it runs entirely in your browser.
+
 ## Set it up
 
 Follow the [Gitea](/stackkits/apps/gitea) page from an empty owner workspace. Push to a test repository from a real client before you rely on it.
+

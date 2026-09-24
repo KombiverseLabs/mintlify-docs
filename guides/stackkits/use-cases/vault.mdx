@@ -1,0 +1,82 @@
+---
+title: "Vault"
+description: "A password vault today, with planned service-secret and Bitcoin extensions under owner-controlled custody"
+sidebarTitle: "Vault"
+icon: vault
+---
+
+<Info>
+  Evidence state (2026-09-24, v0.39.7): Passwords with Vaultwarden is
+  `available, lifecycle-verified`. A lifecycle run on Ubuntu 24.04 amd64
+  (Basement Kit, standalone) passed install, init, generate, apply,
+  setup-vault, verify, backup, isolated restore and restore activation. The
+  service-secret and Bitcoin extensions below are `planned`: target design
+  only, with no release and no committed date.
+</Info>
+
+Vault keeps passwords, machine secrets and Bitcoin roles under separate
+owner control. Today it ships one experience, Passwords, on Vaultwarden. The
+extensions on this page are planned directions, not something you can select
+yet.
+
+## Passwords, today
+
+<Card title="Passwords" icon="key" href="/guides/stackkits/use-cases/passwords">
+  Vaultwarden and Bitwarden clients: released contract, owner setup and client enrollment.
+</Card>
+
+See the [Passwords](/guides/stackkits/use-cases/passwords) page and the
+[Vaultwarden](/stackkits/apps/vaultwarden) application page to select and set
+up the current, lifecycle-verified experience.
+
+## Planned extensions
+
+None of the experiences below are selectable yet. They are design proposals
+for a broader Vault & Sovereignty umbrella, and existing Vaultwarden users
+will not receive a Bitcoin node or a new credential broker merely because
+Vault expands.
+
+<CardGroup cols={2}>
+  <Card title="Service secrets" icon="lock-keyhole">
+    Grant applications limited machine credentials, kept separate from human passwords and owner custody. OpenBao is the first candidate under evaluation; Infisical is a comparison candidate.
+  </Card>
+  <Card title="Bitcoin node and verification" icon="server">
+    Validate and inspect Bitcoin using your own node. Bitcoin Core, with an explicit pruned or full-data mode. No funds custody.
+  </Card>
+  <Card title="Explorer" icon="network-wired">
+    Private indexed queries and a familiar explorer view, on a full-data node plus electrs and mempool.
+  </Card>
+  <Card title="Payments" icon="file-contract">
+    Receive invoice payments without moving signing authority onto the server. BTCPay Server with a watch-only or external-signing wallet configuration.
+  </Card>
+  <Card title="Portfolio (read-only)" icon="chart-line">
+    Inspect selected multi-asset records privately with rotki, using read-only sources only.
+  </Card>
+  <Card title="Lightning" icon="clock-rotate-left">
+    Deferred until recovery and custody are specifically designed; not a reward for finishing Bitcoin onboarding.
+  </Card>
+</CardGroup>
+
+## Security principles behind the design
+
+- **Separate trust domains.** A password client, a service-secret grant, a
+  Bitcoin node's blockchain data, and an external signer's keys are four
+  different things. The design keeps them on separate credentials and does
+  not put them in one generic secrets bundle.
+- **No hot keys on the server.** The proposed Bitcoin paths keep signing keys
+  on an external signer, outside StackKits and any workflow history or agent
+  context. Nothing asks you to type a seed phrase into onboarding, a chat, or
+  a support ticket.
+- **Watch-only data is still sensitive.** Descriptors, extended public keys,
+  addresses and invoice records can reveal financial activity even though
+  they do not confer spending authority, and the design treats them
+  accordingly.
+- **Recovery is not one generic snapshot.** A password vault, a service-secret
+  engine, a blockchain index and a hardware signer each need a different
+  recovery treatment; rebuildable public chain data is not treated the same
+  as owner-controlled private metadata.
+
+## Choose the host
+
+- Use [Basement Kit](/stackkits/kits/basement-kit) for local hardware and LAN-first access.
+- Use [Cloud Kit](/stackkits/kits/cloud-kit) for an existing VPS or cloud host with a domain you control.

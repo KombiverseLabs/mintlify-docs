@@ -1,0 +1,67 @@
+---
+title: "Documents & Files"
+description: "Store and share your files with Cloudreve, and archive paperwork with the optional Paperless-ngx add-on"
+sidebarTitle: "Documents & Files"
+icon: folder-open
+---
+
+<Info>
+  Evidence state (2026-09-24, v0.39.7): Files with Cloudreve is `available,
+  lifecycle-verified`. A lifecycle run on Ubuntu 24.04 amd64 (Basement Kit,
+  standalone) passed install, init, generate, apply, setup-files, verify,
+  backup and restore; the restore returned the original bytes and the
+  activation and application readback were verified over the guest-local
+  loopback. The public support grade for this run is published on
+  [stackkit.cc/compatibility](https://stackkit.cc/compatibility). Documents
+  with Paperless-ngx is `available, not yet lifecycle-verified`: it is
+  selectable in the catalog today, but no lifecycle receipt covers it yet.
+</Info>
+
+Documents & Files gives your household storage and sharing for everyday
+files, plus an optional archive for the paperwork you want to search later.
+Cloudreve is the default, released application for the optional `files`
+workload. Paperless-ngx is an optional add-on that runs as the separate
+`documents` workload: it ingests scanned or emailed paperwork, runs OCR, and
+keeps both the searchable text and the original file.
+
+## Applications
+
+<CardGroup cols={2}>
+  <Card title="Cloudreve" icon="folder-cloud" href="/stackkits/apps/cloudreve">
+    The file storage and sharing application behind Files: selection, rollout and operation.
+  </Card>
+  <Card title="Paperless-ngx" icon="file-contract" href="/stackkits/reference/use-case-catalog#documents">
+    The document archive behind Documents: OCR, indexing and search over ingested paperwork. Selectable now; no dedicated setup guide yet.
+  </Card>
+</CardGroup>
+
+## When to use which
+
+- Use **Files (Cloudreve)** for everyday storage: working documents, photo exports, backups of folders, and sharing a link with one recipient.
+- Add **Documents (Paperless-ngx)** when you want scanned mail, receipts and paperwork turned into a searchable, OCR'd archive that keeps the original file.
+- The two applications keep separate data. Cloudreve does not index what Paperless-ngx has archived, and Paperless-ngx does not browse your Cloudreve library.
+
+## Plan storage first
+
+- Choose an absolute primary data root with enough free space for both applications you select.
+- Keep the backup root separate from primary data.
+- Decide which clients may reach the generated Files route.
+- Paperless-ngx keeps the OCR text index and the original file together; size storage for the archive plus its database, and expect it to grow with every scanned document.
+- Practice a restore before you place irreplaceable files or paperwork in either application.
+
+## Get the apps
+
+### Cloudreve
+
+- **Web UI**: open the generated Files route in any browser, on desktop or mobile.
+- **Desktop sync client**: Cloudreve publishes an [official Windows sync client](https://docs.cloudreve.org/en/usage/desktop-client) with on-demand file access and Explorer integration; it requires a Cloudreve Pro server instance.
+- There is no official Cloudreve mobile app; use the web UI from a phone browser.
+
+### Paperless-ngx
+
+- **Web UI**: open the generated Documents route in any browser once you select the workload.
+- **Mobile apps** (third-party, not maintained by kombify or the Paperless-ngx project): [Paperless Mobile](https://github.com/astubenbord/paperless-mobile) for Android, and [Swift Paperless](https://apps.apple.com/app/swift-paperless/id6448698521) for iOS. Both connect to your own server address and account; review their permissions before granting access to your archive.
+
+## Set it up
+
+Files is a good first use case, because Cloudreve's standalone selection needs no secret reference. Select, deploy and verify it on the [Cloudreve](/stackkits/apps/cloudreve) page. Select Paperless-ngx as the separate `documents` workload when you want the archive, then practice the recovery lifecycle for whichever applications you run in [Back up and restore](/guides/stackkits/back-up-and-restore).
