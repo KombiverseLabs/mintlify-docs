@@ -275,6 +275,48 @@ test('renders no operating-system table without lifecycle evidence', () => {
   assert.ok(delivery.includes('| Standalone Compose (`standalone-compose`) | `supported` |'))
 })
 
+test('groups by main use case, marks the default component, and falls back to its own group without one', () => {
+  const temp = mkdtempSync(path.join(tmpdir(), 'stackkits-docs-group-'))
+  const input = path.join(temp, 'input'), repo = path.join(temp, 'repo')
+  const release = { tag: 'v9.9.9', version: '9.9.9', sourceSha: 'a'.repeat(40), publicSourceSha: 'b'.repeat(40), releaseUrl: 'https://github.com/kombifyio/StackKits/releases/tag/v9.9.9' }
+  const base = { release, generatedAt: '2026-08-13T00:00:00Z', generatorVersion: '9.9.9' }
+  const photosGroup = { id: 'photos', title: 'Photos and memories' }
+  const useCases = [
+    { id: 'files', title: 'Files', description: 'Private file storage.', components: [{ id: 'cloudreve', name: 'Cloudreve', role: 'primary', kind: 'application' }], mainUseCase: photosGroup },
+    { id: 'mail', title: 'Mail', description: 'Mail delivery.', components: [{ id: 'stalwart', name: 'Stalwart', role: 'primary', kind: 'application' }] },
+    {
+      id: 'photos', title: 'Photos', description: 'Photo library.',
+      components: [{ id: 'immich', name: 'Immich', role: 'primary', kind: 'application' }, { id: 'immich-lite', name: 'Immich Lite', role: 'alternative', kind: 'application' }],
+      defaultAlternative: 'immich',
+      alternatives: [
+        { id: 'immich', name: 'Immich', modules: [{ id: 'immich-runtime', computeProfiles: ['standard'] }] },
+        { id: 'immich-lite', name: 'Immich Lite', modules: [{ id: 'immich-lite-runtime', computeProfiles: ['low'] }] },
+      ],
+      mainUseCase: photosGroup,
+    },
+  ]
+  const catalog = { schemaVersion: 'stackkits-use-case-catalog/v1', ...base, catalog: { useCases }, contentDigest: '' }
+  catalog.contentDigest = canonicalDigest(catalog)
+  const compatibility = { schemaVersion: 'stackkits-compatibility/v1', ...base, compatibility: { os: [], applicationDelivery: [] }, contentDigest: '' }
+  compatibility.contentDigest = canonicalDigest(compatibility)
+  writeFixture(input, { catalog, compatibility })
+  syncRelease({ repoRoot: repo, inputDir: input, tag: 'v9.9.9' })
+  const page = readFileSync(path.join(repo, 'stackkits/reference/use-case-catalog.mdx'), 'utf8')
+
+  // "photos" is a fixed MAIN_USE_CASE_ORDER group, so it groups files and
+  // photos together and sorts ahead of "mail", another fixed group id that a
+  // use case without its own `mainUseCase` falls back to for itself.
+  const photosHeading = page.indexOf('## Photos and memories')
+  const filesHeading = page.indexOf('### Files')
+  const photosSubheading = page.indexOf('### Photos')
+  const mailHeading = page.indexOf('## Mail')
+  assert.ok(photosHeading >= 0 && photosHeading < filesHeading && filesHeading < photosSubheading && photosSubheading < mailHeading)
+  assert.ok(!page.includes('### Mail'), 'a single-use-case group renders directly under its ## heading')
+  assert.ok(page.includes('| Immich (`immich`) | primary | application | ✓ |'))
+  assert.ok(page.includes('| Immich Lite (`immich-lite`) | alternative | application |  |'))
+  assert.ok(page.includes('Alternatives: Immich, Immich Lite'))
+})
+
 test('accepts evidence identities that match the StackKits slug pattern', () => {
   const dotted = evidence()
   dotted.applications[0] = { ...dotted.applications[0], useCase: 'files.v2', adapter: 'standalone-compose.v2' }

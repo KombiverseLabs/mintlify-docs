@@ -62,7 +62,7 @@ export function validateCatalog(document, tag) {
   if (!Array.isArray(document.catalog.useCases)) throw new Error('catalog.useCases must be an array')
   sortedUnique(document.catalog.useCases.map(item => item.id), 'catalog use-case IDs')
   for (const useCase of document.catalog.useCases) {
-    keys(useCase, ['id', 'title', 'description', 'components', 'computeTiers', 'settings', 'docs', 'defaultAlternative', 'alternatives'], `useCase ${useCase.id ?? '?'}`)
+    keys(useCase, ['id', 'title', 'description', 'components', 'computeTiers', 'settings', 'docs', 'defaultAlternative', 'alternatives', 'mainUseCase'], `useCase ${useCase.id ?? '?'}`)
     string(useCase.id, 'useCase.id', /^[a-z][a-z0-9-]+$/)
     string(useCase.title, `${useCase.id}.title`)
     string(useCase.description, `${useCase.id}.description`)
@@ -79,6 +79,7 @@ export function validateCatalog(document, tag) {
     validateSettings(useCase)
     if (useCase.docs !== undefined) string(useCase.docs, `${useCase.id}.docs`, /^\/[a-z0-9/-]+$/)
     if (useCase.defaultAlternative !== undefined || useCase.alternatives !== undefined) validateAlternatives(useCase, `useCase ${useCase.id}`)
+    if (useCase.mainUseCase !== undefined) validateMainUseCase(useCase.mainUseCase, `${useCase.id}.mainUseCase`)
   }
   validateKitCores(document.catalog.kitCores)
   return document
@@ -93,8 +94,11 @@ const CONTRACT_ID = /^[a-z][a-z0-9-]+$/
  * workload carries its `defaultAlternative` and `alternatives`, whose modules
  * expose the module-local `computeProfiles` that replaced the computeTiers
  * axis. It is validated against the generator's invariants so the sync binds
- * to the real contract, but deliberately not rendered: the public pages stay
- * purpose/components only and publish no installation or module graph.
+ * to the real contract. Since 2026-09-24 the use-case page renders a use
+ * case's own `defaultAlternative`/`alternatives` (a Default marker on its
+ * component table, and alternative names when there is more than one): that
+ * is catalog intent, not installation evidence. `kitCores` and every module
+ * id / `computeProfiles` entry stay unrendered install internals.
  */
 function validateAlternatives(owner, label) {
   string(owner.defaultAlternative, `${label}.defaultAlternative`, CONTRACT_ID)
@@ -116,6 +120,14 @@ function validateAlternatives(owner, label) {
   if (!owner.alternatives.some(alternative => alternative.id === owner.defaultAlternative)) throw new Error(`${label}.defaultAlternative is not a declared alternative`)
 }
 
+// Groups the use-case page: `id` matches one of the fixed MAIN_USE_CASE_ORDER
+// entries or an unrecognized main use case yet to be added there.
+function validateMainUseCase(value, label) {
+  keys(value, ['id', 'title'], label)
+  string(value.id, `${label}.id`, /^[a-z][a-z0-9-]*$/)
+  string(value.title, `${label}.title`)
+}
+
 function validateKitCores(kitCores) {
   if (kitCores === undefined) return
   if (!Array.isArray(kitCores)) throw new Error('catalog.kitCores must be an array')
@@ -128,8 +140,11 @@ function validateKitCores(kitCores) {
 }
 
 // Public v0.24.60 foundation/use_case_catalog.cue and internal/usecasecatalog
-// project this metadata. Validate it without expanding the purpose/components
-// page into a settings UI or treating recorded intent as installation support.
+// project this metadata. Validate it without expanding the use-case page (see
+// renderPages: purpose, components, default app, alternatives by name, guide
+// link and main-use-case grouping) into a settings UI or treating recorded
+// intent as installation support: `settings` stays an unrendered install
+// internal alongside computeTiers, kitCores and module ids.
 function validateSettings(useCase) {
   if (useCase.settings === undefined) return
   const label = `${useCase.id}.settings`
@@ -172,9 +187,11 @@ const COMPUTE_TIERS = ['high', 'low', 'standard']
  * `computeTiers` is the Unifier-readable fit of a package on one
  * install.computeTier graph (StackKits internal/usecasecatalog UseCase). It is
  * validated here so the pipeline binds to the real contract rather than
- * allowlisting an opaque key, but it is deliberately not rendered: the axis was
- * superseded by module-local profiles on 2026-09-01, and public docs must not
- * publish a concept the product is retiring.
+ * allowlisting an opaque key, but it stays deliberately unrendered under the
+ * expanded use-case page too (see renderPages): the axis was superseded by
+ * module-local profiles on 2026-09-01, and public docs must not publish a
+ * concept the product is retiring, or any other install internal (settings,
+ * kitCores, module ids/computeProfiles).
  */
 function validateComputeTiers(useCase) {
   if (useCase.computeTiers === undefined) return
@@ -390,14 +407,77 @@ function renderOperatingSystems(release, compatibility, evidence) {
   return page
 }
 
-export function renderPages(catalog, compatibility, evidence = null) {
+// StackKits foundation/use_case_catalog.cue mainUseCase enum. Fixes the
+// grouping order on the use-case page; a group whose id is not in this list
+// (an unrecognized main use case, or a use case without one grouped under its
+// own id as a fallback) sorts alphabetically after all of these.
+const MAIN_USE_CASE_ORDER = ['photos', 'documents-files', 'vault', 'media', 'smart-home', 'dev', 'mail', 'game', 'network', 'automation', 'ai']
+
+// Groups use cases by their declared `mainUseCase`. A use case without one
+// (every release before the field shipped) falls back to being its own
+// single-use-case group, titled after itself, so the page still renders
+// sensibly against older stored snapshots.
+function groupUseCases(useCases) {
+  const groups = new Map()
+  for (const useCase of useCases) {
+    const id = useCase.mainUseCase?.id ?? useCase.id
+    const title = useCase.mainUseCase?.title ?? useCase.title
+    if (!groups.has(id)) groups.set(id, { id, title, useCases: [] })
+    groups.get(id).useCases.push(useCase)
+  }
+  const known = MAIN_USE_CASE_ORDER.filter(id => groups.has(id)).map(id => groups.get(id))
+  const unknown = [...groups.values()].filter(group => !MAIN_USE_CASE_ORDER.includes(group.id)).sort((a, b) => a.id.localeCompare(b.id))
+  return [...known, ...unknown]
+}
+
+// The component the use case installs by default: the component matching the
+// declared default alternative directly, or one of that alternative's
+// modules, else the component with the `primary` role. Returns null rather
+// than guessing further (for example when no component or role fits).
+function defaultComponentId(useCase) {
+  if (useCase.defaultAlternative) {
+    if (useCase.components.some(component => component.id === useCase.defaultAlternative)) return useCase.defaultAlternative
+    const alternative = (useCase.alternatives ?? []).find(candidate => candidate.id === useCase.defaultAlternative)
+    if (alternative) {
+      const moduleIds = new Set(alternative.modules.map(module => module.id))
+      const match = useCase.components.find(component => moduleIds.has(component.id))
+      if (match) return match.id
+    }
+  }
+  return useCase.components.find(component => component.role === 'primary')?.id ?? null
+}
+
+function renderUseCase(useCase, redirects) {
+  let section = `${md(useCase.description)}\n\n`
+  // A release keeps the guide path it shipped with; docs.json redirects name where a moved guide lives now.
+  if (useCase.docs) section += `Guide: [Open the guide](${redirects.get(useCase.docs) ?? useCase.docs})\n\n`
+  const defaultId = defaultComponentId(useCase)
+  section += '| Component | Role | Kind | Default |\n| --- | --- | --- | --- |\n'
+  for (const component of useCase.components) {
+    section += `| ${md(component.name)} (\`${md(component.id)}\`) | ${md(component.role)} | ${md(component.kind)} | ${component.id === defaultId ? '✓' : ''} |\n`
+  }
+  section += '\n'
+  if ((useCase.alternatives ?? []).length > 1) {
+    // A release may carry no display name (name === id); show those as the StackSpec IDs they are.
+    const label = alternative => (alternative.name === alternative.id ? `\`${md(alternative.id)}\`` : md(alternative.name))
+    section += `Alternatives: ${useCase.alternatives.map(label).join(', ')}\n\n`
+  }
+  return section
+}
+
+export function renderPages(catalog, compatibility, evidence = null, redirects = new Map()) {
   const release = catalog.release
   let useCases = provenance('Use-case catalog', `Use cases and components declared by StackKits ${release.tag}`, 'diagram-project', catalog.contentDigest, release.publicSourceSha)
-  useCases += `This page is generated from the published [${release.tag} release](${release.releaseUrl}). It lists every use case that release declares, with its purpose and components. A declared component is not evidence of an installation or a verified run on a host. [Use cases](/guides/stackkits/use-cases/overview) has the setup guides.\n\n`
-  for (const useCase of catalog.catalog.useCases) {
-    useCases += `## ${md(useCase.title)}\n\n${md(useCase.description)}\n\n| Component | Role | Kind |\n| --- | --- | --- |\n`
-    for (const component of useCase.components) useCases += `| ${md(component.name)} (\`${md(component.id)}\`) | ${md(component.role)} | ${md(component.kind)} |\n`
-    useCases += '\n'
+  useCases += `This page is generated from the published [${release.tag} release](${release.releaseUrl}). It lists every use case that release declares, grouped by main use case, with its purpose, components and default app. A declared component is not evidence of an installation or a verified run on a host; [OS compatibility](/stackkits/reference/os-compatibility) has the verified lifecycle grades. [Use cases](/guides/stackkits/use-cases/overview) has the setup guides overview.\n\n`
+  for (const group of groupUseCases(catalog.catalog.useCases)) {
+    useCases += `## ${md(group.title)}\n\n`
+    if (group.useCases.length > 1) {
+      for (const useCase of group.useCases) {
+        useCases += `### ${md(useCase.title)}\n\n${renderUseCase(useCase, redirects)}`
+      }
+    } else {
+      useCases += renderUseCase(group.useCases[0], redirects)
+    }
   }
 
   const os = renderOperatingSystems(release, compatibility, evidence)
@@ -472,6 +552,13 @@ function readManifests(dir, tag) {
   return { catalogBytes, compatibilityBytes, catalog, compatibility }
 }
 
+function docsRedirects(repoRoot) {
+  const docsPath = path.join(repoRoot, 'docs.json')
+  if (!existsSync(docsPath)) return new Map()
+  const redirects = JSON.parse(readFileSync(docsPath, 'utf8')).redirects ?? []
+  return new Map(redirects.map(redirect => [redirect.source, redirect.destination]))
+}
+
 export function syncRelease({ repoRoot, inputDir, tag }) {
   string(tag, 'tag', /^v\d+\.\d+\.\d+$/)
   const synced = readManifests(inputDir, tag)
@@ -510,7 +597,7 @@ export function syncRelease({ repoRoot, inputDir, tag }) {
   // means a sync for an older tag that updates that projection re-renders the
   // pages, and an older incoming projection never displaces a newer stored one.
   const evidence = storedEvidence(releases, shown.catalog.release.tag)
-  const pages = renderPages(shown.catalog, shown.compatibility, evidence)
+  const pages = renderPages(shown.catalog, shown.compatibility, evidence, docsRedirects(repoRoot))
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'use-case-catalog.mdx'), pages.useCases)
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'os-compatibility.mdx'), pages.os)
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'application-delivery-compatibility.mdx'), pages.delivery)
