@@ -1,0 +1,60 @@
+---
+title: "Smart Home"
+description: "Watch and control the devices you choose with Home Assistant, on a host you operate"
+sidebarTitle: "Smart Home"
+icon: house-signal
+---
+
+<Info>
+  Evidence state (2026-09-24, v0.41.0): Smart Home with Home Assistant is
+  `available, lifecycle-verified`. Smart Home was verified on the public
+  v0.39.7 archive, where a Depot producer lifecycle run on Ubuntu 24.04 amd64
+  (Basement Kit, standalone) passed install, init, generate, apply, owner
+  setup, verify, backup, restore, and restore activation, with the
+  application readback verified over the guest-local loopback.
+</Info>
+
+Smart Home gives your household one place to watch and control the devices you choose, on a host you operate. Home Assistant runs the automation platform. The release catalog calls this use case Smart Home and delivers it as the optional `smart-home` workload.
+
+## Choose how Home Assistant runs
+
+| Setting | Options | Default |
+| --- | --- | --- |
+| Installation | Container (Home Assistant Core, no Supervisor or Apps) or Home Assistant OS on a dedicated appliance | Container |
+| Existing installation | Create new, or connect an existing instance without changing its configuration | Create new |
+| USB devices | Pass a Zigbee, Z-Wave or other USB radio through to the workload | Off |
+| Network discovery | Automatically discover lights, speakers and hubs on your home network | On |
+
+Connecting an existing instance preserves its current configuration. StackKits never resets an existing instance to simulate a fresh start, and managing that instance still requires a separate grant.
+
+## Choose the host
+
+Use [Basement Kit](/stackkits/kits/basement-kit) for local hardware, direct access to Zigbee/Z-Wave USB radios, and devices on your LAN. Cloud Kit does not have access to local radios or devices on your home network, so it is not a fit for the local side of Smart Home.
+
+## Set it up
+
+1. Select the `smart-home` workload in your [StackSpec](/guides/stackkits/configure-stack-spec), choose Container or Home Assistant OS, and decide whether to pass a USB radio through.
+2. Generate and apply the stack on a verified [Basement Kit](/stackkits/kits/basement-kit).
+3. Open the generated Smart Home route and complete the Home Assistant onboarding wizard yourself: create the owner account, set your home's location, and add the integrations for the devices you actually have.
+4. Pair your first device and confirm it shows the correct state before you add more.
+
+## Check the Node Hub
+
+Open the [Node Hub](/guides/stackkits/node-hub) to confirm the Smart Home workload is running and see its generated address. Homepage is a released navigation module, but the initial StackSpec does not select it. The Node Hub is your current entrypoint until you choose otherwise.
+
+## Back up and recover
+
+Home Assistant's configuration and device registrations are part of your kit's declared backup. Restoring into an isolated environment does not automatically re-pair physical devices or reapply revoked access. Revalidate device bindings and current grants before you resume physical actions. See [Back up and restore](/guides/stackkits/back-up-and-restore).
+
+## Get the apps
+
+<CardGroup cols={2}>
+  <Card title="Home Assistant Companion (iOS)" icon="apple" href="https://apps.apple.com/us/app/home-assistant/id1099568401">
+    The official Home Assistant app for iPhone and iPad.
+  </Card>
+  <Card title="Home Assistant Companion (Android)" icon="android" href="https://play.google.com/store/apps/details?id=io.homeassistant.companion.android">
+    The official Home Assistant app for Android.
+  </Card>
+</CardGroup>
+
+Install the app, choose to connect manually, and enter your generated Smart Home URL when it asks how to connect. Sign in with the owner account you created during onboarding.

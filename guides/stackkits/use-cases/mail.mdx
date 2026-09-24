@@ -1,0 +1,37 @@
+---
+title: "Mail"
+description: "A client-first design is in development: connect your existing mailbox before you consider running your own mail server"
+sidebarTitle: "Mail"
+icon: envelope
+---
+
+<Info>
+  Evidence state (2026-09-24, v0.41.0): Mail is `in development`. The release
+  catalog declares a Stalwart Mail Server component with a recorded mail
+  domain setting, but the current release does not install it. There is no
+  executable Mail workload yet. This page describes the design direction,
+  not something you can set up today.
+</Info>
+
+Mail is not installable yet. The design direction is client-first: you connect an existing mailbox before you consider running your own mail server, and the two decisions stay independent of each other.
+
+## Planned design
+
+| Experience | What it means | Status |
+| --- | --- | --- |
+| Connect an existing mailbox | Use a self-hosted webmail client with your current provider's IMAP/SMTP or supported login, without operating mail delivery yourself | Planned |
+| Run your own mail server | Operate your own domain's mail delivery with Stalwart, or an integrated suite such as mailcow | Declared in the catalog; not installable |
+
+Selecting Mail is planned to never make DNS or MX changes, open a public SMTP listener, or send anything on your behalf without an explicit, separate approval step. Running your own mail server is planned as an opt-in for households that want to operate their own domain, not a requirement for using a mail client with an account you already have.
+
+## What exists today
+
+The release catalog declares a `mail` use case with the Stalwart Mail Server component and one recorded setting: your mail domain. Recorded means the setting is captured for a later release to apply. The current release does not install or configure Stalwart, and there is nothing to select, generate, or apply for Mail yet.
+
+## What to expect
+
+- A client-first flow comes before any self-hosted mail-server requirement.
+- Sending a real message will need an explicit, separate approval step.
+- An own mail server or suite, when it ships, will be an additional opt-in, not a replacement for using the mailbox you already have.
+
+Check the [StackKits changelog](/changelog/overview) or the [use-case catalog](/stackkits/reference/use-case-catalog) for whether Mail has moved out of development.

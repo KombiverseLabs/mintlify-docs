@@ -1,0 +1,44 @@
+---
+title: "Network"
+description: "DNS filtering and private connectivity are planned; here is the networking baseline StackKits already sets up"
+sidebarTitle: "Network"
+icon: network-wired
+---
+
+<Info>
+  Evidence state (2026-09-24, v0.41.0): Network is `planned`. It has no
+  release and no dates, and it does not yet have an entry in the release
+  catalog. This page describes a design direction under review, not
+  something you can install today.
+</Info>
+
+Network is not a use case you can select yet. This page separates what StackKits already sets up for you on any kit from what the team is planning to add as a dedicated use case.
+
+## What StackKits already sets up
+
+| Capability | What you get today |
+| --- | --- |
+| Routing | Traefik is the released reverse-proxy component. It routes every generated service name, such as `base.<domain>` and each application's own route, from your validated StackSpec. |
+| Local DNS | Basement Kit gives every service an HTTPS address at `*.home`, trusted through an Owner certificate authority that your enrolled devices install. |
+| Remote access | Device enrollment can optionally set up a private split tunnel, so the same `*.home` addresses keep working away from your home network. |
+
+These are built into Basement Kit and Cloud Kit today. You do not need the Network use case for them, and Network shipping in the future will not change how they work.
+
+## Planned design
+
+| Job | Preferred candidate | Alternative |
+| --- | --- | --- |
+| Filter DNS on your devices | [AdGuard Home](https://adguard.com/en/adguard-home/overview.html) | [Pi-hole](https://pi-hole.net/) |
+| Connect your own devices and servers privately | [Tailscale](https://tailscale.com/) | [Headscale](https://github.com/juanfont/headscale) or [NetBird](https://docs.netbird.io/selfhosted/selfhosted-guide) for self-hosted coordination |
+| Run your own connectivity edge instead of a hosted path | [Pangolin](https://github.com/fosrl/pangolin) | None |
+| See DNS failures and device presence | Reuse the existing Node Hub status | None |
+
+None of these are installable yet. Network is planned as a use case that adds deliberate device-to-device and site-to-site connectivity plus DNS filtering on top of the baseline above, not as a requirement for reaching your existing StackKits applications.
+
+## What to expect
+
+- Network will not replace the built-in routing, `*.home` DNS, or optional remote access described above.
+- Selecting Network will not require a VPN client just to open applications you already run.
+- Filtering or connecting devices will need explicit device and destination choices; nothing turns on automatically.
+
+Check the [StackKits changelog](/changelog/overview) or the [use-case catalog](/stackkits/reference/use-case-catalog) for whether Network has moved out of planning.

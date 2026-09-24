@@ -1,0 +1,77 @@
+---
+title: "Game"
+description: "Run a self-hosted Minecraft server for friends and family with Pterodactyl, new in v0.41.0"
+sidebarTitle: "Game"
+icon: gamepad
+---
+
+<Info>
+  Evidence state (2026-09-24, v0.41.0): Game with Pterodactyl is `available,
+  not yet lifecycle-verified`. It shipped as an optional workload in v0.41.0
+  for Basement Kit, Cloud Kit and Modern Homelab, with curated Minecraft Java
+  and Bedrock profiles. No automated Depot lifecycle run has covered install,
+  verify, backup, or restore yet, and world backups are currently
+  crash-consistent, and an isolated restore has not been exercised end to end.
+</Info>
+
+Game gives your household a self-hosted Minecraft server for friends and family, on a host you operate. Pterodactyl runs the panel and the game containers. The release catalog calls this use case Game Server and delivers it as the optional `game` workload.
+
+## Choose your edition
+
+| Edition | Transport | Default port |
+| --- | --- | --- |
+| Minecraft Java | TCP | 25565 |
+| Minecraft Bedrock | UDP (RakNet) | 19132 |
+
+Both curated profiles start with online-mode verification, an allow list, no RCON, and no automatic operator rights.
+
+## Set it up
+
+1. Select the `game` workload in your [StackSpec](/guides/stackkits/configure-stack-spec), generate, and apply it on a verified [Basement Kit](/stackkits/kits/basement-kit) or [Cloud Kit](/stackkits/kits/cloud-kit).
+2. Create a private, workspace-relative setup file, for example `.stackkit/setup/game.json`:
+
+```json
+{
+  "profile": "minecraft-java",
+  "name": "Family Survival",
+  "acceptEula": true,
+  "allowList": ["PlayerOne"]
+}
+```
+
+3. Read and accept the [Minecraft End User License Agreement](https://www.minecraft.net/en-us/eula) yourself before you set `acceptEula` to `true`. Never accept it on someone else's behalf.
+4. Run the setup command:
+
+```bash
+stackkit setup game --owner-approve --credentials-file .stackkit/setup/game.json --json
+```
+
+The command creates one server on the profile you chose, applies the secure defaults above with a graceful stop, and reads back the allow list so you can confirm it took effect. An unlisted account fails to join.
+
+## Choose local or managed hosting
+
+- Run the workload on a local [Basement Kit](/stackkits/kits/basement-kit) node so it is reachable on your LAN.
+- Run it on a [Cloud Kit](/stackkits/kits/cloud-kit) VPS so friends can join while your home computer is off.
+
+A home node is not reachable from the internet unless you deliberately choose a managed VPS or an explicit bridge. Do not rely on router port forwarding to work around that.
+
+## Invite players
+
+Share the node's address and the profile's port with the players on your allow list. Manage the allow list, server power, and resources through the Pterodactyl panel at your generated Game route.
+
+## Back up worlds
+
+Game backups follow your kit's declared schedule, but two limits apply today:
+
+- Backups are crash-consistent: the server is not yet quiesced before the snapshot runs.
+- An isolated restore of a Game backup has not been exercised end to end.
+
+Practice a restore in an isolated environment before you rely on it for a world you cannot recreate. See [Back up and restore](/guides/stackkits/back-up-and-restore).
+
+## Get the clients
+
+<Card title="Minecraft" icon="download" href="https://www.minecraft.net/en-us/get-minecraft">
+  Official Java and Bedrock clients from Mojang/Microsoft, for the platforms you actually own the game on.
+</Card>
+
+The Pterodactyl panel itself is browser-based, so no separate administration client is required.
