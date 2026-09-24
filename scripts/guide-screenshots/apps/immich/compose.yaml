@@ -1,0 +1,53 @@
+# Local Immich reference install for guide screenshots. Synthetic data only.
+# Images and digests match the StackKits catalog for Photos; machine learning is
+# left out (and disabled in immich.json) to keep the install small.
+name: kombify-guide-immich
+services:
+  immich-server:
+    image: ghcr.io/immich-app/immich-server:v2.7.0@sha256:ee60b98e7fcc836d61d7f5e7689514f3de7a9480f31ec6ca62d6221056b46ae1
+    environment:
+      DB_HOSTNAME: database
+      DB_USERNAME: immich
+      DB_PASSWORD: ${GUIDE_DB_SECRET:?the runner sets a per-run database secret}
+      DB_DATABASE_NAME: immich
+      REDIS_HOSTNAME: redis
+      IMMICH_CONFIG_FILE: /config/immich.json
+    volumes:
+      - ./immich.json:/config/immich.json:ro
+    ports:
+      # The Android emulator reaches the host loopback as 10.0.2.2.
+      - "127.0.0.1:2283:2283"
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "immich-healthcheck"]
+      interval: 5s
+      retries: 40
+  database:
+    image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
+    environment:
+      POSTGRES_USER: immich
+      POSTGRES_PASSWORD: ${GUIDE_DB_SECRET:?the runner sets a per-run database secret}
+      POSTGRES_DB: immich
+      POSTGRES_INITDB_ARGS: --data-checksums
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U immich -d immich"]
+      interval: 3s
+      retries: 40
+  redis:
+    image: docker.io/valkey/valkey:9@sha256:3b55fbaa0cd93cf0d9d961f405e4dfcc70efe325e2d84da207a0a8e6d8fde4f9
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 3s
+      retries: 20
+  proxy:
+    image: caddy:2.10-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d
+    command: caddy reverse-proxy --from photos.home.test --to immich-server:2283 --internal-certs
+    ports:
+      - "127.0.0.1:8444:443"
+    depends_on:
+      immich-server:
+        condition: service_healthy

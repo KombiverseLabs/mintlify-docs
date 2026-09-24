@@ -1,156 +1,213 @@
 ---
 title: "Set up your password manager apps"
-description: "Create your vault account, save a first password, and connect the Bitwarden apps on your phone, browser and computer to your own vault."
+description: "Create your vault account, save a first password, and connect the Bitwarden browser extension and phone app to your own vault."
 sidebarTitle: "Password apps"
 icon: "mobile-screen-button"
 mode: "wide"
-keywords: ["Passwords", "Vaultwarden", "Bitwarden", "Password manager", "Browser extension", "iPhone", "Android", "Self-hosted"]
+keywords: ["Passwords", "Vaultwarden", "Bitwarden", "Password manager", "Browser extension", "iPhone", "Android", "Self-hosted", "Server URL", "Master password"]
 ---
 
-import { ClientSetupGuide } from "/snippets/client-setup-guide.jsx";
+import { ClientSetupGuide, GuideMeta, GuideNeeds, GuideNeed, GuideApps, GuideApp, GuideHint, GuideSteps, GuideStep, GuideShot, GuideLinks, UI, GuideNote, GuideCheck, GuideFaq, GuideTicks, GuideTick, GuideNext, GuideNextCard, GuideHelp, GuideFooter, GuideSources, kcgIcon, kcgExternal, kcgNewTab, kcgList, kcgProps, kcgIsVisual } from "/snippets/client-setup-guide.jsx";
 
-<ClientSetupGuide
-  id="kcg-passwords"
-  meta={[
-    { icon: "phone", text: "Phone, browser & computer" },
-    { icon: "steps", text: "6 short steps" },
-    { icon: "book", text: "No prior knowledge needed" },
-  ]}
-  requirements={[
-    "Your vault address, for example https://vault.home.test",
-    "An invitation for your email address",
-    "Each device set up for your home vault by the person who set up kombify",
-    "A master password you can remember",
-  ]}
-  requirementsHelp={{ label: "No invitation yet?", target: "kcg-passwords-no-invite" }}
-  appsTitle="First, get the Bitwarden app."
-  vendor={{ label: "All downloads from Bitwarden", href: "https://bitwarden.com/download/" }}
-  apps={[
-    { platform: "apple", label: "iPhone & iPad", detail: "Bitwarden Password Manager", store: "Open in the App Store", href: "https://apps.apple.com/app/bitwarden-password-manager/id1137397744", vendor: "Bitwarden", official: true },
-    { platform: "android", label: "Android", detail: "Bitwarden Password Manager", store: "Open in Google Play", href: "https://play.google.com/store/apps/details?id=com.x8bit.bitwarden", vendor: "Bitwarden", official: true },
-    { platform: "browser", label: "Browser extension", detail: "Chrome, Firefox, Edge, Safari and more", store: "Open the Bitwarden download page", href: "https://bitwarden.com/download/", vendor: "Bitwarden", official: true },
-    { platform: "desktop", label: "Computer", detail: "Windows, macOS and Linux", store: "Open the Bitwarden download page", href: "https://bitwarden.com/download/", vendor: "Bitwarden", official: true },
-  ]}
-  appsNote="Browser stores: [Chrome](https://chromewebstore.google.com/detail/bitwarden-password-manager/nngceckbapebfimnlniiiahkandclblb) · [Firefox](https://addons.mozilla.org/firefox/addon/bitwarden-password-manager/) · [Edge](https://microsoftedge.microsoft.com/addons/detail/bitwarden-password-manager/jbkfoedolllekgbhcbcoahefnbanhhlh) · [Safari (Mac App Store)](https://apps.apple.com/app/bitwarden/id1352778147). Your vault runs on Vaultwarden, which works with these official Bitwarden apps. You do not need a separate Vaultwarden app."
-  stepsTitle="Set up your vault step by step."
-  steps={[
-    {
-      tab: "Open vault",
-      title: "Open your vault in a browser.",
-      intro: "Start on a computer. Your vault has its own web address, like a website that only your household uses.",
-      clicks: [
-        "Type your vault address into the browser's address bar, for example **https://vault.home.test**, and press Enter.",
-        "Below the login box, click [[Create account]].",
-      ],
-      note: "The address in this guide is an example. Use the address you got from the person who set up kombify.",
-      faq: { q: "What is a vault address?", a: "It is the web address of your household's password vault. It usually starts with **https://vault.** and ends with your home network's name. The person who set up kombify can tell you the exact address." },
-      check: "You see the [[Create account]] form.",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-01-open-vault.webp", width: 1088, height: 830, alt: "Vaultwarden login page with the Create account link marked", caption: "Vault login page", credit: "kombify screenshot", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: 2, top: 84.3, left: 38.3, width: 23.5, height: 7.2 }] },
-    },
-    {
-      tab: "Create account",
-      title: "Create your account.",
-      intro: "Your vault only accepts email addresses that were invited. Use the same address the invitation went to.",
-      clicks: [
-        "In [[Email address]], enter your invited email address.",
-        "In [[Name]], enter your name. The person who runs the vault, and anyone you share passwords with, can see it.",
-        "Click [[Continue]].",
-      ],
-      faq: { q: "Is this my kombify account?", a: "No. This account belongs only to your password vault. It has its own email address and its own master password." },
-      check: "The page now asks you to [[Set a strong password]].",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-02-create-account.webp", width: 1088, height: 718, alt: "Create account form with the email address alex@example.com and the name Alex Example", caption: "Create account", credit: "kombify screenshot", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: 1, top: 37.6, left: 16.4, width: 65.1, height: 13.4 }, { n: 2, top: 61, left: 16.4, width: 65.1, height: 13.4 }, { n: 3, top: 76.3, left: 14, width: 72.1, height: 13.9 }] },
-    },
-    {
-      tab: "Master password",
-      title: "Choose your master password.",
-      intro: "The master password is the one password you still need to remember. It unlocks all the others.",
-      clicks: [
-        "In [[Master password]], enter a long password. A short sentence of four or more words works well.",
-        "Enter the same password again in [[Confirm master password]].",
-        "Click [[Create account]]. If the page suggests the browser extension, click [[Add it later]] and then [[Skip to web app]]. You connect the extension in step 5.",
-      ],
-      note: "**Nobody can recover a forgotten master password**, not even the person who runs your vault. Write it down and keep the note somewhere safe outside the vault.",
-      faq: { q: "What does the strength bar mean?", a: "It estimates how hard your password is to guess. Aim for **Strong**. Longer is better than complicated." },
-      check: "Your empty vault opens with the title [[All vaults]].",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-03-master-password.webp", width: 1088, height: 1310, alt: "Set a strong password page with the master password entered twice and rated Strong", caption: "Set a strong password", credit: "kombify screenshot", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: 1, top: 25.5, left: 16.4, width: 60.7, height: 7.3 }, { n: 2, top: 52.2, left: 16.4, width: 60.7, height: 7.3 }, { n: 3, top: 87, left: 14, width: 72.1, height: 7.6 }] },
-    },
-    {
-      tab: "First password",
-      title: "Save your first password.",
-      intro: "Save one login as a test. It shows later that your apps are connected to your vault.",
-      clicks: [
-        "At the top right, click [[New]] and choose [[Login]]. If a welcome window appears first, click [[Skip]].",
-        "In [[Item name]], enter a name you recognize, for example the name of a shop.",
-        "Enter your [[Username]]. Next to [[Password]], click the circular arrows to create a password, then click [[Use this password]].",
-        "Click [[Save]].",
-      ],
-      note: "Add the shop's web address under [[Website (URI)]]. The browser extension then suggests this login on that website.",
-      check: "The message [[Item added]] appears and your login shows in the list.",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-04-new-login.webp", width: 1472, height: 1664, alt: "New Login window with the item name Example Shop, a username and a generated password", caption: "New Login", credit: "kombify screenshot", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: 2, top: 12.1, left: 7.9, width: 82.6, height: 5.8 }, { n: 3, top: 41.8, left: 7.9, width: 79.3, height: 5.8 }, { n: 3, top: 52.3, left: 87.5, width: 5.7, height: 5 }, { n: 4, top: 92.1, left: 2.7, width: 10.4, height: 6 }] },
-    },
-    {
-      tab: "Connect apps",
-      title: "Connect the Bitwarden apps.",
-      intro: "Each Bitwarden app first connects to Bitwarden's own servers. Tell it once to use your vault instead.",
-      clicks: [
-        "Install the Bitwarden app from the list above and open it.",
-        "On the login screen, open the [[Logging in on]] menu and choose [[Self-hosted]]. In the computer app, the menu is called [[Accessing]].",
-        "In [[Server URL]], enter your vault address with **https://** at the start, then tap [[Save]].",
-        "Log in with your email address and master password.",
-      ],
-      note: "Repeat these steps on every phone, browser and computer you use. Each one needs your vault address once.",
-      faq: { q: "Why is there no picture of the app here?", a: "Bitwarden's terms give no permission to reuse its pictures. Its own guide shows each screen, and the labels above match it." },
-      check: "The app shows the login you saved in step 4.",
-      visual: {
-        tag: "BITWARDEN GUIDE",
-        title: "Bitwarden shows each screen",
-        text: "Pick your device in Bitwarden's guide. Look for the section about a **self-hosted** server.",
-        links: [
-          { label: "Connect an app to your own server", detail: "bitwarden.com · all devices", href: "https://bitwarden.com/help/change-client-environment/", icon: "server" },
-          { label: "Get started with the browser extension", detail: "bitwarden.com", href: "https://bitwarden.com/help/getting-started-browserext/", icon: "browser" },
-          { label: "Get started with the mobile app", detail: "bitwarden.com", href: "https://bitwarden.com/help/getting-started-mobile/", icon: "phone" },
-        ],
-      },
-    },
-    {
-      tab: "Check",
-      title: "Is everything connected?",
-      intro: "Check it in the web vault and in one app. Only tick what you checked yourself.",
-      verify: [
-        "I can open my vault address and log in.",
-        "The login I saved shows up in a Bitwarden app on my phone, browser or computer.",
-        "My master password is written down and kept outside the vault.",
-      ],
-      note: "This guide does not read your vault. Your ticks stay in this browser.",
-      check: "Now you can move your other passwords into the vault.",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-05-first-item.webp", width: 1430, height: 300, alt: "All vaults list showing the saved Example Shop login", caption: "Your first login in the vault", credit: "kombify screenshot", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: null, top: 37.2, left: 1, width: 98, height: 58.1 }] },
-    },
-  ]}
-  nextTitle="What comes next."
-  next={[
-    { icon: "shield", title: "Turn on two-step login", text: "Bitwarden explains how to add a second login step.", href: "https://bitwarden.com/help/setup-two-step-login/" },
-    { icon: "server", title: "Back up the vault", text: "For the person who runs kombify: protect the vault data.", href: "/guides/stackkits/back-up-and-restore" },
-  ]}
-  help={[
-    { id: "kcg-passwords-no-invite", q: "I don't have a vault address or an invitation yet.", a: "Ask the person who set up kombify in your household. They add the Passwords service and invite your email address. [How Passwords works with kombify](/guides/stackkits/use-cases/passwords) · [Owner setup](/stackkits/apps/vaultwarden)." },
-    { q: "Create account says “Registration not allowed or user already exists”.", a: "Check that you use exactly the invited email address. If you already created your account, go back and log in instead. Otherwise, ask for a new invitation." },
-    { q: "The address does not open, or the browser warns about the connection.", a: "Try the address on a device in your home network first. If your vault runs only at home, connect to your home Wi-Fi or to the home connection app you were given. Each device must also be set up to trust your home server; the person who set up kombify does this. If the browser says the connection is not private, stop there and ask them. Do not click past the warning. [About home addresses](/guides/stackkits/use-cases/network)." },
-    { q: "I forgot my master password.", a: "Nobody can recover it. Your vault is encrypted with it. The person who runs your vault can delete your account so you can start again, but the passwords saved in it are lost. [Bitwarden on master passwords](https://bitwarden.com/help/master-password/)." },
-    { q: "My Android phone has no Google Play.", a: "Bitwarden runs its own F-Droid repository. The address is listed on the [Bitwarden download page](https://bitwarden.com/download/)." },
-    { q: "Why does it say Vaultwarden and Bitwarden?", a: "Vaultwarden is the program that runs your vault. It is an unofficial server that works with the official Bitwarden apps. Vaultwarden is not associated with Bitwarden, Inc. The pictures show Vaultwarden 1.37.2 in English; newer versions and other languages can look different." },
-  ]}
-  attribution="**Vaultwarden runs your vault, and the Bitwarden apps open it. kombify installs it for you.** kombify makes neither app. [Vaultwarden](https://github.com/dani-garcia/vaultwarden) (AGPL-3.0) · web vault: [Bitwarden web client built for Vaultwarden](https://github.com/dani-garcia/bw_web_builds) (GPL-3.0) · [Bitwarden](https://bitwarden.com/)"
-  sources={{
-    summary: "Screenshots by kombify from a local Vaultwarden install · made-up account · English menus.",
-    paragraphs: [
-      "**Screenshots · September 24, 2026.** kombify captured the web vault pictures from a local reference install: Vaultwarden 1.37.2, the image the StackKits catalog delivers for Passwords, with its bundled web vault 2026.7.0 (the Bitwarden web client, GPL-3.0). The install used the example address https://vault.home.test and the made-up account alex@example.com. It is a reference install, not a StackKits rollout test. This guide added the violet markers.",
-      "The Bitwarden app screens are not shown. [Bitwarden's terms](https://bitwarden.com/terms/) give no permission to reuse its content, so step 5 links to Bitwarden's own guide.",
-      "Store links and help pages were checked on September 24, 2026. Your progress stays in this browser. The guide connects no accounts and asks for no passwords.",
-    ],
-    links: [
-      { label: "Bitwarden: connect individual apps", href: "https://bitwarden.com/help/change-client-environment/" },
-      { label: "Bitwarden downloads", href: "https://bitwarden.com/download/" },
-      { label: "Vaultwarden project", href: "https://github.com/dani-garcia/vaultwarden" },
-    ],
-  }}
-/>
+<ClientSetupGuide id="kcg-passwords">
+
+<GuideMeta items={[{ icon: "phone", text: "Phone, browser & computer" }, { icon: "steps", text: "6 short steps" }, { icon: "book", text: "No prior knowledge needed" }]} />
+
+<GuideNeeds helpHref="#kcg-passwords-no-invite" helpLabel="No invitation yet?">
+  <GuideNeed>Your vault address, for example https://vault.home.test</GuideNeed>
+  <GuideNeed>An invitation for your email address</GuideNeed>
+  <GuideNeed>Each device set up for your home vault by the person who set up kombify</GuideNeed>
+  <GuideNeed>A master password you can remember</GuideNeed>
+</GuideNeeds>
+
+<GuideApps id="kcg-passwords-apps" title="First, get the Bitwarden app." vendorHref="https://bitwarden.com/download/" vendorLabel="All downloads from Bitwarden">
+  <GuideApp platform="apple" label="iPhone & iPad" detail="Bitwarden Password Manager" store="Open in the App Store" href="https://apps.apple.com/app/bitwarden-password-manager/id1137397744" vendor="Bitwarden" official />
+  <GuideApp platform="android" label="Android" detail="Bitwarden Password Manager" store="Open in Google Play" href="https://play.google.com/store/apps/details?id=com.x8bit.bitwarden" vendor="Bitwarden" official />
+  <GuideApp platform="browser" label="Browser extension" detail="Chrome, Firefox, Edge, Safari and more" store="Open the Bitwarden download page" href="https://bitwarden.com/download/" vendor="Bitwarden" official />
+  <GuideApp platform="desktop" label="Computer" detail="Windows, macOS and Linux" store="Open the Bitwarden download page" href="https://bitwarden.com/download/" vendor="Bitwarden" official />
+</GuideApps>
+
+<GuideHint>
+Browser stores: [Chrome](https://chromewebstore.google.com/detail/bitwarden-password-manager/nngceckbapebfimnlniiiahkandclblb) · [Firefox](https://addons.mozilla.org/firefox/addon/bitwarden-password-manager/) · [Edge](https://microsoftedge.microsoft.com/addons/detail/bitwarden-password-manager/jbkfoedolllekgbhcbcoahefnbanhhlh) · [Safari (Mac App Store)](https://apps.apple.com/app/bitwarden/id1352778147). Your vault runs on Vaultwarden, which works with these official Bitwarden apps. You do not need a separate Vaultwarden app.
+</GuideHint>
+
+<GuideSteps id="kcg-passwords-steps" title="Set up your vault step by step." provenance="Screenshots by kombify from a local Vaultwarden install and the official Bitwarden apps · made-up account · English menus." sourcesHref="#kcg-passwords-sources">
+
+<GuideStep tab="Create account">
+
+### Create your vault account.
+
+Start on a computer. Your vault has its own web address, like a website that only your household uses. It only accepts email addresses that were invited.
+
+1. Type your vault address into the browser's address bar, for example **https://vault.home.test**, and press Enter.
+2. Below the login box, click <UI>Create account</UI>.
+3. Enter the invited address in <UI>Email address</UI> and your name in <UI>Name</UI>.
+4. Click <UI>Continue</UI>.
+
+<GuideNote>The address in this guide is an example. Use the address you got from the person who set up kombify.</GuideNote>
+
+<GuideFaq q="What is a vault address? Is this my kombify account?">
+The vault address is the web address of your household's password vault. It usually starts with **https://vault.** and ends with your home network's name. The account you create here belongs only to the vault. It has its own email address and its own master password.
+</GuideFaq>
+
+<GuideCheck>The page now asks you to <UI>Set a strong password</UI>.</GuideCheck>
+
+<GuideShot src="/images/guides/passwords/vaultwarden/web-02-create-account.webp" width={1088} height={718} alt="Create account form with the email address alex@example.com and the name Alex Example" caption="Create account" credit="kombify screenshot" creditHref="#kcg-passwords-sources" version="Vaultwarden 1.37.2 · web vault 2026.7.0" captured="2026-09-24" annotations={[{ n: 3, top: 37.6, left: 16.4, width: 65.1, height: 13.4 }, { n: 3, top: 61, left: 16.4, width: 65.1, height: 13.4 }, { n: 4, top: 76.3, left: 14, width: 72.1, height: 13.9 }]} />
+
+</GuideStep>
+
+<GuideStep tab="Master password">
+
+### Choose your master password.
+
+The master password is the one password you still need to remember. It unlocks all the others.
+
+1. In <UI>Master password</UI>, enter a long password. A short sentence of four or more words works well.
+2. Enter the same password again in <UI>Confirm master password</UI>.
+3. Click <UI>Create account</UI>. If the page suggests the browser extension, click <UI>Add it later</UI> and then <UI>Skip to web app</UI>. You connect the extension in step 4.
+
+<GuideNote>**Nobody can recover a forgotten master password**, not even the person who runs your vault. Write it down and keep the note somewhere safe outside the vault.</GuideNote>
+
+<GuideFaq q="What does the strength bar mean?">
+It estimates how hard your password is to guess. Aim for **Strong**. Longer is better than complicated.
+</GuideFaq>
+
+<GuideCheck>Your empty vault opens with the title <UI>All vaults</UI>.</GuideCheck>
+
+<GuideShot src="/images/guides/passwords/vaultwarden/web-03-master-password.webp" width={1088} height={1310} alt="Set a strong password page with the master password entered twice and rated Strong" caption="Set a strong password" credit="kombify screenshot" creditHref="#kcg-passwords-sources" version="Vaultwarden 1.37.2 · web vault 2026.7.0" captured="2026-09-24" annotations={[{ n: 1, top: 25.5, left: 16.4, width: 60.7, height: 7.3 }, { n: 2, top: 52.2, left: 16.4, width: 60.7, height: 7.3 }, { n: 3, top: 87, left: 14, width: 72.1, height: 7.6 }]} />
+
+</GuideStep>
+
+<GuideStep tab="First password">
+
+### Save your first password.
+
+Save one login as a test. It shows later that your apps are connected to your vault.
+
+1. At the top right, click <UI>New</UI> and choose <UI>Login</UI>. If a welcome window appears first, click <UI>Skip</UI>.
+2. In <UI>Item name</UI>, enter a name you recognize, for example the name of a shop.
+3. Enter your <UI>Username</UI>. Next to <UI>Password</UI>, click the circular arrows to create a password, then click <UI>Use this password</UI>.
+4. Click <UI>Save</UI>.
+
+<GuideNote>Add the shop's web address under <UI>Website (URI)</UI>. The browser extension then suggests this login on that website.</GuideNote>
+
+<GuideCheck>The message <UI>Item added</UI> appears and your login shows in the list.</GuideCheck>
+
+<GuideShot src="/images/guides/passwords/vaultwarden/web-04-new-login.webp" width={1472} height={1664} alt="New Login window with the item name Example Shop, a username and a generated password" caption="New Login" credit="kombify screenshot" creditHref="#kcg-passwords-sources" version="Vaultwarden 1.37.2 · web vault 2026.7.0" captured="2026-09-24" annotations={[{ n: 2, top: 12.1, left: 7.9, width: 82.6, height: 5.8 }, { n: 3, top: 41.8, left: 7.9, width: 79.3, height: 5.8 }, { n: 3, top: 52.3, left: 87.5, width: 5.7, height: 5 }, { n: 4, top: 92.1, left: 2.7, width: 10.4, height: 6 }]} />
+
+</GuideStep>
+
+<GuideStep tab="Browser">
+
+### Connect the browser extension.
+
+The Bitwarden extension first connects to Bitwarden's own servers. Tell it once to use your vault instead.
+
+1. Install the Bitwarden extension from your browser's store and open it from the toolbar.
+2. Below <UI>Email address</UI>, open the <UI>Logging in on</UI> menu and choose <UI>self-hosted</UI>.
+3. In <UI>Server URL</UI>, enter your vault address with **https://** at the start, then click <UI>Save</UI>.
+4. Enter your email address, click <UI>Continue</UI>, and log in with your master password.
+
+<GuideNote>The computer app works the same way. There the menu is called <UI>Accessing</UI>.</GuideNote>
+
+<GuideCheck>The extension shows <UI>Logging in on: vault.home.test</UI> before you log in.</GuideCheck>
+
+<GuideShot src="/images/guides/passwords/bitwarden/browser-04-server-url.webp" width={760} height={1000} alt="Bitwarden browser extension with the Self-hosted environment window and the Server URL https://vault.home.test" caption="Bitwarden browser extension" credit="kombify screenshot" creditHref="#kcg-passwords-sources" version="Bitwarden browser extension 2026.9.1" captured="2026-09-24" annotations={[]} />
+
+</GuideStep>
+
+<GuideStep tab="Phone">
+
+### Connect the phone app.
+
+The phone app needs your vault address once, just like the extension.
+
+1. Open the Bitwarden app and tap <UI>Log in</UI>.
+2. Tap <UI>Logging in on</UI> and choose <UI>Self-hosted</UI>.
+3. In <UI>Server URL</UI>, enter your vault address with **https://** at the start, then tap <UI>Save</UI>.
+4. Enter your email address, tap <UI>Continue</UI>, and log in with your master password.
+
+<GuideNote>The picture shows Android. On an iPhone the screens and labels are the same; Bitwarden's guide shows them: [Bitwarden mobile app](https://bitwarden.com/help/getting-started-mobile/).</GuideNote>
+
+<GuideCheck>The app shows the login you saved in step 3.</GuideCheck>
+
+<GuideShot src="/images/guides/passwords/bitwarden/android-05-server-url.webp" width={540} height={1200} frame="phone" alt="Bitwarden Android app with the Server URL https://vault.home.test entered in the self-hosted settings" caption="Bitwarden for Android" credit="kombify screenshot" creditHref="#kcg-passwords-sources" version="Bitwarden for Android 2026.9.0" captured="2026-09-24" annotations={[]} />
+
+</GuideStep>
+
+<GuideStep tab="Check">
+
+### Is everything connected?
+
+Check it in the web vault and in one app. Only tick what you checked yourself.
+
+<GuideTicks>
+  <GuideTick>I can open my vault address and log in.</GuideTick>
+  <GuideTick>The login I saved shows up in a Bitwarden app on my phone, browser or computer.</GuideTick>
+  <GuideTick>My master password is written down and kept outside the vault.</GuideTick>
+</GuideTicks>
+
+<GuideNote>This guide does not read your vault. Your ticks stay in this browser.</GuideNote>
+
+<GuideCheck>Now you can move your other passwords into the vault.</GuideCheck>
+
+<GuideShot src="/images/guides/passwords/bitwarden/browser-06-vault.webp" width={760} height={1000} alt="Bitwarden browser extension vault showing the saved Example Shop login" caption="Your first login in the browser extension" credit="kombify screenshot" creditHref="#kcg-passwords-sources" version="Bitwarden browser extension 2026.9.1" captured="2026-09-24" annotations={[]} />
+
+</GuideStep>
+
+</GuideSteps>
+
+<GuideNext id="kcg-passwords-more">
+  <GuideNextCard icon="shield" title="Turn on two-step login" href="https://bitwarden.com/help/setup-two-step-login/">Bitwarden explains how to add a second login step.</GuideNextCard>
+  <GuideNextCard icon="server" title="Back up the vault" href="/guides/stackkits/back-up-and-restore">For the person who runs kombify: protect the vault data.</GuideNextCard>
+</GuideNext>
+
+<GuideHelp id="kcg-passwords-help">
+
+<GuideFaq id="kcg-passwords-no-invite" q="I don't have a vault address or an invitation yet.">
+Ask the person who set up kombify in your household. They add the Passwords service and invite your email address. [How Passwords works with kombify](/guides/stackkits/use-cases/passwords) · [Owner setup](/stackkits/apps/vaultwarden).
+</GuideFaq>
+
+<GuideFaq q="Create account says “Registration not allowed or user already exists”.">
+Check that you use exactly the invited email address. If you already created your account, go back and log in instead. Otherwise, ask for a new invitation.
+</GuideFaq>
+
+<GuideFaq q="The address does not open, or the browser warns about the connection.">
+Try the address on a device in your home network first. If your vault runs only at home, connect to your home Wi-Fi or to the home connection app you were given. Each device must also be set up to trust your home server; the person who set up kombify does this. If the browser says the connection is not private, stop there and ask them. Do not click past the warning. [About home addresses](/guides/stackkits/use-cases/network).
+</GuideFaq>
+
+<GuideFaq q="I forgot my master password.">
+Nobody can recover it. Your vault is encrypted with it. The person who runs your vault can delete your account so you can start again, but the passwords saved in it are lost. [Bitwarden on master passwords](https://bitwarden.com/help/master-password/).
+</GuideFaq>
+
+<GuideFaq q="My Android phone has no Google Play.">
+Bitwarden runs its own F-Droid repository. The address is listed on the [Bitwarden download page](https://bitwarden.com/download/).
+</GuideFaq>
+
+<GuideFaq q="Why does it say Vaultwarden and Bitwarden?">
+Vaultwarden is the program that runs your vault. It is an unofficial server that works with the official Bitwarden apps. Vaultwarden is not associated with Bitwarden, Inc. The pictures show English menus; newer versions and other languages can look different.
+</GuideFaq>
+
+</GuideHelp>
+
+<GuideFooter>
+**Vaultwarden runs your vault, and the Bitwarden apps open it. kombify installs it for you.** kombify makes neither app. [Vaultwarden](https://github.com/dani-garcia/vaultwarden) (AGPL-3.0) · web vault: [Bitwarden web client built for Vaultwarden](https://github.com/dani-garcia/bw_web_builds) (GPL-3.0) · Bitwarden [browser extension](https://github.com/bitwarden/clients) and [Android app](https://github.com/bitwarden/android) (GPL-3.0) · [Bitwarden](https://bitwarden.com/)
+</GuideFooter>
+
+<GuideSources id="kcg-passwords-sources">
+
+**Screenshots · September 24, 2026.** kombify captured every picture itself, from a local reference install with the example address https://vault.home.test and the made-up account alex@example.com. It is a reference install, not a StackKits rollout test. This guide added the violet markers.
+
+- Web vault: Vaultwarden 1.37.2, the image the StackKits catalog delivers for Passwords, with its bundled web vault 2026.7.0 (the Bitwarden web client, GPL-3.0).
+- Browser extension: Bitwarden 2026.9.1 for Chrome from Bitwarden's official GitHub release, checked against its published SHA-256 digest.
+- Android app: Bitwarden 2026.9.0 from Bitwarden's official GitHub release, checked against its SHA-256 digest and signing certificate, on an Android 15 emulator.
+
+iPhone screens are not shown. [Bitwarden's terms](https://bitwarden.com/terms/) give no permission to reuse its help-page pictures, so the phone step links to Bitwarden's own guide for iPhone.
+
+Store links and help pages were checked on September 24, 2026. Your progress stays in this browser. The guide connects no accounts and asks for no passwords.
+
+[Bitwarden: connect individual apps](https://bitwarden.com/help/change-client-environment/) · [Bitwarden downloads](https://bitwarden.com/download/) · [Vaultwarden project](https://github.com/dani-garcia/vaultwarden)
+
+</GuideSources>
+
+</ClientSetupGuide>

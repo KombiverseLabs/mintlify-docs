@@ -38,6 +38,7 @@
 .kombify-client-guide .store-name{color:var(--deep);font-size:10px;margin-top:4px}
 .kombify-client-guide .store-name .ico{width:11px;height:11px}
 .kombify-client-guide .download-hint{font-size:10px;color:var(--muted);margin-top:9px}
+.kombify-client-guide .download-hint p{margin:0}
 .kombify-client-guide .download-hint a{color:var(--deep);text-decoration:underline;text-underline-offset:3px}
 .kombify-client-guide .download-hint .ico{width:10px;height:10px}
 .kombify-client-guide .guide-section{margin-top:31px}
@@ -53,20 +54,28 @@
 .kombify-client-guide .guide-panel{display:grid;grid-template-columns:minmax(0,1fr) 43%;min-height:460px}
 /* Panels switch by class, not [hidden]: Mintlify's layered [hidden]{display:none!important} would also hide them in print. */
 .kombify-client-guide .guide-panel:not(.active){display:none}
-.kombify-client-guide .panel-copy{padding:29px 30px 24px;display:flex;flex-direction:column;min-width:0}
-.kombify-client-guide .step-kicker{font-size:9px;letter-spacing:1.35px;font-weight:650;color:var(--primary);margin-bottom:11px}
-.kombify-client-guide .panel-copy h3{font-size:25px;line-height:1.24;letter-spacing:-.7px;font-weight:650;margin:0 0 13px}
-.kombify-client-guide .step-intro{color:var(--muted);font-size:14px;line-height:1.65;margin-bottom:21px}
-.kombify-client-guide .click-list{padding:0;list-style:none;margin:0 0 14px}
-.kombify-client-guide .click-list li{display:flex;align-items:flex-start;gap:11px;margin:0 0 15px;font-size:14px;line-height:1.7}
-.kombify-client-guide .click-num{width:22px;height:22px;background:var(--wash);color:var(--deep);display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:6px;font-size:10px;font-weight:650;margin-top:2px}
+.kombify-client-guide .guide-panel{position:relative}
+.kombify-client-guide .panel-copy{padding:54px 30px 24px;display:flex;flex-direction:column;min-width:0}
+.kombify-client-guide .step-kicker{position:absolute;top:29px;left:30px;font-size:9px;letter-spacing:1.35px;font-weight:650;color:var(--primary)}
+.kombify-client-guide .panel-copy h3{font-size:25px;line-height:1.24;letter-spacing:-.7px;font-weight:650;margin:0 0 13px;scroll-margin-top:110px}
+.kombify-client-guide .panel-copy :is(h3,h3 *){color:var(--ink)}
+.kombify-client-guide .panel-copy h3 a{pointer-events:none}
+.kombify-client-guide .panel-copy h3 :is(svg,[aria-label*="anchor" i],.anchor){display:none}
+.kombify-client-guide .panel-copy>p{color:var(--muted);font-size:14px;line-height:1.65;margin:0 0 18px}
+.kombify-client-guide .panel-copy>ol{padding:0;list-style:none;margin:0 0 14px;counter-reset:kcg-click}
+.kombify-client-guide .panel-copy>ol>li{position:relative;counter-increment:kcg-click;padding-left:33px;margin:0 0 15px;font-size:14px;line-height:1.7;list-style:none}
+.kombify-client-guide .panel-copy>ol>li::marker{content:none}
+.kombify-client-guide .panel-copy>ol>li:before{content:counter(kcg-click);position:absolute;left:0;top:2px;width:22px;height:22px;background:var(--wash);color:var(--deep);display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:10px;font-weight:650}
+.kombify-client-guide .panel-copy>ol>li p{margin:0}
 .kombify-client-guide .key{font-size:12px;background:var(--soft);border:1px solid var(--border);border-radius:4px;padding:1px 4px;font-weight:600;white-space:nowrap}
 .kombify-client-guide .micro-note{font-size:12px;line-height:1.7;color:var(--muted);display:flex;align-items:flex-start;gap:8px;margin-bottom:15px}
 .kombify-client-guide .micro-note .ico{width:14px;height:14px;margin-top:3px}
+.kombify-client-guide :is(.micro-note,.step-check,.answer,.attribution,.source-content,.warning) p{margin:0}
+.kombify-client-guide :is(.micro-note,.answer,.attribution,.source-content,.warning,.download-hint) a{color:var(--deep);text-decoration:underline;text-underline-offset:3px}
 .kombify-client-guide .panel-copy details{font-size:12px;color:var(--muted);margin:0 0 15px}
 .kombify-client-guide summary{cursor:pointer}
 .kombify-client-guide .panel-copy summary{color:var(--deep);font-weight:500}
-.kombify-client-guide .panel-copy details p{padding-top:8px;line-height:1.8}
+.kombify-client-guide .panel-copy details .answer{padding:8px 0 0;font-size:12px;line-height:1.8}
 .kombify-client-guide .panel-copy details a{color:var(--deep);text-decoration:underline}
 .kombify-client-guide .step-check{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--green);margin-top:auto;padding-top:10px}
 .kombify-client-guide .step-check .ico{width:15px;height:15px}
@@ -112,8 +121,8 @@
 .kombify-client-guide .more-icon{background:var(--wash);color:var(--deep);width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:9px;flex-shrink:0}
 .kombify-client-guide .more-icon.green{color:var(--green);background:var(--panel)}
 .kombify-client-guide .faq-section{margin-top:32px}
-.kombify-client-guide .faq{border-bottom:1px solid var(--border)}
-.kombify-client-guide .faq summary{padding:16px 1px;font-size:13px;font-weight:500}
+.kombify-client-guide .faq-section details{border-bottom:1px solid var(--border)}
+.kombify-client-guide .faq-section summary{padding:16px 1px;font-size:13px;font-weight:500}
 .kombify-client-guide .answer{font-size:13px;line-height:1.8;color:var(--muted);padding:0 2px 16px}
 .kombify-client-guide .answer a{color:var(--deep);text-decoration:underline}
 .kombify-client-guide .answer .ico{width:11px;height:11px}
@@ -123,7 +132,8 @@
 .kombify-client-guide .reset{border:0;background:transparent;color:var(--muted);font-size:10px;white-space:nowrap;padding:0}
 .kombify-client-guide .source-section{margin-top:17px;font-size:10px;color:var(--muted)}
 .kombify-client-guide .source-content{padding:14px;background:var(--panel);border:1px solid var(--border);border-radius:8px;margin-top:10px;font-size:11px;line-height:1.8}
-.kombify-client-guide .source-content p+p{margin-top:9px}
+.kombify-client-guide .source-content>*+*{margin-top:9px}
+.kombify-client-guide .source-content ul{padding-left:18px;list-style:disc}
 .kombify-client-guide .source-links{display:flex;flex-wrap:wrap;gap:8px 15px;margin-top:12px}
 .kombify-client-guide .source-links a{color:var(--deep)}
 .kombify-client-guide .source-links .ico{width:10px;height:10px}
@@ -167,3 +177,10 @@
 .dark .kombify-client-guide .badge.official{background:#1c2a24;border-color:#2f5446}
 .dark .kombify-client-guide .badge.unofficial{background:#2c2618;border-color:#5a4a22;color:#f0cf85}
 @media print{.kombify-client-guide .panel-visual{border-left:0}.kombify-client-guide .link-visual a:after{content:" (" attr(href) ")";font-size:9px;color:var(--muted)}.kombify-client-guide .image-fallback{display:none!important}}
+.kombify-client-guide .warning{display:flex;gap:12px;padding:16px 18px;border:1px solid #e4e7df;background:#f8faf6;border-radius:10px;margin-top:24px;color:#515b48}
+.kombify-client-guide .warning>.ico{width:21px;height:21px;flex-shrink:0}
+.kombify-client-guide .warning strong{font-size:12px}
+.kombify-client-guide .warning>div>div{font-size:11px;line-height:1.8;margin-top:3px}
+.dark .kombify-client-guide .warning{background:#25271e;border-color:#454833;color:#dcdfcf}
+.kombify-client-guide .panel-visual .screen-figure+.screenshot-tag{position:static;margin-top:18px}
+@media print{.kombify-client-guide .warning{break-inside:avoid}}
