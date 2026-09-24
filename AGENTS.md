@@ -81,6 +81,10 @@ Binding; `kombify-fast-development` holds the detail.
   product names and public URLs consistent with current standards.
 - Link standards instead of copying them; implementation-specific docs stay in
   the owning product repository.
+- Client setup guides for non-technical readers follow
+  `docs-guidelines/client-setup-guides.md` (component
+  `snippets/client-setup-guide.jsx`, screenshots from
+  `scripts/guide-screenshots/`).
 
 ## Verification
 

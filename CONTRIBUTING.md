@@ -35,3 +35,7 @@ Keep unfinished or internal material in its owning product repository. Move it h
 - **Use consistent terminology**: Don't alternate between synonyms for the same concept
 - **Include examples**: Show, don't just tell
 - **Keep examples public-safe**: Never include operator secret names, private origins, internal runbooks, customer data, or live credentials
+
+## Client setup guides
+
+Pages that walk non-technical readers through setting up apps for a use case, such as phone apps, browser extensions and web vaults, follow [docs-guidelines/client-setup-guides.md](docs-guidelines/client-setup-guides.md). That standard covers tone, page structure, the screenshot and vendor-link policy, image rules and a review checklist. Build them with `snippets/client-setup-guide.jsx`, and capture screenshots with [scripts/guide-screenshots](scripts/guide-screenshots/README.md).
