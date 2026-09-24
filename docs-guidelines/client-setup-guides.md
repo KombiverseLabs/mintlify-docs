@@ -48,7 +48,9 @@ localized MDX under the Mintlify language navigation, reviewed by a competent
 speaker before publication. UI labels in a translated page must match the app's
 UI in that language. Captures are tied to one UI language. Until localized
 captures exist, a translated page keeps the English screenshots and says so in
-its sources note.
+its sources note. The component's own labels ("Back", "STEP", badges) are English
+only today. Add a `labels` prop to the component before the first
+translated guide ships.
 
 ## 2. Page structure
 
@@ -56,7 +58,7 @@ Each guide uses the `ClientSetupGuide` component (`snippets/client-setup-guide.j
 and keeps this order:
 
 1. **Intro meta**: platforms, number of steps, "No prior knowledge needed".
-2. **What you need** (`requirements`): at most three items. Link the missing
+2. **What you need** (`requirements`): at most four items. Link the missing
    case, such as "No invitation yet?", to an FAQ entry through
    `requirementsHelp`.
 3. **Get the app(s)** (`apps`): one card per platform. See section 5 for link
@@ -128,9 +130,10 @@ such as the Immich images in Phone backup, must show a "Vendor screenshot"
 label, a credit link and a fallback link, and it is scheduled for replacement
 with own captures.
 
-Screenshots of open-source software that we run and capture ourselves are
-our own images. Product names and logos in them stay trademarks of their
-owners. Do not suggest endorsement, and name an unofficial project as
+We may publish our own captures of open-source software under that
+software's license. The UI remains its authors' work, so credit the project
+and name its license in the attribution. Product names and logos in them stay
+trademarks of their owners. Do not suggest endorsement, and name an unofficial project as
 unofficial. For example, Vaultwarden is not associated with Bitwarden, Inc.
 
 ### Vendor documentation licenses (checked 2026-09-24)
@@ -148,7 +151,8 @@ on a row that is older than a year.
 | Cloudreve (docs.cloudreve.org) | None, so all rights reserved | https://github.com/cloudreve/docs | **Not permitted.** Capture our own (the software is GPL-3.0). |
 | Paperless-ngx (docs.paperless-ngx.com) | GPL-3.0, whole repo | https://github.com/paperless-ngx/paperless-ngx/blob/dev/LICENSE | Permitted with notice, but image copyleft is unclear. Capture our own. The site footer was not verified. |
 | Gitea (docs.gitea.com) | Apache-2.0 | https://gitea.com/gitea/docs | Permitted with the license link and a note of changes. Logo trademark not verified. |
-| Vaultwarden (software) | AGPL-3.0 | https://github.com/dani-garcia/vaultwarden/blob/main/LICENSE.txt | Own captures of the running software. |
+| Vaultwarden (server) | AGPL-3.0 | https://github.com/dani-garcia/vaultwarden/blob/main/LICENSE.txt | Own captures of the running software. |
+| Vaultwarden web vault (Bitwarden web client built by bw_web_builds) | GPL-3.0 | https://github.com/dani-garcia/bw_web_builds | Own captures; credit it alongside Vaultwarden. |
 
 ## 4. Images
 
@@ -164,8 +168,9 @@ on a row that is older than a year.
 - **Annotations**: violet numbered rings overlaid by the component from
   percentage boxes (`annotations: [{ n, top, left, width, height }]`). The
   capture tool computes them from the elements it clicks and writes them to
-  `captures.json`. Numbers match the click list. Never bake markers into a
-  vendor image.
+  `captures.json`. Numbers match the click list. A box without a number
+  (`n: null`) highlights a result, such as the saved entry. The component
+  draws no markers on vendor images, and markers are never baked into them.
 - **Alt text** describes what the screenshot shows and the state that
   matters, such as "Create account form with the email address
   alex@example.com". Don't start with "Screenshot of".

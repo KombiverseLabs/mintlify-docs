@@ -12,7 +12,7 @@ export default {
   compose: 'apps/vaultwarden/compose.yaml',
   hosts: { 'vault.home.test': 8443 },
   secrets: ['GUIDE_ADMIN_TOKEN'],
-  viewport: { width: 1280, height: 860 },
+  viewport: { width: 1280, height: 960 },
 
   async run({ page, shot, env }) {
     // Synthetic master password, regenerated per run and never stored.
@@ -105,7 +105,7 @@ export default {
     await shot('web-05-first-item', {
       clip: page.getByRole('table').first(),
       pad: 12,
-      annotate: [row],
+      annotate: [{ n: null, target: row }],
       alt: 'All vaults list showing the saved Example Shop login',
     });
 
