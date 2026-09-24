@@ -1,0 +1,30 @@
+# Local reference install for guide screenshots. Synthetic data only; never
+# point this at a real vault. The runner passes GUIDE_ADMIN_TOKEN per run.
+name: kombify-guide-vaultwarden
+services:
+  vaultwarden:
+    # Same image and digest the StackKits release catalog delivers for Passwords.
+    image: ghcr.io/dani-garcia/vaultwarden:1.37.2@sha256:094b5689ed81549bd293418395c7cf495ae9d960fc2d4928cef2083ef913d912
+    environment:
+      DOMAIN: https://vault.home.test
+      SIGNUPS_ALLOWED: "false"
+      INVITATIONS_ALLOWED: "true"
+      ADMIN_TOKEN: ${GUIDE_ADMIN_TOKEN:?the runner sets a per-run admin token}
+      SHOW_PASSWORD_HINT: "false"
+      # Throwaway instance: data lives only as long as the container.
+      I_REALLY_WANT_VOLATILE_STORAGE: "true"
+      # Allow repeated runner invites against one kept instance.
+      ADMIN_RATELIMIT_MAX_BURST: "30"
+    # The image's own check runs every 60 s; poll faster so `up --wait` is quick.
+    healthcheck:
+      test: ["CMD", "/healthcheck.sh"]
+      interval: 3s
+      retries: 20
+  proxy:
+    image: caddy:2.10-alpine@sha256:4c6e91c6ed0e2fa03efd5b44747b625fec79bc9cd06ac5235a779726618e530d
+    command: caddy reverse-proxy --from vault.home.test --to vaultwarden:80 --internal-certs
+    ports:
+      - "127.0.0.1:8443:443"
+    depends_on:
+      vaultwarden:
+        condition: service_healthy
