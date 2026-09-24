@@ -23,6 +23,7 @@ $executableExamplePages = [System.Collections.Generic.HashSet[string]]::new(
     "guides/stackkits/cli-walkthrough.mdx",
     "guides/stackkits/configure-stack-spec.mdx",
     "guides/stackkits/review-plan-and-apply.mdx",
+    "guides/stackkits/use-cases/game.mdx",
     "guides/stackkits/use-cases/personal-ai.mdx",
     "stackkits/apps/cloudreve.mdx",
     "stackkits/apps/gitea.mdx",
@@ -88,6 +89,7 @@ $structuredExamplePages = [System.Collections.Generic.HashSet[string]]::new(
 @(
     "guides/stackkits/application-delivery.mdx",
     "guides/stackkits/configure-stack-spec.mdx",
+    "guides/stackkits/use-cases/game.mdx",
     "stackkits/apps/cloudreve.mdx",
     "stackkits/apps/gitea.mdx",
     "stackkits/apps/jellyfin.mdx",
