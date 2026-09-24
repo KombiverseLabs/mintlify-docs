@@ -1,0 +1,77 @@
+---
+title: "stackkit game"
+description: "Operate the owner's game servers on the installed Game workload"
+sidebarTitle: "game"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:17bb374c3459797f98c916b1e0dcceaa88a19e1522c5d1190fa93ce813f6a987"
+source_hash: "e78d886da36be8d0d9beebf264dd6cde837649b7"
+---
+Operate the owner's game servers on the installed Game workload.
+
+List game servers and run the routine owner operations (power, allow list) through the Pterodactyl Panel of the applied Game workload. Creating a server is `stackkit setup game`.
+
+```bash
+stackkit game [flags]
+```
+
+Subcommands: [`stackkit game allow`](#stackkit-game-allow), [`stackkit game list`](#stackkit-game-list), [`stackkit game power`](#stackkit-game-power)
+
+## stackkit game allow
+
+Admit one player on a StackKits allow-list game server.
+
+```bash
+stackkit game allow <server> [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+| `--owner-approve` | bool | — | Authorize the allow-list change with the established local Owner custody |
+| `--player` | string | — | **Required.** Exact game account name (Minecraft account name or Xbox gamertag) |
+
+**Examples**
+
+```bash
+stackkit game allow 92c66407 --player Notch --owner-approve
+```
+
+## stackkit game list
+
+List the owner's game servers with state and port.
+
+```bash
+stackkit game list [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+
+**Examples**
+
+```bash
+stackkit game list --json
+```
+
+## stackkit game power
+
+Start, stop or restart one game server and wait for the result.
+
+```bash
+stackkit game power <server> [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+| `--owner-approve` | bool | — | Authorize the power change with the established local Owner custody |
+| `--signal` | string | — | **Required.** Power signal: start, stop or restart |
+
+**Examples**
+
+```bash
+stackkit game power 92c66407 --signal restart --owner-approve
+```
+
