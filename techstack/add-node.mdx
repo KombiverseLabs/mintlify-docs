@@ -1,0 +1,113 @@
+---
+title: "Add a Node"
+description: "Choose where a new Node comes from, which system it runs, and what role it has in your StackKit"
+sidebarTitle: "Add a Node"
+icon: "server"
+---
+
+A Node is one server in your homelab: a mini PC in a cupboard, an old laptop,
+a VPS, or a server kombify prepares for you. The Techstack **Add Node** wizard
+asks three things in its Node step: where the server comes from, which system
+it runs, and what job it does in your StackKit.
+
+<Note>
+Techstack is pre-1.0. The Windows Alpha and the hosted preview show the same
+wizard, but some options depend on what your kombify account has enabled. See
+[availability](/techstack/availability).
+</Note>
+
+## Where the Node comes from
+
+The wizard first asks where you are starting.
+
+**I already have a device.** You own the computer, home server, or VPS. You
+then choose how Techstack reaches it:
+
+- **Give me a 1-liner.** After you finish the wizard, Techstack shows a
+  personal command. You paste it into the terminal of the server once. The
+  server then connects itself. This is the simplest path and needs no SSH
+  details. See [Pairing command](/techstack/pairing-command).
+- **Connect my device.** You enter the server's address and an SSH key or
+  password. Techstack signs in over SSH and runs the same setup for you. See
+  [Connect a server over SSH](/techstack/ssh-connection).
+
+**I need a server.** You do not have a machine yet. You have two options:
+
+- **kombify VPS.** kombify prepares a virtual server with a partner provider
+  and connects it for you. This option is in preview and only selectable when
+  your account has managed servers enabled. See
+  [Managed servers](/techstack/managed-servers).
+- **Find a server with a partner.** You rent a VPS directly from a partner.
+  When it is ready, return to the wizard, choose **My device is ready — connect
+  it**, and connect it with the command or with SSH. Your other wizard choices
+  stay in place.
+
+Every path ends with the same kind of Node. Remote access through your own
+domain or a `*.kombify.me` address works the same way for local hardware and
+for rented servers; see [kombify.me](/kombify-me/overview).
+
+## Operating system
+
+For a device you own, the wizard starts with **Ubuntu / Linux**. This is the
+standard. The installer checks the operating system on your device.
+
+- When Docker is missing, the setup installs it with the Ubuntu package
+  manager (`apt-get`).
+- Check [OS compatibility](/stackkits/reference/os-compatibility) for the
+  operating systems StackKits has lifecycle evidence for.
+
+A kombify VPS always starts from Ubuntu 24.04, so you do not choose a system
+for it.
+
+The wizard can also offer a hypervisor option for hosts that run virtual
+machines. That option is preview scope and is not covered by the public
+documentation yet.
+
+## Node configuration
+
+When you add a Node to an existing homelab, the wizard asks what the new Node
+is for:
+
+- **Worker or storage for this StackKit.** The Node joins the StackKit you
+  opened the wizard from. It uses the same foundation (for example Basement
+  Kit) and keeps your existing access, people, and sign-in. You then pick
+  **Worker Node** or **Storage Node**.
+- **New StackKit / main Node.** The Node becomes the main Node of a new
+  StackKit inside the same homelab, for example a Cloud Kit on a VPS next to
+  your Basement Kit at home.
+
+The wizard can also list a hypervisor host here. That option is preview scope
+and not documented publicly yet.
+
+[Node roles and StackKit foundation](/techstack/node-roles) explains each role
+and when to start a new StackKit.
+
+## What happens next
+
+After you confirm, Techstack opens a progress page for the new Node.
+
+1. **With the pairing command**, the page shows the command and a copy button.
+   The Node shows **Not connected yet** until you run the command on the
+   server and its Guard reports in.
+2. **With SSH**, Techstack signs in to the server, installs the Guard, and
+   waits for it to register. You do not paste anything.
+3. **With a kombify VPS**, kombify prepares the server and connects it.
+
+Once the Node is connected, Techstack continues with the StackKit rollout and
+shows its progress on the same page. When it finishes, the Node appears in your
+homelab with its health and services.
+
+<CardGroup cols={2}>
+  <Card title="Pairing command" icon="terminal" href="/techstack/pairing-command">
+    What the one-line command does and how to run it.
+  </Card>
+  <Card title="Connect over SSH" icon="key" href="/techstack/ssh-connection">
+    Address, SSH key or password, user, port, and sudo.
+  </Card>
+  <Card title="Node roles" icon="sitemap" href="/techstack/node-roles">
+    Foundation, worker, and storage Nodes.
+  </Card>
+  <Card title="Managed servers" icon="cloud" href="/techstack/managed-servers">
+    Servers kombify prepares for you (preview).
+  </Card>
+</CardGroup>

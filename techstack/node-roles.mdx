@@ -1,0 +1,72 @@
+---
+title: "Node roles and StackKit foundation"
+description: "What foundation, worker, and storage Nodes do, and when a new Node starts its own StackKit"
+sidebarTitle: "Node roles"
+icon: "sitemap"
+---
+
+Every Node you add with the wizard is bound to one StackKit and has one role
+in it. The role tells Techstack what the Node is for. The StackKit foundation
+tells it which kit definition the Node follows.
+
+## Foundation Node
+
+The foundation Node is the first and main Node of a StackKit. It runs the core
+of that StackKit. Each StackKit has exactly one foundation Node.
+
+You create a foundation Node when you set up your first homelab, or when you
+choose **New StackKit / main Node** while adding a Node. You cannot add a
+second foundation Node to an existing StackKit; a second main Node always
+starts a new StackKit.
+
+## Worker Node
+
+A worker Node adds computing power to an existing StackKit. The StackKit can
+place services on it. Choose **Worker Node** when you add a second machine to
+spread the load, for example a spare mini PC next to your first server.
+
+A worker Node joins the StackKit you add it to and uses that StackKit's
+foundation.
+
+## Storage Node
+
+A storage Node is an additional Node intended for services that need a lot of
+disk space, such as photos, files, or media. Choose **Storage Node** when the
+machine's main strength is its disks.
+
+Like a worker Node, a storage Node joins an existing StackKit and uses its
+foundation.
+
+## StackKit foundation
+
+A StackKit foundation is the kit definition a StackKit is built on. Techstack
+offers two:
+
+- **[Basement Kit](/stackkits/kits/basement-kit)** for local or user-owned
+  hardware, such as a server at home or a VPS you rent yourself.
+- **[Cloud Kit](/stackkits/kits/cloud-kit)** for a VPS. A
+  [managed server](/techstack/managed-servers) uses Cloud Kit.
+
+Every Node is bound to one foundation. If you are not sure which kit fits, read
+[Choosing a kit](/guides/stackkits/choosing-a-kit).
+
+## Joining an existing StackKit
+
+Choose **Worker or storage for this StackKit** when the new Node should help a
+StackKit you already run. The Node then:
+
+- takes the foundation of that StackKit; you do not choose it again;
+- keeps your existing access, people, and sign-in;
+- becomes a **Worker Node** or a **Storage Node**. The foundation role is not
+  offered here, because the StackKit already has its main Node.
+
+## Starting a new StackKit
+
+Choose **New StackKit / main Node** when the new machine should run its own
+StackKit inside the same homelab. The Node becomes the foundation Node of that
+new StackKit, and you choose its foundation.
+
+A common setup is two StackKits in one homelab: a Basement Kit on hardware at
+home and a Cloud Kit on a VPS. Each has its own main Node. Both can be reached
+from anywhere through your own domain or a `*.kombify.me` address; see
+[kombify.me](/kombify-me/overview).

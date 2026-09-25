@@ -1,0 +1,82 @@
+---
+title: "Pairing command"
+description: "Connect a server to Techstack by running one personal command in its terminal"
+sidebarTitle: "Pairing command"
+icon: "terminal"
+---
+
+The pairing command is the **Give me a 1-liner** path in the Add Node wizard.
+You copy one line from Techstack, paste it into the terminal of your server,
+and the server connects itself. You do not need to enter SSH details in
+Techstack.
+
+## What the command does
+
+The command downloads the Techstack installer from your Techstack and runs it
+with a personal, short-lived pairing token. On the server, the installer:
+
+1. detects the platform and installs the Techstack **Guard**, a small agent
+   that reports the server's health;
+2. installs the pinned StackKits runtime the rollout needs;
+3. redeems the pairing token, which links this server to your homelab;
+4. installs Docker with `apt-get` when no working container runtime is present;
+5. installs and starts the `techstack-agent` system service, so the Guard
+   keeps running after a restart.
+
+The Guard talks to Techstack only through an **outbound** HTTPS connection. It
+sends a heartbeat and a measured inventory about every 30 seconds. You do not
+open an inbound port on the server for it.
+
+The token works once. Techstack stores only a hash of the credential the
+server receives, and the command is not kept in job reports.
+
+## Before you run it
+
+- **A Linux server with systemd.** Ubuntu is the standard system; see
+  [Add a Node](/techstack/add-node#operating-system).
+- **Administrator rights.** Run the command as `root` or as a user that can use
+  `sudo`. The installer writes system files and installs a service.
+- **`curl` on the server.** The command uses it to download the installer.
+- **The server can reach Techstack.** The progress page shows the field
+  **Techstack URL reachable from the server**. The address in that field must
+  open from the server, not only from your computer. With the
+  [Windows Alpha](/techstack/install-windows), the server reaches the Windows
+  computer on TCP port `5264` in your local network, so keep the Windows client
+  running while you pair.
+- **A fresh command.** A pairing token expires 15 minutes after Techstack
+  creates it.
+
+## Run the command
+
+1. Finish the Add Node wizard. Techstack opens the progress page for the new
+   Node, which shows **Not connected yet**.
+2. Check the **Techstack URL reachable from the server** field and correct it
+   if the server uses a different address to reach Techstack.
+3. Select **Copy pairing command**.
+4. Open a terminal on the server, directly or over SSH, paste the command, and
+   press Enter. Do not change the command. It contains your personal token.
+5. Wait for the installer to finish. It prints each step.
+
+If the page says **This pairing token has expired**, select **Generate new
+command** and run the new command instead. The old one no longer works.
+
+<Warning>
+Treat the command like a one-time password. Anyone who runs it before it
+expires can connect a server to your homelab.
+</Warning>
+
+## When the Node is connected
+
+When the Guard sends its first heartbeat, Techstack changes the Node from
+**Not connected yet** to connected. The progress page then continues with the
+StackKit rollout for this Node. You can close the terminal.
+
+To check the Guard on the server later:
+
+- `sudo systemctl status techstack-agent` shows whether the service runs.
+- `sudo journalctl -u techstack-agent -f` follows its log.
+
+The Node now appears in your homelab with its health. Where its services are
+reachable does not depend on where the server stands: local hardware and
+rented servers can both use your own domain or a `*.kombify.me` address. See
+[kombify.me](/kombify-me/overview).

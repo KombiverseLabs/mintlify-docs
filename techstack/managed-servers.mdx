@@ -1,0 +1,79 @@
+---
+title: "Managed servers"
+description: "Preview: let kombify prepare a VPS with a partner provider and connect it as a Node"
+sidebarTitle: "Managed servers"
+icon: "cloud"
+---
+
+<Warning>
+Managed servers are preview scope. They are not a general-availability claim,
+and the option only appears as selectable when your kombify account has
+managed servers enabled. See [availability](/techstack/availability).
+</Warning>
+
+A managed server is the **kombify VPS** option under **I need a server** in the
+Add Node wizard. kombify creates a virtual server with a partner provider,
+prepares it, and connects it to your homelab. You do not rent the server or
+run a command yourself.
+
+## How a managed server works
+
+1. In the Node step, choose **I need a server**, then **kombify VPS**.
+   Techstack checks which providers your account can use. If none is enabled,
+   the option stays unavailable and the wizard names what is missing. You can
+   still connect your own device.
+2. Review the server details the wizard shows: size (vCPU, RAM, disk),
+   location, and provider.
+3. Finish the wizard. kombify creates the server from an Ubuntu 24.04 image,
+   connects it to your homelab, and then sets up the tools you selected.
+   The progress page shows each step.
+
+A managed server uses the [Cloud Kit](/stackkits/kits/cloud-kit) foundation.
+Like every other Node, its services can be reached through your own domain or
+a `*.kombify.me` address; see [kombify.me](/kombify-me/overview).
+
+## Providers
+
+Techstack currently lists two partner providers for managed servers:
+
+- **IONOS**
+- **centron**
+
+Which of them you can choose depends on your account. When more than one is
+enabled, open **Provider & server details** to pick one. When only one is
+enabled, the wizard shows it as the provider for your server.
+
+For IONOS, the server is created in an IONOS datacenter in Frankfurt,
+Germany. The wizard shows the location in the server details. Choosing other
+sizes or locations is not available in the wizard yet.
+
+If you prefer to rent a server yourself, choose **Find a server with a
+partner** instead. It links to the same providers. Once your server is ready,
+connect it with the [pairing command](/techstack/pairing-command) or
+[over SSH](/techstack/ssh-connection).
+
+## Standard and Premium
+
+A managed server comes in two sizes. The wizard shows which one applies as
+**Your standard VPS** or **Your premium VPS**, together with its exact vCPU,
+RAM, disk size, and location.
+
+- **Standard** is the default size for a new managed server.
+- **Premium** currently has more resources than Standard: more disk space
+  with every provider, and on IONOS also more vCPU and RAM.
+
+The exact size depends on the provider, so check the values the wizard shows
+before you confirm. A managed Node added to an existing managed StackKit keeps
+that StackKit's size.
+
+## Availability
+
+Managed servers are in preview. The option is selectable only when your
+kombify account has managed server access and at least one provider enabled.
+If Techstack cannot check your account right now, the wizard says so and
+offers **Try again**. In every case you can add a server you own instead, with
+the [pairing command](/techstack/pairing-command) or
+[over SSH](/techstack/ssh-connection).
+
+For the current public and preview boundaries of Techstack, see
+[availability](/techstack/availability).
