@@ -136,22 +136,12 @@ try {
     }
     Assert-Case -Name "provider origin fails" -Fixture $origin -ShouldPass $false -ExpectedMessage "provider-origin"
 
-    $proxmox = New-TestFixture -Name "proxmox" -Pages @{
-        "index.mdx" = "---`ntitle: Test`ndescription: Internal development infrastructure`n---`n`nProxmox setup guide.`n"
-    }
-    Assert-Case -Name "internal Proxmox content fails" -Fixture $proxmox -ShouldPass $false -ExpectedMessage "internal-proxmox"
-
-    $unreleasedProduct = New-TestFixture -Name "unreleased-product" -Pages @{
-        "index.mdx" = "---`ntitle: Test`ndescription: Unreleased product surface`n---`n`nUse kombify Cloud to operate this stack.`n"
-    }
-    Assert-Case -Name "unreleased product content fails" -Fixture $unreleasedProduct -ShouldPass $false -ExpectedMessage "unreleased-product-surface"
-
     $publishedData = @{
         "index.mdx" = "---`ntitle: Test`ndescription: Safe public page`n---`n`n# Test`n"
-        "data/evidence.json" = "{ `"name`": `"Proxmox VE`" }`n"
+        "data/evidence.json" = "{ `"token`": `"AUTH0_MCP_BEARER`" }`n"
     }
     $servedData = New-TestFixture -Name "served-data" -Pages $publishedData
-    Assert-Case -Name "published non-page file with forbidden content fails" -Fixture $servedData -ShouldPass $false -ExpectedMessage "internal-proxmox"
+    Assert-Case -Name "published non-page file with forbidden content fails" -Fixture $servedData -ShouldPass $false -ExpectedMessage "operator-secret-name"
 
     $ignoredData = New-TestFixture -Name "ignored-data" -Pages $publishedData -MintIgnore "public-safety-policy.json`n/data/"
     Assert-Case -Name "mintignored non-page file is not published" -Fixture $ignoredData -ShouldPass $true

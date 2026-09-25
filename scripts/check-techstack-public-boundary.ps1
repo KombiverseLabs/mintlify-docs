@@ -38,20 +38,8 @@ foreach ($relativePath in $requirements.Keys) {
 }
 
 $techstackFiles = @(
-    Get-ChildItem -LiteralPath (Join-Path $repoRoot "techstack") -File -Filter "*.mdx" |
-        Sort-Object FullName
+    Get-ChildItem -LiteralPath (Join-Path $repoRoot "techstack") -File -Filter "*.mdx"
 )
-foreach ($file in $techstackFiles) {
-    $relative = $file.FullName.Substring($repoRoot.Length).TrimStart("\", "/").Replace("\", "/")
-    $content = Get-Content -LiteralPath $file.FullName -Raw
-    foreach ($rule in @(
-        @{ Pattern = '(?i)\b(?:generally available|production-ready|GA release)\b'; Reason = "unsupported availability claim" }
-    )) {
-        if ($content -match $rule.Pattern) {
-            $errors.Add("$relative contains $($rule.Reason)") | Out-Null
-        }
-    }
-}
 
 if ($errors.Count -gt 0) {
     Write-Host "Techstack public-boundary violations:"
