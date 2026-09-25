@@ -4,8 +4,8 @@ description: "Generate deterministic StackKits documentation projections"
 sidebarTitle: "docs"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:17bb374c3459797f98c916b1e0dcceaa88a19e1522c5d1190fa93ce813f6a987"
-source_hash: "e78d886da36be8d0d9beebf264dd6cde837649b7"
+content_hash: "sha256:8c145ee26f1691282ddda9ade2e6ef3ec9e1976a952c6531c37bdbd09cf450ef"
+source_hash: "fbc435d9cca61961f243df413ad96a9900170d26"
 ---
 Generate deterministic StackKits documentation projections.
 
@@ -13,7 +13,34 @@ Generate deterministic StackKits documentation projections.
 stackkit docs [flags]
 ```
 
-Subcommands: [`stackkit docs emit-cli-reference`](#stackkit-docs-emit-cli-reference), [`stackkit docs emit-release-manifests`](#stackkit-docs-emit-release-manifests), [`stackkit docs emit-use-case-overview`](#stackkit-docs-emit-use-case-overview)
+Subcommands: [`stackkit docs emit-advanced-operations`](#stackkit-docs-emit-advanced-operations), [`stackkit docs emit-cli-reference`](#stackkit-docs-emit-cli-reference), [`stackkit docs emit-release-manifests`](#stackkit-docs-emit-release-manifests), [`stackkit docs emit-use-case-overview`](#stackkit-docs-emit-use-case-overview)
+
+## stackkit docs emit-advanced-operations
+
+Emit the Advanced operations catalog (stackkit.advanced-operations/v1).
+
+Write the machine-readable catalog of every Advanced operation an orchestrator may dispatch: exact argv templates, admission requirements, input and result contracts, rollout event phases and the denial envelope.
+
+The release archive ships this file. With `--check` nothing is written; the command fails when the file differs from the catalog source.
+
+```bash
+stackkit docs emit-advanced-operations [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--check` | bool | — | Write nothing; fail when the catalog file is missing or stale |
+| `--out` | string | `docs/data/advanced-operations/latest.json` | Catalog JSON path, relative to `--chdir` |
+
+**Examples**
+
+```bash
+# Regenerate the committed catalog after changing an Advanced operation
+stackkit docs emit-advanced-operations
+
+# Fail when the committed catalog is stale
+stackkit docs emit-advanced-operations --check
+```
 
 ## stackkit docs emit-cli-reference
 
