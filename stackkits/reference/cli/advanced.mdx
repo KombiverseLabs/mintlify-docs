@@ -4,8 +4,8 @@ description: "Manage offline-authorized Advanced lifecycle operations"
 sidebarTitle: "advanced"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:17bb374c3459797f98c916b1e0dcceaa88a19e1522c5d1190fa93ce813f6a987"
-source_hash: "e78d886da36be8d0d9beebf264dd6cde837649b7"
+content_hash: "sha256:8c145ee26f1691282ddda9ade2e6ef3ec9e1976a952c6531c37bdbd09cf450ef"
+source_hash: "fbc435d9cca61961f243df413ad96a9900170d26"
 ---
 Manage offline-authorized Advanced lifecycle operations.
 
@@ -13,7 +13,7 @@ Manage offline-authorized Advanced lifecycle operations.
 stackkit advanced [flags]
 ```
 
-Subcommands: [`stackkit advanced change-set`](#stackkit-advanced-change-set), [`stackkit advanced trust`](#stackkit-advanced-trust)
+Subcommands: [`stackkit advanced change-set`](#stackkit-advanced-change-set), [`stackkit advanced restore-drill`](#stackkit-advanced-restore-drill), [`stackkit advanced rollback`](#stackkit-advanced-rollback), [`stackkit advanced trust`](#stackkit-advanced-trust)
 
 ## stackkit advanced change-set
 
@@ -54,6 +54,77 @@ stackkit advanced change-set create [flags]
 | `--candidate-spec` | string | — | Path to the candidate StackSpec v2 using generation.target=terramate |
 | `--capability` | string | — | Path to a canonical stackkit.advanced-capability/v1 file |
 | `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+
+## stackkit advanced restore-drill
+
+Run capability-gated native restore drills.
+
+```bash
+stackkit advanced restore-drill [flags]
+```
+
+Subcommands: [`stackkit advanced restore-drill run`](#stackkit-advanced-restore-drill-run)
+
+### stackkit advanced restore-drill run
+
+Stage and verify a restore of a backup anchor without activation.
+
+Run a native v2 restore drill as an Advanced operation.
+
+The drill is admitted only with an offline-verified capability that allows restore.drill, the local Owner-approved issuer trust, and explicit `--owner-approve`. It verifies the current runtime, creates a new snapshot anchor (or validates `--anchor` in local custody), stages a restore of that anchor, verifies the staged tree, removes the staging area, and verifies that the live runtime is unchanged. Staged data is never activated.
+
+```bash
+stackkit advanced restore-drill run [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--anchor` | string | — | Existing sha256 snapshot-anchor ID to drill; a new backup anchor is created when omitted |
+| `--capability` | string | — | Path to a canonical stackkit.advanced-capability/v1 file that allows restore.drill |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+| `--operation-id` | string | — | Stable lowercase drill ID (8-100 characters); generated when omitted |
+| `--owner-approve` | bool | — | Explicitly approve the drill's backup and staged restore side effects |
+
+**Examples**
+
+```bash
+stackkit advanced restore-drill run --capability capability.json --owner-approve --json
+```
+
+## stackkit advanced rollback
+
+Run capability-gated coordinated rollbacks across Terramate stacks.
+
+```bash
+stackkit advanced rollback [flags]
+```
+
+Subcommands: [`stackkit advanced rollback run`](#stackkit-advanced-rollback-run)
+
+### stackkit advanced rollback run
+
+Roll every local Terramate stack back to one verified checkpoint.
+
+Roll the local host back to one verified executor-state checkpoint as the Advanced operation rollback.coordinated.
+
+The rollback is admitted only with an offline-verified capability that allows rollback.coordinated, the local Owner-approved issuer trust, and explicit `--owner-approve`. `--to` names the checkpoint directly or the change set whose pre-apply checkpoint is the target. Stacks run in reverse run order: stacks added after the checkpoint are destroyed through OpenTofu (docker compose down without volumes) and removed, changed stacks get the checkpoint's state, configuration and payload back and are forced to converge, and stacks removed after the checkpoint are recreated. The checkpoint's StackSpec and Inventory are restored, regenerated and verified. An interrupted rollback resumes on the next run with the same `--to` and skips stacks that already converged.
+
+```bash
+stackkit advanced rollback run [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--capability` | string | — | Path to a canonical stackkit.advanced-capability/v1 file that allows rollback.coordinated |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+| `--owner-approve` | bool | — | Explicitly approve destroying, restoring and recreating stacks |
+| `--to` | string | — | Target sha256 executor-state snapshot ID, or the sha256 change-set ID whose pre-apply checkpoint is the target |
+
+**Examples**
+
+```bash
+stackkit advanced rollback run --capability capability.json --to sha256:<change-set-id> --owner-approve --json
+```
 
 ## stackkit advanced trust
 
