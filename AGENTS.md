@@ -14,8 +14,8 @@ Binding; `kombify-fast-development` holds the detail.
 
 1. Pre-1.0 (`fast-pre-1.0`): the affected deterministic gate is the only synchronous gate.
 2. Test behavior at public boundaries; black-box by default.
-3. Add a test only for a regression, core invariant or sensitive boundary (auth, billing, migrations, provider control, signing).
-4. Assert effects, never structure (error strings, counts, snapshots).
+3. Add a test only for a regression, core invariant or sensitive boundary (auth, billing, migrations, provider control, signing); lint, type, build, security and schema checks are the baseline, not extra tests.
+4. Assert effects, never structure: no fixed counts, presence or existence checks, exact strings, source or doc greps, or snapshots.
 5. One behavior, max one test.
 6. No coverage or test-count goals pre-1.0.
 7. A test that breaks on a behavior-preserving refactor is fixed or deleted.
