@@ -26,14 +26,14 @@ jobs:
           [[ "$GITHUB_EVENT_NAME" == 'pull_request' || "$GITHUB_EVENT_NAME" == 'merge_group' ]]
           [[ "$SOURCE_SHA" =~ ^[a-f0-9]{40}$ && "$PRODUCER_SHA" =~ ^[a-f0-9]{40}$ ]]
       - name: Checkout ruleset-selected producer
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: KombiverseLabs/mintlify-docs
           ref: ${{ github.workflow_sha }}
           path: producer
           persist-credentials: false
       - name: Checkout candidate as data
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha }}
           path: candidate
