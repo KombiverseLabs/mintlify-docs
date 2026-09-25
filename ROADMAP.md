@@ -126,14 +126,13 @@ verification of the full anonymous surface.
 
 - Localized customer documentation after the English source and review workflow
   are stable.
-- Additional products and API references only after their public artifacts and
-  support boundaries are available.
+- Additional products and API references as their public artifacts and support
+  boundaries ship.
 
 ## Not Planned
 
 - Restoring or migrating the retired legacy documentation tree.
 - Publishing internal development infrastructure or operator runbooks.
-- Treating Simulate as a standalone product.
 - Generated roadmap synchronization from this document.
 
 <!-- BEGIN GENERATED: open-issues kombify-roadmap-sync -->
