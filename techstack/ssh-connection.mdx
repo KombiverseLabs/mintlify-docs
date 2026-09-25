@@ -1,0 +1,80 @@
+---
+title: "Connect a server over SSH"
+description: "Let Techstack sign in to your server over SSH and connect it for you"
+sidebarTitle: "Connect over SSH"
+icon: "key"
+---
+
+Choose **Connect my device** in the Add Node wizard when your server already
+accepts SSH logins and you prefer not to paste a command yourself. Techstack
+signs in with the details below, runs the same setup as the
+[pairing command](/techstack/pairing-command), and waits for the server's
+Guard to register.
+
+## Host or IP address
+
+Enter the address Techstack uses to reach the server in **Node host or IP**,
+for example `192.168.1.20` or `server.example.com`.
+
+The address must be reachable from where Techstack runs. A home address like
+`192.168.1.20` works when Techstack runs in the same network, for example the
+[Windows Alpha](/techstack/install-windows) on a computer at home. If Techstack
+cannot reach the server this way, use the
+[pairing command](/techstack/pairing-command) instead: the server then
+connects outward on its own.
+
+## SSH key or password
+
+Under **Authentication**, choose how Techstack signs in:
+
+- **SSH key.** Techstack uses a private key you saved in your Wallet.
+- **Password.** Techstack uses the SSH password of the user you enter.
+
+When you choose a password, the wizard keeps it only in the browser's memory
+while you move to the next page. It is not written to the browser's session
+storage, so if you reload the page before setup starts, enter the password
+again. Techstack then saves the password encrypted in your Wallet for this
+StackKit, so it can retry the setup. It is not stored as plain text in the
+StackKit configuration or in job reports.
+
+## SSH key label
+
+With **SSH key**, enter the **SSH key label**: the name of an SSH key saved in
+your Wallet. Techstack looks up the Wallet item with that name (upper and lower
+case do not matter) and uses its private key. You never paste the private key
+into the wizard.
+
+If no SSH key in your Wallet has that name, the connection test and the setup
+stop with an error. Save the key in your Wallet first, then enter its name
+here. The public half of the key must be in the server user's
+`~/.ssh/authorized_keys` file, as for any SSH login.
+
+## SSH user, port and sudo
+
+Open **SSH details** to change the defaults:
+
+- **SSH user.** The account Techstack signs in as. The default is `root`.
+- **SSH port.** The default is `22`. Change it only if your server's SSH
+  service listens on another port.
+- **Use sudo for setup commands.** Turn this on when the SSH user is not
+  `root`. Techstack then runs the setup with `sudo`. It first tries `sudo`
+  without a password prompt, so the setup is most reliable when that user may
+  run `sudo` without typing a password. The setup stops if the user has no
+  `sudo` at all.
+
+## Test connection
+
+Select **Test connection** before you continue. Techstack tries to sign in
+with the address, user, port, and key or password you entered, and shows
+**SSH connection successful** or the error it received. The test only signs
+in. It does not change anything on the server.
+
+If you change any field after a test, the result is cleared. Test again before
+you continue.
+
+Common reasons a test fails:
+
+- the host or IP is wrong, or not reachable from where Techstack runs;
+- the SSH port is different from `22`;
+- the key label does not match an SSH key in your Wallet;
+- the server does not accept that key or password for that user.
