@@ -65,4 +65,4 @@ When updating, use the current checkout as source of truth; retain the full chec
 
 - **Public-safety implementation details** — `README.md` references `public-safety-policy.json` and a schema path, but neither is present in this checkout’s root listing. Deferred until checkout evidence is available or the README is reconciled.
 - **Complete StackKits contract reconciliation** — `stackkits/overview.mdx`, `stackkits/reference/spec-format.mdx`, individual kit pages, and newer changelog entries disagree on versions, names, and some support states. This wiki records the inconsistency but does not choose an unverified contract.
-- **Broader public product coverage** — `STATUS.md` says current public coverage is limited to StackKits, Identity & Access, and Changelog. Additional product documentation belongs here only after verified source material is added.
+- **Broader public product coverage** — `STATUS.md` says current public coverage is limited to StackKits, Identity & Access, and Changelog. Additional product documentation is added as verified source material ships.

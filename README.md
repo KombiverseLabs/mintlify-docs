@@ -22,10 +22,9 @@ The public surface has five tabs:
 | SpeechKit | Released Windows beta, voice modes, and Go framework guidance. |
 | Identity & Access | The small identity boundary relevant to StackKits. |
 
-Content for Cloud, Simulate, AI, Workbench, Companion, unreleased components,
-internal infrastructure, comparisons, operator runbooks, and generic platform
-architecture remains outside the current public scope. Simulate is not a
-standalone product and must not appear as one.
+Products are documented here as their public artifacts ship. Internal
+infrastructure and operator runbooks stay out of the public docs. Simulate is a
+kombify product that users reach through the kombify Cloud dashboard.
 
 ## Publication Boundary
 
