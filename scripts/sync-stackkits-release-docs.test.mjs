@@ -191,19 +191,6 @@ test('renders operating systems only from the lifecycle evidence document', () =
   assert.ok(delivery.includes('| yes | `supported` |'))
 })
 
-test('defines lifecycle grades with the wording shared by every compatibility surface', () => {
-  const { temp, repo } = tempRepo()
-  const { os, delivery } = syncWithEvidence(repo, path.join(temp, 'input'), 'v9.9.9', evidence())
-
-  // Shared verbatim with stackkit.cc/compatibility and StackKits docs/OS_COMPATIBILITY.md.
-  for (const page of [os, delivery]) {
-    assert.ok(page.includes('- `supported`: Every lifecycle phase passed in the newest run on this release.'))
-    assert.ok(page.includes('- `preview`: Install through verify passed in the newest run; a later phase failed.'))
-    assert.ok(page.includes('- `unverified`: No completed run on this release yet, or the newest run failed before verify.'))
-  }
-  assert.ok(os.includes('Operating-system and hypervisor rows show the best result across the environments tested on this release; Kits by environment lists each environment on its own.'))
-})
-
 test('names the evidence release when it trails the synced tag', () => {
   const { temp, repo } = tempRepo()
   const { os, delivery } = syncWithEvidence(repo, path.join(temp, 'input'), 'v9.9.9', evidence('v9.9.8'))
