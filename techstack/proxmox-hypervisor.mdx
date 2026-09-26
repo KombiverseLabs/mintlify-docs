@@ -1,0 +1,112 @@
+---
+title: "Proxmox hypervisor"
+description: "Preview: connect a Proxmox host and let Techstack run your StackKit in a separate Ubuntu VM"
+sidebarTitle: "Proxmox hypervisor"
+icon: "cubes"
+---
+
+<Warning>
+The Proxmox hypervisor option is preview scope. It needs some administration
+on the Proxmox host itself, described below. See
+[availability](/techstack/availability).
+</Warning>
+
+If your server runs Proxmox VE, Techstack does not install your StackKit on the
+Proxmox host itself. It connects to the host and creates a separate Ubuntu
+24.04 LTS virtual machine (VM), the **guest**. Your StackKit runs inside that
+guest. Techstack prepares and connects the guest automatically.
+
+## When to use Proxmox
+
+Choose **Proxmox hypervisor** under **Device & system details** in the Add Node
+wizard when the machine you want to use already runs Proxmox VE. For any other
+Linux server, keep the standard **Ubuntu / Linux** option; see
+[Add a Node](/techstack/add-node#operating-system).
+
+Use it when:
+
+- you want to keep the Proxmox host for other VMs and give your StackKit its
+  own VM next to them;
+- you want the Smart Home use case with Home Assistant OS. Techstack can then
+  create a second, separate Home Assistant OS VM. The Ubuntu guest still runs
+  the StackKit core and your other services.
+
+The host needs an `x86_64` processor with hardware virtualization (Intel VT-x
+or AMD-V). Without it, Techstack cannot create the guest.
+
+## Connect and authorize the host
+
+The wizard shows it in this order: connect the Proxmox host, enable guest
+management, then choose where the Ubuntu VM runs.
+
+1. **Connect the host.** Select **Connect another Proxmox server**, then
+   **Generate connection command**. Run the command in the Proxmox host shell
+   as an administrator. It installs the Techstack Guard on the host, which
+   reports health to your homelab through an outbound connection. The command
+   works once and expires after a short time; generate a new one if needed.
+   It is shown only on this page and is not kept in job reports.
+2. **Give the Guard access to Proxmox.** On the host, an administrator creates
+   a scoped Proxmox API token in the Proxmox administration interface and saves
+   the full token value in a file only `root` can read (permissions `0600`).
+   The token must cover the node, the storage, and the range of VM IDs
+   Techstack may use, including `VM.Audit` on each ID. Downloading images also
+   needs Proxmox's import-storage and network-access privileges. Then run
+   `techstack substrate configure` on the host with the node name, the token
+   file, and the first and last VM ID Techstack may use, check the result with
+   `techstack substrate inventory`, and restart the Guard. The token stays on
+   the host; never send it to Techstack or put it on a command line.
+3. **Enable guest management.** Back in the wizard, select **Enable guest
+   management** for the host. It then appears under **Connected Proxmox
+   server**. If enabling fails, check the Guard's local Proxmox configuration
+   and select **Refresh**.
+
+**Find Proxmox on my network** can search your local network for Proxmox
+hosts when a local executor is connected. Found hosts become selectable only
+after you connect and authorize them as above. You can always connect a host
+manually.
+
+Existing VMs on the host stay outside Techstack's control. Techstack only
+cleans up guests it created itself.
+
+## Storage and network bridge
+
+After you choose the host, Techstack reads its resources and picks a default
+for both fields. You can change them:
+
+- **Storage** is where the guest's disk is created. The list shows only active
+  storage that allows `images`, `import`, and `snippets` content, with its free
+  space. The storage must already exist on the host; Techstack does not create
+  it. For the Ubuntu guest, the `snippets` content holds the setup file that
+  creates the guest user, installs the guest agent, and connects the guest to
+  Techstack. That file contains a one-time connection secret until an
+  administrator removes it.
+- **LAN bridge** is the network bridge the guest's network card is attached
+  to, for example `vmbr0`. The list shows only active bridges. The guest must
+  be able to reach your Techstack through this network.
+
+If the wizard says an active storage and an active LAN bridge are required,
+add or enable them on the Proxmox host, then select **Refresh**.
+
+With Home Assistant OS, the appliance VM gets its own storage and bridge
+fields. Its storage must also allow `vztmpl` content.
+
+## Guest size
+
+Set how much of the host the Ubuntu guest may use:
+
+| Setting | Wizard default | Minimum | Maximum |
+| --- | --- | --- | --- |
+| CPU | 2 | 2 | the host's CPU count |
+| RAM (MiB) | 4096 | 2048 | the host's currently available memory |
+| Disk (GiB) | 64 | 32 | not limited in the wizard; check the free space shown for the storage |
+
+The Home Assistant OS VM needs at least 2 CPUs, 4096 MiB RAM and 32 GiB disk.
+
+Leave room for the Proxmox host and your other VMs. When you confirm, the
+progress page shows Techstack preparing the Ubuntu guest, connecting it, and
+running the selected StackKit. If the progress is interrupted, it resumes with
+the same operation instead of creating a second guest.
+
+Like every other Node, the services in the guest can be reached from anywhere
+through your own domain or a `*.kombify.me` address; see
+[kombify.me](/kombify-me/overview).
