@@ -1,0 +1,132 @@
+---
+title: "Configure the Box media endpoint"
+description: "Deploy the paired-Box media lifecycle on the SpeechKit self-hosted server"
+sidebarTitle: "Box media endpoint"
+icon: "server"
+---
+
+The Box media endpoint plays SpeechKit audio through a paired Kombify Box on
+your own network. It runs as a dedicated TLS 1.3-only listener on the
+self-hosted SpeechKit server and carries a single route:
+`POST /v1/box-media/turn`. The endpoint is never mounted on the general server
+mux, so enabling it does not expand any other listener's surface.
+
+The listener is opt-in. Configure it under `[server.device_agent.box_media]` in
+the server TOML once the operator prerequisites are in place.
+
+## When to enable it
+
+Enable this section only when:
+
+- You run the SpeechKit self-hosted server on the same network as the paired
+  Box.
+- The paired Box should play media through the local device agent instead of
+  reaching an external service.
+- You can provision the listener certificate, private key, pinned CA, and
+  media token out-of-band.
+
+If any of those are not true, leave the section commented out. SpeechKit does
+not generate certificates, provision the media token, or install the CA on the
+Box.
+
+## Prerequisites
+
+Before enabling the section, confirm the surrounding server configuration:
+
+- `[local].enabled = true` with an absolute `[local].model_path` for the
+  Whisper runtime and a valid local port.
+- One local-only text-to-speech provider is configured and ready.
+- `[tts].strategy = "local-only"`. Cloud-first or cloud-only strategies are
+  rejected because they would cross the local G0 boundary.
+- Certificate, private key, and pinned CA files exist at distinct absolute
+  paths on the server, and the CA is installed on the Box.
+- A media token is available in an environment variable that is not shared
+  with Home Assistant, the general server, edge HMAC, smoke tests, or any of
+  the four-route device-agent tokens.
+- The device, pairing epoch, room, transcript, locale, and command ID
+  together select exactly one existing G0 rule.
+
+## Compute the pinned CA digest
+
+`pinned_ca_sha256` is the SHA-256 of the CA certificate's DER bytes, not the
+PEM text. Compute it with `openssl` and `sha256sum`:
+
+```bash
+openssl x509 -in /etc/speechkit/box-media-ca.crt -outform DER | sha256sum
+```
+
+Copy the 64-character lowercase hex digest into `pinned_ca_sha256`. Rotate
+this value whenever the CA is reissued.
+
+## Example configuration
+
+Add the section to the server TOML (for example, `server.toml`):
+
+```toml
+[server.device_agent.box_media]
+enabled = true
+listen_addr = "192.168.10.10:8444"
+certificate_file = "/etc/speechkit/box-media.crt"
+private_key_file = "/etc/speechkit/box-media.key"
+pinned_ca_file = "/etc/speechkit/box-media-ca.crt"
+pinned_ca_sha256 = "REPLACE_WITH_64_LOWERCASE_HEX_DER_SHA256"
+token_env = "SPEECHKIT_BOX_MEDIA_KITCHEN_TOKEN"
+device_id = "speaker-kitchen-001"
+pairing_id = "pairing-kitchen-2026-07"
+room_id = "kitchen"
+transcript = "turn off the kitchen light"
+command_id = "kitchen-light-off"
+locale = "en-US"
+```
+
+Replace every placeholder with values from the Box that is being paired and
+the G0 rule that authorizes the turn.
+
+## Field reference
+
+| Field | Description |
+| --- | --- |
+| `enabled` | Set to `true` to start the Box media listener. When `false` or absent, no Box media listener is created. |
+| `listen_addr` | Explicit local IP and port for the TLS 1.3 listener. Must match the IP SAN in the certificate. |
+| `certificate_file` | Absolute path to the listener's PEM certificate. |
+| `private_key_file` | Absolute path to the listener's PEM private key. |
+| `pinned_ca_file` | Absolute path to the CA certificate that signs the Box client credential. |
+| `pinned_ca_sha256` | 64-character lowercase hex SHA-256 of the CA's DER bytes. See [Compute the pinned CA digest](#compute-the-pinned-ca-digest). |
+| `token_env` | Name of the environment variable that holds the media token. Must not match the HA, general-server, edge-HMAC, smoke, or four-route device-agent tokens. |
+| `device_id` | Identifier of the paired Box that will play media. |
+| `pairing_id` | Current pairing epoch for that Box. |
+| `room_id` | Room the paired Box serves. |
+| `transcript` | Exact transcript that authorizes the turn. |
+| `command_id` | G0 rule command identifier that the transcript maps to. |
+| `locale` | BCP-47 locale for the transcript, for example `en-US`. |
+
+## Fail-closed startup
+
+The listener fails closed at server start when any of the following is
+missing, invalid, or mismatched:
+
+- The bridge or host-local Whisper runtime is unavailable.
+- No local-only text-to-speech provider is ready.
+- The media token, listener IP, certificate, private key, pinned CA file,
+  pinned CA digest, or certificate IP SAN is missing.
+- The certificate is outside its current validity window.
+- The `device_id`, `pairing_id`, `room_id`, `transcript`, `locale`, and
+  `command_id` combination does not select exactly one G0 rule.
+
+When the listener fails, the failure propagates to the main server process
+so operators see it immediately instead of the Box silently losing media
+playback.
+
+## Operator responsibilities
+
+SpeechKit does not automate the trust material. The operator is responsible
+for:
+
+- Provisioning the certificate, private key, and pinned CA out-of-band and
+  installing the CA on the paired Box.
+- Computing `pinned_ca_sha256` after every CA rotation.
+- Issuing a fresh media token in a dedicated environment variable and keeping
+  it out of every other SpeechKit credential.
+- Recording physical microphone, playback, room, and pinned-CA installation
+  evidence against the exact server and device firmware digests. Source and
+  local TLS tests are not a substitute for that evidence.
