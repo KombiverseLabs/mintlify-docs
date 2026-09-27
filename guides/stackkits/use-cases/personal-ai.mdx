@@ -80,6 +80,31 @@ Ollama's API has no host-published port. Open WebUI reaches it on the private wo
 
 Create a new chat in Open WebUI, select the downloaded model, and send a question. The model runs on your host. Reopen the chat to check that your conversation was saved.
 
+## Use your model in kombify AI (optional)
+
+You can also use this Ollama from kombify AI, for example in a Companion Studio chat, without opening any inbound port. An optional connector next to Ollama opens an outbound tunnel to kombify. kombify never connects into your network, and requests on your own model do not count against your Cloud AI allowance.
+
+1. In Companion Studio, open **Settings → AI access → Your model endpoints** and add an endpoint. Choose **kombify Local AI StackKit** as the location.
+2. Copy the connector token that is shown once.
+3. On the host, from your StackKits workspace, turn on the connector and paste the token when prompted, then apply:
+
+```bash
+stackkit setup ai-connect --token-file -
+stackkit generate
+stackkit apply
+```
+
+4. Back in Companion Studio, select **Check connection**. The endpoint shows as online and lists the models you downloaded.
+5. In a chat, choose **My endpoint** as the AI source. This is a direct chat with your model; it has no agent tools.
+
+Only the model list, model details and chat completion requests reach Ollama through the connector; model downloads and deletions stay local. To stop using it, delete the endpoint in Companion Studio, which makes the token useless everywhere, and turn the connector off on the host:
+
+```bash
+stackkit setup ai-connect --disable
+stackkit generate
+stackkit apply
+```
+
 ## What persists where
 
 Storage is split deliberately:
@@ -99,6 +124,8 @@ Chats and model weights persist across container replacement. Keep the model nam
 | Initial administrator login fails | Use the owner's email and initial password for the first login. After changing it, use your new password; restarting does not reset an existing account. |
 | A previously downloaded model is missing | Check the selected model and the persistent model volume. Ordinary container replacement preserves it. A new or lost model store requires an explicit download. |
 | Responses stall or the container stops | Check workload logs and available memory. A smaller model or shorter context reduces memory use; CPU inference may also take time. |
+| kombify AI shows the endpoint as offline | The connector is not running. Check that the connector token was set up and the workload was applied; the Node Hub shows the connector container. |
+| kombify AI says the model is not installed | Download the model in Open WebUI first; kombify AI only lists models that Ollama already has. |
 | AI owner secret references missing in an existing workspace | After changing the canonical intent, run the existing `stackkit secrets materialize`; generation alone does not mint secrets. |
 
 If a question is not covered above, check the [Node Hub](/guides/stackkits/node-hub) status for the workload containers before changing anything in the generated runtime directory.
