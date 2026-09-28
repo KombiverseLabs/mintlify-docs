@@ -48,9 +48,22 @@ localized MDX under the Mintlify language navigation, reviewed by a competent
 speaker before publication. UI labels in a translated page must match the app's
 UI in that language. Captures are tied to one UI language. Until localized
 captures exist, a translated page keeps the English screenshots and says so in
-its sources note. The component's own labels ("Back", "STEP", badges) are English
-only today. Add a `labels` prop to the component before the first
-translated guide ships.
+its sources note. Import the English source catalog from
+`/snippets/client-setup-labels-en.jsx` and pass `labels={clientSetupLabelsEn}`.
+Translated guides pass a complete reviewed catalog through `labels`, their
+canonical `locale`, and `direction="rtl"` for Arabic. All component messages,
+including accessible names and announcements, come from that catalog. Keep
+placeholder names intact; numeric values are formatted for the selected locale.
+For an unpublished preview, English fallback can be composed at the MDX boundary
+with `{ ...clientSetupLabelsEn, ...proposedLabels }`; fallback is not translation
+completeness or publication evidence.
+
+Keep the same guide `id`, step order, and verification order across translations:
+the existing browser progress key is intentionally locale independent. Do not
+translate IDs or remount the guide with a locale-dependent key. Screenshot dates
+remain the supplied provenance value; provide a localized display value where
+needed. See [the entry rollout proposal](localization-entry.md) before adding any
+translated page to public navigation.
 
 ## 2. Page structure
 

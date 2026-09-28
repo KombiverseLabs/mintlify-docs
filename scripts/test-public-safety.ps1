@@ -19,6 +19,7 @@ function New-TestFixture {
             "index.mdx" = "---`ntitle: Test`ndescription: Safe public page`n---`n`n# Test`n"
         },
         [string]$TabName = "Start",
+        [string]$NavigationLanguage = "en",
         [switch]$RestrictedNavigation,
         [string]$MintIgnore = "public-safety-policy.json"
     )
@@ -39,7 +40,7 @@ function New-TestFixture {
         navigation = [ordered]@{
             languages = @(
                 [ordered]@{
-                    language = "en"
+                    language = $NavigationLanguage
                     tabs = @([ordered]@{ tab = $TabName; groups = @($group) })
                 }
             )
@@ -96,6 +97,12 @@ try {
 
     $safe = New-TestFixture -Name "safe"
     Assert-Case -Name "public allowlist passes" -Fixture $safe -ShouldPass $true -ExpectedMessage "public_safety: PASS"
+
+    # Target coverage does not authorize unreviewed translations for publication.
+    foreach ($language in @("de", "es", "zh-Hans", "cn", "hi", "ar")) {
+        $unreviewed = New-TestFixture -Name "unreviewed-$language" -NavigationLanguage $language
+        Assert-Case -Name "unreviewed $language navigation fails closed" -Fixture $unreviewed -ShouldPass $false
+    }
 
     $explicitPublic = New-TestFixture -Name "explicit-public" -Pages @{
         "index.mdx" = "---`ntitle: Test`ndescription: Safe public page`npublic: true`naudience: public`n---`n`n# Test`n"

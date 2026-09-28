@@ -4,28 +4,34 @@
 //
 // Text props accept a small markup: [[UI label]] for an on-screen label,
 // **bold**, and [link text](https://... | /path | #anchor). External links open in a new tab.
-// The component's own UI strings are English; a localized page needs a labels prop first.
+// The page supplies the reviewed message catalog; keep id and step order stable across locales.
 export const ClientSetupGuide = ({
   id,
+  labels,
+  locale = 'en',
+  direction = 'ltr',
   meta = [],
   requirements = [],
   requirementsHelp,
-  appsTitle = 'First, get the app.',
+  appsTitle = labels.appsTitle,
   vendor,
   apps = [],
   appsNote,
-  stepsTitle = 'Connect step by step.',
+  stepsTitle = labels.stepsTitle,
   steps = [],
   help = [],
-  helpTitle = 'Stuck?',
+  helpTitle = labels.helpTitle,
   next = [],
-  nextTitle = 'What comes next.',
+  nextTitle = labels.nextTitle,
   attribution,
   sources,
 }) => {
   // Tags live in variables so MDX does not route them through Mintlify's
   // component overrides (figure, img and a gain wrappers otherwise).
   const Anchor = 'a', Article = 'article', Details = 'details', Dialog = 'dialog', Figcaption = 'figcaption', Figure = 'figure', Footer = 'footer', Img = 'img', Summary = 'summary';
+  const number = new Intl.NumberFormat(locale);
+  const stepNumber = new Intl.NumberFormat(locale, { minimumIntegerDigits: 2 });
+  const message = (key, values = {}) => labels[key].replace(/\{(\w+)\}/g, (_, name) => String(values[name]));
   const count = steps.length;
   const last = count - 1;
   const storageKey = `kombify-client-guide:${id}:v1`;
@@ -69,7 +75,7 @@ export const ClientSetupGuide = ({
   };
   const safeHref = (href) => (/^(https:\/\/|\/|#)/.test(href || '') ? href : '#');
   const link = (href, children, className, key) => (isExternal(href)
-    ? <Anchor className={className || ''} href={safeHref(href)} key={key} rel="noopener noreferrer" target="_blank">{children} {icon('external')}<span className="sr-only"> (opens in a new tab)</span></Anchor>
+    ? <Anchor className={className || ''} href={safeHref(href)} key={key} rel="noopener noreferrer" target="_blank">{children} {icon('external')}<span className="sr-only">{labels.opensInNewTab}</span></Anchor>
     : <Anchor className={className || ''} href={safeHref(href)} key={key} onClick={(href || '').startsWith('#') ? () => { zoomRef.current?.close(); reveal(href.slice(1)); } : undefined}>{children}</Anchor>);
   const rich = (text) => {
     if (!text || !text.split) return text;
@@ -125,7 +131,7 @@ export const ClientSetupGuide = ({
   const onNext = () => {
     const checks = verified[current] || [];
     if (checks.length && !checks.every(Boolean)) {
-      say('Tick each point after you checked it yourself.');
+      say(labels.verifyRequired);
       rootRef.current?.querySelector(`[id="${id}-verify-${current}-${checks.indexOf(false)}"]`)?.focus();
       return;
     }
@@ -135,7 +141,7 @@ export const ClientSetupGuide = ({
     if (current < last) select(current + 1, true);
     else {
       const done = nextCompleted.filter(Boolean).length;
-      say(done === count ? 'All steps are marked as done in this browser.' : `${done} of ${count} steps are marked as done. Open the other tabs to finish them.`);
+      say(done === count ? labels.allDone : message('remainingSteps', { done: number.format(done), count: number.format(count) }));
       rootRef.current?.querySelector(`[id="${id}-more"], [id="${id}-help"]`)?.scrollIntoView({ block: 'start' });
     }
   };
@@ -150,7 +156,7 @@ export const ClientSetupGuide = ({
     const nextCompleted = steps.map(() => false);
     const nextVerified = steps.map((step) => (step.verify || []).map(() => false));
     setCompleted(nextCompleted); setVerified(nextVerified); persist(nextCompleted, nextVerified); select(0);
-    say('Your progress in this browser was reset.');
+    say(labels.progressReset);
   };
   const onTabKey = (event) => {
     const moves = { ArrowRight: (c) => (c + 1) % count, ArrowLeft: (c) => (c - 1 + count) % count, Home: () => 0, End: () => last };
@@ -180,7 +186,7 @@ export const ClientSetupGuide = ({
 
   const renderShot = (shot, stepIndex) => {
     const unavailable = failed[shot.src];
-    const label = shot.vendor ? 'VENDOR SCREENSHOT' : 'KOMBIFY SCREENSHOT';
+    const label = shot.vendor ? labels.vendorScreenshotTag : labels.kombifyScreenshotTag;
     return (
       <>
         <span className="screenshot-tag">{icon('camera')} {label}</span>
@@ -189,12 +195,12 @@ export const ClientSetupGuide = ({
             <Img alt={shot.alt} className={shot.srcDark ? 'only-light has-dark' : undefined} decoding="async" height={shot.height} loading={stepIndex === 0 ? 'eager' : 'lazy'} onError={() => setFailed((old) => ({ ...old, [shot.src]: true }))} referrerPolicy="no-referrer" src={shot.src} width={shot.width} />
             {shot.srcDark ? <Img alt={shot.alt} className="only-dark" decoding="async" height={shot.height} loading="lazy" onError={() => setFailed((old) => ({ ...old, [shot.src]: true }))} src={shot.srcDark} width={shot.width} /> : null}
             {(shot.vendor ? [] : shot.annotations || []).map((mark, i) => <span aria-hidden="true" className="annotation" data-n={mark.n ?? undefined} key={i} style={{ top: `${mark.top}%`, left: `${mark.left}%`, width: `${mark.width}%`, height: `${mark.height}%` }} />)}
-            <Anchor className="image-fallback" href={shot.vendor ? shot.creditHref || shot.src : shot.src} rel="noopener noreferrer" target="_blank">{icon('external')} {shot.vendor ? 'Open the vendor page' : 'Open the screenshot'}<span>{shot.vendor ? 'Loading it needs an internet connection.' : 'The image did not load.'}</span></Anchor>
-            <button aria-label={`Enlarge screenshot: ${shot.alt}`} className="zoom-button" onClick={() => openZoom(shot)} type="button">{icon('zoom')}</button>
+            <Anchor className="image-fallback" href={shot.vendor ? shot.creditHref || shot.src : shot.src} rel="noopener noreferrer" target="_blank">{icon('external')} {shot.vendor ? labels.openVendorPage : labels.openScreenshot}<span>{shot.vendor ? labels.vendorImageUnavailable : labels.imageUnavailable}</span></Anchor>
+            <button aria-label={message('enlargeScreenshot', { description: shot.alt })} className="zoom-button" onClick={() => openZoom(shot)} type="button">{icon('zoom')}</button>
           </div>
           <Figcaption>
             {shot.caption}{shot.credit ? <> · {shot.creditHref ? link(shot.creditHref, shot.credit) : shot.credit}</> : null}
-            {shot.version || shot.captured ? <span className="meta">{[shot.version, shot.captured ? `captured ${shot.captured}` : null].filter(Boolean).join(' · ')}</span> : null}
+            {shot.version || shot.captured ? <span className="meta">{[shot.version, shot.captured ? message('captured', { date: shot.captured }) : null].filter(Boolean).join(' · ')}</span> : null}
           </Figcaption>
         </Figure>
       </>
@@ -202,13 +208,13 @@ export const ClientSetupGuide = ({
   };
   const renderLinkVisual = (visual) => (
     <>
-      <span className="screenshot-tag">{icon('external')} {visual.tag || 'VENDOR GUIDE'}</span>
+      <span className="screenshot-tag">{icon('external')} {visual.tag || labels.vendorGuideTag}</span>
       <div className="link-visual">
         {visual.title ? <strong>{visual.title}</strong> : null}
         {visual.text ? <p>{rich(visual.text)}</p> : null}
         {(visual.links || []).map((item, i) => (
           <Anchor className="vendor-link" href={item.href} key={i} rel="noopener noreferrer" target="_blank">
-            {icon(item.icon || 'book')}<span>{item.label}{item.detail ? <small>{item.detail}</small> : null}</span>{icon('external')}<span className="sr-only"> (opens in a new tab)</span>
+            {icon(item.icon || 'book')}<span>{item.label}{item.detail ? <small>{item.detail}</small> : null}</span>{icon('external')}<span className="sr-only">{labels.opensInNewTab}</span>
           </Anchor>
         ))}
       </div>
@@ -216,15 +222,15 @@ export const ClientSetupGuide = ({
   );
 
   return (
-    <div className="kombify-client-guide not-prose" id={id} lang="en" ref={rootRef} style={{ '--kcg-steps': count }}>
+    <div className="kombify-client-guide not-prose" id={id} dir={direction} lang={locale} ref={rootRef} style={{ '--kcg-steps': count }}>
       <div className="guide-content">
         <div className="page-top">
           <div className="intro-meta">{meta.map((item, i) => <span key={i}>{icon(item.icon)} {item.text}</span>)}</div>
-          <div className="page-tools"><button aria-label="Print guide" className="tool-button" onClick={() => window.print()} type="button">{icon('print')}</button></div>
+          <div className="page-tools"><button aria-label={labels.printGuide} className="tool-button" onClick={() => window.print()} type="button">{icon('print')}</button></div>
         </div>
         {requirements.length ? (
           <div className="ready-strip">
-            <strong>What you need</strong>
+            <strong>{labels.requirementsTitle}</strong>
             {requirements.map((item, i) => <span key={i}>{icon('check')} {rich(item)}</span>)}
             {requirementsHelp ? <Anchor href={`#${requirementsHelp.target}`} onClick={() => reveal(requirementsHelp.target)}>{requirementsHelp.label} {icon('arrow')}</Anchor> : null}
           </div>
@@ -244,9 +250,9 @@ export const ClientSetupGuide = ({
                     <strong>{app.label}</strong>
                     <small>{app.detail}</small>
                     <span className="store-name">{app.store} {icon('external')}</span>
-                    <span className={`badge ${app.official ? 'official' : 'unofficial'}`}>{app.official ? `Official · ${app.vendor}` : `Third-party · ${app.vendor}`}</span>
+                    <span className={`badge ${app.official ? 'official' : 'unofficial'}`}>{app.official ? message('officialApp', { vendor: app.vendor }) : message('thirdPartyApp', { vendor: app.vendor })}</span>
                   </span>
-                  <span className="sr-only"> (opens in a new tab)</span>
+                  <span className="sr-only">{labels.opensInNewTab}</span>
                 </Anchor>
               ))}
             </div>
@@ -257,21 +263,21 @@ export const ClientSetupGuide = ({
         <section aria-labelledby={`${id}-guide-title`} className="guide-section" id={`${id}-guide`}>
           <div className="guide-heading"><h2 id={`${id}-guide-title`}>{stepsTitle}</h2></div>
           <div className="wizard">
-            <div aria-label="Setup steps" className="step-tabs" onKeyDown={onTabKey} role="tablist">
+            <div aria-label={labels.setupSteps} className="step-tabs" onKeyDown={onTabKey} role="tablist">
               {steps.map((step, i) => (
                 <button aria-controls={`${id}-panel-${i}`} aria-selected={i === current} className={`step-tab${completed[i] ? ' done' : ''}`} id={`${id}-tab-${i}`} key={i} onClick={() => select(i)} role="tab" tabIndex={i === current ? 0 : -1} type="button">
-                  <span className="step-dot">{completed[i] ? '✓' : i + 1}</span><span>{step.tab}</span>
+                  <span className="step-dot">{completed[i] ? '✓' : number.format(i + 1)}</span><span>{step.tab}</span>
                 </button>
               ))}
             </div>
             {steps.map((step, i) => (
               <Article aria-labelledby={`${id}-tab-${i}`} className={`guide-panel${i === current ? ' active' : ''}`} id={`${id}-panel-${i}`} key={i} role="tabpanel">
                 <div className="panel-copy">
-                  <div className="step-kicker">STEP {String(i + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}</div>
+                  <div className="step-kicker">{message('stepPosition', { current: stepNumber.format(i + 1), count: stepNumber.format(count) })}</div>
                   <h3>{step.title}</h3>
                   {step.intro ? <p className="step-intro">{rich(step.intro)}</p> : null}
                   {step.clicks?.length ? (
-                    <ol className="click-list">{step.clicks.map((click, j) => <li key={j}><span className="click-num">{j + 1}</span><span>{rich(click)}</span></li>)}</ol>
+                    <ol className="click-list">{step.clicks.map((click, j) => <li key={j}><span className="click-num">{number.format(j + 1)}</span><span>{rich(click)}</span></li>)}</ol>
                   ) : null}
                   {step.verify?.length ? (
                     <div className="verify-list">
@@ -293,14 +299,14 @@ export const ClientSetupGuide = ({
             ))}
             <div className="wizard-bottom">
               <div className="progress-note">
-                <span>{completed.filter(Boolean).length} of {count} steps done</span>
+                <span>{message('progress', { done: number.format(completed.filter(Boolean).length), count: number.format(count) })}</span>
                 <div aria-hidden="true" className="progress-meter">{steps.map((step, i) => <span className={completed[i] ? 'done' : undefined} key={i} />)}</div>
               </div>
-              <button className="prev" disabled={current === 0} onClick={() => select(current - 1, true)} type="button">{icon('back')} Back</button>
-              <button className="next" onClick={onNext} type="button"><span>{current === last ? 'Finish' : 'Done · next'}</span>{icon('arrow')}</button>
+              <button className="prev" disabled={current === 0} onClick={() => select(current - 1, true)} type="button">{icon('back')} {labels.back}</button>
+              <button className="next" onClick={onNext} type="button"><span>{current === last ? labels.finish : labels.next}</span>{icon('arrow')}</button>
             </div>
           </div>
-          {sources ? <p className="provenance-inline">{sources.summary} <Anchor href={`#${id}-sources`} onClick={() => reveal(`${id}-sources-detail`)}>Image sources and date</Anchor></p> : null}
+          {sources ? <p className="provenance-inline">{sources.summary} <Anchor href={`#${id}-sources`} onClick={() => reveal(`${id}-sources-detail`)}>{labels.imageSources}</Anchor></p> : null}
         </section>
 
         {next.length ? (
@@ -328,31 +334,31 @@ export const ClientSetupGuide = ({
 
         <Footer className="footline">
           <div className="attribution">{attribution ? rich(attribution) : null}</div>
-          <button className="reset" onClick={onReset} type="button">Reset progress</button>
+          <button className="reset" onClick={onReset} type="button">{labels.resetProgress}</button>
         </Footer>
 
         {sources ? (
           <section className="source-section" id={`${id}-sources`}>
             <Details id={`${id}-sources-detail`}>
-              <Summary>Image sources, checked links and date</Summary>
+              <Summary>{labels.sourcesTitle}</Summary>
               <div className="source-content">
                 {(sources.paragraphs || []).map((text, i) => <p key={i}>{rich(text)}</p>)}
                 <div className="source-links">{(sources.links || []).map((item, i) => link(item.href, item.label, undefined, i))}</div>
               </div>
             </Details>
-            <div className="dim">Guide by kombify · Product names, screenshots of vendor apps and trademarks belong to their respective owners.</div>
+            <div className="dim">{labels.ownershipNotice}</div>
           </section>
         ) : null}
       </div>
 
       <Dialog aria-labelledby={`${id}-zoom-title`} className="zoom-dialog" onClick={closeOnBackdrop} ref={zoomRef}>
         <div className="dialog-header">
-          <h2 id={`${id}-zoom-title`}>{zoom?.vendor ? 'Vendor screenshot' : 'Screenshot'}</h2>
-          <button aria-label="Close image" className="dialog-close" onClick={() => zoomRef.current?.close()} type="button">{icon('close')}</button>
+          <h2 id={`${id}-zoom-title`}>{zoom?.vendor ? labels.vendorScreenshot : labels.screenshot}</h2>
+          <button aria-label={labels.closeImage} className="dialog-close" onClick={() => zoomRef.current?.close()} type="button">{icon('close')}</button>
         </div>
         <div className="zoom-content">
           {zoom ? <Img alt={zoom.alt} src={zoom.src} /> : null}
-          {zoom?.creditHref ? link(zoom.creditHref, zoom.vendor ? 'Open the original from the vendor' : 'About this screenshot') : null}
+          {zoom?.creditHref ? link(zoom.creditHref, zoom.vendor ? labels.openOriginal : labels.aboutScreenshot) : null}
         </div>
       </Dialog>
       <div aria-live="polite" className="sr-only" role="status">{toast}</div>
