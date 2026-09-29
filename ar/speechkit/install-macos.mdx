@@ -1,0 +1,76 @@
+---
+title: "تثبيت SpeechKit على macOS"
+description: "ثبّت نسخة Beta للإملاء على Apple Silicon وافهم حدودها"
+sidebarTitle: "التثبيت على macOS"
+icon: "apple"
+---
+
+SpeechKit لنظام macOS نسخة Beta مبكرة تدعم الإملاء (Dictation) فقط. تعمل على macOS 14 أو أحدث
+على Apple Silicon. أجهزة Mac ذات معالج Intel غير مدعومة.
+
+{/* speechkit-release:begin */}
+الإصدار العام الحالي هو [v0.72.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.1)، نُشر في 2026-09-20.
+{/* speechkit-release:end */}
+
+<Warning>
+حزمة macOS موقّعة توقيعاً ad-hoc، دون Apple Developer ID ودون توثيق (notarization). يضعها
+macOS في الحجر وقد يدّعي أن التطبيق تالف. وهو ليس كذلك. إزالة وسم الحجر تتطلب أمراً موثقاً
+واحداً، موصوفاً أدناه.
+</Warning>
+
+## التنزيل
+
+<Card title="macOS bundle (Apple Silicon)" icon="download" href="https://github.com/kombifyio/SpeechKit/releases/latest/download/SpeechKit-macOS-arm64.zip">
+  نزّل `SpeechKit-macOS-arm64.zip` من أحدث إصدار منشور.
+</Card>
+
+تحقق من التنزيل مقابل
+[SHA256SUMS.txt](https://github.com/kombifyio/SpeechKit/releases/latest/download/SHA256SUMS.txt)
+قبل فتحه. يسرد ذلك الملف أصول Windows أيضاً، فتحقق من السطر الخاص بأرشيف macOS فقط:
+
+```bash
+grep SpeechKit-macOS-arm64.zip SHA256SUMS.txt | shasum -a 256 -c
+```
+
+## التثبيت
+
+1. فك ضغط التنزيل واسحب `SpeechKit.app` إلى مجلد Applications. انقله قبل الخطوة التالية:
+   يشغّل macOS التطبيق المتروك في Downloads من نسخة مخفية للقراءة فقط، ولا يستطيع SpeechKit
+   تحديث نفسه من هناك.
+2. أزل وسم الحجر في Terminal:
+
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/SpeechKit.app
+   ```
+
+   لا يُطبع شيء عندما ينجح الأمر. لا يحتاج الأمر إلى كلمة مرور ويؤثر في هذا التطبيق فقط.
+3. افتح SpeechKit من Applications وامنح **Microphone** و**Accessibility** عند الطلب.
+
+اقرأ
+[إشعار الإصدار غير الموقّع](https://github.com/kombifyio/SpeechKit/releases/latest/download/UNSIGNED-MACOS-RELEASE.txt)
+كاملاً لمعرفة الأساس المنطقي لكل خطوة. لا شيء في الإجراء يطلب منك تعطيل Gatekeeper على
+مستوى النظام أو تشغيل أي شيء بصفة root.
+
+## ما الذي يعمل وما الذي لا يعمل
+
+| القدرة | نسخة macOS Beta |
+| --- | --- |
+| الإملاء بالنموذج المحلي المضمّن | متاح |
+| الإملاء بمزودي تحويل الكلام إلى نص السحابيين | متاح |
+| التقاط الميكروفون وحقن النص وعنصر شريط القوائم | متاح |
+| مفاتيح الاختصار العامة والضغط المستمر للتحدث | لا يعمل في هذه البنية |
+| Assist وVoice Agent | لم يُتحقق منهما على macOS |
+| التقاط صوت النظام للاجتماعات ولقطات الشاشة وكلمة التنبيه والنموذج اللغوي المحلي | لم يُنقل؛ يرفض كل منها بخطأ مصنّف وتُخفى عناصر التحكم الخاصة به |
+
+يُثبَّت مستمع مفاتيح الاختصار لكنه لا يتلقى أي أحداث مفاتيح، لذا فإن عنصر شريط القوائم هو
+الطريقة لبدء الإملاء إلى أن يُصلَح ذلك. استخدم
+[عميل Windows](/ar/speechkit/install-windows) عندما تحتاج مجموعة الميزات الكاملة.
+
+## الأذونات بعد التحديث
+
+يتذكر macOS منح الأذونات مقابل التوقيع الدقيق للتطبيق. لكل بنية موقّعة ad-hoc توقيع مختلف،
+لذا يطلب macOS Microphone وAccessibility مرة أخرى بعد كل تحديث، وأحياناً الوصول إلى
+سلسلة المفاتيح. وهذا متوقع في نسخة Beta غير موقّعة.
+
+إذا جعل التحديث الإملاء لا يستجيب، فافتح **System Settings → Privacy & Security →
+Accessibility** وأعد تفعيل SpeechKit. يلتقط الإذن أثناء التشغيل؛ ولا حاجة إلى إعادة تشغيل.

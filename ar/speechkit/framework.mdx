@@ -1,0 +1,86 @@
+---
+title: "البناء باستخدام SpeechKit"
+description: "ضمّن نواة الصوت بلغة Go، أو استخدم أهداف الخادم وAndroid والمتصفح"
+sidebarTitle: "إطار العمل"
+icon: "code"
+---
+
+تحتوي وحدة SpeechKit العامة على نواة الصوت المستقلة عن المنصة. استخدمها عندما يجب أن يمتلك
+تطبيقك عمليته وتهيئته وبيانات اعتماد المزودين بدلاً من الاعتماد على خادم SpeechKit منفصل.
+
+{/* speechkit-release:begin */}
+الإصدار العام الحالي هو [v0.72.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.1)، نُشر في 2026-09-20.
+{/* speechkit-release:end */}
+
+## المتطلبات
+
+- Go 1.26 أو أحدث
+- تطبيق يستطيع توفير مدخل الميكروفون أو الصوت أو النص المحدد
+- بيانات اعتماد المزود فقط عندما تختار مزوداً خارجياً
+
+## إضافة الوحدة
+
+```bash
+go get github.com/kombifyio/SpeechKit@latest
+```
+
+يتحول `@latest` إلى أحدث إصدار منشور. سجّل النسخة الدقيقة التي حلّها بناؤك وثبّتها قبل
+الإطلاق: هذا برنامج تجريبي (Beta)، وقد تتغير واجهات API العامة ومفاتيح التهيئة والقيم
+الافتراضية بين الإصدارات الفرعية.
+
+استورد فقط الحزم التي يحتاجها مضيفك: `pkg/speechkit/dictation` للإملاء، و
+`pkg/speechkit/wakeword` للتفعيل، و`pkg/speechkit/tts` للإخراج المنطوق، و
+`pkg/speechkit/companion` مع محوّلات Assist والنص إلى كلام للمضيفات ذات الطلب الواحد، و
+`pkg/speechkit/speaker` للتطبيقات الواعية بالمتحدث، و`pkg/speechkit/meeting` لجلسات التسجيل، و
+`pkg/speechkit/client` للتطبيقات المتصلة بخادم. تحتوي الحزمة الجذر `speechkit` على العقود
+وأنواع القيم فقط.
+
+لتشغيل الإطار من ملف `config.toml` بدلاً من بناء الإعدادات يدوياً، تحوّل الحزمة
+`pkg/speechkit/hostconfig` ملف تهيئة إلى إعدادات الأوضاع العامة وسياسة تشغيل ابتدائية في
+استدعاء واحد:
+
+```go
+settings, policy, err := hostconfig.Load("config.toml")
+```
+
+يعطي الملف المفقود القيم الافتراضية المشحونة — محلي فقط، دون مفاتيح سحابية. يفوّض عميل سطح
+المكتب إلى المحمّل نفسه، لذا يقرأ المضمِّن والتطبيق المرجعي ملف `config.toml` بالطريقة نفسها.
+
+تحتاج بعض الحزم إلى cgo (التقاط صوت Windows، وكلمة التنبيه ONNX) أو إلى ملف تنفيذي خارجي
+(`whisper-server`). وتفشل كل منها بشكل مغلق مع خطأ حارس (sentinel) عند غياب اعتماديتها بدلاً
+من التظاهر بالعمل.
+
+## أهداف أخرى
+
+<CardGroup cols={2}>
+  <Card title="Self-hosted server" icon="server" href="https://github.com/kombifyio/SpeechKit/blob/main/docs/server/README.md">
+    خدمة HTTP وWebSocket على Linux فوق النواة نفسها، تُبنى من المصدر العام. تعرض
+    Dictation وAssist وVoice Agent تحت عنوان URL واحد.
+  </Card>
+  <Card title="Agent tools" icon="robot" href="https://github.com/kombifyio/SpeechKit/blob/main/docs/mcp/README.md">
+    يتيح `speechkit-mcp` و`speechkit-cli` لوكيل أو مشغّل فحص الإطار وتوليد قوالب البدء
+    والتحقق من الحمولات وتشغيل الخادم.
+  </Card>
+  <Card title="Android modules" icon="android" href="https://github.com/kombifyio/SpeechKit/blob/main/android/README.md">
+    وحدات Gradle بترخيص Apache-2.0 لتحديد الخادم، والالتقاط وتبادل الأدوار، وبروتوكول
+    الاتصال، وواجهة صوت Compose، مع تطبيق مرجعي داخل المستودع.
+  </Card>
+  <Card title="Browser clients" icon="js" href="https://github.com/kombifyio/SpeechKit/tree/main/clients/typescript">
+    حزم TypeScript لواجهة REST للخادم، وبروتوكول WebSocket لـ Voice Agent، ومجموعة واجهة
+    صوت محايدة للأطر، تُنشر كمصدر في المستودع.
+  </Card>
+</CardGroup>
+
+## تابع مع التوثيق العام
+
+- [SDK in 10 minutes](https://github.com/kombifyio/SpeechKit/blob/main/docs/sdk/README.md)
+- [Framework API](https://github.com/kombifyio/SpeechKit/blob/main/docs/speechkit-framework-api.md)
+- [Add a custom provider](https://github.com/kombifyio/SpeechKit/blob/main/docs/sdk/custom-provider.md)
+- [Words and Replacements](https://github.com/kombifyio/SpeechKit/blob/main/docs/words-and-replacements-standard.md)
+- [SDK surface boundary](https://github.com/kombifyio/SpeechKit/blob/main/docs/architecture/sdk-surface-boundary.md)
+- [Runnable examples](https://github.com/kombifyio/SpeechKit/tree/main/examples)
+
+<Note>
+تتبع هذه الروابط الفرع الافتراضي للمستودع العام، فتبقى صالحة مع تطور المشروع. ثبّت وسماً (tag)
+في عنوان URL عندما تحتاج التوثيق المطابق لإصدار واحد بعينه.
+</Note>

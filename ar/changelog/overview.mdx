@@ -1,0 +1,210 @@
+---
+title: "سجل التغييرات"
+description: "ما الجديد في StackKits ومنصة kombify"
+icon: "newspaper"
+mode: "center"
+---
+
+تحديثات المنتج مرتبة من الأحدث إلى الأقدم. للاطلاع على تفاصيل أوفى عن كل إصدار، راجع ملاحظات إصدارات [StackKits](https://github.com/kombifyio/stackKits/releases) و[SpeechKit](https://github.com/kombifyio/SpeechKit/releases) و[Techstack](https://github.com/kombifyio/TechStack/releases) على GitHub.
+
+<Update label="2026-09-16" description="5 سبتمبر – 16 سبتمبر">
+
+## SpeechKit على macOS، وإيقاف Google AI، ومثبّت StackKits يختار الـ Kit بنفسه
+
+انتقل SpeechKit من [v0.68.24](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.24) إلى [v0.70.3](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.3): أول إصدار لنظام macOS، وMicrosoft Foundry كاتصال واحد للصوت والنماذج، وإزالة جميع محوّلات الصوت من Google. وأصدر StackKits الإصدارات من [v0.25.1](https://github.com/kombifyio/stackKits/releases/tag/v0.25.1) إلى [v0.32.1](https://github.com/kombifyio/stackKits/releases/tag/v0.32.1): مثبّت يكتشف المضيف ويقترح الـ Kit المناسب، وبوابات تسجيل دخول أمام مسارات الـ homelab، ومستخدمو المنزل عبر PocketID.
+
+### ميزات جديدة
+
+- **SpeechKit يعمل على Mac.** يصدر [v0.70.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.0) الملف `SpeechKit-macOS-arm64.zip` إلى جانب ملفات Windows: نسخة Dictation تجريبية موقّعة توقيعًا مؤقتًا (ad-hoc) لنظام macOS 14+ على Apple Silicon، تتضمن التقاط الميكروفون وإدراج النص وعنصرًا في شريط القوائم والنموذج المحلي المضمّن ومزوّدي تحويل الكلام إلى نص السحابيين. ويأتي معها قصور معروف واحد: يُثبَّت مستمع المفتاح السريع العام ولا يتلقى أي أحداث مفاتيح، لذلك لا يعمل الضغط المطوّل للتحدث بعد، ويبقى عنصر شريط القوائم هو المدخل. راجع [التثبيت على macOS](/ar/speechkit/install-macos).
+- **Microsoft Foundry بثلاث طرق اتصال.** يضيف [v0.69.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.69.0) نافذة Connect تتيح نقطة نهاية المشروع مع مفتاح API، أو حساب Azure CLI الموجود على جهازك، أو تسجيل تطبيق Microsoft الخاص بمؤسستك. اتصال واحد يخدم Dictation ومخرجات الكلام وAssist وVoice Agent؛ ويعرض الاختبار (Test) عمليات النشر والأصوات التي يملكها المشروع فعلًا.
+- **مكتبة بعلامة تبويب لكل وضع.** يمنح [v0.70.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.0) كلًّا من Transcriptions وQuick Notes وVoice Sessions علامة تبويب خاصة به، ويحمّل السجل الأقدم صفحةً بصفحة، ويوسّع أي صف في مكانه، ويتيح تثبيت النسخ الصوتي كما كان ممكنًا مع الملاحظة السريعة.
+- **مثبّت StackKits يختار الـ Kit.** يجعل [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) الموقع `install.stackkit.cc` يكتشف المضيف، ويختار بين Basement وCloud، ويسأل عن المالك وحالات الاستخدام قبل كل تثبيت، ويعرض تثبيت StackKit بمجرد جاهزية CLI. وعنوان المثبّت الخاطئ يتعافى بدل أن يفشل. راجع [دليل استخدام CLI](/ar/guides/stackkits/cli-walkthrough).
+- **مستخدمو المنزل دون حسابات تُبنى يدويًا.** يوفّر [v0.29.0](https://github.com/kombifyio/stackKits/releases/tag/v0.29.0) مستخدمي المنزل عبر مجموعات PocketID، ويضيف [v0.30.0](https://github.com/kombifyio/stackKits/releases/tag/v0.30.0) الأوامر `stackkit user add` و`list` و`remove`. راجع [PocketID](/ar/stackkits/apps/pocketid).
+
+### تحديثات
+
+- **اختفت محوّلات الصوت من Google.** يزيل [v0.70.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.2) خدمة Google لتحويل الكلام إلى نص وGoogle لتحويل النص إلى كلام وGemini Live. أي إعداد ما زال يذكر أحدها يفشل بأمان (fail closed) بدل أن يتحول بصمت إلى شيء آخر، وإعداد الجهاز الفارغ يستخدم AssemblyAI افتراضيًا. راجع [الأوضاع ومسارات البيانات](/ar/speechkit/modes).
+- **كلمة التنبيه هي `hey_kubi`.** يجعلها [v0.70.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.2) الافتراضية ويُبقي `hey_quby` اسمًا بديلًا، فيستمر عمل أي إعداد قائم.
+- **بوابات تسجيل دخول أمام مسارات الـ homelab.** يضع [v0.31.0](https://github.com/kombifyio/stackKits/releases/tag/v0.31.0) خدمة TinyAuth أمام مسارات الصور والملفات والخزنة والوسائط والمنزل الذكي والذكاء الاصطناعي والمطورين والمستندات وCoolify، ويقبل التحقق إعادة التوجيه إلى تسجيل الدخول على أنها حالة سليمة بدل اعتبارها فشلًا. راجع [TinyAuth](/ar/stackkits/apps/tinyauth).
+- **Cloud Kit لا يحتاج نطاقًا خاصًا بك.** يجعل [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) اسم kombify.me هو الافتراضي عند عدم تحديد نطاق مخصص، ويُنشئ مفتاح SSH لقناة التنفيذ قبل تعطيل تسجيل دخول root. راجع [kombify.me](/ar/kombify-me/overview).
+- **Apply ينتظر الشهادة.** ينتظر [v0.31.5](https://github.com/kombifyio/stackKits/releases/tag/v0.31.5) إصدار الشهادة قبل التحقق من TLS العام وأوراق PKI الداخلية، ويعرض [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) التقدم أثناء تشغيل generate وapply بدل توقف صامت.
+- **هذه الوثائق تواكب الإصدار الحالي.** تُحلّ روابط تنزيل SpeechKit الآن إلى أحدث إصدار منشور بدل إصدار واحد مجمّد، ولعميل macOS وMeeting صفحتاهما الخاصتان، ويجري تلقائيًا تسوية خط الإصدار المذكور في كل صفحة مع الإصدار العام.
+
+### إصلاح الأخطاء
+
+- **التشغيل الأول على macOS يبدأ.** يصلح [v0.70.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.0) مشكلة كتابة التثبيت الجديد لواجهة صوت خاصة بـ Windows في إعداده، ورفضه فتح الميكروفون بها، ثم إنهاء التطبيق دون رسالة أو سجل أو تقرير عطل.
+- **لم يعد Voice Agent يقلع على مزوّد متقاعد.** يصلح [v0.70.3](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.3) خادمًا ما زال إعداده المضمّن يختار Gemini Live، ولذلك فشل في البدء بعد إيقاف Google.
+- **Dictation يفتح الميكروفون أولًا.** يفتح [v0.70.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.1) الجهاز قبل مصافحة البث المباشر لا بعدها، ويعيد تثبيت التحديث تشغيل التطبيق مرة واحدة بالضبط.
+- **الإزالة تنظّف حزم native.** يجعل [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) الأمر `stackkit remove` يزيل حزم Compose الأصلية (native) ويجد مساحة عمل المثبّت، ويؤجّل [v0.31.1](https://github.com/kombifyio/stackKits/releases/tag/v0.31.1) مراقبة التطبيقات إلى تفعيل الاستعادة، فلا تفحص الاستعادة تطبيقات لم تعمل بعد.
+
+</Update>
+
+<Update label="2026-09-07" description="عناوين kombify.me العامة">
+
+## أسماء HTTPS العامة في kombify.me
+
+تغطي الوثائق العامة الآن [kombify.me](/ar/kombify-me/overview) ضمن Techstack: أسماء HTTPS ثابتة لخدمات homelab التي يمكن الوصول إليها أصلًا، وأسماء Kit من الطرف الأول مثل `{your-lab}-auth.kombify.me`، وترحيل HTTP خاص اختياري عبر وكيل عقدة Techstack. يبقى التصفح المحلي فقط على محلّل homelab. kombify.me في مرحلة Alpha.
+
+</Update>
+
+<Update label="2026-09-04" description="أسبوع 29 أغسطس – 4 سبتمبر">
+
+## وضع الاجتماعات في SpeechKit ونطاقات خصوصية الشبكة، وStackKits للمنزل الذكي والوسائط
+
+انتقل SpeechKit من [v0.65.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.65.0) إلى [v0.68.24](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.24): وضع اجتماعات كامل مع مراجعات بست لغات، وإعداد خصوصية يرسم حدًّا صارمًا للشبكة، ولقطات شاشة أثناء الاجتماع لا تغادر الجهاز أبدًا. وأصدر StackKits الإصدارات من [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) إلى [v0.24.27](https://github.com/kombifyio/stackKits/releases/tag/v0.24.27): حالتا استخدام المنزل الذكي والوسائط، ومخطِّط يعمل في المتصفح على stackkit.cc/planner، وملفات حوسبة محلية لكل وحدة.
+
+### ميزات جديدة
+
+- **وضع الاجتماعات وضع من الدرجة الأولى.** يضع [SpeechKit v0.67.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.67.0) وضع الاجتماعات بجانب Dictation وAssist وVoice Agent، بإعدادات خاصة للالتقاط وتوليد المراجعات واللغات والاحتفاظ. تعرض طبقة شفافة مدمجة سلامة الالتقاط وأدوات التحكم أثناء المكالمة، وتعمل الملخصات المتدرجة دون إيقاف الالتقاط، وتنتج نهاية الاجتماع مراجعة اجتماع دائمة وملخصًا تنفيذيًا من خمس جمل وبنود عمل بالإنجليزية والألمانية والإسبانية والصينية والهندية والعربية. وGitHub Copilot مزوّد اختياري لتوليد المراجعات خلف إذن منفصل قابل للسحب لمعالجة النص المفرَّغ؛ أما المسار المحلي فلا يحتاج إلى أي بيانات اعتماد سحابية. راجع [أوضاع SpeechKit](/ar/speechkit/modes).
+- **اختر حدّ الشبكة وسيفرضه SpeechKit.** يضيف [v0.67.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.67.0) إعداد Network Scope: كل الشبكات، أو الشبكة المحلية فقط، أو هذا الجهاز فقط. يفرض الخادم الخلفي هذا الحد على مزوّدي الكلام وتنزيلات النماذج والتحديثات والقياس عن بُعد واتصالات الخادم والتكاملات. والانتقال إلى نطاق أشد صرامة يعلّق الإعدادات غير المتوافقة بدل حذفها، وتوضح الإعدادات ما عُطّل ولماذا. راجع [نظرة عامة على SpeechKit](/ar/speechkit/overview).
+- **لقطات شاشة داخل الاجتماع تبقى على جهازك.** يلتقط [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) نافذة تختارها أو الشاشة التي يقع عليها المؤشر باختصار `Ctrl+Alt+S` قابل للضبط. تظهر اللقطات كعلامات في الخط الزمني للنص المفرَّغ، ويُستشهد بها في مراجعات الاجتماع المولَّدة، وتفتح حبة الاجتماع المدمجة معاينة قصيرة لتتأكد أن النافذة الصحيحة قد التُقطت. ولا تغادر أي صورة الجهاز.
+- **ابحث عن أي اجتماع وصدّره.** تجمّع [إصدارات v0.68 التصحيحية](https://github.com/kombifyio/SpeechKit/releases) قائمة الاجتماعات بحسب موعد انعقادها، وتضيف البحث في العناوين والنصوص المفرَّغة والملاحظات والملخصات، وتعرض الملاحظات بتنسيق Markdown، وتضيف Copy Markdown وSave .md للملخص الكامل.
+- **حالة استخدام المنزل الذكي في StackKits.** يضيف [StackKits v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) حمل Home Assistant على Kits من نوع Basement وCloud وModern. يكتب Generate خط الأساس للوكيل العكسي (reverse proxy) وجزء عميل MCP أصليًّا، وينشئ الإعداد حساب مالك Homelab. راجع [فهرس حالات الاستخدام](/ar/stackkits/reference/use-case-catalog).
+- **حالة استخدام الوسائط مع Jellyfin.** يضيف [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) حمل Jellyfin على مستويي الحوسبة `standard` و`high`. تبقى مكتبة الوسائط في عهدة المالك، وهي عمدًا ليست مصدرًا للنسخ الاحتياطي في StackKits. راجع [Jellyfin](/ar/stackkits/apps/jellyfin).
+- **خطّط لـ homelab في المتصفح.** يطلق [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) مخطِّط StackKits على stackkit.cc/planner: أدوات للقراءة فقط تبدأ من المخطط (schema-first) فوق الفهرس العام، وتسلّم تسلسل `init → validate → resolve → generate → plan` إلى CLI. ويبقى Apply خطوة صريحة على جهازك. راجع [موصّل MCP](/ar/stackkits/reference/mcp-connector).
+
+### تحديثات
+
+- **الاجتماعات تنتهي من تلقاء نفسها.** يوقف [SpeechKit v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) التسجيل بعد وقت قصير من تحرير تطبيق الاتصال للميكروفون، ويُعلمك إشعار عندما تصبح مراجعة الاجتماع جاهزة أو لماذا فشلت. أما التسجيلات التي بدأتها يدويًا فلا تُوقَف تلقائيًا أبدًا.
+- **ملفات حوسبة محلية لكل وحدة في StackKits.** تنقل الإصدارات من [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) إلى [v0.24.27](https://github.com/kombifyio/stackKits/releases/tag/v0.24.27) ملفات الحوسبة والتخزين والمسرّعات إلى كل وحدة مع بدائل لكل حمل. ويجب رصد حقائق المضيف المطلوبة في المخزون قبل Apply، لا استنتاجها من العتاد المُعلَن. راجع [اختيار Kit](/ar/guides/stackkits/choosing-a-kit).
+- **المستوى المنخفض يحصل على نسخ خفيفة حقيقية.** يجعل [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) الأمر generate لمستوى Basement `low` يُنتج نسخ Compose مستقلة: النواة دون Coolify وImmich دون تعلّم آلي. تُحذف الوسائط على `low` إلى أن يتوفر بديل خفيف، وتفشل بأمان عند init بدل نشر شيء أقل من المطلوب.
+- **التكاملات تُظهر مستوى نضجها.** يصنّف [SpeechKit v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) كل تكامل في الإعدادات بأنه Ready أو Partial أو Planned أو Unavailable، مع وسوم لكل وضع. وما لا يستطيع هذا الإصدار تشغيله يظهر رماديًا بدل أن يفشل عند تفعيله.
+- **SDK أخف لـ SpeechKit.** يزيل [v0.65.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.65.0) أسماء المزوّدين المهجورة منذ v0.64.0، فيصبح تطبيق يعتمد Deepgram فقط يُصرّف 49 حزمة خارجية بدل 286. ويقسم [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) الحزمة الجذرية إلى عقود وتنفيذات مع إعادة كتابة آلية للاستيراد. وينشر [v0.66.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.66.0) وحدات Android الخمس جميعها كحزم Apache-2.0 على JitPack يمكن حلّها دون هوية. راجع [إطار SpeechKit](/ar/speechkit/framework).
+- **إعدادات الطبقة العلوية صارت مصمِّمًا.** تعيد [إصدارات v0.68 التصحيحية](https://github.com/kombifyio/SpeechKit/releases) رسم الإعدادات العامة كبطاقات مدمجة وتعاين الطبقة العلوية مباشرة: النمط والموضع والأزرار السريعة على شريط التمرير تتحدث في المعاينة فورًا.
+
+### إصلاح الأخطاء
+
+- **لا شيء يفشل بصمت بعد الآن.** يبلّغ [SpeechKit v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) في سجل النشاط، مع السبب، عن كلام Voice Agent المُسقَط وإخفاقات تموضع الطبقة العلوية وأخطاء لقطات الشاشة الصامتة وتعثّر ملخصات الاجتماعات، بدل تركك تخمّن.
+- **صوت الاجتماعات بعيد عن Dictation.** يشغّل [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) نسخ الاجتماعات على مسار معالجة خاص. لم يعد صوت المكالمة يُومض على طبقة Dictation ولا يملأ سجل Dictation ولا يصبح "آخر نسخ" تعيد استخدامه اختصارات النسخ والإدراج.
+- **الاجتماعات الطويلة تنتج ملخصات.** تضبط [إصدارات v0.68 التصحيحية](https://github.com/kombifyio/SpeechKit/releases) حجم دفعات الملخص بما يناسب النموذج المحلي المضمّن، وتقسم أجزاء النص المفرَّغ المفرطة الطول عند حدود الجمل، وتستأنف الملخصات التي قطعها إعادة تشغيل، وتعيد المحاولة مع نموذج محلي تعذّر الوصول إليه مؤقتًا بدل إفشال المراجعة نهائيًا.
+- **Dictation المحلي يبدأ مع مسارات التثبيت غير ASCII.** يصلح [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) فشل whisper-server المضمّن في تثبيت جديد عندما يحتوي مسار النموذج على حرف مُعدَّل (umlaut). وإذا ظل تحويل الكلام إلى نص محليًا عاجزًا عن البدء، فإن سجل النشاط يسمّي السبب ويوضح هل Dictation غير متصل أم يعود إلى مزوّد سحابي محدد.
+- **المراجعات متعددة اللغات تعمل واحدة تلو الأخرى.** يمنع [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) تشغيلات المراجعة المتوازية من تجويع النموذج المحلي وفوات مواعيدها معًا، ويتبع التقدم اللغة التي تعمل فعلًا بدل مهمة في الطابور عالقة عند 0%.
+- **لوحة التحكم تُفتح بحجم مناسب.** توقف [إصدارات v0.68 التصحيحية](https://github.com/kombifyio/SpeechKit/releases) النافذة عن الافتتاح بارتفاع أكبر من شاشة حاسوب محمول مُكبَّرة، وتُبقي الحد الأدنى للحجم ضمن شاشة 13 بوصة، وتحفظ الحجم الذي تختاره.
+- **زر Connect يقول الحقيقة.** يصلح [v0.67.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.67.0) ادّعاء الاتصال المستضاف الجاهزية دون الحصول على بيانات اعتماد قط، ويقول تطبيق Android الآن إن اقتران Companion فشل لأن التطبيقين المثبّتين غير متطابقين، بدل إظهار فشل عام.
+- **أرشيفات إصدار StackKits تحمل وثائقها.** يضمّن [v0.24.2](https://github.com/kombifyio/stackKits/releases/tag/v0.24.2) وثائق النسخ الاحتياطي العامة وجاهزية التطبيقات في أرشيفات الإصدار، ويُبقي وصفات Basement وCloud الموجَّهة صريحة عبر محوّل التوافق.
+
+</Update>
+
+<Update label="2026-08-28" description="أسبوع 22 أغسطس – 28 أغسطس">
+
+## ملاحظات الاجتماعات واكتشاف LAN في SpeechKit، والعناوين العامة ومستويات الحوسبة في StackKits
+
+انتقل SpeechKit من [v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) إلى [v0.64.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.64.0): ملاحظات اجتماعات تنطلق مما دوّنته، واكتشاف LAN لتجد الأجهزة خادم homelab دون كتابة عنوان، والنقر للمقاطعة على كل عميل. وأصدر StackKits الإصدارات من [v0.21.10](https://github.com/kombifyio/stackKits/releases/tag/v0.21.10) إلى [v0.22.0](https://github.com/kombifyio/stackKits/releases/tag/v0.22.0): عناوين خدمات عامة مُدارة مع TLS تلقائي على Cloud Kit، ومستويات حوسبة تطابق الـ Kit مع العتاد الذي تملكه فعلًا.
+
+### ميزات جديدة
+
+- **ملاحظات اجتماعات تنطلق من ملاحظاتك.** يضيف [SpeechKit v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) دفتر ملاحظات للاجتماعات: ملاحظاتك في المقدمة، والنص المفرَّغ يملأ الباقي، ويستشهد الملخص بالكلمات التي استُمدّ منها. يبقى الميكروفون وصوت النظام على مسارين منفصلين، فتأتي تسميات المتحدثين دون جهد ولا يُحتفظ بالصوت أبدًا. يلاحظ SpeechKit عندما يستحوذ تطبيق اتصال على الميكروفون ويعرض تدوين الملاحظات؛ ولا يُسجَّل شيء حتى تقبل. ويصل الملخص إلى لوحة التحكم فور انتهاء الاجتماع. راجع [أوضاع SpeechKit](/ar/speechkit/modes).
+- **اعثر على خادم SpeechKit في الشبكة المنزلية.** يتيح [v0.60.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.60.0) لخادم homelab أن يعلن عن نفسه عبر mDNS/DNS-SD، فيجده تطبيق سطح المكتب وتطبيق Android والأمر `speechkitctl discover` دون كتابة عنوان. الاكتشاف اختياري ومعطَّل افتراضيًا، فتبقى النسخة المستضافة صامتة، ولا يقول الإعلان سوى أين تطرق الباب: تسجّل الأجهزة دخولها بعد الاتصال. راجع [نظرة عامة على SpeechKit](/ar/speechkit/overview).
+- **عناوين عامة مُدارة مع TLS تلقائي على Cloud Kit.** يمنح [StackKits v0.21.20](https://github.com/kombifyio/stackKits/releases/tag/v0.21.20) حتى [v0.21.24](https://github.com/kombifyio/stackKits/releases/tag/v0.21.24) خدمات Cloud Kit عناوين kombify.me عامة مُدارة: خطة عناوين خالية من الأسرار، ومسارات تُولَّد من بادئة النطاق الفرعي التي تحققت منها، وشهادات تُصدَر عبر ACME HTTP-01 لتتمكن بوابة Cloudflare من التحقق من TLS عند الأصل بينما تبقى حركة الخدمة عبر HTTPS. راجع [Cloud Kit](/ar/stackkits/kits/cloud-kit).
+- **مستويات الحوسبة تطابق الـ Kit مع عتادك.** يضيف [StackKits v0.22.0](https://github.com/kombifyio/stackKits/releases/tag/v0.22.0) مستويات حوسبة `low` و`standard` و`high` لكل Kit. يتحقق Apply من المعالج والذاكرة والقرص محليًا قبل الحلّ، ويحجب مع سبب واضح بدل النشر على مضيف أقل من المطلوب. راجع [اختيار Kit](/ar/guides/stackkits/choosing-a-kit) و[المراجعة والتخطيط والتطبيق](/ar/guides/stackkits/review-plan-and-apply).
+- **قاطع المساعد من أي عميل.** يجلب [SpeechKit v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) خاصية النقر لإيقاف الإجابة المنطوقة إلى عميلي الويب وAndroid، لا إلى تطبيق سطح المكتب وحده. وتحمل النصوص المفرَّغة على الويب وAndroid تسميات المتحدثين عند تفعيل التعرف على المتحدث، ويعرض كل عميل الواجهة الخلفية للكلام التي تخدم الجلسة. راجع [أوضاع SpeechKit](/ar/speechkit/modes).
+- **نسخ الملاحظات الصوتية وتلخيصها على Android.** ينسخ [v0.60.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.60.0) الملاحظات الصوتية ويلخّص رسائل WhatsApp وTelegram الصوتية من تطبيق SpeechKit.
+- **أضف حفظ الأسرار إلى homelab قائم.** يضيف [StackKits v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) أمر `stackkit secrets materialize` صريحًا وعديم الأثر عند التكرار (idempotent)، ليتمكن homelab مستقل من إرساء حفظ مرتبط بالمالك بعد اختيار حمل جديد، دون إعادة تشغيل StackSpec الأولي. راجع [عمليات اليوم الثاني](/ar/stackkits/reference/day-2-operations).
+
+### تحديثات
+
+- **Words وReplacements قابلة للإدارة.** يجعل [SpeechKit v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) الكلمات والاستبدالات المخصصة قابلة للبحث والتصفح بالصفحات والحذف من الإعدادات. ويمكن لعدة صيغ منطوقة أن تُعاد كتابتها إلى مصطلح واحد، وتُطبَّق الأسماء البديلة في Dictation وAssist وVoice Agent.
+- **اختر محرك Dictation بعنصر تحكم واحد.** يبدّل [v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) بين Deepgram Nova-3 وAssemblyAI Universal 3.5 في إعداد Dictation واحد، وLLM Gateway من AssemblyAI واجهة خلفية أصلية تستخدم مفتاح API نفسه المستخدم لتحويل الكلام إلى نص.
+- **الطبقة العلوية هي شريط التحكم.** يتيح [v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) اختيار الإجراءات الموضوعة على طبقة Windows العلوية وتدوير لغة الكلام وبدء اجتماع منها. راجع [إطار SpeechKit](/ar/speechkit/framework).
+- **حزمة Go واحدة لكل مزوّد كلام.** يقسم [v0.64.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.64.0) كل مزوّد للكلام والصوت الفوري إلى حزمة SDK خاصة به، فيتوقف التطبيق الذي يتحدث إلى واجهة خلفية واحدة عن تصريف الباقي. تظل الأسماء القديمة تعمل حتى v0.64 مع جدول ترحيل وتُزال في v0.65.0. وأصبح فهرس النماذج مصدرًا واحدًا، وتحمل مدخلاته حقل `modality`.
+- **الإزالة المعتمدة من المالك تستهدف عقدة واحدة.** يتيح [StackKits v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) حتى [v0.21.13](https://github.com/kombifyio/stackKits/releases/tag/v0.21.13) لإزالة الأحمال المعتمدة من المالك أن تختار تموضع عقدة واحدة بعينها من نتيجة Apply متعددة العقد تم التحقق منها، مع بقاء دليل الغياب مرتبطًا بـ Apply نفسه.
+- **بيان وصول أغنى.** يوسّع [v0.21.16](https://github.com/kombifyio/stackKits/releases/tag/v0.21.16) بيان الوصول الأصلي إلى الإصدار 3 مع تجميع التطبيقات وأسماء العرض وأثر دورة الحياة وعناوين داخلية خالية من الأسرار للخدمات العاملة.
+
+### إصلاح الأخطاء
+
+- **لم يعد تحصين Cloud قادرًا على حبسك خارج الخادم.** يحفظ [StackKits v0.21.10](https://github.com/kombifyio/stackKits/releases/tag/v0.21.10) حسابًا غير root موثَّقًا بمفتاح قبل أن يعطّل أمان مضيف Cloud تسجيل دخول root، ويجعل [v0.21.17](https://github.com/kombifyio/stackKits/releases/tag/v0.21.17) سياسة sshd المحصَّنة تتغلب على الإعدادات الافتراضية للمزوّد وcloud-init، فيبقى دخول root بالمفتاح معطَّلًا.
+- **إعادة تشغيل Apply على المنفذين 80 و443 آمنة.** يتيح [v0.21.18](https://github.com/kombifyio/stackKits/releases/tag/v0.21.18) لـ Apply عديم الأثر عند التكرار إعادة استخدام المنفذين 80 و443 فقط عندما يثبت Docker أنهما يخصان نواة Cloud لمساحة العمل الحالية. أما المستمعون الغريبون أو القدامى فما زالوا يحجبون.
+- **الأحمال دون كتلة placement تعمل ببساطة.** يطبّق [v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) الإعدادات الافتراضية المحكومة للتموضع عندما يختار كاتب StackSpec حملًا دون كتلة `placement`. راجع [إعداد مواصفة Stack](/ar/guides/stackkits/configure-stack-spec).
+- **Apply الفاشل يخبرك بما تفعله بعد ذلك.** ينهي [v0.22.0](https://github.com/kombifyio/stackKits/releases/tag/v0.22.0) أي Product Apply فاشل بإرشاد إلى إعادة المحاولة و`status` و`logs` مع Run-ID، وتستأنف المثبّتات مساحة عمل قائمة بدل أن تتعطل.
+- **جلسة الصوت المرفوضة تشرح نفسها.** يجعل [SpeechKit v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) جلسة Voice Agent المرفوضة تسمّي الأمر الوحيد الواجب تغييره، ويحمل كل خطأ المعرّف الذي يحتاجه الدعم للعثور على الطلب.
+- **الأرقام المنطوقة تخرج أرقامًا.** يكتب [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) الأرقام المنطوقة بالأرقام ويحذف كلمات الحشو الألمانية مثل äh وähm، بما في ذلك عند ضبط اللغة على كل اللغات.
+- **المساعد يتوقف عن مقاطعة نفسه.** يرفض [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) صوت الوكيل نفسه بوصفه مقاطعة (barge-in)، ويمنع إغلاق مزوّد معلّق من ترك جلسة عالقة في حالة الإنهاء، ويشغّل الرد بمعدل 24 kHz الصحيح.
+- **Windows يعرض الإصدار الحقيقي بعد التحديث.** يجعل [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) خيار Install and restart يعرض الإصدار المنشور بدل السابق.
+- **Dictation بالالتقاط الكامل يحترم اختيارك للمحرك.** يستخدم [v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) محرك الكلام المحدد بدل تجربة Deepgram أولًا دائمًا.
+- **لوحة المفاتيح تتصرف جيدًا على Android.** يضع [v0.60.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.60.0) SpeechKit على شريط اقتراحات Gboard ويستعيد أزرار المزوّدين على لوحة المفاتيح، ويُبقي [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) اتصال المختبِر يعمل إلى أن تنتقل صراحةً إلى اتصال مستضاف.
+
+</Update>
+
+<Update label="2026-08-21" description="أسبوع 15 أغسطس – 21 أغسطس">
+
+## Techstack مفتوح المصدر في Alpha، وSpeechKit على لوحة مفاتيح Android، ونواة StackKits Cloud
+
+أصبح Techstack عامًّا: نسخة Alpha لنظام Windows غير موقّعة وعميل مفتوح المصدر يمكنك تثبيته على جهازك لتشغيل خادم محلي دون حساب kombify مستضاف. ويأتي SpeechKit بلوحة مفاتيح Android خاصة به لتصبح Dictation وVoice Agent على بُعد نقرة فوق المفاتيح، مع خيار بين على الجهاز أو خادم SpeechKit أو Deepgram أو AssemblyAI أو GPT. ويستكمل StackKits [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) عشر حالات استخدام من الدرجة الأولى ويُنزِل بيئة تشغيل نواة Cloud المحايدة للمزوّد، تتبعها سلسلة إصلاحات لـ Cloud Apply وVerify حتى [v0.21.9](https://github.com/kombifyio/stackKits/releases/tag/v0.21.9).
+
+### ميزات جديدة
+
+- **Techstack Alpha لـ Windows، مفتوح المصدر.** نُشر عميل Techstack ذو النواة المفتوحة الآن برخصة AGPL-3.0 على [kombifyio/TechStack](https://github.com/kombifyio/TechStack)، وتتوفر نسخة Windows Alpha غير الموقّعة لتلقي ملاحظات حول الخادم المحلي. Techstack هو تجربة التنسيق والتشغيل الاختيارية فوق StackKits، وتدعم هذه النسخة Alpha المسار المحلي دون حساب. راجع [نظرة عامة على Techstack](/ar/techstack/overview) و[التوفر](/ar/techstack/availability) و[تثبيت Techstack Alpha على Windows](/ar/techstack/install-windows).
+- **Dictation وVoice Agent على بُعد نقرة فوق المفاتيح.** يضيف [SpeechKit v0.58.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.58.0) صفًّا فوق لوحة مفاتيح Android للإملاء على الجهاز أو عبر خادم SpeechKit، أو للتحدث إلى Deepgram أو AssemblyAI أو GPT. والإجراءات التي تحتاج إلى خادم تقول ذلك بدل أن تفشل عند الضغط عليها. راجع [أوضاع SpeechKit](/ar/speechkit/modes).
+- **SpeechKit يأتي بلوحة مفاتيح Android خاصة به.** يستبدل [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) لوحة الإدخال المستعارة بلوحة مفاتيح تحمل هوية SpeechKit (تفرّع من HeliBoard). اضغط مفتاح الصوت فتفتح لوحة الإملاء داخل لوحة المفاتيح، حيث كنت تكتب، دون تبديل تطبيق ولا فقدان للمؤشر. وتُنشر المصادر الكاملة المقابلة مع الإصدار.
+- **اضبط وضع SpeechKit قبل تشغيله.** يُبقي [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) إعدادات Transcribe وAssist وVoice Agent مفتوحة وقابلة للتحرير أثناء إيقاف الوضع، ولم يعد يُخرجك من الصفحة عند تعطيل وضع. راجع [إطار SpeechKit](/ar/speechkit/framework).
+- **عشر حالات استخدام من الدرجة الأولى في StackKits.** يكمل [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) مرجعيات CUE لجميع حالات الاستخدام العشر، بما فيها Vault وMedia ومسوّدات AI/Dev/Remote، إضافة إلى مسوّدتي Mail وGame لما بعد 1.0. وترتبط أدوار Basement وCloud Kit القائمة بها. راجع [اختيار Kit](/ar/guides/stackkits/choosing-a-kit).
+- **بيئة تشغيل نواة Cloud محايدة للمزوّد.** ينفّذ [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) بيئة تشغيل نواة Cloud المحايدة للمزوّد مع Product Apply محلي محروس، ورصد Verify حيّ، والإسقاط الدقيق لبيان الوصول v2 لـ `base` و`auth` و`id` و`coolify`. يبقى حفظ المزوّد وبيانات الاعتماد في Techstack. راجع [Cloud Kit](/ar/stackkits/kits/cloud-kit).
+
+### تحديثات
+
+- **واجهة سطح المكتب تحمل اسم "SpeechKit UI".** يمنح [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) نافذة سطح المكتب شعار SpeechKit وعنوانه فلا تعرّف نفسها بعد الآن كغلاف عام.
+- **`foundation` يحل محل حزمة المخطط `base`.** يعيد [StackKits v0.18.22](https://github.com/kombifyio/stackKits/releases/tag/v0.18.22) تسمية حزمة مخطط CUE المشتركة من `base` إلى `foundation` ويشترط وجود `foundation/stackkit.cue` في الأرشيفات المنشورة. أما Kits المنتج فلا تتغير وما زالت تمدّ `#FoundationStackKit`.
+- **إيقاف وسيط المثبّت `base-kit`.** يرفض [v0.18.22](https://github.com/kombifyio/stackKits/releases/tag/v0.18.22) المعرّف المتقاعد `base-kit` بدل إعادة كتابته بصمت إلى `basement-kit`. استخدم `basement-kit`. راجع [اختيار Kit](/ar/guides/stackkits/choosing-a-kit).
+
+### إصلاح الأخطاء
+
+- **Cloud Apply يبلغ الوضع الذي يعلنه على مضيف Ubuntu قياسي.** يثبّت [StackKits v0.21.9](https://github.com/kombifyio/stackKits/releases/tag/v0.21.9) الحزم التي تقوم عليها وحدات أمان مضيف Cloud ومجموعة قواعده بدل الفشل عند غياب `nft` و`fail2ban`، ولا يعيد تحميل `sshd` إلا إذا كان يعمل مع ضمان دليل فصل الامتيازات على المضيفين المفعَّلين بالمقبس.
+- **إخفاقات أمان مضيف Cloud تسمّي الوحدة الفاشلة الآن.** يحتفظ [v0.21.8](https://github.com/kombifyio/stackKits/releases/tag/v0.21.8) بمخرجات الأمر والعملية المحدودة عند فشل مصالحة أمان مضيف Cloud، فيبلّغ الهدف الحي عن الوحدة الفاشلة بدقة.
+- **Verify الدقيق لنواة Cloud يتعامل مع وكيل المقبس والخدمات المفحوصة صحيًا.** يقبل [v0.21.6](https://github.com/kombifyio/stackKits/releases/tag/v0.21.6) ملاحظة `not-configured` لوكيل المقبس الذي لا يملك فحص صحة عمدًا، ويحتفظ [v0.21.7](https://github.com/kombifyio/stackKits/releases/tag/v0.21.7) بنتائج صحة المسارات العامة الدقيقة المملوكة لبيئة التشغيل بعد التحقق منها مقابل فحوص وحدات نواة Cloud.
+- **Cloud Kit Apply يتوقف عن الفشل الآمن بسبب بيانات المرسِل الوصفية.** يقبل [v0.21.4](https://github.com/kombifyio/stackKits/releases/tag/v0.21.4) البيانات الوصفية لفئة خطة المرسِل على مالكي Cloud Kit وقبول المضيف بحيث لا يفشل Product Apply بالخطأ `health:stackkits-host-admission=executor-failed`. وينفّذ [v0.21.5](https://github.com/kombifyio/stackKits/releases/tag/v0.21.5) مالكي Cloud Kit المحليين بالكامل عبر موجّههم المحلي الدقيق. راجع [المراجعة والتخطيط والتطبيق](/ar/guides/stackkits/review-plan-and-apply).
+- **Verify وStatus يرفضان إسقاطات خدمات Cloud القديمة.** يرفض [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) إسقاطات خدمات Cloud القديمة أو الغريبة أو المعدَّلة أثناء قراءة Verify وStatus.
+- **لا مزيد من أيقونات مشغّل SpeechKit المكررة على Android.** يوقف [v0.58.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.58.0) تفرّع لوحة المفاتيح عن إضافة مشغّل ثانٍ كان يفتح إعدادات لوحة المفاتيح بدل التطبيق.
+- **مفتاح الصوت موجود عند تثبيت SpeechKit.** يجعل [v0.58.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.58.0) مفتاح الصوت ظاهرًا دون تفعيل طريقة إدخال ثانية، وتفتح لوحة الإملاء الآن فوق المفاتيح بدل أعلى الشاشة.
+- **حالة Voice Agent صادقة على Android.** يوقف [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) الإعلان عن Voice Agent بوصفه غير مُصدَر، ويتيح ظهور لوحة مفاتيح SpeechKit فعلًا مع تركيب لوحة الإملاء داخل عرض الإدخال فيها.
+
+</Update>
+
+<Update label="2026-08-14" description="أسبوع 10 أغسطس – 14 أغسطس">
+
+## StackKits v0.15.0 – v0.18.1: مثبّت موجَّه، وطرح قابل للتحكم على مستوى الخدمة، ونواة Cloud محايدة للمزوّد
+
+انتقل StackKits من v0.14.28 إلى [v0.18.1](https://github.com/kombifyio/stackKits/releases/tag/v0.18.1) هذا الأسبوع. يأخذ مثبّت موجَّه جديد جهازًا غير مُعَدّ إلى homelab عامل بثلاثة أوضاع. واكتسب Cloud Kit نواة Cloud محايدة للمزوّد وملكية مسارات TLS العامة ونسخًا احتياطيًا خارجيًا اختياريًا. وأصبحت `apply` و`status` و`verify` و`logs` قابلة للقراءة الآلية بالكامل في كل نتيجة، وأمر `stackkit service` جديد يتحكم في الخدمات الفردية بين عمليات apply الكاملة.
+
+## SpeechKit v0.53.0 – v0.57.0: مساعد صوتي واحد في كل مكان، وVoice Agent على Android، ومساعد ويب مستضاف
+
+أصدر SpeechKit [v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0). يجري تطبيق Android الآن محادثة منطوقة حقيقية ويصل إلى المساعد مباشرة من لوحة مفاتيح SpeechKit. ويعرض كل خادم SpeechKit صفحة ويب `/assistant` جاهزة للاستخدام. ويُعرض المساعد المتحرك نفسه بشكل متطابق على Android وفي طبقة Windows العلوية وعلى الويب، بقيادة مكتبة مشتركة واحدة. وأصبح Deepgram Flux v2 قابلًا للاختيار عبر الوقت الفعلي وتحويل الكلام إلى نص وتحويل النص إلى كلام.
+
+### ميزات جديدة
+
+- **مثبّت موجَّه إلى homelab عامل.** يأتي [StackKits v0.17.0](https://github.com/kombifyio/stackKits/releases/tag/v0.17.0) بتثبيت موجَّه كامل بثلاثة أوضاع وتدفق `v2 init` يقبل `--use-case` و`--platform` و`--enable`. يهيّئ المثبّت Docker وجذور التخزين مباشرة، ويعمل بأمان تحت `sudo`، ويطبع بيانات اعتماد أصلية صادقة. راجع [البدء السريع](/ar/stackkits/quickstart) و[اختيار Kit](/ar/guides/stackkits/choosing-a-kit).
+- **نواة Cloud محايدة للمزوّد مع مسارات TLS عامة.** يحلّ [StackKits v0.15.0](https://github.com/kombifyio/stackKits/releases/tag/v0.15.0) حملًا مطلوبًا `cloud-core` لـ `base` و`auth` و`id` و`coolify`، ويُنتج مشروع Compose واحدًا مثبَّتًا بالـ digest، وينفّذه عبر مالك بيئة تشغيل محلي مغلق على مضيف يُقدَّم من الخارج. ويجعل [v0.18.0](https://github.com/kombifyio/stackKits/releases/tag/v0.18.0) Cloud Kit يملك مسارات TLS العامة ويجسّدها من البداية إلى النهاية. ولا يخزّن حفظ بيئة تشغيل Cloud سوى مواد PocketID وTinyAuth وCoolify الخاصة بكل خدمة. أما بيانات اعتماد المزوّد وبيانات اعتماد الخادم وعقود الإيجار (leases) والمخزون فتبقى خارج StackKits. راجع [Cloud Kit](/ar/stackkits/kits/cloud-kit).
+- **أمر `stackkit service` للتحكم بعد الطرح.** يضيف [v0.16.0](https://github.com/kombifyio/stackKits/releases/tag/v0.16.0) الأمرين `stackkit service start|stop|restart <service-key>` و`stackkit service logs <service-key>` لخدمات نواة Cloud التي تديرها StackKits. تتطلب التعديلات `--owner-approve`، ويعيد `--json` نتيجة إجراء مُرقَّمة الإصدار. استخدمه لإعادة تشغيل خدمة واحدة أو فحصها بين عمليات apply الكاملة. راجع [عمليات اليوم الثاني](/ar/stackkits/reference/day-2-operations).
+
+```bash
+stackkit service restart coolify --owner-approve --json
+stackkit service logs auth --tail 100
+```
+
+- **مخرجات آلية كاملة في apply وstatus وverify وlogs.** يُبقي [v0.15.8](https://github.com/kombifyio/stackKits/releases/tag/v0.15.8) الأوامر `stackkit apply --json` و`stackkit status --json` و`stackkit verify --json` قابلة للتحليل عند النجاح والرفض والفشل. ويعيد `stackkit logs` صفحات منقَّحة ومحدودة بمؤشرات مرتبطة بالـ digest وبيانات وصفية صريحة عن الاقتطاع. ويعرض موصّل MCP الأدلة المنظَّمة نفسها. راجع [موصّل MCP](/ar/stackkits/reference/mcp-connector) و[تشغيل StackKit](/ar/stackkits/reference/day-2-operations).
+- **مستمعو بيئة تشغيل Architecture v2 لتسليم التطبيقات المملوك للمنتج.** يعرض [v0.15.3](https://github.com/kombifyio/stackKits/releases/tag/v0.15.3) مستمعي بيئة التشغيل على إسقاطات فهرس Architecture v2 كي تتمكن التطبيقات من قيادة تسليمها دون نقل سلطة دورة الحياة خارج StackKits. راجع [تسليم التطبيقات](/ar/guides/stackkits/application-delivery).
+- **عميل Voice Agent على Android.** يضيف [SpeechKit v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0) Voice Agent فوريًا إلى تطبيق Android. اضغط للتحدث، واسمع الإجابة، وشاهد النص المفرَّغ يتكوّن أثناء حديثك. تفتح لوحة مفاتيح SpeechKit المساعد في مكانه، فتبقى المحادثة خارج حقل النص بينما يواصل Dictation الكتابة فيه. راجع [أوضاع SpeechKit](/ar/speechkit/modes).
+- **صفحة ويب `/assistant` مستضافة على كل خادم SpeechKit.** يقدّم [v0.55.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.55.0) صفحة Voice Assistant جاهزة للاستخدام. افتحها في أي متصفح، واتصل، وابدأ الحديث. راجع [نظرة عامة على SpeechKit](/ar/speechkit/overview).
+- **إعدادات مظهر Voice Assistant ولغة بصرية واحدة في كل مكان.** يضيف [v0.55.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.55.0) إعدادات لاختيار الرسوم المتحركة (Aura orb أو Waveform) والشعار في المركز وما إذا كان النص المفرَّغ المباشر يظهر افتراضيًا، مع معاينة حية. وينشر [v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0) الكرة المشتركة ليرسم تطبيق Android وطبقة Windows العلوية وصفحة الويب المستضافة المساعد نفسه من مصدر واحد. راجع [إطار SpeechKit](/ar/speechkit/framework).
+- **Deepgram Flux v2 عبر جميع مسارات الصوت.** يتيح [v0.54.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.10) استخدام Deepgram Flux v2 في Voice Agent الفوري وتحويل الكلام إلى نص وتحويل النص إلى كلام.
+- **دورة حياة الوسائط في Local Box.** يشغّل [v0.54.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.0) الوسائط عبر وكيل الجهاز المحلي على Kombify Box مقترن، فيبقى مسار الصوت على شبكتك الخاصة.
+
+### تحديثات
+
+- **النسخ الاحتياطي الخارجي في Cloud Kit أصبح اختياريًا.** يجعل [v0.16.1](https://github.com/kombifyio/stackKits/releases/tag/v0.16.1) النسخ الاحتياطي الخارجي خيارًا صريحًا في Cloud Kit. راجع [النسخ الاحتياطي والاستعادة](/ar/guides/stackkits/back-up-and-restore).
+- **واجهة Traefik الإدارية تبقى على localhost فقط في Cloud Kit.** يُبقي [v0.18.1](https://github.com/kombifyio/stackKits/releases/tag/v0.18.1) واجهة Traefik الإدارية مرتبطة بـ localhost في عقدي المنتج والإصدار العام معًا.
+- **إعادة بناء طبقة Voice Agent العلوية على Windows.** يحوّل [SpeechKit v0.56.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.56.0) الطبقة العلوية إلى لوحة داكنة مقروءة واحدة تتمركز حول الرسوم المتحركة والمحادثة. وتظهر أدوات التحكم فقط عندما تمدّ يدك إليها. انتقلت Quick Note إلى الطبقة العلوية، ولكل أيقونة فيها تلميح.
+- **محدّث صامت بمرحلة تحقق مميزة.** يثبّت [v0.52.11](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.11) التحديثات بصمت، ويجعل [v0.52.12](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.12) SpeechKit يعيد تشغيل نفسه بعد التثبيت، ويعرض [v0.54.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.10) مرحلة تحقق مميزة بدل الظهور بمظهر التوقف عند 100%.
+- **إصدارات ما قبل 1.0 الرقمية عادت إلى الواجهات العامة.** ينشر [v0.52.9](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.9) إصدارات `v0.x` الرقمية كإصدارات GitHub عادية ويقدّم الاسم البديل القانوني `latest`، فيتفق الموقع ومرآة المثبّت ومحدّث التطبيق على أحدث بناء. ويستعيد [v0.52.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.10) ملاحظات الإصدار العامة المفقودة للإصدارات من v0.51.37 إلى v0.52.9.
+
+### إصلاح الأخطاء
+
+- **Apply يربط التعديل بتجزئة الخطة المتوقعة.** يمنع [StackKits v0.17.0](https://github.com/kombifyio/stackKits/releases/tag/v0.17.0) تشغيل apply على خطة تغيّرت من تحته. راجع [المراجعة والتخطيط والتطبيق](/ar/guides/stackkits/review-plan-and-apply).
+- **سحب صور بيئة التشغيل العامة بمصادقة.** يوثّق [v0.16.8](https://github.com/kombifyio/stackKits/releases/tag/v0.16.8) عمليات سحب صور بيئة التشغيل العامة التي يجريها تثبيت جديد.
+- **تحرير الضغط المطوّل ينهي المحادثة.** يغلق [SpeechKit v0.56.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.56.0) الحوار عند تحرير الضغط المطوّل للتحدث. وتتيح نافذة قصيرة لضغطة ثانية فورية أن تواصل من حيث توقفت.
+- **تشغيل SpeechKit يفتح SpeechKit.** يُظهر [v0.56.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.56.0) النافذة من شريط المهام أو قائمة Start ويعود إلى التطبيق العامل عند النقر مرة أخرى.
+- **إعداد لوحة مفاتيح Android يكتشف لوحتنا.** يمنع [v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0) تدفق الإعداد من ادّعاء اكتمال خطوة قبل اكتمالها.
+- **النصوص المفرَّغة تحتفظ بلغتها.** لم يعد [v0.54.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.0) يصنّف النصوص كألمانية أيًّا كان المنطوق، فتُطبَّق المفردات المخصصة والاستبدالات على اللغة التي استخدمتها فعلًا. وتتوقف كذلك حالات إسقاط التسجيلات الصامتة: فعندما لا ينتج التسجيل نصًّا لأن اللغة المنطوقة لم تطابق اللغة المضبوطة، يقول SpeechKit ذلك بدل إسقاطه.
+- **الخادم يستمر بالعمل عبر فشل فحص عابر.** يمنع [v0.54.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.1) فحصًا واحدًا فاشلًا من قتل خادم SpeechKit، ويحرّر علم جاهزية Whisper المحلي عند تعافيه.
+- **إعداد النموذج يعيد محاولة تنزيلات Whisper العابرة.** يعيد [v0.54.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.10) المحاولة بدل إفشال التثبيت عند خطأ شبكة عابر.
+
+</Update>
