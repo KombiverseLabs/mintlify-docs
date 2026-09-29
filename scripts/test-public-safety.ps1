@@ -21,7 +21,8 @@ function New-TestFixture {
         [string]$TabName = "Start",
         [string]$NavigationLanguage = "en",
         [switch]$RestrictedNavigation,
-        [string]$MintIgnore = "public-safety-policy.json"
+        [string]$MintIgnore = "public-safety-policy.json",
+        [hashtable]$OpenApi
     )
 
     $root = Join-Path $testRoot $Name
@@ -36,12 +37,16 @@ function New-TestFixture {
     if ($RestrictedNavigation) {
         $group.public = $false
     }
+    $groups = @($group)
+    if ($OpenApi) {
+        $groups += [ordered]@{ group = "API"; openapi = $OpenApi }
+    }
     $docs = [ordered]@{
         navigation = [ordered]@{
             languages = @(
                 [ordered]@{
                     language = $NavigationLanguage
-                    tabs = @([ordered]@{ tab = $TabName; groups = @($group) })
+                    tabs = @([ordered]@{ tab = $TabName; groups = $groups })
                 }
             )
         }
@@ -132,6 +137,12 @@ try {
         "sim/overview.mdx" = "---`ntitle: Test`ndescription: Out of scope page`n---`n`n# Test`n"
     }
     Assert-Case -Name "unapproved public page fails" -Fixture $unapprovedPage -ShouldPass $false -ExpectedMessage "outside the approved public scope"
+
+    $unapprovedOpenApi = New-TestFixture -Name "unapproved-openapi" -OpenApi @{ source = "internal/openapi.yaml"; directory = "internal/api" } -Pages @{
+        "index.mdx" = "---`ntitle: Test`ndescription: Safe public page`n---`n`n# Test`n"
+        "internal/openapi.yaml" = "openapi: 3.1.0`npaths: {}`n"
+    }
+    Assert-Case -Name "unapproved OpenAPI reference fails" -Fixture $unapprovedOpenApi -ShouldPass $false -ExpectedMessage "navigation OpenAPI reference"
 
     $secret = New-TestFixture -Name "secret" -Pages @{
         "index.mdx" = "---`ntitle: Test`ndescription: Unsafe operator secret name`n---`n`nAUTH0_MCP_BEARER must never be public.`n"

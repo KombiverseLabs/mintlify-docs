@@ -38,7 +38,7 @@ export function validateCliReference(reference) {
 
 // Help text is prose, never markup: MDX expressions, JSX, links and emphasis
 // from the command tree render literally.
-function text(value) {
+export function text(value) {
   return String(value ?? '')
     .replaceAll('\\', '\\\\')
     .replaceAll('*', '\\*')
@@ -53,16 +53,16 @@ function text(value) {
     .replace(/(^|[\s('"])(--[a-z0-9][a-z0-9-]*(?:=[A-Za-z0-9._:/-]+)?)(?=$|[\s),.;:'"])/g, '$1`$2`')
 }
 
-function cell(value) {
+export function cell(value) {
   return text(value).replaceAll('|', '\\|').replaceAll('\n', ' ')
 }
 
-function code(value) {
+export function code(value) {
   // Inline code in a table cell: escape the pipe, keep the rest literal.
   return `\`${String(value).replaceAll('|', '\\|').replaceAll('`', "'")}\``
 }
 
-function yamlString(value) {
+export function yamlString(value) {
   return `"${String(value).replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`
 }
 
