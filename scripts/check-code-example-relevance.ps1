@@ -121,6 +121,10 @@ foreach ($file in $mdxFiles) {
         $content -match '(?m)^generated_by: "stackkit docs emit-cli-reference"$') {
         continue
     }
+    if ($relative -like "techstack/reference/cli/*.mdx" -and
+        $content -match '(?m)^generated_by: "render-api-surface-reference"$') {
+        continue
+    }
     $inFence = $false
     $fenceLanguage = ""
 

@@ -18,7 +18,7 @@ The public surface has five tabs:
 | --- | --- |
 | Start | Product entry points and current availability. |
 | StackKits | Released kits, modules, workflows, CLI, and MCP documentation. |
-| Techstack | Preview product boundary, operating modes, and availability. |
+| Techstack | Preview product boundary, operating modes, availability, and the release-bound API and `techstack api` CLI reference. |
 | SpeechKit | Released Windows beta, voice modes, and Go framework guidance. |
 | Identity & Access | The small identity boundary relevant to StackKits. |
 
@@ -45,7 +45,11 @@ internal development workflow is not release evidence.
 SpeechKit instructions are pinned to its exact public release and assets.
 Techstack pages deliberately document the product contract and preview status
 without presenting a public installer or source distribution that does not yet
-exist.
+exist. The Techstack API reference and `techstack api` CLI reference under
+`techstack/reference/` are generated only from `api/surface/openapi.public.yaml`
+and `api/surface/api-surface.json` of a published Techstack release
+(`.github/workflows/techstack-release-docs.yml`); until a release carries both,
+the reference does not exist.
 
 The old Kombify documentation repository is not an upstream source and must
 not be used for migration or content recovery. Product repositories and their
@@ -88,7 +92,8 @@ mise run local:e2e
 | `scripts/check-stackkits-release-truth.ps1` | Keep installer commands on the current public release and prevent stale lifecycle wording. |
 | `scripts/check-stackkits-external-links.ps1` | Verify the bounded website, installer, and release destinations used by the StackKits quickstart. |
 | `scripts/check-speechkit-release-truth.ps1` | Pin SpeechKit version, platform, module, and Windows assets to the public release. |
-| `scripts/check-techstack-public-boundary.ps1` | Keep the released Techstack Windows Alpha links and pre-1.0 availability boundary truthful. |
+| `scripts/check-techstack-public-boundary.ps1` | Keep the released Techstack Windows Alpha links and pre-1.0 availability boundary truthful, and the generated reference bound to one published release. |
+| `scripts/render-api-surface-reference.mjs` | Render a release's public OpenAPI document and `api-surface.json` into the API and CLI reference; `--check` reports drift. |
 | `scripts/check-product-docs-external-links.ps1` | Verify the public Techstack entry and SpeechKit release destinations. |
 | `scripts/check-code-example-relevance.ps1` | Allow executable and structured examples only on pages with a topic-specific workflow or configuration. |
 | `mise run local:e2e` | Prove allowed and forbidden routes over real local HTTP. |

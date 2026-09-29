@@ -47,6 +47,20 @@
       "uniqueItems": true,
       "items": { "type": "string", "pattern": "/$" }
     },
+    "allowedOpenApiReferences": {
+      "description": "Navigation OpenAPI references Mintlify may render as API pages. Each entry is the exact spec file and generated-page directory; any other openapi navigation entry fails closed.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source", "directory"],
+        "properties": {
+          "source": { "type": "string", "pattern": "^[a-z0-9][a-z0-9/_-]*\\.(?:yaml|yml|json)$" },
+          "directory": { "type": "string", "pattern": "^[a-z0-9][a-z0-9/_-]*[a-z0-9]$" }
+        }
+      }
+    },
     "excludedDirectories": {
       "type": "array",
       "minItems": 1,
