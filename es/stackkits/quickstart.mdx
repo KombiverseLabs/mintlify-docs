@@ -1,0 +1,87 @@
+---
+title: "Guía de inicio rápido de StackKits"
+description: "Arranca, inspecciona y aplica explícitamente un Basement Kit publicado"
+sidebarTitle: "Inicio rápido"
+icon: rocket
+---
+
+Esta guía de inicio rápido instala el release público actual de StackKits con un
+Basement Kit en un servidor que ya operas. Antes de empezar, consulta la [compatibilidad de SO](/es/stackkits/reference/os-compatibility)
+para ver la combinación de release y host con evidencia de ciclo de vida
+publicada. La CLI sigue siendo la autoridad de ejecución local.
+
+## Arranca un Basement Kit
+
+En un servidor compatible, el instalador de Basement crea `~/my-homelab`,
+instala los artefactos publicados y el runtime necesario, inicializa la custodia
+local del propietario, arranca el acceso local de Admin/PocketID, valida la
+StackSpec generada y aplica los servicios predeterminados de Basement:
+
+```bash
+curl -sSL https://base.stackkit.cc | sh
+cd ~/my-homelab
+stackkit version
+stackkit logs latest --json
+cat .stackkit/access.json
+```
+
+<Warning>
+  No hace falta una cuenta alojada de kombify. StackKits sí sigue requiriendo un
+  Owner/Admin local, que este arranque crea automáticamente. Mantén privados los
+  detalles de acceso generados.
+</Warning>
+
+¿Necesitas otro instalador? Usa [Elige un kit](/es/guides/stackkits/choosing-a-kit)
+para la vía solo de la cadena de herramientas, [Cloud Kit](/es/stackkits/kits/cloud-kit) para un VPS
+que ya operas, o el [recorrido por la CLI](/es/guides/stackkits/cli-walkthrough)
+para los pasos separados de configuración, revisión, aplicación y verificación.
+
+## Revisa o cambia la intención generada
+
+Inspecciona `stack-spec.yaml` antes de generar la salida. En particular, revisa
+las raíces de almacenamiento absolutas, el dominio local (el instalador de
+Basement usa `home`, así que los servicios se resuelven en `*.home` tras
+inscribir el dispositivo), las identidades de site y de nodo, y la selección
+opcional de workloads vacía.
+
+La StackSpec es la entrada de configuración. CUE sigue siendo la autoridad de
+validación y los archivos de despliegue generados son salidas, no archivos que
+editar a mano. Consulta
+[Configurar una StackSpec](/es/guides/stackkits/configure-stack-spec) para ver
+ejemplos actuales.
+
+## Genera e inspecciona un plan modificado
+
+```bash
+stackkit generate
+stackkit plan --json
+```
+
+Confirma que la disposición para generar y para aplicar son ambas `ready` y
+después revisa los workloads seleccionados y las rutas de los artefactos.
+
+## Aplica un cambio intencionado
+
+```bash
+stackkit apply
+stackkit logs latest --json
+cat .stackkit/access.json
+```
+
+El comando único de Basement ya realiza el apply inicial. Ejecuta estos comandos
+del ciclo de vida solo después de cambiar intencionadamente `stack-spec.yaml`.
+Conserva los logs locales y el registro de acceso junto al workspace.
+
+## Continúa
+
+<CardGroup cols={3}>
+  <Card title="Basement Kit" icon="house" href="/es/stackkits/kits/basement-kit">
+    Conoce el kit local de un solo entorno.
+  </Card>
+  <Card title="Cloud Kit" icon="cloud" href="/es/stackkits/kits/cloud-kit">
+    Usa el mismo ciclo de vida independiente en un VPS que operas.
+  </Card>
+  <Card title="Aplica con seguridad" icon="clipboard-check" href="/es/guides/stackkits/review-plan-and-apply">
+    Revisa la disposición y los artefactos generados antes de cambiar el host.
+  </Card>
+</CardGroup>

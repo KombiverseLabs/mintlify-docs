@@ -1,0 +1,90 @@
+---
+title: "SpeechKit"
+description: "Dictado local, captura de reuniones y agentes de voz en tiempo real"
+sidebarTitle: "Resumen"
+icon: "microphone"
+---
+
+SpeechKit es el framework y runtime de voz local-first de kombify. Un único
+proyecto público ofrece el kernel de voz en Go, un servidor autoalojado,
+herramientas para agentes, módulos para Android y clientes de escritorio para
+Windows y macOS.
+
+{/* speechkit-release:begin */}
+La versión pública actual es [v0.72.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.1), publicada el 2026-09-20.
+{/* speechkit-release:end */}
+
+SpeechKit es software beta: las API públicas, las claves de configuración y los
+valores por defecto pueden cambiar entre versiones menores, así que fija la
+versión que hayas probado.
+
+## Tres modos y un servicio de grabación
+
+| Superficie | Finalidad |
+| --- | --- |
+| Dictation | Convertir la voz en texto sin reescritura por LLM. |
+| Assist | Convertir voz o texto en un único resultado acotado, opcionalmente hablado. |
+| Voice Agent | Mantener una conversación de audio en tiempo real para trabajo interactivo. |
+| Meeting | Grabar una llamada en dos canales y redactarla después. |
+
+Hands-Free es una capa de activación y salida sobre los tres modos, no un
+cuarto modo. Meeting es un servicio de grabación independiente que solo
+comparte con Dictation el transcriptor de voz a texto.
+
+## Dónde se ejecuta SpeechKit
+
+| Destino | Disponibilidad |
+| --- | --- |
+| Cliente de escritorio para Windows 10/11 x64 | Beta pública; los tres modos, Hands-Free y Meeting |
+| macOS 14+ en Apple Silicon | Beta solo de Dictation, firmada ad hoc, con carencias conocidas |
+| Framework de Go | Módulo público; integra el kernel en tu propio host de Go |
+| Servidor autoalojado | Destino Linux compilado desde el código fuente público |
+| Android | Módulos de Gradle con licencia Apache-2.0 más una app de referencia en el repositorio |
+| Navegador | Cliente TypeScript y paquetes de interfaz de voz en el repositorio público |
+| Escritorio Linux | No disponible; Linux es un runtime de servidor |
+
+## Límites de privacidad que tú defines
+
+Dos ajustes independientes deciden lo que SpeechKit puede hacer:
+
+- **Network Scope** responde a dónde puede conectarse el proceso: a todas las
+  redes, solo a la red local o solo a este dispositivo. El backend aplica el
+  límite a los proveedores de voz, las descargas de modelos, las
+  actualizaciones, la telemetría, las conexiones con servidores y las
+  integraciones. Un alcance más estricto suspende los ajustes incompatibles en
+  lugar de eliminarlos.
+- **Retention Scope** responde a qué sobrevive al trabajo que lo produjo:
+  conservar o cero retención. La cero retención elimina el material en bruto
+  cuando termina una sesión y conserva solo el resultado generado.
+
+Ambos son ortogonales. Una instalación solo para el dispositivo sigue
+escribiendo transcripciones en el disco, a menos que elijas también cero
+retención.
+
+## Elige un destino
+
+<CardGroup cols={2}>
+  <Card title="Cliente para Windows" icon="windows" href="/es/speechkit/install-windows">
+    Instala la beta para Windows 10/11 x64 desde la versión oficial.
+  </Card>
+  <Card title="Cliente para macOS" icon="apple" href="/es/speechkit/install-macos">
+    Instala la beta de Dictation para Apple Silicon y consulta sus límites conocidos.
+  </Card>
+  <Card title="Framework de Go" icon="code" href="/es/speechkit/framework">
+    Integra el kernel de voz o compila los destinos de servidor, Android y navegador.
+  </Card>
+  <Card title="Modos y rutas de datos" icon="waveform-lines" href="/es/speechkit/modes">
+    Compara Dictation, Assist, Voice Agent y los límites de los proveedores.
+  </Card>
+  <Card title="Meeting" icon="users" href="/es/speechkit/meeting">
+    Graba una llamada en dos canales y genera un resumen con citas.
+  </Card>
+  <Card title="Repositorio público" icon="github" href="https://github.com/kombifyio/SpeechKit">
+    Explora el código fuente, los ejemplos, los contratos de API y las notas de la versión.
+  </Card>
+</CardGroup>
+
+<Info>
+El sitio de producto en [speechkit.cc](https://speechkit.cc) cubre la misma
+versión desde un enfoque de producto, con prompts de inicio ejecutables.
+</Info>

@@ -1,0 +1,73 @@
+---
+title: "Roles de Node y base de StackKit"
+description: "Qué hacen los Nodes de base, worker y de almacenamiento, y cuándo un nuevo Node inicia su propio StackKit"
+sidebarTitle: "Roles de Node"
+icon: "sitemap"
+---
+
+Cada Node que añades con el asistente está ligado a un StackKit y tiene un rol
+en él. El rol le dice a Techstack para qué sirve el Node. La base del StackKit
+le dice qué definición de kit sigue el Node.
+
+## Node de base
+
+El Node de base es el primer Node y el principal de un StackKit. Ejecuta el
+núcleo de ese StackKit. Cada StackKit tiene exactamente un Node de base.
+
+Creas un Node de base cuando configuras tu primer homelab, o cuando eliges
+**New StackKit / main Node** al añadir un Node. No puedes añadir un segundo Node
+de base a un StackKit existente; un segundo Node principal siempre inicia un
+nuevo StackKit.
+
+## Node worker
+
+Un Node worker añade potencia de cómputo a un StackKit existente. El StackKit
+puede colocar servicios en él. Elige **Worker Node** cuando añadas una segunda
+máquina para repartir la carga, por ejemplo un mini PC de repuesto junto a tu
+primer servidor.
+
+Un Node worker se une al StackKit al que lo añades y usa la base de ese
+StackKit.
+
+## Node de almacenamiento
+
+Un Node de almacenamiento es un Node adicional pensado para servicios que
+necesitan mucho espacio en disco, como fotos, archivos o medios. Elige
+**Storage Node** cuando la principal fortaleza de la máquina sean sus discos.
+
+Como un Node worker, un Node de almacenamiento se une a un StackKit existente y
+usa su base.
+
+## Base de StackKit
+
+Una base de StackKit es la definición de kit sobre la que se construye un
+StackKit. Techstack ofrece dos:
+
+- **[Basement Kit](/es/stackkits/kits/basement-kit)** para hardware local o
+  propio, como un servidor en casa o un VPS que alquilas tú mismo.
+- **[Cloud Kit](/es/stackkits/kits/cloud-kit)** para un VPS. Un
+  [servidor gestionado](/es/techstack/managed-servers) usa Cloud Kit.
+
+Cada Node está ligado a una base. Si no estás seguro de qué kit te conviene, lee
+[Elegir un kit](/es/guides/stackkits/choosing-a-kit).
+
+## Unirse a un StackKit existente
+
+Elige **Worker or storage for this StackKit** cuando el nuevo Node deba ayudar a
+un StackKit que ya ejecutas. El Node entonces:
+
+- toma la base de ese StackKit; no la eliges de nuevo;
+- conserva tu acceso, tus personas y tu inicio de sesión;
+- pasa a ser un **Worker Node** o un **Storage Node**. El rol de base no se
+  ofrece aquí, porque el StackKit ya tiene su Node principal.
+
+## Iniciar un nuevo StackKit
+
+Elige **New StackKit / main Node** cuando la nueva máquina deba ejecutar su
+propio StackKit dentro del mismo homelab. El Node pasa a ser el Node de base de
+ese nuevo StackKit, y tú eliges su base.
+
+Una configuración habitual son dos StackKits en un homelab: un Basement Kit en
+hardware de casa y un Cloud Kit en un VPS. Cada uno tiene su propio Node
+principal. Ambos pueden alcanzarse desde cualquier lugar mediante tu propio
+dominio o una dirección `*.kombify.me`; consulta [kombify.me](/es/kombify-me/overview).

@@ -1,0 +1,145 @@
+---
+title: "stackkit logs"
+description: "Consulta los logs estructurados de despliegue"
+sidebarTitle: "logs"
+---
+Consulta los logs estructurados de despliegue.
+
+Consulta y filtra los logs estructurados de despliegue de ejecuciones anteriores.
+
+Por defecto muestra el log más reciente en formato legible. Usa filtros para acotar a tipos de evento concretos.
+
+```bash
+stackkit logs [run-id] [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | Cursor opaco ligado a un digest, devuelto por una página JSON anterior |
+| `--decisions` | bool | — | Muestra solo los eventos de decisión |
+| `--errors` | bool | — | Muestra solo errores y advertencias |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+| `--jsonl` | bool | — | Muestra JSON-Lines sin procesar |
+| `--max-bytes` | int | `262144` | Máximo de bytes de log sin procesar analizados por página JSON |
+| `--max-events` | int | `200` | Máximo de eventos estructurados por página JSON |
+| `--timing` | bool | — | Muestra el resumen de tiempos |
+
+**Ejemplos**
+
+```bash
+# Show the latest log (human-readable)
+stackkit logs
+
+# Show the latest log as structured JSON
+stackkit logs --json
+
+# Show the latest log as raw JSON Lines
+stackkit logs --jsonl
+
+# Show only decision events
+stackkit logs --decisions
+
+# Show only errors and warnings
+stackkit logs --errors
+
+# Show a timing summary
+stackkit logs --timing
+```
+
+Subcomandos: [`stackkit logs get`](#stackkit-logs-get), [`stackkit logs latest`](#stackkit-logs-latest), [`stackkit logs list`](#stackkit-logs-list)
+
+## stackkit logs get
+
+Lee un log estructurado de despliegue exacto.
+
+```bash
+stackkit logs get <run-id> [flags]
+```
+
+Heredado de `stackkit logs`:
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | Cursor opaco ligado a un digest, devuelto por una página JSON anterior |
+| `--decisions` | bool | — | Muestra solo los eventos de decisión |
+| `--errors` | bool | — | Muestra solo errores y advertencias |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+| `--jsonl` | bool | — | Muestra JSON-Lines sin procesar |
+| `--max-bytes` | int | `262144` | Máximo de bytes de log sin procesar analizados por página JSON |
+| `--max-events` | int | `200` | Máximo de eventos estructurados por página JSON |
+| `--timing` | bool | — | Muestra el resumen de tiempos |
+
+**Ejemplos**
+
+```bash
+# Read one run by an ID that stackkit logs list printed
+stackkit logs get <run-id>
+
+# Read that run as JSON, 50 events per page
+stackkit logs get <run-id> --json --max-events 50
+
+# Continue with the cursor the previous JSON page returned
+stackkit logs get <run-id> --json --max-events 50 --cursor <cursor>
+```
+
+## stackkit logs latest
+
+Lee el log estructurado de despliegue más reciente.
+
+```bash
+stackkit logs latest [flags]
+```
+
+Heredado de `stackkit logs`:
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | Cursor opaco ligado a un digest, devuelto por una página JSON anterior |
+| `--decisions` | bool | — | Muestra solo los eventos de decisión |
+| `--errors` | bool | — | Muestra solo errores y advertencias |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+| `--jsonl` | bool | — | Muestra JSON-Lines sin procesar |
+| `--max-bytes` | int | `262144` | Máximo de bytes de log sin procesar analizados por página JSON |
+| `--max-events` | int | `200` | Máximo de eventos estructurados por página JSON |
+| `--timing` | bool | — | Muestra el resumen de tiempos |
+
+**Ejemplos**
+
+```bash
+# Read the newest rollout log
+stackkit logs latest
+
+# Only errors and warnings from the newest log, as JSON
+stackkit logs latest --errors --json
+```
+
+## stackkit logs list
+
+Lista los archivos de log disponibles.
+
+```bash
+stackkit logs list [flags]
+```
+
+Heredado de `stackkit logs`:
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | Cursor opaco ligado a un digest, devuelto por una página JSON anterior |
+| `--decisions` | bool | — | Muestra solo los eventos de decisión |
+| `--errors` | bool | — | Muestra solo errores y advertencias |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+| `--jsonl` | bool | — | Muestra JSON-Lines sin procesar |
+| `--max-bytes` | int | `262144` | Máximo de bytes de log sin procesar analizados por página JSON |
+| `--max-events` | int | `200` | Máximo de eventos estructurados por página JSON |
+| `--timing` | bool | — | Muestra el resumen de tiempos |
+
+**Ejemplos**
+
+```bash
+# List the run IDs of all local rollout logs
+stackkit logs list
+
+# The same list as JSON
+stackkit logs list --json
+```

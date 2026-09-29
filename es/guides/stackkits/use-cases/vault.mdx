@@ -1,0 +1,85 @@
+---
+title: "Vault"
+description: "Una bóveda de contraseñas hoy, con extensiones previstas de secretos de servicio y Bitcoin bajo custodia controlada por el propietario"
+sidebarTitle: "Vault"
+icon: vault
+---
+
+<Info>
+  Estado de la evidencia (2026-09-24, v0.39.7): Passwords con Vaultwarden es
+  `available, lifecycle-verified`. Una ejecución del ciclo de vida en Ubuntu
+  24.04 amd64 (Basement Kit, independiente) pasó install, init, generate, apply,
+  setup-vault, verify, backup, restauración aislada y activación de la
+  restauración. Las extensiones de secretos de servicio y Bitcoin de más abajo
+  están `planned`: solo diseño objetivo, sin versión ni fecha comprometida.
+</Info>
+
+Vault mantiene las contraseñas, los secretos de máquina y los roles de Bitcoin
+bajo un control de propietario separado. Hoy incluye una única experiencia,
+Passwords, sobre Vaultwarden. Las extensiones de esta página son direcciones
+previstas, no algo que puedas seleccionar todavía.
+
+## Passwords, hoy
+
+<Card title="Passwords" icon="key" href="/es/guides/stackkits/use-cases/passwords">
+  Vaultwarden y clientes de Bitwarden: contrato publicado, configuración del propietario e inscripción de clientes.
+</Card>
+
+Consulta la página de [Passwords](/es/guides/stackkits/use-cases/passwords) y la
+página de la aplicación [Vaultwarden](/es/stackkits/apps/vaultwarden) para
+seleccionar y configurar la experiencia actual, con ciclo de vida verificado.
+
+## Extensiones previstas
+
+Ninguna de las experiencias siguientes se puede seleccionar todavía. Son
+propuestas de diseño para un paraguas más amplio, Vault & Sovereignty, y los
+usuarios existentes de Vaultwarden no recibirán un nodo de Bitcoin ni un nuevo
+intermediario de credenciales solo porque Vault se amplíe.
+
+<CardGroup cols={2}>
+  <Card title="Secretos de servicio" icon="lock-keyhole">
+    Concede a las aplicaciones credenciales de máquina limitadas, separadas de las contraseñas de las personas y de la custodia del propietario. OpenBao es el primer candidato en evaluación; Infisical es un candidato de comparación.
+  </Card>
+  <Card title="Nodo de Bitcoin y verificación" icon="server">
+    Valida e inspecciona Bitcoin con tu propio nodo. Bitcoin Core, con un modo explícito podado o de datos completos. Sin custodia de fondos.
+  </Card>
+  <Card title="Explorador" icon="network-wired">
+    Consultas indexadas privadas y una vista de explorador familiar, sobre un nodo de datos completos más electrs y mempool.
+  </Card>
+  <Card title="Pagos" icon="file-contract">
+    Recibe pagos de facturas sin trasladar la autoridad de firma al servidor. BTCPay Server con una configuración de monedero de solo lectura o de firma externa.
+  </Card>
+  <Card title="Cartera (solo lectura)" icon="chart-line">
+    Inspecciona de forma privada registros seleccionados de varios activos con rotki, usando únicamente fuentes de solo lectura.
+  </Card>
+  <Card title="Lightning" icon="clock-rotate-left">
+    Aplazado hasta que se diseñen específicamente la recuperación y la custodia; no es un premio por terminar la incorporación de Bitcoin.
+  </Card>
+</CardGroup>
+
+## Principios de seguridad detrás del diseño
+
+- **Dominios de confianza separados.** Un cliente de contraseñas, una concesión de
+  secretos de servicio, los datos de la cadena de bloques de un nodo de Bitcoin y
+  las claves de un firmante externo son cuatro cosas distintas. El diseño las
+  mantiene en credenciales separadas y no las pone en un único conjunto genérico
+  de secretos.
+- **Sin claves en caliente en el servidor.** Las vías de Bitcoin propuestas
+  mantienen las claves de firma en un firmante externo, fuera de StackKits y de
+  cualquier historial de flujos de trabajo o contexto de agente. Nada te pide que
+  escribas una frase semilla en la incorporación, en un chat o en un ticket de
+  soporte.
+- **Los datos de solo lectura siguen siendo sensibles.** Los descriptores, las
+  claves públicas extendidas, las direcciones y los registros de facturas pueden
+  revelar actividad financiera aunque no confieran autoridad de gasto, y el
+  diseño los trata en consecuencia.
+- **La recuperación no es una única instantánea genérica.** Una bóveda de
+  contraseñas, un motor de secretos de servicio, un índice de cadena de bloques y
+  un firmante de hardware necesitan cada uno un tratamiento de recuperación
+  distinto; los datos públicos reconstruibles de la cadena no se tratan igual que
+  los metadatos privados controlados por el propietario.
+
+## Elige el host
+
+- Usa [Basement Kit](/es/stackkits/kits/basement-kit) para hardware local y acceso orientado a la LAN.
+- Usa [Cloud Kit](/es/stackkits/kits/cloud-kit) para un VPS o un host en la nube existente con un dominio que controlas.

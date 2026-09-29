@@ -1,0 +1,140 @@
+---
+title: "Personal AI"
+description: "Ejecuta un espacio de chat privado en tu host con custodia del propietario y descargas de modelos explícitas"
+sidebarTitle: "Personal AI"
+icon: brain
+---
+
+<Info>
+  Estado de la evidencia (2026-09-24, v0.41.0): Personal AI es `available, not
+  yet lifecycle-verified`. La versión actual declara sus componentes (Ollama y
+  Open WebUI), y ninguna ejecución automatizada del ciclo de vida cubre todavía
+  install, apply, verify, backup ni restore. La evidencia de ejecución está
+  pendiente.
+</Info>
+
+Personal AI ejecuta una interfaz de chat para modelos de lenguaje en tu host Linux con Docker. El propietario local recibe la cuenta de administrador inicial, el registro público está desactivado y no se necesita ninguna cuenta de kombify. El catálogo de la versión llama a este caso de uso Private AI y lo entrega como el workload opcional `ai` con la alternativa `private-ai`.
+
+## Aplicaciones
+
+- [Ollama](https://ollama.com) sirve el modelo.
+- Open WebUI ofrece la interfaz de chat en la que inicias sesión.
+
+Esta página cubre ambas, porque se seleccionan y operan juntas.
+
+## Comprueba primero la capacidad de tu host
+
+El perfil de CPU tiene un mínimo declarado de host de 4 núcleos de CPU, 12 GiB de RAM y 40 GiB de disco; se recomiendan 8 núcleos de CPU, 16 GiB de RAM y 80 GiB de disco. El tamaño del modelo importa además de ese mínimo:
+
+- Ollama tiene un límite declarado de 6 GiB de RAM. Los pesos del modelo descargado más el contexto que uses deben caber en él.
+- Open WebUI tiene un límite declarado de 2 GiB de RAM.
+- Reserva espacio en disco para las imágenes de contenedor y para los pesos de los modelos descargados en conjunto.
+- El servicio con GPU no está habilitado; un nivel de cómputo superior usa el mismo runtime de CPU.
+
+Estos límites describen capacidad, no velocidad de respuesta. Comprueba los recursos disponibles del host y los requisitos del modelo elegido antes de la instalación. Consulta [Elige un StackKit](/es/guides/stackkits/choosing-a-kit) para los perfiles de cómputo.
+
+## Selecciona el workload de IA
+
+Desde un workspace de propietario vacío:
+
+```bash
+stackkit init basement-kit --platform standalone-compose \
+  --use-case ai --use-case-alternative ai=private-ai \
+  --use-case-alternative basement-core=standalone \
+  --module-compute-profile stackkits-basement-core-runtime=standard \
+  --module-compute-profile stackkits-private-ai-runtime=standard \
+  --owner-source=local --non-interactive
+```
+
+El comando init crea la configuración de IA y sus referencias privadas a credenciales. Al añadir IA a un workspace existente, actualiza el [StackSpec](/es/guides/stackkits/configure-stack-spec) y ejecuta `stackkit secrets materialize`. Revisa y aplica la configuración:
+
+```bash
+stackkit validate
+stackkit generate
+stackkit plan --json
+stackkit apply
+stackkit verify
+```
+
+Ejecuta Apply en el host Linux compatible usando su inventario observado; consulta [Revisar, aplicar y verificar](/es/guides/stackkits/review-plan-and-apply).
+
+## Abre la ruta de IA como propietario
+
+Tras aplicar, abre la ruta de IA generada. Open WebUI crea su administrador inicial a partir de la identidad del propietario local establecido y del secreto `owner-password` que el comando init colocó bajo custodia del propietario. Desde tu workspace de StackKits, recupera la contraseña inicial en una terminal privada:
+
+```bash
+stackkit secrets reveal --workload ai --slot owner-password
+```
+
+- Mantén en privado la contraseña mostrada y no la copies en chats, capturas de pantalla ni Git.
+- Cambia la contraseña dentro de Open WebUI tras el primer inicio de sesión. El arranque inicial no restablece una cuenta existente, así que conserva bajo tu propia custodia la contraseña de administrador que hayas cambiado.
+
+## Elige y descarga un modelo de forma explícita
+
+No se selecciona ni se descarga ningún modelo por ti, ni durante la instalación, ni al reiniciar, ni al actualizar. En Open WebUI, abre **Admin Settings**, selecciona explícitamente un modelo de Ollama y solicita su descarga. Antes de elegir uno, revisa la licencia del modelo original, el tamaño de descarga, la cuantización, la longitud de contexto y los requisitos de RAM.
+
+Empieza con un modelo pequeño en el perfil de CPU. Los modelos más grandes y los contextos más largos necesitan más memoria. Un modelo que se descarga correctamente aún puede superar la capacidad de inferencia disponible.
+
+La API de Ollama no tiene ningún puerto publicado en el host. Open WebUI accede a ella en la red privada del workload. Ollama tiene acceso de red saliente para las descargas solicitadas.
+
+## Haz tu primera pregunta
+
+Crea un chat nuevo en Open WebUI, selecciona el modelo descargado y envía una pregunta. El modelo se ejecuta en tu host. Vuelve a abrir el chat para comprobar que tu conversación se guardó.
+
+## Usa tu modelo desde tu cuenta de kombify (opcional)
+
+También puedes usar este Ollama desde el chat de IA de tu cuenta de kombify sin abrir ningún puerto de entrada. Un conector opcional junto a Ollama abre un túnel saliente hacia kombify. kombify nunca se conecta a tu red, y las solicitudes a tu propio modelo no cuentan contra tu cuota de IA en la nube.
+
+1. En tu cuenta de kombify, abre **Settings → AI access → Your model endpoints** y añade un endpoint. Elige **kombify Local AI StackKit** como ubicación.
+2. Copia el token del conector que se muestra una sola vez.
+3. En el host, desde tu workspace de StackKits, activa el conector y pega el token cuando se te pida; después aplica:
+
+```bash
+stackkit setup ai-connect --token-file -
+stackkit generate
+stackkit apply
+```
+
+4. De vuelta en **Settings → AI access**, selecciona **Check connection**. El endpoint aparece como en línea y enumera los modelos que descargaste.
+5. En un chat, elige **My endpoint** como fuente de IA. Es un chat directo con tu modelo; no tiene herramientas de agente.
+
+Solo la lista de modelos, los detalles del modelo y las solicitudes de completado de chat llegan a Ollama a través del conector; las descargas y eliminaciones de modelos permanecen en local. Para dejar de usarlo, elimina el endpoint en **Settings → AI access**, lo que inutiliza el token en todas partes, y desactiva el conector en el host:
+
+```bash
+stackkit setup ai-connect --disable
+stackkit generate
+stackkit apply
+```
+
+## Qué persiste y dónde
+
+El almacenamiento se divide deliberadamente:
+
+| Qué | Dónde | Comportamiento de la copia de seguridad |
+| --- | --- | --- |
+| Chats y datos de Open WebUI | Volumen persistente `open-webui-data` en `/app/backend/data` | Origen de copia de seguridad declarado; la restauración completa de IA sigue sin verificarse |
+| Pesos de los modelos descargados | Volumen persistente `ollama-models` en `/root/.ollama` | No es un origen de copia de seguridad; se excluye de las copias |
+
+Los chats y los pesos de los modelos persisten al reemplazar el contenedor. Conserva el nombre y el digest del modelo para poder identificarlo de nuevo si se pierde su almacenamiento. La disponibilidad del modelo depende de su fuente original. La copia de seguridad y la restauración completas de IA siguen sin verificarse; la persistencia del contenedor por sí sola no establece la recuperación. Consulta [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore) para el ciclo de vida del workspace.
+
+## Solución de problemas
+
+| Estado | Qué hacer |
+| --- | --- |
+| Apply bloquea el host con un motivo de capacidad | Comprueba el mínimo de host anterior: ¿cumple el host el mínimo de 4 CPU / 12 GiB / 40 GiB y cabe el modelo que quieres cargar en el límite de 6 GiB de Ollama? |
+| Falla el inicio de sesión del administrador inicial | Usa el correo del propietario y la contraseña inicial para el primer inicio de sesión. Después de cambiarla, usa la nueva; reiniciar no restablece una cuenta existente. |
+| Falta un modelo descargado anteriormente | Comprueba el modelo seleccionado y el volumen persistente de modelos. El reemplazo normal del contenedor lo conserva. Un almacén de modelos nuevo o perdido requiere una descarga explícita. |
+| Las respuestas se detienen o el contenedor se para | Revisa los registros del workload y la memoria disponible. Un modelo más pequeño o un contexto más corto reduce el uso de memoria; la inferencia en CPU también puede tardar. |
+| Tu cuenta de kombify muestra el endpoint como fuera de línea | El conector no está en ejecución. Comprueba que el token del conector se configuró y que el workload se aplicó; el Node Hub muestra el contenedor del conector. |
+| Tu cuenta de kombify dice que el modelo no está instalado | Descarga primero el modelo en Open WebUI; solo se enumeran los modelos que Ollama ya tiene. |
+| Faltan las referencias a secretos del propietario de IA en un workspace existente | Tras cambiar la intención canónica, ejecuta el `stackkit secrets materialize` existente; la generación por sí sola no crea secretos. |
+
+Si una pregunta no está cubierta arriba, revisa el estado del [Node Hub](/es/guides/stackkits/node-hub) para los contenedores del workload antes de cambiar nada en el directorio de runtime generado.
+
+## Consigue las apps
+
+Open WebUI funciona en el navegador: abre tu ruta de IA generada en cualquier navegador moderno e inicia sesión con la cuenta de administrador que estableciste. No hace falta instalar ningún cliente.
+
+<Card title="Ollama" icon="terminal" href="https://ollama.com">
+  Ollama en sí es un ejecutor de modelos por CLI/API y no una app para el usuario final. StackKits ya lo ejecuta por ti; el sitio original documenta el catálogo de modelos y la CLI por si quieres inspeccionarlo directamente en el host.
+</Card>

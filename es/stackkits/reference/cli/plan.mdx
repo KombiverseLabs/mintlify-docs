@@ -1,0 +1,34 @@
+---
+title: "stackkit plan"
+description: "Previsualiza cambios de infraestructura"
+sidebarTitle: "plan"
+---
+Previsualiza cambios de infraestructura.
+
+Inspecciona el plan gobernado de Architecture v2 o previsualiza los cambios de infraestructura v0.6.
+
+En v0.7 nativo, este comando verifica e inspecciona el ResolvedPlan exacto, el manifiesto de generación, el recibo y los hashes de los artefactos generados sin invocar a un ejecutor. El v0.6 exacto conserva su previsualización empaquetada de OpenTofu; `--out` y `--destroy` se aplican solo a esa previsualización y se rechazan en la línea nativa.
+
+```bash
+stackkit plan [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | Manifiesto de generación de Architecture v2 (predeterminado: &lt;outputRoot&gt;/.stackkit/generation-manifest.json) |
+| `--destroy` | bool | — | Crea un plan de destrucción |
+| `--generation-receipt` | string | — | Recibo de generación de Architecture v2 (predeterminado: &lt;outputRoot&gt;/.stackkit/generation-receipt.json) |
+| `--inventory` | string | — | Inventory observado de Architecture v2 (si no, se selecciona un archivo de inventario convencional) |
+| `--json` | bool | — | Emite la inspección del plan nativo de Architecture v2 como JSON |
+| `--out, -o` | string | — | Guarda el plan en un archivo |
+| `--resolved-plan` | string | — | ResolvedPlan canónico de Architecture v2 (predeterminado: &lt;outputRoot&gt;/.stackkit/resolved-plan.json) |
+
+**Ejemplos**
+
+```bash
+# Inspect the generated plan, its readiness, and artifact hashes
+stackkit plan
+
+# The same inspection as JSON
+stackkit plan --json
+```

@@ -1,0 +1,26 @@
+---
+title: "Vaultwarden"
+description: "Selecciona Vaultwarden para el caso de uso Passwords e inscribe clientes de Bitwarden"
+sidebarTitle: "Vaultwarden"
+icon: vault
+---
+
+Vaultwarden aporta el caso de uso [Contraseñas](/es/guides/stackkits/use-cases/passwords). Es la alternativa publicada para el workload opcional `vault` de v2 nativo, y las StackSpec iniciales de Basement y Cloud no lo habilitan.
+
+| Propiedad | Valor |
+| --- | --- |
+| Workload | `vault` |
+| Alternativa | `vaultwarden` |
+| Clase de datos | secret |
+| Referencia de secreto requerida | `admin-token` |
+| Adaptador independiente compatible | `standalone-compose` |
+
+El slot `admin-token` contiene una referencia opaca `secret://`; el token real permanece en la custodia local del propietario. Elige el workload, la ubicación y el adaptador en la [StackSpec](/es/guides/stackkits/configure-stack-spec) y después sigue [Añadir un workload](/es/stackkits/reference/day-2-operations#añadir-un-workload-a-un-workspace-existente) para validar, establecer la custodia, generar, inspeccionar el plan, aplicar y verificar.
+
+## Primer uso
+
+1. Crea la cuenta de propietario de la aplicación y elige la política de registro antes de añadir secretos reales.
+2. Tras aceptar una invitación, completa el registro de la cuenta e inicia sesión desde tu cliente de Bitwarden.
+3. Crea y sincroniza una entrada de la bóveda para confirmar que la cuenta está lista. Una invitación por sí sola no completa esta configuración.
+
+Para un workload ya admitido, cambia la intención de StackKits mediante la StackSpec y los comandos del ciclo de vida; no edites la configuración generada de la aplicación en el destino.

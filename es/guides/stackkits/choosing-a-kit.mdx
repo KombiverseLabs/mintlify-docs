@@ -1,0 +1,49 @@
+---
+title: "Elige un StackKit"
+description: "Compara las vías de entrada Home y Cloud con la vista previa de Modern Homelab"
+sidebarTitle: "Elegir un kit"
+---
+
+La versión pública de StackKits incluye Basement Kit, Cloud Kit y una definición
+en vista previa de Modern Homelab. Elige una vía para los hosts que ya operas.
+La evidencia de ejecución en vivo de Cloud Kit sigue siendo específica de cada
+versión; Modern todavía no tiene una vía de instalación completa compatible.
+
+| Si operas... | Elige | Por qué |
+| --- | --- | --- |
+| hardware local en una red doméstica o privada | [Basement Kit](/es/stackkits/kits/basement-kit) | Es el perfil local publicado, orientado a la LAN. |
+| un VPS o un host en la nube existente con un dominio que controlas | [Cloud Kit](/es/stackkits/kits/cloud-kit) | Es el perfil publicado de dominio público para ese host. |
+| entornos Home y Cloud cuya conexión quieres explorar | [Modern Homelab (alpha)](/es/stackkits/kits/modern-homelab) | La definición publicada describe ambas ubicaciones; la compatibilidad completa de ejecución sigue pendiente. |
+
+Para las guías de instalación existentes, empieza con un solo entorno. StackKits no aprovisiona servidores ni asume la custodia de las credenciales de proveedores, así que selecciona un kit solo cuando sepas qué host y qué dominio controlas.
+
+La primera vía correcta de Basement es el [inicio rápido](/es/stackkits/quickstart). Para un VPS que ya operas, usa [Cloud Kit](/es/stackkits/kits/cloud-kit). El [sitio web de StackKits](https://stackkit.cc/getting-started) también puede ayudarte a elegir.
+
+## Instala solo la cadena de herramientas
+
+Para instalar la CLI y el catálogo público completo sin el comando único de Basement:
+
+```bash
+curl -sSL https://install.stackkit.cc | sh
+```
+
+Para instalar solo las definiciones de un kit junto con la CLI, indica su nombre:
+
+```bash
+curl -sSL https://install.stackkit.cc | sh -s -- basement-kit
+```
+
+Puedes pasar `cloud-kit` o `modern-homelab` de la misma forma.
+
+<Note>
+  El nombre retirado `base-kit` se rechaza. Actualiza los scripts que todavía lo
+  pasan para que usen `basement-kit`.
+</Note>
+
+Los instaladores de shell resuelven la versión pública actual y son compatibles
+con Linux y macOS en `amd64` y `arm64`. Los usuarios de Windows pueden descargar
+el ZIP `windows_amd64` de la
+[última versión](https://github.com/kombifyio/StackKits/releases/latest).
+
+Tras una instalación solo de la cadena de herramientas, inicializa el workspace con [Basement Kit](/es/stackkits/kits/basement-kit) o
+[Configura un StackSpec](/es/guides/stackkits/configure-stack-spec).

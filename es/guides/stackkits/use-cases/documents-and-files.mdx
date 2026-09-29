@@ -1,0 +1,70 @@
+---
+title: "Documents & Files"
+description: "Almacena y comparte tus archivos con Cloudreve y archiva documentos con el complemento opcional Paperless-ngx"
+sidebarTitle: "Documents & Files"
+icon: folder-open
+---
+
+<Info>
+  Estado de la evidencia (2026-09-24, v0.39.7): Files con Cloudreve es
+  `available, lifecycle-verified`. Una ejecución del ciclo de vida en Ubuntu
+  24.04 amd64 (Basement Kit, independiente) pasó install, init, generate, apply,
+  setup-files, verify, backup y restore; la restauración devolvió los bytes
+  originales, y la activación y la lectura de vuelta de la aplicación se
+  verificaron a través del loopback local del invitado. El nivel público de
+  compatibilidad de esta ejecución se publica en
+  [stackkit.cc/compatibility](https://stackkit.cc/compatibility). Documents con
+  Paperless-ngx es `available, not yet lifecycle-verified`: ya se puede
+  seleccionar en el catálogo, pero todavía ningún recibo de ciclo de vida lo
+  cubre.
+</Info>
+
+Documents & Files da a tu hogar almacenamiento y uso compartido para los
+archivos del día a día, además de un archivo opcional para los documentos en
+papel en los que quieras buscar más adelante. Cloudreve es la aplicación
+publicada por defecto para el workload opcional `files`. Paperless-ngx es
+un complemento opcional que se ejecuta como el workload independiente
+`documents`: ingiere documentos escaneados o recibidos por correo, ejecuta OCR y
+conserva tanto el texto con búsqueda como el archivo original.
+
+## Aplicaciones
+
+<CardGroup cols={2}>
+  <Card title="Cloudreve" icon="folder-cloud" href="/es/stackkits/apps/cloudreve">
+    La aplicación de almacenamiento y uso compartido de archivos detrás de Files: selección, despliegue y operación.
+  </Card>
+  <Card title="Paperless-ngx" icon="file-contract" href="/es/stackkits/reference/use-case-catalog#documentos">
+    El archivo de documentos detrás de Documents: OCR, indexación y búsqueda sobre los documentos ingeridos. Se puede seleccionar ya; todavía no hay una guía de configuración específica.
+  </Card>
+</CardGroup>
+
+## Cuándo usar cada una
+
+- Usa **Files (Cloudreve)** para el almacenamiento cotidiano: documentos de trabajo, exportaciones de fotos, copias de seguridad de carpetas y compartir un enlace con un único destinatario.
+- Añade **Documents (Paperless-ngx)** cuando quieras convertir el correo escaneado, los recibos y los documentos en un archivo con OCR y búsqueda que conserve el archivo original.
+- Las dos aplicaciones mantienen datos separados. Cloudreve no indexa lo que Paperless-ngx ha archivado, y Paperless-ngx no explora tu biblioteca de Cloudreve.
+
+## Planifica primero el almacenamiento
+
+- Elige una raíz de datos principal absoluta con espacio libre suficiente para las dos aplicaciones que selecciones.
+- Mantén la raíz de copias de seguridad separada de los datos principales.
+- Decide qué clientes pueden llegar a la ruta de Files generada.
+- Paperless-ngx conserva juntos el índice de texto OCR y el archivo original; dimensiona el almacenamiento para el archivo más su base de datos y espera que crezca con cada documento escaneado.
+- Practica una restauración antes de colocar archivos o documentos irremplazables en cualquiera de las dos aplicaciones.
+
+## Consigue las apps
+
+### Cloudreve
+
+- **Interfaz web**: abre la ruta de Files generada en cualquier navegador, en escritorio o en móvil.
+- **Cliente de sincronización de escritorio**: Cloudreve publica un [cliente de sincronización oficial para Windows](https://docs.cloudreve.org/en/usage/desktop-client) con acceso a archivos bajo demanda e integración con el Explorador; requiere una instancia de servidor Cloudreve Pro.
+- No hay una app móvil oficial de Cloudreve; usa la interfaz web desde el navegador del teléfono.
+
+### Paperless-ngx
+
+- **Interfaz web**: abre la ruta de Documents generada en cualquier navegador una vez que selecciones el workload.
+- **Apps móviles** (de terceros, no mantenidas por kombify ni por el proyecto Paperless-ngx): [Paperless Mobile](https://github.com/astubenbord/paperless-mobile) para Android y [Swift Paperless](https://apps.apple.com/app/swift-paperless/id6448698521) para iOS. Ambas se conectan a la dirección y la cuenta de tu propio servidor; revisa sus permisos antes de concederles acceso a tu archivo.
+
+## Configúralo
+
+Files es un buen primer caso de uso, porque la selección independiente de Cloudreve no necesita ninguna referencia a secretos. Selecciónalo, despliégalo y verifícalo en la página de [Cloudreve](/es/stackkits/apps/cloudreve). Selecciona Paperless-ngx como el workload independiente `documents` cuando quieras el archivo y practica después el ciclo de recuperación de las aplicaciones que ejecutes en [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).

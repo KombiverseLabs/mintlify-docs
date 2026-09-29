@@ -1,0 +1,98 @@
+---
+title: "stackkit docs"
+description: "Genera proyecciones deterministas de la documentación de StackKits"
+sidebarTitle: "docs"
+---
+Genera proyecciones deterministas de la documentación de StackKits.
+
+```bash
+stackkit docs [flags]
+```
+
+Subcomandos: [`stackkit docs emit-advanced-operations`](#stackkit-docs-emit-advanced-operations), [`stackkit docs emit-cli-reference`](#stackkit-docs-emit-cli-reference), [`stackkit docs emit-release-manifests`](#stackkit-docs-emit-release-manifests), [`stackkit docs emit-use-case-overview`](#stackkit-docs-emit-use-case-overview)
+
+## stackkit docs emit-advanced-operations
+
+Emite el catálogo de operaciones Advanced (stackkit.advanced-operations/v1).
+
+Escribe el catálogo legible por máquinas de cada operación Advanced que un orquestador puede despachar: plantillas exactas de argv, requisitos de admisión, contratos de entrada y resultado, fases de eventos del despliegue y el sobre de denegación.
+
+El archivo de release incluye este archivo. Con `--check` no se escribe nada; el comando falla cuando el archivo difiere de la fuente del catálogo.
+
+```bash
+stackkit docs emit-advanced-operations [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--check` | bool | — | No escribe nada; falla cuando falta el archivo del catálogo o está desactualizado |
+| `--out` | string | `docs/data/advanced-operations/latest.json` | Ruta del JSON del catálogo, relativa a `--chdir` |
+
+**Ejemplos**
+
+```bash
+# Regenerate the committed catalog after changing an Advanced operation
+stackkit docs emit-advanced-operations
+
+# Fail when the committed catalog is stale
+stackkit docs emit-advanced-operations --check
+```
+
+## stackkit docs emit-cli-reference
+
+Emite la referencia de la CLI de stackkit legible por máquinas.
+
+Escribe como JSON determinista cada comando, flag y ejemplo visible de stackkit.
+
+La referencia de la CLI de stackkit.cc renderiza este archivo. Con `--check` no se escribe nada; el comando falla cuando el archivo difiere del árbol de comandos actual.
+
+```bash
+stackkit docs emit-cli-reference [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--check` | bool | — | No escribe nada; falla cuando falta el archivo de referencia o está desactualizado |
+| `--out` | string | `docs/data/cli-reference/latest.json` | Ruta del JSON de referencia, relativa a `--chdir` |
+
+**Ejemplos**
+
+```bash
+# Regenerate the committed reference after changing a command, flag, or example
+stackkit docs emit-cli-reference
+
+# Fail when the committed reference is stale
+stackkit docs emit-cli-reference --check
+```
+
+## stackkit docs emit-release-manifests
+
+Emite los manifiestos de casos de uso y de compatibilidad vinculados al release.
+
+```bash
+stackkit docs emit-release-manifests [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--output-dir` | string | — | **Obligatorio.** directorio de salida de los manifiestos |
+| `--public-source-sha` | string | — | **Obligatorio.** SHA exacto del código fuente público |
+| `--release-tag` | string | — | **Obligatorio.** etiqueta del release publicado (vX.Y.Z) |
+| `--release-url` | string | — | **Obligatorio.** URL pública exacta del release |
+| `--source-sha` | string | — | **Obligatorio.** SHA exacto del código fuente privado |
+
+## stackkit docs emit-use-case-overview
+
+Renderiza la vista general interna derivada del desarrollo de casos de uso.
+
+```bash
+stackkit docs emit-use-case-overview [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--evidence-output` | string | — | ruta de salida del manifiesto de evidencia |
+| `--output` | string | — | ruta de salida de Markdown |
+| `--source-sha` | string | — | **Obligatorio.** SHA exacto del código fuente |
+| `--test-receipt` | string | — | recibo de pruebas superadas vinculado al SHA del código fuente |
+| `--tests-passed-for-source` | bool | — | marca las pruebas como completas después de que quien llama haya superado de forma síncrona las pruebas del catálogo para source-sha |

@@ -1,0 +1,90 @@
+---
+title: "Operar un StackKit"
+description: "Inspecciona un workspace de StackKits en marcha y después añade o elimina un workload con la CLI publicada"
+sidebarTitle: "Operaciones"
+icon: wrench
+---
+
+Empieza el trabajo diario con los comandos de solo lectura de la misma CLI publicada que creó el workspace:
+
+```bash
+stackkit verify --json
+stackkit drift detect --json
+stackkit logs list --json
+```
+
+Conserva su salida junto al workspace para poder comparar el estado observado actual con el último apply correcto.
+
+## Monitorizar el stack
+
+Estas comprobaciones del ciclo de vida son la forma compatible de evaluar el propio stack. StackKits guarda localmente la evidencia de observación y verificación y no necesita ningún servicio de monitorización alojado.
+
+El módulo publicado de [Uptime Kuma](/es/stackkits/apps/uptime-kuma) no lo selecciona la StackSpec v2 nativa inicial, así que un Basement o Cloud Kit nuevo no tiene una dirección de monitorización generada. Si ejecutas un monitor aparte, añade comprobaciones solo para las rutas que estés autorizado a monitorizar. Las rutas protegidas necesitan un endpoint de salud intencionado o una respuesta de autenticación esperada; debilitar la protección de una ruta para obtener HTTP 200 no es una configuración de monitor válida.
+
+## Antes de un cambio
+
+1. Actualiza la StackSpec, no los artefactos generados.
+2. Ejecuta `stackkit validate` y `stackkit generate`.
+3. Inspecciona `stackkit plan --json` y detente ante cualquier bloqueo de disposición.
+4. Revisa la salida y obtén la aprobación del propietario local antes de un comando que modifique algo.
+5. Ejecuta `stackkit verify --http --json` después del cambio.
+
+## Añadir un workload a un workspace existente
+
+Seleccionar un workload nuevo no requiere volver a ejecutar `stackkit init` ni reemplazar la StackSpec inicial. Edita el bloque `workloads` de la StackSpec existente y establece después la custodia de secretos antes de regenerar:
+
+```bash
+stackkit validate
+stackkit secrets materialize
+stackkit generate
+stackkit apply
+```
+
+StackKits v0.21.11 añade `stackkit secrets materialize` como paso explícito entre seleccionar un workload y ejecutar `generate`. Establece la custodia y después genera y aplica; no inventes valores de secretos.
+
+## Eliminar un workload aplicado
+
+`stackkit remove` elimina un workload aplicado exacto con la aprobación del propietario local:
+
+```bash
+stackkit remove --workload photos
+stackkit remove --workload photos --auto-approve --json
+```
+
+La CLI verifica el plan actual, la generación, el resultado de apply y la autoridad del propietario, y después despacha una solicitud de eliminación firmada por el propietario, válida durante cinco minutos, a través del canal de ejecución Standard fijado por digest. El éxito exige una lectura de vuelta `absent` para el requisito, la instancia y el digest exactos del artefacto aplicado. La solicitud, el resultado y la evidencia terminal acotada se persisten bajo `.stackkit/evidence/removal/`.
+
+### Apunta a una ubicación concreta en un resultado multinodo
+
+El resumen de apply verificado expone `planHash`, `appliedRequestDigest` y una lista `appliedWorkloads` sin secretos. Cada entrada es una identidad determinista y ligada por hash que vincula el workload, el propietario del runtime, las ubicaciones, el canal de ejecución y los digests de los artefactos referenciados. Úsala para identificar a qué debe apuntar una eliminación posterior; por sí sola no es una autorización de eliminación ni evidencia de ausencia.
+
+Desde v0.21.12, cuando el resultado de apply colocó un workload en más de un Site o nodo, indica la ubicación exacta de la que se encarga esta eliminación. Toma los valores de la entrada de `appliedWorkloads`:
+
+```bash
+stackkit remove --workload photos \
+  --local-site <site-ref> \
+  --local-node <node-ref> \
+  --local-execution-channel <channel-ref>
+```
+
+La ubicación indicada debe coincidir exactamente con una entrada del resultado de apply verificado. Cada recibo de ausencia local del nodo permanece correlacionado con el mismo apply original mediante el `appliedRequestDigest` compartido.
+
+Añade `--terminal-evidence-json` cuando necesites un registro de eliminación legible por máquinas en stdout.
+
+## Flujos de trabajo habituales
+
+<CardGroup cols={2}>
+  <Card title="Cambiar la intención de la StackSpec" icon="sliders" href="/es/guides/stackkits/configure-stack-spec">
+    Edita la intención publicada y regenera la salida gobernada.
+  </Card>
+  <Card title="Copia de seguridad y restauración" icon="clock-rotate-left" href="/es/guides/stackkits/back-up-and-restore">
+    Crea un snapshot idempotente y practica la recuperación por etapas.
+  </Card>
+</CardGroup>
+
+La superficie exacta de comandos está versionada con el release. Usa `stackkit --help` y la ayuda específica de cada comando para la versión instalada antes de realizar una copia de seguridad, una restauración, una actualización o una eliminación.
+
+<Warning>
+  StackKits no ofrece un flujo de operaciones alojadas desatendidas en el Standard Mode. Trata cada comando que modifica algo como una operación local en un host que controlas.
+</Warning>
+
+Para un flujo conectado a un agente, consulta el [conector MCP](/es/stackkits/reference/mcp-connector).

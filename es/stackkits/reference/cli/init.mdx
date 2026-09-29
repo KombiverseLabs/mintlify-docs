@@ -1,0 +1,77 @@
+---
+title: "stackkit init"
+description: "Inicializa un nuevo despliegue a partir de un StackKit"
+sidebarTitle: "init"
+---
+Inicializa un nuevo despliegue a partir de un StackKit.
+
+Crea un stack-spec.yaml en tu directorio de despliegue. Esto guarda tus elecciones; no instala servicios ni cambia el host. La ruta local independiente funciona sin una cuenta de kombify ni Techstack.
+
+Empieza con los valores predeterminados del catálogo del Kit seleccionado. `--owner-source=local` mantiene al propietario en esta máquina y necesita `--owner-email` para el propietario local de PocketID. Cloud Kit usa una dirección kombify.me, salvo que `--domain` indique un dominio que ya apunte a este host.
+
+Revisa la configuración guardada antes de generarla o aplicarla. Los valores predeterminados se registran como intención explícita y los valida el contrato CUE del Kit. La información necesaria, como un dominio, se solicita cuando el Kit la necesita. Usa `--non-interactive` en scripts para que falle en lugar de preguntar.
+
+Para un control preciso, usa `--use-case-alternative` y `--module-compute-profile` en lugar de `--catalog-defaults`. Estas selecciones provienen del Kit elegido. La creación nativa usa stackkit/v2alpha2; `--api-version` stackkit/v2alpha1 selecciona el adaptador de grafo heredado explícito. Los flags marcados como compatibilidad v0.6 solo los acepta un binario v0.6 con versión explícita.
+
+```bash
+stackkit init [stackkit] [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--admin-email` | string | — | Solo compatibilidad v0.6: correo del administrador para las cuentas de inicio de sesión |
+| `--api-version` | string | `stackkit/v2alpha2` | Contrato de StackSpec (stackkit/v2alpha2; adaptador heredado explícito: stackkit/v2alpha1) |
+| `--candidate-spec` | string | — | Solo v2 nativo: conserva una StackSpec completa y válida para CUE desde un archivo o - para stdin; excluye las sobrescrituras de creación |
+| `--catalog-defaults` | bool | — | Acepta los valores predeterminados del catálogo CUE para las alternativas nativas y los perfiles de cómputo omitidos; persiste la intención explícita |
+| `--cloud-oidc-client-id` | string | — | Solo compatibilidad v0.6: ID de cliente OIDC de Cloud |
+| `--cloud-oidc-client-secret-ref` | string | — | Solo compatibilidad v0.6: referencia del secreto de cliente OIDC de Cloud (p. ej. secret://) |
+| `--cloud-oidc-foreign-subject` | string | — | Solo compatibilidad v0.6: ID de subject externo del usuario de Cloud |
+| `--cloud-oidc-issuer` | string | — | Solo compatibilidad v0.6: URL del emisor OIDC de Cloud para el traspaso automático/cloud del propietario |
+| `--cluster-mode` | string | `first` | Solo compatibilidad v0.6: modo de clúster (first\|join) |
+| `--compute-tier` | string | — | Solo v2alpha1 heredado: grafo de kit declarado (low, standard, high) |
+| `--domain` | string | — | Sobrescribe el dominio de la stack spec generada |
+| `--enable` | strings | — | Solo v2 nativo: capacidades opcionales del kit que se habilitan (capabilities.enable, p. ej. lan-dns,internal-pki) |
+| `--expected-spec-hash` | string | — | Solo v2 nativo: hash exacto y actual de la spec normalizada por CUE que se exige para el reemplazo |
+| `--force, -f` | bool | — | Solo compatibilidad v0.6: sobrescribe los archivos existentes |
+| `--hardware-profile` | string | — | Clase de dispositivo para nodes\[0\].hardware.profile (standard, pi, gpu, storage). pi es un dispositivo homelab con recursos limitados, no exclusivo de Raspberry. No se detecta automáticamente desde el inventario |
+| `--local-dns` | bool | — | Solo compatibilidad v0.6: usa los nombres DNS locales de Kombify Point |
+| `--local-name` | string | — | Solo compatibilidad v0.6: nombre corto DNS local para `--local-dns` |
+| `--mode` | string | — | Solo compatibilidad v0.6: modo de instalación (bare, bootstrapped, advanced) |
+| `--module-accelerator-profile` | stringArray | — | v2alpha2 nativo: module-id=accelerator-profile para una dimensión de acelerador declarada |
+| `--module-compute-profile` | stringArray | — | v2alpha2 nativo: module-id=profile; repítelo para cada módulo de workload seleccionado |
+| `--module-storage-profile` | stringArray | — | v2alpha2 nativo: module-id=storage-profile para una dimensión de almacenamiento declarada |
+| `--name` | string | — | ID del contrato de despliegue (por defecto, un nombre normalizado del directorio de trabajo) |
+| `--non-interactive` | bool | — | Ejecuta en modo no interactivo (falla si se requiere entrada) |
+| `--output, -o` | string | `deploy` | Solo compatibilidad v0.6: directorio de salida de los archivos generados |
+| `--owner-bootstrap-mode` | string | — | Solo compatibilidad v0.6: modo de bootstrap del propietario (auto\|custom\|none) |
+| `--owner-display-name` | string | — | Nombre visible deseado del propietario de PocketID para `--owner-source=local` |
+| `--owner-email` | string | — | Correo deseado del propietario de PocketID para `--owner-source=local` |
+| `--owner-source` | string | — | Origen de la custodia del propietario (independiente nativo: local; compatibilidad v0.6: local\|cloud) |
+| `--owner-username` | string | — | Nombre de usuario deseado del propietario de PocketID para `--owner-source=local` |
+| `--platform` | string | — | Solo v2 nativo: adaptador de plataforma del proveedor seleccionado (install.platform.providerRef, p. ej. coolify o komodo) |
+| `--recovery-material-ref` | string | — | Solo compatibilidad v0.6: referencia al material de recuperación propiedad del orquestador; las frases de contraseña de recuperación en texto plano nunca se aceptan en las stack specs |
+| `--recovery-passphrase-hash` | string | — | Solo compatibilidad v0.6: hash de la frase de contraseña de recuperación (argon2id PHC); la solicita si falta |
+| `--service-profile` | string | — | Solo compatibilidad v0.6: perfil de servicio de BaseKit |
+| `--use-case` | strings | — | Workloads opcionales del kit que se habilitan (p. ej. photos,files,vault); v2alpha2 requiere alternativas explícitas |
+| `--use-case-alternative` | stringArray | — | v2alpha2 nativo: use-case-id=alternative; incluye los workloads centrales requeridos |
+
+**Ejemplos**
+
+```bash
+# Basement Kit for a home server, with the Kit's catalog defaults
+mkdir my-homelab && cd my-homelab
+stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com
+
+# Basement Kit with the optional Photos and Files use cases
+stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com --use-case photos,files
+
+# Cloud Kit for a public VPS on a kombify.me address
+mkdir my-cloud && cd my-cloud
+stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email you@example.com
+
+# Cloud Kit on your own domain, without prompts (for scripts)
+stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email you@example.com --domain example.com --non-interactive
+
+# Pick the core alternative and module profile explicitly instead of catalog defaults
+stackkit init basement-kit --owner-source=local --owner-email you@example.com --use-case-alternative basement-core=standalone --module-compute-profile stackkits-basement-core-runtime=standard
+```

@@ -1,0 +1,399 @@
+---
+title: "stackkit backup"
+description: "Gestiona copias de seguridad (motor Kopia)"
+sidebarTitle: "backup"
+---
+Gestiona copias de seguridad (motor Kopia).
+
+Gestiona las copias de seguridad de este despliegue de StackKit.
+
+Las copias de seguridad funcionan con Kopia (véase ADR-0016) y se ejecutan en el servicio local kopia-agent que renderiza el núcleo de Basement. Las operaciones nativas configure, status y run revalidan el Plan local exacto, los artefactos generados, la custodia del propietario y la evidencia de Apply antes de tocar Kopia. El repositorio, el origen, las exclusiones, la identidad del servicio y las credenciales son propiedad de CUE o de la custodia del propietario.
+
+```bash
+stackkit backup [flags]
+```
+
+**Ejemplos**
+
+```bash
+# Configure the local Kopia repository after stackkit apply
+stackkit backup configure
+
+# Take a snapshot now
+stackkit backup run
+
+# Check repository readiness and the latest snapshot and restore receipts
+stackkit backup status
+
+# Restore a snapshot into isolated staging
+stackkit backup restore sha256:<snapshot-anchor-id> --owner-approve
+```
+
+Subcomandos: [`stackkit backup configure`](#stackkit-backup-configure), [`stackkit backup emergency-export`](#stackkit-backup-emergency-export), [`stackkit backup emergency-restore`](#stackkit-backup-emergency-restore), [`stackkit backup init`](#stackkit-backup-init), [`stackkit backup restore`](#stackkit-backup-restore), [`stackkit backup run`](#stackkit-backup-run), [`stackkit backup schedule`](#stackkit-backup-schedule), [`stackkit backup status`](#stackkit-backup-status), [`stackkit backup target`](#stackkit-backup-target)
+
+## stackkit backup configure
+
+Configura el repositorio Kopia local gobernado por CUE.
+
+Configura el repositorio Kopia local a partir de la política de copias de seguridad exacta de la StackSpec v2 generada.
+
+La ruta del repositorio y el servicio kopia-agent son propiedad de CUE y no se pueden sobrescribir desde la línea de comandos.
+
+```bash
+stackkit backup configure [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+**Ejemplos**
+
+```bash
+# Configure the repository once the Basement core is applied
+stackkit backup configure
+
+# Configure it and print the command result as JSON
+stackkit backup configure --json
+```
+
+## stackkit backup emergency-export
+
+Exporta datos locales seleccionados como un archivo de recuperación portátil y cifrado.
+
+Crea un archivo tar/gzip portátil cifrado con age, con sumas de verificación por archivo y un runbook de restauración. Proporciona una clave pública de destinatario age y un nuevo directorio de destino fuera de los orígenes. Omite `--source` para exportar el contrato de copia de seguridad v2 generado (las clases emergencyExport de CUE más los volúmenes de la política de orígenes de generate/apply). Los orígenes explícitos CLASS=PATH siguen siendo la vía independiente cuando no hay un contrato generado. Copiar archivos no demuestra la consistencia de la aplicación; detén los procesos que escriben o exporta antes volcados nativos de la base de datos. La recuperación prepara los datos sin el host original, sin Kopia ni una cuenta de Kombify.
+
+```bash
+stackkit backup emergency-export [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--format` | string | `tar.gz.age` | Formato de archivo portátil (tar.gz.age) |
+| `--json` | bool | — | Muestra el recibo del archivo como JSON |
+| `--large-media-mode` | string | `manifest-only` | Orígenes de medios: manifest-only, include o exclude |
+| `--recipient` | stringArray | — | Clave pública de destinatario age X25519; repítela para varios propietarios de la recuperación |
+| `--source` | stringArray | — | Origen explícito CLASS=PATH; repítelo para config, secrets, platform-state, database, user-content, documents, photos, large-media, telemetry-timeseries, serverless-config o cache-generated |
+| `--target` | string | — | Nuevo directorio de salida; su directorio padre debe existir |
+
+**Ejemplos**
+
+```bash
+# Export the generated backup contract, encrypted to your age public key, into a new directory
+stackkit backup emergency-export --recipient <age-public-key> --target /mnt/usb/stackkit-export
+
+# Export explicit paths when no generated contract exists
+stackkit backup emergency-export --recipient <age-public-key> --target /mnt/usb/stackkit-export --source config=/opt/stacks --source user-content=/opt/data
+```
+
+## stackkit backup emergency-restore
+
+Descifra y verifica una exportación portátil en un nuevo directorio de preparación.
+
+```bash
+stackkit backup emergency-restore [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--archive` | string | — | Archivo de emergencia cifrado |
+| `--identity-file` | string | — | Archivo de identidad age local; las claves secretas nunca deben ir en la línea de comandos |
+| `--json` | bool | — | Muestra el resultado verificado de la preparación como JSON |
+| `--max-bytes` | int | `549755813888` | Máximo de bytes descomprimidos del archivo, incluidos los metadatos |
+| `--target` | string | — | Nuevo directorio de restauración aislado; su directorio padre debe existir |
+
+**Ejemplos**
+
+```bash
+# Decrypt and verify an export into a new staging directory with your age identity file
+stackkit backup emergency-restore --archive <export-dir>/<archive>.tar.gz.age --identity-file ~/.config/age/key.txt --target ./restore-staging
+```
+
+## stackkit backup init
+
+Imprime las instrucciones de configuración inicial.
+
+Imprime los pasos de configuración inicial del complemento de copias de seguridad.
+
+Este comando es de solo lectura. Describe el ciclo de vida nativo que renderiza y aplica el kopia-agent local propiedad de CUE antes de configurar el repositorio.
+
+```bash
+stackkit backup init [flags]
+```
+
+## stackkit backup restore
+
+Verifica y restaura un snapshot firmado en un área de preparación aislada.
+
+Restaura un ancla de snapshot firmada por el propietario y direccionada por contenido en el volumen de preparación aislado propiedad de CUE. El ID de snapshot de Kopia sin procesar y la ruta de preparación no los controla quien invoca el comando. `--owner-approve` registra la autorización local explícita del Owner; este comando nunca requiere una cuenta de Kombify ni un servicio Cloud.
+
+```bash
+stackkit backup restore <snapshot-anchor-id> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+| `--operation-id` | string | — | Clave de idempotencia estable para esta operación de restauración preparada |
+| `--owner-approve` | bool | — | Autoriza esta restauración preparada con la custodia local establecida del Owner |
+
+**Ejemplos**
+
+```bash
+# Restore a snapshot into isolated staging; the live volumes are not touched
+stackkit backup restore sha256:<snapshot-anchor-id> --owner-approve
+
+# Print the result as JSON: data.id is the restore result ID for restore activate, data.operationId is the restore operation ID for restore abandon
+stackkit backup restore sha256:<snapshot-anchor-id> --owner-approve --json
+```
+
+Subcomandos: [`stackkit backup restore abandon`](#stackkit-backup-restore-abandon), [`stackkit backup restore activate`](#stackkit-backup-restore-activate), [`stackkit backup restore recover`](#stackkit-backup-restore-recover)
+
+### stackkit backup restore abandon
+
+Abandona una operación de restauración pendiente o preparada.
+
+```bash
+stackkit backup restore abandon <restore-operation-id> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+| `--owner-approve` | bool | — | Autoriza este abandono de la restauración con la custodia local establecida del Owner |
+
+**Ejemplos**
+
+```bash
+# Discard a staged restore you do not want to activate
+stackkit backup restore abandon <restore-operation-id> --owner-approve
+```
+
+### stackkit backup restore activate
+
+Activa una restauración preparada y verificada en los volúmenes activos de Basement.
+
+```bash
+stackkit backup restore activate <restore-result-id> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+| `--operation-id` | string | — | Clave de idempotencia estable para esta activación de restauración en vivo |
+| `--owner-approve` | bool | — | Autoriza la activación en vivo con la custodia local establecida del Owner |
+
+**Ejemplos**
+
+```bash
+# Replace the live volumes with a verified staged restore
+stackkit backup restore activate sha256:<restore-result-id> --owner-approve
+
+# Name the activation operation so an interrupted run can be recovered by that ID
+stackkit backup restore activate sha256:<restore-result-id> --owner-approve --operation-id restore-activate-2026-09-18
+```
+
+### stackkit backup restore recover
+
+Recupera una restauración interrumpida o finaliza su resultado confirmado.
+
+Recupera la activación de restauración exacta aprobada por el propietario. Antes de la confirmación, la recuperación restaura los volúmenes activos anteriores. Después de la confirmación, conserva los datos activados y reanuda la limpieza del resultado y la finalización de la aplicación. Repetir la recuperación de una operación completada devuelve su resultado firmado original. `--rollback` es obligatorio.
+
+```bash
+stackkit backup restore recover <activation-operation-id> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+| `--owner-approve` | bool | — | Autoriza la recuperación con la custodia local establecida del Owner |
+| `--rollback` | bool | — | Autoriza la reversión si la activación interrumpida no llegó a confirmarse |
+
+**Ejemplos**
+
+```bash
+# Recover an interrupted activation by its operation ID
+stackkit backup restore recover restore-activate-2026-09-18 --rollback --owner-approve
+```
+
+## stackkit backup run
+
+Fuerza un snapshot ahora (fuera de banda).
+
+```bash
+stackkit backup run [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+| `--operation-id` | string | — | Clave de idempotencia estable para esta operación de snapshot |
+| `--scheduled` | bool | — | Ejecuta solo a través de la autorización de programación local firmada vigente |
+
+**Ejemplos**
+
+```bash
+# Take a snapshot now; data.id in the JSON result is the snapshot anchor ID for backup restore
+stackkit backup run --json
+
+# Use your own operation ID so a retry cannot create a second snapshot
+stackkit backup run --operation-id manual-2026-09-18
+```
+
+## stackkit backup schedule
+
+Controla el temporizador local de copias de seguridad aprobado por el Owner.
+
+```bash
+stackkit backup schedule [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+Subcomandos: [`stackkit backup schedule disable`](#stackkit-backup-schedule-disable), [`stackkit backup schedule enable`](#stackkit-backup-schedule-enable), [`stackkit backup schedule status`](#stackkit-backup-schedule-status)
+
+### stackkit backup schedule disable
+
+Revoca la ejecución programada de copias de seguridad y detiene su temporizador.
+
+```bash
+stackkit backup schedule disable [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Revoca la autoridad local de copias de seguridad programadas |
+
+Heredado de [`stackkit backup schedule`](#stackkit-backup-schedule):
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+**Ejemplos**
+
+```bash
+# Stop scheduled snapshots and revoke their authorization
+stackkit backup schedule disable --owner-approve
+```
+
+### stackkit backup schedule enable
+
+Aprueba y habilita la cadencia exacta de copias de seguridad de CUE.
+
+```bash
+stackkit backup schedule enable [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Aprueba este Plan exacto, la CLI y la cadencia local de copias de seguridad |
+
+Heredado de [`stackkit backup schedule`](#stackkit-backup-schedule):
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+**Ejemplos**
+
+```bash
+# Approve the backup cadence from the applied plan and start its timer
+stackkit backup schedule enable --owner-approve
+```
+
+### stackkit backup schedule status
+
+Muestra por separado el temporizador, la autorización y el último snapshot programado.
+
+```bash
+stackkit backup schedule status [flags]
+```
+
+Heredado de [`stackkit backup schedule`](#stackkit-backup-schedule):
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+**Ejemplos**
+
+```bash
+# Show the timer, its authorization, and the last scheduled snapshot
+stackkit backup schedule status
+
+# The same status as JSON
+stackkit backup schedule status --json
+```
+
+## stackkit backup status
+
+Muestra el estado del repositorio Kopia local.
+
+```bash
+stackkit backup status [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+**Ejemplos**
+
+```bash
+# Show repository readiness, coverage, and the latest snapshot and restore receipts
+stackkit backup status
+
+# The same status as JSON
+stackkit backup status --json
+```
+
+## stackkit backup target
+
+Vincula un destino S3 aportado por el propietario a la política de copias de seguridad generada.
+
+```bash
+stackkit backup target [flags]
+```
+
+Subcomandos: [`stackkit backup target import`](#stackkit-backup-target-import), [`stackkit backup target status`](#stackkit-backup-target-status)
+
+### stackkit backup target import
+
+Importa la custodia S3 cifrada desde JSON por stdin.
+
+Importa desde stdin los campos JSON endpoint, bucket, prefix, region, accessKeyId, secretAccessKey y passphrase. La passphrase es una cadena para un repositorio Kopia existente. Solo se imprimen referencias opacas al destino. Esto importa la custodia; no crea un bucket ni verifica que esté listo el almacenamiento externo.
+
+```bash
+stackkit backup target import [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--candidate-digest` | string | — | Digest sha256 exacto del release candidate de StackKits instalado |
+| `--owner-approve` | bool | — | Autoriza este destino local de copias de seguridad exacto |
+| `--rebind` | bool | — | Renueva la autoridad de Plan/origen conservando el destino y las credenciales existentes |
+
+**Ejemplos**
+
+```bash
+# Import the S3 target from a private JSON file with the fields listed above
+stackkit backup target import --owner-approve < s3-target.json
+```
+
+### stackkit backup target status
+
+Verifica la custodia local del destino sin contactar con S3.
+
+```bash
+stackkit backup target status [flags]
+```
+
+**Ejemplos**
+
+```bash
+# Confirm the imported target custody is intact
+stackkit backup target status
+```

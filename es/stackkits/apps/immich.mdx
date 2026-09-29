@@ -1,0 +1,31 @@
+---
+title: "Immich"
+description: "Selecciona Immich para el caso de uso Photos y completa su primer uso"
+sidebarTitle: "Immich"
+icon: images
+---
+
+Immich aporta el caso de uso [Fotos](/es/guides/stackkits/use-cases/photos). Es la alternativa publicada para el workload opcional `photos` de v2 nativo, y las StackSpec iniciales de Basement y Cloud no lo habilitan. Planifica el almacenamiento y la recuperación en la página Fotos antes de seleccionarlo.
+
+## Contrato publicado
+
+| Propiedad | Valor |
+| --- | --- |
+| Workload | `photos` |
+| Alternativa | `immich` |
+| Clase de datos | personal |
+| Referencia de secreto requerida | `database-password` |
+| Adaptador independiente compatible | `standalone-compose` |
+
+La CLI publicada valida y genera este contrato de workload, incluidas las asignaciones persistentes de fotos y de base de datos y una ruta de Photos generada. El [catálogo de casos de uso](/es/stackkits/reference/use-case-catalog) muestra los componentes que declara el release.
+
+El slot `database-password` contiene una referencia opaca `secret://`; la custodia local del propietario guarda su contraseña. Elige el workload, la ubicación y el adaptador en la [StackSpec](/es/guides/stackkits/configure-stack-spec) y después sigue [Añadir un workload](/es/stackkits/reference/day-2-operations#añadir-un-workload-a-un-workspace-existente) para validar, establecer la custodia, generar, inspeccionar el plan, aplicar y verificar.
+
+## Primer uso
+
+1. Completa la verificación de StackKits tras un despliegue que ya tenga una custodia válida ligada al propietario.
+2. Abre la dirección de Immich generada desde el Node Hub o desde la salida del despliegue.
+3. Crea la cuenta de propietario de la aplicación y conecta clientes solo después de confirmar la capacidad de almacenamiento y las copias de seguridad.
+4. Conecta cada teléfono con [Copia de seguridad de fotos desde el teléfono](/es/guides/stackkits/use-cases/photos/phone-backup).
+
+Vuelve a verificar el workspace de StackKits después de cualquier cambio de configuración.

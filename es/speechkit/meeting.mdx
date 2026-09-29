@@ -1,0 +1,84 @@
+---
+title: "Graba y revisa una reunión"
+description: "Captura de reuniones en dos canales, notas, capturas de pantalla y resúmenes con citas"
+sidebarTitle: "Meeting"
+icon: "users"
+---
+
+Meeting graba una llamada como dos canales independientes (tu micrófono y el
+loopback del sistema), transcribe ambos en una sola sesión y redacta la reunión
+a partir de la transcripción, tus propias notas y una plantilla. Es un servicio
+de grabación independiente, no un cuarto modo: solo comparte con Dictation el
+transcriptor de voz a texto.
+
+<Info>
+Meeting es una función de escritorio de Windows. La captura de audio del sistema
+no está portada a la beta de macOS.
+</Info>
+
+## Qué produce una reunión
+
+- Una transcripción con ambos canales, etiquetada por canal de captura. Las
+  etiquetas de canal indican de qué lado de la llamada procede una línea; no
+  identifican a cada interlocutor remoto.
+- Tus propias notas, reproducidas textualmente en el resumen.
+- Una **Meeting Review** duradera: un resumen ejecutivo de cinco frases,
+  elementos de acción y un cuerpo que cita la transcripción de la que procede.
+- Reviews en inglés, alemán, español, chino, hindi y árabe.
+
+El audio nunca se conserva. Lo que permanece son la transcripción, las notas y
+la review, y el [Retention Scope](/es/speechkit/modes#retention-scope) decide
+durante cuánto tiempo.
+
+## Inicia y termina una grabación
+
+1. Inicia una reunión desde el cliente de escritorio, o deja que la detección de
+   llamadas te ofrezca una cuando aceptes una llamada. La detección es una
+   sugerencia que aceptas, no una grabación automática.
+2. Una superposición compacta y transparente muestra el estado de la captura y
+   los controles durante la llamada, y se puede desplegar para tomar notas.
+3. Los resúmenes parciales se ejecutan por lotes mientras continúa la captura,
+   de modo que una llamada larga no espera hasta el final para procesarse.
+4. SpeechKit se detiene poco después de que la aplicación de llamadas libere el
+   micrófono y te avisa cuando la review está lista o por qué falló. Una
+   grabación que iniciaste a mano nunca se detiene automáticamente.
+
+Solo una captura mantiene el micrófono a la vez. Iniciar Dictation, Assist o
+Voice Agent mientras se graba una reunión se rechaza en lugar de tomar el
+dispositivo en silencio.
+
+## Capturas de pantalla
+
+Pulsa `Ctrl+Alt+S` durante una reunión para capturar una ventana elegida o el
+monitor que hay bajo el cursor. Las capturas aparecen como marcadores en la
+línea de tiempo de la transcripción, se citan en la review generada y se
+muestran brevemente en la píldora de la reunión para que confirmes que se
+capturó la ventana correcta. Ninguna imagen sale del dispositivo.
+
+## Buscar y exportar
+
+La lista de reuniones agrupa las sesiones según cuándo ocurrieron. La búsqueda
+abarca títulos, transcripciones, notas y resúmenes. Las notas se muestran como
+Markdown con formato, y el resumen completo ofrece **Copy Markdown** y **Save .md**.
+
+## Generación de la review
+
+La vía local no necesita credenciales de nube: el modelo local incluido genera
+la review en el dispositivo. GitHub Copilot es un proveedor opcional de
+generación de reviews, tras una autorización independiente y revocable para el
+procesamiento de transcripciones.
+
+Los conectores de exportación y los proveedores de review en la nube no están
+disponibles con los
+[Network Scopes](/es/speechkit/modes#network-scope) **local network only** y
+**this device only**. Una instalación nueva no configura ningún conector, así
+que nada sale del equipo hasta que tú lo eliges.
+
+<CardGroup cols={2}>
+  <Card title="Instalar en Windows" icon="windows" href="/es/speechkit/install-windows">
+    Meeting se incluye con el cliente de escritorio para Windows.
+  </Card>
+  <Card title="Modos y rutas de datos" icon="waveform-lines" href="/es/speechkit/modes">
+    Descubre cómo funcionan la elección del proveedor y los dos ámbitos de privacidad.
+  </Card>
+</CardGroup>

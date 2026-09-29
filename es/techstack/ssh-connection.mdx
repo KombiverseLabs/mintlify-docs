@@ -1,0 +1,84 @@
+---
+title: "Conectar un servidor por SSH"
+description: "Deja que Techstack inicie sesión en tu servidor por SSH y lo conecte por ti"
+sidebarTitle: "Conectar por SSH"
+icon: "key"
+---
+
+Elige **Connect my device** en el asistente Add Node cuando tu servidor ya
+acepte inicios de sesión SSH y prefieras no pegar un comando tú mismo.
+Techstack inicia sesión con los datos siguientes, ejecuta la misma
+configuración que el [comando de emparejamiento](/es/techstack/pairing-command)
+y espera a que el Guard del servidor se registre.
+
+## Host o dirección IP
+
+Introduce la dirección que Techstack usa para alcanzar el servidor en **Node
+host or IP**, por ejemplo `192.168.1.20` o `server.example.com`.
+
+La dirección debe ser alcanzable desde donde se ejecuta Techstack. Una
+dirección doméstica como `192.168.1.20` funciona cuando Techstack se ejecuta en
+la misma red, por ejemplo la [Windows Alpha](/es/techstack/install-windows) en
+un ordenador de casa. Si Techstack no puede alcanzar el servidor de esta
+manera, usa en su lugar el [comando de emparejamiento](/es/techstack/pairing-command):
+entonces el servidor se conecta hacia fuera por sí mismo.
+
+## Clave SSH o contraseña
+
+En **Authentication**, elige cómo inicia sesión Techstack:
+
+- **SSH key.** Techstack usa una clave privada que guardaste en tu Wallet.
+- **Password.** Techstack usa la contraseña SSH del usuario que introduces.
+
+Cuando eliges una contraseña, el asistente la mantiene solo en la memoria del
+navegador mientras pasas a la página siguiente. No se escribe en el
+almacenamiento de sesión del navegador, así que si recargas la página antes de
+que empiece la configuración, vuelve a introducir la contraseña. Después
+Techstack guarda la contraseña cifrada en tu Wallet para este StackKit, de modo
+que pueda reintentar la configuración. No se almacena como texto plano en la
+configuración del StackKit ni en los informes de trabajos.
+
+## Etiqueta de la clave SSH
+
+Con **SSH key**, introduce la **SSH key label**: el nombre de una clave SSH
+guardada en tu Wallet. Techstack busca el elemento del Wallet con ese nombre
+(las mayúsculas y minúsculas no importan) y usa su clave privada. Nunca pegas la
+clave privada en el asistente.
+
+Si ninguna clave SSH de tu Wallet tiene ese nombre, la prueba de conexión y la
+configuración se detienen con un error. Guarda primero la clave en tu Wallet y
+después introduce aquí su nombre. La mitad pública de la clave debe estar en el
+archivo `~/.ssh/authorized_keys` del usuario del servidor, como en cualquier
+inicio de sesión SSH.
+
+## Usuario SSH, puerto y sudo
+
+Abre **SSH details** para cambiar los valores predeterminados:
+
+- **SSH user.** La cuenta con la que inicia sesión Techstack. El valor
+  predeterminado es `root`.
+- **SSH port.** El valor predeterminado es `22`. Cámbialo solo si el servicio
+  SSH de tu servidor escucha en otro puerto.
+- **Use sudo for setup commands.** Actívalo cuando el usuario SSH no sea `root`.
+  Techstack ejecuta entonces la configuración con `sudo`. Primero prueba `sudo`
+  sin pedir contraseña, así que la configuración es más fiable cuando ese
+  usuario puede ejecutar `sudo` sin escribir una contraseña. La configuración se
+  detiene si el usuario no tiene `sudo` en absoluto.
+
+## Probar la conexión
+
+Selecciona **Test connection** antes de continuar. Techstack intenta iniciar
+sesión con la dirección, el usuario, el puerto y la clave o contraseña que
+introdujiste, y muestra **SSH connection successful** o el error que recibió. La
+prueba solo inicia sesión. No cambia nada en el servidor.
+
+Si cambias cualquier campo después de una prueba, el resultado se borra. Vuelve a
+probar antes de continuar.
+
+Motivos habituales por los que falla una prueba:
+
+- el host o la IP es incorrecto, o no es alcanzable desde donde se ejecuta
+  Techstack;
+- el puerto SSH es distinto de `22`;
+- la etiqueta de la clave no coincide con ninguna clave SSH de tu Wallet;
+- el servidor no acepta esa clave o contraseña para ese usuario.

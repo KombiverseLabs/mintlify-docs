@@ -1,0 +1,160 @@
+---
+title: "stackkit advanced"
+description: "Gestiona operaciones del ciclo de vida Advanced autorizadas sin conexión"
+sidebarTitle: "advanced"
+---
+Gestiona operaciones del ciclo de vida Advanced autorizadas sin conexión.
+
+```bash
+stackkit advanced [flags]
+```
+
+Subcomandos: [`stackkit advanced change-set`](#stackkit-advanced-change-set), [`stackkit advanced restore-drill`](#stackkit-advanced-restore-drill), [`stackkit advanced rollback`](#stackkit-advanced-rollback), [`stackkit advanced trust`](#stackkit-advanced-trust)
+
+## stackkit advanced change-set
+
+Gestiona conjuntos de cambios de Terramate autorizados sin conexión.
+
+```bash
+stackkit advanced change-set [flags]
+```
+
+Subcomandos: [`stackkit advanced change-set apply`](#stackkit-advanced-change-set-apply), [`stackkit advanced change-set create`](#stackkit-advanced-change-set-create)
+
+### stackkit advanced change-set apply
+
+Aplica un conjunto de cambios de Terramate exacto aprobado por el Owner.
+
+```bash
+stackkit advanced change-set apply [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--candidate-spec` | string | — | Ruta a la StackSpec v2 candidata exacta que usa generation.target=terramate |
+| `--capability` | string | — | Ruta al stackkit.advanced-capability/v1 canónico usado para crear el conjunto de cambios |
+| `--change-set` | string | — | Dirección de contenido exacta sha256:&lt;hex&gt; del conjunto de cambios firmado por el Owner |
+| `--expect-sha256` | string | — | Digest exacto sha256:&lt;hex&gt; obligatorio de los bytes canónicos del conjunto de cambios almacenado |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+### stackkit advanced change-set create
+
+Crea un conjunto de cambios de Terramate firmado por el Owner.
+
+```bash
+stackkit advanced change-set create [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--candidate-spec` | string | — | Ruta a la StackSpec v2 candidata que usa generation.target=terramate |
+| `--capability` | string | — | Ruta a un archivo canónico stackkit.advanced-capability/v1 |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+## stackkit advanced restore-drill
+
+Ejecuta simulacros de restauración nativos condicionados por capacidad.
+
+```bash
+stackkit advanced restore-drill [flags]
+```
+
+Subcomandos: [`stackkit advanced restore-drill run`](#stackkit-advanced-restore-drill-run)
+
+### stackkit advanced restore-drill run
+
+Prepara y verifica la restauración de un ancla de copia de seguridad sin activarla.
+
+Ejecuta un simulacro de restauración v2 nativo como operación Advanced.
+
+El simulacro solo se admite con una capacidad verificada sin conexión que permita restore.drill, la confianza de emisor local aprobada por el Owner y `--owner-approve` explícito. Verifica el runtime actual, crea una nueva ancla de snapshot (o valida `--anchor` en custodia local), prepara una restauración de esa ancla, verifica el árbol preparado, elimina el área de preparación y verifica que el runtime activo no haya cambiado. Los datos preparados nunca se activan.
+
+```bash
+stackkit advanced restore-drill run [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--anchor` | string | — | ID de ancla de snapshot sha256 existente para el simulacro; si se omite, se crea una nueva ancla de copia de seguridad |
+| `--capability` | string | — | Ruta a un archivo canónico stackkit.advanced-capability/v1 que permita restore.drill |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+| `--operation-id` | string | — | ID estable del simulacro en minúsculas (8-100 caracteres); se genera si se omite |
+| `--owner-approve` | bool | — | Aprueba explícitamente los efectos secundarios de la copia de seguridad y de la restauración preparada del simulacro |
+
+**Ejemplos**
+
+```bash
+stackkit advanced restore-drill run --capability capability.json --owner-approve --json
+```
+
+## stackkit advanced rollback
+
+Ejecuta reversiones coordinadas condicionadas por capacidad en todos los stacks de Terramate.
+
+```bash
+stackkit advanced rollback [flags]
+```
+
+Subcomandos: [`stackkit advanced rollback run`](#stackkit-advanced-rollback-run)
+
+### stackkit advanced rollback run
+
+Revierte todos los stacks locales de Terramate a un único punto de control verificado.
+
+Revierte el host local a un punto de control verificado del estado del ejecutor como la operación Advanced rollback.coordinated.
+
+La reversión solo se admite con una capacidad verificada sin conexión que permita rollback.coordinated, la confianza de emisor local aprobada por el Owner y `--owner-approve` explícito. `--to` nombra directamente el punto de control o el conjunto de cambios cuyo punto de control previo a la aplicación es el destino. Los stacks se ejecutan en orden de ejecución inverso: los stacks añadidos después del punto de control se destruyen mediante OpenTofu (docker compose down sin volúmenes) y se eliminan, los stacks modificados recuperan el estado, la configuración y el payload del punto de control y se fuerzan a converger, y los stacks eliminados después del punto de control se recrean. La StackSpec y el Inventory del punto de control se restauran, se regeneran y se verifican. Una reversión interrumpida se reanuda en la siguiente ejecución con el mismo `--to` y omite los stacks que ya convergieron.
+
+```bash
+stackkit advanced rollback run [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--capability` | string | — | Ruta a un archivo canónico stackkit.advanced-capability/v1 que permita rollback.coordinated |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+| `--owner-approve` | bool | — | Aprueba explícitamente destruir, restaurar y recrear stacks |
+| `--to` | string | — | ID sha256 de snapshot del estado del ejecutor de destino, o ID sha256 del conjunto de cambios cuyo punto de control previo a la aplicación es el destino |
+
+**Ejemplos**
+
+```bash
+stackkit advanced rollback run --capability capability.json --to sha256:<change-set-id> --owner-approve --json
+```
+
+## stackkit advanced trust
+
+Gestiona la confianza local de emisores Advanced aprobada por el Owner.
+
+```bash
+stackkit advanced trust [flags]
+```
+
+Subcomandos: [`stackkit advanced trust import`](#stackkit-advanced-trust-import), [`stackkit advanced trust inspect`](#stackkit-advanced-trust-inspect)
+
+### stackkit advanced trust import
+
+Importa un paquete de confianza de emisores Advanced fijado con exactitud.
+
+```bash
+stackkit advanced trust import [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--bundle` | string | — | Ruta a un archivo canónico stackkit.advanced-trust-bundle/v1 |
+| `--expect-sha256` | string | — | Digest exacto sha256:&lt;hex&gt; obligatorio del paquete de confianza |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+| `--owner-approve` | bool | — | Aprueba explícitamente el cambio de la confianza local de emisores Advanced |
+
+### stackkit advanced trust inspect
+
+Inspecciona la confianza local verificada de emisores Advanced.
+
+```bash
+stackkit advanced trust inspect [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |

@@ -1,0 +1,35 @@
+---
+title: "Acceder a un servicio privado a través de kombify.me"
+description: "Reenvía un origen HTTP(S) privado a través del agente de nodo de Techstack"
+sidebarTitle: "Destinos privados"
+icon: "network-wired"
+---
+
+Usa esta vía cuando el servicio no es accesible desde internet. kombify.me no
+obtiene por sí mismo la dirección privada. Un agente de nodo de Techstack en el
+homelab abre una conexión autenticada y reenvía solicitudes HTTP(S) acotadas.
+
+## Antes de empezar
+
+- Debe haber un agente de nodo de Techstack en ejecución en el homelab que
+  pueda alcanzar el origen.
+- La ruta debe usar el tipo de destino privado, no el proxy público.
+- La exposición del servicio sigue desactivada por defecto. Actívala solo
+  cuando quieras que el nombre público acepte tráfico.
+
+## Abrir el nombre privado
+
+1. Registra el nombre del servicio igual que una dirección pública.
+2. Define el destino como un origen HTTP(S) privado del homelab.
+3. Mantén conectado el agente de nodo de Techstack.
+4. Expón la ruta del servicio.
+5. Abre `https://{base}-{service}.kombify.me`.
+
+Si el agente está desconectado, el nombre público sigue sin estar disponible y
+pide al cliente que lo reintente. Al reconectar al mismo propietario se
+restablece el reenvío. El agente de otro propietario no puede servir la ruta.
+
+## Mantén los nombres locales en local
+
+La navegación solo por LAN permanece en el resolvedor que StackKits instala en
+el homelab. kombify.me no publica nombres `*.lan.kombify.me`.

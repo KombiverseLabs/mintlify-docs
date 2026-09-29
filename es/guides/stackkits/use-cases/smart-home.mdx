@@ -1,0 +1,61 @@
+---
+title: "Smart Home"
+description: "Supervisa y controla los dispositivos que elijas con Home Assistant, en un host que operas"
+sidebarTitle: "Smart Home"
+icon: house-signal
+---
+
+<Info>
+  Estado de la evidencia (2026-09-24, v0.41.0): Smart Home con Home Assistant es
+  `available, lifecycle-verified`. Smart Home se verificó en el archivo público
+  de la v0.39.7, donde una ejecución del ciclo de vida del productor de Depot en
+  Ubuntu 24.04 amd64 (Basement Kit, independiente) pasó install, init, generate,
+  apply, configuración del propietario, verify, backup, restore y activación de
+  la restauración, con la lectura de vuelta de la aplicación verificada a través
+  del loopback local del invitado.
+</Info>
+
+Smart Home da a tu hogar un único lugar para supervisar y controlar los dispositivos que elijas, en un host que tú operas. Home Assistant ejecuta la plataforma de automatización. El catálogo de la versión llama a este caso de uso Smart Home y lo entrega como el workload opcional `smart-home`.
+
+## Elige cómo se ejecuta Home Assistant
+
+| Ajuste | Opciones | Por defecto |
+| --- | --- | --- |
+| Instalación | Contenedor (Home Assistant Core, sin Supervisor ni Apps) o Home Assistant OS en un dispositivo dedicado | Contenedor |
+| Instalación existente | Crear una nueva o conectar una instancia existente sin cambiar su configuración | Crear una nueva |
+| Dispositivos USB | Pasar un radio USB Zigbee, Z-Wave u otro al workload | Desactivado |
+| Descubrimiento de red | Descubrir automáticamente luces, altavoces y hubs en tu red doméstica | Activado |
+
+Conectar una instancia existente conserva su configuración actual. StackKits nunca restablece una instancia existente para simular un comienzo desde cero, y gestionar esa instancia sigue requiriendo una concesión aparte.
+
+## Elige el host
+
+Usa [Basement Kit](/es/stackkits/kits/basement-kit) para hardware local, acceso directo a los radios USB Zigbee/Z-Wave y dispositivos en tu LAN. Cloud Kit no tiene acceso a radios locales ni a dispositivos de tu red doméstica, así que no es adecuado para la parte local de Smart Home.
+
+## Configúralo
+
+1. Selecciona el workload `smart-home` en tu [StackSpec](/es/guides/stackkits/configure-stack-spec), elige Contenedor o Home Assistant OS y decide si vas a pasar un radio USB.
+2. Genera y aplica el stack en un [Basement Kit](/es/stackkits/kits/basement-kit) verificado.
+3. Abre la ruta de Smart Home generada y completa tú mismo el asistente de incorporación de Home Assistant: crea la cuenta de propietario, establece la ubicación de tu casa y añade las integraciones de los dispositivos que realmente tienes.
+4. Empareja tu primer dispositivo y confirma que muestra el estado correcto antes de añadir más.
+
+## Revisa el Node Hub
+
+Abre el [Node Hub](/es/guides/stackkits/node-hub) para confirmar que el workload de Smart Home está en ejecución y ver su dirección generada. Homepage es un módulo de navegación publicado, pero el StackSpec inicial no lo selecciona. El Node Hub es tu punto de entrada actual hasta que elijas otra cosa.
+
+## Copia de seguridad y recuperación
+
+La configuración de Home Assistant y los registros de dispositivos forman parte de la copia de seguridad declarada de tu kit. Restaurar en un entorno aislado no vuelve a emparejar automáticamente los dispositivos físicos ni reaplica el acceso revocado. Revalida los vínculos de dispositivos y las concesiones vigentes antes de reanudar acciones físicas. Consulta [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).
+
+## Consigue las apps
+
+<CardGroup cols={2}>
+  <Card title="Home Assistant Companion (iOS)" icon="apple" href="https://apps.apple.com/us/app/home-assistant/id1099568401">
+    La app oficial de Home Assistant para iPhone y iPad.
+  </Card>
+  <Card title="Home Assistant Companion (Android)" icon="android" href="https://play.google.com/store/apps/details?id=io.homeassistant.companion.android">
+    La app oficial de Home Assistant para Android.
+  </Card>
+</CardGroup>
+
+Instala la app, elige conectar manualmente e introduce tu URL de Smart Home generada cuando pregunte cómo conectarse. Inicia sesión con la cuenta de propietario que creaste durante la incorporación.

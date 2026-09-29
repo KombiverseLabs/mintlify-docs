@@ -1,0 +1,35 @@
+---
+title: "CUE y StackKits"
+description: "Cómo CUE valida la intención de StackKits antes de aplicar los artefactos generados"
+sidebarTitle: "CUE"
+icon: cubes
+---
+
+StackKits usa CUE como fuente de verdad de los contratos de los kits. Tu StackSpec se comprueba contra ese contrato antes de generar artefactos o de cambiar un destino.
+
+## El flujo de trabajo
+
+La inicialización crea una StackSpec completa para el kit seleccionado. La validación comprueba esa intención contra los contratos CUE del release. Después, la generación deriva artefactos de despliegue desechables a partir de la entrada validada. Cuando cambia un ajuste, actualiza la StackSpec y repite la validación y la generación; no edites directamente los archivos generados.
+
+## Paquete de esquema compartido
+
+Los contratos de los kits comparten el paquete CUE `foundation`, importado como `github.com/kombifyio/stackkits/foundation`. Define `#FoundationStackKit`, el contrato compartido que los esquemas de plataforma y de kit extienden con sus propios servicios y restricciones.
+
+Los archivos publicados y el instalador incluyen el paquete como `foundation/`, con su contrato de kit compartido en `foundation/stackkit.cue`.
+
+<Note>
+  Los releases anteriores a v0.18.22 llamaban a este paquete `base` y exponían
+  `#BaseStackKit`. Ambos nombres están retirados. Quienes crean kits y las
+  herramientas deben importar `github.com/kombifyio/stackkits/foundation` y
+  extender `#FoundationStackKit`.
+</Note>
+
+## Límite
+
+La StackSpec independiente describe la intención de StackKits. Las credenciales de proveedor, el ciclo de vida del proveedor y la adquisición de servidores quedan fuera de ese contrato. Un workspace de StackKits sigue siendo utilizable sin ninguna dependencia alojada de kombify.
+
+## Páginas relacionadas
+
+- [Formato de la spec](/es/stackkits/reference/spec-format)
+- [Basement Kit](/es/stackkits/kits/basement-kit)
+- [Cloud Kit](/es/stackkits/kits/cloud-kit)

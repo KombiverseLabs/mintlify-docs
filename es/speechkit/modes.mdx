@@ -1,0 +1,98 @@
+---
+title: "Modos de SpeechKit y rutas de datos"
+description: "Comprende Dictation, Assist, Voice Agent y los límites de los proveedores"
+sidebarTitle: "Modos y rutas de datos"
+icon: "waveform-lines"
+---
+
+SpeechKit usa tres modos estrictos. Elige el modo más pequeño que se ajuste a la
+tarea para que el procesamiento y la salida esperados sigan siendo claros.
+
+## Dictation
+
+Dictation convierte la voz en texto. No reescribe con un LLM, no ejecuta
+utilidades ni genera respuestas habladas. Úsalo para notas, formularios,
+mensajes y otras tareas de transcripción directa.
+
+## Assist
+
+Assist convierte voz o texto en un único resultado acotado. Ese resultado puede
+provenir de una sustitución determinista, una utilidad o un LLM, y opcionalmente
+puede leerse en voz alta. Úsalo cuando quieras una transformación o una única
+respuesta en lugar de una conversación en vivo.
+
+## Voice Agent
+
+Voice Agent es una conversación de audio en tiempo real. Está pensado para lluvia
+de ideas interactiva, soporte y preguntas de seguimiento donde importan la
+detección de turnos y la salida hablada.
+
+## Hands-Free y personalización
+
+Hands-Free controla la activación, la captura del micrófono, el fin automático
+del habla y la salida opcional por altavoz sobre los tres modos. Words enseña a
+SpeechKit términos que debe reconocer; Replacements aplica transformaciones
+deterministas de texto, comando, fragmento, sinónimo o plantilla.
+
+[Meeting](/es/speechkit/meeting) está junto a los tres modos, no dentro de
+ellos. Graba una llamada en su propio pipeline y solo comparte con Dictation el
+transcriptor de voz a texto, de modo que el audio de la llamada nunca llega a la
+superposición de dictado, al historial ni a los atajos del portapapeles.
+
+## Proveedores locales y externos
+
+La elección del proveedor determina la ruta de los datos:
+
+| Tipo de proveedor | Límite de los datos |
+| --- | --- |
+| Voz a texto local o modelo local | El procesamiento permanece en el dispositivo. |
+| Servidor SpeechKit autoalojado o runtime local | Los datos viajan a la máquina que tú operas. |
+| Proveedor de voz externo | El audio, el texto o ambos pueden enviarse a ese proveedor según sus condiciones. |
+
+SpeechKit incluye adaptadores para `whisper.cpp` y Piper locales, un
+`whisper-server` autoalojado, Ollama y otros endpoints compatibles con OpenAI, y
+los proveedores externos OpenAI, Groq, Deepgram, AssemblyAI, Hugging Face,
+OpenRouter, Azure Speech y Microsoft Foundry. Google speech-to-text, Google
+text-to-speech y Gemini Live se eliminaron; las configuraciones que aún los
+nombran fallan de forma cerrada en lugar de seleccionar en silencio otro
+proveedor.
+
+SpeechKit no convierte un proveedor externo en local. Revisa la configuración
+del proveedor y sus condiciones de privacidad antes de enviar audio sensible.
+
+## Network Scope
+
+Network Scope es el límite que defines una vez y que el backend aplica en todas
+partes: ensamblado de proveedores, descargas de modelos, actualizaciones,
+telemetría, conexiones con servidores e integraciones.
+
+| Ámbito | Con qué se puede contactar |
+| --- | --- |
+| All networks | Todos los proveedores e integraciones configurados, incluidos los endpoints de nube pública. |
+| Local network only | Runtimes en el dispositivo más servicios en direcciones de loopback o privadas, como un host de Ollama en tu LAN o tu propio servidor SpeechKit. Los endpoints públicos se bloquean, también en el momento de la conexión tras la resolución DNS. |
+| This device only | Solo los runtimes que el propio SpeechKit gestiona como procesos hijos locales. Todos los servicios externos se bloquean, incluso uno en la misma máquina, porque no se puede certificar su propio tráfico de salida. |
+
+Elegir un ámbito más estricto suspende los ajustes incompatibles en lugar de
+eliminarlos, y Settings explica qué está desactivado y por qué.
+
+## Retention Scope
+
+Retention Scope es el segundo eje, independiente: responde a qué sobrevive al
+trabajo que lo produjo.
+
+| Ámbito | Efecto |
+| --- | --- |
+| Retain | El contenido es duradero y solo desaparece mediante los ajustes de retención, una eliminación o una solicitud de supresión. |
+| Zero retention | El material en bruto se escribe mientras el trabajo está en curso y se elimina cuando termina la sesión. El resultado generado sobrevive; la transcripción que hay detrás, no. Se rechazan las superficies de proveedor que no pueden garantizar que no almacenan datos. |
+
+Una instalación sin acceso a la red sigue escribiendo transcripciones en el
+disco. Define ambos ámbitos de forma deliberada.
+
+<CardGroup cols={2}>
+  <Card title="Instalar el cliente para Windows" icon="windows" href="/es/speechkit/install-windows">
+    Descarga y verifica la beta pública actual.
+  </Card>
+  <Card title="Grabar una reunión" icon="users" href="/es/speechkit/meeting">
+    Captura una llamada en dos canales y genera un resumen con citas.
+  </Card>
+</CardGroup>

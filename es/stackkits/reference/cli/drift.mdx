@@ -1,0 +1,66 @@
+---
+title: "stackkit drift"
+description: "Observa y reconcilia la deriva local de StackKit"
+sidebarTitle: "drift"
+---
+Observa y reconcilia la deriva local de StackKit.
+
+```bash
+stackkit drift [flags]
+```
+
+Subcomandos: [`stackkit drift detect`](#stackkit-drift-detect), [`stackkit drift reconcile`](#stackkit-drift-reconcile)
+
+## stackkit drift detect
+
+Lee el estado local autoritativo e informa de la deriva.
+
+Lee y verifica el ResolvedPlan canónico, los artefactos generados, la evidencia de Apply firmada por el propietario, el vínculo local del Owner y el runtime activo de Compose de Basement, sin refrescar el estado del runtime. Con el destino de generación terramate, además ejecuta a través de Terramate un plan de OpenTofu de solo lectura con exitcode detallado en cada stack del proyecto local del host y añade una entrada stacks por stack; nunca aplica. El informe direccionado por contenido se conserva como evidencia local del Owner para cada Application Kit seleccionado.
+
+```bash
+stackkit drift detect [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+**Ejemplos**
+
+```bash
+# Compare the live deployment with the applied plan
+stackkit drift detect
+
+# The same drift report as JSON
+stackkit drift detect --json
+```
+
+## stackkit drift reconcile
+
+Reconcilia la deriva mediante el ciclo de vida local gobernado.
+
+El modo estándar requiere la aprobación local explícita del Owner, verifica la autoridad local vigente, crea un punto de control de reversión obligatorio de Kopia y del estado del ejecutor, y después ejecuta generate, apply y verify a través del diario exclusivo del ciclo de vida. Una fase de destino fallida restaura, reaplica y verifica automáticamente el estado previo del ejecutor capturado. El modo avanzado sigue cerrado por defecto hasta que se proporcione una capacidad verificada sin conexión; tras la mutación Advanced observa de nuevo el informe de deriva, incluido el plan de cada stack de Terramate, y falla a menos que el informe posterior a la reconciliación esté limpio.
+
+```bash
+stackkit drift reconcile [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--candidate-spec` | string | — | Advanced: StackSpec candidata exacta de Terramate |
+| `--capability` | string | — | Advanced: archivo canónico de capacidad sin conexión |
+| `--change-set` | string | — | Advanced: ID exacto del conjunto de cambios firmado por el Owner |
+| `--expect-sha256` | string | — | Advanced: digest exacto en bytes del conjunto de cambios almacenado |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+| `--mode` | string | `standard` | Modo de reconciliación: standard o advanced |
+| `--owner-approve` | bool | — | Registra la aprobación local explícita del Owner para la reconciliación estándar |
+
+**Ejemplos**
+
+```bash
+# Reconcile drift in standard mode: checkpoint, then generate, apply, and verify
+stackkit drift reconcile --owner-approve
+
+# The same reconciliation with a JSON result
+stackkit drift reconcile --owner-approve --json
+```

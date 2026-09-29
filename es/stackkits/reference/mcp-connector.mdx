@@ -1,0 +1,40 @@
+---
+title: "Conector MCP de StackKits"
+description: "Conecta un cliente MCP al ciclo de vida local publicado de StackKits"
+sidebarTitle: "Conector MCP"
+icon: plug
+---
+
+StackKits expone una única conexión MCP de cara al usuario, llamada `stackkit`. El adaptador local es `stackkit-mcp`; tras la instalación, el mismo conector también puede servirlo `stackkit-server` en su endpoint protegido `/mcp`.
+
+## Configura un cliente local
+
+Genera un fragmento de cliente a partir del release instalado:
+
+```bash
+stackkit agent mcp-config --client codex
+```
+
+La forma local predeterminada es:
+
+```toml
+[mcp_servers.stackkit]
+command = "stackkit-mcp"
+args = ["--mode", "docs,local,server"]
+```
+
+## Modelo de seguridad
+
+- Las herramientas de documentación y diagnóstico de solo lectura están disponibles por defecto.
+- Las herramientas con capacidad de escritura requieren el modo de escritura explícito y la aprobación local del Owner específica de la operación.
+- Un endpoint accesible de forma remota debe protegerse deliberadamente; no lo expongas directamente a internet.
+- El conector usa el mismo ciclo de vida local de la CLI y el mismo contrato de evidencia que los comandos del terminal.
+
+## State Console
+
+La State Console opcional es un adaptador local de revisión de estado y aprobación de operaciones. Puede mostrar un workspace, un plan, un estado, logs y evidencia seleccionados. No recomienda un kit ni implementa por sí misma acciones del ciclo de vida.
+
+## Páginas relacionadas
+
+- [Guía de inicio rápido](/es/stackkits/quickstart)
+- [Operar un StackKit](/es/stackkits/reference/day-2-operations)

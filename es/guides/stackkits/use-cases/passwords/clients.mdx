@@ -1,0 +1,160 @@
+---
+title: "Configura tus apps de gestor de contraseñas"
+description: "Crea la cuenta de tu bóveda, guarda una primera contraseña y conecta las apps de Bitwarden de tu teléfono, navegador y ordenador a tu propia bóveda."
+sidebarTitle: "Apps de contraseñas"
+icon: "mobile-screen-button"
+mode: "wide"
+keywords: ["Contraseñas", "Vaultwarden", "Bitwarden", "Gestor de contraseñas", "Extensión de navegador", "iPhone", "Android", "Autoalojado"]
+---
+
+import { clientSetupLabelsEs } from "/snippets/client-setup-labels-es.jsx";
+
+import { ClientSetupGuide } from "/snippets/client-setup-guide.jsx";
+
+<ClientSetupGuide
+  labels={clientSetupLabelsEs}
+  locale="es"
+  id="kcg-passwords"
+  meta={[
+    { icon: "phone", text: "Teléfono, navegador y ordenador" },
+    { icon: "steps", text: "6 pasos cortos" },
+    { icon: "book", text: "No hacen falta conocimientos previos" },
+  ]}
+  requirements={[
+    "La dirección de tu bóveda, por ejemplo https://vault.home.test",
+    "Una invitación para tu dirección de correo electrónico",
+    "Cada dispositivo preparado para tu bóveda doméstica por la persona que configuró kombify",
+    "Una contraseña maestra que puedas recordar",
+  ]}
+  requirementsHelp={{ label: "¿Aún no tienes invitación?", target: "kcg-passwords-no-invite" }}
+  appsTitle="Primero, descarga la app de Bitwarden."
+  vendor={{ label: "Todas las descargas de Bitwarden", href: "https://bitwarden.com/download/" }}
+  apps={[
+    { platform: "apple", label: "iPhone y iPad", detail: "Bitwarden Password Manager", store: "Abrir en la App Store", href: "https://apps.apple.com/app/bitwarden-password-manager/id1137397744", vendor: "Bitwarden", official: true },
+    { platform: "android", label: "Android", detail: "Bitwarden Password Manager", store: "Abrir en Google Play", href: "https://play.google.com/store/apps/details?id=com.x8bit.bitwarden", vendor: "Bitwarden", official: true },
+    { platform: "browser", label: "Extensión de navegador", detail: "Chrome, Firefox, Edge, Safari y más", store: "Abrir la página de descargas de Bitwarden", href: "https://bitwarden.com/download/", vendor: "Bitwarden", official: true },
+    { platform: "desktop", label: "Ordenador", detail: "Windows, macOS y Linux", store: "Abrir la página de descargas de Bitwarden", href: "https://bitwarden.com/download/", vendor: "Bitwarden", official: true },
+  ]}
+  appsNote="Tiendas de navegadores: [Chrome](https://chromewebstore.google.com/detail/bitwarden-password-manager/nngceckbapebfimnlniiiahkandclblb) · [Firefox](https://addons.mozilla.org/firefox/addon/bitwarden-password-manager/) · [Edge](https://microsoftedge.microsoft.com/addons/detail/bitwarden-password-manager/jbkfoedolllekgbhcbcoahefnbanhhlh) · [Safari (Mac App Store)](https://apps.apple.com/app/bitwarden/id1352778147). Tu bóveda funciona con Vaultwarden, que es compatible con estas apps oficiales de Bitwarden. No necesitas una app de Vaultwarden aparte."
+  stepsTitle="Configura tu bóveda paso a paso."
+  steps={[
+    {
+      tab: "Abrir la bóveda",
+      title: "Abre tu bóveda en un navegador.",
+      intro: "Empieza en un ordenador. Tu bóveda tiene su propia dirección web, como un sitio web que solo usa tu hogar.",
+      clicks: [
+        "Escribe la dirección de tu bóveda en la barra de direcciones del navegador, por ejemplo **https://vault.home.test**, y pulsa Intro.",
+        "Debajo del cuadro de inicio de sesión, haz clic en [[Create account]].",
+      ],
+      note: "La dirección de esta guía es un ejemplo. Usa la dirección que te dio la persona que configuró kombify.",
+      faq: { q: "¿Qué es la dirección de una bóveda?", a: "Es la dirección web de la bóveda de contraseñas de tu hogar. Suele empezar por **https://vault.** y terminar con el nombre de tu red doméstica. La persona que configuró kombify puede darte la dirección exacta." },
+      check: "Ves el formulario [[Create account]].",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-01-open-vault.webp", width: 1088, height: 830, alt: "Página de inicio de sesión de Vaultwarden con el enlace Create account marcado", caption: "Página de inicio de sesión de la bóveda", credit: "Captura de kombify", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · bóveda web 2026.7.0", captured: "2026-09-24", annotations: [{ n: 2, top: 84.3, left: 38.3, width: 23.5, height: 7.2 }] },
+    },
+    {
+      tab: "Crear cuenta",
+      title: "Crea tu cuenta.",
+      intro: "Tu bóveda solo acepta direcciones de correo electrónico invitadas. Usa la misma dirección a la que llegó la invitación.",
+      clicks: [
+        "En [[Email address]], introduce tu dirección de correo electrónico invitada.",
+        "En [[Name]], introduce tu nombre. La persona que gestiona la bóveda y aquellos con quienes compartas contraseñas pueden verlo.",
+        "Haz clic en [[Continue]].",
+      ],
+      faq: { q: "¿Es esta mi cuenta de kombify?", a: "No. Esta cuenta pertenece solo a tu bóveda de contraseñas. Tiene su propia dirección de correo electrónico y su propia contraseña maestra." },
+      check: "La página te pide ahora [[Set a strong password]].",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-02-create-account.webp", width: 1088, height: 718, alt: "Formulario Create account con la dirección de correo alex@example.com y el nombre Alex Example", caption: "Crear cuenta", credit: "Captura de kombify", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · bóveda web 2026.7.0", captured: "2026-09-24", annotations: [{ n: 1, top: 37.6, left: 16.4, width: 65.1, height: 13.4 }, { n: 2, top: 61, left: 16.4, width: 65.1, height: 13.4 }, { n: 3, top: 76.3, left: 14, width: 72.1, height: 13.9 }] },
+    },
+    {
+      tab: "Contraseña maestra",
+      title: "Elige tu contraseña maestra.",
+      intro: "La contraseña maestra es la única contraseña que aún tienes que recordar. Desbloquea todas las demás.",
+      clicks: [
+        "En [[Master password]], introduce una contraseña larga. Una frase corta de cuatro palabras o más funciona bien.",
+        "Introduce la misma contraseña otra vez en [[Confirm master password]].",
+        "Haz clic en [[Create account]]. Si la página sugiere la extensión de navegador, haz clic en [[Add it later]] y después en [[Skip to web app]]. Conectarás la extensión en el paso 5.",
+      ],
+      note: "**Nadie puede recuperar una contraseña maestra olvidada**, ni siquiera la persona que gestiona tu bóveda. Anótala y guarda la nota en un lugar seguro fuera de la bóveda.",
+      faq: { q: "¿Qué significa la barra de seguridad?", a: "Estima lo difícil que es adivinar tu contraseña. Apunta a **Strong**. Es mejor una contraseña larga que una complicada." },
+      check: "Tu bóveda vacía se abre con el título [[All vaults]].",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-03-master-password.webp", width: 1088, height: 1310, alt: "Página Set a strong password con la contraseña maestra introducida dos veces y valorada como Strong", caption: "Set a strong password", credit: "Captura de kombify", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · bóveda web 2026.7.0", captured: "2026-09-24", annotations: [{ n: 1, top: 25.5, left: 16.4, width: 60.7, height: 7.3 }, { n: 2, top: 52.2, left: 16.4, width: 60.7, height: 7.3 }, { n: 3, top: 87, left: 14, width: 72.1, height: 7.6 }] },
+    },
+    {
+      tab: "Primera contraseña",
+      title: "Guarda tu primera contraseña.",
+      intro: "Guarda un inicio de sesión de prueba. Más adelante demuestra que tus apps están conectadas a tu bóveda.",
+      clicks: [
+        "Arriba a la derecha, haz clic en [[New]] y elige [[Login]]. Si primero aparece una ventana de bienvenida, haz clic en [[Skip]].",
+        "En [[Item name]], introduce un nombre que reconozcas, por ejemplo el nombre de una tienda.",
+        "Introduce tu [[Username]]. Junto a [[Password]], haz clic en las flechas circulares para generar una contraseña y después en [[Use this password]].",
+        "Haz clic en [[Save]].",
+      ],
+      note: "Añade la dirección web de la tienda en [[Website (URI)]]. Entonces la extensión de navegador sugiere este inicio de sesión en ese sitio web.",
+      check: "Aparece el mensaje [[Item added]] y tu inicio de sesión se muestra en la lista.",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-04-new-login.webp", width: 1472, height: 1664, alt: "Ventana New Login con el nombre de elemento Example Shop, un nombre de usuario y una contraseña generada", caption: "New Login", credit: "Captura de kombify", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · bóveda web 2026.7.0", captured: "2026-09-24", annotations: [{ n: 2, top: 12.1, left: 7.9, width: 82.6, height: 5.8 }, { n: 3, top: 41.8, left: 7.9, width: 79.3, height: 5.8 }, { n: 3, top: 52.3, left: 87.5, width: 5.7, height: 5 }, { n: 4, top: 92.1, left: 2.7, width: 10.4, height: 6 }] },
+    },
+    {
+      tab: "Conectar apps",
+      title: "Conecta las apps de Bitwarden.",
+      intro: "Cada app de Bitwarden se conecta primero a los servidores del propio Bitwarden. Indícale una vez que use tu bóveda en su lugar.",
+      clicks: [
+        "Instala la app de Bitwarden de la lista de arriba y ábrela.",
+        "En la pantalla de inicio de sesión, abre el menú [[Logging in on]] y elige [[Self-hosted]]. En la app de ordenador, el menú se llama [[Accessing]].",
+        "En [[Server URL]], introduce la dirección de tu bóveda con **https://** al principio y pulsa [[Save]].",
+        "Inicia sesión con tu dirección de correo electrónico y tu contraseña maestra.",
+      ],
+      note: "Repite estos pasos en cada teléfono, navegador y ordenador que uses. Cada uno necesita la dirección de tu bóveda una vez.",
+      faq: { q: "¿Por qué aquí no hay ninguna imagen de la app?", a: "Las condiciones de Bitwarden no dan permiso para reutilizar sus imágenes. Su propia guía muestra cada pantalla, y las etiquetas de arriba coinciden con ella." },
+      check: "La app muestra el inicio de sesión que guardaste en el paso 4.",
+      visual: {
+        tag: "GUÍA DE BITWARDEN",
+        title: "Bitwarden muestra cada pantalla",
+        text: "Elige tu dispositivo en la guía de Bitwarden. Busca la sección sobre un servidor **autoalojado**.",
+        links: [
+          { label: "Conectar una app a tu propio servidor", detail: "bitwarden.com · todos los dispositivos", href: "https://bitwarden.com/help/change-client-environment/", icon: "server" },
+          { label: "Primeros pasos con la extensión de navegador", detail: "bitwarden.com", href: "https://bitwarden.com/help/getting-started-browserext/", icon: "browser" },
+          { label: "Primeros pasos con la app móvil", detail: "bitwarden.com", href: "https://bitwarden.com/help/getting-started-mobile/", icon: "phone" },
+        ],
+      },
+    },
+    {
+      tab: "Comprobación",
+      title: "¿Está todo conectado?",
+      intro: "Compruébalo en la bóveda web y en una app. Marca solo lo que hayas comprobado por tu cuenta.",
+      verify: [
+        "Puedo abrir la dirección de mi bóveda e iniciar sesión.",
+        "El inicio de sesión que guardé aparece en una app de Bitwarden en mi teléfono, navegador u ordenador.",
+        "Mi contraseña maestra está anotada y guardada fuera de la bóveda.",
+      ],
+      note: "Esta guía no lee tu bóveda. Tus marcas permanecen en este navegador.",
+      check: "Ahora puedes trasladar tus otras contraseñas a la bóveda.",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-05-first-item.webp", width: 1430, height: 300, alt: "Lista All vaults que muestra el inicio de sesión guardado de Example Shop", caption: "Tu primer inicio de sesión en la bóveda", credit: "Captura de kombify", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · bóveda web 2026.7.0", captured: "2026-09-24", annotations: [{ n: null, top: 37.2, left: 1, width: 98, height: 58.1 }] },
+    },
+  ]}
+  nextTitle="Qué viene después."
+  next={[
+    { icon: "shield", title: "Activa el inicio de sesión en dos pasos", text: "Bitwarden explica cómo añadir un segundo paso al inicio de sesión.", href: "https://bitwarden.com/help/setup-two-step-login/" },
+    { icon: "server", title: "Haz copia de seguridad de la bóveda", text: "Para la persona que gestiona kombify: protege los datos de la bóveda.", href: "/es/guides/stackkits/back-up-and-restore" },
+  ]}
+  help={[
+    { id: "kcg-passwords-no-invite", q: "Todavía no tengo la dirección de una bóveda ni una invitación.", a: "Pregunta a la persona que configuró kombify en tu hogar. Ella añade el servicio Passwords e invita a tu dirección de correo electrónico. [Cómo funciona Passwords con kombify](/es/guides/stackkits/use-cases/passwords) · [Configuración del propietario](/es/stackkits/apps/vaultwarden)." },
+    { q: "Create account dice «Registration not allowed or user already exists».", a: "Comprueba que usas exactamente la dirección de correo electrónico invitada. Si ya creaste tu cuenta, vuelve atrás e inicia sesión. En caso contrario, pide una nueva invitación." },
+    { q: "La dirección no se abre o el navegador avisa sobre la conexión.", a: "Prueba primero la dirección en un dispositivo de tu red doméstica. Si tu bóveda solo funciona en casa, conéctate a tu Wi-Fi doméstico o a la app de conexión doméstica que te dieron. Además, cada dispositivo debe estar configurado para confiar en tu servidor doméstico; la persona que configuró kombify se encarga de ello. Si el navegador dice que la conexión no es privada, detente ahí y pregúntale. No ignores la advertencia. [Sobre las direcciones domésticas](/es/guides/stackkits/use-cases/network)." },
+    { q: "He olvidado mi contraseña maestra.", a: "Nadie puede recuperarla. Tu bóveda está cifrada con ella. La persona que gestiona tu bóveda puede eliminar tu cuenta para que empieces de nuevo, pero las contraseñas guardadas en ella se pierden. [Bitwarden sobre las contraseñas maestras](https://bitwarden.com/help/master-password/)." },
+    { q: "Mi teléfono Android no tiene Google Play.", a: "Bitwarden mantiene su propio repositorio de F-Droid. La dirección figura en la [página de descargas de Bitwarden](https://bitwarden.com/download/)." },
+    { q: "¿Por qué dice Vaultwarden y Bitwarden?", a: "Vaultwarden es el programa que ejecuta tu bóveda. Es un servidor no oficial que funciona con las apps oficiales de Bitwarden. Vaultwarden no está asociado con Bitwarden, Inc. Las imágenes muestran Vaultwarden 1.37.2 en inglés; las versiones más recientes y otros idiomas pueden verse distintos." },
+  ]}
+  attribution="**Vaultwarden ejecuta tu bóveda y las apps de Bitwarden la abren. kombify lo instala por ti.** kombify no fabrica ninguna de las dos apps. [Vaultwarden](https://github.com/dani-garcia/vaultwarden) (AGPL-3.0) · bóveda web: [cliente web de Bitwarden compilado para Vaultwarden](https://github.com/dani-garcia/bw_web_builds) (GPL-3.0) · [Bitwarden](https://bitwarden.com/)"
+  sources={{
+    summary: "Capturas de kombify de una instalación local de Vaultwarden · cuenta ficticia · menús en inglés.",
+    paragraphs: [
+      "**Capturas · 24 de septiembre de 2026.** kombify tomó las imágenes de la bóveda web de una instalación de referencia local: Vaultwarden 1.37.2, la imagen que el catálogo de StackKits entrega para Passwords, con su bóveda web incluida 2026.7.0 (el cliente web de Bitwarden, GPL-3.0). La instalación usó la dirección de ejemplo https://vault.home.test y la cuenta ficticia alex@example.com. Es una instalación de referencia, no una prueba de despliegue de StackKits. Esta guía añadió los marcadores violeta.",
+      "Las pantallas de las apps de Bitwarden no se muestran. Las [condiciones de Bitwarden](https://bitwarden.com/terms/) no dan permiso para reutilizar su contenido, así que el paso 5 enlaza a la propia guía de Bitwarden.",
+      "Los enlaces de las tiendas y las páginas de ayuda se comprobaron el 24 de septiembre de 2026. Tu progreso permanece en este navegador. La guía no conecta ninguna cuenta ni pide contraseñas.",
+    ],
+    links: [
+      { label: "Bitwarden: conectar aplicaciones individuales", href: "https://bitwarden.com/help/change-client-environment/" },
+      { label: "Descargas de Bitwarden", href: "https://bitwarden.com/download/" },
+      { label: "Proyecto Vaultwarden", href: "https://github.com/dani-garcia/vaultwarden" },
+    ],
+  }}
+/>

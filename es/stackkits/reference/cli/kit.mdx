@@ -1,0 +1,46 @@
+---
+title: "stackkit kit"
+description: "Operaciones sobre releases publicados de StackKit"
+sidebarTitle: "kit"
+---
+Operaciones sobre releases publicados de StackKit.
+
+Descubre, verifica e instala artefactos de release publicados de StackKit.
+
+```bash
+stackkit kit [flags]
+```
+
+Subcomandos: [`stackkit kit list`](#stackkit-kit-list)
+
+## stackkit kit list
+
+Lista los releases de StackKits publicados en GitHub.
+
+Resuelve el release publicado más reciente de cada StackKit público para el sistema operativo y la arquitectura actuales. El índice de releases se obtiene del repositorio público de GitHub Releases kombifyio/stackKits.
+
+```text
+Channels:
+  stable  newest release that is not a prerelease
+  beta    newest -beta.* prerelease
+  edge    newest -edge.* prerelease
+```
+
+```bash
+stackkit kit list [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--channel` | string | `stable` | Canal de release: stable, beta o edge. |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1. |
+
+**Ejemplos**
+
+```bash
+# Show the newest stable release of every public StackKit for this OS and architecture
+stackkit kit list
+
+# Show beta prereleases as JSON
+stackkit kit list --channel beta --json
+```

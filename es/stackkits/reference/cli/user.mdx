@@ -1,0 +1,160 @@
+---
+title: "stackkit user"
+description: "Invita y gestiona a los usuarios del hogar en PocketID local"
+sidebarTitle: "user"
+---
+Invita y gestiona a los usuarios del hogar en PocketID local.
+
+Crea, lista y elimina usuarios del Homelab en el grupo household de PocketID.
+
+Add imprime una URL de configuración de passkey de un solo uso. TinyAuth sigue admitiendo a los grupos owners, admins y household ya vinculados en el cliente OIDC. Aquí no se pueden crear ni eliminar identidades de propietario y administrador.
+
+```bash
+stackkit user [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+**Ejemplos**
+
+```bash
+# Invite a household member; share the printed one-time URL only with them
+stackkit user add alex --email alex@example.com --owner-approve
+
+# List household users
+stackkit user list
+
+# Remove a household user
+stackkit user remove alex --owner-approve
+```
+
+Subcomandos: [`stackkit user add`](#stackkit-user-add), [`stackkit user list`](#stackkit-user-list), [`stackkit user owner`](#stackkit-user-owner), [`stackkit user remove`](#stackkit-user-remove)
+
+## stackkit user add
+
+Invita a un usuario del hogar con una URL de configuración de passkey de un solo uso.
+
+```bash
+stackkit user add <username> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--display-name` | string | — | Nombre visible opcional |
+| `--email` | string | — | **Obligatorio.** Correo del miembro del hogar |
+| `--owner-approve` | bool | — | Aprueba explícitamente la creación de este usuario del hogar |
+
+Heredado de `stackkit user`:
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+**Ejemplos**
+
+```bash
+# Invite a household member and print their one-time passkey setup URL
+stackkit user add alex --email alex@example.com --owner-approve
+
+# Set a display name and return the invitation as JSON
+stackkit user add sam --email sam@example.com --display-name "Sam Doe" --owner-approve --json
+```
+
+## stackkit user list
+
+Lista los usuarios del hogar en PocketID local.
+
+```bash
+stackkit user list [flags]
+```
+
+Heredado de `stackkit user`:
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+**Ejemplos**
+
+```bash
+# List household users
+stackkit user list
+
+# The same list as JSON
+stackkit user list --json
+```
+
+## stackkit user owner
+
+Inspecciona y reanuda la activación de la passkey del propietario de PocketID.
+
+```bash
+stackkit user owner [flags]
+```
+
+Heredado de `stackkit user`:
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+Subcomandos: [`stackkit user owner activate`](#stackkit-user-owner-activate), [`stackkit user owner status`](#stackkit-user-owner-status)
+
+### stackkit user owner activate
+
+Devuelve o vuelve a emitir la activación de passkey de un solo uso ligada al propietario.
+
+```bash
+stackkit user owner activate [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Aprueba explícitamente revelar o volver a emitir la activación del propietario |
+
+Heredado de `stackkit user`:
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+### stackkit user owner status
+
+Lee el estado de activación de la passkey del propietario.
+
+```bash
+stackkit user owner status [flags]
+```
+
+Heredado de `stackkit user`:
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+## stackkit user remove
+
+Elimina a un usuario del hogar de PocketID local.
+
+```bash
+stackkit user remove <username> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Aprueba explícitamente la eliminación de este usuario del hogar |
+
+Heredado de `stackkit user`:
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+**Ejemplos**
+
+```bash
+# Remove a household user
+stackkit user remove alex --owner-approve
+```

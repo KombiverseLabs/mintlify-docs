@@ -1,0 +1,86 @@
+---
+title: "Referencia de la CLI"
+description: "Cada comando de stackkit con sus flags y ejemplos"
+sidebarTitle: "Resumen"
+icon: square-terminal
+---
+Configura y mantén tus propios servicios con StackKits portables. Estas páginas listan cada comando de `stackkit` con sus flags y ejemplos. Se generan a partir de las definiciones de comandos de StackKits; si tu versión instalada es anterior, `stackkit <command> --help` es la fuente autorizada para ella.
+
+## Instala la CLI
+
+```bash
+curl -sSL https://install.stackkit.cc | STACKKIT_CLI_ONLY=1 sh
+```
+
+Con `STACKKIT_CLI_ONLY=1` el instalador coloca `stackkit`, `stackkit-server`, `stackkit-mcp`, OpenTofu empaquetado y el catálogo público de kits en `~/.stackkits` sin instalar ningún StackKit. Sin esa variable, el instalador detecta el host y continúa con Basement Kit o Cloud Kit.
+
+## Flags globales
+
+Estos flags funcionan con todos los comandos.
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--chdir, -C` | string | `.` | Cambia al directorio indicado antes de ejecutar |
+| `--correlation-id` | string | — | ID de correlación validado de quien llama, registrado en la evidencia local del despliegue |
+| `--no-log` | bool | — | Desactiva el registro estructurado del despliegue |
+| `--progress-jsonl` | string | — | Escribe el progreso del despliegue en JSONL redactado y legible por máquinas en una ruta, o '-' para stdout |
+| `--quiet, -q` | bool | — | Suprime la salida no esencial |
+| `--spec, -s` | string | `stack-spec.yaml` | Ruta al archivo de especificación del stack (se acepta kombination.yaml cuando falta el predeterminado) |
+| `--verbose, -v` | bool | — | Activa la salida detallada |
+
+## Configura tus servicios
+
+| Comando | Descripción |
+| --- | --- |
+| [`stackkit apply`](/es/stackkits/reference/cli/apply) | Aplica cambios de infraestructura |
+| [`stackkit generate`](/es/stackkits/reference/cli/generate) | Genera artefactos de despliegue gobernados a partir de una especificación de stack |
+| [`stackkit init`](/es/stackkits/reference/cli/init) | Inicializa un nuevo despliegue a partir de un StackKit |
+| [`stackkit plan`](/es/stackkits/reference/cli/plan) | Previsualiza cambios de infraestructura |
+| [`stackkit prepare`](/es/stackkits/reference/cli/prepare) | Prepara un sistema para el despliegue de StackKit |
+| [`stackkit setup`](/es/stackkits/reference/cli/setup) | Configura la cuenta de propietario de una aplicación aplicada |
+| [`stackkit validate`](/es/stackkits/reference/cli/validate) | Valida archivos de configuración |
+
+## Comprueba, mantén y recupera
+
+| Comando | Descripción |
+| --- | --- |
+| [`stackkit backup`](/es/stackkits/reference/cli/backup) | Gestiona copias de seguridad (motor Kopia) |
+| [`stackkit break-glass`](/es/stackkits/reference/cli/break-glass) | Gestiona las cuentas y los paquetes de recuperación break-glass |
+| [`stackkit drift`](/es/stackkits/reference/cli/drift) | Observa y reconcilia la deriva local de StackKit |
+| [`stackkit logs`](/es/stackkits/reference/cli/logs) | Consulta los logs estructurados de despliegue |
+| [`stackkit remove`](/es/stackkits/reference/cli/remove) | Desinstala el despliegue local de StackKits |
+| [`stackkit service`](/es/stackkits/reference/cli/service) | Controla los servicios declarados por el plan activo de StackKits |
+| [`stackkit upgrade`](/es/stackkits/reference/cli/upgrade) | Resuelve e instala un release verificado de StackKit |
+| [`stackkit user`](/es/stackkits/reference/cli/user) | Invita y gestiona a los usuarios del hogar en PocketID local |
+| [`stackkit verify`](/es/stackkits/reference/cli/verify) | Ejecuta las comprobaciones de verificación posteriores al despliegue |
+
+## Herramientas avanzadas y referencia
+
+| Comando | Descripción |
+| --- | --- |
+| [`stackkit address`](/es/stackkits/reference/cli/address) | Planifica y vincula direcciones públicas de servicios sin secretos |
+| [`stackkit advanced`](/es/stackkits/reference/cli/advanced) | Gestiona operaciones del ciclo de vida Advanced autorizadas sin conexión |
+| [`stackkit agent`](/es/stackkits/reference/cli/agent) | Ayudantes nativos para agentes en la automatización de StackKits |
+| [`stackkit app`](/es/stackkits/reference/cli/app) | Inspecciona la entrega de aplicaciones de StackKits y gestiona los traspasos v0.6 |
+| [`stackkit cluster`](/es/stackkits/reference/cli/cluster) | Gestiona la pertenencia a clústeres multinodo de StackKits |
+| [`stackkit compat`](/es/stackkits/reference/cli/compat) | Muestra la evidencia de compatibilidad de SO y los diagnósticos de conformidad del host |
+| [`stackkit completion`](/es/stackkits/reference/cli/completion) | Genera scripts de autocompletado para el shell |
+| [`stackkit docs`](/es/stackkits/reference/cli/docs) | Genera proyecciones deterministas de la documentación de StackKits |
+| [`stackkit federation`](/es/stackkits/reference/cli/federation) | Gestiona la evidencia local de vínculos de Federation |
+| [`stackkit game`](/es/stackkits/reference/cli/game) | Opera los servidores de juegos del propietario en el workload Game instalado |
+| [`stackkit host`](/es/stackkits/reference/cli/host) | Operaciones del contrato de host independientes del proveedor |
+| [`stackkit identity`](/es/stackkits/reference/cli/identity) | Gestiona el plano de identidad local independiente |
+| [`stackkit kit`](/es/stackkits/reference/cli/kit) | Operaciones sobre releases publicados de StackKit |
+| [`stackkit migrate`](/es/stackkits/reference/cli/migrate) | Clasifica una StackSpec v1 y emite su informe de migración |
+| [`stackkit module`](/es/stackkits/reference/cli/module) | Crea y valida módulos CUE locales |
+| [`stackkit operations`](/es/stackkits/reference/cli/operations) | Lista los contratos canónicos de operaciones del ciclo de vida independiente |
+| [`stackkit output-transaction`](/es/stackkits/reference/cli/output-transaction) | Inspecciona las acciones explícitas del ciclo de vida de transacciones de salida de Architecture v2 |
+| [`stackkit registry`](/es/stackkits/reference/cli/registry) | Gestiona la instantánea integrada del registro de StackKits |
+| [`stackkit resolve`](/es/stackkits/reference/cli/resolve) | Resuelve la intención de Architecture v2 en un plan de despliegue canónico |
+| [`stackkit runtime`](/es/stackkits/reference/cli/runtime) | Ejecuta operaciones de runtime autenticadas en el lado del nodo |
+| [`stackkit secrets`](/es/stackkits/reference/cli/secrets) | Gestiona la custodia local de secretos ligada al propietario |
+| [`stackkit support`](/es/stackkits/reference/cli/support) | Exporta evidencia de soporte local redactada |
+| [`stackkit use-cases`](/es/stackkits/reference/cli/use-cases) | Selecciona los casos de uso opcionales del kit |
+| [`stackkit version`](/es/stackkits/reference/cli/version) | Imprime la información de versión |
+
+Los comandos que los releases actuales rechazan o reemplazan se listan en [comandos heredados y obsoletos](/es/stackkits/reference/cli/legacy).

@@ -1,0 +1,43 @@
+---
+title: "Publicar un servicio en kombify.me"
+description: "Dale a un servicio de homelab accesible públicamente un nombre HTTPS estable"
+sidebarTitle: "Direcciones públicas"
+icon: "lock"
+---
+
+Usa esta vía cuando el servicio ya responde en una URL HTTP(S) pública.
+kombify.me termina TLS y hace de proxy entre el navegador y ese origen. En esta
+vía se rechazan los destinos privados, de loopback y de enlace local.
+
+## Antes de empezar
+
+- El origen debe ser accesible desde internet por HTTP o HTTPS.
+- Una cuenta de kombify con sesión iniciada registra los nombres a través de
+  [api.kombify.io](https://api.kombify.io). Las instalaciones autoalojadas se
+  registran con una clave de API tras verificar el correo electrónico.
+- Los flujos conectados de StackKits y Techstack pueden registrar por ti los
+  nombres de los kits propios.
+
+## Dale un nombre al servicio
+
+1. Registra un nombre base para el homelab. Las cuentas alojadas obtienen
+   `{homelab}-{you}.kombify.me`. Las instalaciones autoalojadas obtienen
+   `sh-{homelab}-{device}.kombify.me`.
+2. Registra el servicio bajo esa base. Los slugs de kits propios, como `auth`,
+   `id` y `coolify`, siempre se convierten en `{base}-{service}.kombify.me`.
+3. Apunta el servicio a la URL del origen público.
+4. Expón la ruta del servicio. Los nombres de servicio no expuestos siguen sin
+   publicarse.
+
+Después abre `https://{base}-{service}.kombify.me` en un navegador.
+
+Los nombres apex reservados, como `auth.kombify.me`, permanecen sin usar. El
+inicio de sesión del kit sigue llegando a `{your-lab}-auth.kombify.me`.
+
+## Si el origen no es público
+
+Detente aquí y sigue [Acceder a un servicio privado](/es/kombify-me/private-targets).
+No publiques una URL de localhost o solo de LAN en el proxy público.
+
+Los nombres solo locales permanecen en el resolvedor del homelab que instala
+StackKits. No son nombres de kombify.me.

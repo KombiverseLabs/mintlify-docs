@@ -1,0 +1,53 @@
+---
+title: "Dev"
+description: "Aloja repositorios Git privados con Gitea, con escritorio remoto y un runtime de workspace previstos"
+sidebarTitle: "Dev"
+icon: code
+---
+
+<Info>
+  Estado de la evidencia (2026-09-24, v0.39.7): Repositorios con Gitea es
+  `available, not yet lifecycle-verified`: se puede seleccionar en el catálogo,
+  pero todavía ninguna ejecución automatizada del ciclo de vida lo cubre.
+  Escritorio remoto con Guacamole está `in development`: declarado para una
+  versión futura, aún no se puede instalar. Un runtime compartido de workspace de desarrollo está `planned`, sin versión ni fecha comprometida.
+</Info>
+
+Dev reúne bajo un mismo caso de uso los resultados de repositorio, workspace de desarrollo y escritorio remoto: continuar un proyecto desde otro
+ordenador sin tener que montar tú mismo un servidor Git, un workspace y
+una ruta de acceso. Los repositorios y el escritorio remoto se pueden seleccionar
+de forma independiente, y los runners de CI son una activación aparte del uso
+normal de Dev.
+
+## Aplicaciones
+
+<CardGroup cols={2}>
+  <Card title="Gitea" icon="code-branch" href="/es/stackkits/apps/gitea">
+    El servidor Git detrás de Repositorios: selección, ruta HTTPS, inicio de sesión del propietario y el límite de almacenamiento.
+  </Card>
+  <Card title="Guacamole" icon="server">
+    Apache Guacamole es el candidato actual para Escritorio remoto. En desarrollo: declarado para la versión, aún no se puede instalar.
+  </Card>
+</CardGroup>
+
+## Repositorios, hoy
+
+- Git funciona solo por HTTPS. No se expone SSH y no se instala ningún runner de CI.
+- Cada cliente necesita un nombre DNS para el host de Git y debe confiar en el certificado de la CA interna de ese host.
+- La recuperación necesita los dos volúmenes de Gitea, capturados mientras las escrituras están detenidas.
+
+## Escritorio remoto y workspace, previstos
+
+- **Escritorio remoto** funciona en el navegador: [Apache Guacamole](https://guacamole.apache.org/) es el candidato actual, y una sesión se abre desde cualquier navegador sin instalar un cliente de escritorio. Se vincula a un destino de escritorio explícito y ya compatible; no aprovisiona por sí mismo un escritorio de sistema operativo.
+- **Workspace de desarrollo** (abrir, editar y retomar un proyecto con su cadena de herramientas declarada) necesita una elección explícita de runtime y todavía no está admitido.
+- Ambos siguen en evaluación. Ninguno cambia lo que hace Repositorios hoy, y seleccionar uno no requiere el otro: un propietario que solo usa Git no necesita un escritorio, y uno que solo usa escritorio no necesita un servidor Git.
+
+## Consigue las herramientas
+
+- **Clientes Git**: usa tu cliente Git nativo o la integración de tu IDE con la ruta HTTPS generada.
+- **tea, la CLI de Gitea**: para operaciones con scripts de repositorios, incidencias y pull requests desde una terminal, consulta [gitea.com/gitea/tea](https://gitea.com/gitea/tea).
+- **Guacamole**: no hay que instalar ningún cliente cuando se publique; se ejecuta por completo en tu navegador.
+
+## Configúralo
+
+Sigue la página de [Gitea](/es/stackkits/apps/gitea) desde un workspace de propietario vacío. Haz un push a un repositorio de prueba desde un cliente real antes de depender de él.

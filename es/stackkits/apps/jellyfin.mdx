@@ -1,0 +1,62 @@
+---
+title: "Jellyfin"
+description: "El workload de biblioteca multimedia con medios de solo lectura, configuración nativa del propietario y vías de recuperación separadas"
+sidebarTitle: "Jellyfin"
+icon: film
+---
+
+Jellyfin aporta el caso de uso [Multimedia](/es/guides/stackkits/use-cases/media) mediante el workload `media` en un host de Compose independiente. Configúralo después de que se verifique la base de tu [Basement Kit](/es/stackkits/kits/basement-kit). Usa `stackkit app compatibility --json` para inspeccionar las capacidades de adaptador del release instalado.
+
+## Apunta el workload a un directorio de medios existente
+
+Para usar una biblioteca existente, establece `storage.mediaRoot` en la StackSpec con el directorio absoluto de los medios en el host de runtime, por ejemplo `/srv/household-media`, antes de generar y aplicar el stack:
+
+- StackKits monta ese directorio en `/media` como solo lectura. Jellyfin puede escanear y reproducir esos archivos, pero no puede editarlos ni eliminarlos.
+- El directorio ya debe existir. StackKits no lo crea ni cambia sus permisos; si falta, la entrega falla, así que prepara y protege tú mismo el almacenamiento del host.
+- Deja `storage.mediaRoot` sin definir para mantener, en su lugar, un volumen de biblioteca con nombre gestionado por el plan.
+- La ruta nombra almacenamiento del host de runtime, no de la máquina donde se ejecuta un visor remoto.
+
+## Configura la cuenta de propietario
+
+Crea un archivo de credenciales privado y relativo al workspace `.stackkit/setup/media-owner.json`:
+
+```json
+{
+  "username": "<your administrator name>",
+  "password": "<your unique password>"
+}
+```
+
+Restringe ese archivo al propietario del workspace y mantén su contenido fuera de los argumentos de comandos y de los mensajes de chat. Después ejecuta:
+
+```bash
+stackkit setup media --credentials-file .stackkit/setup/media-owner.json --owner-approve --json
+```
+
+Antes de actuar, el comando verifica el plan actual, el Apply firmado, el contenedor local exacto y la versión fijada de Jellyfin. En la primera ejecución establece las credenciales de administrador que elegiste; nunca usa una contraseña predeterminada de primer usuario. En una instalación existente realiza un inicio de sesión normal y una lectura de vuelta del administrador. La sesión temporal de configuración se revoca antes de registrar el resultado firmado.
+
+## Termina el asistente y añade bibliotecas
+
+Sin más flags, un asistente de inicio de Jellyfin sin terminar sigue sin terminar: abre Media en su ruta privada declarada y elige tú mismo las rutas de biblioteca, el idioma y los ajustes del hogar. Para completar en cambio el asistente de inicio con los ajustes actuales de la aplicación y configurar tus bibliotecas después, añade `--complete-onboarding`:
+
+```bash
+stackkit setup media --credentials-file .stackkit/setup/media-owner.json --owner-approve --complete-onboarding --json
+```
+
+El flag solo termina el asistente de inicio. No añade bibliotecas, no cambia los ajustes de acceso remoto ni configura la transcodificación. Cuando añadas una biblioteca, sigue el mapeo de volumen de medios del plan: el montaje `/media` de solo lectura para un directorio bajo custodia del propietario. Da a los espectadores del hogar cuentas de Jellyfin distintas y sin permisos de administrador, y conecta cada reproductor directamente a la URL de Media declarada.
+
+## Límites de la recuperación
+
+La configuración de la aplicación y los bytes de los medios se custodian por separado:
+
+- La configuración de Jellyfin y su caché de transcodificación residen en volúmenes separados. Comprueba la declaración de copia de seguridad de la aplicación para ver qué datos incluye; que el almacenamiento sea escribible no implica cobertura de copia de seguridad.
+- Tu origen de medios no es una copia de seguridad de StackKits. Sea cual sea el valor que establezcas para `storage.mediaRoot`, mantén una fuente de recuperación independiente para esos bytes y documéntala fuera del stack.
+- La salud del contenedor y una configuración de administrador verificada no demuestran el contenido de la biblioteca ni la recuperación; comprueba ambos de forma explícita.
+
+## Prueba un cliente real
+
+Prueba la reproducción de uno de tus propios archivos desde un cliente previsto. Comprueba primero la reproducción directa y la transcodificación solo si la has configurado explícitamente. La compatibilidad de clientes, el ancho de banda y la calidad de la transcodificación no las demuestra un contenedor sano; verifícalas en los dispositivos en los que realmente planeas ver contenido.
+
+## Reanuda una configuración interrumpida
+
+Si una ejecución de configuración se interrumpe, reinténtala con el `--operation-id` indicado. El comando vuelve a comprobar el estado de la aplicación y nunca reabre un asistente de inicio ya completado.
