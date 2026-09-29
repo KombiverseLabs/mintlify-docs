@@ -1,0 +1,170 @@
+---
+title: "techstack api monitor"
+description: "techstack api monitor कमांड के लिए जनरेट किया गया संदर्भ"
+sidebarTitle: "monitor"
+release: "v0.32.8"
+---
+<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+
+## techstack api monitor alerts list
+
+सक्रिय मॉनिटरिंग अलर्ट सूचीबद्ध करें।
+
+```bash
+techstack api monitor alerts list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/alerts` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_monitor_alerts` |
+
+## techstack api monitor alerts rules
+
+मॉनिटरिंग अलर्ट नियम सूचीबद्ध करें।
+
+```bash
+techstack api monitor alerts rules [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/alerts/rules` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_monitor_alert_rules` |
+
+## techstack api monitor availability
+
+ट्रांज़िशन टाइमलाइन से निकाली गई उपलब्धता, डाउनटाइम घटनाएँ और दैनिक स्टेट।
+
+सैंपलर के बजाय केवल-जोड़ने वाली (append-only) सर्वर ट्रांज़िशन टाइमलाइन पर एक प्रक्षेपण: हर घटना दो दर्ज ट्रांज़िशन से सीमित होती है और उन कारण कोड को साथ रखती है जिनके साथ वे लिखे गए थे। रिस्पॉन्स अपनी गणना शब्दावली स्वयं प्रकाशित करता है, ताकि पाठक सोर्स पढ़े बिना देख सके कि कौन-सी कनेक्शन स्टेट डाउनटाइम के रूप में गिनी गईं।
+
+```bash
+techstack api monitor availability [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/availability` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_availability_report` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--window` | string | बंद सेट; असीमित विंडो denial-of-service का ज़रिया बन सकती है। इनमें से एक: `24h`, `7d`, `30d`, `90d`। डिफ़ॉल्ट `"30d"`। |
+| `--server-id` | string | सर्वर विवरण पेज के लिए रिपोर्ट को एक सर्वर तक सीमित करें। |
+
+## techstack api monitor health
+
+मॉनिटरिंग ingest/query हेल्थ डायग्नोस्टिक प्राप्त करें।
+
+```bash
+techstack api monitor health [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/health` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_monitor_health` |
+
+## techstack api monitor metrics label-values
+
+किसी मेट्रिक लेबल के मान सूचीबद्ध करें।
+
+```bash
+techstack api monitor metrics label-values [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/values` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_monitor_metric_label_values` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--name` | string | **आवश्यक।** |
+
+## techstack api monitor metrics labels
+
+मेट्रिक लेबल नाम सूचीबद्ध करें।
+
+```bash
+techstack api monitor metrics labels [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/labels` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_monitor_metric_labels` |
+
+## techstack api monitor metrics names
+
+मेट्रिक नाम सूचीबद्ध करें।
+
+```bash
+techstack api monitor metrics names [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/names` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_monitor_metric_names` |
+
+## techstack api monitor query
+
+PromQL instant क्वेरी चलाएँ।
+
+```bash
+techstack api monitor query [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/instant` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `instant_monitor_query` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--q` | string | **आवश्यक।** |
+| `--time` | string | — |
+
+## techstack api monitor query-range
+
+PromQL range क्वेरी चलाएँ।
+
+```bash
+techstack api monitor query-range [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/query` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `range_monitor_query` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--q` | string | **आवश्यक।** |
+| `--start` | string | — |
+| `--end` | string | — |
+| `--step` | string | — |
+
+## techstack api monitor status
+
+मॉनिटरिंग बैकएंड स्टेटस और रनटाइम मेटाडेटा प्राप्त करें।
+
+```bash
+techstack api monitor status [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/status` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_monitor_status` |

@@ -1,0 +1,210 @@
+---
+title: "techstack api discovery"
+description: "مرجع مولَّد لأوامر techstack api discovery"
+sidebarTitle: "discovery"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api discovery cache clear
+
+مسح ذاكرة التخزين المؤقت للاكتشاف (للمسؤولين فقط).
+
+```bash
+techstack api discovery cache clear [flags]
+```
+
+<Warning>يتطلب تأكيداً: تتجاهل هذه العملية كل نتائج الاكتشاف المخزنة مؤقتاً؛ ويعيد الاكتشاف التالي فحص الشبكة. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/discovery/cache` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `clear_discovery_cache` |
+
+## techstack api discovery devices get
+
+جلب جهاز مكتشَف يملكه المستدعي.
+
+```bash
+techstack api discovery devices get <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/discovery/devices/{id}` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_device` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+
+## techstack api discovery devices list
+
+عرض الأجهزة المكتشَفة التي يملكها المستدعي.
+
+يُرجع فقط الأجهزة الناتجة عن عمليات فحص يملكها المستدعي المصادَق عليه.
+
+```bash
+techstack api discovery devices list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/discovery/devices` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_devices` |
+
+## techstack api discovery devices probe
+
+فحص معمّق لجهاز يملكه المستدعي.
+
+لا يجوز للمستدعين من غير المسؤولين فحص إلا عناوين IP من نتائج اكتشافهم الخاصة؛ ويجوز للمسؤولين فحص أي عناوين IP.
+
+```bash
+techstack api discovery devices probe [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/discovery/probe` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا شيء |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--ip` | string | **مطلوب.** |
+| `--ssh-key` | string | — |
+| `--ssh-user` | string | — |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api discovery networks
+
+جلب واجهات الشبكة المحلية.
+
+```bash
+techstack api discovery networks [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/discovery/networks` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_networks` |
+
+## techstack api discovery scans cancel
+
+إلغاء الفحص الجاري.
+
+```bash
+techstack api discovery scans cancel <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/discovery/scan/{id}/cancel` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `cancel_scan` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+
+## techstack api discovery scans enrich
+
+إثراء نتائج الفحص ببيانات إضافية.
+
+```bash
+techstack api discovery scans enrich <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/discovery/scan/{id}/enrich` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `enrich_scan` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+
+## techstack api discovery scans get
+
+جلب حالة الفحص ونتائجه.
+
+```bash
+techstack api discovery scans get <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/discovery/scan/{id}` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_scan` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+
+## techstack api discovery scans start
+
+بدء فحص الشبكة (غير متزامن).
+
+```bash
+techstack api discovery scans start [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/discovery/scan` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `start_scan` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--exclude-ips` | string\[\] | — |
+| `--max-concurrent` | integer | الافتراضي `50`. |
+| `--profile` | string | إحدى القيم: `passive`، `active`. الافتراضي `"passive"`. |
+| `--subnet` | string | — |
+| `--target-ips` | string\[\] | — |
+| `--timeout-seconds` | integer | الافتراضي `30`. |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api discovery stats
+
+جلب إحصاءات الاكتشاف (للمسؤولين فقط).
+
+```bash
+techstack api discovery stats [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/discovery/stats` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_discovery_stats` |
+
+## techstack api discovery test-ssh
+
+اختبار اتصال SSH بجهاز.
+
+لا يجوز للمستدعين من غير المسؤولين اختبار إلا عناوين IP من نتائج اكتشافهم الخاصة؛ ويجوز للمسؤولين اختبار أي عناوين IP.
+
+```bash
+techstack api discovery test-ssh [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/discovery/test-ssh` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا شيء |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--ip` | string | **مطلوب.** |
+| `--password` | string | — |
+| `--port` | integer | الافتراضي `22`. |
+| `--user` | string | — |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |

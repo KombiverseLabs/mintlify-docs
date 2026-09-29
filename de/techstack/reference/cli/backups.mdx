@@ -1,0 +1,185 @@
+---
+title: "techstack api backups"
+description: "Generierte Referenz für die Befehle unter techstack api backups"
+sidebarTitle: "backups"
+release: "v0.32.8"
+---
+<Note>Generiert aus dem Techstack-Release v0.32.8 (Quelle `4c7d219a5d56`). Für eine installierte Version ist `techstack api <command> --help` maßgeblich.</Note>
+
+## techstack api backups cleanup
+
+Aufbewahrungsrichtlinie anwenden (nur Admins).
+
+```bash
+techstack api backups cleanup [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/backups/cleanup` |
+| Ändert Zustand | Ja |
+| MCP-Tool | Keine |
+
+## techstack api backups create
+
+Datenbank-Backup erstellen (nur Admins).
+
+```bash
+techstack api backups create [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/backups` |
+| Ändert Zustand | Ja |
+| MCP-Tool | Keine |
+
+## techstack api backups delete
+
+Backup löschen (nur Admins).
+
+```bash
+techstack api backups delete <name> [flags]
+```
+
+<Warning>Erfordert Bestätigung: Diese Operation löscht das lokale Backup-Archiv dauerhaft. Übergib `--yes` oder beantworte die Rückfrage; ein nicht interaktiver Lauf ohne `--yes` stoppt vor jeder Anfrage mit Exit-Code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/backups/{name}` |
+| Ändert Zustand | Ja |
+| MCP-Tool | Keine |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<name>` | string | **Erforderlich.** |
+
+## techstack api backups download
+
+Backup-Datei herunterladen (nur Admins).
+
+```bash
+techstack api backups download <name> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups/{name}/download` |
+| Ändert Zustand | Nein |
+| MCP-Tool | Keine |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<name>` | string | **Erforderlich.** |
+
+## techstack api backups latest
+
+Informationen zum neuesten Backup abrufen (nur Admins).
+
+```bash
+techstack api backups latest [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups/latest` |
+| Ändert Zustand | Nein |
+| MCP-Tool | Keine |
+
+## techstack api backups list
+
+Backups auflisten (nur Admins).
+
+```bash
+techstack api backups list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups` |
+| Ändert Zustand | Nein |
+| MCP-Tool | Keine |
+
+## techstack api backups s3 delete
+
+S3-Backup löschen (nur Admins).
+
+```bash
+techstack api backups s3 delete <name> [flags]
+```
+
+<Warning>Erfordert Bestätigung: Diese Operation löscht das Backup dauerhaft aus dem S3-Speicher. Übergib `--yes` oder beantworte die Rückfrage; ein nicht interaktiver Lauf ohne `--yes` stoppt vor jeder Anfrage mit Exit-Code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/backups/s3/{name}` |
+| Ändert Zustand | Ja |
+| MCP-Tool | Keine |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<name>` | string | **Erforderlich.** |
+
+## techstack api backups s3 download
+
+Backup aus S3 herunterladen (nur Admins).
+
+```bash
+techstack api backups s3 download <name> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/backups/s3/{name}/download` |
+| Ändert Zustand | Ja |
+| MCP-Tool | Keine |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<name>` | string | **Erforderlich.** |
+
+## techstack api backups s3 list
+
+S3-Backups auflisten (nur Admins).
+
+```bash
+techstack api backups s3 list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups/s3` |
+| Ändert Zustand | Nein |
+| MCP-Tool | Keine |
+
+## techstack api backups s3 status
+
+S3-Verbindungsstatus abrufen (nur Admins).
+
+```bash
+techstack api backups s3 status [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups/s3/status` |
+| Ändert Zustand | Nein |
+| MCP-Tool | Keine |
+
+## techstack api backups upload-s3
+
+Backup nach S3 hochladen (nur Admins).
+
+```bash
+techstack api backups upload-s3 <name> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/backups/{name}/upload-s3` |
+| Ändert Zustand | Ja |
+| MCP-Tool | Keine |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<name>` | string | **Erforderlich.** |

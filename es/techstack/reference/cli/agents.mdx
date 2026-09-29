@@ -1,0 +1,106 @@
+---
+title: "techstack api agents"
+description: "Referencia generada de los comandos techstack api agents"
+sidebarTitle: "agents"
+release: "v0.32.8"
+---
+<Note>Generado a partir del release v0.32.8 de Techstack (fuente `4c7d219a5d56`). Para una versión instalada, `techstack api <command> --help` es la fuente autorizada.</Note>
+
+## techstack api agents get
+
+Obtiene un agente por ID con sus recursos.
+
+```bash
+techstack api agents get <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/agents/{id}` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_agent` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<id>` | string | **Obligatorio.** ID del recurso. |
+
+## techstack api agents list
+
+Lista los agentes gRPC conectados.
+
+```bash
+techstack api agents list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/agents` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_agents` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--page` | integer | Número de página (predeterminado: 1). |
+| `--per-page` | integer | Elementos por página (predeterminado: 20, máximo: 100). |
+
+## techstack api agents logs
+
+Obtiene los logs recientes del agente.
+
+```bash
+techstack api agents logs <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/agents/{id}/logs` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_agent_logs` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<id>` | string | **Obligatorio.** ID del recurso. |
+
+## techstack api agents remove
+
+Elimina o da de baja un agente.
+
+```bash
+techstack api agents remove <id> [flags]
+```
+
+<Warning>Requiere confirmación. Esta operación da de baja el agente; el nodo deja de informar hasta que se vuelva a inscribir. Pasa `--yes` o responde a la pregunta; una ejecución no interactiva sin `--yes` se detiene antes de cualquier solicitud con el código de salida 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/agents/{id}` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `remove_agent` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<id>` | string | **Obligatorio.** ID del recurso. |
+
+## techstack api agents send-command
+
+Envía un comando al agente.
+
+```bash
+techstack api agents send-command <id> [flags]
+```
+
+<Warning>Requiere confirmación. Esta operación ejecuta el comando en el agente de nodo conectado. Pasa `--yes` o responde a la pregunta; una ejecución no interactiva sin `--yes` se detiene antes de cualquier solicitud con el código de salida 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/agents/{id}/command` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `send_agent_command` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<id>` | string | **Obligatorio.** ID del recurso. |
+| `--args` | string\[\] | — |
+| `--command` | string | **Obligatorio.** |
+| `--type` | string | **Obligatorio.** |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |

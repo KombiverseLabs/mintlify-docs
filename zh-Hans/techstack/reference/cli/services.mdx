@@ -1,0 +1,85 @@
+---
+title: "techstack api services"
+description: "techstack api services 命令的生成参考"
+sidebarTitle: "services"
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api services get
+
+获取某个服务期望的和已观测的状态、健康状况、访问情况以及可执行的操作能力。
+
+```bash
+techstack api services get <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_service_runtime` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<service-id>` | string | **必填。** 规范的服务运行时 ID。 |
+
+## techstack api services list
+
+列出规范的、经测量的服务运行时状态。
+
+```bash
+techstack api services list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_service_runtimes` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--stack-id` | string | — |
+| `--server-id` | string | — |
+
+## techstack api services logs
+
+读取最新一页有界、已脱敏的 StackKits 服务日志。
+
+```bash
+techstack api services logs <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/registry/services/{serviceId}/logs` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_managed_service_logs` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<service-id>` | string | **必填。** 规范的服务运行时 ID。 |
+| `--limit` | integer | 默认值：`100`。 |
+| `--cursor` | string | — |
+
+## techstack api services run-action
+
+将所有者授权的 StackKits 服务操作加入队列。
+
+根据最新的规范清单推导栈、服务器、代理、Kit 和服务的授权。精确重放会通过持久的任务回执收敛；原始 Idempotency-Key 从不持久化。每次变更之后都会先执行 StackKits 验证，然后才更改测量状态。在服务器重启或更新期间，由代理执行的操作会以 409 `maintenance_active` 拒绝。
+
+```bash
+techstack api services run-action <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/registry/services/{serviceId}/actions` |
+| 更改状态 | 是 |
+| MCP 工具 | `run_managed_service_action` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<service-id>` | string | **必填。** 规范的服务运行时 ID。 |
+| `--body` | json | **必填。** JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |

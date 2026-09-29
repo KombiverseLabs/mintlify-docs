@@ -1,0 +1,90 @@
+---
+title: "techstack api CLI संदर्भ"
+description: "हर techstack api कमांड, उसके विकल्प और एग्ज़िट कोड"
+sidebarTitle: "अवलोकन"
+icon: square-terminal
+release: "v0.32.8"
+---
+<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+
+`techstack api` Techstack API को ठीक वैसे ही कॉल करता है जैसा [API संदर्भ](#api-सदरभ) उसका वर्णन करता है: हर सार्वजनिक ऑपरेशन के लिए एक कमांड, जो रिलीज़ के API कॉन्ट्रैक्ट से जनरेट होती है। हर कमांड रिस्पॉन्स एनवेलप हटाकर stdout पर JSON प्रिंट करती है; त्रुटियाँ संरचित त्रुटि ऑब्जेक्ट के रूप में stderr पर जाती हैं।
+
+## प्रमाणीकरण
+
+| वेरिएबल | अर्थ |
+| --- | --- |
+| `TECHSTACK_API_URL` | API बेस URL। डिफ़ॉल्ट `https://api.kombify.io/v1/techstack` है; अपने Techstack इंस्टेंस को सीधे कॉल करने के लिए इसे उस इंस्टेंस के पते पर सेट करें। |
+| `TECHSTACK_API_TOKEN` | हर रिक्वेस्ट के साथ भेजा जाने वाला Bearer टोकन। इसके बिना CLI `techstack login` द्वारा सहेजा गया सेशन उपयोग करता है, और सेशन न होने या उसकी अवधि समाप्त होने पर एग्ज़िट कोड 3 के साथ विफल होता है। |
+
+## सार्वभौमिक विकल्प
+
+| विकल्प | किस पर लागू | विवरण |
+| --- | --- | --- |
+| `--fields <paths>` | हर कमांड | आउटपुट में रखने के लिए कॉमा से अलग किए गए डॉट-पथ; ऐरे के लिए हर एलिमेंट पर लागू होते हैं। |
+| `--ndjson` | हर कमांड | ऐरे को प्रति पंक्ति एक कॉम्पैक्ट JSON मान के रूप में प्रिंट करें। |
+| `--dry-run` | बदलाव करने वाली कमांड | रिज़ॉल्व की गई रिक्वेस्ट को अधिकृत किए या भेजे बिना JSON के रूप में प्रिंट करें। |
+| `--idempotency-key <key>` | बदलाव करने वाली कमांड | Idempotency-Key हेडर; डिफ़ॉल्ट एक नया UUID है। |
+| `--body <json\|@path\|->` | JSON बॉडी वाली कमांड | बेस रिक्वेस्ट बॉडी लिटरल, फ़ाइल या stdin के रूप में; आर्ग्युमेंट फ़्लैग उसकी प्रॉपर्टी को ओवरराइड करते हैं। |
+| `--file <path\|->` | फ़ाइल बॉडी वाली कमांड | घोषित कंटेंट टाइप के साथ भेजी जाने वाली रिक्वेस्ट बॉडी फ़ाइल। |
+| `--yes` | पुष्टि माँगने वाली कमांड | प्रॉम्प्ट के बिना पुष्टि करें; गैर-इंटरैक्टिव होने पर आवश्यक। |
+
+जिन कमांड पर पुष्टि आवश्यक चिह्नित है, वे टर्मिनल में `yes` माँगती हैं। टर्मिनल के बिना, `--yes` सेट न हो तो वे रिक्वेस्ट भेजने से इनकार करती हैं, `CONFIRMATION_REQUIRED` त्रुटि प्रिंट करती हैं और कोड 9 के साथ बाहर निकलती हैं।
+
+## एग्ज़िट कोड
+
+| कोड | अर्थ |
+| --- | --- |
+| 0 | सफलता। |
+| 1 | कोई अन्य विफलता। |
+| 2 | अमान्य इनपुट (HTTP 400/422)। |
+| 3 | प्रमाणित नहीं (HTTP 401)। |
+| 4 | अस्वीकृत, भुगतान आवश्यक या रेट सीमित (HTTP 402/403/429)। |
+| 5 | नहीं मिला (HTTP 404)। |
+| 6 | टकराव (HTTP 409)। |
+| 7 | सर्वर या ट्रांसपोर्ट विफलता (HTTP 5xx)। |
+| 9 | पुष्टि आवश्यक है या अस्वीकार की गई। |
+
+## एजेंट संदर्भ
+
+`techstack api agent-context` यह कमांड कैटलॉग AI एजेंटों के लिए Markdown के रूप में, या `--json` के साथ JSON के रूप में प्रिंट करता है: हर कमांड उसके उपयोग, आर्ग्युमेंट, पुष्टि, उपलब्धता और MCP टूल नाम के साथ, और ऊपर दिए सार्वभौमिक विकल्प और एग्ज़िट कोड भी।
+
+## कमांड
+
+| कमांड समूह | दायरा |
+| --- | --- |
+| [`techstack api addons`](/hi/techstack/reference/cli/addons) | ऐड-ऑन |
+| [`techstack api agents`](/hi/techstack/reference/cli/agents) | एजेंट |
+| [`techstack api auth`](/hi/techstack/reference/cli/auth) | प्रमाणीकरण |
+| [`techstack api autoinstall`](/hi/techstack/reference/cli/autoinstall) | हेल्थ |
+| [`techstack api backups`](/hi/techstack/reference/cli/backups) | बैकअप |
+| [`techstack api client-pairing`](/hi/techstack/reference/cli/client-pairing) | क्लाइंट बाइंडिंग |
+| [`techstack api discovery`](/hi/techstack/reference/cli/discovery) | डिस्कवरी |
+| [`techstack api drift`](/hi/techstack/reference/cli/drift) | स्टैक - ड्रिफ़्ट |
+| [`techstack api features`](/hi/techstack/reference/cli/features) | फ़ीचर |
+| [`techstack api health`](/hi/techstack/reference/cli/health) | हेल्थ |
+| [`techstack api homelab`](/hi/techstack/reference/cli/homelab) | स्टैक |
+| [`techstack api install-scripts`](/hi/techstack/reference/cli/install-scripts) | वर्कर |
+| [`techstack api instance`](/hi/techstack/reference/cli/instance) | इंस्टेंस |
+| [`techstack api inventory`](/hi/techstack/reference/cli/inventory) | इन्वेंटरी |
+| [`techstack api jobs`](/hi/techstack/reference/cli/jobs) | जॉब |
+| [`techstack api managed-runtimes`](/hi/techstack/reference/cli/managed-runtimes) | जॉब, स्टैक |
+| [`techstack api monitor`](/hi/techstack/reference/cli/monitor) | मेट्रिक्स |
+| [`techstack api monthly-runtimes`](/hi/techstack/reference/cli/monthly-runtimes) | जॉब, मासिक रनटाइम, स्टैक |
+| [`techstack api pairing-tokens`](/hi/techstack/reference/cli/pairing-tokens) | ट्रस्ट |
+| [`techstack api prechecks`](/hi/techstack/reference/cli/prechecks) | प्री-चेक |
+| [`techstack api runtime`](/hi/techstack/reference/cli/runtime) | रनटाइम |
+| [`techstack api servers`](/hi/techstack/reference/cli/servers) | इन्वेंटरी, जॉब, RIL, सर्वर |
+| [`techstack api services`](/hi/techstack/reference/cli/services) | जॉब, सेवाएँ |
+| [`techstack api stack-identity`](/hi/techstack/reference/cli/stack-identity) | प्रमाणीकरण |
+| [`techstack api stackkits`](/hi/techstack/reference/cli/stackkits) | StackKits |
+| [`techstack api stacks`](/hi/techstack/reference/cli/stacks) | इन्वेंटरी, जॉब, स्टैक, स्टैक - ड्रिफ़्ट, स्टैक - इम्पोर्ट/एक्सपोर्ट, स्टैक - स्पेक |
+| [`techstack api system`](/hi/techstack/reference/cli/system) | हेल्थ, मेट्रिक्स |
+| [`techstack api system-accounts`](/hi/techstack/reference/cli/system-accounts) | प्रमाणीकरण |
+| [`techstack api tunnel`](/hi/techstack/reference/cli/tunnel) | टनल |
+| [`techstack api unifier`](/hi/techstack/reference/cli/unifier) | यूनिफ़ायर |
+| [`techstack api wallet`](/hi/techstack/reference/cli/wallet) | वॉलेट |
+| [`techstack api workers`](/hi/techstack/reference/cli/workers) | प्री-चेक, वर्कर |
+
+## API संदर्भ
+
+इस सेक्शन में Techstack API संदर्भ उसी रिलीज़ के सार्वजनिक OpenAPI दस्तावेज़ से जनरेट होता है।

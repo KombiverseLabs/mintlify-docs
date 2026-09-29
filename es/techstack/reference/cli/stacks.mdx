@@ -1,0 +1,553 @@
+---
+title: "techstack api stacks"
+description: "Referencia generada de los comandos techstack api stacks"
+sidebarTitle: "stacks"
+release: "v0.32.8"
+---
+<Note>Generado a partir del release v0.32.8 de Techstack (fuente `4c7d219a5d56`). Para una versión instalada, `techstack api <command> --help` es la fuente autorizada.</Note>
+
+## techstack api stacks create
+
+Crea un despliegue de StackKit en el Homelab del propietario.
+
+Crea un despliegue interno de StackKit bajo el Homelab único del propietario B2C autenticado a partir de la carga útil canónica de stack-spec de StackKits indicada como `stack_spec`. La ruta heredada `/stacks` y el campo de respuesta `stack_id` identifican ese despliegue; no crean ni seleccionan un segundo producto Homelab. Una instancia de TechStack puede servir a muchos propietarios, cada uno con su propio Homelab. Las cargas útiles heredadas `user_config`/kombination se siguen aceptando en este límite de compatibilidad. Los clientes del asistente deben enviar un `X-Idempotency-Key` estable; los reintentos con la misma clave y la misma carga útil devuelven el despliegue, el servidor planificado y el trabajo de aprovisionamiento originales.
+
+```bash
+techstack api stacks create [flags]
+```
+
+<Warning>Requiere confirmación. Esta operación crea el despliegue de StackKit e inicia el aprovisionamiento, que puede contratar servidores facturados. Pasa `--yes` o responde a la pregunta; una ejecución no interactiva sin `--yes` se detiene antes de cualquier solicitud con el código de salida 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `create_stack` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--x-idempotency-key` | string | Clave estable del intento del asistente. Máximo 256 caracteres. |
+| `--mode` | string | Modo del asistente. Uno de `easy`, `techie`. |
+| `--name` | string | Nombre del stack. |
+| `--options` | object | — |
+| `--provider` | string | Proveedor de infraestructura (formato directo). |
+| `--services` | string\[\] | Nombres de servicios (formato directo). |
+| `--stack-spec` | object | Forma canónica de stack-spec.yaml de StackKits generada por el asistente de creación. Cuando está presente, es la fuente de verdad para el aprovisionamiento y se guarda como user_config del stack por compatibilidad. |
+| `--user-config` | object | Configuración estructurada heredada, incluidas las cargas útiles antiguas de estilo kombination. Los clientes nuevos del asistente deben enviar stack_spec. |
+| `--user-config-format` | string | Uno de `json`, `yaml`. |
+| `--user-config-raw` | string | Cadena YAML/JSON sin procesar. |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api stacks deploy
+
+Implanta un despliegue de StackKit (unify + IaC + tofu apply).
+
+```bash
+techstack api stacks deploy <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/deploy` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `deploy_stack` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+
+## techstack api stacks destroy
+
+Da de baja un despliegue de StackKit y su infraestructura.
+
+```bash
+techstack api stacks destroy <stack-id> [flags]
+```
+
+<Warning>Requiere confirmación. Esta operación da de baja toda la infraestructura del despliegue de StackKit. Pasa `--yes` o responde a la pregunta; una ejecución no interactiva sin `--yes` se detiene antes de cualquier solicitud con el código de salida 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/destroy` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `destroy_stack` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+
+## techstack api stacks drift check
+
+Lanza una comprobación de deriva.
+
+Limitado a una vez cada 5 minutos (salvo con force=true)
+
+```bash
+techstack api stacks drift check <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/drift/check` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `check_drift` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+| `--force` | boolean | Predeterminado: `false`. |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api stacks drift details
+
+Obtiene información detallada de la deriva con los recursos afectados.
+
+```bash
+techstack api stacks drift details <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/drift/details` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_drift_details` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+
+## techstack api stacks drift resolve
+
+Lanza la resolución de la deriva (volver a aplicar).
+
+Condición previa: el stack debe tener el estado "drifted"
+
+```bash
+techstack api stacks drift resolve <stack-id> [flags]
+```
+
+<Warning>Requiere confirmación. Esta operación vuelve a aplicar la especificación del stack a sus servidores y sobrescribe los cambios con deriva. Pasa `--yes` o responde a la pregunta; una ejecución no interactiva sin `--yes` se detiene antes de cualquier solicitud con el código de salida 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/drift/resolve` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `resolve_drift` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+
+## techstack api stacks drift status
+
+Obtiene el estado actual de la deriva.
+
+```bash
+techstack api stacks drift status <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/drift/status` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_drift_status` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+
+## techstack api stacks export
+
+Exporta el stack como stack-spec.yaml.
+
+Devuelve el stack-spec de StackKits en YAML o JSON según el encabezado Accept
+
+```bash
+techstack api stacks export <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/export` |
+| Cambia el estado | No |
+| Herramienta MCP | `export_stack` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+
+## techstack api stacks import
+
+Importa stack-spec.yaml como despliegue de StackKit.
+
+Importa YAML o JSON como despliegue bajo el Homelab del propietario autenticado.
+
+```bash
+techstack api stacks import [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/import` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `import_stack` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--body` | json | **Obligatorio.** Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api stacks intent
+
+Obtiene el kombination.yaml persistido (byte a byte, base64).
+
+```bash
+techstack api stacks intent <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/intent` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_stack_intent` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+
+## techstack api stacks list
+
+Lista los despliegues de StackKit del propietario.
+
+Devuelve todos los despliegues de StackKit bajo el Homelab B2C único del propietario autenticado. `kit_deployment_id`, `homelab_id` y `stackkit_id` son las identidades del producto; los identificadores heredados siguen siendo alias de compatibilidad en esta ruta mientras los consumidores migran.
+
+```bash
+techstack api stacks list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_kit_deployments` |
+
+## techstack api stacks managed-runtimes add
+
+Añade un Node gestionado mediante el control nativo del proveedor.
+
+Crea o reanuda un trabajo determinista de Add-Server para el despliegue de StackKit propio exacto. El `Idempotency-Key` estándar es obligatorio. Repetir la misma clave con la misma solicitud canónica devuelve las correlaciones originales de trabajo, arrendamiento, servidor de runtime, generación de recursos y operación del proveedor; reutilizarla con otra intención falla con 409.
+
+La clave sin procesar nunca se persiste ni se devuelve. Una respuesta perdida o un resultado incierto de la admisión nativa solo se puede reanudar con la misma clave. La aceptación HTTP significa que la admisión nativa es duradera y la reconciliación con el proveedor está pendiente; nunca afirma que la VM ya esté aprovisionada o sana. Una admisión nueva reserva de forma atómica la ranura de capacidad del tenant/propietario autenticado junto con la generación del arrendamiento y la operación del proveedor. Cuando la admisión nativa autorizada encuentra llena esa capacidad acotada, persiste un resultado 403 no reintentable, y repetir ese trabajo denegado devuelve el mismo resultado. Las repeticiones exactas de una admisión ya confirmada reutilizan su reserva existente. Esta versión no libera reservas automáticamente: un estado terminal o de baja local por sí solo no libera una ranura. El inventario de arrendamientos y los flags de entrega de funciones nunca autorizan ni deniegan capacidad. En el modo alojado, una admisión nueva también requiere los derechos comerciales de runtime y de proveedor firmados con v2, además de la decisión firmada de modo y límite `cloud.runtime.credits` `managed_servers`; los feature flags por sí solos nunca conceden capacidad del proveedor. El OSS autoalojado usa en su lugar su política estática de manifiesto de release, fijada en la construcción, sin depender de un derecho SaaS.
+
+```bash
+techstack api stacks managed-runtimes add <stack-id> [flags]
+```
+
+<Warning>Requiere confirmación. Esta operación contrata un servidor gestionado adicional para el despliegue de StackKit y se factura. Pasa `--yes` o responde a la pregunta; una ejecución no interactiva sin `--yes` se detiene antes de cualquier solicitud con el código de salida 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/managed-runtimes` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `add_managed_runtime_server` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+| `--ionos-datacenter` | string | Alias de centro de datos de IONOS para provider_region; se ignora para otros proveedores canónicos. |
+| `--node-role` | string | Uno de `foundation`, `worker`, `storage`. Predeterminado: `"worker"`. |
+| `--provider-id` | string | **Obligatorio.** Identificador canónico de proveedor ejecutable; los alias de visualización históricos se rechazan. Uno de `centron`, `ionos`. |
+| `--provider-region` | string | Región del proveedor. Para IONOS se normaliza al identificador canónico del centro de datos. |
+| `--runtime-offering-id` | string | Oferta canónica de runtime gestionado. Si se omite, se usa el valor predeterminado efectivo registrado en la instantánea del stack. |
+| `--services` | string\[\] | Claves de servicio; los duplicados y el orden no tienen relevancia semántica. |
+| `--stackkit` | string | Base de StackKit solicitada para este servidor. |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api stacks operations
+
+Obtiene el modelo de lectura de operaciones posteriores a la configuración de un despliegue de StackKit propio.
+
+Devuelve exactamente el modelo de lectura limitado al propietario y al tenant que usa el panel de operaciones de TechStack. `approved_servers` registra la aprobación del operador; `connected_servers` es más estricto y cuenta solo los Node asignados y aprobados con evidencia canónica de heartbeat, conexión y salud de Guard con indicación de actualidad. La operación es de solo lectura y nunca inicia una implantación, un aprovisionamiento ni trabajo del proveedor.
+
+```bash
+techstack api stacks operations <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/operations` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_stack_operations` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+
+## techstack api stacks owner-spec
+
+Obtiene la especificación de arranque del propietario para un despliegue de StackKit.
+
+Endpoint de arranque de administración de StackKit para obtener los campos del propietario local y el hash de la frase de recuperación. Esta ruta solo acepta el token Bearer de arranque de corta duración que devuelve `createStack`; no usa el token Bearer normal de navegador o de sesión.
+
+```bash
+techstack api stacks owner-spec <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/owner-spec` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_stack_owner_spec` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+
+## techstack api stacks pipeline-status
+
+Obtiene el estado completo del pipeline para todas las fases de la especificación.
+
+```bash
+techstack api stacks pipeline-status <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/pipeline-status` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_pipeline_status` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+
+## techstack api stacks provision
+
+Inicia el aprovisionamiento de un despliegue de StackKit existente.
+
+```bash
+techstack api stacks provision <stack-id> [flags]
+```
+
+<Warning>Requiere confirmación. Esta operación inicia el aprovisionamiento del despliegue de StackKit, que puede contratar servidores facturados. Pasa `--yes` o responde a la pregunta; una ejecución no interactiva sin `--yes` se detiene antes de cualquier solicitud con el código de salida 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/provision` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `provision_stack` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api stacks prune-orphans
+
+Revisa o aplica la limpieza de residuos de pruebas limitada al propietario.
+
+Limpieza en dos fases solo para proyecciones del plano de control. Un `dry_run` devuelve exactamente los candidatos E2E/runtime-cloud del propietario autenticado y un digest estable ligado a la revisión. `apply` vuelve a calcular el plan y solo acepta ese digest exacto. Esta ruta nunca da de baja un arrendamiento, llama a un proveedor, destruye infraestructura ni pone en cola trabajo del ciclo de vida.
+
+```bash
+techstack api stacks prune-orphans [flags]
+```
+
+<Warning>Requiere confirmación. Esta operación elimina los registros huérfanos revisados del plano de control cuando el modo es apply. Pasa `--yes` o responde a la pregunta; una ejecución no interactiva sin `--yes` se detiene antes de cualquier solicitud con el código de salida 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/prune-orphans` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `review_or_apply_orphan_projection_cleanup` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--digest` | string | Obligatorio para apply; se copia sin cambios del dry-run revisado. |
+| `--mode` | string | **Obligatorio.** Uno de `dry_run`, `apply`. |
+| `--stack-id` | string | Ámbito opcional de despliegue exacto que usa la limpieza E2E. |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api stacks requirements
+
+Obtiene la especificación de requisitos (salida de la fase 1).
+
+```bash
+techstack api stacks requirements <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/requirements` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_stack_requirements` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+
+## techstack api stacks resume-enrollment
+
+Reanuda una espera vencida de un Node gestionado en su VM exacta existente.
+
+Recuperación autenticada e idempotente de un trabajo persistido en `waiting_enrollment`, `waiting_provider_provision` o `waiting_canonical_guard` cuyo `next_resume_at` lleva vencido más allá del periodo de gracia acotado. El servidor valida el despliegue de StackKit propio, el trabajo de origen, el motivo de la espera, el arrendamiento exacto, el rol foundation activo y el Node canónico como una sola operación. Retira de forma atómica la espera de origen exacta, crea o rehidrata un único despliegue de sustitución determinista ligado al mismo arrendamiento y Node, y reproduce ese trabajo en llamadas posteriores. Antes de entrar en el handler, los workers de la cola adquieren de forma atómica la reclamación duradera de ejecución de compatibilidad `tenant/stack`; esto serializa distintos trabajos del mismo despliegue de StackKit entre réplicas de Techstack. La reclamación sigue en `running` de forma duradera hasta que el handler termina, también durante una cancelación. Este endpoint nunca invoca la creación de VM en el proveedor ni selecciona una VM más nueva. Una sustitución que se encuentra en `running` duradero tras un fallo sigue cerrada ante fallos, se informa como el mismo trabajo y nunca se duplica automáticamente; la reconciliación de acciones de runtime sigue siendo una tarea aparte del operador.
+
+```bash
+techstack api stacks resume-enrollment <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/resume-enrollment` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `resume_stack_enrollment` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+| `--job-id` | string | **Obligatorio.** Trabajo de origen persistido que actualmente se proyecta como waiting_enrollment. |
+| `--lease-id` | string | **Obligatorio.** Arrendamiento foundation gestionado exacto ya vinculado al trabajo de origen. |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api stacks retry-rollout
+
+Reintenta una implantación fallida de un despliegue de StackKit en su VM gestionada exacta existente.
+
+Valida el despliegue fallido propio, su arrendamiento foundation activo exacto y el Node canónico en una sola operación del lado del servidor. La sustitución duradera determinista omite la creación de VM en el proveedor, obtiene una reclamación duradera de ejecución de compatibilidad `tenant/stack` antes de entrar en el handler y se reproduce en las llamadas repetidas a esta operación. La reclamación serializa distintos trabajos del mismo despliegue de StackKit entre réplicas y sigue cerrada ante fallos como `running` tras la caída de un proceso hasta la reconciliación del operador.
+
+```bash
+techstack api stacks retry-rollout <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/retry-rollout` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `retry_stack_rollout` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+| `--lease-id` | string | **Obligatorio.** Arrendamiento foundation gestionado activo exacto vinculado al trabajo fallido. |
+| `--source-job-id` | string | **Obligatorio.** Trabajo de despliegue fallido exacto que se usa como evidencia inmutable del reintento. |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api stacks routing ensure
+
+Garantiza la capa de enrutamiento deseada para un despliegue de StackKit y un Node exactos.
+
+Persiste de forma atómica una capa de enrutamiento idempotente y con revisiones sin modificar la intención inmutable del usuario. server_id siempre es exacto y obligatorio. lease_id es obligatorio para los runtimes gestionados y se omite para un runtime local/Basement, que no tiene arrendamiento. Para un destino gestionado, una solicitud con ensure_rollout en true despacha el pipeline de despliegue existente solo después de demostrar que su arrendamiento foundation activo seleccionado y su Node canónico coinciden con este destino exacto. La API nunca informa del trabajo resultante como ya aplicado. La capa solo se consume al derivar los artefactos de StackKits, y esta ruta nunca crea ni selecciona una VM de sustitución.
+
+```bash
+techstack api stacks routing ensure <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/stacks/{id}/routing` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `ensure_stack_routing` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+| `--if-match` | string | Revisión de enrutamiento opcional para concurrencia optimista, por ejemplo `"3"`. |
+| `--domain` | string | **Obligatorio.** Dominio personalizado normalizado; se rechazan esquemas, rutas, puertos y comodines. |
+| `--ensure-rollout` | boolean | Solicita la reconciliación sin implicar que ya se haya despachado o aplicado. Predeterminado: `false`. |
+| `--lease-id` | string | RuntimeLease exacto para un destino gestionado. Omítelo para un ServerRuntime local/Basement que realmente no tiene arrendamiento; los arrendamientos inventados se rechazan. |
+| `--mode` | string | **Obligatorio.** Uno de `custom-domain`. |
+| `--provenance` | object | **Obligatorio.** |
+| `--server-id` | string | **Obligatorio.** Destino ServerRuntime canónico exacto que pertenece al stack y al propietario. Para un arrendamiento gestionado, es el server_id que expone la proyección de operations/worker. Si esa fila del modelo de lectura aún no existe, TechStack solo puede crear este ID determinista a partir del arrendamiento exacto validado. |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api stacks routing get
+
+Lee el estado de enrutamiento deseado y observado de un despliegue de StackKit.
+
+Devuelve la capa de enrutamiento ligada al tenant y al propietario para el despliegue de StackKit exacto. El estado deseado y el estado observado/aplicado se informan por separado para que los clientes nunca deduzcan un DNS, un TLS o una implantación de StackKit correctos solo a partir de la persistencia.
+
+```bash
+techstack api stacks routing get <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/routing` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_stack_routing` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+
+## techstack api stacks routing targets
+
+Lista los destinos de enrutamiento principales explícitos de un despliegue de StackKit.
+
+Descubrimiento de solo lectura respaldado por la autoridad activa de RuntimeLease. Devuelve todos los destinos foundation/control-plane visibles para el propietario y nunca selecciona uno, crea una proyección de Node canónico (`ServerRuntime`) ni modifica el despliegue de StackKit. Quienes llaman deben enviar la tupla completa de server_id y lease_id a una mutación de enrutamiento.
+
+```bash
+techstack api stacks routing targets <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/routing/targets` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_stack_routing_targets` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+
+## techstack api stacks unified
+
+Obtiene la especificación unificada (salida de la fase 2).
+
+```bash
+techstack api stacks unified <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/unified` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_stack_unified` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |
+
+## techstack api stacks validate-import
+
+Valida una especificación sin importarla.
+
+```bash
+techstack api stacks validate-import [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/import/validate` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `validate_import` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--body` | json | **Obligatorio.** Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api stacks verify-chain
+
+Verifica la integridad de la cadena de hashes de la especificación.
+
+```bash
+techstack api stacks verify-chain <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/verify-chain` |
+| Cambia el estado | No |
+| Herramienta MCP | `verify_spec_chain` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<stack-id>` | string | **Obligatorio.** ID del stack. |

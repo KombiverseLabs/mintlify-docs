@@ -1,0 +1,84 @@
+---
+title: "techstack api jobs"
+description: "مرجع مولَّد لأوامر techstack api jobs"
+sidebarTitle: "jobs"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api jobs get
+
+جلب الحالة الحالية لمهمة واحدة مملوكة.
+
+هذا هو سطح الاستطلاع القياسي لواجهة المستخدم وعملاء API وأدوات MCP والوكلاء. تكشف `waiting_enrollment` عن انتظار غير نهائي؛ ويبقى الوصول إلى الهدف غير متاح حتى تُستأنف المهمة وتبلغ حالة نجاح نهائية.
+
+```bash
+techstack api jobs get <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs/{id}` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_job` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+
+## techstack api jobs list
+
+عرض المهام التي يملكها المستخدم المصادَق عليه.
+
+يُرجع حالة المهام نفسها المحصورة بالمالك التي تستخدمها واجهة المشغّل وعملاء الأتمتة. تبقى المهمة ذات `state: waiting` نشطة، وتجدول عملية المنسّق الحالية فحصها التالي؛ وهي ليست إجراء مزوّد فاشلاً. إذا أصبحت هذه الجدولة قديمة بعد إعادة تشغيل العملية، فاستخدم العملية `resumeStackEnrollment` ذات الهدف الدقيق.
+
+```bash
+techstack api jobs list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_jobs` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--page` | integer | رقم الصفحة (الافتراضي 1). |
+| `--per-page` | integer | الافتراضي `50`. |
+| `--stack-id` | string | — |
+| `--state` | string | إحدى القيم: `pending`، `running`، `waiting`، `completed`، `failed`، `canceled`. |
+| `--type` | string | — |
+| `--search` | string | — |
+
+## techstack api jobs logs
+
+جلب سجلات المهمة.
+
+```bash
+techstack api jobs logs <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs/{id}/logs` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_job_logs` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+
+## techstack api jobs stats
+
+جلب إحصاءات طابور المهام.
+
+```bash
+techstack api jobs stats [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs/stats` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_job_stats` |

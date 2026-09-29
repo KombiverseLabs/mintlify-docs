@@ -1,0 +1,85 @@
+---
+title: "techstack api services"
+description: "Referencia generada de los comandos techstack api services"
+sidebarTitle: "services"
+release: "v0.32.8"
+---
+<Note>Generado a partir del release v0.32.8 de Techstack (fuente `4c7d219a5d56`). Para una versión instalada, `techstack api <command> --help` es la fuente autorizada.</Note>
+
+## techstack api services get
+
+Obtiene el estado deseado y observado, la salud, el acceso y las capacidades de acción de un servicio.
+
+```bash
+techstack api services get <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_service_runtime` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<service-id>` | string | **Obligatorio.** ID canónico del runtime del servicio. |
+
+## techstack api services list
+
+Lista el estado canónico medido del runtime de los servicios.
+
+```bash
+techstack api services list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_service_runtimes` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--stack-id` | string | — |
+| `--server-id` | string | — |
+
+## techstack api services logs
+
+Lee la página más reciente, acotada y redactada, del log de un servicio de StackKits.
+
+```bash
+techstack api services logs <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/registry/services/{serviceId}/logs` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_managed_service_logs` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<service-id>` | string | **Obligatorio.** ID canónico del runtime del servicio. |
+| `--limit` | integer | Predeterminado: `100`. |
+| `--cursor` | string | — |
+
+## techstack api services run-action
+
+Pone en cola una acción de servicio de StackKits autorizada por el propietario.
+
+Deriva la autoridad sobre el stack, el servidor, el agente, el kit y el servicio a partir de un inventario canónico actualizado. Las repeticiones exactas convergen mediante un recibo de trabajo duradero; el Idempotency-Key sin procesar nunca se persiste. Las mutaciones van seguidas de una verificación de StackKits antes de que cambie el estado medido. Las acciones ejecutadas por el agente se rechazan con 409 `maintenance_active` mientras el servidor se reinicia o se actualiza.
+
+```bash
+techstack api services run-action <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/registry/services/{serviceId}/actions` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `run_managed_service_action` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<service-id>` | string | **Obligatorio.** ID canónico del runtime del servicio. |
+| `--body` | json | **Obligatorio.** Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |

@@ -1,0 +1,27 @@
+---
+title: "techstack api managed-runtimes"
+description: "techstack api managed-runtimes 命令的生成参考"
+sidebarTitle: "managed-runtimes"
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api managed-runtimes authority
+
+在不创建资源的情况下验证与请求绑定的托管运行时授权。
+
+对从 Gateway 到原生准入的授权链进行只读预检。托管请求必须携带 Gateway 以 v2 签名的托管运行时、Cloud Kit、提供商权益以及 `cloud.runtime.credits` `managed_servers` 决策，并与这一个精确请求绑定。成功的响应从不预留容量，也不会创建 StackKit 部署、队列任务、租约、Node 投影或提供商操作；真正的 Add-Server 请求会以原子方式重复每一项可变的准入检查。
+
+```bash
+techstack api managed-runtimes authority [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/managed-runtimes/authority` |
+| 更改状态 | 否 |
+| MCP 工具 | `preflight_managed_runtime_authority` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--provider-id` | string | **必填。** 正在检查其托管运行时授权的精确规范提供商。可选值：`centron`、`ionos`。 |

@@ -1,0 +1,27 @@
+---
+title: "techstack api managed-runtimes"
+description: "مرجع مولَّد لأوامر techstack api managed-runtimes"
+sidebarTitle: "managed-runtimes"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api managed-runtimes authority
+
+التحقق من سلطة وقت التشغيل المُدار المرتبطة بالطلب دون إنشاء مورد.
+
+فحص تمهيدي للقراءة فقط لسلسلة السلطة من Gateway إلى القبول الأصلي. يجب أن تحمل الطلبات المستضافة قرار Gateway الموقَّع بإصدار v2 بشأن وقت التشغيل المُدار وCloud Kit واستحقاق المزوّد و`cloud.runtime.credits` `managed_servers`، مرتبطاً بهذا الطلب بعينه. لا تحجز الاستجابة الناجحة أي سعة أبداً ولا تنشئ نشر StackKit أو مهمة في الطابور أو عقد إيجار أو إسقاط عقدة أو عملية لدى المزوّد؛ إذ يعيد طلب Add-Server الفعلي كل فحص قبول قابل للتغيير بشكل ذرّي.
+
+```bash
+techstack api managed-runtimes authority [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/managed-runtimes/authority` |
+| يغيّر الحالة | لا |
+| أداة MCP | `preflight_managed_runtime_authority` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--provider-id` | string | **مطلوب.** المزوّد القياسي الدقيق الذي يجري التحقق من سلطة وقت التشغيل المُدار لديه. إحدى القيم: `centron`، `ionos`. |

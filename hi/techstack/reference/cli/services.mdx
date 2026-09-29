@@ -1,0 +1,85 @@
+---
+title: "techstack api services"
+description: "techstack api services कमांड के लिए जनरेट किया गया संदर्भ"
+sidebarTitle: "services"
+release: "v0.32.8"
+---
+<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+
+## techstack api services get
+
+किसी एक सेवा की वांछित, देखी गई, हेल्थ, एक्सेस और एक्शन क्षमताएँ प्राप्त करें।
+
+```bash
+techstack api services get <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_service_runtime` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<service-id>` | string | **आवश्यक।** कैनोनिकल सेवा रनटाइम ID। |
+
+## techstack api services list
+
+कैनोनिकल मापी गई सेवा रनटाइम स्टेट सूचीबद्ध करें।
+
+```bash
+techstack api services list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_service_runtimes` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--stack-id` | string | — |
+| `--server-id` | string | — |
+
+## techstack api services logs
+
+नवीनतम सीमित, रेडैक्ट किया गया StackKits सेवा लॉग पेज पढ़ें।
+
+```bash
+techstack api services logs <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/registry/services/{serviceId}/logs` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_managed_service_logs` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<service-id>` | string | **आवश्यक।** कैनोनिकल सेवा रनटाइम ID। |
+| `--limit` | integer | डिफ़ॉल्ट `100`। |
+| `--cursor` | string | — |
+
+## techstack api services run-action
+
+ओनर द्वारा अधिकृत StackKits सेवा एक्शन कतार में डालें।
+
+ताज़ा कैनोनिकल इन्वेंटरी से स्टैक, सर्वर, एजेंट, kit और सेवा अथॉरिटी निकालता है। सटीक रीप्ले एक टिकाऊ जॉब रसीद के ज़रिए एक ही परिणाम पर पहुँचते हैं; रॉ Idempotency-Key कभी सहेजी नहीं जाती। हर बदलाव के बाद, मापी गई स्टेट बदलने से पहले StackKits verify चलता है। जब सर्वर रीबूट या अपडेट हो रहा हो, तब एजेंट द्वारा निष्पादित एक्शन 409 `maintenance_active` के साथ अस्वीकार होते हैं।
+
+```bash
+techstack api services run-action <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/registry/services/{serviceId}/actions` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `run_managed_service_action` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<service-id>` | string | **आवश्यक।** कैनोनिकल सेवा रनटाइम ID। |
+| `--body` | json | **आवश्यक।** JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |

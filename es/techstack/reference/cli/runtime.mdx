@@ -1,0 +1,35 @@
+---
+title: "techstack api runtime"
+description: "Referencia generada de los comandos techstack api runtime"
+sidebarTitle: "runtime"
+release: "v0.32.8"
+---
+<Note>Generado a partir del release v0.32.8 de Techstack (fuente `4c7d219a5d56`). Para una versión instalada, `techstack api <command> --help` es la fuente autorizada.</Note>
+
+## techstack api runtime logs
+
+Obtiene los logs recientes de runtime y de despliegue.
+
+Devuelve las entradas recientes del log de runtime y de despliegue (progreso de trabajos y despliegues, más la cola de los contenedores) desde el búfer de logs de runtime del servidor gRPC, filtradas por los parámetros de consulta indicados. Requiere autenticación y un servidor gRPC disponible.
+
+```bash
+techstack api runtime logs [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/runtime/logs` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_runtime_logs` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--stack-id` | string | — |
+| `--job-id` | string | — |
+| `--lease-id` | string | — |
+| `--agent-id` | string | — |
+| `--provider` | string | — |
+| `--service-name` | string | Nombre del servicio (también se acepta el alias `service`). |
+| `--min-level` | string | Nivel mínimo de log (también se acepta el alias `level`). Uno de `debug`, `info`, `warn`, `error`. |
+| `--since` | string | Límite inferior RFC3339 para las marcas de tiempo de los logs. |
+| `--limit` | integer | Predeterminado: `200`. |

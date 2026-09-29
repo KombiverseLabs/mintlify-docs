@@ -1,0 +1,175 @@
+---
+title: "techstack api servers"
+description: "Generierte Referenz für die Befehle unter techstack api servers"
+sidebarTitle: "servers"
+release: "v0.32.8"
+---
+<Note>Generiert aus dem Techstack-Release v0.32.8 (Quelle `4c7d219a5d56`). Für eine installierte Version ist `techstack api <command> --help` maßgeblich.</Note>
+
+## techstack api servers detach
+
+Genau einen vom Kunden betriebenen BYO-Server widerrufen und abkoppeln.
+
+Behält den terminalen kanonischen Server-Beleg und führt keinen Aufruf der Anbieter-API aus.
+
+```bash
+techstack api servers detach <server-id> [flags]
+```
+
+<Warning>Erfordert Bestätigung: Diese Operation widerruft die Zugangsdaten des Servers und entfernt ihn aus der Verwaltung, ohne die Maschine anzufassen. Übergib `--yes` oder beantworte die Rückfrage; ein nicht interaktiver Lauf ohne `--yes` stoppt vor jeder Anfrage mit Exit-Code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/detach` |
+| Ändert Zustand | Ja |
+| MCP-Tool | `detach_self_owned_server` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<server-id>` | string | **Erforderlich.** Kanonische Server-Runtime-ID. |
+| `--confirm-server-id` | string | **Erforderlich.** Muss exakt dem Pfadparameter serverId entsprechen. |
+| `--body` | json | JSON-Request-Body (`application/json`) als Literal, `@path` oder `-` für stdin. |
+
+## techstack api servers get
+
+Kanonischen Lebenszyklus, Verbindung, Health-Status und Kanäle eines Servers abrufen.
+
+```bash
+techstack api servers get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `get_server_runtime` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<server-id>` | string | **Erforderlich.** Kanonische Server-Runtime-ID. |
+
+## techstack api servers list
+
+Kanonischen Node-Runtime-Zustand auflisten.
+
+Gibt Owner-bezogene Nodes mit den kanonischen Identitäten `node_id` und `kit_deployment_id` zurück.
+
+```bash
+techstack api servers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `list_server_runtimes` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `--kit-deployment-id` | string | — |
+
+## techstack api servers maintenance get
+
+Einen Wartungs-Job eines eigenen Servers lesen.
+
+Gleich begrenzt wie der POST: das Edge-signierte Entitlement `techstack.servers.maintenance`, der Tenant, die Ownership des Servers und ein Job, der zu diesem Server gehört und vom Aufrufer angefordert wurde. Alles andere liefert 404. Wartungs-Jobs haben ein eigenes Ledger und werden nicht über `/api/v1/jobs/&#123;id&#125;` ausgeliefert. Es gibt keinen Log-Endpoint: Der Job trägt sein Ergebnis, und ein Fehlschlag trägt seinen stabilen Code mit Hinweisen für den Benutzer.
+
+```bash
+techstack api servers maintenance get <server-id> <job-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/actions/{jobId}` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `get_server_maintenance_job` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<server-id>` | string | **Erforderlich.** Kanonische Server-Runtime-ID. |
+| `<job-id>` | string | **Erforderlich.** |
+
+## techstack api servers maintenance run
+
+Einen vom Owner genehmigten OS-Update-Plan, ein OS-Update oder einen Neustart einreihen.
+
+Erfordert das Edge-signierte Entitlement `techstack.servers.maintenance`, die Ownership des Servers im Tenant und für `reboot` und `os_update` eine Multi-Faktor-Anmeldung aus dem verifizierten Edge-Envelope, die höchstens 300 Sekunden alt ist. Der Body wird strikt dekodiert: exakte Schlüssel in Kleinbuchstaben, keine Duplikate, keine unbekannten Felder. Eine Wiederholung mit demselben Idempotency-Key gibt den gespeicherten Beleg vor der Zielvalidierung zurück. Pro Server darf ein Neustart oder OS-Update und getrennt davon ein Update-Plan aktiv sein; ein Job, der bis zu seiner Frist nicht fertig ist, schlägt mit `deadline_exceeded` fehl und gibt seinen Slot frei. Die Aktion wird in `allowed_actions` nur angeboten, wenn der Server-Agent `stackkit.host-maintenance.v1` ankündigt, und `reboot` nur, wenn der Server außerdem `host_boot_id` meldet. Ablehnungen sind client-error-envelope/v1-Dokumente; der 409-`reason_code` ist einer von control_plane_host, substrate_node, protected_demo_server, service_locked, maintenance_active, node_operation_active, plan_stale, agent_capability_missing, boot_id_unknown, agent_not_connected, heartbeat_stale, inventory_revision_stale oder idempotency_key_reused; 403 trägt entitlement_required oder server_maintenance_step_up_required.
+
+```bash
+techstack api servers maintenance run <server-id> [flags]
+```
+
+<Warning>Erfordert Bestätigung: Diese Operation startet das Betriebssystem des Servers neu, aktualisiert es oder plant ein Update, je nach Anfrage. Übergib `--yes` oder beantworte die Rückfrage; ein nicht interaktiver Lauf ohne `--yes` stoppt vor jeder Anfrage mit Exit-Code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/actions` |
+| Ändert Zustand | Ja |
+| MCP-Tool | `run_server_maintenance_action` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<server-id>` | string | **Erforderlich.** Kanonische Server-Runtime-ID. |
+| `--action` | string | **Erforderlich.** Mögliche Werte: `os_update_plan`, `os_update`, `reboot`. |
+| `--expected-inventory-revision` | integer | **Erforderlich.** |
+| `--expected-plan-digest` | string | Nur für os_update: der plan_digest eines abgeschlossenen os_update_plan für diesen Server, der höchstens 15 Minuten alt ist. |
+| `--owner-approved` | boolean | Für os_update und reboot muss true gesetzt sein. |
+| `--body` | json | JSON-Request-Body (`application/json`) als Literal, `@path` oder `-` für stdin. |
+
+## techstack api servers ports
+
+Das Port-Inventory des authentifizierten Owners für einen kanonischen Server abrufen.
+
+Projektion für die Server-Detail-UI über dieselbe zentrale Port-Autorität wie die Inventory-/MCP-Schnittstelle, autorisiert über die kanonische, Owner-bezogene Server-Lesegrenze.
+
+```bash
+techstack api servers ports <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/ports` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `get_server_runtime_ports` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<server-id>` | string | **Erforderlich.** Kanonische Server-Runtime-ID. |
+
+## techstack api servers summary
+
+Die Server-Präsenz-Zusammenfassung des authentifizierten Owners lesen.
+
+Gibt nur eine Anzahl und ein Präsenz-Flag zurück, mit derselben Tenant- und Owner-Richtlinie wie die kanonische Inventory-Liste. Der optionale Tenant-Query-Parameter existiert für die Gateway-Kompatibilität und muss exakt dem Tenant in der authentifizierten Identität entsprechen; eine Abweichung wird vor jedem Lesezugriff auf den Store abgelehnt. Es werden keine Server-, Tenant- oder Subjekt-Bezeichner zurückgegeben.
+
+```bash
+techstack api servers summary [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/summary` |
+| Ändert Zustand | Nein |
+| MCP-Tool | Keine |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `--tenant` | string | — |
+
+## techstack api servers transitions
+
+Die gespeicherte Zeitleiste der Server-Zustände auflisten.
+
+```bash
+techstack api servers transitions <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/transitions` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `list_server_runtime_transitions` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<server-id>` | string | **Erforderlich.** Kanonische Server-Runtime-ID. |

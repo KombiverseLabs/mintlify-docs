@@ -1,0 +1,35 @@
+---
+title: "techstack api runtime"
+description: "techstack api runtime कमांड के लिए जनरेट किया गया संदर्भ"
+sidebarTitle: "runtime"
+release: "v0.32.8"
+---
+<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+
+## techstack api runtime logs
+
+हाल के रनटाइम/डिप्लॉय लॉग प्राप्त करें।
+
+gRPC सर्वर के रनटाइम लॉग बफ़र से हाल की रनटाइम/डिप्लॉय लॉग प्रविष्टियाँ (जॉब/डिप्लॉय प्रगति और कंटेनर का अंतिम हिस्सा) लौटाता है, जो दिए गए क्वेरी पैरामीटर से फ़िल्टर होती हैं। प्रमाणीकरण और उपलब्ध gRPC सर्वर आवश्यक है।
+
+```bash
+techstack api runtime logs [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/runtime/logs` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_runtime_logs` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--stack-id` | string | — |
+| `--job-id` | string | — |
+| `--lease-id` | string | — |
+| `--agent-id` | string | — |
+| `--provider` | string | — |
+| `--service-name` | string | सेवा का नाम (उपनाम `service` भी स्वीकार्य)। |
+| `--min-level` | string | न्यूनतम लॉग स्तर (उपनाम `level` भी स्वीकार्य)। इनमें से एक: `debug`, `info`, `warn`, `error`। |
+| `--since` | string | लॉग टाइमस्टैम्प की RFC3339 निचली सीमा। |
+| `--limit` | integer | डिफ़ॉल्ट `200`। |

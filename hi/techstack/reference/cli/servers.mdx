@@ -1,0 +1,175 @@
+---
+title: "techstack api servers"
+description: "techstack api servers कमांड के लिए जनरेट किया गया संदर्भ"
+sidebarTitle: "servers"
+release: "v0.32.8"
+---
+<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+
+## techstack api servers detach
+
+ग्राहक द्वारा संचालित एक सटीक BYO सर्वर का एक्सेस रद्द करें और उसे अलग करें।
+
+टर्मिनल कैनोनिकल सर्वर रसीद बनाए रखता है और कोई प्रोवाइडर API कॉल नहीं करता।
+
+```bash
+techstack api servers detach <server-id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन सर्वर के क्रेडेंशियल रद्द करता है और मशीन को छुए बिना उसे प्रबंधन से हटा देता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/detach` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `detach_self_owned_server` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+| `--confirm-server-id` | string | **आवश्यक।** serverId पथ पैरामीटर के ठीक बराबर होना चाहिए। |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api servers get
+
+कैनोनिकल सर्वर लाइफ़साइकल, कनेक्शन, हेल्थ और चैनल प्राप्त करें।
+
+```bash
+techstack api servers get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_server_runtime` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+
+## techstack api servers list
+
+कैनोनिकल नोड रनटाइम स्टेट सूचीबद्ध करें।
+
+कैनोनिकल `node_id` और `kit_deployment_id` पहचानों के साथ ओनर-स्कोप्ड नोड लौटाता है।
+
+```bash
+techstack api servers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_server_runtimes` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--kit-deployment-id` | string | — |
+
+## techstack api servers maintenance get
+
+स्वामित्व वाले सर्वर का एक मेंटेनेंस जॉब पढ़ें।
+
+POST की तरह ही सीमित: Edge-हस्ताक्षरित `techstack.servers.maintenance` एंटाइटलमेंट, टेनेंट, सर्वर का स्वामित्व, और ऐसा जॉब जो इसी सर्वर का हो और कॉलर ने अनुरोध किया हो। बाकी सब कुछ 404 है। मेंटेनेंस जॉब का अपना लेजर होता है और वे `/api/v1/jobs/&#123;id&#125;` से नहीं मिलते। कोई लॉग एंडपॉइंट नहीं है: जॉब अपना परिणाम साथ रखता है, और विफलता अपना स्थिर कोड उपयोगकर्ता मार्गदर्शन के साथ रखती है।
+
+```bash
+techstack api servers maintenance get <server-id> <job-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/actions/{jobId}` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_server_maintenance_job` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+| `<job-id>` | string | **आवश्यक।** |
+
+## techstack api servers maintenance run
+
+ओनर द्वारा स्वीकृत OS अपडेट प्लान, OS अपडेट या रीबूट कतार में डालें।
+
+Edge-हस्ताक्षरित `techstack.servers.maintenance` एंटाइटलमेंट, टेनेंट में सर्वर का स्वामित्व, और `reboot` व `os_update` के लिए सत्यापित edge एनवेलप से अधिकतम 300 सेकंड पुराना मल्टी-फ़ैक्टर साइन-इन आवश्यक है। बॉडी को सख़्ती से डिकोड किया जाता है: सटीक लोअरकेस कुंजियाँ, कोई डुप्लिकेट नहीं, कोई अज्ञात फ़ील्ड नहीं। उसी Idempotency-Key के साथ रीप्ले, लक्ष्य सत्यापन से पहले सहेजी गई रसीद लौटाता है। प्रति सर्वर एक रीबूट या OS अपडेट और, अलग से, एक अपडेट प्लान सक्रिय हो सकता है; जो जॉब अपनी समय-सीमा तक पूरा नहीं होता वह `deadline_exceeded` के साथ विफल होता है और अपना स्लॉट खाली कर देता है। यह एक्शन `allowed_actions` में तभी दिया जाता है जब सर्वर एजेंट `stackkit.host-maintenance.v1` घोषित करता है, और `reboot` तभी जब सर्वर `host_boot_id` भी रिपोर्ट करता है। अस्वीकृतियाँ client-error-envelope/v1 दस्तावेज़ होती हैं; 409 `reason_code` इनमें से एक है: control_plane_host, substrate_node, protected_demo_server, service_locked, maintenance_active, node_operation_active, plan_stale, agent_capability_missing, boot_id_unknown, agent_not_connected, heartbeat_stale, inventory_revision_stale या idempotency_key_reused; 403 में entitlement_required या server_maintenance_step_up_required होता है।
+
+```bash
+techstack api servers maintenance run <server-id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन अनुरोध के अनुसार सर्वर के ऑपरेटिंग सिस्टम को रीबूट करता है, अपडेट करता है या अपडेट की योजना बनाता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/actions` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `run_server_maintenance_action` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+| `--action` | string | **आवश्यक।** इनमें से एक: `os_update_plan`, `os_update`, `reboot`। |
+| `--expected-inventory-revision` | integer | **आवश्यक।** |
+| `--expected-plan-digest` | string | केवल os_update के लिए: इस सर्वर के पूरे हो चुके os_update_plan का plan_digest, जो अधिकतम 15 मिनट पुराना हो। |
+| `--owner-approved` | boolean | os_update और reboot के लिए true आवश्यक है। |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api servers ports
+
+किसी एक कैनोनिकल सर्वर के लिए प्रमाणित ओनर की पोर्ट इन्वेंटरी प्राप्त करें।
+
+Inventory/MCP सरफ़ेस वाली उसी केंद्रीय पोर्ट अथॉरिटी पर सर्वर-विवरण UI प्रक्षेपण, जो कैनोनिकल ओनर-स्कोप्ड सर्वर रीड सीमा के ज़रिए अधिकृत होता है।
+
+```bash
+techstack api servers ports <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/ports` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_server_runtime_ports` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+
+## techstack api servers summary
+
+प्रमाणित ओनर का सर्वर-उपस्थिति सारांश पढ़ें।
+
+कैनोनिकल इन्वेंटरी सूची वाले उसी टेनेंट और ओनर नीति दायरे में केवल एक गिनती और उपस्थिति फ़्लैग लौटाता है। वैकल्पिक tenant क्वेरी Gateway संगतता के लिए है और प्रमाणित पहचान के टेनेंट से ठीक मेल खानी चाहिए; बेमेल होने पर किसी भी स्टोर रीड से पहले अस्वीकार किया जाता है। कोई सर्वर, टेनेंट या सब्जेक्ट पहचानकर्ता नहीं लौटाया जाता।
+
+```bash
+techstack api servers summary [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/summary` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--tenant` | string | — |
+
+## techstack api servers transitions
+
+सहेजी गई सर्वर स्टेट टाइमलाइन सूचीबद्ध करें।
+
+```bash
+techstack api servers transitions <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/transitions` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_server_runtime_transitions` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |

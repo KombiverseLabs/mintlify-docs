@@ -1,0 +1,123 @@
+---
+title: "techstack api unifier"
+description: "techstack api unifier कमांड के लिए जनरेट किया गया संदर्भ"
+sidebarTitle: "unifier"
+release: "v0.32.8"
+---
+<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+
+## techstack api unifier analyze
+
+आवश्यकताएँ जानने के लिए स्पेक का विश्लेषण करें (चरण 1)।
+
+सुरक्षित, आइडेम्पोटेंट। हार्डवेयर आवश्यकताएँ, पहचाने गए ऐड-ऑन और आवश्यक क्रेडेंशियल लौटाता है।
+
+```bash
+techstack api unifier analyze [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/analyze` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `analyze_spec` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--body` | json | **आवश्यक।** JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api unifier pipeline preview
+
+साइड इफ़ेक्ट के बिना पाइपलाइन परिणामों का प्रीव्यू देखें।
+
+सुरक्षित, आइडेम्पोटेंट। दिखाता है कि क्या जनरेट होगा। बैकएंड सत्यापन या StackKit रिज़ॉल्यूशन विफलताएँ data.valid=false और संरचित data.errors के साथ 200 लौटाती हैं; गलत स्वरूप वाला इनपुट और ऑथ विफलताएँ HTTP त्रुटियाँ ही रहती हैं।
+
+```bash
+techstack api unifier pipeline preview [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/pipeline/preview` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `preview_pipeline` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--body` | json | **आवश्यक।** JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api unifier pipeline run
+
+पूरी यूनिफ़ायर पाइपलाइन चलाएँ (validate + analyze + unify + generate)।
+
+साइड इफ़ेक्ट वाला -- IaC आउटपुट फ़ाइलें जनरेट करता है।
+
+```bash
+techstack api unifier pipeline run [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/pipeline` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `run_pipeline` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--body` | json | **आवश्यक।** JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api unifier pipeline validate
+
+निष्पादित किए बिना पाइपलाइन इनपुट सत्यापित करें।
+
+```bash
+techstack api unifier pipeline validate [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/pipeline/validate` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `validate_pipeline` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--body` | json | **आवश्यक।** JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api unifier unify
+
+स्पेसिफ़िकेशन यूनिफ़ाई करें (चरण 2)।
+
+```bash
+techstack api unifier unify [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/unify` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `unify_spec` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--body` | json | **आवश्यक।** JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api unifier validate
+
+स्टैक स्पेसिफ़िकेशन को CUE स्कीमा के विरुद्ध सत्यापित करें।
+
+सुरक्षित, आइडेम्पोटेंट। कोई साइड इफ़ेक्ट नहीं।
+
+```bash
+techstack api unifier validate [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/validate` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `validate_spec` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--body` | json | **आवश्यक।** JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |

@@ -1,0 +1,90 @@
+---
+title: "techstack api CLI-Referenz"
+description: "Jeder techstack-api-Befehl mit seinen Optionen und Exit-Codes"
+sidebarTitle: "Übersicht"
+icon: square-terminal
+release: "v0.32.8"
+---
+<Note>Generiert aus dem Techstack-Release v0.32.8 (Quelle `4c7d219a5d56`). Für eine installierte Version ist `techstack api <command> --help` maßgeblich.</Note>
+
+`techstack api` ruft die Techstack API genau so auf, wie die [API-Referenz](#api-referenz) sie beschreibt: ein Befehl pro öffentlicher Operation, generiert aus dem API-Vertrag des Release. Jeder Befehl gibt JSON ohne die Antwort-Hülle auf stdout aus; Fehler gehen als strukturiertes Fehlerobjekt an stderr.
+
+## Authentifizierung
+
+| Variable | Bedeutung |
+| --- | --- |
+| `TECHSTACK_API_URL` | Basis-URL der API. Standard ist `https://api.kombify.io/v1/techstack`; setze sie auf die Adresse deiner eigenen Techstack-Instanz, um diese Instanz direkt aufzurufen. |
+| `TECHSTACK_API_TOKEN` | Bearer-Token, das mit jeder Anfrage gesendet wird. Ohne dieses Token nutzt das CLI die von `techstack login` gespeicherte Session und bricht mit Exit-Code 3 ab, wenn keine vorhanden oder sie abgelaufen ist. |
+
+## Universelle Optionen
+
+| Option | Gilt für | Beschreibung |
+| --- | --- | --- |
+| `--fields <paths>` | jeden Befehl | Kommagetrennte Punkt-Pfade, die in der Ausgabe erhalten bleiben; bei Arrays pro Element angewendet. |
+| `--ndjson` | jeden Befehl | Arrays als einen kompakten JSON-Wert pro Zeile ausgeben. |
+| `--dry-run` | ändernde Befehle | Die aufgelöste Anfrage als JSON ausgeben, ohne sie zu autorisieren oder zu senden. |
+| `--idempotency-key <key>` | ändernde Befehle | Idempotency-Key-Header; Standard ist eine neue UUID. |
+| `--body <json\|@path\|->` | Befehle mit JSON-Body | Basis-Request-Body als Literal, Datei oder stdin; Argument-Flags überschreiben seine Eigenschaften. |
+| `--file <path\|->` | Befehle mit Datei-Body | Request-Body-Datei, die mit dem deklarierten Content-Type gesendet wird. |
+| `--yes` | Befehle mit Bestätigung | Ohne Rückfrage bestätigen; ohne interaktives Terminal erforderlich. |
+
+Befehle, die als bestätigungspflichtig markiert sind, fragen im Terminal nach `yes`. Ohne Terminal senden sie die Anfrage nur, wenn `--yes` gesetzt ist; andernfalls geben sie einen `CONFIRMATION_REQUIRED`-Fehler aus und beenden sich mit Exit-Code 9.
+
+## Exit-Codes
+
+| Code | Bedeutung |
+| --- | --- |
+| 0 | Erfolg. |
+| 1 | Jeder andere Fehler. |
+| 2 | Ungültige Eingabe (HTTP 400/422). |
+| 3 | Nicht authentifiziert (HTTP 401). |
+| 4 | Abgelehnt, Zahlung erforderlich oder Rate Limit erreicht (HTTP 402/403/429). |
+| 5 | Nicht gefunden (HTTP 404). |
+| 6 | Konflikt (HTTP 409). |
+| 7 | Server- oder Transportfehler (HTTP 5xx). |
+| 9 | Bestätigung erforderlich oder abgelehnt. |
+
+## Agent-Kontext
+
+`techstack api agent-context` gibt diesen Befehlskatalog für KI-Agents als Markdown aus, mit `--json` als JSON: jeden Befehl mit Aufruf, Argumenten, Bestätigung, Verfügbarkeit und MCP-Tool-Namen sowie die universellen Optionen und Exit-Codes von oben.
+
+## Befehle
+
+| Befehlsgruppe | Umfasst |
+| --- | --- |
+| [`techstack api addons`](/de/techstack/reference/cli/addons) | Add-ons |
+| [`techstack api agents`](/de/techstack/reference/cli/agents) | Agents |
+| [`techstack api auth`](/de/techstack/reference/cli/auth) | Auth |
+| [`techstack api autoinstall`](/de/techstack/reference/cli/autoinstall) | Health |
+| [`techstack api backups`](/de/techstack/reference/cli/backups) | Backups |
+| [`techstack api client-pairing`](/de/techstack/reference/cli/client-pairing) | Client Binding |
+| [`techstack api discovery`](/de/techstack/reference/cli/discovery) | Discovery |
+| [`techstack api drift`](/de/techstack/reference/cli/drift) | Stacks - Drift |
+| [`techstack api features`](/de/techstack/reference/cli/features) | Features |
+| [`techstack api health`](/de/techstack/reference/cli/health) | Health |
+| [`techstack api homelab`](/de/techstack/reference/cli/homelab) | Stacks |
+| [`techstack api install-scripts`](/de/techstack/reference/cli/install-scripts) | Workers |
+| [`techstack api instance`](/de/techstack/reference/cli/instance) | Instance |
+| [`techstack api inventory`](/de/techstack/reference/cli/inventory) | Inventory |
+| [`techstack api jobs`](/de/techstack/reference/cli/jobs) | Jobs |
+| [`techstack api managed-runtimes`](/de/techstack/reference/cli/managed-runtimes) | Jobs, Stacks |
+| [`techstack api monitor`](/de/techstack/reference/cli/monitor) | Metrics |
+| [`techstack api monthly-runtimes`](/de/techstack/reference/cli/monthly-runtimes) | Jobs, Monthly Runtime, Stacks |
+| [`techstack api pairing-tokens`](/de/techstack/reference/cli/pairing-tokens) | Trust |
+| [`techstack api prechecks`](/de/techstack/reference/cli/prechecks) | Pre-Checks |
+| [`techstack api runtime`](/de/techstack/reference/cli/runtime) | Runtime |
+| [`techstack api servers`](/de/techstack/reference/cli/servers) | Inventory, Jobs, RIL, Servers |
+| [`techstack api services`](/de/techstack/reference/cli/services) | Jobs, Services |
+| [`techstack api stack-identity`](/de/techstack/reference/cli/stack-identity) | Auth |
+| [`techstack api stackkits`](/de/techstack/reference/cli/stackkits) | StackKits |
+| [`techstack api stacks`](/de/techstack/reference/cli/stacks) | Inventory, Jobs, Stacks, Stacks - Drift, Stacks - Import/Export, Stacks - Specs |
+| [`techstack api system`](/de/techstack/reference/cli/system) | Health, Metrics |
+| [`techstack api system-accounts`](/de/techstack/reference/cli/system-accounts) | Auth |
+| [`techstack api tunnel`](/de/techstack/reference/cli/tunnel) | Tunnel |
+| [`techstack api unifier`](/de/techstack/reference/cli/unifier) | Unifier |
+| [`techstack api wallet`](/de/techstack/reference/cli/wallet) | Wallet |
+| [`techstack api workers`](/de/techstack/reference/cli/workers) | Pre-Checks, Workers |
+
+## API-Referenz
+
+Die Techstack-API-Referenz in diesem Abschnitt wird aus dem öffentlichen OpenAPI-Dokument desselben Release generiert.

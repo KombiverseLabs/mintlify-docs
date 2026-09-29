@@ -1,0 +1,106 @@
+---
+title: "techstack api agents"
+description: "techstack api agents कमांड के लिए जनरेट किया गया संदर्भ"
+sidebarTitle: "agents"
+release: "v0.32.8"
+---
+<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+
+## techstack api agents get
+
+ID से एजेंट और उसके संसाधन प्राप्त करें।
+
+```bash
+techstack api agents get <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/agents/{id}` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_agent` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<id>` | string | **आवश्यक।** संसाधन ID। |
+
+## techstack api agents list
+
+कनेक्टेड gRPC एजेंट सूचीबद्ध करें।
+
+```bash
+techstack api agents list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/agents` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_agents` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--page` | integer | पेज नंबर (डिफ़ॉल्ट 1)। |
+| `--per-page` | integer | प्रति पेज आइटम (डिफ़ॉल्ट 20, अधिकतम 100)। |
+
+## techstack api agents logs
+
+हाल के एजेंट लॉग प्राप्त करें।
+
+```bash
+techstack api agents logs <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/agents/{id}/logs` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_agent_logs` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<id>` | string | **आवश्यक।** संसाधन ID। |
+
+## techstack api agents remove
+
+एजेंट हटाएँ/डीरजिस्टर करें।
+
+```bash
+techstack api agents remove <id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन एजेंट को डीरजिस्टर करता है; नोड तब तक रिपोर्ट करना बंद रखता है जब तक वह दोबारा एनरोल न हो। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/agents/{id}` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `remove_agent` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<id>` | string | **आवश्यक।** संसाधन ID। |
+
+## techstack api agents send-command
+
+एजेंट को कमांड भेजें।
+
+```bash
+techstack api agents send-command <id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन कनेक्टेड नोड एजेंट पर कमांड चलाता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/agents/{id}/command` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `send_agent_command` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<id>` | string | **आवश्यक।** संसाधन ID। |
+| `--args` | string\[\] | — |
+| `--command` | string | **आवश्यक।** |
+| `--type` | string | **आवश्यक।** |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |

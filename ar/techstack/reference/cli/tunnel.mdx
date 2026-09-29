@@ -1,0 +1,149 @@
+---
+title: "techstack api tunnel"
+description: "مرجع مولَّد لأوامر techstack api tunnel"
+sidebarTitle: "tunnel"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api tunnel install-command
+
+إنشاء أمر تثبيت العامل مع عنوان URL للنفق.
+
+```bash
+techstack api tunnel install-command [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/tunnel/install-command` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا شيء |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--token` | string | **مطلوب.** |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api tunnel registry-url
+
+جلب عنوان URL لسجل الأنفاق العام.
+
+```bash
+techstack api tunnel registry-url [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/tunnel/registry-url` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_tunnel_registry_url` |
+
+## techstack api tunnel start
+
+بدء نفق Cloudflare.
+
+```bash
+techstack api tunnel start [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/tunnel/start` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `start_tunnel` |
+
+## techstack api tunnel status
+
+جلب حالة اتصال النفق.
+
+```bash
+techstack api tunnel status [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/tunnel/status` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_tunnel_status` |
+
+## techstack api tunnel stop
+
+إيقاف نفق Cloudflare.
+
+```bash
+techstack api tunnel stop [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/tunnel/stop` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `stop_tunnel` |
+
+## techstack api tunnel subdomains list
+
+عرض نطاقات kombify.me الفرعية الخاصة بالمستدعي لأغراض التشخيص؛ والتسجيل من مسؤولية StackKits.
+
+يتطلب مستدعياً مصادَقاً عليه. مع هوية المنصة المشتركة تُحصر القائمة في ربط المالك الخاص بالمستدعي.
+
+```bash
+techstack api tunnel subdomains list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/tunnel/subdomains` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_tunnel_subdomains` |
+
+## techstack api tunnel subdomains services
+
+عرض الخدمات تحت أحد نطاقات kombify.me الفرعية الأساسية الخاصة بالمستدعي.
+
+```bash
+techstack api tunnel subdomains services <base-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/tunnel/subdomains/{baseId}/services` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_tunnel_subdomain_services` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<base-id>` | string | **مطلوب.** |
+
+## techstack api tunnel topology
+
+اكتشاف طوبولوجيا الشبكة.
+
+```bash
+techstack api tunnel topology [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/tunnel/topology` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_topology` |
+
+## techstack api tunnel validate-url
+
+التحقق من عنوان URL لنفق مخصص.
+
+```bash
+techstack api tunnel validate-url [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/tunnel/validate-url` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `validate_tunnel_url` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--url` | string | — |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |

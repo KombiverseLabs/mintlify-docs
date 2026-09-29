@@ -1,0 +1,170 @@
+---
+title: "techstack api monitor"
+description: "techstack api monitor 命令的生成参考"
+sidebarTitle: "monitor"
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api monitor alerts list
+
+列出活动的监控告警。
+
+```bash
+techstack api monitor alerts list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/alerts` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_monitor_alerts` |
+
+## techstack api monitor alerts rules
+
+列出监控告警规则。
+
+```bash
+techstack api monitor alerts rules [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/alerts/rules` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_monitor_alert_rules` |
+
+## techstack api monitor availability
+
+可用性、停机时段和每日状态，均由状态转换时间线推导得出。
+
+这是基于只追加的服务器状态转换时间线的投影，而不是采样器：每个时段都由两次已记录的状态转换界定，并带有写入这些转换时使用的原因代码。响应会公布其自身的统计口径，因此读者无需阅读源码即可看出哪些连接状态被计为停机。
+
+```bash
+techstack api monitor availability [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/availability` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_availability_report` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--window` | string | 封闭集合；无界窗口会成为拒绝服务的调节旋钮。可选值：`24h`、`7d`、`30d`、`90d`。默认值：`"30d"`。 |
+| `--server-id` | string | 将报告限定到一台服务器，用于服务器详情页。 |
+
+## techstack api monitor health
+
+获取监控摄取/查询健康诊断。
+
+```bash
+techstack api monitor health [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/health` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_monitor_health` |
+
+## techstack api monitor metrics label-values
+
+列出某个指标标签的值。
+
+```bash
+techstack api monitor metrics label-values [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/values` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_monitor_metric_label_values` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--name` | string | **必填。** |
+
+## techstack api monitor metrics labels
+
+列出指标标签名称。
+
+```bash
+techstack api monitor metrics labels [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/labels` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_monitor_metric_labels` |
+
+## techstack api monitor metrics names
+
+列出指标名称。
+
+```bash
+techstack api monitor metrics names [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/names` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_monitor_metric_names` |
+
+## techstack api monitor query
+
+运行 PromQL 即时查询。
+
+```bash
+techstack api monitor query [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/instant` |
+| 更改状态 | 否 |
+| MCP 工具 | `instant_monitor_query` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--q` | string | **必填。** |
+| `--time` | string | — |
+
+## techstack api monitor query-range
+
+运行 PromQL 范围查询。
+
+```bash
+techstack api monitor query-range [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/query` |
+| 更改状态 | 否 |
+| MCP 工具 | `range_monitor_query` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--q` | string | **必填。** |
+| `--start` | string | — |
+| `--end` | string | — |
+| `--step` | string | — |
+
+## techstack api monitor status
+
+获取监控后端状态和运行时元数据。
+
+```bash
+techstack api monitor status [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/status` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_monitor_status` |

@@ -1,0 +1,270 @@
+---
+title: "techstack api monthly-runtimes"
+description: "techstack api monthly-runtimes कमांड के लिए जनरेट किया गया संदर्भ"
+sidebarTitle: "monthly-runtimes"
+release: "v0.32.8"
+---
+<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+
+## techstack api monthly-runtimes cleanup-readback
+
+रेडैक्ट किए गए मैनेज्ड रनटाइम क्लीनअप स्टेट तथ्य पढ़ें।
+
+लीज़ की सटीक वर्तमान प्रोवाइडर-कंट्रोल रिसोर्स जनरेशन के लिए टेनेंट- और ओनर-स्कोप्ड स्टेट तथ्य लौटाता है। यह केवल-पढ़ने वाला एंडपॉइंट कभी किसी प्रोवाइडर या रनटाइम एजेंट को कॉल नहीं करता और कभी प्रोवाइडर रिसोर्स हैंडल, कमांड, प्रमाण दस्तावेज़ या क्रेडेंशियल नहीं लौटाता। टर्मिनल ऑपरेशन अब नहीं चल रहा होता, लेकिन वह अपने आप में सफल क्लीनअप का प्रमाण नहीं है: प्रोवाइडर पर अनुपस्थिति के लिए absence_evidence_ref और क्षमता रिलीज़ के लिए capacity_released आवश्यक है।
+
+```bash
+techstack api monthly-runtimes cleanup-readback <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/{lease_id}/cleanup-readback` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_monthly_runtime_cleanup_readback` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<lease-id>` | string | **आवश्यक।** मासिक रनटाइम लीज़ ID। |
+
+## techstack api monthly-runtimes decommission
+
+मासिक रनटाइम लीज़ डीकमीशन करें।
+
+```bash
+techstack api monthly-runtimes decommission <lease-id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन मासिक रनटाइम को डीकमीशन करता है और उसके प्रोवाइडर संसाधन हटा देता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/decommission` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `decommission_monthly_runtime` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<lease-id>` | string | **आवश्यक।** मासिक रनटाइम लीज़ ID। |
+| `--force-query` | boolean | रनटाइम पहुँच से बाहर होने पर सटीक जनरेशन-बद्ध प्रोवाइडर रीकंसिलिएशन का अनुरोध करें। Force केवल तभी स्वीकार होता है जब कंट्रोल प्लेन लीज़ रद्द करने से पहले रीस्टार्ट-सुरक्षित, HA-फ़ेंस्ड टिकाऊ कस्टडी साबित कर सके। &#123;"force": true&#125; JSON बॉडी के रूप में भी स्वीकार किया जाता है। खाली रिक्वेस्ट का डिफ़ॉल्ट false है। डिफ़ॉल्ट `false`। |
+| `--expected-resource-generation-digest` | string | वैकल्पिक ऑप्टिमिस्टिक कॉन्करेंसी दावा। जब तक यह डाइजेस्ट अब भी वर्तमान लीज़ रिसोर्स जनरेशन की पहचान न करे, प्रोवाइडर टियरडाउन 409 के साथ अस्वीकार किया जाता है। |
+| `--force` | boolean | डिफ़ॉल्ट `false`। |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api monthly-runtimes get
+
+मासिक रनटाइम स्टेटस प्राप्त करें।
+
+```bash
+techstack api monthly-runtimes get <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/{lease_id}` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_monthly_runtime_status` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<lease-id>` | string | **आवश्यक।** मासिक रनटाइम लीज़ ID। |
+
+## techstack api monthly-runtimes offerings
+
+मासिक रनटाइम ऑफ़रिंग सूचीबद्ध करें।
+
+सार्वजनिक, प्रोवाइडर-मुक्त सब्सक्रिप्शन रनटाइम ऑफ़रिंग लौटाता है।
+
+```bash
+techstack api monthly-runtimes offerings [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/offerings` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_monthly_runtime_offerings` |
+
+## techstack api monthly-runtimes operations
+
+मासिक रनटाइम ऑपरेशन इतिहास सूचीबद्ध करें।
+
+```bash
+techstack api monthly-runtimes operations <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/{lease_id}/operations` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_monthly_runtime_operations` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<lease-id>` | string | **आवश्यक।** मासिक रनटाइम लीज़ ID। |
+| `--limit` | integer | लौटाए जाने वाले ऑपरेशन इवेंट की अधिकतम संख्या। डिफ़ॉल्ट `50`। |
+
+## techstack api monthly-runtimes reconnect
+
+किसी मैनेज्ड रनटाइम का Guard सेशन रिकवर करें।
+
+कैनोनिकल एग्रीगेट की जाँच करता है; जब वह Guard कनेक्शन साबित नहीं कर पाता, तो चल रहे सर्वर के एंटाइटल्ड ओनर के लिए पिन किए गए निष्पादन चैनल पर Guard रीस्टार्ट करता है, सीमित समय-विंडो में कनेक्शन फिर से देखता है, और फिर एनरोलमेंट को enrolled तक ले जाता है। रुका हुआ रनटाइम अस्वीकार किया जाता है (managed_runtime_stopped)। किसी प्रोवाइडर संसाधन को छुआ नहीं जाता।
+
+```bash
+techstack api monthly-runtimes reconnect <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/reconnect` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `reconnect_monthly_runtime` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<lease-id>` | string | **आवश्यक।** मासिक रनटाइम लीज़ ID। |
+
+## techstack api monthly-runtimes recreate
+
+पूरी तरह रिलीज़ हो चुकी एक मैनेज्ड सर्वर जनरेशन फिर से बनाएँ।
+
+जब जनरेशन N की लीज़ और कैनोनिकल सर्वर स्टेट टर्मिनल हो, प्रोवाइडर ऑपरेशन स्टेट टर्मिनल हो, प्रोवाइडर-नेटिव अनुपस्थिति का अपारदर्शी प्रमाण हो और सटीक क्षमता रिलीज़ हो चुकी हो, तब उसी प्रोवाइडर-निरपेक्ष रनटाइम स्लॉट के लिए स्पष्ट रूप से जनरेशन N+1 प्रोविज़न करता है। अपरिवर्तनीय प्रोवाइडर, रीजन, ऑफ़रिंग, भूमिका, StackKit और सेवा आशय पुरानी ओनर-स्कोप्ड लीज़ से रिकवर किए जाते हैं; क्लाइंट उन्हें बदल नहीं सकते। एंडपॉइंट उसी मैनेज्ड-रनटाइम विस्तार अथॉरिटी को सौंपता है जिसका उपयोग Add Node करता है, इसलिए एनरोलमेंट, Guard प्रमाण, एंडपॉइंट और StackKit रोलआउट पूरे Creation फ़्लो से गुज़रते हैं। मानक Idempotency-Key अनिवार्य है और स्वीकृत जनरेशन को सुरक्षित रूप से रीप्ले करती है।
+
+```bash
+techstack api monthly-runtimes recreate <lease-id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन रनटाइम के प्रोवाइडर सर्वर को नए प्रोविज़न किए गए सर्वर से बदल देता है और इसका बिल बनता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/recreate` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `recreate_monthly_runtime` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<lease-id>` | string | **आवश्यक।** मासिक रनटाइम लीज़ ID। |
+| `--confirmed` | boolean | **आवश्यक।** स्पष्ट स्वीकृति कि Recreate एक नई मैनेज्ड सर्वर जनरेशन प्रोविज़न करता है और उसका बिल बनाता है। इनमें से एक: `true`। |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api monthly-runtimes resolve-custody
+
+प्रोवाइडर क्लीनअप के बाद लेगेसी या अनबाउंड कस्टडी रिकॉर्ड आर्काइव करें।
+
+किसी गैर-निष्पादन-योग्य लेगेसी या अनबाउंड लीज़ को सक्रिय डैशबोर्ड से तभी हटाता है जब ओनर पुष्टि कर दे कि उसका प्रोवाइडर संसाधन पहले ही हटाया जा चुका है। यह ऑपरेशन कभी किसी प्रोवाइडर संसाधन से संपर्क नहीं करता या उसे नहीं हटाता, और Techstack के प्रोवाइडर-नियंत्रित जनरेशन के लिए अस्वीकार किया जाता है।
+
+```bash
+techstack api monthly-runtimes resolve-custody <lease-id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन दर्ज करता है कि प्रोवाइडर संसाधन साफ़ किए जा चुके हैं और लीज़ कस्टडी रिलीज़ करता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/resolve-custody` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `resolve_monthly_runtime_custody` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<lease-id>` | string | **आवश्यक।** मासिक रनटाइम लीज़ ID। |
+| `--provider-cleanup-confirmed` | boolean | **आवश्यक।** इनमें से एक: `true`। |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api monthly-runtimes ssh disable
+
+इस जनरेशन के लिए ओनर SSH एक्सेस अक्षम करें।
+
+Kombify की निष्पादन-चैनल कुंजी रखते हुए नोड से ओनर द्वारा अधिकृत हर कुंजी हटाता है, और अक्षम अनुमति दर्ज करता है ताकि SSH फिर से सक्षम होने तक नई ओनर कुंजियाँ अस्वीकार हों।
+
+```bash
+techstack api monthly-runtimes ssh disable <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/disable-ssh` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `disable_monthly_runtime_ssh` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<lease-id>` | string | **आवश्यक।** मासिक रनटाइम लीज़ ID। |
+
+## techstack api monthly-runtimes ssh enable
+
+इस जनरेशन के लिए ओनर SSH एक्सेस सक्षम करें।
+
+पिन किए गए निष्पादन चैनल पर जनरेशन-बद्ध ओनर SSH अनुमति फिर से सक्षम करता है और ओनर द्वारा इस जनरेशन के लिए अधिकृत कुंजियाँ फिर से इंस्टॉल करता है। नई कुंजियाँ केवल दोबारा प्रमाणित सर्वर एक्सेस रूट से अधिकृत होती हैं।
+
+```bash
+techstack api monthly-runtimes ssh enable <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/enable-ssh` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `enable_monthly_runtime_ssh` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<lease-id>` | string | **आवश्यक।** मासिक रनटाइम लीज़ ID। |
+
+## techstack api monthly-runtimes ssh get
+
+मासिक रनटाइम लीज़ की SSH कनेक्शन जानकारी प्राप्त करें।
+
+```bash
+techstack api monthly-runtimes ssh get <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/{lease_id}/ssh` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_monthly_runtime_ssh_info` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<lease-id>` | string | **आवश्यक।** मासिक रनटाइम लीज़ ID। |
+
+## techstack api monthly-runtimes start
+
+उसी जनरेशन का रुका हुआ मैनेज्ड सर्वर शुरू करें।
+
+running की ओर एक जनरेशन-बद्ध प्रोवाइडर-कंट्रोल रीकंसाइल स्वीकार करता है। प्रोवाइडर पावर-ऑन at-most-once दावे के तहत एक बार चलता है; अभिसरण के दौरान दोहराई गई रिक्वेस्ट वही ऑपरेशन रीप्ले करती है। किसी भी प्रोवाइडर कॉल से पहले मैनेज्ड रनटाइम एंटाइटलमेंट आवश्यक है।
+
+```bash
+techstack api monthly-runtimes start <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/start` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `start_monthly_runtime` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<lease-id>` | string | **आवश्यक।** मासिक रनटाइम लीज़ ID। |
+
+## techstack api monthly-runtimes stop
+
+मैनेज्ड सर्वर को नष्ट किए बिना रोकें।
+
+stopped की ओर एक जनरेशन-बद्ध प्रोवाइडर-कंट्रोल रीकंसाइल स्वीकार करता है। centron अपने graceful गेस्ट शटडाउन एक्शन का उपयोग करता है; IONOS गेस्ट को निष्पादन चैनल पर बंद करता है, क्योंकि IONOS प्रोवाइडर का stop बाउंड DHCP IPv4 को रिलीज़ कर देता है। सर्वर अपनी डिस्क, पता, लीज़, क्षमता आरक्षण और मासिक बिलिंग बनाए रखता है।
+
+```bash
+techstack api monthly-runtimes stop <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/stop` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `stop_monthly_runtime` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<lease-id>` | string | **आवश्यक।** मासिक रनटाइम लीज़ ID। |

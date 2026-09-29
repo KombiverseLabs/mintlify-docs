@@ -1,0 +1,85 @@
+---
+title: "techstack api services"
+description: "Generierte Referenz für die Befehle unter techstack api services"
+sidebarTitle: "services"
+release: "v0.32.8"
+---
+<Note>Generiert aus dem Techstack-Release v0.32.8 (Quelle `4c7d219a5d56`). Für eine installierte Version ist `techstack api <command> --help` maßgeblich.</Note>
+
+## techstack api services get
+
+Gewünschten und beobachteten Zustand, Health-Status, Zugriff und Aktionsfähigkeiten für einen Service abrufen.
+
+```bash
+techstack api services get <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `get_service_runtime` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<service-id>` | string | **Erforderlich.** Kanonische Service-Runtime-ID. |
+
+## techstack api services list
+
+Kanonischen, gemessenen Service-Runtime-Zustand auflisten.
+
+```bash
+techstack api services list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `list_service_runtimes` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `--stack-id` | string | — |
+| `--server-id` | string | — |
+
+## techstack api services logs
+
+Die neueste begrenzte, geschwärzte StackKits-Service-Logseite lesen.
+
+```bash
+techstack api services logs <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/registry/services/{serviceId}/logs` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `get_managed_service_logs` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<service-id>` | string | **Erforderlich.** Kanonische Service-Runtime-ID. |
+| `--limit` | integer | Standard `100`. |
+| `--cursor` | string | — |
+
+## techstack api services run-action
+
+Eine vom Owner autorisierte StackKits-Service-Aktion einreihen.
+
+Leitet die Autorität für Stack, Server, Agent, Kit und Service aus einem frischen kanonischen Inventory ab. Exakte Wiederholungen konvergieren über einen dauerhaften Job-Beleg; der rohe Idempotency-Key wird nie gespeichert. Auf Änderungen folgt StackKits verify, bevor sich der gemessene Zustand ändert. Vom Agent ausgeführte Aktionen werden mit 409 `maintenance_active` abgelehnt, solange der Server neu gestartet oder aktualisiert wird.
+
+```bash
+techstack api services run-action <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/registry/services/{serviceId}/actions` |
+| Ändert Zustand | Ja |
+| MCP-Tool | `run_managed_service_action` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<service-id>` | string | **Erforderlich.** Kanonische Service-Runtime-ID. |
+| `--body` | json | **Erforderlich.** JSON-Request-Body (`application/json`) als Literal, `@path` oder `-` für stdin. |

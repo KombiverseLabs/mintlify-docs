@@ -1,0 +1,35 @@
+---
+title: "techstack api runtime"
+description: "Generierte Referenz für die Befehle unter techstack api runtime"
+sidebarTitle: "runtime"
+release: "v0.32.8"
+---
+<Note>Generiert aus dem Techstack-Release v0.32.8 (Quelle `4c7d219a5d56`). Für eine installierte Version ist `techstack api <command> --help` maßgeblich.</Note>
+
+## techstack api runtime logs
+
+Aktuelle Runtime-/Deploy-Logs abrufen.
+
+Gibt aktuelle Runtime-/Deploy-Logeinträge (Job-/Deploy-Fortschritt plus Container-Tail) aus dem Runtime-Log-Puffer des gRPC-Servers zurück, gefiltert nach den übergebenen Query-Parametern. Erfordert Authentifizierung und einen verfügbaren gRPC-Server.
+
+```bash
+techstack api runtime logs [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/runtime/logs` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `get_runtime_logs` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `--stack-id` | string | — |
+| `--job-id` | string | — |
+| `--lease-id` | string | — |
+| `--agent-id` | string | — |
+| `--provider` | string | — |
+| `--service-name` | string | Service-Name (Alias `service` wird ebenfalls akzeptiert). |
+| `--min-level` | string | Minimales Log-Level (Alias `level` wird ebenfalls akzeptiert). Mögliche Werte: `debug`, `info`, `warn`, `error`. |
+| `--since` | string | Untere Grenze für Log-Zeitstempel im RFC3339-Format. |
+| `--limit` | integer | Standard `200`. |

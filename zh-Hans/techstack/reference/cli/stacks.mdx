@@ -1,0 +1,553 @@
+---
+title: "techstack api stacks"
+description: "techstack api stacks 命令的生成参考"
+sidebarTitle: "stacks"
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api stacks create
+
+在所有者的 Homelab 中创建 StackKit 部署。
+
+根据以 `stack_spec` 提供的规范 StackKits stack-spec 负载，在经过认证的 B2C 所有者唯一的 Homelab 下创建一个内部 StackKit 部署。旧版 `/stacks` 路由和 `stack_id` 响应字段标识的就是该部署；它们不会创建或选择第二个 Homelab 产品。一个 TechStack 实例可以服务许多所有者，每个所有者都有自己的 Homelab。旧版 `user_config`/kombination 负载在此兼容边界上仍被接受。向导客户端应发送稳定的 `X-Idempotency-Key`；使用相同键和相同负载的重试会返回原始的部署、计划服务器和预配任务。
+
+```bash
+techstack api stacks create [flags]
+```
+
+<Warning>需要确认：此操作会创建 StackKit 部署并开始预配，可能会订购计费服务器。传入 `--yes` 或回答提示；未使用 `--yes` 的非交互式运行会在发出任何请求之前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks` |
+| 更改状态 | 是 |
+| MCP 工具 | `create_stack` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--x-idempotency-key` | string | 稳定的向导尝试键。最多 256 个字符。 |
+| `--mode` | string | 向导模式。可选值：`easy`、`techie`。 |
+| `--name` | string | 栈名称。 |
+| `--options` | object | — |
+| `--provider` | string | 基础设施提供商（直接格式）。 |
+| `--services` | string\[\] | 服务名称（直接格式）。 |
+| `--stack-spec` | object | 由创建向导生成的规范 StackKits stack-spec.yaml 结构。存在时，它是预配的唯一事实来源，并为兼容起见存储为该栈的 user_config。 |
+| `--user-config` | object | 旧版结构化配置，包括较早的 kombination 风格负载。新的向导客户端应发送 stack_spec。 |
+| `--user-config-format` | string | 可选值：`json`、`yaml`。 |
+| `--user-config-raw` | string | 原始 YAML/JSON 字符串。 |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api stacks deploy
+
+对一个 StackKit 部署执行 rollout（unify + IaC + tofu apply）。
+
+```bash
+techstack api stacks deploy <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/deploy` |
+| 更改状态 | 是 |
+| MCP 工具 | `deploy_stack` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+
+## techstack api stacks destroy
+
+停用一个 StackKit 部署及其基础设施。
+
+```bash
+techstack api stacks destroy <stack-id> [flags]
+```
+
+<Warning>需要确认：此操作会停用该 StackKit 部署的全部基础设施。传入 `--yes` 或回答提示；未使用 `--yes` 的非交互式运行会在发出任何请求之前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/destroy` |
+| 更改状态 | 是 |
+| MCP 工具 | `destroy_stack` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+
+## techstack api stacks drift check
+
+触发漂移检查。
+
+速率限制为每 5 分钟一次（除非 force=true）
+
+```bash
+techstack api stacks drift check <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/drift/check` |
+| 更改状态 | 是 |
+| MCP 工具 | `check_drift` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+| `--force` | boolean | 默认值：`false`。 |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api stacks drift details
+
+获取包含受影响资源的详细漂移信息。
+
+```bash
+techstack api stacks drift details <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/drift/details` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_drift_details` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+
+## techstack api stacks drift resolve
+
+触发漂移解决（重新应用）。
+
+前提条件：栈的状态必须为 "drifted"
+
+```bash
+techstack api stacks drift resolve <stack-id> [flags]
+```
+
+<Warning>需要确认：此操作会将栈规格重新应用到其服务器，并覆盖发生漂移的更改。传入 `--yes` 或回答提示；未使用 `--yes` 的非交互式运行会在发出任何请求之前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/drift/resolve` |
+| 更改状态 | 是 |
+| MCP 工具 | `resolve_drift` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+
+## techstack api stacks drift status
+
+获取当前漂移状态。
+
+```bash
+techstack api stacks drift status <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/drift/status` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_drift_status` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+
+## techstack api stacks export
+
+将栈导出为 stack-spec.yaml。
+
+根据 Accept 标头返回 YAML 或 JSON 格式的 StackKits stack-spec
+
+```bash
+techstack api stacks export <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/export` |
+| 更改状态 | 否 |
+| MCP 工具 | `export_stack` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+
+## techstack api stacks import
+
+将 stack-spec.yaml 导入为 StackKit 部署。
+
+将 YAML 或 JSON 作为部署导入到经过认证的所有者的 Homelab 下。
+
+```bash
+techstack api stacks import [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/import` |
+| 更改状态 | 是 |
+| MCP 工具 | `import_stack` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--body` | json | **必填。** JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api stacks intent
+
+获取已持久化的 kombination.yaml（逐字节一致，base64）。
+
+```bash
+techstack api stacks intent <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/intent` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_stack_intent` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+
+## techstack api stacks list
+
+列出所有者的 StackKit 部署。
+
+返回经过认证的所有者唯一的 B2C Homelab 下的所有 StackKit 部署。`kit_deployment_id`、`homelab_id` 和 `stackkit_id` 是产品身份；在使用方迁移期间，旧版标识符仍作为此路由上的兼容别名保留。
+
+```bash
+techstack api stacks list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_kit_deployments` |
+
+## techstack api stacks managed-runtimes add
+
+通过原生提供商控制添加一个托管节点。
+
+为确切的自有 StackKit 部署创建或恢复一个确定性的 Add-Server 任务。标准的 `Idempotency-Key` 是必需的。使用相同的键重放相同的规范请求，会返回原始的任务、租约、运行时服务器、资源代际和提供商操作关联；以不同的意图重用该键会以 409 失败。
+
+原始键从不持久化或返回。丢失的响应或不确定的原生准入结果只能使用相同的键恢复。HTTP 接受表示原生准入已持久化且提供商协调尚待进行；它从不声称虚拟机已经预配完成或处于健康状态。新的准入会以原子方式，将经过认证的租户/所有者容量槽位与租约代际和提供商操作一同预留。当权威的原生准入发现该有界容量已满时，会持久化一个不可重试的 403 结果，重放该被拒绝的任务会返回相同的结果。对已提交准入的精确重放会复用其现有预留。此版本没有自动释放预留的机制：仅有终态或本地停用状态并不会释放槽位。租约清单和功能交付标志从不授予或拒绝容量。托管环境中的新准入还需要以 v2 签名的商业运行时和提供商权益，以及已签名的 `cloud.runtime.credits` `managed_servers` 模式/限额决策；仅有功能标志从不授予提供商容量。自托管 OSS 改用其在构建时固定的静态版本清单策略，而不依赖 SaaS 权益。
+
+```bash
+techstack api stacks managed-runtimes add <stack-id> [flags]
+```
+
+<Warning>需要确认：此操作会为该 StackKit 部署订购一台额外的托管服务器，并会产生费用。传入 `--yes` 或回答提示；未使用 `--yes` 的非交互式运行会在发出任何请求之前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/managed-runtimes` |
+| 更改状态 | 是 |
+| MCP 工具 | `add_managed_runtime_server` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+| `--ionos-datacenter` | string | provider_region 的 IONOS 数据中心别名；对其他规范提供商会被忽略。 |
+| `--node-role` | string | 可选值：`foundation`、`worker`、`storage`。默认值：`"worker"`。 |
+| `--provider-id` | string | **必填。** 规范的可执行提供商标识符；历史显示别名会被拒绝。可选值：`centron`、`ionos`。 |
+| `--provider-region` | string | 提供商区域。对于 IONOS，会规范化为规范的数据中心标识符。 |
+| `--runtime-offering-id` | string | 规范的托管运行时套餐。省略时使用该栈快照中记录的有效默认值。 |
+| `--services` | string\[\] | 服务键；重复项和顺序在语义上无关紧要。 |
+| `--stackkit` | string | 为此服务器请求的 StackKit 基础。 |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api stacks operations
+
+获取某个自有 StackKit 部署在配置完成后的运维读取模型。
+
+返回 TechStack 运维仪表板所使用的、按所有者和租户限定的确切读取模型。`approved_servers` 记录运维人员的批准；`connected_servers` 更为严格，只统计已分配、已批准且具有带新鲜度限定的规范 Guard 心跳、连接和健康证据的节点。该操作是只读的，从不启动 rollout、预配或提供商工作。
+
+```bash
+techstack api stacks operations <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/operations` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_stack_operations` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+
+## techstack api stacks owner-spec
+
+获取 StackKit 部署的所有者引导规格。
+
+用于获取本地所有者字段和恢复口令哈希的 StackKit 管理员引导端点。此路由只接受由 `createStack` 返回的短期引导 Bearer 令牌；它不使用常规的浏览器/会话 Bearer 令牌。
+
+```bash
+techstack api stacks owner-spec <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/owner-spec` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_stack_owner_spec` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+
+## techstack api stacks pipeline-status
+
+获取所有规格阶段的完整流水线状态。
+
+```bash
+techstack api stacks pipeline-status <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/pipeline-status` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_pipeline_status` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+
+## techstack api stacks provision
+
+开始预配现有的 StackKit 部署。
+
+```bash
+techstack api stacks provision <stack-id> [flags]
+```
+
+<Warning>需要确认：此操作会开始预配该 StackKit 部署，可能会订购计费服务器。传入 `--yes` 或回答提示；未使用 `--yes` 的非交互式运行会在发出任何请求之前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/provision` |
+| 更改状态 | 是 |
+| MCP 工具 | `provision_stack` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api stacks prune-orphans
+
+审查或应用按所有者限定的测试残留清理。
+
+仅针对控制平面投影的两阶段清理。`dry_run` 会返回经过认证的所有者确切的 E2E/runtime-cloud 候选项，以及一个与修订绑定的稳定摘要。`apply` 会重新计算计划，并且只接受该确切摘要。此路由从不停用租约、调用提供商、销毁基础设施或将生命周期工作加入队列。
+
+```bash
+techstack api stacks prune-orphans [flags]
+```
+
+<Warning>需要确认：当模式为 apply 时，此操作会删除经过审查的孤立控制平面记录。传入 `--yes` 或回答提示；未使用 `--yes` 的非交互式运行会在发出任何请求之前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/prune-orphans` |
+| 更改状态 | 是 |
+| MCP 工具 | `review_or_apply_orphan_projection_cleanup` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--digest` | string | apply 时必需；从经过审查的 dry-run 中原样复制。 |
+| `--mode` | string | **必填。** 可选值：`dry_run`、`apply`。 |
+| `--stack-id` | string | E2E 清理使用的可选确切部署范围。 |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api stacks requirements
+
+获取需求规格（阶段 1 输出）。
+
+```bash
+techstack api stacks requirements <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/requirements` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_stack_requirements` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+
+## techstack api stacks resume-enrollment
+
+在其确切的现有虚拟机上恢复一个逾期的托管节点等待。
+
+对已持久化的、处于 `waiting_enrollment`、`waiting_provider_provision` 或 `waiting_canonical_guard` 状态且其 `next_resume_at` 已超过有界宽限期的任务，进行经过认证的幂等恢复。服务器会将自有 StackKit 部署、源任务、等待原因、确切租约、活动的 foundation 角色和规范节点作为一个操作进行校验。它会以原子方式结束该确切的源等待，创建或重新激活一个绑定到同一租约和节点的确定性替代部署，并在后续调用中重放该任务。在进入处理程序之前，队列 Worker 会以原子方式获取持久的 `tenant/stack` 兼容执行声明；这会在各 Techstack 副本之间串行化同一 StackKit 部署的不同任务。该声明会持久保持 `running`，直到处理程序退出，包括取消期间。此端点从不调用提供商的虚拟机创建，也不会选择更新的虚拟机。崩溃后被发现处于持久 `running` 状态的替代任务会保持失败关闭，作为同一任务报告，并且从不自动复制；运行时操作的协调仍是独立的运维事项。
+
+```bash
+techstack api stacks resume-enrollment <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/resume-enrollment` |
+| 更改状态 | 是 |
+| MCP 工具 | `resume_stack_enrollment` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+| `--job-id` | string | **必填。** 当前被投影为 waiting_enrollment 的已持久化源任务。 |
+| `--lease-id` | string | **必填。** 已绑定到源任务的确切托管 foundation 租约。 |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api stacks retry-rollout
+
+在其确切的现有托管虚拟机上重试一次失败的 StackKit 部署 rollout。
+
+在一次服务器端操作中校验自有的失败部署、其确切的活动 foundation 租约和规范节点。确定性的持久替代任务会绕过提供商的虚拟机创建，在进入处理程序之前赢得持久的 `tenant/stack` 兼容执行声明，并在重复调用此操作时被重放。该声明会在各副本之间串行化同一 StackKit 部署的不同任务，并在进程崩溃后以 `running` 保持失败关闭，直到运维人员进行协调。
+
+```bash
+techstack api stacks retry-rollout <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/retry-rollout` |
+| 更改状态 | 是 |
+| MCP 工具 | `retry_stack_rollout` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+| `--lease-id` | string | **必填。** 绑定到失败任务的确切活动托管 foundation 租约。 |
+| `--source-job-id` | string | **必填。** 用作不可变重试证据的确切失败部署任务。 |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api stacks routing ensure
+
+确保某个确切 StackKit 部署和节点具有期望的路由覆盖层。
+
+以原子方式持久化一个幂等、带修订的路由覆盖层，而不修改用户的不可变意图。server_id 始终是确切且必需的。lease_id 对托管运行时是必需的，对没有租约的本地/Basement 运行时则省略。对于托管目标，ensure_rollout 为 true 的请求只有在证明其所选的活动 foundation 租约和规范节点与此确切目标一致之后，才会分派现有的部署流水线。API 从不将由此产生的任务报告为已应用。覆盖层只在推导 StackKits 产物时被使用，此路径从不创建或选择替代虚拟机。
+
+```bash
+techstack api stacks routing ensure <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/stacks/{id}/routing` |
+| 更改状态 | 是 |
+| MCP 工具 | `ensure_stack_routing` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+| `--if-match` | string | 可选的乐观并发路由修订，例如 `"3"`。 |
+| `--domain` | string | **必填。** 规范化的自定义域名；会拒绝协议方案、路径、端口和通配符。 |
+| `--ensure-rollout` | boolean | 请求协调，但不表示协调已被分派或应用。默认值：`false`。 |
+| `--lease-id` | string | 托管目标的确切 RuntimeLease。对于确实没有租约的本地/Basement ServerRuntime 请省略；虚构的租约会被拒绝。 |
+| `--mode` | string | **必填。** 可选值：`custom-domain`。 |
+| `--provenance` | object | **必填。** |
+| `--server-id` | string | **必填。** 属于该栈和所有者的确切规范 ServerRuntime 目标。对于托管租约，这是 operations/ worker 投影所暴露的 server_id。如果该读取模型行尚不存在，TechStack 只能根据已校验的确切租约创建这个确定性 ID。 |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api stacks routing get
+
+读取某个 StackKit 部署期望的和已观测的路由状态。
+
+返回确切 StackKit 部署的、与租户和所有者绑定的路由覆盖层。期望状态与已观测/已应用状态分开报告，因此客户端绝不会仅凭持久化就推断 DNS、TLS 或 StackKit rollout 已成功。
+
+```bash
+techstack api stacks routing get <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/routing` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_stack_routing` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+
+## techstack api stacks routing targets
+
+列出某个 StackKit 部署的显式主路由目标。
+
+由活动的 RuntimeLease 授权支持的只读发现。返回所有对所有者可见的 foundation/control-plane 目标，从不选择其中之一、创建规范节点（`ServerRuntime`）投影或修改 StackKit 部署。调用方必须将完整的 server_id 和 lease_id 元组发送给路由变更操作。
+
+```bash
+techstack api stacks routing targets <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/routing/targets` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_stack_routing_targets` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+
+## techstack api stacks unified
+
+获取统一规格（阶段 2 输出）。
+
+```bash
+techstack api stacks unified <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/unified` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_stack_unified` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |
+
+## techstack api stacks validate-import
+
+校验规格而不导入。
+
+```bash
+techstack api stacks validate-import [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/import/validate` |
+| 更改状态 | 是 |
+| MCP 工具 | `validate_import` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--body` | json | **必填。** JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api stacks verify-chain
+
+验证规格哈希链的完整性。
+
+```bash
+techstack api stacks verify-chain <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/verify-chain` |
+| 更改状态 | 否 |
+| MCP 工具 | `verify_spec_chain` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<stack-id>` | string | **必填。** 栈 ID。 |

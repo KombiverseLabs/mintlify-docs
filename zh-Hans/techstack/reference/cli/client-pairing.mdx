@@ -1,0 +1,47 @@
+---
+title: "techstack api client-pairing"
+description: "techstack api client-pairing 命令的生成参考"
+sidebarTitle: "client-pairing"
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api client-pairing issue
+
+签发一个短期有效的 ClientPairingEnvelope v1。
+
+需要经过认证的实例管理员。仅适用于配置了租户和原生 OIDC 授权方的 HTTPS 自托管实例。本地单所有者模式会以失败关闭方式拒绝。
+
+```bash
+techstack api client-pairing issue [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/client-pairing/issue` |
+| 更改状态 | 是 |
+| MCP 工具 | 无 |
+
+## techstack api client-pairing redeem
+
+以原子方式兑换 ClientPairingEnvelope v1 代码。
+
+客户端在发送此请求之前会校验 HTTPS 证书指纹。成功时会恰好消耗该代码一次，并返回用于常规 OIDC 账号流程的公开元数据；它从不返回会话，也不会复制本地所有者身份。
+
+```bash
+techstack api client-pairing redeem [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/client-pairing/redeem` |
+| 更改状态 | 是 |
+| MCP 工具 | 无 |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--instance-id` | string | **必填。** |
+| `--one-time-code` | string | **必填。** |
+| `--tls-fingerprint-sha256` | string | **必填。** |
+| `--version` | string | **必填。** |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |

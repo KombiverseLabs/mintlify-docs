@@ -1,0 +1,185 @@
+---
+title: "techstack api backups"
+description: "techstack api backups कमांड के लिए जनरेट किया गया संदर्भ"
+sidebarTitle: "backups"
+release: "v0.32.8"
+---
+<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+
+## techstack api backups cleanup
+
+रिटेंशन नीति लागू करें (केवल एडमिन)।
+
+```bash
+techstack api backups cleanup [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/backups/cleanup` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+## techstack api backups create
+
+डेटाबेस बैकअप बनाएँ (केवल एडमिन)।
+
+```bash
+techstack api backups create [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/backups` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+## techstack api backups delete
+
+बैकअप हटाएँ (केवल एडमिन)।
+
+```bash
+techstack api backups delete <name> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन लोकल बैकअप आर्काइव को स्थायी रूप से हटा देता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/backups/{name}` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<name>` | string | **आवश्यक।** |
+
+## techstack api backups download
+
+बैकअप फ़ाइल डाउनलोड करें (केवल एडमिन)।
+
+```bash
+techstack api backups download <name> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups/{name}/download` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<name>` | string | **आवश्यक।** |
+
+## techstack api backups latest
+
+नवीनतम बैकअप की जानकारी प्राप्त करें (केवल एडमिन)।
+
+```bash
+techstack api backups latest [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups/latest` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | कोई नहीं |
+
+## techstack api backups list
+
+बैकअप सूचीबद्ध करें (केवल एडमिन)।
+
+```bash
+techstack api backups list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | कोई नहीं |
+
+## techstack api backups s3 delete
+
+S3 बैकअप हटाएँ (केवल एडमिन)।
+
+```bash
+techstack api backups s3 delete <name> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन बैकअप को S3 स्टोरेज से स्थायी रूप से हटा देता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/backups/s3/{name}` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<name>` | string | **आवश्यक।** |
+
+## techstack api backups s3 download
+
+S3 से बैकअप डाउनलोड करें (केवल एडमिन)।
+
+```bash
+techstack api backups s3 download <name> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/backups/s3/{name}/download` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<name>` | string | **आवश्यक।** |
+
+## techstack api backups s3 list
+
+S3 बैकअप सूचीबद्ध करें (केवल एडमिन)।
+
+```bash
+techstack api backups s3 list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups/s3` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | कोई नहीं |
+
+## techstack api backups s3 status
+
+S3 कनेक्शन स्टेटस प्राप्त करें (केवल एडमिन)।
+
+```bash
+techstack api backups s3 status [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups/s3/status` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | कोई नहीं |
+
+## techstack api backups upload-s3
+
+बैकअप S3 पर अपलोड करें (केवल एडमिन)।
+
+```bash
+techstack api backups upload-s3 <name> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/backups/{name}/upload-s3` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<name>` | string | **आवश्यक।** |

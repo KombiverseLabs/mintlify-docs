@@ -1,0 +1,35 @@
+---
+title: "techstack api runtime"
+description: "techstack api runtime 命令的生成参考"
+sidebarTitle: "runtime"
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api runtime logs
+
+获取近期的运行时/部署日志。
+
+从 gRPC 服务器的运行时日志缓冲区返回近期的运行时/部署日志条目（任务/部署进度以及容器尾部日志），并按提供的查询参数筛选。需要认证以及可用的 gRPC 服务器。
+
+```bash
+techstack api runtime logs [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/runtime/logs` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_runtime_logs` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--stack-id` | string | — |
+| `--job-id` | string | — |
+| `--lease-id` | string | — |
+| `--agent-id` | string | — |
+| `--provider` | string | — |
+| `--service-name` | string | 服务名称（也接受别名 `service`）。 |
+| `--min-level` | string | 最低日志级别（也接受别名 `level`）。可选值：`debug`、`info`、`warn`、`error`。 |
+| `--since` | string | 日志时间戳的 RFC3339 下限。 |
+| `--limit` | integer | 默认值：`200`。 |

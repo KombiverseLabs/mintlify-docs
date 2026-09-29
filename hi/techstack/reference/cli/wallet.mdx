@@ -1,0 +1,79 @@
+---
+title: "techstack api wallet"
+description: "techstack api wallet कमांड के लिए जनरेट किया गया संदर्भ"
+sidebarTitle: "wallet"
+release: "v0.32.8"
+---
+<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+
+## techstack api wallet list
+
+रेडैक्ट किए गए वॉलेट रिकवरी आइटम सूचीबद्ध करें।
+
+रिज़ॉल्व किए गए टेनेंट के लिए कॉलर के वॉलेट रिकवरी आइटम सूचीबद्ध करता है। इस रिस्पॉन्स से `secret` और `totp` मान हमेशा हटा दिए जाते हैं; केवल उपस्थिति फ़्लैग (`has_secret`, `has_totp`) दिखाए जाते हैं।
+
+```bash
+techstack api wallet list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/wallet` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_wallet_items` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--stack-id` | string | — |
+
+## techstack api wallet reauth-proof
+
+नए प्लेटफ़ॉर्म री-ऑथ के बाद अल्पकालिक reauth प्रमाण बनाएँ।
+
+नए बायोमेट्रिक/प्लेटफ़ॉर्म री-ऑथेंटिकेशन के बाद एक अल्पकालिक trusted-reauth HMAC प्रमाण (टाइमस्टैम्प + हस्ताक्षर) बनाता है, जिससे 5 मिनट की विंडो में बाद वाले reveal को अधिकृत किया जा सकता है। रिक्वेस्ट पर मान्य, नया प्लेटफ़ॉर्म reauth असर्शन आवश्यक है।
+
+```bash
+techstack api wallet reauth-proof <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/wallet/{id}/reauth-proof` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<id>` | string | **आवश्यक।** संसाधन ID। |
+| `--platform-reauth-at` | string | — |
+| `--reason` | string | — |
+| `--reauth-assertion` | string | — |
+| `--reauth-signature` | string | — |
+| `--reauth-timestamp` | string | — |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api wallet reveal
+
+नए reauth प्रमाण से सुरक्षित वॉलेट रिकवरी सीक्रेट/TOTP प्रकट करें।
+
+बायोमेट्रिक से सुरक्षित। बॉडी में या `X-Kombify-Reauth-\*` / `X-TechStack-Reauth-\*` हेडर में दिया गया नया trusted-reauth HMAC प्रमाण (टाइमस्टैम्प + हस्ताक्षर, 5 मिनट की विंडो) आवश्यक है। प्लेनटेक्स्ट रिकवरी मान एक बार लौटाता है; reveal का सर्वर-साइड ऑडिट होता है।
+
+```bash
+techstack api wallet reveal <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/wallet/{id}/reveal` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<id>` | string | **आवश्यक।** संसाधन ID। |
+| `--platform-reauth-at` | string | — |
+| `--reason` | string | — |
+| `--reauth-assertion` | string | — |
+| `--reauth-signature` | string | **आवश्यक।** |
+| `--reauth-timestamp` | string | **आवश्यक।** |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |

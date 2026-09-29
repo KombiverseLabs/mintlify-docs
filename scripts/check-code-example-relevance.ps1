@@ -125,7 +125,7 @@ foreach ($file in $mdxFiles) {
         continue
     }
     if ($relative -like "techstack/reference/cli/*.mdx" -and
-        $content -match '(?m)^generated_by: "render-api-surface-reference"$') {
+        ($isLocalized -or $content -match '(?m)^generated_by: "render-api-surface-reference"$')) {
         continue
     }
     $inFence = $false

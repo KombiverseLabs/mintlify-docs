@@ -1,0 +1,87 @@
+---
+title: "techstack api workers"
+description: "techstack api workers कमांड के लिए जनरेट किया गया संदर्भ"
+sidebarTitle: "workers"
+release: "v0.32.8"
+---
+<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+
+## techstack api workers approve
+
+लंबित वर्कर स्वीकृत करें।
+
+```bash
+techstack api workers approve <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/approve` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `approve_worker` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<id>` | string | **आवश्यक।** संसाधन ID। |
+
+## techstack api workers list
+
+पंजीकृत वर्कर सूचीबद्ध करें (ओनर के अनुसार फ़िल्टर किए गए)।
+
+```bash
+techstack api workers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_workers` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--page` | integer | पेज नंबर (डिफ़ॉल्ट 1)। |
+| `--per-page` | integer | प्रति पेज आइटम (डिफ़ॉल्ट 20, अधिकतम 100)। |
+
+## techstack api workers prechecks list
+
+वर्कर के प्री-चेक परिणाम प्राप्त करें।
+
+```bash
+techstack api workers prechecks list <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/{id}/prechecks` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<id>` | string | **आवश्यक।** संसाधन ID। |
+| `--page` | integer | पेज नंबर (डिफ़ॉल्ट 1)। |
+| `--per-page` | integer | प्रति पेज आइटम (डिफ़ॉल्ट 20, अधिकतम 100)। |
+
+## techstack api workers prechecks run
+
+वर्कर पर प्री-चेक चलाएँ।
+
+```bash
+techstack api workers prechecks run <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/prechecks` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<id>` | string | **आवश्यक।** संसाधन ID। |
+| `--checks` | object\[\] | **आवश्यक।** |
+| `--stack-id` | string | — |
+| `--timeout-seconds` | integer | डिफ़ॉल्ट `30`। |
+| `--worker-id` | string | — |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |

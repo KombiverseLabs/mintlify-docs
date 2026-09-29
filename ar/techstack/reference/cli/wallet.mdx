@@ -1,0 +1,79 @@
+---
+title: "techstack api wallet"
+description: "مرجع مولَّد لأوامر techstack api wallet"
+sidebarTitle: "wallet"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api wallet list
+
+عرض عناصر استرداد المحفظة المحجوبة البيانات الحساسة.
+
+يعرض عناصر استرداد المحفظة الخاصة بالمستدعي للمستأجر المحدد. تُحذف القيمتان `secret` و`totp` دائماً من هذه الاستجابة؛ ولا تُكشف إلا علامات الوجود (`has_secret`، `has_totp`).
+
+```bash
+techstack api wallet list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/wallet` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_wallet_items` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--stack-id` | string | — |
+
+## techstack api wallet reauth-proof
+
+إصدار إثبات إعادة مصادقة قصير العمر بعد إعادة مصادقة حديثة على المنصة.
+
+بعد إعادة مصادقة حديثة بالقياسات الحيوية أو عبر المنصة، يُصدر إثبات HMAC قصير العمر لإعادة المصادقة الموثوقة (trusted-reauth) (طابع زمني + توقيع) يمكن استخدامه لتفويض كشف لاحق خلال نافذة الدقائق الخمس. يتطلب تأكيداً حديثاً وصالحاً لإعادة المصادقة على المنصة في الطلب.
+
+```bash
+techstack api wallet reauth-proof <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/wallet/{id}/reauth-proof` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا شيء |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+| `--platform-reauth-at` | string | — |
+| `--reason` | string | — |
+| `--reauth-assertion` | string | — |
+| `--reauth-signature` | string | — |
+| `--reauth-timestamp` | string | — |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api wallet reveal
+
+كشف سر/TOTP لاسترداد المحفظة، محمي بإثبات إعادة مصادقة حديث.
+
+محمي بالقياسات الحيوية. يتطلب إثبات HMAC حديثاً لإعادة المصادقة الموثوقة (trusted-reauth) (طابع زمني + توقيع، نافذة 5 دقائق) يُقدَّم في الجسم أو في الترويسات `X-Kombify-Reauth-\*` / `X-TechStack-Reauth-\*`. يُرجع قيم الاسترداد بنص صريح مرة واحدة؛ ويُدقَّق الكشف على جانب الخادم.
+
+```bash
+techstack api wallet reveal <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/wallet/{id}/reveal` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا شيء |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+| `--platform-reauth-at` | string | — |
+| `--reason` | string | — |
+| `--reauth-assertion` | string | — |
+| `--reauth-signature` | string | **مطلوب.** |
+| `--reauth-timestamp` | string | **مطلوب.** |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |

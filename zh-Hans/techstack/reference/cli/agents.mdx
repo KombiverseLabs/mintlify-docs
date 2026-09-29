@@ -1,0 +1,106 @@
+---
+title: "techstack api agents"
+description: "techstack api agents 命令的生成参考"
+sidebarTitle: "agents"
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api agents get
+
+按 ID 获取代理及其资源。
+
+```bash
+techstack api agents get <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/agents/{id}` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_agent` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+
+## techstack api agents list
+
+列出已连接的 gRPC 代理。
+
+```bash
+techstack api agents list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/agents` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_agents` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--page` | integer | 页码（默认 1）。 |
+| `--per-page` | integer | 每页条目数（默认 20，最多 100）。 |
+
+## techstack api agents logs
+
+获取代理的近期日志。
+
+```bash
+techstack api agents logs <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/agents/{id}/logs` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_agent_logs` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+
+## techstack api agents remove
+
+移除/注销代理。
+
+```bash
+techstack api agents remove <id> [flags]
+```
+
+<Warning>需要确认：此操作会注销该代理；在该节点重新注册之前，它将停止上报。传入 `--yes` 或回答提示；未使用 `--yes` 的非交互式运行会在发出任何请求之前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/agents/{id}` |
+| 更改状态 | 是 |
+| MCP 工具 | `remove_agent` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+
+## techstack api agents send-command
+
+向代理发送命令。
+
+```bash
+techstack api agents send-command <id> [flags]
+```
+
+<Warning>需要确认：此操作会在已连接的节点代理上运行该命令。传入 `--yes` 或回答提示；未使用 `--yes` 的非交互式运行会在发出任何请求之前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/agents/{id}/command` |
+| 更改状态 | 是 |
+| MCP 工具 | `send_agent_command` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+| `--args` | string\[\] | — |
+| `--command` | string | **必填。** |
+| `--type` | string | **必填。** |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |

@@ -1,0 +1,90 @@
+---
+title: "مرجع CLI لـ techstack api"
+description: "كل أوامر techstack api وخياراتها ورموز الخروج"
+sidebarTitle: "نظرة عامة"
+icon: square-terminal
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+يستدعي `techstack api` واجهة Techstack API تماماً كما يصفها [مرجع API](#مرجع-api): أمر واحد لكل عملية عامة، مولَّد من عقد API الخاص بالإصدار. يطبع كل أمر JSON على stdout بعد إزالة غلاف الاستجابة؛ وتذهب الأخطاء إلى stderr ككائن خطأ منظَّم.
+
+## المصادقة
+
+| المتغير | المعنى |
+| --- | --- |
+| `TECHSTACK_API_URL` | عنوان URL الأساسي لـ API. القيمة الافتراضية `https://api.kombify.io/v1/techstack`؛ اضبطه على عنوان مثيل Techstack الخاص بك لاستدعاء ذلك المثيل مباشرة. |
+| `TECHSTACK_API_TOKEN` | رمز Bearer المميز المُرسل مع كل طلب. بدونه يستخدم CLI الجلسة المخزنة بواسطة `techstack login`، ويفشل برمز الخروج 3 عندما لا توجد جلسة أو تكون قد انتهت صلاحيتها. |
+
+## الخيارات العامة
+
+| الخيار | ينطبق على | الوصف |
+| --- | --- | --- |
+| `--fields <paths>` | كل أمر | مسارات منقوطة مفصولة بفواصل للإبقاء عليها في الإخراج؛ وتُطبَّق على كل عنصر في المصفوفات. |
+| `--ndjson` | كل أمر | طباعة المصفوفات كقيمة JSON مضغوطة واحدة في كل سطر. |
+| `--dry-run` | الأوامر المعدِّلة | طباعة الطلب المحلول بصيغة JSON دون تفويضه أو إرساله. |
+| `--idempotency-key <key>` | الأوامر المعدِّلة | ترويسة Idempotency-Key؛ والقيمة الافتراضية UUID جديد. |
+| `--body <json\|@path\|->` | الأوامر ذات جسم JSON | جسم الطلب الأساسي كقيمة حرفية أو ملف أو stdin؛ وتتجاوز خيارات الوسائط خصائصه. |
+| `--file <path\|->` | الأوامر ذات جسم ملف | ملف جسم الطلب المُرسل بنوع المحتوى المُعلَن. |
+| `--yes` | الأوامر التي تتطلب تأكيداً | التأكيد دون مطالبة؛ مطلوب عند التشغيل غير التفاعلي. |
+
+الأوامر الموسومة بأنها تتطلب تأكيداً تطلب `yes` في الطرفية. وبدون طرفية ترفض إرسال الطلب ما لم يُضبط `--yes`، وتطبع الخطأ `CONFIRMATION_REQUIRED` وتخرج بالرمز 9.
+
+## رموز الخروج
+
+| الرمز | المعنى |
+| --- | --- |
+| 0 | نجاح. |
+| 1 | أي فشل آخر. |
+| 2 | إدخال غير صالح (HTTP 400/422). |
+| 3 | غير مصادَق عليه (HTTP 401). |
+| 4 | مرفوض أو يتطلب الدفع أو محدود المعدل (HTTP 402/403/429). |
+| 5 | غير موجود (HTTP 404). |
+| 6 | تعارض (HTTP 409). |
+| 7 | فشل في الخادم أو النقل (HTTP 5xx). |
+| 9 | التأكيد مطلوب أو مرفوض. |
+
+## سياق الوكيل
+
+يطبع `techstack api agent-context` كتالوج الأوامر هذا لوكلاء الذكاء الاصطناعي بصيغة Markdown، أو بصيغة JSON مع `--json`: كل أمر مع طريقة استخدامه ووسائطه وتأكيده وتوفره واسم أداة MCP الخاصة به، إضافة إلى الخيارات العامة ورموز الخروج أعلاه.
+
+## الأوامر
+
+| مجموعة الأوامر | يغطي |
+| --- | --- |
+| [`techstack api addons`](/ar/techstack/reference/cli/addons) | الإضافات |
+| [`techstack api agents`](/ar/techstack/reference/cli/agents) | الوكلاء |
+| [`techstack api auth`](/ar/techstack/reference/cli/auth) | المصادقة |
+| [`techstack api autoinstall`](/ar/techstack/reference/cli/autoinstall) | الحالة الصحية |
+| [`techstack api backups`](/ar/techstack/reference/cli/backups) | النسخ الاحتياطية |
+| [`techstack api client-pairing`](/ar/techstack/reference/cli/client-pairing) | ربط العميل |
+| [`techstack api discovery`](/ar/techstack/reference/cli/discovery) | الاكتشاف |
+| [`techstack api drift`](/ar/techstack/reference/cli/drift) | الـ Stacks - الانحراف |
+| [`techstack api features`](/ar/techstack/reference/cli/features) | الميزات |
+| [`techstack api health`](/ar/techstack/reference/cli/health) | الحالة الصحية |
+| [`techstack api homelab`](/ar/techstack/reference/cli/homelab) | الـ Stacks |
+| [`techstack api install-scripts`](/ar/techstack/reference/cli/install-scripts) | العمّال |
+| [`techstack api instance`](/ar/techstack/reference/cli/instance) | المثيل |
+| [`techstack api inventory`](/ar/techstack/reference/cli/inventory) | الجرد |
+| [`techstack api jobs`](/ar/techstack/reference/cli/jobs) | المهام |
+| [`techstack api managed-runtimes`](/ar/techstack/reference/cli/managed-runtimes) | المهام، الـ Stacks |
+| [`techstack api monitor`](/ar/techstack/reference/cli/monitor) | المقاييس |
+| [`techstack api monthly-runtimes`](/ar/techstack/reference/cli/monthly-runtimes) | المهام، وقت التشغيل الشهري، الـ Stacks |
+| [`techstack api pairing-tokens`](/ar/techstack/reference/cli/pairing-tokens) | الثقة |
+| [`techstack api prechecks`](/ar/techstack/reference/cli/prechecks) | الفحوصات المسبقة |
+| [`techstack api runtime`](/ar/techstack/reference/cli/runtime) | وقت التشغيل |
+| [`techstack api servers`](/ar/techstack/reference/cli/servers) | الجرد، المهام، RIL، الخوادم |
+| [`techstack api services`](/ar/techstack/reference/cli/services) | المهام، الخدمات |
+| [`techstack api stack-identity`](/ar/techstack/reference/cli/stack-identity) | المصادقة |
+| [`techstack api stackkits`](/ar/techstack/reference/cli/stackkits) | StackKits |
+| [`techstack api stacks`](/ar/techstack/reference/cli/stacks) | الجرد، المهام، الـ Stacks، الـ Stacks - الانحراف، الـ Stacks - الاستيراد/التصدير، الـ Stacks - المواصفات |
+| [`techstack api system`](/ar/techstack/reference/cli/system) | الحالة الصحية، المقاييس |
+| [`techstack api system-accounts`](/ar/techstack/reference/cli/system-accounts) | المصادقة |
+| [`techstack api tunnel`](/ar/techstack/reference/cli/tunnel) | النفق |
+| [`techstack api unifier`](/ar/techstack/reference/cli/unifier) | الموحِّد (Unifier) |
+| [`techstack api wallet`](/ar/techstack/reference/cli/wallet) | المحفظة |
+| [`techstack api workers`](/ar/techstack/reference/cli/workers) | الفحوصات المسبقة، العمّال |
+
+## مرجع API
+
+مرجع Techstack API في هذا القسم مولَّد من مستند OpenAPI العام للإصدار نفسه.

@@ -1,0 +1,175 @@
+---
+title: "techstack api servers"
+description: "techstack api servers 命令的生成参考"
+sidebarTitle: "servers"
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api servers detach
+
+吊销并分离一台确切的、由客户自行运营的 BYO 服务器。
+
+保留终态的规范服务器回执，且不执行任何提供商 API 调用。
+
+```bash
+techstack api servers detach <server-id> [flags]
+```
+
+<Warning>需要确认：此操作会吊销该服务器的凭据并将其移出管理，而不会触碰该机器。传入 `--yes` 或回答提示；未使用 `--yes` 的非交互式运行会在发出任何请求之前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/detach` |
+| 更改状态 | 是 |
+| MCP 工具 | `detach_self_owned_server` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<server-id>` | string | **必填。** 规范的服务器运行时 ID。 |
+| `--confirm-server-id` | string | **必填。** 必须与 serverId 路径参数完全相同。 |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api servers get
+
+获取规范的服务器生命周期、连接、健康状况和通道。
+
+```bash
+techstack api servers get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_server_runtime` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<server-id>` | string | **必填。** 规范的服务器运行时 ID。 |
+
+## techstack api servers list
+
+列出规范的 Node 运行时状态。
+
+返回按所有者限定的 Node，带有规范的 `node_id` 和 `kit_deployment_id` 身份。
+
+```bash
+techstack api servers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_server_runtimes` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--kit-deployment-id` | string | — |
+
+## techstack api servers maintenance get
+
+读取某台自有服务器的一个维护任务。
+
+范围与 POST 相同：由 Edge 签名的 `techstack.servers.maintenance` 权益、租户、服务器的所有权，以及属于此服务器且由调用方请求的任务。其他任何情况均返回 404。维护任务有自己的账本，不通过 `/api/v1/jobs/&#123;id&#125;` 提供。没有日志端点：任务本身携带其结果，失败时携带稳定的代码和用户指引。
+
+```bash
+techstack api servers maintenance get <server-id> <job-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/actions/{jobId}` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_server_maintenance_job` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<server-id>` | string | **必填。** 规范的服务器运行时 ID。 |
+| `<job-id>` | string | **必填。** |
+
+## techstack api servers maintenance run
+
+将所有者批准的操作系统更新计划、操作系统更新或重启加入队列。
+
+需要由 Edge 签名的 `techstack.servers.maintenance` 权益、该服务器在租户中的所有权，并且对于 `reboot` 和 `os_update`，还需要来自已验证边缘信封、不超过 300 秒的多因素登录。正文会被严格解码：键名必须为精确的小写形式，不得重复，不得有未知字段。使用相同 Idempotency-Key 的重放会在目标校验之前返回已存储的回执。每台服务器同时只能有一个活动的重启或操作系统更新，另外还可以有一个活动的更新计划；未在截止时间前完成的任务会以 `deadline_exceeded` 失败并释放其槽位。只有当服务器代理声明支持 `stackkit.host-maintenance.v1` 时，才会在 `allowed_actions` 中提供该操作；只有当服务器还报告了 `host_boot_id` 时，才会提供 `reboot`。拒绝响应是 client-error-envelope/v1 文档；409 的 `reason_code` 为以下之一：control_plane_host、substrate_node、protected_demo_server、service_locked、maintenance_active、node_operation_active、plan_stale、agent_capability_missing、boot_id_unknown、agent_not_connected、heartbeat_stale、inventory_revision_stale 或 idempotency_key_reused；403 携带 entitlement_required 或 server_maintenance_step_up_required。
+
+```bash
+techstack api servers maintenance run <server-id> [flags]
+```
+
+<Warning>需要确认：此操作会按请求重启服务器、更新其操作系统，或为操作系统更新制定计划。传入 `--yes` 或回答提示；未使用 `--yes` 的非交互式运行会在发出任何请求之前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/actions` |
+| 更改状态 | 是 |
+| MCP 工具 | `run_server_maintenance_action` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<server-id>` | string | **必填。** 规范的服务器运行时 ID。 |
+| `--action` | string | **必填。** 可选值：`os_update_plan`、`os_update`、`reboot`。 |
+| `--expected-inventory-revision` | integer | **必填。** |
+| `--expected-plan-digest` | string | 仅适用于 os_update：此服务器已完成、且不超过 15 分钟的 os_update_plan 的 plan_digest。 |
+| `--owner-approved` | boolean | 对于 os_update 和 reboot，必须为 true。 |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api servers ports
+
+获取经过认证的所有者在某台规范服务器上的端口清单。
+
+服务器详情 UI 投影，基于与 Inventory/MCP 接口相同的中央端口授权，并通过规范的、按所有者限定的服务器读取边界进行授权。
+
+```bash
+techstack api servers ports <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/ports` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_server_runtime_ports` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<server-id>` | string | **必填。** 规范的服务器运行时 ID。 |
+
+## techstack api servers summary
+
+读取经过认证的所有者的服务器存在情况摘要。
+
+只返回一个计数和存在标志，其租户和所有者策略范围与规范清单列表相同。可选的 tenant 查询参数是为了兼容 Gateway 而存在，必须与已认证身份中的租户完全一致；不一致时会在读取任何存储之前被拒绝。不返回任何服务器、租户或主体标识符。
+
+```bash
+techstack api servers summary [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/summary` |
+| 更改状态 | 否 |
+| MCP 工具 | 无 |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--tenant` | string | — |
+
+## techstack api servers transitions
+
+列出已持久化的服务器状态时间线。
+
+```bash
+techstack api servers transitions <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/transitions` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_server_runtime_transitions` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<server-id>` | string | **必填。** 规范的服务器运行时 ID。 |

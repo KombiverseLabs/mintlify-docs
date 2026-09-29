@@ -1,0 +1,553 @@
+---
+title: "techstack api stacks"
+description: "مرجع مولَّد لأوامر techstack api stacks"
+sidebarTitle: "stacks"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api stacks create
+
+إنشاء نشر StackKit في Homelab المالك.
+
+ينشئ نشر StackKit داخلياً تحت Homelab الوحيد لمالك B2C المصادَق عليه، من حمولة stack-spec القياسية لـ StackKits المقدَّمة بوصفها `stack_spec`. يحدد المسار القديم `/stacks` وحقل الاستجابة `stack_id` هذا النشر؛ ولا ينشئان منتج Homelab ثانياً ولا يختارانه. يمكن لمثيل TechStack واحد أن يخدم مالكين كثيرين، لكل منهم Homelab خاص به. تظل حمولات `user_config`/kombination القديمة مقبولة عند حد التوافق هذا. ينبغي لعملاء المعالج إرسال `X-Idempotency-Key` ثابت؛ وتُرجع إعادات المحاولة بالمفتاح والحمولة نفسيهما النشر الأصلي والخادم المخطط ومهمة التجهيز.
+
+```bash
+techstack api stacks create [flags]
+```
+
+<Warning>يتطلب تأكيداً: تنشئ هذه العملية نشر StackKit وتبدأ التجهيز، الذي قد يطلب خوادم مدفوعة. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `create_stack` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--x-idempotency-key` | string | مفتاح ثابت لمحاولة المعالج. الحد الأقصى 256 حرفاً. |
+| `--mode` | string | وضع المعالج. إحدى القيم: `easy`، `techie`. |
+| `--name` | string | اسم الـ stack. |
+| `--options` | object | — |
+| `--provider` | string | مزوّد البنية التحتية (التنسيق المباشر). |
+| `--services` | string\[\] | أسماء الخدمات (التنسيق المباشر). |
+| `--stack-spec` | object | شكل stack-spec.yaml القياسي لـ StackKits الذي يولّده معالج الإنشاء. عند وجوده يكون مصدر الحقيقة للتجهيز، ويُخزَّن بوصفه user_config للـ stack لأغراض التوافق. |
+| `--user-config` | object | إعداد منظَّم قديم، بما في ذلك الحمولات الأقدم بأسلوب kombination. ينبغي لعملاء المعالج الجدد إرسال stack_spec. |
+| `--user-config-format` | string | إحدى القيم: `json`، `yaml`. |
+| `--user-config-raw` | string | سلسلة YAML/JSON خام. |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api stacks deploy
+
+طرح نشر StackKit واحد (unify + IaC + tofu apply).
+
+```bash
+techstack api stacks deploy <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/deploy` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `deploy_stack` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+
+## techstack api stacks destroy
+
+إخراج نشر StackKit واحد وبنيته التحتية من الخدمة.
+
+```bash
+techstack api stacks destroy <stack-id> [flags]
+```
+
+<Warning>يتطلب تأكيداً: تُخرج هذه العملية كل البنية التحتية لنشر StackKit من الخدمة. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/destroy` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `destroy_stack` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+
+## techstack api stacks drift check
+
+تشغيل فحص الانحراف.
+
+محدود بمرة واحدة كل 5 دقائق (ما لم يكن force=true)
+
+```bash
+techstack api stacks drift check <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/drift/check` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `check_drift` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+| `--force` | boolean | الافتراضي `false`. |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api stacks drift details
+
+جلب معلومات مفصلة عن الانحراف مع الموارد المتأثرة.
+
+```bash
+techstack api stacks drift details <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/drift/details` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_drift_details` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+
+## techstack api stacks drift resolve
+
+تشغيل معالجة الانحراف (re-apply).
+
+شرط مسبق -- يجب أن تكون حالة الـ stack هي "drifted"
+
+```bash
+techstack api stacks drift resolve <stack-id> [flags]
+```
+
+<Warning>يتطلب تأكيداً: تعيد هذه العملية تطبيق مواصفة الـ stack على خوادمها وتستبدل التغييرات المنحرفة. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/drift/resolve` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `resolve_drift` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+
+## techstack api stacks drift status
+
+جلب حالة الانحراف الحالية.
+
+```bash
+techstack api stacks drift status <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/drift/status` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_drift_status` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+
+## techstack api stacks export
+
+تصدير الـ stack بصيغة stack-spec.yaml.
+
+يُرجع stack-spec الخاصة بـ StackKits بصيغة YAML أو JSON حسب ترويسة Accept
+
+```bash
+techstack api stacks export <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/export` |
+| يغيّر الحالة | لا |
+| أداة MCP | `export_stack` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+
+## techstack api stacks import
+
+استيراد stack-spec.yaml كنشر StackKit.
+
+يستورد YAML أو JSON كنشر تحت Homelab المالك المصادَق عليه.
+
+```bash
+techstack api stacks import [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/import` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `import_stack` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--body` | json | **مطلوب.** جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api stacks intent
+
+جلب kombination.yaml المحفوظ (مطابق بايتاً ببايت، base64).
+
+```bash
+techstack api stacks intent <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/intent` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_stack_intent` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+
+## techstack api stacks list
+
+عرض عمليات نشر StackKit التابعة للمالك.
+
+يُرجع كل عمليات نشر StackKit تحت Homelab الوحيد لمالك B2C المصادَق عليه. `kit_deployment_id` و`homelab_id` و`stackkit_id` هي هويات المنتج؛ وتبقى المعرّفات القديمة أسماء بديلة للتوافق على هذا المسار ريثما ينتقل المستهلكون.
+
+```bash
+techstack api stacks list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_kit_deployments` |
+
+## techstack api stacks managed-runtimes add
+
+إضافة عقدة مُدارة واحدة عبر التحكم الأصلي لدى المزوّد.
+
+ينشئ أو يستأنف مهمة Add-Server حتمية واحدة لنشر StackKit المملوك المحدد. مفتاح `Idempotency-Key` القياسي إلزامي. تُرجع إعادة إرسال المفتاح نفسه مع الطلب القياسي نفسه ارتباطات المهمة وعقد الإيجار وخادم وقت التشغيل وجيل الموارد وعملية المزوّد الأصلية؛ وتفشل إعادة استخدامه بنية مختلفة بالرمز 409.
+
+لا يُحفظ المفتاح الخام ولا يُرجَع أبداً. لا يمكن استئناف استجابة مفقودة أو نتيجة قبول أصلي غير مؤكدة إلا بالمفتاح نفسه. يعني قبول HTTP أن القبول الأصلي دائم وأن المطابقة لدى المزوّد معلّقة؛ ولا يدّعي أبداً أن الـ VM قد جُهّزت بالفعل أو أنها سليمة. يحجز القبول الجديد بشكل ذرّي خانة سعة المستأجر/المالك المصادَق عليه مع جيل عقد الإيجار وعملية المزوّد. وعندما يجد القبول الأصلي المرجعي أن تلك السعة المحدودة ممتلئة، يحفظ نتيجة 403 غير قابلة لإعادة المحاولة، وتُرجع إعادة تشغيل تلك المهمة المرفوضة النتيجة نفسها. تعيد عمليات الإعادة الدقيقة لقبول مُلتزَم به مسبقاً استخدام حجزه القائم. لا يوجد في هذا الإصدار تحرير تلقائي للحجز: فحالة الإخراج من الخدمة النهائية أو المحلية وحدها لا تحرر خانة. لا يفوّض جرد عقود الإيجار وأعلام feature-delivery السعة ولا يرفضانها أبداً. يتطلب القبول الجديد المستضاف أيضاً استحقاقات وقت التشغيل التجاري والمزوّد الموقَّعة بإصدار v2، إضافة إلى قرار الوضع/الحد الموقَّع `cloud.runtime.credits` `managed_servers`؛ ولا تمنح أعلام الميزات وحدها سعة لدى المزوّد أبداً. يستخدم Self-host OSS سياسة بيان الإصدار الثابتة المحددة عند البناء بدلاً من الاعتماد على استحقاق SaaS.
+
+```bash
+techstack api stacks managed-runtimes add <stack-id> [flags]
+```
+
+<Warning>يتطلب تأكيداً: تطلب هذه العملية خادماً مُداراً إضافياً لنشر StackKit، وتُحتسب عليها رسوم. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/managed-runtimes` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `add_managed_runtime_server` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+| `--ionos-datacenter` | string | اسم بديل لمركز بيانات IONOS لـ provider_region؛ ويُتجاهل لدى المزوّدين القياسيين الآخرين. |
+| `--node-role` | string | إحدى القيم: `foundation`، `worker`، `storage`. الافتراضي `"worker"`. |
+| `--provider-id` | string | **مطلوب.** معرّف المزوّد القياسي القابل للتنفيذ؛ وتُرفض أسماء العرض البديلة التاريخية. إحدى القيم: `centron`، `ionos`. |
+| `--provider-region` | string | منطقة المزوّد. بالنسبة إلى IONOS تُوحَّد إلى معرّف مركز البيانات القياسي. |
+| `--runtime-offering-id` | string | عرض وقت التشغيل المُدار القياسي. عند الحذف تُستخدم القيمة الافتراضية الفعلية المأخوذة من لقطة الـ stack. |
+| `--services` | string\[\] | مفاتيح الخدمات؛ التكرارات والترتيب لا أهمية دلالية لهما. |
+| `--stackkit` | string | أساس StackKit المطلوب لهذا الخادم. |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api stacks operations
+
+جلب نموذج قراءة العمليات بعد التهيئة لنشر StackKit مملوك واحد.
+
+يُرجع نموذج القراءة الدقيق المحصور بالمالك والمستأجر الذي تستخدمه لوحة عمليات TechStack. يسجّل `approved_servers` موافقة المشغّل؛ أما `connected_servers` فأكثر صرامة ولا يحتسب إلا العقد المعيَّنة الموافق عليها التي لديها أدلة قياسية موسومة بحداثتها على نبض Guard واتصاله وحالته الصحية. العملية للقراءة فقط ولا تبدأ أبداً طرحاً أو تجهيزاً أو عملاً لدى المزوّد.
+
+```bash
+techstack api stacks operations <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/operations` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_stack_operations` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+
+## techstack api stacks owner-spec
+
+جلب مواصفة تمهيد المالك لنشر StackKit.
+
+نقطة نهاية admin-bootstrap في StackKit لجلب حقول المالك المحلي وتجزئة عبارة مرور الاسترداد. لا يقبل هذا المسار إلا رمز bearer للتمهيد قصير العمر الذي يُرجعه `createStack`؛ ولا يستخدم رمز bearer العادي للمتصفح/الجلسة.
+
+```bash
+techstack api stacks owner-spec <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/owner-spec` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_stack_owner_spec` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+
+## techstack api stacks pipeline-status
+
+جلب حالة خط المعالجة الكاملة لكل مراحل المواصفة.
+
+```bash
+techstack api stacks pipeline-status <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/pipeline-status` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_pipeline_status` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+
+## techstack api stacks provision
+
+بدء تجهيز نشر StackKit قائم.
+
+```bash
+techstack api stacks provision <stack-id> [flags]
+```
+
+<Warning>يتطلب تأكيداً: تبدأ هذه العملية تجهيز نشر StackKit، الذي قد يطلب خوادم مدفوعة. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/provision` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `provision_stack` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api stacks prune-orphans
+
+مراجعة تنظيف بقايا الاختبار المحصور بالمالك أو تطبيقه.
+
+تنظيف على مرحلتين لإسقاطات مستوى التحكم فقط. يُرجع `dry_run` المرشحين الدقيقين من E2E/runtime-cloud للمالك المصادَق عليه وملخصاً ثابتاً مرتبطاً بالمراجعة. يعيد `apply` حساب الخطة ولا يقبل إلا ذلك الملخص بعينه. لا يُخرج هذا المسار أبداً عقد إيجار من الخدمة ولا يستدعي مزوّداً ولا يهدم بنية تحتية ولا يضع أعمال دورة حياة في الطابور.
+
+```bash
+techstack api stacks prune-orphans [flags]
+```
+
+<Warning>يتطلب تأكيداً: تحذف هذه العملية سجلات مستوى التحكم اليتيمة التي جرت مراجعتها عندما يكون الوضع apply. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/prune-orphans` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `review_or_apply_orphan_projection_cleanup` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--digest` | string | مطلوب لـ apply؛ ويُنسخ دون تغيير من dry-run الذي جرت مراجعته. |
+| `--mode` | string | **مطلوب.** إحدى القيم: `dry_run`، `apply`. |
+| `--stack-id` | string | نطاق نشر دقيق اختياري يستخدمه تنظيف E2E. |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api stacks requirements
+
+جلب مواصفة المتطلبات (مُخرج المرحلة 1).
+
+```bash
+techstack api stacks requirements <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/requirements` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_stack_requirements` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+
+## techstack api stacks resume-enrollment
+
+استئناف انتظار متأخر لعقدة مُدارة على الـ VM القائمة المحددة الخاصة بها.
+
+استرداد مصادَق عليه وغير متغير النتيجة (idempotent) لمهمة محفوظة في الحالة `waiting_enrollment` أو `waiting_provider_provision` أو `waiting_canonical_guard` تجاوز موعد `next_resume_at` الخاص بها فترة السماح المحدودة. يتحقق الخادم من نشر StackKit المملوك والمهمة المصدر وسبب الانتظار وعقد الإيجار الدقيق ودور الأساس النشط والعقدة القياسية كعملية واحدة. وهو ينهي بشكل ذرّي الانتظار المصدر المحدد، وينشئ أو يعيد بناء عملية نشر بديلة حتمية واحدة مرتبطة بعقد الإيجار والعقدة نفسيهما، ويعيد تشغيل تلك المهمة في الاستدعاءات اللاحقة. قبل الدخول إلى المعالج، يحصل عمّال الطابور بشكل ذرّي على مطالبة التنفيذ التوافقية الدائمة `tenant/stack`؛ وهذا يسلسل المهام المختلفة لنشر StackKit نفسه عبر نسخ Techstack المتماثلة. تبقى المطالبة دائمة في الحالة `running` حتى يخرج المعالج، بما في ذلك أثناء الإلغاء. لا تستدعي نقطة النهاية هذه أبداً إنشاء VM لدى المزوّد ولا تختار VM أحدث. البديل الذي يُعثر عليه دائماً في الحالة `running` بعد انهيار يبقى مغلقاً عند الفشل، ويُبلَّغ عنه بوصفه المهمة نفسها، ولا يُكرَّر تلقائياً أبداً؛ وتبقى مطابقة إجراءات وقت التشغيل شأناً منفصلاً للمشغّل.
+
+```bash
+techstack api stacks resume-enrollment <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/resume-enrollment` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `resume_stack_enrollment` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+| `--job-id` | string | **مطلوب.** المهمة المصدر المحفوظة التي تُسقَط حالياً بوصفها waiting_enrollment. |
+| `--lease-id` | string | **مطلوب.** عقد إيجار الأساس المُدار الدقيق المرتبط مسبقاً بالمهمة المصدر. |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api stacks retry-rollout
+
+إعادة محاولة طرح فاشل لنشر StackKit واحد على الـ VM المُدارة القائمة المحددة الخاصة به.
+
+يتحقق من عملية النشر الفاشلة المملوكة وعقد إيجار الأساس النشط الدقيق الخاص بها والعقدة القياسية في عملية واحدة على جانب الخادم. يتجاوز البديل الدائم الحتمي إنشاء VM لدى المزوّد، ويفوز بمطالبة التنفيذ التوافقية الدائمة `tenant/stack` قبل الدخول إلى المعالج، ويُعاد تشغيله عند تكرار استدعاء هذه العملية. تسلسل المطالبة المهام المختلفة لنشر StackKit نفسه عبر النسخ المتماثلة، وتبقى مغلقة عند الفشل بالحالة `running` بعد انهيار العملية حتى يطابقها المشغّل.
+
+```bash
+techstack api stacks retry-rollout <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/retry-rollout` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `retry_stack_rollout` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+| `--lease-id` | string | **مطلوب.** عقد إيجار الأساس المُدار النشط الدقيق المرتبط بالمهمة الفاشلة. |
+| `--source-job-id` | string | **مطلوب.** مهمة النشر الفاشلة المحددة المستخدمة كدليل ثابت لإعادة المحاولة. |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api stacks routing ensure
+
+ضمان طبقة التوجيه المرغوبة لنشر StackKit وعقدة محددين.
+
+يحفظ بشكل ذرّي طبقة توجيه ذات مراجعات وغير متغيرة النتيجة (idempotent) دون تعديل نية المستخدم غير القابلة للتغيير. server_id دقيق وإلزامي دائماً. lease_id إلزامي لأوقات التشغيل المُدارة ويُحذف لوقت تشغيل محلي/Basement ليس له عقد إيجار. بالنسبة إلى هدف مُدار، لا يُطلق طلب ensure_rollout بقيمة true خط النشر القائم إلا بعد إثبات أن عقد إيجار الأساس النشط المختار والعقدة القياسية يساويان هذا الهدف بعينه. لا تُبلغ API أبداً عن المهمة الناتجة بوصفها مطبَّقة بالفعل. لا تُستهلك الطبقة إلا أثناء اشتقاق مخرجات StackKits، ولا ينشئ هذا المسار أبداً VM بديلة ولا يختارها.
+
+```bash
+techstack api stacks routing ensure <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/stacks/{id}/routing` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `ensure_stack_routing` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+| `--if-match` | string | مراجعة توجيه اختيارية للتزامن المتفائل، مثلاً `"3"`. |
+| `--domain` | string | **مطلوب.** نطاق مخصص موحَّد؛ وتُرفض المخططات والمسارات والمنافذ وأحرف البدل. |
+| `--ensure-rollout` | boolean | طلب المطابقة دون الإيحاء بأنها أُرسلت أو طُبّقت بالفعل. الافتراضي `false`. |
+| `--lease-id` | string | RuntimeLease الدقيق لهدف مُدار. احذفه لـ ServerRuntime محلي/Basement ليس له عقد إيجار فعلاً؛ وتُرفض عقود الإيجار المختلَقة. |
+| `--mode` | string | **مطلوب.** إحدى القيم: `custom-domain`. |
+| `--provenance` | object | **مطلوب.** |
+| `--server-id` | string | **مطلوب.** هدف ServerRuntime القياسي الدقيق التابع للـ stack والمالك. بالنسبة إلى عقد إيجار مُدار، هذا هو server_id الذي يكشفه إسقاط operations/ worker. إذا لم يكن صف نموذج القراءة هذا موجوداً بعد، فلا يجوز لـ TechStack أن ينشئ إلا هذا المعرّف الحتمي من عقد الإيجار الدقيق الذي جرى التحقق منه. |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api stacks routing get
+
+قراءة حالة التوجيه المرغوبة والمرصودة لنشر StackKit واحد.
+
+يُرجع طبقة التوجيه المرتبطة بالمستأجر والمالك لنشر StackKit المحدد. يُبلَّغ عن الحالة المرغوبة والحالة المرصودة/المطبَّقة بشكل منفصل، كي لا يستنتج العملاء أبداً نجاح DNS أو TLS أو طرح StackKit من مجرد الحفظ.
+
+```bash
+techstack api stacks routing get <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/routing` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_stack_routing` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+
+## techstack api stacks routing targets
+
+عرض أهداف التوجيه الأساسية الصريحة لنشر StackKit واحد.
+
+اكتشاف للقراءة فقط مدعوم بسلطة RuntimeLease النشطة. يُرجع كل هدف أساس/مستوى تحكم مرئي للمالك، ولا يختار أبداً أحدها أو ينشئ إسقاط عقدة قياسية (`ServerRuntime`) أو يعدّل نشر StackKit. يجب على المستدعين إرسال الزوج الكامل server_id وlease_id إلى أي تعديل للتوجيه.
+
+```bash
+techstack api stacks routing targets <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/routing/targets` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_stack_routing_targets` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+
+## techstack api stacks unified
+
+جلب المواصفة الموحَّدة (مُخرج المرحلة 2).
+
+```bash
+techstack api stacks unified <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/unified` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_stack_unified` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |
+
+## techstack api stacks validate-import
+
+التحقق من المواصفة دون استيرادها.
+
+```bash
+techstack api stacks validate-import [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/import/validate` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `validate_import` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--body` | json | **مطلوب.** جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api stacks verify-chain
+
+التحقق من سلامة سلسلة تجزئات المواصفة.
+
+```bash
+techstack api stacks verify-chain <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/stacks/{id}/verify-chain` |
+| يغيّر الحالة | لا |
+| أداة MCP | `verify_spec_chain` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<stack-id>` | string | **مطلوب.** معرّف الـ stack. |

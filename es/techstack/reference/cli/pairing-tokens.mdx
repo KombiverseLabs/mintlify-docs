@@ -1,0 +1,63 @@
+---
+title: "techstack api pairing-tokens"
+description: "Referencia generada de los comandos techstack api pairing-tokens"
+sidebarTitle: "pairing-tokens"
+release: "v0.32.8"
+---
+<Note>Generado a partir del release v0.32.8 de Techstack (fuente `4c7d219a5d56`). Para una versión instalada, `techstack api <command> --help` es la fuente autorizada.</Note>
+
+## techstack api pairing-tokens create
+
+Crea un token de emparejamiento para registrar workers.
+
+```bash
+techstack api pairing-tokens create [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/trust/pairing-tokens` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `create_pairing_token` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--environment-class` | string | Declaración explícita de la ubicación del propietario; omítela si no se conoce. Uno de `local`, `cloud`. |
+| `--name` | string | — |
+| `--server-provisioning-mode` | string | Uno de `install-command`, `connect-remote`. |
+| `--stack-id` | string | — |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api pairing-tokens delete
+
+Elimina un token de emparejamiento.
+
+```bash
+techstack api pairing-tokens delete <id> [flags]
+```
+
+<Warning>Requiere confirmación. Esta operación revoca el token de emparejamiento; los dispositivos que aún no se han emparejado ya no pueden usarlo. Pasa `--yes` o responde a la pregunta; una ejecución no interactiva sin `--yes` se detiene antes de cualquier solicitud con el código de salida 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/trust/pairing-tokens/{id}` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `delete_pairing_token` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<id>` | string | **Obligatorio.** ID del recurso. |
+
+## techstack api pairing-tokens list
+
+Lista los tokens de emparejamiento.
+
+```bash
+techstack api pairing-tokens list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/trust/pairing-tokens` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_pairing_tokens` |

@@ -1,0 +1,128 @@
+---
+title: "techstack api inventory"
+description: "techstack api inventory कमांड के लिए जनरेट किया गया संदर्भ"
+sidebarTitle: "inventory"
+release: "v0.32.8"
+---
+<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+
+## techstack api inventory servers access-context
+
+स्वामित्व वाले एक सर्वर का सैनिटाइज़्ड एक्सेस संदर्भ प्राप्त करें।
+
+केवल पते का मेटाडेटा, चैनल स्टेट और ताज़गी-योग्य सेवा लिंक लौटाता है। यह कभी एंडपॉइंट संदर्भ, एक्सेस-प्रोफ़ाइल संदर्भ, रूट ID, क्रेडेंशियल, टोकन, SSH उपयोगकर्ता, पोर्ट, कुंजियाँ, कमांड या लॉग नहीं लौटाता। इस सरफ़ेस के लिए इन्वेंटरी operate अनुमति आवश्यक है; केवल read अनुमति पर्याप्त नहीं है।
+
+```bash
+techstack api inventory servers access-context <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers/{serverId}/access-context` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `server_access_context` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+
+## techstack api inventory servers health
+
+स्वामित्व वाले एक सर्वर की ताज़गी-योग्य हेल्थ प्राप्त करें।
+
+```bash
+techstack api inventory servers health <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers/{serverId}/health` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `server_health` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+
+## techstack api inventory servers list
+
+प्रमाणित ओनर की सैनिटाइज़्ड सर्वर इन्वेंटरी सूचीबद्ध करें।
+
+केवल वे सर्वर लौटाता है जो विश्वसनीय टेनेंट संदर्भ में प्रमाणित सब्जेक्ट के स्वामित्व में हैं। टेनेंट और ओनर ओवरराइड स्वीकार नहीं किए जाते। रॉ मेटाडेटा, चैनल एंडपॉइंट, प्रोवाइडर-रिसोर्स संदर्भ, क्रेडेंशियल, SSH सामग्री, टोकन और लॉग कभी नहीं लौटाए जाते। लीज़ प्रक्षेपण में केवल एक अपारदर्शी पहचानकर्ता और स्टेट होते हैं। कर्सर पेज एक ही ऑथराइज़ेशन- और फ़िल्टर-बद्ध कलेक्शन वॉटरमार्क साझा करते हैं और बाद में जोड़ी गई प्रविष्टियाँ शामिल नहीं करते।
+
+```bash
+techstack api inventory servers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_servers` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--limit` | integer | डिफ़ॉल्ट `50`। |
+| `--cursor` | string | — |
+
+## techstack api inventory servers ports
+
+स्वामित्व वाले एक सर्वर के वांछित, आरक्षित, देखे गए और एक्सपोज़ किए गए लिसनर प्राप्त करें।
+
+कंपाइलर द्वारा घोषित लिसनर दावों और जनरेशन-फ़ेंस्ड आरक्षणों को मोनोटोन Guard रनटाइम प्रमाण के साथ प्रक्षेपित करता है। अनुपलब्ध या पुराने अवलोकन स्पष्ट रूप से दिखते रहते हैं और कभी आशावादी उपलब्धता नहीं बनते।
+
+```bash
+techstack api inventory servers ports <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers/{serverId}/ports` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `server_ports` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+
+## techstack api inventory servers rename
+
+स्वामित्व वाले एक सर्वर का ओनर द्वारा चुना गया नाम सेट करें या हटाएँ।
+
+servers.display_name लिखता है, जिसे रनटाइम प्रक्षेपण कभी ओवरराइट नहीं करते। `null` या खाली स्ट्रिंग नया नाम हटा देती है। हस्ताक्षरित techstack.inventory.write एंटाइटलमेंट और FGA सर्वर `caller` संबंध आवश्यक है; यह लेखन प्रमाणित टेनेंट और ओनर से बद्ध है, और उस दायरे से बाहर का सर्वर यह बताए बिना अस्वीकार किया जाता है कि वह मौजूद है या नहीं। नाम सेट होने पर कैनोनिकल इन्वेंटरी `name` चुना गया नाम दिखाता है।
+
+```bash
+techstack api inventory servers rename <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PATCH /api/v1/inventory/servers/{serverId}` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `rename_server` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+| `--display-name` | string | **आवश्यक।** |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api inventory services list
+
+प्रमाणित ओनर के सर्वरों की सैनिटाइज़्ड सेवाएँ सूचीबद्ध करें।
+
+```bash
+techstack api inventory services list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/services` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_services` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--server-id` | string | स्वामित्व वाले सर्वर का वैकल्पिक सटीक फ़िल्टर; किसी दूसरे का सर्वर "नहीं मिला" के रूप में लौटाया जाता है। |
+| `--limit` | integer | डिफ़ॉल्ट `50`। |
+| `--cursor` | string | प्रमाणित दायरे और सटीक server_id फ़िल्टर से बद्ध अपारदर्शी कर्सर। |

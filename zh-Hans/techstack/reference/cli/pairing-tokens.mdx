@@ -1,0 +1,63 @@
+---
+title: "techstack api pairing-tokens"
+description: "techstack api pairing-tokens 命令的生成参考"
+sidebarTitle: "pairing-tokens"
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api pairing-tokens create
+
+创建用于 Worker 注册的配对令牌。
+
+```bash
+techstack api pairing-tokens create [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/trust/pairing-tokens` |
+| 更改状态 | 是 |
+| MCP 工具 | `create_pairing_token` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--environment-class` | string | 显式的所有者位置声明；未知时省略。可选值：`local`、`cloud`。 |
+| `--name` | string | — |
+| `--server-provisioning-mode` | string | 可选值：`install-command`、`connect-remote`。 |
+| `--stack-id` | string | — |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api pairing-tokens delete
+
+删除配对令牌。
+
+```bash
+techstack api pairing-tokens delete <id> [flags]
+```
+
+<Warning>需要确认：此操作会吊销该配对令牌；尚未配对的设备将无法再使用它。传入 `--yes` 或回答提示；未使用 `--yes` 的非交互式运行会在发出任何请求之前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/trust/pairing-tokens/{id}` |
+| 更改状态 | 是 |
+| MCP 工具 | `delete_pairing_token` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+
+## techstack api pairing-tokens list
+
+列出配对令牌。
+
+```bash
+techstack api pairing-tokens list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/trust/pairing-tokens` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_pairing_tokens` |

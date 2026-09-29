@@ -1,0 +1,185 @@
+---
+title: "techstack api backups"
+description: "techstack api backups 命令的生成参考"
+sidebarTitle: "backups"
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api backups cleanup
+
+应用保留策略（仅限管理员）。
+
+```bash
+techstack api backups cleanup [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/backups/cleanup` |
+| 更改状态 | 是 |
+| MCP 工具 | 无 |
+
+## techstack api backups create
+
+创建数据库备份（仅限管理员）。
+
+```bash
+techstack api backups create [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/backups` |
+| 更改状态 | 是 |
+| MCP 工具 | 无 |
+
+## techstack api backups delete
+
+删除备份（仅限管理员）。
+
+```bash
+techstack api backups delete <name> [flags]
+```
+
+<Warning>需要确认：此操作会永久删除本地备份归档。传入 `--yes` 或回答提示；未使用 `--yes` 的非交互式运行会在发出任何请求之前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/backups/{name}` |
+| 更改状态 | 是 |
+| MCP 工具 | 无 |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<name>` | string | **必填。** |
+
+## techstack api backups download
+
+下载备份文件（仅限管理员）。
+
+```bash
+techstack api backups download <name> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups/{name}/download` |
+| 更改状态 | 否 |
+| MCP 工具 | 无 |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<name>` | string | **必填。** |
+
+## techstack api backups latest
+
+获取最新备份信息（仅限管理员）。
+
+```bash
+techstack api backups latest [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups/latest` |
+| 更改状态 | 否 |
+| MCP 工具 | 无 |
+
+## techstack api backups list
+
+列出备份（仅限管理员）。
+
+```bash
+techstack api backups list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups` |
+| 更改状态 | 否 |
+| MCP 工具 | 无 |
+
+## techstack api backups s3 delete
+
+删除 S3 备份（仅限管理员）。
+
+```bash
+techstack api backups s3 delete <name> [flags]
+```
+
+<Warning>需要确认：此操作会从 S3 存储中永久删除该备份。传入 `--yes` 或回答提示；未使用 `--yes` 的非交互式运行会在发出任何请求之前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/backups/s3/{name}` |
+| 更改状态 | 是 |
+| MCP 工具 | 无 |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<name>` | string | **必填。** |
+
+## techstack api backups s3 download
+
+从 S3 下载备份（仅限管理员）。
+
+```bash
+techstack api backups s3 download <name> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/backups/s3/{name}/download` |
+| 更改状态 | 是 |
+| MCP 工具 | 无 |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<name>` | string | **必填。** |
+
+## techstack api backups s3 list
+
+列出 S3 备份（仅限管理员）。
+
+```bash
+techstack api backups s3 list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups/s3` |
+| 更改状态 | 否 |
+| MCP 工具 | 无 |
+
+## techstack api backups s3 status
+
+获取 S3 连接状态（仅限管理员）。
+
+```bash
+techstack api backups s3 status [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups/s3/status` |
+| 更改状态 | 否 |
+| MCP 工具 | 无 |
+
+## techstack api backups upload-s3
+
+将备份上传到 S3（仅限管理员）。
+
+```bash
+techstack api backups upload-s3 <name> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/backups/{name}/upload-s3` |
+| 更改状态 | 是 |
+| MCP 工具 | 无 |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<name>` | string | **必填。** |

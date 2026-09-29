@@ -1,0 +1,63 @@
+---
+title: "techstack api pairing-tokens"
+description: "Generierte Referenz für die Befehle unter techstack api pairing-tokens"
+sidebarTitle: "pairing-tokens"
+release: "v0.32.8"
+---
+<Note>Generiert aus dem Techstack-Release v0.32.8 (Quelle `4c7d219a5d56`). Für eine installierte Version ist `techstack api <command> --help` maßgeblich.</Note>
+
+## techstack api pairing-tokens create
+
+Pairing-Token für die Worker-Registrierung erstellen.
+
+```bash
+techstack api pairing-tokens create [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/trust/pairing-tokens` |
+| Ändert Zustand | Ja |
+| MCP-Tool | `create_pairing_token` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `--environment-class` | string | Ausdrückliche Angabe des Owners zur Platzierung; weglassen, wenn unbekannt. Mögliche Werte: `local`, `cloud`. |
+| `--name` | string | — |
+| `--server-provisioning-mode` | string | Mögliche Werte: `install-command`, `connect-remote`. |
+| `--stack-id` | string | — |
+| `--body` | json | JSON-Request-Body (`application/json`) als Literal, `@path` oder `-` für stdin. |
+
+## techstack api pairing-tokens delete
+
+Pairing-Token löschen.
+
+```bash
+techstack api pairing-tokens delete <id> [flags]
+```
+
+<Warning>Erfordert Bestätigung: Diese Operation widerruft das Pairing-Token; Geräte, die sich noch nicht gekoppelt haben, können es nicht mehr verwenden. Übergib `--yes` oder beantworte die Rückfrage; ein nicht interaktiver Lauf ohne `--yes` stoppt vor jeder Anfrage mit Exit-Code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/trust/pairing-tokens/{id}` |
+| Ändert Zustand | Ja |
+| MCP-Tool | `delete_pairing_token` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<id>` | string | **Erforderlich.** Ressourcen-ID. |
+
+## techstack api pairing-tokens list
+
+Pairing-Tokens auflisten.
+
+```bash
+techstack api pairing-tokens list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/trust/pairing-tokens` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `list_pairing_tokens` |

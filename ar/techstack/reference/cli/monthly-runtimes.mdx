@@ -1,0 +1,270 @@
+---
+title: "techstack api monthly-runtimes"
+description: "مرجع مولَّد لأوامر techstack api monthly-runtimes"
+sidebarTitle: "monthly-runtimes"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api monthly-runtimes cleanup-readback
+
+قراءة حقائق حالة تنظيف وقت التشغيل المُدار المحجوبة البيانات الحساسة.
+
+يُرجع حقائق الحالة المحصورة بالمستأجر والمالك لجيل موارد التحكم لدى المزوّد الحالي الدقيق لعقد الإيجار. لا تستدعي نقطة النهاية هذه، وهي للقراءة فقط، أي مزوّد أو وكيل وقت تشغيل أبداً، ولا تُرجع مقابض موارد المزوّد أو الأوامر أو مستندات الأدلة أو بيانات الاعتماد. العملية النهائية لم تعد قيد التشغيل، لكنها ليست بحد ذاتها دليلاً على نجاح التنظيف: فغياب المورد لدى المزوّد يتطلب absence_evidence_ref، وتحرير السعة يتطلب capacity_released.
+
+```bash
+techstack api monthly-runtimes cleanup-readback <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/{lease_id}/cleanup-readback` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_monthly_runtime_cleanup_readback` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<lease-id>` | string | **مطلوب.** معرّف عقد إيجار وقت التشغيل الشهري. |
+
+## techstack api monthly-runtimes decommission
+
+إخراج عقد إيجار وقت تشغيل شهري من الخدمة.
+
+```bash
+techstack api monthly-runtimes decommission <lease-id> [flags]
+```
+
+<Warning>يتطلب تأكيداً: تُخرج هذه العملية وقت التشغيل الشهري من الخدمة وتزيل موارده لدى المزوّد. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/decommission` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `decommission_monthly_runtime` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<lease-id>` | string | **مطلوب.** معرّف عقد إيجار وقت التشغيل الشهري. |
+| `--force-query` | boolean | طلب مطابقة دقيقة لدى المزوّد مرتبطة بالجيل عندما يتعذر الوصول إلى وقت التشغيل. لا يُقبل Force إلا عندما يستطيع مستوى التحكم إثبات حيازة دائمة آمنة عند إعادة التشغيل ومسيّجة بـ HA قبل إلغاء عقد الإيجار. ويُقبل أيضاً كجسم JSON بالشكل &#123;"force": true&#125;. الطلب الفارغ يفترض false. الافتراضي `false`. |
+| `--expected-resource-generation-digest` | string | مطالبة تزامن متفائلة اختيارية. يُرفض هدم الموارد لدى المزوّد بالرمز 409 ما لم يظل هذا الملخص يحدد جيل موارد عقد الإيجار الحالي. |
+| `--force` | boolean | الافتراضي `false`. |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api monthly-runtimes get
+
+جلب حالة وقت التشغيل الشهري.
+
+```bash
+techstack api monthly-runtimes get <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/{lease_id}` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_monthly_runtime_status` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<lease-id>` | string | **مطلوب.** معرّف عقد إيجار وقت التشغيل الشهري. |
+
+## techstack api monthly-runtimes offerings
+
+عرض عروض وقت التشغيل الشهري.
+
+يُرجع عروض وقت التشغيل بالاشتراك العامة والمستقلة عن المزوّد.
+
+```bash
+techstack api monthly-runtimes offerings [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/offerings` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_monthly_runtime_offerings` |
+
+## techstack api monthly-runtimes operations
+
+عرض سجل عمليات وقت التشغيل الشهري.
+
+```bash
+techstack api monthly-runtimes operations <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/{lease_id}/operations` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_monthly_runtime_operations` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<lease-id>` | string | **مطلوب.** معرّف عقد إيجار وقت التشغيل الشهري. |
+| `--limit` | integer | الحد الأقصى لأحداث العمليات المُرجَعة. الافتراضي `50`. |
+
+## techstack api monthly-runtimes reconnect
+
+استرداد جلسة Guard لوقت تشغيل مُدار.
+
+يفحص الكيان التجميعي القياسي؛ وعندما يتعذر إثبات اتصال Guard، يعيد تشغيل Guard عبر قناة التنفيذ المثبّتة لمالك مستحق لخادم قيد التشغيل، ويعيد رصد الاتصال خلال نافذة محدودة، ثم يوصل التسجيل إلى الحالة enrolled. يُرفض وقت التشغيل المتوقف (managed_runtime_stopped). ولا يُمسّ أي مورد لدى المزوّد.
+
+```bash
+techstack api monthly-runtimes reconnect <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/reconnect` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `reconnect_monthly_runtime` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<lease-id>` | string | **مطلوب.** معرّف عقد إيجار وقت التشغيل الشهري. |
+
+## techstack api monthly-runtimes recreate
+
+إعادة إنشاء جيل خادم مُدار واحد محرَّر بالكامل.
+
+يجهّز صراحةً الجيل N+1 لخانة وقت التشغيل نفسها المحايدة للمزوّد بعد أن يبلغ الجيل N حالة نهائية لعقد الإيجار والخادم القياسي، وحالة نهائية لعملية المزوّد، ودليلاً معتماً أصلياً لدى المزوّد على الغياب، وتحريراً دقيقاً للسعة. يُسترد المزوّد والمنطقة والعرض والدور وStackKit ونية الخدمة غير القابلة للتغيير من عقد الإيجار القديم المحصور بالمالك؛ ولا يمكن للعملاء استبدالها. تفوّض نقطة النهاية إلى سلطة توسيع وقت التشغيل المُدار نفسها التي يستخدمها Add Node، لذا يمر التسجيل وأدلة Guard ونقاط النهاية وطرح StackKit عبر مسار Creation الكامل. مفتاح Idempotency-Key القياسي إلزامي ويعيد تشغيل الجيل المقبول بأمان.
+
+```bash
+techstack api monthly-runtimes recreate <lease-id> [flags]
+```
+
+<Warning>يتطلب تأكيداً: تستبدل هذه العملية خادم المزوّد لوقت التشغيل بخادم مجهَّز حديثاً، وتُحتسب عليها رسوم. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/recreate` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `recreate_monthly_runtime` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<lease-id>` | string | **مطلوب.** معرّف عقد إيجار وقت التشغيل الشهري. |
+| `--confirmed` | boolean | **مطلوب.** إقرار صريح بأن Recreate يجهّز جيل خادم مُدار جديداً ويحتسب رسومه. إحدى القيم: `true`. |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api monthly-runtimes resolve-custody
+
+أرشفة سجل حيازة قديم أو غير مرتبط بعد تنظيف موارد المزوّد.
+
+يزيل عقد إيجار قديماً أو غير مرتبط وغير قابل للتنفيذ من لوحة التحكم النشطة فقط بعد أن يؤكد المالك أن مورده لدى المزوّد قد أُزيل بالفعل. لا تتصل هذه العملية أبداً بأي مورد لدى المزوّد ولا تحذفه، وتُرفض للأجيال التي يتحكم Techstack في مزوّدها.
+
+```bash
+techstack api monthly-runtimes resolve-custody <lease-id> [flags]
+```
+
+<Warning>يتطلب تأكيداً: تسجّل هذه العملية أن موارد المزوّد قد نُظّفت، وتحرر حيازة عقد الإيجار. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/resolve-custody` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `resolve_monthly_runtime_custody` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<lease-id>` | string | **مطلوب.** معرّف عقد إيجار وقت التشغيل الشهري. |
+| `--provider-cleanup-confirmed` | boolean | **مطلوب.** إحدى القيم: `true`. |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api monthly-runtimes ssh disable
+
+تعطيل وصول SSH للمالك لهذا الجيل.
+
+يزيل كل مفتاح أذن به المالك من العقدة مع الإبقاء على مفتاح قناة التنفيذ الخاص بـ Kombify، ويسجّل المنحة المعطَّلة بحيث تُرفض مفاتيح المالك الجديدة حتى يُفعَّل SSH مجدداً.
+
+```bash
+techstack api monthly-runtimes ssh disable <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/disable-ssh` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `disable_monthly_runtime_ssh` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<lease-id>` | string | **مطلوب.** معرّف عقد إيجار وقت التشغيل الشهري. |
+
+## techstack api monthly-runtimes ssh enable
+
+تفعيل وصول SSH للمالك لهذا الجيل.
+
+يعيد تفعيل منحة SSH للمالك المرتبطة بالجيل عبر قناة التنفيذ المثبّتة، ويعيد تثبيت المفاتيح التي أذن بها المالك لهذا الجيل. لا يُؤذن بالمفاتيح الجديدة إلا عبر مسار الوصول إلى الخادم بعد إعادة المصادقة.
+
+```bash
+techstack api monthly-runtimes ssh enable <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/enable-ssh` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `enable_monthly_runtime_ssh` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<lease-id>` | string | **مطلوب.** معرّف عقد إيجار وقت التشغيل الشهري. |
+
+## techstack api monthly-runtimes ssh get
+
+جلب معلومات اتصال SSH لعقد إيجار وقت تشغيل شهري.
+
+```bash
+techstack api monthly-runtimes ssh get <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/{lease_id}/ssh` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_monthly_runtime_ssh_info` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<lease-id>` | string | **مطلوب.** معرّف عقد إيجار وقت التشغيل الشهري. |
+
+## techstack api monthly-runtimes start
+
+تشغيل خادم مُدار متوقف من الجيل نفسه.
+
+يقبل عملية مطابقة واحدة للتحكم لدى المزوّد مرتبطة بالجيل نحو الحالة running. يُنفَّذ تشغيل الطاقة لدى المزوّد مرة واحدة بموجب مطالبة at-most-once؛ ويعيد الطلب المكرر أثناء التقارب تشغيل العملية نفسها. يتطلب استحقاق وقت التشغيل المُدار قبل أي استدعاء للمزوّد.
+
+```bash
+techstack api monthly-runtimes start <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/start` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `start_monthly_runtime` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<lease-id>` | string | **مطلوب.** معرّف عقد إيجار وقت التشغيل الشهري. |
+
+## techstack api monthly-runtimes stop
+
+إيقاف خادم مُدار دون إتلافه.
+
+يقبل عملية مطابقة واحدة للتحكم لدى المزوّد مرتبطة بالجيل نحو الحالة stopped. يستخدم centron إجراء إيقاف تشغيل الضيف السلس الخاص به؛ أما IONOS فيوقف الضيف عبر قناة التنفيذ لأن إيقاف المزوّد IONOS يحرر عنوان DHCP IPv4 المرتبط. يحتفظ الخادم بقرصه وعنوانه وعقد إيجاره وحجز سعته وفوترته الشهرية.
+
+```bash
+techstack api monthly-runtimes stop <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/stop` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `stop_monthly_runtime` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<lease-id>` | string | **مطلوب.** معرّف عقد إيجار وقت التشغيل الشهري. |

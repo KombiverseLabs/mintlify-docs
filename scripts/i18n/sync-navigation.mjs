@@ -32,6 +32,9 @@ function localize(node, code, labels) {
       out[key] = labels[value] ?? value;
     } else if (key === "root" && typeof value === "string") {
       out[key] = `${code}/${value}`;
+    } else if (key === "openapi" && value && typeof value === "object" && typeof value.directory === "string") {
+      // One shared English spec; each locale renders its pages under its own prefix.
+      out[key] = { ...value, directory: `${code}/${value.directory}` };
     } else if (key === "pages" || key === "groups" || key === "tabs") {
       out[key] = localize(value, code, labels);
     } else {

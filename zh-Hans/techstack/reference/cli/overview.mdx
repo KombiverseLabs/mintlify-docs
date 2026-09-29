@@ -1,0 +1,90 @@
+---
+title: "techstack api CLI 参考"
+description: "每个 techstack api 命令及其选项和退出码"
+sidebarTitle: "概览"
+icon: square-terminal
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+`techstack api` 严格按照 [API 参考](#api-参考)中的描述调用 Techstack API：每个公开操作对应一个命令，由该版本的 API 契约生成。每个命令都会在 stdout 上输出去掉响应信封的 JSON；错误以结构化错误对象的形式输出到 stderr。
+
+## 认证
+
+| 变量 | 含义 |
+| --- | --- |
+| `TECHSTACK_API_URL` | API 基础 URL。默认为 `https://api.kombify.io/v1/techstack`；将其设置为你自己的 Techstack 实例地址，即可直接调用该实例。 |
+| `TECHSTACK_API_TOKEN` | 随每个请求发送的 Bearer 令牌。未设置时，CLI 会使用 `techstack login` 保存的会话；如果没有会话或会话已过期，则以退出码 3 失败。 |
+
+## 通用选项
+
+| 选项 | 适用于 | 说明 |
+| --- | --- | --- |
+| `--fields <paths>` | 所有命令 | 以逗号分隔、要在输出中保留的点分路径；对于数组，逐个元素应用。 |
+| `--ndjson` | 所有命令 | 将数组按每行一个紧凑 JSON 值的形式输出。 |
+| `--dry-run` | 会修改状态的命令 | 将解析后的请求以 JSON 输出，而不进行授权或发送。 |
+| `--idempotency-key <key>` | 会修改状态的命令 | Idempotency-Key 标头；默认为新生成的 UUID。 |
+| `--body <json\|@path\|->` | 带 JSON 正文的命令 | 基础请求正文，可以是字面量、文件或 stdin；参数标志会覆盖其中的属性。 |
+| `--file <path\|->` | 带文件正文的命令 | 以声明的内容类型发送的请求正文文件。 |
+| `--yes` | 需要确认的命令 | 无需提示即确认；非交互运行时必需。 |
+
+标记为需要确认的命令会在终端中要求输入 `yes`。在没有终端的情况下，除非设置了 `--yes`，否则它们会拒绝发送请求，输出 `CONFIRMATION_REQUIRED` 错误并以退出码 9 退出。
+
+## 退出码
+
+| 代码 | 含义 |
+| --- | --- |
+| 0 | 成功。 |
+| 1 | 其他任何失败。 |
+| 2 | 输入无效（HTTP 400/422）。 |
+| 3 | 未认证（HTTP 401）。 |
+| 4 | 被拒绝、需要付款或受到速率限制（HTTP 402/403/429）。 |
+| 5 | 未找到（HTTP 404）。 |
+| 6 | 冲突（HTTP 409）。 |
+| 7 | 服务器或传输故障（HTTP 5xx）。 |
+| 9 | 需要确认或确认被拒绝。 |
+
+## 代理上下文
+
+`techstack api agent-context` 会为 AI 代理以 Markdown 输出此命令目录，或使用 `--json` 以 JSON 输出：包括每个命令的用法、参数、确认要求、可用性和 MCP 工具名称，以及上面的通用选项和退出码。
+
+## 命令
+
+| 命令组 | 涵盖 |
+| --- | --- |
+| [`techstack api addons`](/zh-Hans/techstack/reference/cli/addons) | 附加组件 |
+| [`techstack api agents`](/zh-Hans/techstack/reference/cli/agents) | 代理 |
+| [`techstack api auth`](/zh-Hans/techstack/reference/cli/auth) | 认证 |
+| [`techstack api autoinstall`](/zh-Hans/techstack/reference/cli/autoinstall) | 健康 |
+| [`techstack api backups`](/zh-Hans/techstack/reference/cli/backups) | 备份 |
+| [`techstack api client-pairing`](/zh-Hans/techstack/reference/cli/client-pairing) | 客户端绑定 |
+| [`techstack api discovery`](/zh-Hans/techstack/reference/cli/discovery) | 发现 |
+| [`techstack api drift`](/zh-Hans/techstack/reference/cli/drift) | Stacks - 漂移 |
+| [`techstack api features`](/zh-Hans/techstack/reference/cli/features) | 功能 |
+| [`techstack api health`](/zh-Hans/techstack/reference/cli/health) | 健康 |
+| [`techstack api homelab`](/zh-Hans/techstack/reference/cli/homelab) | Stacks |
+| [`techstack api install-scripts`](/zh-Hans/techstack/reference/cli/install-scripts) | Worker |
+| [`techstack api instance`](/zh-Hans/techstack/reference/cli/instance) | 实例 |
+| [`techstack api inventory`](/zh-Hans/techstack/reference/cli/inventory) | 清单 |
+| [`techstack api jobs`](/zh-Hans/techstack/reference/cli/jobs) | 任务 |
+| [`techstack api managed-runtimes`](/zh-Hans/techstack/reference/cli/managed-runtimes) | 任务、Stacks |
+| [`techstack api monitor`](/zh-Hans/techstack/reference/cli/monitor) | 指标 |
+| [`techstack api monthly-runtimes`](/zh-Hans/techstack/reference/cli/monthly-runtimes) | 任务、月度运行时、Stacks |
+| [`techstack api pairing-tokens`](/zh-Hans/techstack/reference/cli/pairing-tokens) | 信任 |
+| [`techstack api prechecks`](/zh-Hans/techstack/reference/cli/prechecks) | 预检 |
+| [`techstack api runtime`](/zh-Hans/techstack/reference/cli/runtime) | 运行时 |
+| [`techstack api servers`](/zh-Hans/techstack/reference/cli/servers) | 清单、任务、RIL、服务器 |
+| [`techstack api services`](/zh-Hans/techstack/reference/cli/services) | 任务、服务 |
+| [`techstack api stack-identity`](/zh-Hans/techstack/reference/cli/stack-identity) | 认证 |
+| [`techstack api stackkits`](/zh-Hans/techstack/reference/cli/stackkits) | StackKits |
+| [`techstack api stacks`](/zh-Hans/techstack/reference/cli/stacks) | 清单、任务、Stacks、Stacks - 漂移、Stacks - 导入/导出、Stacks - 规格 |
+| [`techstack api system`](/zh-Hans/techstack/reference/cli/system) | 健康、指标 |
+| [`techstack api system-accounts`](/zh-Hans/techstack/reference/cli/system-accounts) | 认证 |
+| [`techstack api tunnel`](/zh-Hans/techstack/reference/cli/tunnel) | 隧道 |
+| [`techstack api unifier`](/zh-Hans/techstack/reference/cli/unifier) | Unifier |
+| [`techstack api wallet`](/zh-Hans/techstack/reference/cli/wallet) | Wallet |
+| [`techstack api workers`](/zh-Hans/techstack/reference/cli/workers) | 预检、Worker |
+
+## API 参考
+
+本节中的 Techstack API 参考由同一版本的公开 OpenAPI 文档生成。

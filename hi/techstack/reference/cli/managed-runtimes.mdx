@@ -1,0 +1,27 @@
+---
+title: "techstack api managed-runtimes"
+description: "techstack api managed-runtimes कमांड के लिए जनरेट किया गया संदर्भ"
+sidebarTitle: "managed-runtimes"
+release: "v0.32.8"
+---
+<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+
+## techstack api managed-runtimes authority
+
+कोई संसाधन बनाए बिना रिक्वेस्ट-बद्ध मैनेज्ड-रनटाइम अथॉरिटी सत्यापित करें।
+
+Gateway से नेटिव एडमिशन तक की अथॉरिटी चेन के लिए केवल-पढ़ने वाला प्रीफ़्लाइट। होस्टेड रिक्वेस्ट में Gateway के v2-हस्ताक्षरित मैनेज्ड-रनटाइम, Cloud Kit, प्रोवाइडर एंटाइटलमेंट और इसी सटीक रिक्वेस्ट से बद्ध `cloud.runtime.credits` `managed_servers` निर्णय होने चाहिए। सफल रिस्पॉन्स कभी क्षमता आरक्षित नहीं करता और न ही StackKit डिप्लॉयमेंट, कतार जॉब, लीज़, नोड प्रक्षेपण या प्रोवाइडर ऑपरेशन बनाता है; असली Add-Server रिक्वेस्ट हर परिवर्तनशील एडमिशन जाँच को एटॉमिक रूप से दोहराती है।
+
+```bash
+techstack api managed-runtimes authority [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/managed-runtimes/authority` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `preflight_managed_runtime_authority` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--provider-id` | string | **आवश्यक।** वह सटीक कैनोनिकल प्रोवाइडर जिसकी मैनेज्ड-रनटाइम अथॉरिटी जाँची जा रही है। इनमें से एक: `centron`, `ionos`। |
