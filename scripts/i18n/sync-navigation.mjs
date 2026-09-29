@@ -19,7 +19,7 @@ export const LOCALES = {
   de: { language: "de" },
   // es: { language: "es" },
   // "zh-Hans": { language: "zh-Hans" },
-  // hi: { language: "hi" },
+  hi: { language: "hi" },
   // ar: { language: "ar" },
 };
 
