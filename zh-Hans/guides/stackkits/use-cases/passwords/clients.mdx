@@ -1,0 +1,160 @@
+---
+title: "设置你的密码管理器应用"
+description: "创建你的保险库账号，保存第一个密码，并把手机、浏览器和电脑上的 Bitwarden 应用连接到你自己的保险库。"
+sidebarTitle: "密码应用"
+icon: "mobile-screen-button"
+mode: "wide"
+keywords: ["密码", "Vaultwarden", "Bitwarden", "密码管理器", "浏览器扩展", "iPhone", "Android", "自托管"]
+---
+
+import { clientSetupLabelsZhHans } from "/snippets/client-setup-labels-zh-Hans.jsx";
+
+import { ClientSetupGuide } from "/snippets/client-setup-guide.jsx";
+
+<ClientSetupGuide
+  labels={clientSetupLabelsZhHans}
+  locale="zh-Hans"
+  id="kcg-passwords"
+  meta={[
+    { icon: "phone", text: "手机、浏览器和电脑" },
+    { icon: "steps", text: "6 个简短步骤" },
+    { icon: "book", text: "无需任何基础" },
+  ]}
+  requirements={[
+    "你的保险库地址，例如 https://vault.home.test",
+    "发送到你邮箱地址的邀请",
+    "每台设备都已由设置 kombify 的人为你的家庭保险库准备好",
+    "一个你能记住的主密码",
+  ]}
+  requirementsHelp={{ label: "还没有邀请？", target: "kcg-passwords-no-invite" }}
+  appsTitle="先下载 Bitwarden 应用。"
+  vendor={{ label: "Bitwarden 的全部下载", href: "https://bitwarden.com/download/" }}
+  apps={[
+    { platform: "apple", label: "iPhone 和 iPad", detail: "Bitwarden Password Manager", store: "在 App Store 中打开", href: "https://apps.apple.com/app/bitwarden-password-manager/id1137397744", vendor: "Bitwarden", official: true },
+    { platform: "android", label: "Android", detail: "Bitwarden Password Manager", store: "在 Google Play 中打开", href: "https://play.google.com/store/apps/details?id=com.x8bit.bitwarden", vendor: "Bitwarden", official: true },
+    { platform: "browser", label: "浏览器扩展", detail: "Chrome、Firefox、Edge、Safari 等", store: "打开 Bitwarden 下载页面", href: "https://bitwarden.com/download/", vendor: "Bitwarden", official: true },
+    { platform: "desktop", label: "电脑", detail: "Windows、macOS 和 Linux", store: "打开 Bitwarden 下载页面", href: "https://bitwarden.com/download/", vendor: "Bitwarden", official: true },
+  ]}
+  appsNote="浏览器商店：[Chrome](https://chromewebstore.google.com/detail/bitwarden-password-manager/nngceckbapebfimnlniiiahkandclblb) · [Firefox](https://addons.mozilla.org/firefox/addon/bitwarden-password-manager/) · [Edge](https://microsoftedge.microsoft.com/addons/detail/bitwarden-password-manager/jbkfoedolllekgbhcbcoahefnbanhhlh) · [Safari（Mac App Store）](https://apps.apple.com/app/bitwarden/id1352778147)。你的保险库运行在 Vaultwarden 上，它可以配合这些官方 Bitwarden 应用使用。你不需要单独的 Vaultwarden 应用。"
+  stepsTitle="按步骤设置你的保险库。"
+  steps={[
+    {
+      tab: "打开保险库",
+      title: "在浏览器中打开你的保险库。",
+      intro: "先从电脑开始。你的保险库有自己的网址，就像一个只有你们家庭使用的网站。",
+      clicks: [
+        "在浏览器的地址栏中输入你的保险库地址，例如 **https://vault.home.test**，然后按 Enter。",
+        "在登录框下方点击 [[Create account]]。",
+      ],
+      note: "本指南中的地址只是示例。请使用设置 kombify 的人提供给你的地址。",
+      faq: { q: "什么是保险库地址？", a: "它是你们家庭密码保险库的网址。通常以 **https://vault.** 开头，以你家庭网络的名称结尾。设置 kombify 的人可以告诉你确切的地址。" },
+      check: "你看到 [[Create account]] 表单。",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-01-open-vault.webp", width: 1088, height: 830, alt: "Vaultwarden 登录页面，标出了 Create account 链接", caption: "保险库登录页面", credit: "kombify 截图", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: 2, top: 84.3, left: 38.3, width: 23.5, height: 7.2 }] },
+    },
+    {
+      tab: "创建账号",
+      title: "创建你的账号。",
+      intro: "你的保险库只接受受邀的邮箱地址。请使用收到邀请的同一个地址。",
+      clicks: [
+        "在 [[Email address]] 中输入你受邀的邮箱地址。",
+        "在 [[Name]] 中输入你的名字。运营保险库的人以及你与之共享密码的人都可以看到它。",
+        "点击 [[Continue]]。",
+      ],
+      faq: { q: "这是我的 kombify 账号吗？", a: "不是。这个账号只属于你的密码保险库。它有自己的邮箱地址和自己的主密码。" },
+      check: "页面现在要求你 [[Set a strong password]]。",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-02-create-account.webp", width: 1088, height: 718, alt: "创建账号表单，邮箱地址为 alex@example.com，名字为 Alex Example", caption: "创建账号", credit: "kombify 截图", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: 1, top: 37.6, left: 16.4, width: 65.1, height: 13.4 }, { n: 2, top: 61, left: 16.4, width: 65.1, height: 13.4 }, { n: 3, top: 76.3, left: 14, width: 72.1, height: 13.9 }] },
+    },
+    {
+      tab: "主密码",
+      title: "选择你的主密码。",
+      intro: "主密码是你仍然需要记住的唯一一个密码。它可以解锁所有其他密码。",
+      clicks: [
+        "在 [[Master password]] 中输入一个较长的密码。由四个或更多词组成的一句短话效果很好。",
+        "在 [[Confirm master password]] 中再次输入相同的密码。",
+        "点击 [[Create account]]。如果页面建议安装浏览器扩展，请点击 [[Add it later]]，然后点击 [[Skip to web app]]。你会在第 5 步连接扩展。",
+      ],
+      note: "**忘记的主密码无人能够找回**，运营你保险库的人也不行。请把它写下来，并把纸条保存在保险库之外的安全地方。",
+      faq: { q: "强度条是什么意思？", a: "它估计你的密码有多难被猜到。请争取达到 **Strong**。长一些比复杂更好。" },
+      check: "你的空保险库会打开，标题为 [[All vaults]]。",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-03-master-password.webp", width: 1088, height: 1310, alt: "Set a strong password 页面，主密码输入了两次，强度评级为 Strong", caption: "设置强密码", credit: "kombify 截图", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: 1, top: 25.5, left: 16.4, width: 60.7, height: 7.3 }, { n: 2, top: 52.2, left: 16.4, width: 60.7, height: 7.3 }, { n: 3, top: 87, left: 14, width: 72.1, height: 7.6 }] },
+    },
+    {
+      tab: "第一个密码",
+      title: "保存你的第一个密码。",
+      intro: "保存一条登录信息作为测试。之后它可以证明你的应用已连接到你的保险库。",
+      clicks: [
+        "在右上角点击 [[New]]，然后选择 [[Login]]。如果先出现欢迎窗口，请点击 [[Skip]]。",
+        "在 [[Item name]] 中输入一个你认得的名称，例如某个商店的名称。",
+        "输入你的 [[Username]]。在 [[Password]] 旁点击圆形箭头生成一个密码，然后点击 [[Use this password]]。",
+        "点击 [[Save]]。",
+      ],
+      note: "在 [[Website (URI)]] 下添加该商店的网址。之后浏览器扩展就会在该网站上建议使用这条登录信息。",
+      check: "出现消息 [[Item added]]，并且你的登录信息显示在列表中。",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-04-new-login.webp", width: 1472, height: 1664, alt: "New Login 窗口，条目名称为 Example Shop，含用户名和生成的密码", caption: "New Login", credit: "kombify 截图", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: 2, top: 12.1, left: 7.9, width: 82.6, height: 5.8 }, { n: 3, top: 41.8, left: 7.9, width: 79.3, height: 5.8 }, { n: 3, top: 52.3, left: 87.5, width: 5.7, height: 5 }, { n: 4, top: 92.1, left: 2.7, width: 10.4, height: 6 }] },
+    },
+    {
+      tab: "连接应用",
+      title: "连接 Bitwarden 应用。",
+      intro: "每个 Bitwarden 应用起初都会连接到 Bitwarden 自己的服务器。请告诉它一次，改用你的保险库。",
+      clicks: [
+        "从上面的列表安装 Bitwarden 应用并打开它。",
+        "在登录界面中，打开 [[Logging in on]] 菜单并选择 [[Self-hosted]]。在电脑应用中，该菜单叫作 [[Accessing]]。",
+        "在 [[Server URL]] 中输入你的保险库地址，开头带上 **https://**，然后点按 [[Save]]。",
+        "使用你的邮箱地址和主密码登录。",
+      ],
+      note: "请在你使用的每部手机、每个浏览器和每台电脑上重复这些步骤。每一个都需要输入一次你的保险库地址。",
+      faq: { q: "为什么这里没有应用的图片？", a: "Bitwarden 的条款没有授权复用其图片。它自己的指南展示了每一个界面，上面的标签与之一致。" },
+      check: "应用显示你在第 4 步保存的登录信息。",
+      visual: {
+        tag: "BITWARDEN 指南",
+        title: "Bitwarden 展示了每个界面",
+        text: "在 Bitwarden 的指南中选择你的设备。请查找关于**自托管**服务器的部分。",
+        links: [
+          { label: "将应用连接到你自己的服务器", detail: "bitwarden.com · 所有设备", href: "https://bitwarden.com/help/change-client-environment/", icon: "server" },
+          { label: "浏览器扩展入门", detail: "bitwarden.com", href: "https://bitwarden.com/help/getting-started-browserext/", icon: "browser" },
+          { label: "移动应用入门", detail: "bitwarden.com", href: "https://bitwarden.com/help/getting-started-mobile/", icon: "phone" },
+        ],
+      },
+    },
+    {
+      tab: "检查",
+      title: "一切都连接好了吗？",
+      intro: "在网页版保险库和一个应用中检查。只勾选你亲自检查过的项目。",
+      verify: [
+        "我可以打开我的保险库地址并登录。",
+        "我保存的登录信息显示在我手机、浏览器或电脑上的 Bitwarden 应用中。",
+        "我的主密码已写下来，并保存在保险库之外。",
+      ],
+      note: "本指南不会读取你的保险库。你的勾选只保存在此浏览器中。",
+      check: "现在你可以把其他密码迁移到保险库中了。",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-05-first-item.webp", width: 1430, height: 300, alt: "All vaults 列表，显示已保存的 Example Shop 登录信息", caption: "保险库中的第一条登录信息", credit: "kombify 截图", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: null, top: 37.2, left: 1, width: 98, height: 58.1 }] },
+    },
+  ]}
+  nextTitle="接下来做什么。"
+  next={[
+    { icon: "shield", title: "开启两步验证登录", text: "Bitwarden 介绍了如何添加第二道登录步骤。", href: "https://bitwarden.com/help/setup-two-step-login/" },
+    { icon: "server", title: "备份保险库", text: "面向运营 kombify 的人：保护保险库数据。", href: "/zh-Hans/guides/stackkits/back-up-and-restore" },
+  ]}
+  help={[
+    { id: "kcg-passwords-no-invite", q: "我还没有保险库地址或邀请。", a: "请询问你们家庭中设置 kombify 的人。他们会添加 Passwords 服务，并邀请你的邮箱地址。[Passwords 如何与 kombify 配合](/zh-Hans/guides/stackkits/use-cases/passwords) · [所有者设置](/zh-Hans/stackkits/apps/vaultwarden)。" },
+    { q: "创建账号时提示“Registration not allowed or user already exists”。", a: "请检查你使用的是否恰好是受邀的邮箱地址。如果你已经创建过账号，请返回并直接登录。否则，请索取新的邀请。" },
+    { q: "地址打不开，或者浏览器对连接发出警告。", a: "请先在你家庭网络中的设备上尝试该地址。如果你的保险库只在家里运行，请连接你的家庭 Wi-Fi，或你拿到的家庭连接应用。每台设备还必须设置为信任你的家庭服务器；这由设置 kombify 的人完成。如果浏览器提示连接不是私密连接，请到此为止并询问他们。不要点击跳过警告。[关于家庭地址](/zh-Hans/guides/stackkits/use-cases/network)。" },
+    { q: "我忘记了主密码。", a: "没有人能够找回它。你的保险库是用它加密的。运营你保险库的人可以删除你的账号，让你重新开始，但保存在其中的密码会丢失。[Bitwarden 关于主密码](https://bitwarden.com/help/master-password/)。" },
+    { q: "我的 Android 手机没有 Google Play。", a: "Bitwarden 运营着自己的 F-Droid 仓库。地址列在 [Bitwarden 下载页面](https://bitwarden.com/download/)上。" },
+    { q: "为什么既提到 Vaultwarden 又提到 Bitwarden？", a: "Vaultwarden 是运行你的保险库的程序。它是一个非官方的服务器，可与官方 Bitwarden 应用配合使用。Vaultwarden 与 Bitwarden, Inc. 没有关联。图片展示的是英文版 Vaultwarden 1.37.2；较新的版本和其他语言可能看起来不同。" },
+  ]}
+  attribution="**Vaultwarden 运行你的保险库，Bitwarden 应用打开它。kombify 为你安装它。** kombify 并不制作这两个应用。[Vaultwarden](https://github.com/dani-garcia/vaultwarden)（AGPL-3.0）· 网页版保险库：[为 Vaultwarden 构建的 Bitwarden 网页客户端](https://github.com/dani-garcia/bw_web_builds)（GPL-3.0）· [Bitwarden](https://bitwarden.com/)"
+  sources={{
+    summary: "kombify 从本地 Vaultwarden 安装中截取的截图 · 虚构账号 · 英文菜单。",
+    paragraphs: [
+      "**截图 · 2026 年 9 月 24 日。** kombify 从本地参考安装中截取了网页版保险库的图片：Vaultwarden 1.37.2，即 StackKits 目录为 Passwords 提供的镜像，附带其内置的 web vault 2026.7.0（Bitwarden 网页客户端，GPL-3.0）。该安装使用示例地址 https://vault.home.test 和虚构账号 alex@example.com。它是参考安装，而不是 StackKits 部署测试。本指南添加了紫色标记。",
+      "此处未展示 Bitwarden 应用的界面。[Bitwarden 的条款](https://bitwarden.com/terms/)没有授权复用其内容，因此第 5 步链接到 Bitwarden 自己的指南。",
+      "商店链接和帮助页面于 2026 年 9 月 24 日核对。你的进度只保存在此浏览器中。本指南不会连接任何账号，也不会索要任何密码。",
+    ],
+    links: [
+      { label: "Bitwarden：连接各个应用", href: "https://bitwarden.com/help/change-client-environment/" },
+      { label: "Bitwarden 下载", href: "https://bitwarden.com/download/" },
+      { label: "Vaultwarden 项目", href: "https://github.com/dani-garcia/vaultwarden" },
+    ],
+  }}
+/>

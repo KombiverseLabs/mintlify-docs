@@ -1,0 +1,103 @@
+---
+title: "stackkit service"
+description: "控制当前 StackKits 计划声明的服务"
+sidebarTitle: "service"
+---
+控制当前 StackKits 计划声明的服务。
+
+```bash
+stackkit service [flags]
+```
+
+子命令：[`stackkit service logs`](#stackkit-service-logs), [`stackkit service restart`](#stackkit-service-restart), [`stackkit service start`](#stackkit-service-start), [`stackkit service stop`](#stackkit-service-stop)
+
+## stackkit service logs
+
+读取有界的、已脱敏的服务日志。
+
+```bash
+stackkit service logs <service-key> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | 来自上一次结果的不透明游标 |
+| `--json` | bool | — | 以 JSON 写出带版本的服务日志页 |
+| `--tail` | int | `100` | 要返回的已脱敏日志条目数（1..200） |
+
+**示例**
+
+```bash
+# Read the last 50 redacted log entries of the TinyAuth login gateway
+stackkit service logs auth --tail 50
+
+# Read PocketID logs as JSON
+stackkit service logs id --json
+
+# Read the next page with the cursor the previous JSON result returned
+stackkit service logs id --json --cursor <cursor>
+```
+
+## stackkit service restart
+
+重启一个受管服务。
+
+```bash
+stackkit service restart <service-key> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 以 JSON 写出带版本的服务操作结果 |
+| `--owner-approve` | bool | — | 显式批准与 Owner 绑定的服务变更 |
+
+**示例**
+
+```bash
+# Restart the PocketID identity service
+stackkit service restart id --owner-approve
+
+# Restart the TinyAuth login gateway and print the result as JSON
+stackkit service restart auth --owner-approve --json
+```
+
+## stackkit service start
+
+启动一个受管服务。
+
+```bash
+stackkit service start <service-key> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 以 JSON 写出带版本的服务操作结果 |
+| `--owner-approve` | bool | — | 显式批准与 Owner 绑定的服务变更 |
+
+**示例**
+
+```bash
+# Start a stopped service again
+stackkit service start coolify --owner-approve
+```
+
+## stackkit service stop
+
+停止一个受管服务。
+
+```bash
+stackkit service stop <service-key> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 以 JSON 写出带版本的服务操作结果 |
+| `--owner-approve` | bool | — | 显式批准与 Owner 绑定的服务变更 |
+
+**示例**
+
+```bash
+# Stop a non-critical service; base, id and auth cannot be stopped
+stackkit service stop coolify --owner-approve
+```
+

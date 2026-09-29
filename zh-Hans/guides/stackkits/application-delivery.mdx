@@ -1,0 +1,50 @@
+---
+title: "选择应用交付方式"
+description: "选择已发布的工作负载适配器，避免产生相互竞争的应用路由"
+sidebarTitle: "应用交付"
+icon: route
+---
+
+StackKits 把应用选择与应用交付分开。像 Files 这样的工作负载选择它的应用备选项，而 `runtimeAdapterRef` 选择该工作负载如何交付。
+
+查看你已安装版本中内嵌的矩阵：
+
+```bash
+stackkit app compatibility --json
+```
+
+## 选择适配器
+
+| 适配器 | 当前状态 | 适用场景 |
+| --- | --- | --- |
+| `standalone-compose` | 受支持 | 你需要本地工作负载路径，具备声明的备份与恢复能力，并且不需要单独的应用平台。 |
+| [Coolify](/zh-Hans/stackkits/apps/coolify) | 受支持 | 你已经在运营生成的应用平台，并接受该适配器不负责工作负载的备份与恢复。 |
+| [Komodo](/zh-Hans/stackkits/apps/komodo) | Beta | 你有意接受 beta 适配器的成熟度，并在自己的工作区中验证它。 |
+
+成熟度描述的是目录契约，而不是你主机上观察到的健康状况。生成的[应用交付兼容性](/zh-Hans/stackkits/reference/application-delivery-compatibility)矩阵列出了已发布版本中每个工作负载和适配器的部署、路由、TLS、备份与恢复能力。请查看你所选应用对应的那一行；平台对部署的支持本身并不能证明它的恢复能力。矩阵中没有列出的组件，不要推断它有公开支持。
+
+对于独立的 Basement Kit，除非你有意运营某个应用平台，否则请从 `standalone-compose` 开始：
+
+```json
+{
+  "workloads": {
+    "files": {
+      "alternative": "cloudreve",
+      "runtimeAdapterRef": "standalone-compose",
+      "placement": {
+        "siteRefs": ["home"],
+        "nodeRefs": ["main"]
+      }
+    }
+  }
+}
+```
+
+## 每个工作负载只有一个所有者
+
+- 不要同时通过 Coolify 和独立的 Compose 路由同一个工作负载。
+- 不要手动添加 Docker 标签或生成的路由。
+- 在此版本中，请把 Komodo 视为 beta 选项，而不是默认的备选项。
+- 在应用不同的适配器之前，先验证更改后的意图并检查解析后的计划。
+
+平台集成请参见[平台服务](/zh-Hans/stackkits/apps/overview)，完整的编辑流程请参见[配置 StackSpec](/zh-Hans/guides/stackkits/configure-stack-spec)。

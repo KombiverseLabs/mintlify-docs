@@ -1,0 +1,106 @@
+---
+title: "你的第一次 CLI 部署"
+description: "跟着 StackKits CLI 从本地配置一路走到应用设置和恢复"
+sidebarTitle: "CLI 演练"
+icon: terminal
+---
+
+CLI 通过一组独立的命令引导你：保存你的选择、检查它们、审查部署、应用部署，并查看还有哪些事项需要关注。每个命令都有各自的帮助。它不会自动推进整个部署，也不会替你选择 kit。
+
+本演练描述的是[当前公开版本](https://github.com/kombifyio/StackKits/releases/latest)中发布的原生 CLI。
+标准模式无需 kombify 账户或 Techstack 即可工作。本地所有者密钥和部署证据都保存在你的工作区中。
+
+## 选择你的起点
+
+| 入口 | 会发生什么 | 继续阅读 |
+| --- | --- | --- |
+| [工具链安装器](/zh-Hans/guides/stackkits/choosing-a-kit#仅安装工具链) | 安装 CLI 和目录；配置和应用服务需要另外进行。 | 下面的第 1 步。 |
+| [Basement 快速开始](/zh-Hans/stackkits/quickstart) | 在受支持的 Ubuntu 服务器上，安装先决条件、初始化工作区和本地所有者，并应用默认的 Basement 服务。 | 下面的第 5 步，在 `~/my-homelab` 中。 |
+
+请只在你打算配置的主机上运行 Basement 引导脚本。如果只想先看看 CLI 而不安装服务，请选择工具链路径。
+Windows 用户可以从公开版本的 ZIP 获取 CLI；这并不意味着 Windows 是受支持的原生 Basement 运行时目标。请查看
+[操作系统兼容性参考](/zh-Hans/stackkits/reference/os-compatibility)了解安装目标。
+
+## 1. 检查 CLI 并创建工作区
+
+安装工具链之后，打开终端：
+
+```bash
+stackkit version
+stackkit --help
+mkdir my-homelab
+cd my-homelab
+```
+
+帮助把命令分为设置、日常维护和参考几组；
+[CLI 参考](/zh-Hans/stackkits/reference/cli/overview)列出了每个命令及其标志和示例。在本演练中始终使用同一个部署目录。做实验时请使用全新的目录，而不是替换现有的配置。
+
+## 2. 保存你的选择
+
+对于使用目录默认值的 Basement Kit：
+
+```bash
+stackkit init basement-kit --catalog-defaults --owner-source=local
+```
+
+`init` 会创建 `stack-spec.yaml` 和本地所有者托管。它会打印保存的配置路径，以及接下来的 `validate` 和 `generate` 命令。它还没有安装任何服务。
+
+目录默认值会被记录为明确的选择。当所选的 kit 需要时，会请求必需的输入。若要在新的工作区中包含该 kit 的照片工作负载，请**代替**前一个 init 命令使用下面这个：
+
+```bash
+stackkit init basement-kit --catalog-defaults --owner-source=local --use-case photos
+```
+
+此时照片工作负载只是一个选择，而不是正在运行的照片库。请在保存的文件中查看存储路径、域名、所选应用和节点设置。参见[配置 StackSpec](/zh-Hans/guides/stackkits/configure-stack-spec)。
+
+对于脚本，请给 `init` 加上 `--non-interactive`。这样缺少必需的输入时会失败，而不是弹出提示。这个标志不会批准之后的部署操作。`stackkit init --help` 记录了可用的选项；标记为旧版兼容的标志不在本原生演练的范围之内。
+
+## 3. 验证、生成并审查
+
+```bash
+stackkit validate
+stackkit generate
+stackkit plan --json
+```
+
+验证会根据 kit 契约检查配置。生成会写出部署产物和证据。计划让你在更改主机之前，检查所选的工作负载、路径和就绪状态。
+
+请检查 `readiness.generation.status` 和 `readiness.apply.status`，并阅读所有阻塞项。如有需要，请修正配置并重新生成。计划就绪并不意味着应用已经在运行。
+
+## 4. 检查目标并应用
+
+在受支持的目标主机上，使用同一个工作区：
+
+```bash
+stackkit prepare
+stackkit apply
+```
+
+在原生 CLI 路径上，`prepare` 会检查主机的先决条件，例如 Docker、Compose、存储和端口。它不会安装缺失的主机软件包。应用之前，请先解决报告的先决条件。
+
+`apply` 会更改主机。请查看它的批准提示和预期的更改。详细的生命周期检查请参见[审查、应用与验证](/zh-Hans/guides/stackkits/review-plan-and-apply)。如果你使用了 Basement 引导脚本，那么首次应用已经发生；不要仅仅为了走完一遍流程而重复它。
+
+## 5. 弄清哪些可以使用
+
+```bash
+stackkit verify --http --json
+```
+
+`verify` 会检查栈规格、部署状态、Docker 守护进程、StackKit 容器及其健康状况，并且加上 `--http` 时，还会检查来自生成的访问摘要的路由。每项失败的检查都带有原因。仅仅配置了地址并不能证明应用可以访问；而通过的 HTTP 检查可以。
+
+当账户仍需配置时，请遵循该应用的设置指南。使用 `stackkit setup --help` 查看受支持的设置操作。最后，打开应用并执行一个小的真实任务，比如向你的照片库添加一张测试照片。仅仅是 CLI 安装成功，并不能证明这个任务可以完成。
+
+## 6. 恢复并排查故障
+
+回到同一个部署目录：
+
+```bash
+stackkit verify --json
+stackkit drift detect --json
+stackkit logs list --json
+stackkit logs get <run-id> --json
+```
+
+`drift detect` 会在不做任何更改的情况下，把实时的 Compose 运行时与解析后的计划、生成的产物以及已签名的应用证据进行对比检查，而 `logs get` 会读取 `logs list` 中某次运行的结构化日志。请根据报告的原因和下一步操作继续。操作失败时请保留工作区；不要用 `init` 重新开始，也不要编辑生成的文件来绕过阻塞项。请妥善保管所有者密钥和访问记录，并在分享诊断输出之前先检查一遍。
+
+日常维护请使用 [Day-2 运维](/zh-Hans/stackkits/reference/day-2-operations)和[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。在 Techstack 中选择 kit 以及引导式配置体验是可选的后续步骤；本地 CLI 工作流并不需要它们。

@@ -1,0 +1,35 @@
+---
+title: "stackkit plan"
+description: "预览基础设施变更"
+sidebarTitle: "plan"
+---
+预览基础设施变更。
+
+检查受治理的 Architecture v2 计划，或预览 v0.6 基础设施变更。
+
+在原生 v0.7 上，此命令会验证并检查确切的 ResolvedPlan、生成清单、回执和生成产物哈希，而不调用执行器。确切的 v0.6 保留其打包的 OpenTofu 预览；`--out` 和 `--destroy` 仅适用于该预览，在原生线上会被拒绝。
+
+```bash
+stackkit plan [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | Architecture v2 生成清单（默认：&lt;outputRoot&gt;/.stackkit/generation-manifest.json） |
+| `--destroy` | bool | — | 创建销毁计划 |
+| `--generation-receipt` | string | — | Architecture v2 生成回执（默认：&lt;outputRoot&gt;/.stackkit/generation-receipt.json） |
+| `--inventory` | string | — | Architecture v2 观测到的 Inventory（否则会选取一个常规的 inventory 文件） |
+| `--json` | bool | — | 以 JSON 输出原生 Architecture v2 计划检查结果 |
+| `--out, -o` | string | — | 将计划保存到文件 |
+| `--resolved-plan` | string | — | Architecture v2 规范的 ResolvedPlan（默认：&lt;outputRoot&gt;/.stackkit/resolved-plan.json） |
+
+**示例**
+
+```bash
+# Inspect the generated plan, its readiness, and artifact hashes
+stackkit plan
+
+# The same inspection as JSON
+stackkit plan --json
+```
+

@@ -1,0 +1,73 @@
+---
+title: "stackkit game"
+description: "在已安装的 Game 工作负载上操作 Owner 的游戏服务器"
+sidebarTitle: "game"
+---
+在已安装的 Game 工作负载上操作 Owner 的游戏服务器。
+
+通过已应用 Game 工作负载的 Pterodactyl Panel 列出游戏服务器，并执行日常的 Owner 操作（电源、允许列表）。创建服务器请使用 `stackkit setup game`。
+
+```bash
+stackkit game [flags]
+```
+
+子命令：[`stackkit game allow`](#stackkit-game-allow), [`stackkit game list`](#stackkit-game-list), [`stackkit game power`](#stackkit-game-power)
+
+## stackkit game allow
+
+在 StackKits 允许列表游戏服务器上放行一名玩家。
+
+```bash
+stackkit game allow <server> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+| `--owner-approve` | bool | — | 使用已建立的本地 Owner 托管授权此次允许列表变更 |
+| `--player` | string | — | **必填。** 确切的游戏账号名（Minecraft 账号名或 Xbox 游戏标签） |
+
+**示例**
+
+```bash
+stackkit game allow 92c66407 --player Notch --owner-approve
+```
+
+## stackkit game list
+
+列出 Owner 的游戏服务器及其状态和端口。
+
+```bash
+stackkit game list [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+**示例**
+
+```bash
+stackkit game list --json
+```
+
+## stackkit game power
+
+启动、停止或重启一台游戏服务器，并等待结果。
+
+```bash
+stackkit game power <server> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+| `--owner-approve` | bool | — | 使用已建立的本地 Owner 托管授权此次电源变更 |
+| `--signal` | string | — | **必填。** 电源信号：start、stop 或 restart |
+
+**示例**
+
+```bash
+stackkit game power 92c66407 --signal restart --owner-approve
+```
+

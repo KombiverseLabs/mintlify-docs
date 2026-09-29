@@ -1,0 +1,44 @@
+---
+title: "操作系统兼容性"
+description: "StackKits v0.39.7 的生命周期证据"
+sidebarTitle: "操作系统兼容性"
+icon: server
+---
+
+<Note>
+v0.46.6 的生命周期运行尚未投影；各行显示的是最新已投影的版本 v0.39.7。
+</Note>
+
+各行来自 StackKits [v0.39.7](https://github.com/kombifyio/StackKits/releases/tag/v0.39.7) 在全新虚拟机上的自动化生命周期运行：install、init、generate、apply、verify、backup 和 restore。最近一次生命周期运行：2026-09-24。
+
+- `supported`：在该版本最新一次运行中，每个生命周期阶段都通过。
+- `preview`：在最新一次运行中，安装到验证通过；后续阶段失败。
+- `unverified`：该版本上还没有完成的运行，或最新一次运行在验证之前就失败了。
+
+操作系统和虚拟机管理程序各行显示的是该版本上所测试环境中的最佳结果；“按环境划分的 Kit”会单独列出每个环境。
+
+| 操作系统 | 版本 | 测试的架构 | 状态 | 证据 | 最后验证 |
+| --- | --- | --- | --- | --- | --- |
+| Ubuntu | 26.04 | amd64 | `supported` | 所有生命周期阶段均通过 | v0.39.7 |
+| Ubuntu | 24.04 | amd64 | `supported` | 所有生命周期阶段均通过 | v0.39.7 |
+| Debian | 13 | amd64 | `supported` | 所有生命周期阶段均通过 | v0.39.7 |
+| Debian | 12 | — | `unverified` | 尚未被自动化生命周期测试覆盖 | — |
+
+每次运行都会在虚拟机中全新安装操作系统。
+
+## 按环境划分的 Kit
+
+每个 kit 都在它所面向的那类环境中评级。家庭网络中的运行还会从该网络中的另一台机器打开本地服务地址。
+
+| Kit | 环境 | 状态 | 证据 | 最后验证 |
+| --- | --- | --- | --- | --- |
+| Basement Kit | CI 中的全新虚拟机 | `supported` | 所有生命周期阶段均通过 | v0.39.7 |
+| Basement Kit | 家庭网络中的虚拟机 | `unverified` | 该版本还没有生命周期回执 | v0.35.0 |
+| Cloud Kit | 带有 kombify.me 地址的公网 VPS | `supported` | 所有生命周期阶段均通过 | v0.39.7 |
+| Modern Homelab | 家庭虚拟机加公网 VPS | `unverified` | 尚未被自动化生命周期测试覆盖 | — |
+
+## 虚拟机管理程序
+
+StackKits 运行在你的虚拟机管理程序上的来宾虚拟机内，绝不运行在虚拟机管理程序主机本身上。状态覆盖的是端到端的部署：来宾在虚拟机管理程序上创建，StackKit 生命周期在其中运行。它并不认证某个厂商产品或服务器提供商。
+
+该版本的虚拟机管理程序部署及其生命周期证据列在 [stackkit.cc/compatibility](https://stackkit.cc/compatibility)。在主机上运行 `stackkit compat`，可以得到非破坏性的诊断，以及为其操作系统和虚拟机管理程序发布的证据。

@@ -1,0 +1,56 @@
+---
+title: "审查、应用与验证"
+description: "在更改主机之前，检查生成的 StackKits 意图"
+sidebarTitle: "安全应用"
+icon: clipboard-check
+---
+
+从配置到验证，始终使用同一个工作区和同一个已发布的 CLI。生成的文件是带有证据的输出；StackSpec 仍然是可编辑的输入。
+
+## 1. 验证并生成
+
+```bash
+stackkit validate
+stackkit generate
+```
+
+生成会在配置的输出根目录下写入解析后的计划、生成清单、回执和受管控的产物。
+
+## 2. 检查计划
+
+```bash
+stackkit plan --json
+```
+
+应用之前，请确认：
+
+- 计划哈希和规格哈希都存在
+- `readiness.generation.status` 为 `ready`
+- `readiness.apply.status` 为 `ready`
+- 所选的工作负载、站点、节点和适配器符合你的意图
+- 每个生成的产物都有所有者和预期路径
+
+`plan` 检查原生 v2 闭包，不会调用执行器。计划就绪是必要条件，但并不证明主机已经发生了变化。
+
+## 3. 明确地应用
+
+```bash
+stackkit apply
+```
+
+请查看本地批准提示。`apply` 是真正更改主机的步骤。
+工具链安装器会把这一步留给你；`base.stackkit.cc` 上的 Basement 引导脚本已经执行了首次应用。完成该引导之后，只有在有意更改配置时才需要再次应用。
+
+## 4. 验证结果
+
+```bash
+stackkit verify --http --json
+stackkit drift detect --json
+stackkit logs list --json
+```
+
+请把 JSON 输出与工作区放在一起保存。它把观察到的结果绑定到本地生命周期，而不是绑定到截图或被编辑过的 Compose 文件。
+
+<Warning>
+  当解析后的计划报告存在应用阻塞项时，请停下来。不要通过直接编辑 Docker、Compose 或生成的文件来绕过它；请修正 StackSpec 或目标主机，然后重新生成。
+</Warning>

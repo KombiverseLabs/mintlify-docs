@@ -1,0 +1,40 @@
+---
+title: "使用场景"
+description: "你可以在 StackKit 上运行的十一个主要使用场景、它们的应用和当前状态"
+sidebarTitle: "使用场景"
+icon: diagram-project
+---
+
+使用场景是你的家庭所依赖的东西，比如照片库或密码保险库。每个使用场景都作为工作负载运行在你已验证的 kit 上，并由一个或多个应用提供。你的 kit 带来登录、路由、Node Hub 和备份；使用场景则在此之上添加应用。
+
+初始的 StackSpec 不会选择任何使用场景。你选择自己想要的那些。
+
+## 十一个主要使用场景
+
+| 使用场景 | 你能得到什么 | 默认应用（备选） | 状态 | 指南 |
+| --- | --- | --- | --- | --- |
+| 照片 | 家庭的照片和视频库，并支持从手机备份 | [Immich](/zh-Hans/stackkits/apps/immich) | 可用，已通过生命周期验证 | [照片](/zh-Hans/guides/stackkits/use-cases/photos) |
+| 文档与文件 | 文件的存储与分享，另有可选的可检索文档归档 | [Cloudreve](/zh-Hans/stackkits/apps/cloudreve)（文件）+ Paperless-ngx（文档附加组件） | 文件：可用，已通过生命周期验证 · 文档：可用，尚未通过生命周期验证 | [文档与文件](/zh-Hans/guides/stackkits/use-cases/documents-and-files) |
+| Vault | 密码保险库，另外规划了服务密钥和 Bitcoin 扩展 | [Vaultwarden](/zh-Hans/stackkits/apps/vaultwarden)（密码） | 密码：可用，已通过生命周期验证 · 扩展：规划中 | [Vault](/zh-Hans/guides/stackkits/use-cases/vault) |
+| 媒体 | 串流你拥有的电影、音乐和视频 | [Jellyfin](/zh-Hans/stackkits/apps/jellyfin) | 可用，已通过生命周期验证 | [媒体](/zh-Hans/guides/stackkits/use-cases/media) |
+| 智能家居 | 以全新或已连接的 Home Assistant 实例为中心的家庭自动化 | Home Assistant | 可用，已通过生命周期验证 | [智能家居](/zh-Hans/guides/stackkits/use-cases/smart-home) |
+| 开发 | 私有 Git 仓库，远程桌面和工作区运行时正在规划中 | [Gitea](/zh-Hans/stackkits/apps/gitea)（仓库） | 仓库：可用，尚未通过生命周期验证 · 远程桌面：开发中 · 工作区：规划中 | [开发](/zh-Hans/guides/stackkits/use-cases/development) |
+| 邮件 | 为该版本声明的邮件服务器，先于客户端优先的设置指南 | Stalwart | 开发中 | [邮件](/zh-Hans/guides/stackkits/use-cases/mail) |
+| 游戏 | 自托管的游戏服务器，从 Pterodactyl 开始 | Pterodactyl | 可用，尚未通过生命周期验证（v0.41.0 新增） | [游戏](/zh-Hans/guides/stackkits/use-cases/game) |
+| 网络 | 你所选设备、服务器和网络之间的 DNS 与连接 | — | 规划中 | [网络](/zh-Hans/guides/stackkits/use-cases/network) |
+| 自动化 | 处理重复性的跨应用工作的、经过审查的例行任务 | — | 规划中 | [自动化](/zh-Hans/guides/stackkits/use-cases/automation) |
+| AI | 用于在你的主机上运行的语言模型的聊天界面 | Ollama 和 Open WebUI | 可用，尚未通过生命周期验证 | [AI](/zh-Hans/guides/stackkits/use-cases/personal-ai) |
+
+“可用，已通过生命周期验证”表示当前版本有公开的 Depot 生产者回执：从 install 到 restore 在被测操作系统上通过，该次运行的支持等级发布在 [stackkit.cc/compatibility](https://stackkit.cc/compatibility)。“可用，尚未通过生命周期验证”表示你现在就可以在目录中选择它，但还没有生命周期回执覆盖它。“开发中”表示该版本已声明它，但还无法安装。“规划中”表示它是目标设计，还没有发布版本，也没有确定的日期。
+
+[使用场景目录](/zh-Hans/stackkits/reference/use-case-catalog)列出了当前版本声明的每个使用场景，它由已发布的清单生成。它自身没有成熟度字段；请从本页读取状态。[操作系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)提供了“已通过生命周期验证”背后的生命周期证据。
+
+## 如何添加使用场景
+
+1. 从已验证的 kit 开始。[快速开始](/zh-Hans/stackkits/quickstart)会设置一个 Basement Kit。
+2. 在使用场景页面上规划存储与恢复。
+3. 在你的 [StackSpec](/zh-Hans/guides/stackkits/configure-stack-spec) 中选择工作负载，然后按照[添加工作负载](/zh-Hans/stackkits/reference/day-2-operations#向现有工作区添加工作负载)来建立密钥托管、生成、应用并验证。
+4. 在应用页面上完成设置，并尝试一个真实的任务，比如上传一张照片。
+5. 在使用场景保存你无法替代的数据之前，先演练一次恢复。参见[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。
+
+文档与文件是一个很好的首个使用场景，因为 Cloudreve 的独立选择不需要密钥引用。

@@ -1,0 +1,49 @@
+---
+title: "节点角色与 StackKit 基础"
+description: "基础节点、工作节点和存储节点分别做什么，以及何时由新节点启动自己的 StackKit"
+sidebarTitle: "节点角色"
+icon: "sitemap"
+---
+
+你通过向导添加的每个节点都绑定到一个 StackKit，并在其中承担一个角色。角色告诉 Techstack 该节点的用途。StackKit 基础则告诉它该节点遵循哪种套件定义。
+
+## 基础节点
+
+基础节点是 StackKit 的第一个也是主要的节点。它运行该 StackKit 的核心。每个 StackKit 恰好有一个基础节点。
+
+当你设置第一个家庭实验室时，或者在添加节点时选择 **New StackKit / main Node**，就会创建基础节点。你不能向现有 StackKit 添加第二个基础节点；第二个主节点总是会启动一个新的 StackKit。
+
+## 工作节点
+
+工作节点为现有 StackKit 增加计算能力。StackKit 可以在其上放置服务。当你添加第二台机器来分摊负载时，请选择 **Worker Node**，例如放在第一台服务器旁边的闲置迷你主机。
+
+工作节点会加入你添加它的那个 StackKit，并使用该 StackKit 的基础。
+
+## 存储节点
+
+存储节点是一个额外的节点，用于需要大量磁盘空间的服务，例如照片、文件或媒体。当这台机器的主要优势是磁盘时，请选择 **Storage Node**。
+
+与工作节点一样，存储节点也会加入现有的 StackKit 并使用其基础。
+
+## StackKit 基础
+
+StackKit 基础是构建 StackKit 所依据的套件定义。Techstack 提供两种：
+
+- **[Basement Kit](/zh-Hans/stackkits/kits/basement-kit)**，适用于本地或用户自有的硬件，例如家里的服务器或你自己租用的 VPS。
+- **[Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)**，适用于 VPS。[托管服务器](/zh-Hans/techstack/managed-servers)使用 Cloud Kit。
+
+每个节点都绑定到一个基础。如果你不确定哪种套件合适，请阅读[选择套件](/zh-Hans/guides/stackkits/choosing-a-kit)。
+
+## 加入现有的 StackKit
+
+当新节点应该协助你已经在运行的 StackKit 时，请选择 **Worker or storage for this StackKit**。此时该节点：
+
+- 采用该 StackKit 的基础；你无需再次选择；
+- 保留你现有的访问、人员和登录；
+- 成为 **Worker Node** 或 **Storage Node**。这里不提供基础角色，因为该 StackKit 已经有自己的主节点。
+
+## 启动新的 StackKit
+
+当新机器应该在同一个家庭实验室内运行自己的 StackKit 时，请选择 **New StackKit / main Node**。该节点会成为这个新 StackKit 的基础节点，并由你选择其基础。
+
+常见的配置是在一个家庭实验室中有两个 StackKit：家里硬件上的 Basement Kit，以及一台 VPS 上的 Cloud Kit。每个都有自己的主节点。两者都可以通过你自己的域名或 `*.kombify.me` 地址从任何地方访问；请参阅 [kombify.me](/zh-Hans/kombify-me/overview)。

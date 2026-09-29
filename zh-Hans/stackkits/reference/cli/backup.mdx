@@ -1,0 +1,400 @@
+---
+title: "stackkit backup"
+description: "管理备份（Kopia 引擎）"
+sidebarTitle: "backup"
+---
+管理备份（Kopia 引擎）。
+
+管理此 StackKit 部署的备份。
+
+备份由 Kopia 提供支持（见 ADR-0016），并运行在由 Basement 核心渲染的本地 kopia-agent 服务中。原生的 configure、status 和 run 会在接触 Kopia 之前，重新校验确切的本地 Plan、生成的产物、Owner 托管和 Apply 证据。仓库、源、排除项、服务身份和凭据均由 CUE 或 Owner 托管所拥有。
+
+```bash
+stackkit backup [flags]
+```
+
+**示例**
+
+```bash
+# Configure the local Kopia repository after stackkit apply
+stackkit backup configure
+
+# Take a snapshot now
+stackkit backup run
+
+# Check repository readiness and the latest snapshot and restore receipts
+stackkit backup status
+
+# Restore a snapshot into isolated staging
+stackkit backup restore sha256:<snapshot-anchor-id> --owner-approve
+```
+
+子命令：[`stackkit backup configure`](#stackkit-backup-configure), [`stackkit backup emergency-export`](#stackkit-backup-emergency-export), [`stackkit backup emergency-restore`](#stackkit-backup-emergency-restore), [`stackkit backup init`](#stackkit-backup-init), [`stackkit backup restore`](#stackkit-backup-restore), [`stackkit backup run`](#stackkit-backup-run), [`stackkit backup schedule`](#stackkit-backup-schedule), [`stackkit backup status`](#stackkit-backup-status), [`stackkit backup target`](#stackkit-backup-target)
+
+## stackkit backup configure
+
+配置由 CUE 治理的本地 Kopia 仓库。
+
+根据确切生成的 StackSpec v2 备份策略配置本地 Kopia 仓库。
+
+仓库路径和 kopia-agent 服务由 CUE 拥有，无法在命令行覆盖。
+
+```bash
+stackkit backup configure [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+**示例**
+
+```bash
+# Configure the repository once the Basement core is applied
+stackkit backup configure
+
+# Configure it and print the command result as JSON
+stackkit backup configure --json
+```
+
+## stackkit backup emergency-export
+
+将选定的本地数据导出为加密的便携式恢复归档。
+
+创建一个便携式的 age 加密 tar/gzip 归档，包含逐文件校验和与恢复运行手册。请提供 age 接收方公钥，以及一个位于数据源之外的新目标目录。省略 `--source` 时，会导出生成的 v2 备份契约（CUE 的 emergencyExport 类别，加上 generate/apply 源策略中的卷）。当不存在生成的契约时，显式的 CLASS=PATH 源仍是独立使用的路径。文件复制并不能证明应用一致性；请先停止写入方，或先导出数据库原生转储。恢复时无需原主机、Kopia 或 Kombify 账号，即可暂存数据。
+
+```bash
+stackkit backup emergency-export [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--format` | string | `tar.gz.age` | 便携归档格式（tar.gz.age） |
+| `--json` | bool | — | 以 JSON 输出归档回执 |
+| `--large-media-mode` | string | `manifest-only` | 媒体源：manifest-only、include 或 exclude |
+| `--recipient` | stringArray | — | age X25519 接收方公钥；有多个恢复负责人时可重复使用 |
+| `--source` | stringArray | — | 显式的 CLASS=PATH 源；可重复用于 config、secrets、platform-state、database、user-content、documents、photos、large-media、telemetry-timeseries、serverless-config 或 cache-generated |
+| `--target` | string | — | 新的输出目录；其父目录必须已存在 |
+
+**示例**
+
+```bash
+# Export the generated backup contract, encrypted to your age public key, into a new directory
+stackkit backup emergency-export --recipient <age-public-key> --target /mnt/usb/stackkit-export
+
+# Export explicit paths when no generated contract exists
+stackkit backup emergency-export --recipient <age-public-key> --target /mnt/usb/stackkit-export --source config=/opt/stacks --source user-content=/opt/data
+```
+
+## stackkit backup emergency-restore
+
+解密并验证便携导出，输出到新的暂存目录。
+
+```bash
+stackkit backup emergency-restore [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--archive` | string | — | 加密的紧急归档 |
+| `--identity-file` | string | — | 本地 age 身份文件；私钥绝不应出现在命令行上 |
+| `--json` | bool | — | 以 JSON 输出验证后的暂存结果 |
+| `--max-bytes` | int | `549755813888` | 解压后归档的最大字节数，包含元数据 |
+| `--target` | string | — | 新的隔离恢复目录；其父目录必须已存在 |
+
+**示例**
+
+```bash
+# Decrypt and verify an export into a new staging directory with your age identity file
+stackkit backup emergency-restore --archive <export-dir>/<archive>.tar.gz.age --identity-file ~/.config/age/key.txt --target ./restore-staging
+```
+
+## stackkit backup init
+
+输出首次运行的设置说明。
+
+输出备份附加组件的首次运行设置步骤。
+
+此命令为只读。它描述的是原生生命周期：在配置仓库之前，先渲染并应用由 CUE 拥有的本地 kopia-agent。
+
+```bash
+stackkit backup init [flags]
+```
+
+## stackkit backup restore
+
+验证已签名的快照并将其恢复到隔离的暂存区。
+
+将一个内容寻址、经 Owner 签名的快照锚点恢复到由 CUE 拥有的隔离暂存卷。原始的 Kopia 快照 ID 和暂存路径不受调用方控制。`--owner-approve` 会记录显式的本地 Owner 授权；此命令从不要求 Kombify 账号或 Cloud 服务。
+
+```bash
+stackkit backup restore <snapshot-anchor-id> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+| `--operation-id` | string | — | 此次暂存恢复操作的稳定幂等键 |
+| `--owner-approve` | bool | — | 使用已建立的本地 Owner 托管授权此次暂存恢复 |
+
+**示例**
+
+```bash
+# Restore a snapshot into isolated staging; the live volumes are not touched
+stackkit backup restore sha256:<snapshot-anchor-id> --owner-approve
+
+# Print the result as JSON: data.id is the restore result ID for restore activate, data.operationId is the restore operation ID for restore abandon
+stackkit backup restore sha256:<snapshot-anchor-id> --owner-approve --json
+```
+
+子命令：[`stackkit backup restore abandon`](#stackkit-backup-restore-abandon), [`stackkit backup restore activate`](#stackkit-backup-restore-activate), [`stackkit backup restore recover`](#stackkit-backup-restore-recover)
+
+### stackkit backup restore abandon
+
+放弃一个待处理或已暂存的恢复操作。
+
+```bash
+stackkit backup restore abandon <restore-operation-id> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+| `--owner-approve` | bool | — | 使用已建立的本地 Owner 托管授权放弃此次恢复 |
+
+**示例**
+
+```bash
+# Discard a staged restore you do not want to activate
+stackkit backup restore abandon <restore-operation-id> --owner-approve
+```
+
+### stackkit backup restore activate
+
+将一个已验证的暂存恢复激活到线上 Basement 卷中。
+
+```bash
+stackkit backup restore activate <restore-result-id> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+| `--operation-id` | string | — | 此次线上恢复激活的稳定幂等键 |
+| `--owner-approve` | bool | — | 使用已建立的本地 Owner 托管授权线上激活 |
+
+**示例**
+
+```bash
+# Replace the live volumes with a verified staged restore
+stackkit backup restore activate sha256:<restore-result-id> --owner-approve
+
+# Name the activation operation so an interrupted run can be recovered by that ID
+stackkit backup restore activate sha256:<restore-result-id> --owner-approve --operation-id restore-activate-2026-09-18
+```
+
+### stackkit backup restore recover
+
+恢复被中断的恢复操作，或完成其已提交的结果。
+
+恢复确切经 Owner 批准的恢复激活。提交之前，恢复会还原先前的线上卷。提交之后，它会保留已激活的数据，并继续结果清理和应用收尾。对已完成的操作重复执行恢复，会返回其原始的签名结果。必须提供 `--rollback`。
+
+```bash
+stackkit backup restore recover <activation-operation-id> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+| `--owner-approve` | bool | — | 使用已建立的本地 Owner 托管授权恢复 |
+| `--rollback` | bool | — | 若被中断的激活尚未提交，则授权回滚 |
+
+**示例**
+
+```bash
+# Recover an interrupted activation by its operation ID
+stackkit backup restore recover restore-activate-2026-09-18 --rollback --owner-approve
+```
+
+## stackkit backup run
+
+立即强制生成一次快照（带外）。
+
+```bash
+stackkit backup run [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+| `--operation-id` | string | — | 此次快照操作的稳定幂等键 |
+| `--scheduled` | bool | — | 仅通过当前已签名的本地计划授权执行 |
+
+**示例**
+
+```bash
+# Take a snapshot now; data.id in the JSON result is the snapshot anchor ID for backup restore
+stackkit backup run --json
+
+# Use your own operation ID so a retry cannot create a second snapshot
+stackkit backup run --operation-id manual-2026-09-18
+```
+
+## stackkit backup schedule
+
+控制经 Owner 批准的本地备份定时器。
+
+```bash
+stackkit backup schedule [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+子命令：[`stackkit backup schedule disable`](#stackkit-backup-schedule-disable), [`stackkit backup schedule enable`](#stackkit-backup-schedule-enable), [`stackkit backup schedule status`](#stackkit-backup-schedule-status)
+
+### stackkit backup schedule disable
+
+撤销计划备份的执行并停止其定时器。
+
+```bash
+stackkit backup schedule disable [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | 撤销本地计划备份授权 |
+
+继承自 [`stackkit backup schedule`](#stackkit-backup-schedule)：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+**示例**
+
+```bash
+# Stop scheduled snapshots and revoke their authorization
+stackkit backup schedule disable --owner-approve
+```
+
+### stackkit backup schedule enable
+
+批准并启用确切的 CUE 备份周期。
+
+```bash
+stackkit backup schedule enable [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | 批准此确切的 Plan、CLI 和本地备份周期 |
+
+继承自 [`stackkit backup schedule`](#stackkit-backup-schedule)：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+**示例**
+
+```bash
+# Approve the backup cadence from the applied plan and start its timer
+stackkit backup schedule enable --owner-approve
+```
+
+### stackkit backup schedule status
+
+分别显示定时器、授权和最近一次计划快照。
+
+```bash
+stackkit backup schedule status [flags]
+```
+
+继承自 [`stackkit backup schedule`](#stackkit-backup-schedule)：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+**示例**
+
+```bash
+# Show the timer, its authorization, and the last scheduled snapshot
+stackkit backup schedule status
+
+# The same status as JSON
+stackkit backup schedule status --json
+```
+
+## stackkit backup status
+
+显示本地 Kopia 仓库状态。
+
+```bash
+stackkit backup status [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+**示例**
+
+```bash
+# Show repository readiness, coverage, and the latest snapshot and restore receipts
+stackkit backup status
+
+# The same status as JSON
+stackkit backup status --json
+```
+
+## stackkit backup target
+
+将 Owner 提供的 S3 目标绑定到生成的备份策略。
+
+```bash
+stackkit backup target [flags]
+```
+
+子命令：[`stackkit backup target import`](#stackkit-backup-target-import), [`stackkit backup target status`](#stackkit-backup-target-status)
+
+### stackkit backup target import
+
+从 stdin 的 JSON 导入加密的 S3 托管。
+
+从 stdin 导入 JSON 字段 endpoint、bucket、prefix、region、accessKeyId、secretAccessKey 和 passphrase。passphrase 是现有 Kopia 仓库所用的字符串。只会输出不透明的目标引用。这只是导入托管信息；它不会创建存储桶，也不会验证异地就绪状态。
+
+```bash
+stackkit backup target import [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--candidate-digest` | string | — | 已安装 StackKits 候选发布版的确切 sha256 摘要 |
+| `--owner-approve` | bool | — | 授权此确切的本地备份目标 |
+| `--rebind` | bool | — | 续期 Plan/源授权，同时保留现有目标和凭据 |
+
+**示例**
+
+```bash
+# Import the S3 target from a private JSON file with the fields listed above
+stackkit backup target import --owner-approve < s3-target.json
+```
+
+### stackkit backup target status
+
+在不连接 S3 的情况下验证本地目标托管。
+
+```bash
+stackkit backup target status [flags]
+```
+
+**示例**
+
+```bash
+# Confirm the imported target custody is intact
+stackkit backup target status
+```
+

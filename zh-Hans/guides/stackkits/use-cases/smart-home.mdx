@@ -1,0 +1,56 @@
+---
+title: "智能家居"
+description: "用 Home Assistant 在你运营的主机上查看并控制你选择的设备"
+sidebarTitle: "智能家居"
+icon: house-signal
+---
+
+<Info>
+  证据状态（2026-09-24，v0.41.0）：使用 Home Assistant 的智能家居为 `available,
+  lifecycle-verified`。智能家居已在公开的 v0.39.7 归档上验证：Depot 生产者在 Ubuntu 24.04 amd64（Basement Kit，standalone）上完成的生命周期运行，通过了 install、init、generate、apply、所有者设置、verify、backup、restore 和 restore activation，并通过来宾本地回环验证了应用层回读。
+</Info>
+
+智能家居为你的家庭提供一个统一的地方，在你运营的主机上查看并控制你选择的设备。Home Assistant 运行自动化平台。发布目录把这个使用场景称为 Smart Home，并作为可选的 `smart-home` 工作负载交付。
+
+## 选择 Home Assistant 的运行方式
+
+| 设置 | 选项 | 默认值 |
+| --- | --- | --- |
+| 安装方式 | 容器（Home Assistant Core，不含 Supervisor 或 Apps），或专用设备上的 Home Assistant OS | 容器 |
+| 现有安装 | 新建，或连接现有实例而不更改其配置 | 新建 |
+| USB 设备 | 把 Zigbee、Z-Wave 或其他 USB 无线电模块直通给该工作负载 | 关闭 |
+| 网络发现 | 自动发现家庭网络上的灯、音箱和集线器 | 开启 |
+
+连接现有实例会保留其当前配置。StackKits 绝不会为了模拟全新开始而重置现有实例，管理该实例仍然需要单独的授权。
+
+## 选择主机
+
+本地硬件、直接访问 Zigbee/Z-Wave USB 无线电模块，以及局域网上的设备，请使用 [Basement Kit](/zh-Hans/stackkits/kits/basement-kit)。Cloud Kit 无法访问本地无线电模块或你家庭网络上的设备，因此不适合智能家居的本地部分。
+
+## 设置
+
+1. 在你的 [StackSpec](/zh-Hans/guides/stackkits/configure-stack-spec) 中选择 `smart-home` 工作负载，选择容器或 Home Assistant OS，并决定是否直通 USB 无线电模块。
+2. 在已验证的 [Basement Kit](/zh-Hans/stackkits/kits/basement-kit) 上生成并应用该栈。
+3. 打开生成的智能家居路由，自己完成 Home Assistant 的引导向导：创建所有者账户、设置你家的位置，并为你实际拥有的设备添加集成。
+4. 配对你的第一台设备，并在添加更多设备之前，确认它显示的状态正确。
+
+## 检查 Node Hub
+
+打开 [Node Hub](/zh-Hans/guides/stackkits/node-hub)，确认智能家居工作负载正在运行，并查看它生成的地址。Homepage 是已发布的导航模块，但初始 StackSpec 不会选择它。在你另作选择之前，Node Hub 就是你当前的入口。
+
+## 备份与恢复
+
+Home Assistant 的配置和设备注册是你的 kit 声明的备份的一部分。恢复到隔离环境不会自动重新配对物理设备，也不会重新应用已被撤销的访问权限。在恢复物理操作之前，请重新验证设备绑定和当前授权。参见[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。
+
+## 获取应用
+
+<CardGroup cols={2}>
+  <Card title="Home Assistant Companion（iOS）" icon="apple" href="https://apps.apple.com/us/app/home-assistant/id1099568401">
+    适用于 iPhone 和 iPad 的官方 Home Assistant 应用。
+  </Card>
+  <Card title="Home Assistant Companion（Android）" icon="android" href="https://play.google.com/store/apps/details?id=io.homeassistant.companion.android">
+    适用于 Android 的官方 Home Assistant 应用。
+  </Card>
+</CardGroup>
+
+安装应用后，选择手动连接，并在它询问如何连接时输入你生成的智能家居 URL。使用你在引导过程中创建的所有者账户登录。

@@ -1,0 +1,73 @@
+---
+title: "游戏"
+description: "用 Pterodactyl 为朋友和家人运行自托管的 Minecraft 服务器，v0.41.0 新增"
+sidebarTitle: "游戏"
+icon: gamepad
+---
+
+<Info>
+  证据状态（2026-09-24，v0.41.0）：使用 Pterodactyl 的游戏为 `available,
+  not yet lifecycle-verified`。它在 v0.41.0 中作为可选工作负载发布，适用于 Basement Kit、Cloud Kit 和 Modern Homelab，附带精选的 Minecraft Java 和 Bedrock 配置。目前还没有自动化的 Depot 生命周期运行覆盖 install、verify、backup 或 restore，世界备份目前是崩溃一致性的，并且尚未端到端地演练过隔离恢复。
+</Info>
+
+游戏为你的家庭在你运营的主机上提供一个面向朋友和家人的自托管 Minecraft 服务器。Pterodactyl 运行面板和游戏容器。发布目录把这个使用场景称为 Game Server，并作为可选的 `game` 工作负载交付。
+
+## 选择版本
+
+| 版本 | 传输协议 | 默认端口 |
+| --- | --- | --- |
+| Minecraft Java | TCP | 25565 |
+| Minecraft Bedrock | UDP (RakNet) | 19132 |
+
+两个精选配置一开始都启用在线模式验证、白名单、不启用 RCON，也不会自动授予管理员权限。
+
+## 设置
+
+1. 在你的 [StackSpec](/zh-Hans/guides/stackkits/configure-stack-spec) 中选择 `game` 工作负载，然后在已验证的 [Basement Kit](/zh-Hans/stackkits/kits/basement-kit) 或 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit) 上生成并应用。
+2. 创建一个私有的、相对于工作区的设置文件，例如 `.stackkit/setup/game.json`：
+
+```json
+{
+  "profile": "minecraft-java",
+  "name": "Family Survival",
+  "acceptEula": true,
+  "allowList": ["PlayerOne"]
+}
+```
+
+3. 在把 `acceptEula` 设为 `true` 之前，请你自己阅读并接受 [Minecraft 最终用户许可协议](https://www.minecraft.net/en-us/eula)。切勿代替别人接受它。
+4. 运行设置命令：
+
+```bash
+stackkit setup game --owner-approve --credentials-file .stackkit/setup/game.json --json
+```
+
+该命令会按你选择的配置创建一个服务器，以正常停止的方式应用上述安全默认值，并回读白名单，让你确认它已生效。不在名单中的账户无法加入。
+
+## 选择本地或托管
+
+- 在本地 [Basement Kit](/zh-Hans/stackkits/kits/basement-kit) 节点上运行该工作负载，这样局域网内即可访问。
+- 在 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit) VPS 上运行它，这样即使你家里的电脑关机，朋友也能加入。
+
+除非你有意选择托管的 VPS 或明确的桥接，否则家庭节点无法从互联网访问。不要依赖路由器端口转发来绕过这一点。
+
+## 邀请玩家
+
+把节点的地址和该配置的端口分享给白名单上的玩家。通过位于生成的游戏路由上的 Pterodactyl 面板，管理白名单、服务器电源和资源。
+
+## 备份世界
+
+游戏备份遵循你的 kit 声明的计划，但目前有两个限制：
+
+- 备份是崩溃一致性的：快照运行前，服务器尚未被静默。
+- 游戏备份的隔离恢复尚未端到端地演练过。
+
+在你依赖它来保护无法重建的世界之前，先在隔离环境中演练一次恢复。参见[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。
+
+## 获取客户端
+
+<Card title="Minecraft" icon="download" href="https://www.minecraft.net/en-us/get-minecraft">
+  来自 Mojang/Microsoft 的官方 Java 和 Bedrock 客户端，适用于你实际拥有该游戏的平台。
+</Card>
+
+Pterodactyl 面板本身基于浏览器，因此不需要单独的管理客户端。

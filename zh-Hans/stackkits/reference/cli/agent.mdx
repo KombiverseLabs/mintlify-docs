@@ -1,0 +1,114 @@
+---
+title: "stackkit agent"
+description: "面向 Agent 的 StackKits 自动化辅助工具"
+sidebarTitle: "agent"
+---
+面向 Agent 的 StackKits 自动化辅助工具。
+
+面向 Agent 的辅助工具会输出安装计划、自检结果、提示词和 MCP 配置，而不会改动任何 rollout。
+
+```bash
+stackkit agent [flags]
+```
+
+子命令：[`stackkit agent install-plan`](#stackkit-agent-install-plan), [`stackkit agent mcp-config`](#stackkit-agent-mcp-config), [`stackkit agent prompt`](#stackkit-agent-prompt), [`stackkit agent self-check`](#stackkit-agent-self-check)
+
+## stackkit agent install-plan
+
+输出非交互式的 StackKits 安装计划。
+
+```bash
+stackkit agent install-plan [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--dir` | string | `my-homelab` | 工作区目录 |
+| `--json` | bool | — | 输出 JSON |
+| `--kit` | string | `basement-kit` | 要为其制定计划的 StackKit |
+| `--target` | string | `local` | 目标类型：local、ssh、vm 或 ci |
+
+**示例**
+
+```bash
+# Print the install steps for a Basement Kit workspace named my-homelab
+stackkit agent install-plan
+
+# A Cloud Kit plan for an agent working over SSH, as JSON
+stackkit agent install-plan --kit cloud-kit --target ssh --dir my-cloud --json
+```
+
+## stackkit agent mcp-config
+
+输出一份 StackKits MCP 客户端连接配置。
+
+输出一份可直接粘贴的 MCP 客户端配置，名称为 "stackkit"。
+
+对用户而言，这是一个 StackKits MCP 连接。在本地它会启动 stackkit-mcp 适配器；安装之后，在显式启用受保护端点时，同一个连接器也可以通过 stackkit-server /mcp 访问。
+
+```bash
+stackkit agent mcp-config [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--client` | string | `generic` | 客户端格式：generic、codex 或 claude |
+| `--mode` | string | `docs,local,server,actions` | MCP 模式；actions 会加入只读的生命周期工具，写入工具仍需 STACKKIT_MCP_ALLOW_WRITE=true |
+| `--server-url` | string | `http://localhost:8082` | stackkit-server 的 URL |
+
+**示例**
+
+```bash
+# Print the connection as Claude mcpServers JSON
+stackkit agent mcp-config --client claude
+
+# Print the Codex config.toml block
+stackkit agent mcp-config --client codex
+```
+
+## stackkit agent prompt
+
+输出可直接复制使用的 StackKits Agent 提示词。
+
+```bash
+stackkit agent prompt [scenario] [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 JSON |
+| `--list` | bool | — | 列出可用的提示词场景 |
+
+**示例**
+
+```bash
+# List the available prompt scenarios
+stackkit agent prompt --list
+
+# Print the prompt for diagnosing a failed rollout
+stackkit agent prompt diagnose-failed-rollout
+```
+
+## stackkit agent self-check
+
+检查本地面向 Agent 的 StackKits 前置条件。
+
+```bash
+stackkit agent self-check [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 JSON |
+| `--server-url` | string | `http://localhost:8082` | stackkit-server 的 URL |
+
+**示例**
+
+```bash
+# Check that stackkit, stackkit-server, and stackkit-mcp are on PATH
+stackkit agent self-check
+
+# The same checks as JSON
+stackkit agent self-check --json
+```
+

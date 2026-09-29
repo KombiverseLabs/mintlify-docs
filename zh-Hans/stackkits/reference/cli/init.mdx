@@ -1,0 +1,78 @@
+---
+title: "stackkit init"
+description: "根据 StackKit 初始化新的部署"
+sidebarTitle: "init"
+---
+根据 StackKit 初始化新的部署。
+
+在你的部署目录中创建 stack-spec.yaml。它会保存你的选择；不会安装服务，也不会改动主机。独立的本地路径无需 kombify 账号或 Techstack 即可工作。
+
+从所选 Kit 的目录默认值开始。`--owner-source=local` 会让 Owner 留在本机，并需要 `--owner-email` 指定本地 PocketID Owner。Cloud Kit 使用 kombify.me 地址，除非 `--domain` 指定了一个已指向此主机的域名。
+
+在生成或应用之前，请先审阅已保存的配置。默认值会被记录为显式意图，并由 Kit 的 CUE 契约校验。Kit 需要的必填信息（例如域名）会在需要时询问。在脚本中使用 `--non-interactive`，可在缺少输入时直接失败而不是提示。
+
+如需精确控制，请使用 `--use-case-alternative` 和 `--module-compute-profile`，而不是 `--catalog-defaults`。这些选择来自所选 Kit。原生创作使用 stackkit/v2alpha2；`--api-version` stackkit/v2alpha1 会选用显式的旧版图适配器。标注为 v0.6 兼容的标志只有显式指定版本的 v0.6 二进制文件才接受。
+
+```bash
+stackkit init [stackkit] [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--admin-email` | string | — | 仅限 v0.6 兼容：登录账号的管理员邮箱 |
+| `--api-version` | string | `stackkit/v2alpha2` | StackSpec 契约（stackkit/v2alpha2；显式旧版适配器：stackkit/v2alpha1） |
+| `--candidate-spec` | string | — | 仅限原生 v2：保留来自文件或 - （stdin）的完整且通过 CUE 校验的 StackSpec；不含创作覆盖项 |
+| `--catalog-defaults` | bool | — | 对省略的原生备选项和计算配置采用 CUE 目录默认值；持久化显式意图 |
+| `--cloud-oidc-client-id` | string | — | 仅限 v0.6 兼容：Cloud OIDC 客户端 ID |
+| `--cloud-oidc-client-secret-ref` | string | — | 仅限 v0.6 兼容：Cloud OIDC 客户端密钥引用（例如 secret://） |
+| `--cloud-oidc-foreign-subject` | string | — | 仅限 v0.6 兼容：Cloud 用户的外部 subject ID |
+| `--cloud-oidc-issuer` | string | — | 仅限 v0.6 兼容：用于 auto/cloud Owner 交接的 Cloud OIDC 签发方 URL |
+| `--cluster-mode` | string | `first` | 仅限 v0.6 兼容：集群模式（first\|join） |
+| `--compute-tier` | string | — | 仅限旧版 v2alpha1：声明的 Kit 图（low、standard、high） |
+| `--domain` | string | — | 为生成的栈规格覆盖域名 |
+| `--enable` | strings | — | 仅限原生 v2：要启用的可选 Kit 能力（capabilities.enable，例如 lan-dns,internal-pki） |
+| `--expected-spec-hash` | string | — | 仅限原生 v2：替换时需要当前经 CUE 规范化的完整规格哈希 |
+| `--force, -f` | bool | — | 仅限 v0.6 兼容：覆盖现有文件 |
+| `--hardware-profile` | string | — | nodes\[0\].hardware.profile 的设备类别（standard、pi、gpu、storage）。pi 指受限的家庭实验室设备，并不局限于树莓派。不会从 inventory 自动检测 |
+| `--local-dns` | bool | — | 仅限 v0.6 兼容：使用 Kombify Point 本地 DNS 名称 |
+| `--local-name` | string | — | 仅限 v0.6 兼容：`--local-dns` 使用的本地 DNS 短名称 |
+| `--mode` | string | — | 仅限 v0.6 兼容：安装模式（bare、bootstrapped、advanced） |
+| `--module-accelerator-profile` | stringArray | — | 原生 v2alpha2：module-id=accelerator-profile，用于已声明的加速器维度 |
+| `--module-compute-profile` | stringArray | — | 原生 v2alpha2：module-id=profile；每个选中的工作负载模块都需重复指定 |
+| `--module-storage-profile` | stringArray | — | 原生 v2alpha2：module-id=storage-profile，用于已声明的存储维度 |
+| `--name` | string | — | 部署契约 ID（默认为规范化后的工作目录名） |
+| `--non-interactive` | bool | — | 以非交互模式运行（需要输入时失败） |
+| `--output, -o` | string | `deploy` | 仅限 v0.6 兼容：生成文件的输出目录 |
+| `--owner-bootstrap-mode` | string | — | 仅限 v0.6 兼容：Owner 引导模式（auto\|custom\|none） |
+| `--owner-display-name` | string | — | 用于 `--owner-source=local` 的期望 PocketID Owner 显示名称 |
+| `--owner-email` | string | — | 用于 `--owner-source=local` 的期望 PocketID Owner 邮箱 |
+| `--owner-source` | string | — | Owner 托管来源（原生独立模式：local；v0.6 兼容：local\|cloud） |
+| `--owner-username` | string | — | 用于 `--owner-source=local` 的期望 PocketID Owner 用户名 |
+| `--platform` | string | — | 仅限原生 v2：所选提供商的平台适配器（install.platform.providerRef，例如 coolify 或 komodo） |
+| `--recovery-material-ref` | string | — | 仅限 v0.6 兼容：对编排器所拥有恢复材料的引用；栈规格永远不接受明文恢复口令 |
+| `--recovery-passphrase-hash` | string | — | 仅限 v0.6 兼容：恢复口令哈希（argon2id PHC）；缺失时会提示输入 |
+| `--service-profile` | string | — | 仅限 v0.6 兼容：BaseKit 服务配置 |
+| `--use-case` | strings | — | 要启用的可选 Kit 工作负载（例如 photos,files,vault）；v2alpha2 需要显式的备选项 |
+| `--use-case-alternative` | stringArray | — | 原生 v2alpha2：use-case-id=alternative；包含必需的核心工作负载 |
+
+**示例**
+
+```bash
+# Basement Kit for a home server, with the Kit's catalog defaults
+mkdir my-homelab && cd my-homelab
+stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com
+
+# Basement Kit with the optional Photos and Files use cases
+stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com --use-case photos,files
+
+# Cloud Kit for a public VPS on a kombify.me address
+mkdir my-cloud && cd my-cloud
+stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email you@example.com
+
+# Cloud Kit on your own domain, without prompts (for scripts)
+stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email you@example.com --domain example.com --non-interactive
+
+# Pick the core alternative and module profile explicitly instead of catalog defaults
+stackkit init basement-kit --owner-source=local --owner-email you@example.com --use-case-alternative basement-core=standalone --module-compute-profile stackkits-basement-core-runtime=standard
+```
+

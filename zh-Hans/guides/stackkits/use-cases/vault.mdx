@@ -1,0 +1,57 @@
+---
+title: "Vault"
+description: "目前是密码保险库，另外规划了在所有者控制的托管下的服务密钥和 Bitcoin 扩展"
+sidebarTitle: "Vault"
+icon: vault
+---
+
+<Info>
+  证据状态（2026-09-24，v0.39.7）：使用 Vaultwarden 的密码为 `available, lifecycle-verified`。在 Ubuntu 24.04 amd64（Basement Kit，standalone）上完成的一次生命周期运行，通过了 install、init、generate、apply、setup-vault、verify、backup、isolated restore 和 restore activation。下面的服务密钥和 Bitcoin 扩展为 `planned`：只有目标设计，没有发布版本，也没有确定的日期。
+</Info>
+
+Vault 让密码、机器密钥和 Bitcoin 角色分别处于各自独立的所有者控制之下。目前它只交付一种体验：基于 Vaultwarden 的密码。本页上的扩展是规划中的方向，现在还无法选择。
+
+## 密码（目前可用）
+
+<Card title="密码" icon="key" href="/zh-Hans/guides/stackkits/use-cases/passwords">
+  Vaultwarden 和 Bitwarden 客户端：已发布的契约、所有者设置和客户端注册。
+</Card>
+
+请参见[密码](/zh-Hans/guides/stackkits/use-cases/passwords)页面和 [Vaultwarden](/zh-Hans/stackkits/apps/vaultwarden) 应用页面，选择并设置当前这个已通过生命周期验证的体验。
+
+## 规划中的扩展
+
+下面的体验目前都还无法选择。它们是为更广泛的 Vault & Sovereignty 总体方案提出的设计构想，现有的 Vaultwarden 用户不会仅仅因为 Vault 的扩展，就获得 Bitcoin 节点或新的凭据代理。
+
+<CardGroup cols={2}>
+  <Card title="服务密钥" icon="lock-keyhole">
+    为应用授予有限的机器凭据，与人类密码和所有者托管分开。OpenBao 是正在评估的首选候选；Infisical 是用于对比的候选。
+  </Card>
+  <Card title="Bitcoin 节点与验证" icon="server">
+    使用你自己的节点来验证和查看 Bitcoin。使用 Bitcoin Core，并明确选择裁剪模式或完整数据模式。不托管资金。
+  </Card>
+  <Card title="浏览器" icon="network-wired">
+    私有的索引查询和熟悉的浏览器视图，基于完整数据节点加上 electrs 和 mempool。
+  </Card>
+  <Card title="支付" icon="file-contract">
+    收取发票付款，而无需把签名权限转移到服务器上。BTCPay Server 搭配仅观察或外部签名的钱包配置。
+  </Card>
+  <Card title="投资组合（只读）" icon="chart-line">
+    使用 rotki 私密地查看所选的多资产记录，且只使用只读数据源。
+  </Card>
+  <Card title="Lightning" icon="clock-rotate-left">
+    推迟到专门设计好恢复和托管之后；不是完成 Bitcoin 入门后的奖励。
+  </Card>
+</CardGroup>
+
+## 设计背后的安全原则
+
+- **分离的信任域。** 密码客户端、服务密钥授权、Bitcoin 节点的区块链数据以及外部签名器的密钥，是四种不同的东西。设计让它们使用各自独立的凭据，而不会把它们放进一个通用的密钥包里。
+- **服务器上没有热密钥。** 提议中的 Bitcoin 路径把签名密钥保留在外部签名器上，处于 StackKits 以及任何工作流历史或智能体上下文之外。没有任何环节会要求你在入门流程、聊天或支持工单中输入助记词。
+- **仅观察数据仍然敏感。** 描述符、扩展公钥、地址和发票记录虽然不赋予花费权限，却可能暴露财务活动，设计会据此对待它们。
+- **恢复不是一个通用的快照。** 密码保险库、服务密钥引擎、区块链索引和硬件签名器各自需要不同的恢复处理；可重建的公开链数据与所有者控制的私有元数据不会被同等对待。
+
+## 选择主机
+
+- 本地硬件和以局域网优先的访问，请使用 [Basement Kit](/zh-Hans/stackkits/kits/basement-kit)。
+- 已有的 VPS 或云主机，并且域名由你掌控，请使用 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。

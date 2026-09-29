@@ -1,0 +1,51 @@
+---
+title: "stackkit prepare"
+description: "为 StackKit 部署准备系统"
+sidebarTitle: "prepare"
+---
+为 StackKit 部署准备系统。
+
+别名：`prep`
+
+为 StackKit 部署准备系统，并检查所选的 StackSpec 路径。
+
+在原生 Architecture v2 线上，此命令执行只读的本地主机验证（Docker、Compose、内核、资源、存储和所需端口）。它从不安装或配置主机软件包，也从不使用托管账号。确切 v0.6 的兼容适配器保留其历史的准备流程。
+
+```text
+This command:
+  1. Selects the versioned StackSpec execution path
+  2. Checks host prerequisites on native Architecture v2
+  3. Retains historical target preparation through the exact-v0.6 compatibility adapter
+```
+
+```bash
+stackkit prepare [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--auto-fix` | bool | `true` | 自动修正可修复的问题（仅限确切 v0.6） |
+| `--dry-run` | bool | — | 显示将会执行的操作（仅限确切 v0.6） |
+| `--force` | bool | — | 即使磁盘空间不足也继续（仅限确切 v0.6） |
+| `--host` | string | `localhost` | 目标主机 IP/主机名（仅限确切 v0.6） |
+| `--json` | bool | — | 以 stackkit.command-result/v1 JSON 输出原生 v2 主机 preflight 报告 |
+| `--key` | string | — | SSH 私钥路径（仅限确切 v0.6） |
+| `--non-interactive` | bool | — | 当 prepare 需要操作员输入时失败而不是提示（仅限确切 v0.6） |
+| `--port` | int | `22` | 远程目标的 SSH 端口（仅限确切 v0.6） |
+| `--skip-docker` | bool | — | 跳过 Docker 安装检查（仅限确切 v0.6） |
+| `--skip-tofu` | bool | — | 跳过打包的 OpenTofu 检查（仅限确切 v0.6） |
+| `--user` | string | — | SSH 用户名（仅限确切 v0.6） |
+
+**示例**
+
+```bash
+# Check this host's prerequisites for the StackSpec in the current directory
+stackkit prepare
+
+# Check the prerequisites for the deployment in another directory
+stackkit prepare -C my-homelab
+
+# Emit the host preflight report as JSON
+stackkit prepare --json
+```
+

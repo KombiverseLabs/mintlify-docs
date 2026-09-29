@@ -1,0 +1,161 @@
+---
+title: "stackkit user"
+description: "在本地 PocketID 中邀请并管理家庭用户"
+sidebarTitle: "user"
+---
+在本地 PocketID 中邀请并管理家庭用户。
+
+在 PocketID 家庭组中创建、列出和移除 Homelab 用户。
+
+Add 会输出一次性的通行密钥（passkey）设置 URL。TinyAuth 继续准入已绑定在 OIDC 客户端上的 owners、admins 和 household 组。Owner 和 admin 身份不能在此创建或移除。
+
+```bash
+stackkit user [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+**示例**
+
+```bash
+# Invite a household member; share the printed one-time URL only with them
+stackkit user add alex --email alex@example.com --owner-approve
+
+# List household users
+stackkit user list
+
+# Remove a household user
+stackkit user remove alex --owner-approve
+```
+
+子命令：[`stackkit user add`](#stackkit-user-add), [`stackkit user list`](#stackkit-user-list), [`stackkit user owner`](#stackkit-user-owner), [`stackkit user remove`](#stackkit-user-remove)
+
+## stackkit user add
+
+通过一次性的通行密钥设置 URL 邀请一名家庭用户。
+
+```bash
+stackkit user add <username> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--display-name` | string | — | 可选的显示名称 |
+| `--email` | string | — | **必填。** 家庭成员邮箱 |
+| `--owner-approve` | bool | — | 显式批准创建此家庭用户 |
+
+继承自 `stackkit user`：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+**示例**
+
+```bash
+# Invite a household member and print their one-time passkey setup URL
+stackkit user add alex --email alex@example.com --owner-approve
+
+# Set a display name and return the invitation as JSON
+stackkit user add sam --email sam@example.com --display-name "Sam Doe" --owner-approve --json
+```
+
+## stackkit user list
+
+列出本地 PocketID 中的家庭用户。
+
+```bash
+stackkit user list [flags]
+```
+
+继承自 `stackkit user`：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+**示例**
+
+```bash
+# List household users
+stackkit user list
+
+# The same list as JSON
+stackkit user list --json
+```
+
+## stackkit user owner
+
+检查并继续 PocketID Owner 的通行密钥激活。
+
+```bash
+stackkit user owner [flags]
+```
+
+继承自 `stackkit user`：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+子命令：[`stackkit user owner activate`](#stackkit-user-owner-activate), [`stackkit user owner status`](#stackkit-user-owner-status)
+
+### stackkit user owner activate
+
+返回或重新签发与 Owner 绑定的一次性通行密钥激活。
+
+```bash
+stackkit user owner activate [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | 显式批准显示或重新签发 Owner 激活 |
+
+继承自 `stackkit user`：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+### stackkit user owner status
+
+读取 Owner 通行密钥的激活状态。
+
+```bash
+stackkit user owner status [flags]
+```
+
+继承自 `stackkit user`：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+## stackkit user remove
+
+从本地 PocketID 中移除一名家庭用户。
+
+```bash
+stackkit user remove <username> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | 显式批准移除此家庭用户 |
+
+继承自 `stackkit user`：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+**示例**
+
+```bash
+# Remove a household user
+stackkit user remove alex --owner-approve
+```
+

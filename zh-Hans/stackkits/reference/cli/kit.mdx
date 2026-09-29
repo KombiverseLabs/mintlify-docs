@@ -1,0 +1,47 @@
+---
+title: "stackkit kit"
+description: "已发布的 StackKit 发布版本操作"
+sidebarTitle: "kit"
+---
+已发布的 StackKit 发布版本操作。
+
+发现、验证并安装已发布的 StackKit 发布产物。
+
+```bash
+stackkit kit [flags]
+```
+
+子命令：[`stackkit kit list`](#stackkit-kit-list)
+
+## stackkit kit list
+
+列出 GitHub 上已发布的 StackKits 发布版本。
+
+为当前操作系统和架构解析每个公开 StackKit 的最新已发布版本。发布索引取自公开的 kombifyio/stackKits GitHub Releases 仓库。
+
+```text
+Channels:
+  stable  newest release that is not a prerelease
+  beta    newest -beta.* prerelease
+  edge    newest -edge.* prerelease
+```
+
+```bash
+stackkit kit list [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--channel` | string | `stable` | 发布渠道：stable、beta 或 edge。 |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON。 |
+
+**示例**
+
+```bash
+# Show the newest stable release of every public StackKit for this OS and architecture
+stackkit kit list
+
+# Show beta prereleases as JSON
+stackkit kit list --channel beta --json
+```
+

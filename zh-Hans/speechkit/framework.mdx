@@ -1,0 +1,68 @@
+---
+title: "使用 SpeechKit 构建"
+description: "嵌入 Go 语音内核，或使用服务器、Android 和浏览器目标"
+sidebarTitle: "框架"
+icon: "code"
+---
+
+公开的 SpeechKit 模块包含与平台无关的语音内核。当你的应用需要自行掌控进程、配置和提供方凭据，而不是依赖单独的 SpeechKit 服务器时，请使用它。
+
+{/* speechkit-release:begin */}
+当前公开版本为 [v0.72.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.1)，发布于 2026-09-20。
+{/* speechkit-release:end */}
+
+## 要求
+
+- Go 1.26 或更新版本
+- 一个能够提供所选麦克风、音频或文本输入的应用
+- 仅当你选择外部提供方时才需要提供方凭据
+
+## 添加模块
+
+```bash
+go get github.com/kombifyio/SpeechKit@latest
+```
+
+`@latest` 会解析为最新发布的版本。请记录你的构建实际解析到的确切版本，并在发布前将其固定：这是测试版软件，公开 API、配置键和默认值在次要版本之间可能发生变化。
+
+只导入你的宿主所需的包：听写使用 `pkg/speechkit/dictation`，唤醒使用 `pkg/speechkit/wakeword`，语音输出使用 `pkg/speechkit/tts`，一次性宿主使用 `pkg/speechkit/companion` 加上 Assist 和文本转语音适配器，感知说话人的应用使用 `pkg/speechkit/speaker`，录制会话使用 `pkg/speechkit/meeting`，连接服务器的应用使用 `pkg/speechkit/client`。根 `speechkit` 包只包含契约和值类型。
+
+如果想通过 `config.toml` 驱动框架，而不是手动构建设置，`pkg/speechkit/hostconfig` 可以一次调用就把配置文件转换为公开的模式设置和初始运行时策略：
+
+```go
+settings, policy, err := hostconfig.Load("config.toml")
+```
+
+文件缺失时会得到随附的默认值：仅本地，没有云端密钥。桌面客户端委托给同一个加载器，因此嵌入方和参考应用读取 `config.toml` 的方式完全一致。
+
+少数包需要 cgo（Windows 音频采集、ONNX 唤醒词）或外部二进制文件（`whisper-server`）。当依赖缺失时，每个包都会以哨兵错误安全失败，而不是假装可以工作。
+
+## 其他目标
+
+<CardGroup cols={2}>
+  <Card title="自托管服务器" icon="server" href="https://github.com/kombifyio/SpeechKit/blob/main/docs/server/README.md">
+    基于同一内核、从公开源码构建的 Linux HTTP 和 WebSocket 服务。它在同一个 URL 下提供 Dictation、Assist 和 Voice Agent。
+  </Card>
+  <Card title="智能体工具" icon="robot" href="https://github.com/kombifyio/SpeechKit/blob/main/docs/mcp/README.md">
+    `speechkit-mcp` 和 `speechkit-cli` 让智能体或运维人员可以检查框架、生成入门项目、验证载荷并操作服务器。
+  </Card>
+  <Card title="Android 模块" icon="android" href="https://github.com/kombifyio/SpeechKit/blob/main/android/README.md">
+    Apache-2.0 许可的 Gradle 模块，涵盖服务器解析、采集与轮流发言、线路协议和 Compose 语音界面，另附仓库内的参考应用。
+  </Card>
+  <Card title="浏览器客户端" icon="js" href="https://github.com/kombifyio/SpeechKit/tree/main/clients/typescript">
+    面向服务器 REST API、Voice Agent WebSocket 协议以及与框架无关的语音界面套件的 TypeScript 包，以源码形式发布在仓库中。
+  </Card>
+</CardGroup>
+
+## 继续阅读公开文档
+
+- [10 分钟上手 SDK](https://github.com/kombifyio/SpeechKit/blob/main/docs/sdk/README.md)
+- [框架 API](https://github.com/kombifyio/SpeechKit/blob/main/docs/speechkit-framework-api.md)
+- [添加自定义提供方](https://github.com/kombifyio/SpeechKit/blob/main/docs/sdk/custom-provider.md)
+- [词汇与替换](https://github.com/kombifyio/SpeechKit/blob/main/docs/words-and-replacements-standard.md)
+- [SDK 表面边界](https://github.com/kombifyio/SpeechKit/blob/main/docs/architecture/sdk-surface-boundary.md)
+- [可运行的示例](https://github.com/kombifyio/SpeechKit/tree/main/examples)
+
+<Note>
+这些链接指向公开仓库的默认分支，因此随着项目演进依然有效。如果需要与某个确切版本对应的文档，请在 URL 中固定一个标签。
+</Note>

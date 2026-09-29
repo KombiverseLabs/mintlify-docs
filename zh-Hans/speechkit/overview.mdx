@@ -1,0 +1,73 @@
+---
+title: "SpeechKit"
+description: "本地优先的听写、会议捕获和实时语音智能体"
+sidebarTitle: "概览"
+icon: "microphone"
+---
+
+SpeechKit 是 kombify 的本地优先语音框架和运行时。同一个公开项目提供 Go 语音内核、自托管服务器、智能体工具、Android 模块，以及面向 Windows 和 macOS 的桌面客户端。
+
+{/* speechkit-release:begin */}
+当前公开版本为 [v0.72.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.1)，发布于 2026-09-20。
+{/* speechkit-release:end */}
+
+SpeechKit 是测试版软件：公开 API、配置键和默认值在次要版本之间可能发生变化，因此请固定你测试过的版本。
+
+## 三种模式和一项录制服务
+
+| 界面 | 用途 |
+| --- | --- |
+| Dictation | 把语音转换为文字，不进行 LLM 改写。 |
+| Assist | 把语音或文本转换为一个有边界的结果，可选择朗读出来。 |
+| Voice Agent | 运行实时音频对话，用于交互式工作。 |
+| Meeting | 通过两个声道录制通话，并在事后撰写纪要。 |
+
+Hands-Free 是三种模式之上的激活和输出层，而不是第四种模式。Meeting 是独立的录制服务，只与 Dictation 共用语音转文字转录器。
+
+## SpeechKit 运行在哪里
+
+| 目标 | 可用性 |
+| --- | --- |
+| Windows 10/11 x64 桌面客户端 | 公开测试版；包含全部三种模式、Hands-Free 和 Meeting |
+| Apple Silicon 上的 macOS 14+ | 仅支持听写的测试版，使用临时签名，存在已知缺陷 |
+| Go 框架 | 公开模块；可将内核嵌入你自己的 Go 宿主 |
+| 自托管服务器 | 从公开源码构建的 Linux 目标 |
+| Android | Apache-2.0 许可的 Gradle 模块，另附仓库内的参考应用 |
+| 浏览器 | 公开仓库中的 TypeScript 客户端和语音界面包 |
+| Linux 桌面 | 不可用；Linux 是服务器运行时 |
+
+## 由你设置的隐私边界
+
+两项相互独立的设置决定了 SpeechKit 可以做什么：
+
+- **网络范围**回答进程可以访问哪里：所有网络、仅本地网络，或仅此设备。后端会针对语音提供方、模型下载、更新、遥测、服务器连接和集成强制执行该边界。更严格的范围会暂停不兼容的设置，而不是删除它们。
+- **保留范围**回答什么内容会比产生它的工作存在得更久：保留，或零保留。零保留会在会话结束时清除原始材料，只保留生成的结果。
+
+两者相互正交。仅限设备的安装仍然会把转录文本写入磁盘，除非你同时选择零保留。
+
+## 选择目标
+
+<CardGroup cols={2}>
+  <Card title="Windows 客户端" icon="windows" href="/zh-Hans/speechkit/install-windows">
+    从官方发布页安装 Windows 10/11 x64 测试版。
+  </Card>
+  <Card title="macOS 客户端" icon="apple" href="/zh-Hans/speechkit/install-macos">
+    安装 Apple Silicon 听写测试版，并阅读其已知限制。
+  </Card>
+  <Card title="Go 框架" icon="code" href="/zh-Hans/speechkit/framework">
+    嵌入语音内核，或构建服务器、Android 和浏览器目标。
+  </Card>
+  <Card title="模式与数据路径" icon="waveform-lines" href="/zh-Hans/speechkit/modes">
+    比较 Dictation、Assist、Voice Agent 以及提供方边界。
+  </Card>
+  <Card title="Meeting" icon="users" href="/zh-Hans/speechkit/meeting">
+    通过双声道录制通话，并生成带引用的会议纪要。
+  </Card>
+  <Card title="公开仓库" icon="github" href="https://github.com/kombifyio/SpeechKit">
+    浏览源码、示例、API 契约和发布说明。
+  </Card>
+</CardGroup>
+
+<Info>
+产品网站 [speechkit.cc](https://speechkit.cc) 从产品角度介绍同一个版本，包括可运行的入门提示词。
+</Info>

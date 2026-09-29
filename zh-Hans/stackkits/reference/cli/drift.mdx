@@ -1,0 +1,67 @@
+---
+title: "stackkit drift"
+description: "观察并协调本地 StackKit 漂移"
+sidebarTitle: "drift"
+---
+观察并协调本地 StackKit 漂移。
+
+```bash
+stackkit drift [flags]
+```
+
+子命令：[`stackkit drift detect`](#stackkit-drift-detect), [`stackkit drift reconcile`](#stackkit-drift-reconcile)
+
+## stackkit drift detect
+
+读取权威的本地状态并报告漂移。
+
+读取并验证规范的 ResolvedPlan、生成的产物、经 Owner 签名的 Apply 证据、本地 Owner 绑定，以及线上 Basement Compose 运行时，而不刷新运行时状态。在 terramate 生成目标下，它还会通过 Terramate 在本地主机项目的每个栈中运行只读的、带详细退出码的 OpenTofu plan，并为每个栈添加一个 stacks 条目；它从不执行 apply。内容寻址的报告会作为本地 Owner 证据，为每个选定的 Application Kit 保留。
+
+```bash
+stackkit drift detect [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+**示例**
+
+```bash
+# Compare the live deployment with the applied plan
+stackkit drift detect
+
+# The same drift report as JSON
+stackkit drift detect --json
+```
+
+## stackkit drift reconcile
+
+通过受治理的本地生命周期协调漂移。
+
+Standard 模式需要显式的本地 Owner 批准，会验证当前的本地授权，创建强制性的 Kopia 与执行器状态回滚检查点，然后通过独占的生命周期日志依次运行 generate、apply 和 verify。目标阶段失败时，会自动恢复、重新应用并验证所捕获的先前执行器状态。Advanced 模式在提供离线验证能力之前保持默认拒绝；Advanced 变更之后，它会再次观察漂移报告（包括每个 Terramate 栈的 plan），并在协调后的报告不干净时失败。
+
+```bash
+stackkit drift reconcile [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--candidate-spec` | string | — | Advanced：确切的 Terramate 候选 StackSpec |
+| `--capability` | string | — | Advanced：规范的离线能力文件 |
+| `--change-set` | string | — | Advanced：确切的经 Owner 签名的变更集 ID |
+| `--expect-sha256` | string | — | Advanced：确切的已存变更集字节摘要 |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+| `--mode` | string | `standard` | 协调模式：standard 或 advanced |
+| `--owner-approve` | bool | — | 为 standard 协调记录显式的本地 Owner 批准 |
+
+**示例**
+
+```bash
+# Reconcile drift in standard mode: checkpoint, then generate, apply, and verify
+stackkit drift reconcile --owner-approve
+
+# The same reconciliation with a JSON result
+stackkit drift reconcile --owner-approve --json
+```
+

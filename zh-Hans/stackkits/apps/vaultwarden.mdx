@@ -1,0 +1,26 @@
+---
+title: "Vaultwarden"
+description: "为 Passwords 用例选择 Vaultwarden 并登记 Bitwarden 客户端"
+sidebarTitle: "Vaultwarden"
+icon: vault
+---
+
+Vaultwarden 提供[密码](/zh-Hans/guides/stackkits/use-cases/passwords)用例。它是可选的原生 v2 `vault` 工作负载的已发布备选方案，初始的 Basement 和 Cloud StackSpec 不会启用它。
+
+| 属性 | 值 |
+| --- | --- |
+| 工作负载 | `vault` |
+| 备选方案 | `vaultwarden` |
+| 数据类别 | secret |
+| 必需的密钥引用 | `admin-token` |
+| 支持的独立适配器 | `standalone-compose` |
+
+`admin-token` 槽位保存一个不透明的 `secret://` 引用；实际的令牌保存在本地所有者托管中。请在 [StackSpec](/zh-Hans/guides/stackkits/configure-stack-spec) 中选择工作负载、放置位置和适配器，然后按照[添加工作负载](/zh-Hans/stackkits/reference/day-2-operations#向现有工作区添加工作负载)进行验证、建立托管、生成、检查计划、应用并验证。
+
+## 首次使用
+
+1. 在添加真实的机密之前，先创建应用所有者账户并选择注册策略。
+2. 接受邀请之后，完成账户注册，并通过你的 Bitwarden 客户端登录。
+3. 创建并同步一个密码库条目，以确认账户已就绪。仅有邀请并不能完成这项设置。
+
+对于已经准入的工作负载，请通过 StackSpec 和生命周期命令来更改 StackKits 意图；不要在目标上编辑生成的应用配置。

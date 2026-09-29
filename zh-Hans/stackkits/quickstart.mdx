@@ -1,0 +1,65 @@
+---
+title: "StackKits 快速开始"
+description: "引导、检查并显式应用已发布的 Basement Kit"
+sidebarTitle: "快速开始"
+icon: rocket
+---
+
+本快速开始会在你已经运维的服务器上，安装带有 Basement Kit 的当前公开 StackKits 版本。开始之前，请查看[操作系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)，了解该版本和主机组合是否有已发布的生命周期证据。CLI 仍然是本地的执行权威。
+
+## 引导 Basement Kit
+
+在受支持的服务器上，Basement 安装程序会创建 `~/my-homelab`，安装已发布的产物和所需的运行时，初始化本地所有者托管，引导本地 Admin/PocketID 访问，验证生成的 StackSpec，并应用默认的 Basement 服务：
+
+```bash
+curl -sSL https://base.stackkit.cc | sh
+cd ~/my-homelab
+stackkit version
+stackkit logs latest --json
+cat .stackkit/access.json
+```
+
+<Warning>
+  不需要托管的 kombify 账户。StackKits 本身仍然需要一个本地 Owner/Admin，此次引导会自动创建它。请保管好生成的访问详情，不要泄露。
+</Warning>
+
+需要其他安装程序？仅工具链的路径请参见[选择 kit](/zh-Hans/guides/stackkits/choosing-a-kit)，你已在运维的 VPS 请参见 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)，配置、审查、应用和验证分开的步骤请参见 [CLI 演练](/zh-Hans/guides/stackkits/cli-walkthrough)。
+
+## 审查或更改生成的意图
+
+在生成输出之前，请检查 `stack-spec.yaml`。尤其要审查绝对存储根目录、本地域名（Basement 安装程序使用 `home`，因此设备登记之后，服务会解析为 `*.home`）、站点和节点标识，以及空的可选工作负载选择。
+
+StackSpec 是配置输入。CUE 仍然是验证权威，生成的部署文件是输出，不要手动编辑。当前示例请参见[配置 StackSpec](/zh-Hans/guides/stackkits/configure-stack-spec)。
+
+## 生成并检查变更后的计划
+
+```bash
+stackkit generate
+stackkit plan --json
+```
+
+确认生成就绪状态和应用就绪状态都是 `ready`，然后审查所选的工作负载和产物路径。
+
+## 应用有意的变更
+
+```bash
+stackkit apply
+stackkit logs latest --json
+cat .stackkit/access.json
+```
+
+Basement 一行命令已经执行了初始的应用。只有在你有意更改 `stack-spec.yaml` 之后，才运行这些生命周期命令。请把本地日志和访问记录与工作区放在一起。
+
+## 继续
+
+<CardGroup cols={3}>
+  <Card title="Basement Kit" icon="house" href="/zh-Hans/stackkits/kits/basement-kit">
+    了解本地单环境 kit。
+  </Card>
+  <Card title="Cloud Kit" icon="cloud" href="/zh-Hans/stackkits/kits/cloud-kit">
+    在你运维的 VPS 上使用相同的独立生命周期。
+  </Card>
+  <Card title="安全应用" icon="clipboard-check" href="/zh-Hans/guides/stackkits/review-plan-and-apply">
+    在更改主机之前，审查就绪状态和生成的产物。
+  </Card>
+</CardGroup>
