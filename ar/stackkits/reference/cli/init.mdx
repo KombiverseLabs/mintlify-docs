@@ -1,0 +1,78 @@
+---
+title: "stackkit init"
+description: "تهيئة نشر جديد من StackKit"
+sidebarTitle: "init"
+---
+تهيئة نشر جديد من StackKit.
+
+أنشئ ملف stack-spec.yaml في دليل النشر لديك. يحفظ هذا اختياراتك؛ ولا يثبّت خدمات ولا يغيّر المضيف. يعمل المسار المحلي المستقل دون حساب kombify أو Techstack.
+
+ابدأ بالقيم الافتراضية في كتالوج الـ Kit المحدد. يُبقي `--owner-source=local` المالك على هذا الجهاز ويحتاج إلى `--owner-email` لمالك PocketID المحلي. يستخدم Cloud Kit عنوان kombify.me ما لم يسمِّ `--domain` نطاقًا يشير بالفعل إلى هذا المضيف.
+
+راجع الإعداد المحفوظ قبل إنشائه أو تطبيقه. تُسجَّل القيم الافتراضية بوصفها نية صريحة ويتحقق منها عقد CUE الخاص بالـ Kit. تُطلب المعلومات المطلوبة، مثل النطاق، عندما يحتاج إليها الـ Kit. استخدم `--non-interactive` في السكربتات ليفشل الأمر بدل أن يسأل.
+
+للتحكم الدقيق، استخدم `--use-case-alternative` و`--module-compute-profile` بدل `--catalog-defaults`. تأتي هذه الاختيارات من الـ Kit المختار. يستخدم التأليف الأصلي stackkit/v2alpha2؛ ويختار `--api-version` stackkit/v2alpha1 محوّل الرسم البياني القديم الصريح. الخيارات الموسومة بتوافق v0.6 لا يقبلها إلا ملف تنفيذي v0.6 محدد الإصدار صراحةً.
+
+```bash
+stackkit init [stackkit] [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--admin-email` | string | — | لتوافق v0.6 فقط: البريد الإلكتروني للمسؤول لحسابات تسجيل الدخول |
+| `--api-version` | string | `stackkit/v2alpha2` | عقد StackSpec (stackkit/v2alpha2؛ المحوّل القديم الصريح: stackkit/v2alpha1) |
+| `--candidate-spec` | string | — | v2 الأصلي فقط: احتفظ بـ StackSpec كاملة وصالحة في CUE من ملف أو من - للإدخال القياسي؛ ويستبعد تجاوزات التأليف |
+| `--catalog-defaults` | bool | — | اقبل القيم الافتراضية لكتالوج CUE للبدائل الأصلية وملفات الحوسبة المحذوفة؛ واحفظ النية الصريحة |
+| `--cloud-oidc-client-id` | string | — | لتوافق v0.6 فقط: معرّف عميل Cloud OIDC |
+| `--cloud-oidc-client-secret-ref` | string | — | لتوافق v0.6 فقط: مرجع سر عميل Cloud OIDC (مثل secret://) |
+| `--cloud-oidc-foreign-subject` | string | — | لتوافق v0.6 فقط: معرّف الموضوع الأجنبي (foreign subject) لمستخدم Cloud |
+| `--cloud-oidc-issuer` | string | — | لتوافق v0.6 فقط: عنوان URL لمُصدِر Cloud OIDC لتسليم المالك تلقائيًا/عبر Cloud |
+| `--cluster-mode` | string | `first` | لتوافق v0.6 فقط: وضع العنقود (first\|join) |
+| `--compute-tier` | string | — | v2alpha1 القديم فقط: رسم الـ Kit البياني المعلن (low وstandard وhigh) |
+| `--domain` | string | — | تجاوز النطاق لمواصفة stack المُنشأة |
+| `--enable` | strings | — | v2 الأصلي فقط: قدرات الـ Kit الاختيارية المطلوب تفعيلها (capabilities.enable، مثل lan-dns,internal-pki) |
+| `--expected-spec-hash` | string | — | v2 الأصلي فقط: تجزئة المواصفة الحالية الدقيقة المطبَّعة في CUE المطلوبة للاستبدال |
+| `--force, -f` | bool | — | لتوافق v0.6 فقط: الكتابة فوق الملفات الموجودة |
+| `--hardware-profile` | string | — | فئة الجهاز لـ nodes\[0\].hardware.profile (standard وpi وgpu وstorage). pi جهاز homelab محدود الموارد وليس مقتصرًا على Raspberry. لا يُكتشف تلقائيًا من inventory |
+| `--local-dns` | bool | — | لتوافق v0.6 فقط: استخدم أسماء DNS المحلية لـ Kombify Point |
+| `--local-name` | string | — | لتوافق v0.6 فقط: الاسم القصير في DNS المحلي لـ `--local-dns` |
+| `--mode` | string | — | لتوافق v0.6 فقط: وضع التثبيت (bare وbootstrapped وadvanced) |
+| `--module-accelerator-profile` | stringArray | — | v2alpha2 الأصلي: module-id=accelerator-profile لبُعد مسرِّع معلن |
+| `--module-compute-profile` | stringArray | — | v2alpha2 الأصلي: module-id=profile؛ كرّره لكل وحدة حمل عمل محددة |
+| `--module-storage-profile` | stringArray | — | v2alpha2 الأصلي: module-id=storage-profile لبُعد تخزين معلن |
+| `--name` | string | — | معرّف عقد النشر (يُشتق افتراضيًا من اسم دليل العمل بعد تطبيعه) |
+| `--non-interactive` | bool | — | التشغيل في وضع غير تفاعلي (يفشل إذا لزم إدخال) |
+| `--output, -o` | string | `deploy` | لتوافق v0.6 فقط: دليل الإخراج للملفات المُنشأة |
+| `--owner-bootstrap-mode` | string | — | لتوافق v0.6 فقط: وضع تمهيد المالك (auto\|custom\|none) |
+| `--owner-display-name` | string | — | الاسم المعروض المطلوب لمالك PocketID لـ `--owner-source=local` |
+| `--owner-email` | string | — | البريد الإلكتروني المطلوب لمالك PocketID لـ `--owner-source=local` |
+| `--owner-source` | string | — | مصدر حيازة المالك (الأصلي المستقل: local؛ توافق v0.6: local\|cloud) |
+| `--owner-username` | string | — | اسم المستخدم المطلوب لمالك PocketID لـ `--owner-source=local` |
+| `--platform` | string | — | v2 الأصلي فقط: محوّل منصة المزوّد المحدد (install.platform.providerRef، مثل coolify أو komodo) |
+| `--recovery-material-ref` | string | — | لتوافق v0.6 فقط: مرجع لمادة الاسترداد التي يملكها المنسّق؛ ولا تُقبل عبارات مرور الاسترداد كنص عادي في stack specs أبدًا |
+| `--recovery-passphrase-hash` | string | — | لتوافق v0.6 فقط: تجزئة عبارة مرور الاسترداد (argon2id PHC)؛ ويسأل الأمر عنها عند غيابها |
+| `--service-profile` | string | — | لتوافق v0.6 فقط: ملف خدمة BaseKit |
+| `--use-case` | strings | — | أحمال عمل الـ Kit الاختيارية المطلوب تفعيلها (مثل photos,files,vault)؛ ويتطلب v2alpha2 بدائل صريحة |
+| `--use-case-alternative` | stringArray | — | v2alpha2 الأصلي: use-case-id=alternative؛ وأدرج أحمال العمل الأساسية المطلوبة |
+
+**أمثلة**
+
+```bash
+# Basement Kit for a home server, with the Kit's catalog defaults
+mkdir my-homelab && cd my-homelab
+stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com
+
+# Basement Kit with the optional Photos and Files use cases
+stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com --use-case photos,files
+
+# Cloud Kit for a public VPS on a kombify.me address
+mkdir my-cloud && cd my-cloud
+stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email you@example.com
+
+# Cloud Kit on your own domain, without prompts (for scripts)
+stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email you@example.com --domain example.com --non-interactive
+
+# Pick the core alternative and module profile explicitly instead of catalog defaults
+stackkit init basement-kit --owner-source=local --owner-email you@example.com --use-case-alternative basement-core=standalone --module-compute-profile stackkits-basement-core-runtime=standard
+```
+

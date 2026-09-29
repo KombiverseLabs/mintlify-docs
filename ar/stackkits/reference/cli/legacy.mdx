@@ -1,0 +1,182 @@
+---
+title: "الأوامر القديمة والمهجورة"
+description: "أوامر ترفضها الإصدارات الحالية أو تستبدلها"
+sidebarTitle: "القديمة والمهجورة"
+---
+هذه الأوامر موجودة في شجرة الأوامر لكنها ليست جزءًا من سير العمل الحالي. ترفض الإصدارات الحالية الأوامر القديمة (legacy)؛ أما الأوامر المهجورة (deprecated) فتعمل وتذكر بديلها.
+
+## stackkit app add
+
+أضف أو حدّث تسليم تطبيق PaaS لتوافق v0.6.
+
+<Warning>ترفض الإصدارات الحالية هذا الأمر؛ فهو يخص خط التوافق v0.6 بعينه.</Warning>
+
+```bash
+stackkit app add <name> [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--auth` | string | `login-gateway` | وضع مصادقة المسار: login-gateway أو public |
+| `--env` | stringArray | — | متغير بيئة عادي بصيغة KEY=value؛ قابل للتكرار |
+| `--health-path` | string | `/health` | مسار فحص الصحة عبر HTTP |
+| `--host` | string | — | مضيف المسار للتطبيق |
+| `--image` | string | — | صورة الحاوية لتسليم PaaS |
+| `--kind` | string | `sveltekit` | نوع التطبيق (sveltekit فقط حاليًا) |
+| `--port` | int | `3000` | منفذ الحاوية الذي يعرضه التطبيق |
+| `--secret` | stringArray | — | مرجع سر بصيغة KEY=env:NAME أو KEY=vault:NAME أو KEY=file:PATH؛ قابل للتكرار |
+
+## stackkit backup list
+
+اعرض اللقطات في المستودع المحلي.
+
+<Warning>ترفض الإصدارات الحالية هذا الأمر؛ فهو يخص خط التوافق v0.6 بعينه.</Warning>
+
+```bash
+stackkit backup list [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج اللقطات بصيغة JSON |
+
+## stackkit backup migrate-from-restic
+
+استورد مستودع Restic موجودًا إلى Kopia (مرة واحدة).
+
+<Warning>ترفض الإصدارات الحالية هذا الأمر؛ فهو يخص خط التوافق v0.6 بعينه.</Warning>
+
+شغّل مستورد Restic إلى Kopia لمرة واحدة.
+
+يقرأ مستودع Restic المضبوط في الإضافة v1، ويمرّ على كل لقطة، ويعيد إنشاءها داخل Kopia مع الحفاظ على الطوابع الزمنية الأصلية. وبعد استيراد ناجح تحوّل الإضافة engine: "restic-import" إلى "kopia" تلقائيًا.
+
+```bash
+stackkit backup migrate-from-restic [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--dry-run` | bool | — | اطبع الخطة دون استيراد |
+
+## stackkit backup verify
+
+تحقق من المستودع مقابل مزوّد التخزين الخاص به.
+
+<Warning>ترفض الإصدارات الحالية هذا الأمر؛ فهو يخص خط التوافق v0.6 بعينه.</Warning>
+
+```bash
+stackkit backup verify [flags]
+```
+
+## stackkit cluster join-token
+
+أنشئ رمز انضمام لعقد العمل أو التخزين.
+
+<Warning>ترفض الإصدارات الحالية هذا الأمر؛ فهو يخص خط التوافق v0.6 بعينه.</Warning>
+
+أنشئ رمز انضمام لعقد العمل أو التخزين.
+
+الرمز هو المسار الوحيد المدعوم لمعاملة تثبيت BaseKit آخر كعضو في هذا الـ homelab. يستهلك تسجيل الخوادم البعيدة في Coolify وتحديثات مرآة TechStack هوية العنقود هذه في خطوات الطرح اللاحقة.
+
+```bash
+stackkit cluster join-token [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--endpoint` | string | — | نقطة نهاية العقدة الرئيسية التي تستخدمها عقد العمل للانضمام |
+| `--homelab-id` | string | — | معرّف الـ Homelab (يُشتق افتراضيًا من اسم stack spec) |
+| `--main-node` | string | — | معرّف/اسم العقدة الرئيسية (يُشتق افتراضيًا من العقدة الشبيهة بالرئيسية في stack spec) |
+| `--output, -o` | string | `.stackkit/cluster/join-token.json` | مسار إخراج JSON الخاص بالرمز |
+| `--ttl` | duration | `24h0m0s` | مدة صلاحية الرمز |
+
+## stackkit kit upgrade
+
+حدّد إصدار StackKit موثَّقًا وثبّته.
+
+<Warning>مهجور: استخدم stackkit upgrade</Warning>
+
+حدّد إصدار StackKit عامًا من GitHub، وتحقق من أرشيفه وSPDX SBOM وشهادة GitHub OIDC/Sigstore والجذر الموثوق المخزَّن مؤقتًا، ثم ثبّته بصورة ذرّية تحت .stackkit/releases/.
+
+مع `--dry-run` ينشئ الهدف الموثَّق داخل مساحة عمل ظلّية محدودة فقط ويبلغ عن فرق قانوني بين الخطة والمخرجات. وبدون `--dry-run` يفحص هذا الهدف أولًا، وينشئ لقطة Kopia أصلية إضافةً إلى نقطة استرداد لحالة المنفِّذ موقَّعة من المالك، ويجهّز بيانات التراجع ويتحقق منها دون تفعيلها، ثم يثبّت ويشغّل بعد ذلك فقط معاملة generate/apply/verify للهدف نفسه بالضبط. يمكن لمعاملة هدف فاشلة أن تستعيد المنفِّذ السابق وتتحقق منه قبل قبول Apply للهدف فقط. بعد Apply يبقى إعادة تشغيل وقت التشغيل السابق محظورة حتى يوجد تفعيل موثَّق لبيانات الإصدار السابق؛ ولا يكفي تجهيز Kopia المعزول وحده للسماح بذلك. يحتفظ التزام الهدف المكتمل بإثبات نجاحه لإنهاء صريح. تتطلب الترقيات الجديدة دعمًا في سياسة Kit CUE المضمَّنة؛ أما استرداد عملية قائمة فيتبع سجلها الموقَّع ونقطة استردادها.
+
+```bash
+stackkit kit upgrade [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--dry-run` | bool | — | تحقق من توليد الهدف وافحصه داخل مساحة عمل ظلّية محدودة دون تطبيقه. |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1. |
+| `--recover` | string | — | استرد صراحةً معرّف عملية دورة حياة واحدة دقيقة انقطعت. |
+| `--to` | string | `latest` | الهدف: latest أو vX.Y.Z أو channel:stable\|beta\|edge. |
+
+**أمثلة**
+
+```bash
+# Verify the newest stable release and preview its plan and artifact diff without applying it
+stackkit upgrade --dry-run
+
+# Upgrade to the newest stable release
+stackkit upgrade
+
+# Upgrade to the newest beta prerelease
+stackkit upgrade --to channel:beta
+
+# Recover an interrupted upgrade by its lifecycle operation ID
+stackkit upgrade --recover <operation-id>
+```
+
+## stackkit kit verify
+
+تحقق من إيصالات الإصدارات وشهاداتها المخزَّنة مؤقتًا.
+
+<Warning>مهجور: استخدم stackkit verify `--offline`</Warning>
+
+اسم مستعار مهجور لـ 'stackkit verify `--offline`'. لا يُجرى أي طلب شبكة.
+
+```bash
+stackkit kit verify [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1. |
+
+## stackkit status
+
+اعرض حالة النشر.
+
+<Warning>ترفض الإصدارات الحالية هذا الأمر؛ فهو يخص خط التوافق v0.6 بعينه.</Warning>
+
+اعرض الحالة الحالية لنشر StackKit.
+
+```text
+Shows:
+  • Deployment state (running, degraded, error)
+  • Service statuses and health
+  • Resource usage
+  • URLs and endpoints
+```
+
+```bash
+stackkit status [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--http` | bool | — | افحص مسارات الخدمة الموثَّقة من مضيف المدقّق هذا |
+| `--inventory` | string | — | Inventory المرصود في Architecture v2 المستخدم لتحديد وقت تشغيل عمليات Standard المضبوط |
+| `--json` | bool | — | أخرج بصيغة JSON |
+| `--resolved-plan` | string | — | ResolvedPlan القانونية في Architecture v2 (الافتراضي: deploy/.stackkit/resolved-plan.json) |
+
+**أمثلة**
+
+```bash
+# Show status
+stackkit status
+
+# Output as JSON
+stackkit status --json
+```
+

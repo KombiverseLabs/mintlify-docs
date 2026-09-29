@@ -1,0 +1,141 @@
+---
+title: "stackkit federation"
+description: "إدارة أدلة ربط Federation المحلية"
+sidebarTitle: "federation"
+---
+إدارة أدلة ربط Federation المحلية.
+
+```bash
+stackkit federation [flags]
+```
+
+الأوامر الفرعية: [`stackkit federation binding`](#stackkit-federation-binding)، [`stackkit federation control`](#stackkit-federation-control)، [`stackkit federation link`](#stackkit-federation-link)
+
+## stackkit federation binding
+
+إدارة روابط وصلات Federation الخارجية المعتمة.
+
+```bash
+stackkit federation binding [flags]
+```
+
+الأوامر الفرعية: [`stackkit federation binding adopt`](#stackkit-federation-binding-adopt)، [`stackkit federation binding import`](#stackkit-federation-binding-import)
+
+### stackkit federation binding adopt
+
+التحقق من ربط خارجي وتوقيعه من المالك واعتماده ذرّياً.
+
+الأسماء المستعارة: `approve`
+
+```bash
+stackkit federation binding adopt [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--binding` | string | — | ملف JSON لربط Federation خارجي غير موقَّع ضمن حدود مساحة العمل |
+| `--inventory` | string | — | ملف inventory.json ضمن حدود مساحة العمل لتحديثه ذرّياً |
+| `--resolved-plan` | string | — | ResolvedPlan القياسية ضمن حدود مساحة العمل (وإلا تُشتق بجوار Inventory) |
+
+### stackkit federation binding import
+
+قبول ربط معتم موقَّع من المالك في Inventory المحلية.
+
+```bash
+stackkit federation binding import [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--admission` | string | — | ملف JSON لقبول ربط Federation موقَّع من المالك ضمن حدود مساحة العمل |
+| `--inventory` | string | — | ملف inventory.json ضمن حدود مساحة العمل لتحديثه ذرّياً |
+| `--resolved-plan` | string | — | ResolvedPlan القياسية ضمن حدود مساحة العمل (وإلا تُشتق بجوار Inventory) |
+
+## stackkit federation control
+
+تنفيذ الخطة المفوَّضة من Home والتحقق منها على عقدة Cloud المختارة.
+
+```bash
+stackkit federation control [flags]
+```
+
+الأوامر الفرعية: [`stackkit federation control bind`](#stackkit-federation-control-bind)، [`stackkit federation control send`](#stackkit-federation-control-send)، [`stackkit federation control sign`](#stackkit-federation-control-sign)، [`stackkit federation control withdraw`](#stackkit-federation-control-withdraw)
+
+### stackkit federation control bind
+
+قبول سلطة Home العامة الدقيقة وحيازة المستقبِل المحلية.
+
+```bash
+stackkit federation control bind [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--file` | string | — | ملف JSON لحيازة المستقبِل راجعه المالك؛ دون مفاتيح خاصة |
+
+### stackkit federation control send
+
+إرسال الإجراء الموقَّع عبر اتصال mTLS دقيق بادرت به Home.
+
+```bash
+stackkit federation control send [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--endpoint-file` | string | — | نقطة نهاية mTLS المحلية المثبَّتة ومسارات بيانات الاعتماد المقيَّدة |
+| `--file` | string | — | ملف JSON للإجراء الموقَّع من Home |
+
+### stackkit federation control sign
+
+توقيع إجراء واحد دقيق قصير الأجل بحيازة Home الحالية.
+
+```bash
+stackkit federation control sign [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--file` | string | — | ملف JSON للإجراء الدقيق مع تجزئة الخطة والهدف وطوابع زمنية محدودة |
+
+### stackkit federation control withdraw
+
+سحب سلطة المستقبِل بشكل دائم، بما في ذلك جلسات TLS القائمة.
+
+```bash
+stackkit federation control withdraw [flags]
+```
+
+## stackkit federation link
+
+ربط الجزء المحلي من نسيج Federation الخارجي وإيقافه.
+
+```bash
+stackkit federation link [flags]
+```
+
+الأوامر الفرعية: [`stackkit federation link bind`](#stackkit-federation-link-bind)، [`stackkit federation link stop`](#stackkit-federation-link-stop)
+
+### stackkit federation link bind
+
+اعتماد مقابض WireGuard الخارجية ضمن حيازة المالك المحلية.
+
+```bash
+stackkit federation link bind [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--file` | string | — | ملف JSON لحيازة النسيج الخارجي؛ لا يحتوي مفاتيح خاصة |
+
+### stackkit federation link stop
+
+إيقاف الواجهة المعتمدة دون حذف النسيج الخارجي.
+
+```bash
+stackkit federation link stop [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--fabric-ref` | string | — | مرجع النسيج المعتم المعتمد بدقة |

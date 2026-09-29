@@ -1,0 +1,59 @@
+---
+title: "Cloudreve"
+description: "اختر Cloudreve لحالة الاستخدام Files وانشره وشغّله"
+sidebarTitle: "Cloudreve"
+icon: folder-cloud
+---
+
+يوفّر Cloudreve نصف الملفات من [Documents & Files](/ar/guides/stackkits/use-cases/documents-and-files). وهو البديل الافتراضي لحمل العمل الاختياري `files`، ولا يختاره StackSpec الأولي. خطّط للتخزين والنسخ الاحتياطية في صفحة Documents & Files قبل أن تختاره.
+
+## الدور المنشور
+
+| الخاصية | القيمة |
+| --- | --- |
+| حمل العمل | `files` |
+| البديل | `cloudreve` |
+| فئة البيانات | personal |
+| المسار | مسار خدمة Files المولَّد |
+| المحوّل المستقل | `standalone-compose` |
+
+## اختيار حمل العمل
+
+ادمج هذا الكائن في StackSpec الكامل الذي أنشأه `stackkit init`:
+
+```json
+{
+  "workloads": {
+    "files": {
+      "alternative": "cloudreve",
+      "runtimeAdapterRef": "standalone-compose",
+      "placement": {
+        "siteRefs": ["home"],
+        "nodeRefs": ["main"]
+      }
+    }
+  }
+}
+```
+
+جرى التحقق من المثال وتوليده مع الإصدار v0.32.x. إذا اختلفت معرّفات الموقع أو العقدة المولَّدة لديك، فاستخدم تلك المعرّفات نفسها.
+
+## النشر والتحقق
+
+```bash
+stackkit validate
+stackkit generate
+stackkit plan --json
+stackkit apply
+stackkit verify --http --json
+```
+
+تأكد من أن الخطة المحلولة تحتوي على حمل العمل `files` والبديل `cloudreve` والمحوّل `standalone-compose` قبل التطبيق.
+
+بعد نجاح التحقق، افتح مسار Files المولَّد وأنشئ فقط حسابات التطبيق التي تحتاجها.
+
+## التشغيل
+
+- أبقِ الجذرين الأساسي والاحتياطي على تخزين تتحكم فيه.
+- أبقِ تغييرات إعدادات StackKits في StackSpec. لا تحرّر حزمة حمل عمل Cloudreve المولَّدة ولا بيئة Compose.
+- تحقق من الاسترداد قبل الاعتماد على الخدمة كنسخة وحيدة لملف. راجع [النسخ الاحتياطي والاستعادة](/ar/guides/stackkits/back-up-and-restore).

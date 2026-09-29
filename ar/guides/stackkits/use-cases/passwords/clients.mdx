@@ -1,0 +1,161 @@
+---
+title: "إعداد تطبيقات مدير كلمات المرور"
+description: "أنشئ حساب خزنتك، واحفظ أول كلمة مرور، ثم اربط تطبيقات Bitwarden على هاتفك ومتصفحك وحاسوبك بخزنتك الخاصة."
+sidebarTitle: "تطبيقات كلمات المرور"
+icon: "mobile-screen-button"
+mode: "wide"
+keywords: ["كلمات المرور", "Vaultwarden", "Bitwarden", "مدير كلمات المرور", "إضافة المتصفح", "iPhone", "Android", "استضافة ذاتية"]
+---
+
+import { clientSetupLabelsAr } from "/snippets/client-setup-labels-ar.jsx";
+
+import { ClientSetupGuide } from "/snippets/client-setup-guide.jsx";
+
+<ClientSetupGuide
+  labels={clientSetupLabelsAr}
+  locale="ar"
+  direction="rtl"
+  id="kcg-passwords"
+  meta={[
+    { icon: "phone", text: "الهاتف والمتصفح والحاسوب" },
+    { icon: "steps", text: "6 خطوات قصيرة" },
+    { icon: "book", text: "لا حاجة إلى معرفة مسبقة" },
+  ]}
+  requirements={[
+    "عنوان خزنتك، مثل https://vault.home.test",
+    "دعوة على عنوان بريدك الإلكتروني",
+    "كل جهاز مُعدّ لخزنة منزلك من قِبل الشخص الذي أعدّ kombify",
+    "كلمة مرور رئيسية يمكنك تذكّرها",
+  ]}
+  requirementsHelp={{ label: "ليست لديك دعوة بعد؟", target: "kcg-passwords-no-invite" }}
+  appsTitle="ابدأ بتنزيل تطبيق Bitwarden."
+  vendor={{ label: "كل التنزيلات من Bitwarden", href: "https://bitwarden.com/download/" }}
+  apps={[
+    { platform: "apple", label: "iPhone وiPad", detail: "Bitwarden Password Manager", store: "افتح في App Store", href: "https://apps.apple.com/app/bitwarden-password-manager/id1137397744", vendor: "Bitwarden", official: true },
+    { platform: "android", label: "Android", detail: "Bitwarden Password Manager", store: "افتح في Google Play", href: "https://play.google.com/store/apps/details?id=com.x8bit.bitwarden", vendor: "Bitwarden", official: true },
+    { platform: "browser", label: "إضافة المتصفح", detail: "Chrome وFirefox وEdge وSafari وغيرها", store: "افتح صفحة تنزيل Bitwarden", href: "https://bitwarden.com/download/", vendor: "Bitwarden", official: true },
+    { platform: "desktop", label: "الحاسوب", detail: "Windows وmacOS وLinux", store: "افتح صفحة تنزيل Bitwarden", href: "https://bitwarden.com/download/", vendor: "Bitwarden", official: true },
+  ]}
+  appsNote="متاجر المتصفحات: [Chrome](https://chromewebstore.google.com/detail/bitwarden-password-manager/nngceckbapebfimnlniiiahkandclblb) · [Firefox](https://addons.mozilla.org/firefox/addon/bitwarden-password-manager/) · [Edge](https://microsoftedge.microsoft.com/addons/detail/bitwarden-password-manager/jbkfoedolllekgbhcbcoahefnbanhhlh) · [Safari (Mac App Store)](https://apps.apple.com/app/bitwarden/id1352778147). تعمل خزنتك على Vaultwarden، وهو يعمل مع تطبيقات Bitwarden الرسمية هذه. لا تحتاج إلى تطبيق Vaultwarden منفصل."
+  stepsTitle="أعِدّ خزنتك خطوة بخطوة."
+  steps={[
+    {
+      tab: "فتح الخزنة",
+      title: "افتح خزنتك في المتصفح.",
+      intro: "ابدأ من حاسوب. لخزنتك عنوان ويب خاص بها، مثل موقع لا يستخدمه إلا أفراد منزلك.",
+      clicks: [
+        "اكتب عنوان خزنتك في شريط عنوان المتصفح، مثل **https://vault.home.test**، ثم اضغط Enter.",
+        "أسفل مربع تسجيل الدخول، انقر [[Create account]].",
+      ],
+      note: "العنوان في هذا الدليل مجرد مثال. استخدم العنوان الذي حصلت عليه من الشخص الذي أعدّ kombify.",
+      faq: { q: "ما عنوان الخزنة؟", a: "هو عنوان الويب الخاص بخزنة كلمات المرور في منزلك. يبدأ عادةً بـ **https://vault.** وينتهي باسم شبكة منزلك. يستطيع الشخص الذي أعدّ kombify إخبارك بالعنوان الدقيق." },
+      check: "ترى نموذج [[Create account]].",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-01-open-vault.webp", width: 1088, height: 830, alt: "صفحة تسجيل الدخول إلى Vaultwarden مع تمييز رابط Create account", caption: "صفحة تسجيل الدخول إلى الخزنة", credit: "لقطة شاشة من kombify", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: 2, top: 84.3, left: 38.3, width: 23.5, height: 7.2 }] },
+    },
+    {
+      tab: "إنشاء الحساب",
+      title: "أنشئ حسابك.",
+      intro: "لا تقبل خزنتك إلا عناوين البريد الإلكتروني المدعوّة. استخدم العنوان نفسه الذي وصلته الدعوة عليه.",
+      clicks: [
+        "في [[Email address]]، أدخل عنوان بريدك الإلكتروني المدعوّ.",
+        "في [[Name]]، أدخل اسمك. يستطيع الشخص الذي يدير الخزنة، وكل من تشارك معه كلمات المرور، رؤيته.",
+        "انقر [[Continue]].",
+      ],
+      faq: { q: "هل هذا حسابي في kombify؟", a: "لا. هذا الحساب يخص خزنة كلمات المرور فقط. له عنوان بريد إلكتروني وكلمة مرور رئيسية خاصان به." },
+      check: "تطلب الصفحة الآن [[Set a strong password]].",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-02-create-account.webp", width: 1088, height: 718, alt: "نموذج Create account مع عنوان البريد alex@example.com والاسم Alex Example", caption: "Create account", credit: "لقطة شاشة من kombify", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: 1, top: 37.6, left: 16.4, width: 65.1, height: 13.4 }, { n: 2, top: 61, left: 16.4, width: 65.1, height: 13.4 }, { n: 3, top: 76.3, left: 14, width: 72.1, height: 13.9 }] },
+    },
+    {
+      tab: "كلمة المرور الرئيسية",
+      title: "اختر كلمة مرورك الرئيسية.",
+      intro: "كلمة المرور الرئيسية هي كلمة المرور الوحيدة التي ما زلت بحاجة إلى تذكّرها. فهي تفتح كل الكلمات الأخرى.",
+      clicks: [
+        "في [[Master password]]، أدخل كلمة مرور طويلة. جملة قصيرة من أربع كلمات أو أكثر خيار جيد.",
+        "أدخل كلمة المرور نفسها مرة أخرى في [[Confirm master password]].",
+        "انقر [[Create account]]. إذا اقترحت الصفحة إضافة المتصفح، فانقر [[Add it later]] ثم [[Skip to web app]]. ستربط الإضافة في الخطوة 5.",
+      ],
+      note: "**لا يستطيع أحد استعادة كلمة مرور رئيسية منسية**، ولا حتى الشخص الذي يدير خزنتك. دوّنها واحتفظ بالورقة في مكان آمن خارج الخزنة.",
+      faq: { q: "ماذا يعني شريط القوة؟", a: "يقدّر مدى صعوبة تخمين كلمة مرورك. استهدف مستوى **Strong**. الطول أفضل من التعقيد." },
+      check: "تُفتح خزنتك الفارغة بعنوان [[All vaults]].",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-03-master-password.webp", width: 1088, height: 1310, alt: "صفحة Set a strong password مع كلمة المرور الرئيسية مُدخلة مرتين وتقييمها Strong", caption: "Set a strong password", credit: "لقطة شاشة من kombify", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: 1, top: 25.5, left: 16.4, width: 60.7, height: 7.3 }, { n: 2, top: 52.2, left: 16.4, width: 60.7, height: 7.3 }, { n: 3, top: 87, left: 14, width: 72.1, height: 7.6 }] },
+    },
+    {
+      tab: "أول كلمة مرور",
+      title: "احفظ أول كلمة مرور.",
+      intro: "احفظ تسجيل دخول واحدًا للتجربة. سيُظهر لاحقًا أن تطبيقاتك متصلة بخزنتك.",
+      clicks: [
+        "في أعلى اليمين، انقر [[New]] واختر [[Login]]. إذا ظهرت نافذة ترحيب أولًا، فانقر [[Skip]].",
+        "في [[Item name]]، أدخل اسمًا تتعرّف عليه، مثل اسم متجر.",
+        "أدخل [[Username]]. بجوار [[Password]]، انقر السهمين الدائريين لإنشاء كلمة مرور، ثم انقر [[Use this password]].",
+        "انقر [[Save]].",
+      ],
+      note: "أضف عنوان ويب المتجر تحت [[Website (URI)]]. عندها تقترح إضافة المتصفح تسجيل الدخول هذا على ذلك الموقع.",
+      check: "تظهر الرسالة [[Item added]] ويظهر تسجيل دخولك في القائمة.",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-04-new-login.webp", width: 1472, height: 1664, alt: "نافذة New Login مع اسم العنصر Example Shop واسم مستخدم وكلمة مرور مُنشأة", caption: "New Login", credit: "لقطة شاشة من kombify", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: 2, top: 12.1, left: 7.9, width: 82.6, height: 5.8 }, { n: 3, top: 41.8, left: 7.9, width: 79.3, height: 5.8 }, { n: 3, top: 52.3, left: 87.5, width: 5.7, height: 5 }, { n: 4, top: 92.1, left: 2.7, width: 10.4, height: 6 }] },
+    },
+    {
+      tab: "ربط التطبيقات",
+      title: "اربط تطبيقات Bitwarden.",
+      intro: "يتصل كل تطبيق Bitwarden أولًا بخوادم Bitwarden نفسها. أخبره مرة واحدة أن يستخدم خزنتك بدلًا منها.",
+      clicks: [
+        "ثبّت تطبيق Bitwarden من القائمة أعلاه وافتحه.",
+        "في شاشة تسجيل الدخول، افتح القائمة [[Logging in on]] واختر [[Self-hosted]]. في تطبيق الحاسوب تُسمى القائمة [[Accessing]].",
+        "في [[Server URL]]، أدخل عنوان خزنتك مع **https://** في البداية، ثم اضغط [[Save]].",
+        "سجّل الدخول ببريدك الإلكتروني وكلمة مرورك الرئيسية.",
+      ],
+      note: "كرّر هذه الخطوات على كل هاتف ومتصفح وحاسوب تستخدمه. يحتاج كل منها إلى عنوان خزنتك مرة واحدة.",
+      faq: { q: "لماذا لا توجد صورة للتطبيق هنا؟", a: "لا تمنح شروط Bitwarden إذنًا بإعادة استخدام صورها. يعرض دليلها الخاص كل شاشة، والتسميات أعلاه تطابقه." },
+      check: "يعرض التطبيق تسجيل الدخول الذي حفظته في الخطوة 4.",
+      visual: {
+        tag: "دليل BITWARDEN",
+        title: "تعرض Bitwarden كل شاشة",
+        text: "اختر جهازك في دليل Bitwarden. ابحث عن القسم الخاص بالخادم **المستضاف ذاتيًا**.",
+        links: [
+          { label: "ربط تطبيق بخادمك الخاص", detail: "bitwarden.com · كل الأجهزة", href: "https://bitwarden.com/help/change-client-environment/", icon: "server" },
+          { label: "البدء مع إضافة المتصفح", detail: "bitwarden.com", href: "https://bitwarden.com/help/getting-started-browserext/", icon: "browser" },
+          { label: "البدء مع تطبيق الهاتف", detail: "bitwarden.com", href: "https://bitwarden.com/help/getting-started-mobile/", icon: "phone" },
+        ],
+      },
+    },
+    {
+      tab: "الفحص",
+      title: "هل كل شيء متصل؟",
+      intro: "افحص ذلك في خزنة الويب وفي تطبيق واحد. ضع علامة فقط على ما فحصته بنفسك.",
+      verify: [
+        "أستطيع فتح عنوان خزنتي وتسجيل الدخول.",
+        "يظهر تسجيل الدخول الذي حفظته في تطبيق Bitwarden على هاتفي أو متصفحي أو حاسوبي.",
+        "كلمة مروري الرئيسية مدوّنة ومحفوظة خارج الخزنة.",
+      ],
+      note: "لا يقرأ هذا الدليل خزنتك. تبقى علاماتك في هذا المتصفح.",
+      check: "يمكنك الآن نقل كلمات مرورك الأخرى إلى الخزنة.",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-05-first-item.webp", width: 1430, height: 300, alt: "قائمة All vaults تعرض تسجيل الدخول المحفوظ Example Shop", caption: "أول تسجيل دخول في الخزنة", credit: "لقطة شاشة من kombify", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: null, top: 37.2, left: 1, width: 98, height: 58.1 }] },
+    },
+  ]}
+  nextTitle="ما الخطوة التالية."
+  next={[
+    { icon: "shield", title: "فعّل تسجيل الدخول بخطوتين", text: "تشرح Bitwarden كيفية إضافة خطوة ثانية لتسجيل الدخول.", href: "https://bitwarden.com/help/setup-two-step-login/" },
+    { icon: "server", title: "انسخ الخزنة احتياطيًا", text: "للشخص الذي يشغّل kombify: احمِ بيانات الخزنة.", href: "/ar/guides/stackkits/back-up-and-restore" },
+  ]}
+  help={[
+    { id: "kcg-passwords-no-invite", q: "ليس لدي عنوان خزنة أو دعوة بعد.", a: "اسأل الشخص الذي أعدّ kombify في منزلك. يضيف خدمة كلمات المرور ويدعو عنوان بريدك الإلكتروني. [كيف تعمل كلمات المرور مع kombify](/ar/guides/stackkits/use-cases/passwords) · [إعداد المالك](/ar/stackkits/apps/vaultwarden)." },
+    { q: "تقول Create account: “Registration not allowed or user already exists”.", a: "تأكد من أنك تستخدم عنوان البريد الإلكتروني المدعوّ نفسه تمامًا. إذا كنت قد أنشأت حسابك بالفعل، فارجع وسجّل الدخول بدلًا من ذلك. وإلا فاطلب دعوة جديدة." },
+    { q: "لا يُفتح العنوان، أو يحذّر المتصفح من الاتصال.", a: "جرّب العنوان أولًا على جهاز داخل شبكة منزلك. إذا كانت خزنتك تعمل في المنزل فقط، فاتصل بشبكة Wi-Fi المنزلية أو بتطبيق الاتصال المنزلي الذي زُوّدت به. يجب أيضًا إعداد كل جهاز ليثق بخادم منزلك؛ ويتولى ذلك الشخص الذي أعدّ kombify. إذا قال المتصفح إن الاتصال ليس خاصًا، فتوقف هنا واسأله. لا تتجاوز التحذير. [حول عناوين المنزل](/ar/guides/stackkits/use-cases/network)." },
+    { q: "نسيت كلمة مروري الرئيسية.", a: "لا يستطيع أحد استعادتها. فخزنتك مشفّرة بها. يستطيع الشخص الذي يدير خزنتك حذف حسابك لتبدأ من جديد، لكن كلمات المرور المحفوظة فيه تضيع. [Bitwarden حول كلمات المرور الرئيسية](https://bitwarden.com/help/master-password/)." },
+    { q: "هاتف Android لدي بلا Google Play.", a: "تشغّل Bitwarden مستودع F-Droid خاصًا بها. العنوان مذكور في [صفحة تنزيل Bitwarden](https://bitwarden.com/download/)." },
+    { q: "لماذا يُذكر Vaultwarden وBitwarden معًا؟", a: "Vaultwarden هو البرنامج الذي يشغّل خزنتك. وهو خادم غير رسمي يعمل مع تطبيقات Bitwarden الرسمية. Vaultwarden غير مرتبط بشركة Bitwarden, Inc. تعرض الصور Vaultwarden 1.37.2 بالإنجليزية؛ وقد تبدو الإصدارات الأحدث واللغات الأخرى مختلفة." },
+  ]}
+  attribution="**يشغّل Vaultwarden خزنتك، وتفتحها تطبيقات Bitwarden. يثبّته kombify لك.** لا تصنع kombify أيًّا من التطبيقين. [Vaultwarden](https://github.com/dani-garcia/vaultwarden) (AGPL-3.0) · خزنة الويب: [عميل ويب Bitwarden المبني لـ Vaultwarden](https://github.com/dani-garcia/bw_web_builds) (GPL-3.0) · [Bitwarden](https://bitwarden.com/)"
+  sources={{
+    summary: "لقطات شاشة من kombify من تثبيت Vaultwarden محلي · حساب مُختلَق · قوائم بالإنجليزية.",
+    paragraphs: [
+      "**لقطات الشاشة · 24 سبتمبر 2026.** التقطت kombify صور خزنة الويب من تثبيت مرجعي محلي: Vaultwarden 1.37.2، وهي الصورة التي يوفّرها كتالوج StackKits لكلمات المرور، مع خزنة الويب المضمّنة 2026.7.0 (عميل ويب Bitwarden، GPL-3.0). استخدم التثبيت العنوان التجريبي https://vault.home.test والحساب المُختلَق alex@example.com. وهو تثبيت مرجعي وليس اختبار نشر لـ StackKits. وقد أضاف هذا الدليل العلامات البنفسجية.",
+      "لا تُعرض شاشات تطبيق Bitwarden. [شروط Bitwarden](https://bitwarden.com/terms/) لا تمنح إذنًا بإعادة استخدام محتواها، لذا تربط الخطوة 5 بدليل Bitwarden نفسه.",
+      "جرى فحص روابط المتاجر وصفحات المساعدة في 24 سبتمبر 2026. يبقى تقدمك في هذا المتصفح. لا يربط الدليل أي حسابات ولا يطلب أي كلمات مرور.",
+    ],
+    links: [
+      { label: "Bitwarden: ربط التطبيقات الفردية", href: "https://bitwarden.com/help/change-client-environment/" },
+      { label: "تنزيلات Bitwarden", href: "https://bitwarden.com/download/" },
+      { label: "مشروع Vaultwarden", href: "https://github.com/dani-garcia/vaultwarden" },
+    ],
+  }}
+/>

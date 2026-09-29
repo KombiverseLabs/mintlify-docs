@@ -1,0 +1,39 @@
+---
+title: "stackkit generate"
+description: "توليد مخرجات نشر خاضعة للحوكمة انطلاقاً من مواصفة الحزمة"
+sidebarTitle: "generate"
+---
+توليد مخرجات نشر خاضعة للحوكمة انطلاقاً من مواصفة الحزمة.
+
+الأسماء المستعارة: `gen`
+
+حلّ النية القياسية في StackSpec v2 عبر سلطة CUE المضمَّنة، وحفظ ResolvedPlan الدقيقة ذرّياً، وتوليد مخرجاتها الخاضعة للحوكمة بشكل معاملاتي تحت outputRoot الذي تملكه الخطة.
+
+توليد StackSpec v1 متقاعد. استخدم ملفاً تنفيذياً منشوراً بإصدار v0.6 المطابق تماماً لمساحة عمل قديمة، أو رحِّل النية إلى StackSpec v2 قبل التوليد. يرفض المسار الأصلي لـ v2 المفتاحين القديمين `--force` و`--fragments`.
+
+```bash
+stackkit generate [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--force, -f` | bool | — | مفتاح الاستبدال القديم المتقاعد؛ مرفوض مع StackSpec v2 |
+| `--fragments` | bool | — | مفتاح المقاطع القديم المتقاعد؛ مرفوض مع StackSpec v2 |
+| `--inventory` | string | — | Inventory المرصودة في Architecture v2 (وإلا يُختار ملف جرد تقليدي واحد) |
+| `--local-node` | string | — | العقدة في Architecture v2 التي تملكها عملية التوليد المحلية هذه صراحةً |
+| `--local-site` | string | — | Site في Architecture v2 التي تملكها عملية التوليد المحلية هذه صراحةً |
+| `--output, -o` | string | `deploy` | تجاوز جذر الإخراج الذي تملكه الخطة |
+| `--resolved-plan` | string | — | ResolvedPlan القياسية في Architecture v2 (الافتراضي: &lt;outputRoot&gt;/.stackkit/resolved-plan.json) |
+
+**أمثلة**
+
+```bash
+# Resolve the plan and render deployment artifacts into deploy/
+stackkit generate
+
+# Render into an explicit output root
+stackkit generate --output ./deploy
+
+# Name the Site and node this process owns
+stackkit generate --local-node main --local-site home
+```

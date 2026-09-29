@@ -1,0 +1,86 @@
+---
+title: "مرجع CLI"
+description: "كل أمر stackkit مع خياراته وأمثلته"
+sidebarTitle: "نظرة عامة"
+icon: square-terminal
+---
+أعدّ خدماتك الخاصة واعتنِ بها باستخدام StackKits المحمولة. تسرد هذه الصفحات كل أمر `stackkit` مع خياراته وأمثلته. وهي مولَّدة من تعريفات أوامر StackKits؛ وإذا كان إصدارك المثبَّت أقدم، فإن `stackkit <command> --help` هو المرجع له.
+
+## تثبيت CLI
+
+```bash
+curl -sSL https://install.stackkit.cc | STACKKIT_CLI_ONLY=1 sh
+```
+
+مع `STACKKIT_CLI_ONLY=1` يضع المثبّت `stackkit` و`stackkit-server` و`stackkit-mcp` وOpenTofu المُحزَّم وكتالوج الـ Kit العام في `~/.stackkits` دون تثبيت StackKit. وبدونه يكتشف المثبّت المضيف ويتابع إلى Basement Kit أو Cloud Kit.
+
+## الخيارات العامة
+
+تعمل هذه الخيارات مع كل أمر.
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--chdir, -C` | string | `.` | انتقل إلى الدليل قبل التشغيل |
+| `--correlation-id` | string | — | معرّف ارتباط للمستدعي جرى التحقق منه ويُسجَّل في أدلة الطرح المحلية |
+| `--no-log` | bool | — | عطّل تسجيل النشر المنظَّم |
+| `--progress-jsonl` | string | — | اكتب تقدّم الطرح القابل للقراءة الآلية والمحجوب البيانات الحساسة بصيغة JSONL إلى مسار، أو '-' إلى stdout |
+| `--quiet, -q` | bool | — | أخفِ الإخراج غير الأساسي |
+| `--spec, -s` | string | `stack-spec.yaml` | مسار ملف مواصفة stack (يُقبل kombination.yaml عندما يغيب الملف الافتراضي) |
+| `--verbose, -v` | bool | — | فعّل الإخراج المفصّل |
+
+## إعداد خدماتك
+
+| الأمر | الوصف |
+| --- | --- |
+| [`stackkit apply`](/ar/stackkits/reference/cli/apply) | تطبيق تغييرات البنية التحتية |
+| [`stackkit generate`](/ar/stackkits/reference/cli/generate) | إنشاء مخرجات نشر محكومة من مواصفة stack |
+| [`stackkit init`](/ar/stackkits/reference/cli/init) | تهيئة نشر جديد من StackKit |
+| [`stackkit plan`](/ar/stackkits/reference/cli/plan) | معاينة تغييرات البنية التحتية |
+| [`stackkit prepare`](/ar/stackkits/reference/cli/prepare) | تجهيز نظام لنشر StackKit |
+| [`stackkit setup`](/ar/stackkits/reference/cli/setup) | إعداد حساب المالك لتطبيق جرى تطبيقه |
+| [`stackkit validate`](/ar/stackkits/reference/cli/validate) | التحقق من ملفات الإعداد |
+
+## الفحص والصيانة والاسترداد
+
+| الأمر | الوصف |
+| --- | --- |
+| [`stackkit backup`](/ar/stackkits/reference/cli/backup) | إدارة النسخ الاحتياطية (محرك Kopia) |
+| [`stackkit break-glass`](/ar/stackkits/reference/cli/break-glass) | إدارة حسابات وحِزم الاسترداد الطارئ (break-glass) |
+| [`stackkit drift`](/ar/stackkits/reference/cli/drift) | مراقبة انحراف StackKit المحلي ومطابقته |
+| [`stackkit logs`](/ar/stackkits/reference/cli/logs) | عرض سجلات النشر المنظَّمة |
+| [`stackkit remove`](/ar/stackkits/reference/cli/remove) | إزالة نشر StackKits المحلي |
+| [`stackkit service`](/ar/stackkits/reference/cli/service) | التحكم في الخدمات التي تعلنها خطة StackKits النشطة |
+| [`stackkit upgrade`](/ar/stackkits/reference/cli/upgrade) | تحديد إصدار StackKit موثَّق وتثبيته |
+| [`stackkit user`](/ar/stackkits/reference/cli/user) | دعوة مستخدمي الأسرة وإدارتهم في PocketID المحلي |
+| [`stackkit verify`](/ar/stackkits/reference/cli/verify) | تشغيل فحوصات التحقق بعد النشر |
+
+## الأدوات المتقدمة والمرجع
+
+| الأمر | الوصف |
+| --- | --- |
+| [`stackkit address`](/ar/stackkits/reference/cli/address) | تخطيط عناوين الخدمات العامة الخالية من الأسرار وربطها |
+| [`stackkit advanced`](/ar/stackkits/reference/cli/advanced) | إدارة عمليات دورة الحياة المتقدمة المصرَّح بها دون اتصال |
+| [`stackkit agent`](/ar/stackkits/reference/cli/agent) | مساعدات أصلية للوكلاء لأتمتة StackKits |
+| [`stackkit app`](/ar/stackkits/reference/cli/app) | فحص تسليم تطبيقات StackKits وإدارة عمليات تسليم v0.6 |
+| [`stackkit cluster`](/ar/stackkits/reference/cli/cluster) | إدارة عضوية عناقيد StackKits متعددة العقد |
+| [`stackkit compat`](/ar/stackkits/reference/cli/compat) | عرض أدلة دعم أنظمة التشغيل وتشخيصات مطابقة المضيف |
+| [`stackkit completion`](/ar/stackkits/reference/cli/completion) | إنشاء سكربتات إكمال الصدفة (shell) |
+| [`stackkit docs`](/ar/stackkits/reference/cli/docs) | إنشاء إسقاطات حتمية لوثائق StackKits |
+| [`stackkit federation`](/ar/stackkits/reference/cli/federation) | إدارة أدلة ربط Federation المحلية |
+| [`stackkit game`](/ar/stackkits/reference/cli/game) | تشغيل خوادم ألعاب المالك على حمل عمل Game المثبَّت |
+| [`stackkit host`](/ar/stackkits/reference/cli/host) | عمليات عقد المضيف المحايدة للمزوّد |
+| [`stackkit identity`](/ar/stackkits/reference/cli/identity) | إدارة مستوى الهوية المحلي المستقل |
+| [`stackkit kit`](/ar/stackkits/reference/cli/kit) | عمليات إصدارات StackKit المنشورة |
+| [`stackkit migrate`](/ar/stackkits/reference/cli/migrate) | صنّف StackSpec v1 وأصدر تقرير ترحيلها |
+| [`stackkit module`](/ar/stackkits/reference/cli/module) | تأليف وحدات CUE المحلية والتحقق منها |
+| [`stackkit operations`](/ar/stackkits/reference/cli/operations) | اعرض عقود عمليات دورة الحياة القانونية المستقلة |
+| [`stackkit output-transaction`](/ar/stackkits/reference/cli/output-transaction) | افحص إجراءات دورة حياة معاملة الإخراج الصريحة في Architecture v2 |
+| [`stackkit registry`](/ar/stackkits/reference/cli/registry) | إدارة لقطة سجل StackKits المضمَّنة |
+| [`stackkit resolve`](/ar/stackkits/reference/cli/resolve) | تحويل نية Architecture v2 إلى خطة نشر قانونية |
+| [`stackkit runtime`](/ar/stackkits/reference/cli/runtime) | تنفيذ عمليات وقت التشغيل الموثَّقة على جانب العقدة |
+| [`stackkit secrets`](/ar/stackkits/reference/cli/secrets) | إدارة حيازة الأسرار المحلية المرتبطة بالمالك |
+| [`stackkit support`](/ar/stackkits/reference/cli/support) | تصدير أدلة الدعم المحلية المحجوبة البيانات الحساسة |
+| [`stackkit use-cases`](/ar/stackkits/reference/cli/use-cases) | اختيار حالات الاستخدام الاختيارية للـ Kit |
+| [`stackkit version`](/ar/stackkits/reference/cli/version) | طباعة معلومات الإصدار |
+
+الأوامر التي ترفضها الإصدارات الحالية أو تستبدلها مدرجة تحت [الأوامر القديمة والمهجورة](/ar/stackkits/reference/cli/legacy).

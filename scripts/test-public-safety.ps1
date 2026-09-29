@@ -98,8 +98,8 @@ try {
     $safe = New-TestFixture -Name "safe"
     Assert-Case -Name "public allowlist passes" -Fixture $safe -ShouldPass $true -ExpectedMessage "public_safety: PASS"
 
-    # Target coverage does not authorize unreviewed translations for publication; de, es, zh-Hans and hi are admitted by the policy.
-    foreach ($language in @("cn", "ar")) {
+    # Target coverage does not authorize unreviewed translations for publication; de, es, zh-Hans, hi and ar are admitted by the policy.
+    foreach ($language in @("cn")) {
         $unreviewed = New-TestFixture -Name "unreviewed-$language" -NavigationLanguage $language
         Assert-Case -Name "unreviewed $language navigation fails closed" -Fixture $unreviewed -ShouldPass $false
     }

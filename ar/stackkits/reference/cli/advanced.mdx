@@ -1,0 +1,160 @@
+---
+title: "stackkit advanced"
+description: "إدارة عمليات دورة الحياة المتقدمة المفوَّضة دون اتصال"
+sidebarTitle: "advanced"
+---
+إدارة عمليات دورة الحياة المتقدمة (Advanced) المفوَّضة دون اتصال.
+
+```bash
+stackkit advanced [flags]
+```
+
+الأوامر الفرعية: [`stackkit advanced change-set`](#stackkit-advanced-change-set)، [`stackkit advanced restore-drill`](#stackkit-advanced-restore-drill)، [`stackkit advanced rollback`](#stackkit-advanced-rollback)، [`stackkit advanced trust`](#stackkit-advanced-trust)
+
+## stackkit advanced change-set
+
+إدارة مجموعات تغييرات Terramate المفوَّضة دون اتصال.
+
+```bash
+stackkit advanced change-set [flags]
+```
+
+الأوامر الفرعية: [`stackkit advanced change-set apply`](#stackkit-advanced-change-set-apply)، [`stackkit advanced change-set create`](#stackkit-advanced-change-set-create)
+
+### stackkit advanced change-set apply
+
+تطبيق مجموعة تغييرات Terramate الدقيقة المعتمدة من المالك.
+
+```bash
+stackkit advanced change-set apply [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--candidate-spec` | string | — | مسار StackSpec v2 المرشحة الدقيقة التي تستخدم generation.target=terramate |
+| `--capability` | string | — | مسار ملف stackkit.advanced-capability/v1 القياسي المستخدم لإنشاء مجموعة التغييرات |
+| `--change-set` | string | — | عنوان المحتوى الدقيق sha256:&lt;hex&gt; لمجموعة التغييرات الموقَّعة من المالك |
+| `--expect-sha256` | string | — | مطلوب: بصمة sha256:&lt;hex&gt; الدقيقة لبايتات مجموعة التغييرات القياسية المخزنة |
+| `--json` | bool | — | إصدار JSON بصيغة stackkit.command-result/v1 |
+
+### stackkit advanced change-set create
+
+إنشاء مجموعة تغييرات Terramate موقَّعة من المالك.
+
+```bash
+stackkit advanced change-set create [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--candidate-spec` | string | — | مسار StackSpec v2 المرشحة التي تستخدم generation.target=terramate |
+| `--capability` | string | — | مسار ملف stackkit.advanced-capability/v1 القياسي |
+| `--json` | bool | — | إصدار JSON بصيغة stackkit.command-result/v1 |
+
+## stackkit advanced restore-drill
+
+تشغيل تمارين الاستعادة الأصلية المقيَّدة بالقدرات.
+
+```bash
+stackkit advanced restore-drill [flags]
+```
+
+الأوامر الفرعية: [`stackkit advanced restore-drill run`](#stackkit-advanced-restore-drill-run)
+
+### stackkit advanced restore-drill run
+
+تجهيز استعادة لمرساة نسخة احتياطية والتحقق منها دون تفعيل.
+
+تشغيل تمرين استعادة أصلي في v2 بوصفه عملية متقدمة.
+
+لا يُقبل التمرين إلا بقدرة (capability) مُتحقَّق منها دون اتصال تسمح بـ restore.drill، وبثقة المُصدِر المعتمدة من المالك المحلي، وبـ `--owner-approve` الصريح. يتحقق من وقت التشغيل الحالي، وينشئ مرساة لقطة جديدة (أو يتحقق من `--anchor` في الحيازة المحلية)، ويجهّز استعادة لتلك المرساة، ويتحقق من الشجرة المجهّزة، ويزيل منطقة التجهيز، ويتحقق من أن وقت التشغيل الحي لم يتغير. لا تُفعَّل البيانات المجهّزة أبداً.
+
+```bash
+stackkit advanced restore-drill run [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--anchor` | string | — | معرّف مرساة اللقطة sha256 الموجودة لإجراء التمرين عليها؛ تُنشأ مرساة نسخة احتياطية جديدة عند عدم تحديده |
+| `--capability` | string | — | مسار ملف stackkit.advanced-capability/v1 القياسي الذي يسمح بـ restore.drill |
+| `--json` | bool | — | إصدار JSON بصيغة stackkit.command-result/v1 |
+| `--operation-id` | string | — | معرّف تمرين ثابت بأحرف صغيرة (8-100 حرف)؛ يُولَّد عند عدم تحديده |
+| `--owner-approve` | bool | — | الموافقة الصريحة على الآثار الجانبية للنسخ الاحتياطي والاستعادة المجهّزة في التمرين |
+
+**أمثلة**
+
+```bash
+stackkit advanced restore-drill run --capability capability.json --owner-approve --json
+```
+
+## stackkit advanced rollback
+
+تشغيل عمليات استرجاع منسّقة مقيَّدة بالقدرات عبر حزم Terramate.
+
+```bash
+stackkit advanced rollback [flags]
+```
+
+الأوامر الفرعية: [`stackkit advanced rollback run`](#stackkit-advanced-rollback-run)
+
+### stackkit advanced rollback run
+
+استرجاع كل حزم Terramate المحلية إلى نقطة تحقق واحدة مُتحقَّق منها.
+
+استرجاع المضيف المحلي إلى نقطة تحقق واحدة مُتحقَّق منها لحالة المنفّذ بوصفها العملية المتقدمة rollback.coordinated.
+
+لا يُقبل الاسترجاع إلا بقدرة (capability) مُتحقَّق منها دون اتصال تسمح بـ rollback.coordinated، وبثقة المُصدِر المعتمدة من المالك المحلي، وبـ `--owner-approve` الصريح. يسمّي `--to` نقطة التحقق مباشرةً أو مجموعة التغييرات التي تكون نقطة التحقق السابقة لتطبيقها هي الهدف. تعمل الحزم بترتيب تشغيل معكوس: تُدمَّر الحزم المضافة بعد نقطة التحقق عبر OpenTofu (docker compose down دون وحدات التخزين) وتُزال، وتستعيد الحزم المتغيرة حالة نقطة التحقق وإعداداتها وحمولتها وتُجبر على التقارب، وتُعاد إنشاء الحزم التي أُزيلت بعد نقطة التحقق. تُستعاد StackSpec وInventory الخاصتان بنقطة التحقق وتُولَّدان من جديد ويُتحقَّق منهما. يُستأنف الاسترجاع المنقطع في التشغيل التالي بـ `--to` نفسه، وتُتخطى الحزم التي تقاربت بالفعل.
+
+```bash
+stackkit advanced rollback run [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--capability` | string | — | مسار ملف stackkit.advanced-capability/v1 القياسي الذي يسمح بـ rollback.coordinated |
+| `--json` | bool | — | إصدار JSON بصيغة stackkit.command-result/v1 |
+| `--owner-approve` | bool | — | الموافقة الصريحة على تدمير الحزم واستعادتها وإعادة إنشائها |
+| `--to` | string | — | معرّف لقطة حالة المنفّذ sha256 الهدف، أو معرّف مجموعة التغييرات sha256 التي تكون نقطة التحقق السابقة لتطبيقها هي الهدف |
+
+**أمثلة**
+
+```bash
+stackkit advanced rollback run --capability capability.json --to sha256:<change-set-id> --owner-approve --json
+```
+
+## stackkit advanced trust
+
+إدارة ثقة مُصدِر Advanced المحلية المعتمدة من المالك.
+
+```bash
+stackkit advanced trust [flags]
+```
+
+الأوامر الفرعية: [`stackkit advanced trust import`](#stackkit-advanced-trust-import)، [`stackkit advanced trust inspect`](#stackkit-advanced-trust-inspect)
+
+### stackkit advanced trust import
+
+استيراد حزمة ثقة مُصدِر Advanced مثبَّتة بدقة.
+
+```bash
+stackkit advanced trust import [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--bundle` | string | — | مسار ملف stackkit.advanced-trust-bundle/v1 القياسي |
+| `--expect-sha256` | string | — | مطلوب: بصمة sha256:&lt;hex&gt; الدقيقة لحزمة الثقة |
+| `--json` | bool | — | إصدار JSON بصيغة stackkit.command-result/v1 |
+| `--owner-approve` | bool | — | الموافقة الصريحة على تغيير ثقة مُصدِر Advanced المحلية |
+
+### stackkit advanced trust inspect
+
+فحص ثقة مُصدِر Advanced المحلية المُتحقَّق منها.
+
+```bash
+stackkit advanced trust inspect [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | إصدار JSON بصيغة stackkit.command-result/v1 |

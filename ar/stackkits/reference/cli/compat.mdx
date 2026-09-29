@@ -1,0 +1,48 @@
+---
+title: "stackkit compat"
+description: "عرض أدلة دعم أنظمة التشغيل وتشخيصات مطابقة المضيف"
+sidebarTitle: "compat"
+---
+عرض أدلة دعم أنظمة التشغيل وتشخيصات مطابقة المضيف.
+
+عرض أدلة توافق StackKits المنشورة لنظام التشغيل هذا ومشرف الأجهزة الافتراضية (hypervisor) الخاص به، ثم تشغيل تشخيصات غير مدمِّرة لمتطلبات مضيف الحاويات المحلي.
+
+```text
+The host diagnostics check:
+  • Virtualization type (KVM, OpenVZ, LXC, bare metal)
+  • unshare(2) syscall availability
+  • OverlayFS support
+  • Bridge networking support
+  • iptables NAT support
+  • Cgroup version
+```
+
+تأتي الأدلة المنشورة من إيصالات دورة حياة آلية مرتبطة بإصدار محدد. لا تعتمد تشخيصات المضيف أي مزوّد خوادم ولا تصنّفه ولا توصي به ولا تسعّره.
+
+```bash
+stackkit compat [flags]
+```
+
+**أمثلة**
+
+```bash
+# Check the published OS and hypervisor evidence and the host container prerequisites
+stackkit compat
+```
+
+الأوامر الفرعية: [`stackkit compat emit-os-matrix`](#stackkit-compat-emit-os-matrix)
+
+## stackkit compat emit-os-matrix
+
+توليد الإسقاط العام لتوافق أنظمة التشغيل والمحاكاة الافتراضية.
+
+```bash
+stackkit compat emit-os-matrix [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--archive-dir` | string | `docs/data/os-compat` | المجلد الذي يحتوي أرشيفات v\*.json لكل إصدار |
+| `--docs-out` | string | `docs/OS_COMPATIBILITY.md` | ملف markdown الناتج |
+| `--input` | string | `docs/data/os-compat/latest.json` | إسقاط التوافق العام المثبَّت في المستودع |
+| `--website-out` | string | `website/public/os-compat.json` | ملف تغذية الموقع الناتج |

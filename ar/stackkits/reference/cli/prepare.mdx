@@ -1,0 +1,51 @@
+---
+title: "stackkit prepare"
+description: "تجهيز نظام لنشر StackKit"
+sidebarTitle: "prepare"
+---
+تجهيز نظام لنشر StackKit.
+
+الأسماء المستعارة: `prep`
+
+جهّز نظامًا لنشر StackKit وافحص مسار StackSpec المحدد.
+
+على خط Architecture v2 الأصلي يجري هذا الأمر تحققًا محليًا من المضيف للقراءة فقط (Docker وCompose والنواة والموارد والتخزين والمنافذ المطلوبة). فهو لا يثبّت حزم المضيف ولا يضبطها أبدًا، ولا يستخدم حسابًا مستضافًا أبدًا. يحتفظ محوّل التوافق v0.6 الدقيق بتدفق التجهيز التاريخي الخاص به.
+
+```text
+This command:
+  1. Selects the versioned StackSpec execution path
+  2. Checks host prerequisites on native Architecture v2
+  3. Retains historical target preparation through the exact-v0.6 compatibility adapter
+```
+
+```bash
+stackkit prepare [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--auto-fix` | bool | `true` | صحّح تلقائيًا المشكلات القابلة للإصلاح (v0.6 الدقيق فقط) |
+| `--dry-run` | bool | — | اعرض ما سيُنفَّذ (v0.6 الدقيق فقط) |
+| `--force` | bool | — | تابع حتى مع مساحة قرص غير كافية (v0.6 الدقيق فقط) |
+| `--host` | string | `localhost` | عنوان IP/اسم المضيف الهدف (v0.6 الدقيق فقط) |
+| `--json` | bool | — | أخرج تقرير preflight للمضيف في v2 الأصلي بصيغة JSON من نوع stackkit.command-result/v1 |
+| `--key` | string | — | مسار مفتاح SSH الخاص (v0.6 الدقيق فقط) |
+| `--non-interactive` | bool | — | افشل بدل السؤال عندما يحتاج prepare إلى إدخال من المشغّل (v0.6 الدقيق فقط) |
+| `--port` | int | `22` | منفذ SSH للأهداف البعيدة (v0.6 الدقيق فقط) |
+| `--skip-docker` | bool | — | تخطَّ فحص تثبيت Docker (v0.6 الدقيق فقط) |
+| `--skip-tofu` | bool | — | تخطَّ فحص OpenTofu المُحزَّم (v0.6 الدقيق فقط) |
+| `--user` | string | — | اسم مستخدم SSH (v0.6 الدقيق فقط) |
+
+**أمثلة**
+
+```bash
+# Check this host's prerequisites for the StackSpec in the current directory
+stackkit prepare
+
+# Check the prerequisites for the deployment in another directory
+stackkit prepare -C my-homelab
+
+# Emit the host preflight report as JSON
+stackkit prepare --json
+```
+

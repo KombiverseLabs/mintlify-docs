@@ -1,0 +1,54 @@
+---
+title: "المستندات والملفات"
+description: "خزّن ملفاتك وشاركها عبر Cloudreve، وأرشف أوراقك بإضافة Paperless-ngx الاختيارية"
+sidebarTitle: "المستندات والملفات"
+icon: folder-open
+---
+
+<Info>
+  حالة الأدلة (2026-09-24، الإصدار v0.39.7): الملفات عبر Cloudreve في حالة `available, lifecycle-verified`. اجتاز تشغيل لدورة الحياة على Ubuntu 24.04 amd64 (Basement Kit، مستقل) مراحل install وinit وgenerate وapply وsetup-files وverify وbackup وrestore؛ وأعادت الاستعادة البايتات الأصلية، وتم التحقق من التفعيل وقراءة التطبيق عبر حلقة loopback المحلية للضيف. تُنشر درجة الدعم العامة لهذا التشغيل على [stackkit.cc/compatibility](https://stackkit.cc/compatibility). أما المستندات عبر Paperless-ngx فهي في حالة `available, not yet lifecycle-verified`: قابلة للاختيار في الكتالوج اليوم، لكن لا يغطيها بعد أي إيصال لدورة الحياة.
+</Info>
+
+توفّر المستندات والملفات لأسرتك تخزيناً ومشاركة للملفات اليومية، إضافة إلى أرشيف اختياري للأوراق التي تريد البحث فيها لاحقاً. Cloudreve هو التطبيق الافتراضي المُصدَر للـ workload الاختياري `files`. أما Paperless-ngx فإضافة اختيارية تعمل كـ workload منفصل هو `documents`: تستقبل الأوراق الممسوحة ضوئياً أو الواردة بالبريد، وتجري عليها OCR، وتحتفظ بالنص القابل للبحث والملف الأصلي معاً.
+
+## التطبيقات
+
+<CardGroup cols={2}>
+  <Card title="Cloudreve" icon="folder-cloud" href="/ar/stackkits/apps/cloudreve">
+    تطبيق تخزين الملفات ومشاركتها الكامن خلف Files: الاختيار والطرح والتشغيل.
+  </Card>
+  <Card title="Paperless-ngx" icon="file-contract" href="/ar/stackkits/reference/use-case-catalog#documents">
+    أرشيف المستندات الكامن خلف Documents: OCR والفهرسة والبحث في الأوراق المستقبَلة. قابل للاختيار الآن؛ ولا يوجد دليل إعداد مخصص له بعد.
+  </Card>
+</CardGroup>
+
+## متى تستخدم أياً منهما
+
+- استخدم **Files (Cloudreve)** للتخزين اليومي: مستندات العمل وصادرات الصور والنسخ الاحتياطية للمجلدات ومشاركة رابط مع مستلم واحد.
+- أضف **Documents (Paperless-ngx)** عندما تريد تحويل البريد الممسوح والإيصالات والأوراق إلى أرشيف قابل للبحث ومُعالَج بـ OCR يحتفظ بالملف الأصلي.
+- يحتفظ التطبيقان ببيانات منفصلة. لا يفهرس Cloudreve ما أرشفه Paperless-ngx، ولا يتصفح Paperless-ngx مكتبة Cloudreve لديك.
+
+## خطط للتخزين أولاً
+
+- اختر جذر بيانات أساسياً بمسار مطلق مع مساحة حرة كافية للتطبيقين اللذين تختارهما.
+- أبقِ جذر النسخ الاحتياطي منفصلاً عن البيانات الأساسية.
+- حدد العملاء المسموح لهم بالوصول إلى مسار Files المولّد.
+- يحتفظ Paperless-ngx بفهرس نص OCR والملف الأصلي معاً؛ فقدّر التخزين للأرشيف وقاعدة بياناته، وتوقع أن ينمو مع كل مستند ممسوح.
+- تمرّن على الاستعادة قبل أن تضع ملفات أو أوراقاً لا تُعوَّض في أي من التطبيقين.
+
+## احصل على التطبيقات
+
+### Cloudreve
+
+- **واجهة الويب**: افتح مسار Files المولّد في أي متصفح، على سطح المكتب أو الجوال.
+- **عميل المزامنة لسطح المكتب**: ينشر Cloudreve [عميل مزامنة رسمياً لـ Windows](https://docs.cloudreve.org/en/usage/desktop-client) مع وصول للملفات عند الطلب وتكامل مع Explorer؛ ويتطلب نسخة خادم Cloudreve Pro.
+- لا يوجد تطبيق جوال رسمي لـ Cloudreve؛ استخدم واجهة الويب من متصفح الهاتف.
+
+### Paperless-ngx
+
+- **واجهة الويب**: افتح مسار Documents المولّد في أي متصفح بعد اختيار الـ workload.
+- **تطبيقات الجوال** (من جهات خارجية، لا تصونها kombify ولا مشروع Paperless-ngx): [Paperless Mobile](https://github.com/astubenbord/paperless-mobile) لنظام Android، و[Swift Paperless](https://apps.apple.com/app/swift-paperless/id6448698521) لنظام iOS. يتصل كلاهما بعنوان خادمك وحسابك؛ فراجع صلاحياتهما قبل منحهما الوصول إلى أرشيفك.
+
+## أعدّه
+
+Files حالة استخدام أولى جيدة، لأن اختيار Cloudreve المستقل لا يحتاج مرجع سر. اخترْه وانشره وتحقق منه في صفحة [Cloudreve](/ar/stackkits/apps/cloudreve). واختر Paperless-ngx كـ workload `documents` المنفصل عندما تريد الأرشيف، ثم تمرّن على دورة الاسترداد للتطبيقات التي تشغّلها في [النسخ الاحتياطي والاستعادة](/ar/guides/stackkits/back-up-and-restore).

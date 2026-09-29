@@ -20,7 +20,7 @@ export const LOCALES = {
   es: { language: "es" },
   "zh-Hans": { language: "zh-Hans" },
   hi: { language: "hi" },
-  // ar: { language: "ar" },
+  ar: { language: "ar" },
 };
 
 function localize(node, code, labels) {

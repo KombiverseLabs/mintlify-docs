@@ -1,0 +1,65 @@
+---
+title: "تثبيت Techstack Alpha على Windows"
+description: "نزّل نسخة Techstack Windows Alpha غير الموقّعة وصل خادماً محلياً"
+sidebarTitle: "تثبيت Windows Alpha"
+icon: "windows"
+---
+
+Techstack Alpha عميل Windows مبكر يعمل محلياً أولاً لتشغيل الخوادم في شبكتك المنزلية. يمكنه
+العمل دون حساب kombify مستضاف. ومع ذلك يهيّئ StackKits على الخادم هوية المالك/المسؤول
+المحلية المطلوبة.
+
+<Warning>
+هذه نسخة Alpha غير موقّعة لتلقي ملاحظات المستخدمين الفعليين، وليست ادعاءً بالاستقرار أو
+الجاهزية للإنتاج. قد يعرض Windows تحذير SmartScreen. تحقق من مصدر إصدار GitHub والمجموع
+الاختباري قبل أن تقرر المتابعة.
+</Warning>
+
+## التنزيل
+
+<CardGroup cols={2}>
+  <Card title="Download Windows Alpha (.exe)" icon="download" href="https://github.com/kombifyio/TechStack/releases/latest/download/kombify-Techstack-Setup.exe">
+    نزّل الملف الحالي غير الموقّع `kombify-Techstack-Setup.exe` مباشرة من الإصدار الرسمي
+    مفتوح المصدر.
+  </Card>
+  <Card title="Open-source repository" icon="github" href="https://github.com/kombifyio/TechStack">
+    اطّلع على المصدر العام وملاحظات الإصدار والمجاميع الاختبارية وحزمة MSI وأرشيف ZIP
+    المحمول.
+  </Card>
+</CardGroup>
+
+قارن تجزئة المثبّت مع
+[`SHA256SUMS.txt`](https://github.com/kombifyio/TechStack/releases/latest/download/SHA256SUMS.txt)
+واقرأ إشعار
+[`UNSIGNED-WINDOWS-RELEASE.txt`](https://github.com/kombifyio/TechStack/releases/latest/download/UNSIGNED-WINDOWS-RELEASE.txt)
+قبل فتح المثبّت.
+
+## استخدام Techstack محلياً
+
+1. شغّل Techstack واختر **Use locally**. لا يتطلب هذا الوضع حساب kombify مستضافاً.
+2. لخادم Ubuntu جديد، اختر **Give me a one-liner**، ثم حدد **Basement Kit**، واملأ حقول
+   تهيئة المالك/المسؤول المحلي.
+3. انسخ أمر الاقتران المُولَّد وشغّله مرة واحدة على خادم Ubuntu. أبقِ عميل Windows يعمل ويمكن
+   الوصول إليه على الشبكة الفرعية المحلية بينما ينزّل الخادم وكيله ويرسل أول نبضة Guard.
+4. انتظر حتى يغيّر Techstack حالة الخادم من **Not connected yet** إلى حالة الاتصال، ثم تابع
+   نشر StackKit.
+5. لخادم يشغّل Basement Kit بالفعل، اختر **Connect my server** بدلاً من ذلك وأدخل تفاصيل SSH
+   المحلية الخاصة به.
+
+<Note>
+تضم نسخة Windows Alpha كتالوج Basement Kit مثبّت الإصدار، ومدقق Windows الخاص به، وحمولة
+النشر لنظام Linux؛ وتذكر ملاحظات الإصدار نسخة StackKits الدقيقة التي تحملها كل بنية. ينشئ
+المثبّت أيضاً استثناءً في جدار حماية Windows للمنفذ TCP `5264` مقيداً بالشبكة الفرعية المحلية،
+ليتمكن الأمر المُولَّد من الوصول إلى العميل حتى عندما يصنّف Windows الشبكة المنزلية على أنها
+عامة.
+</Note>
+
+<Note>
+تتطلب المزامنة السحابية والتشغيل المتصل حساباً منفصلاً لاحقاً. وليست شرطاً مسبقاً لمسار
+Alpha المحلي.
+</Note>
+
+<Card title="Install Basement Kit directly" icon="terminal" href="/ar/stackkits/quickstart">
+  استخدم أمر StackKits المستقل ذا السطر الواحد عندما تريد تجهيز الخادم بشكل مستقل ثم ربطه
+  عبر **Connect my server** لاحقاً.
+</Card>
