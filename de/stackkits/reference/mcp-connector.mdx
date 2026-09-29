@@ -1,0 +1,40 @@
+---
+title: "StackKits-MCP-Connector"
+description: "Einen MCP-Client mit dem veröffentlichten lokalen StackKits-Lebenszyklus verbinden"
+sidebarTitle: "MCP-Connector"
+icon: plug
+---
+
+StackKits stellt eine nutzerseitige MCP-Verbindung namens `stackkit` bereit. Der lokale Adapter ist `stackkit-mcp`; nach der Installation kann derselbe Connector auch von `stackkit-server` an dessen geschütztem `/mcp`-Endpunkt bereitgestellt werden.
+
+## Einen lokalen Client konfigurieren
+
+Erzeuge aus dem installierten Release ein Client-Snippet:
+
+```bash
+stackkit agent mcp-config --client codex
+```
+
+Die lokale Standardform ist:
+
+```toml
+[mcp_servers.stackkit]
+command = "stackkit-mcp"
+args = ["--mode", "docs,local,server"]
+```
+
+## Sicherheitsmodell
+
+- Schreibgeschützte Dokumentations- und Diagnose-Tools sind standardmäßig verfügbar.
+- Schreibfähige Tools erfordern den expliziten Schreibmodus und eine operationsspezifische Freigabe durch den lokalen Owner.
+- Ein von außen erreichbarer Endpunkt muss bewusst geschützt werden; setze ihn nicht direkt dem öffentlichen Internet aus.
+- Der Connector nutzt denselben lokalen CLI-Lebenszyklus und Nachweisvertrag wie die Terminal-Befehle.
+
+## State Console
+
+Die optionale State Console ist ein lokaler Adapter zur Zustandsprüfung und Operationsfreigabe. Sie kann einen ausgewählten Workspace, Plan, Status, Logs und Nachweise anzeigen. Sie empfiehlt kein Kit und setzt selbst keine Lebenszyklus-Aktionen um.
+
+## Verwandte Seiten
+
+- [Quickstart](/de/stackkits/quickstart)
+- [Ein StackKit betreiben](/de/stackkits/reference/day-2-operations)

@@ -1,0 +1,31 @@
+---
+title: "Immich"
+description: "Immich für den Photos-Anwendungsfall auswählen und die erste Nutzung abschließen"
+sidebarTitle: "Immich"
+icon: images
+---
+
+Immich liefert den Anwendungsfall [Fotos](/de/guides/stackkits/use-cases/photos). Es ist die veröffentlichte Alternative für den optionalen nativen v2-Workload `photos`, und die anfänglichen Basement- und Cloud-StackSpecs aktivieren ihn nicht. Plane Speicher und Wiederherstellung auf der Seite Fotos, bevor du es auswählst.
+
+## Veröffentlichter Vertrag
+
+| Eigenschaft | Wert |
+| --- | --- |
+| Workload | `photos` |
+| Alternative | `immich` |
+| Datenklasse | personal |
+| Erforderliche Secret-Referenz | `database-password` |
+| Unterstützter Standalone-Adapter | `standalone-compose` |
+
+Das veröffentlichte CLI validiert und generiert diesen Workload-Vertrag, einschließlich persistenter Foto- und Datenbank-Zuweisungen und einer generierten Fotos-Route. Der [Anwendungsfall-Katalog](/de/stackkits/reference/use-case-catalog) zeigt die Komponenten, die das Release deklariert.
+
+Der Slot `database-password` enthält eine opake `secret://`-Referenz; die lokale Owner-Verwahrung hält das Passwort. Wähle Workload, Platzierung und Adapter in der [StackSpec](/de/guides/stackkits/configure-stack-spec) und folge dann [Einen Workload hinzufügen](/de/stackkits/reference/day-2-operations#einen-workload-zu-einem-bestehenden-workspace-hinzufügen), um zu validieren, die Verwahrung herzustellen, zu generieren, den Plan zu prüfen, anzuwenden und zu verifizieren.
+
+## Erste Nutzung
+
+1. Schließe die StackKits-Verifikation nach einem Rollout ab, der bereits eine gültige Owner-gebundene Verwahrung hat.
+2. Öffne die generierte Immich-Adresse aus dem Node Hub oder der Rollout-Ausgabe.
+3. Lege das Anwendungs-Owner-Konto an und verbinde Clients erst, nachdem du Speicherkapazität und Backups bestätigt hast.
+4. Verbinde jedes Smartphone mit [Fotos vom Smartphone sichern](/de/guides/stackkits/use-cases/photos/phone-backup).
+
+Verifiziere den StackKits-Workspace nach jeder Konfigurationsänderung erneut.

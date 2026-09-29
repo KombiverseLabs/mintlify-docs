@@ -1,0 +1,84 @@
+---
+title: "StackKits-Quickstart"
+description: "Ein veröffentlichtes Basement Kit bootstrappen, prüfen und explizit anwenden"
+sidebarTitle: "Quickstart"
+icon: rocket
+---
+
+Dieser Quickstart installiert das aktuelle öffentliche StackKits-Release mit einem Basement
+Kit auf einem Server, den du bereits betreibst. Prüfe vorab in der [OS-Kompatibilität](/de/stackkits/reference/os-compatibility),
+welche Kombination aus Release und Host veröffentlichte Lebenszyklus-Nachweise hat.
+Das CLI bleibt die lokale Ausführungsinstanz.
+
+## Ein Basement Kit bootstrappen
+
+Auf einem unterstützten Server legt der Basement-Installer `~/my-homelab` an,
+installiert die veröffentlichten Artefakte und die nötige Laufzeit, initialisiert die lokale Owner-Verwahrung,
+bootstrappt den lokalen Admin-/PocketID-Zugang, validiert die generierte
+StackSpec und wendet die standardmäßigen Basement-Dienste an:
+
+```bash
+curl -sSL https://base.stackkit.cc | sh
+cd ~/my-homelab
+stackkit version
+stackkit logs latest --json
+cat .stackkit/access.json
+```
+
+<Warning>
+  Ein gehostetes kombify-Konto ist nicht erforderlich. StackKits selbst braucht
+  weiterhin einen lokalen Owner/Admin, den dieser Bootstrap automatisch anlegt.
+  Halte die generierten Zugangsdaten privat.
+</Warning>
+
+Du brauchst einen anderen Installer? Nutze [Ein Kit wählen](/de/guides/stackkits/choosing-a-kit)
+für den Weg nur mit Toolchain, [Cloud Kit](/de/stackkits/kits/cloud-kit) für einen VPS,
+den du bereits betreibst, oder die [CLI-Schritt-für-Schritt-Anleitung](/de/guides/stackkits/cli-walkthrough)
+für die getrennten Schritte Konfigurieren, Prüfen, Anwenden und Verifizieren.
+
+## Den generierten Intent prüfen oder ändern
+
+Prüfe `stack-spec.yaml`, bevor du Ausgaben generierst. Achte besonders auf die
+absoluten Speicher-Wurzeln, die lokale Domain (der Basement-Installer verwendet `home`,
+daher lösen Dienste nach der Geräte-Registrierung als `*.home` auf), die Site- und Node-Identitäten
+und die leere optionale Workload-Auswahl.
+
+Die StackSpec ist die Konfigurationseingabe. CUE bleibt die Validierungsinstanz,
+und generierte Rollout-Dateien sind Ausgaben, keine Dateien zum manuellen Bearbeiten. Aktuelle
+Beispiele findest du unter [Eine StackSpec konfigurieren](/de/guides/stackkits/configure-stack-spec).
+
+## Einen geänderten Plan generieren und prüfen
+
+```bash
+stackkit generate
+stackkit plan --json
+```
+
+Vergewissere dich, dass Generierungs- und Apply-Bereitschaft beide `ready` sind, und prüfe dann die
+ausgewählten Workloads und Artefaktpfade.
+
+## Eine beabsichtigte Änderung anwenden
+
+```bash
+stackkit apply
+stackkit logs latest --json
+cat .stackkit/access.json
+```
+
+Der Basement-Einzeiler führt das erste Apply bereits aus. Führe diese Lebenszyklus-Befehle
+nur aus, nachdem du `stack-spec.yaml` absichtlich geändert hast. Bewahre die lokalen Logs
+und den Zugangsdatensatz beim Workspace auf.
+
+## Weiter
+
+<CardGroup cols={3}>
+  <Card title="Basement Kit" icon="house" href="/de/stackkits/kits/basement-kit">
+    Lerne das lokale Kit für eine einzelne Umgebung kennen.
+  </Card>
+  <Card title="Cloud Kit" icon="cloud" href="/de/stackkits/kits/cloud-kit">
+    Nutze denselben Standalone-Lebenszyklus auf einem VPS, den du betreibst.
+  </Card>
+  <Card title="Sicher anwenden" icon="clipboard-check" href="/de/guides/stackkits/review-plan-and-apply">
+    Prüfe Bereitschaft und generierte Artefakte, bevor du den Host änderst.
+  </Card>
+</CardGroup>

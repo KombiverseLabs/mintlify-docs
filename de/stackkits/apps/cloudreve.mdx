@@ -1,0 +1,59 @@
+---
+title: "Cloudreve"
+description: "Cloudreve für den Files-Anwendungsfall auswählen, bereitstellen und betreiben"
+sidebarTitle: "Cloudreve"
+icon: folder-cloud
+---
+
+Cloudreve liefert die Files-Hälfte von [Dokumente und Dateien](/de/guides/stackkits/use-cases/documents-and-files). Es ist die Standard-Alternative des optionalen `files`-Workloads, und die anfängliche StackSpec wählt es nicht aus. Plane Speicher und Backups auf der Seite Dokumente und Dateien, bevor du es auswählst.
+
+## Veröffentlichte Rolle
+
+| Eigenschaft | Wert |
+| --- | --- |
+| Workload | `files` |
+| Alternative | `cloudreve` |
+| Datenklasse | personal |
+| Route | generierte Route des Files-Dienstes |
+| Standalone-Adapter | `standalone-compose` |
+
+## Den Workload auswählen
+
+Führe dieses Objekt in die vollständige StackSpec ein, die `stackkit init` erstellt hat:
+
+```json
+{
+  "workloads": {
+    "files": {
+      "alternative": "cloudreve",
+      "runtimeAdapterRef": "standalone-compose",
+      "placement": {
+        "siteRefs": ["home"],
+        "nodeRefs": ["main"]
+      }
+    }
+  }
+}
+```
+
+Das Beispiel wurde mit Release v0.32.x validiert und generiert. Wenn sich deine generierten Site- oder Node-IDs unterscheiden, verwende genau diese IDs.
+
+## Bereitstellen und verifizieren
+
+```bash
+stackkit validate
+stackkit generate
+stackkit plan --json
+stackkit apply
+stackkit verify --http --json
+```
+
+Vergewissere dich vor dem Anwenden, dass der aufgelöste Plan den `files`-Workload, die Alternative `cloudreve` und den Adapter `standalone-compose` enthält.
+
+Öffne nach erfolgreicher Verifikation die generierte Files-Route und lege nur die Anwendungskonten an, die du brauchst.
+
+## Betrieb
+
+- Halte die primären und die Backup-Wurzeln auf Speicher, den du kontrollierst.
+- Halte StackKits-Konfigurationsänderungen in der StackSpec. Bearbeite weder das generierte Cloudreve-Workload-Bundle noch die Compose-Umgebung.
+- Verifiziere die Wiederherstellung, bevor du dich für die einzige Kopie einer Datei auf den Dienst verlässt. Siehe [Sichern und wiederherstellen](/de/guides/stackkits/back-up-and-restore).

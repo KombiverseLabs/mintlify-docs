@@ -1,0 +1,50 @@
+---
+title: "Basement Kit"
+description: "Das veröffentlichte lokale StackKits-Profil für Hardware, die du kontrollierst"
+sidebarTitle: "Basement Kit"
+icon: house
+---
+
+<Info>
+  Nachweisstand (2026-09-17, v0.35.0): Basement Kit ist der unterstützte
+  Ein-Befehl-Weg des aktuellen öffentlichen Releases. Im öffentlichen v0.35.0-Archiv
+  hat Basement Kit auf frischen virtuellen Maschinen mit Ubuntu 24.04 und Debian 13
+  sowie in einer virtuellen Maschine in einem Heimnetz install, init, generate, apply,
+  verify, backup und restore bestanden; dort antworteten seine lokalen Dienstadressen
+  auch von einem anderen Rechner im selben Netz. Phone-Passkey und Vertrauen für
+  Client-Zertifikate stehen noch aus. Cloud Kit ist eine Preview und Modern Homelab ein
+  Alpha-Definitionsarchiv, kein Installationsziel; für keines von beiden gibt es
+  bisher einen automatisierten Lebenszyklus-Lauf.
+</Info>
+
+Basement Kit ist das unterstützte lokale Profil des aktuellen öffentlichen StackKits-Releases. Nutze es für ein Homelab auf Hardware, die du bereits kontrollierst, mit einer Home-Site und einem lokalen Owner.
+
+## Was es bietet
+
+Das kleinste nützliche Basement Kit ist eine Home-Site mit einem lokalen Node. Es bringt:
+
+- eine CUE-validierte StackSpec und den lokalen `stackkit`-Lebenszyklus
+- lokale Owner-Verwahrung mit PocketID und TinyAuth
+- Routing über Traefik
+- einen Node Hub unter der generierten Adresse `base.<domain>`
+- eine lokale Backup-Richtlinie mit Owner-gebundener Wiederherstellung
+
+Die Standard-Domain zum Erstellen ist `home.test`. Stelle sicher, dass Clients einen DNS-Pfad nutzen, den du kontrollierst, bevor du eine generierte Route als erreichbar betrachtest; StackKits ändert nicht stillschweigend jeden Client oder Router.
+
+Die Basis bleibt Standalone. Die StackKits-Website hilft dir, einen Weg zu wählen und zu bootstrappen, betreibt den Host aber nicht.
+
+## Die Basis abschließen
+
+1. Bootstrappe das Kit mit dem [Quickstart](/de/stackkits/quickstart).
+2. Schließe den Schutz beim ersten Start im [Node Hub](/de/guides/stackkits/node-hub) ab: Lege den lokalen PocketID-Owner an und bestätige, dass TinyAuth die erwarteten Routen schützt.
+3. Konfiguriere das lokale Backup-Repository und übe eine Wiederherstellung. Siehe [Sichern und wiederherstellen](/de/guides/stackkits/back-up-and-restore).
+
+Ändere die StackSpec und validiere erneut, statt generierte Dateien zu bearbeiten.
+
+## Anwendungsfälle hinzufügen
+
+Füge Workloads erst hinzu, wenn die Basis verifiziert ist. [Dokumente und Dateien](/de/guides/stackkits/use-cases/documents-and-files) ist ein guter erster Anwendungsfall, weil die Standalone-Auswahl von Cloudreve keine Secret-Referenz braucht. Die [Anwendungsfälle](/de/guides/stackkits/use-cases/overview) listen alle dokumentierten auf.
+
+## Wann du ein anderes Kit wählst
+
+Wähle [Cloud Kit](/de/stackkits/kits/cloud-kit), wenn die einzelne Umgebung ein bestehender VPS oder Cloud-Host mit einer Domain ist, die du betreibst. StackKits stellt diesen Host nicht bereit.

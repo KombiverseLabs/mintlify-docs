@@ -1,0 +1,160 @@
+---
+title: "Richte deine Passwortmanager-Apps ein"
+description: "Erstelle dein Tresor-Konto, speichere ein erstes Passwort und verbinde die Bitwarden-Apps auf Handy, Browser und Computer mit deinem eigenen Tresor."
+sidebarTitle: "Passwort-Apps"
+icon: "mobile-screen-button"
+mode: "wide"
+keywords: ["Passwörter", "Vaultwarden", "Bitwarden", "Passwortmanager", "Browser-Erweiterung", "iPhone", "Android", "Selbst gehostet"]
+---
+
+import { clientSetupLabelsDe } from "/snippets/client-setup-labels-de.jsx";
+
+import { ClientSetupGuide } from "/snippets/client-setup-guide.jsx";
+
+<ClientSetupGuide
+  labels={clientSetupLabelsDe}
+  locale="de"
+  id="kcg-passwords"
+  meta={[
+    { icon: "phone", text: "Handy, Browser & Computer" },
+    { icon: "steps", text: "6 kurze Schritte" },
+    { icon: "book", text: "Keine Vorkenntnisse nötig" },
+  ]}
+  requirements={[
+    "Deine Tresor-Adresse, zum Beispiel https://vault.home.test",
+    "Eine Einladung für deine E-Mail-Adresse",
+    "Jedes Gerät ist von der Person, die kombify eingerichtet hat, für deinen Heimtresor vorbereitet",
+    "Ein Master-Passwort, das du dir merken kannst",
+  ]}
+  requirementsHelp={{ label: "Noch keine Einladung?", target: "kcg-passwords-no-invite" }}
+  appsTitle="Lade zuerst die Bitwarden-App herunter."
+  vendor={{ label: "Alle Downloads von Bitwarden", href: "https://bitwarden.com/download/" }}
+  apps={[
+    { platform: "apple", label: "iPhone & iPad", detail: "Bitwarden Password Manager", store: "Im App Store öffnen", href: "https://apps.apple.com/app/bitwarden-password-manager/id1137397744", vendor: "Bitwarden", official: true },
+    { platform: "android", label: "Android", detail: "Bitwarden Password Manager", store: "In Google Play öffnen", href: "https://play.google.com/store/apps/details?id=com.x8bit.bitwarden", vendor: "Bitwarden", official: true },
+    { platform: "browser", label: "Browser-Erweiterung", detail: "Chrome, Firefox, Edge, Safari und mehr", store: "Bitwarden-Downloadseite öffnen", href: "https://bitwarden.com/download/", vendor: "Bitwarden", official: true },
+    { platform: "desktop", label: "Computer", detail: "Windows, macOS und Linux", store: "Bitwarden-Downloadseite öffnen", href: "https://bitwarden.com/download/", vendor: "Bitwarden", official: true },
+  ]}
+  appsNote="Browser-Stores: [Chrome](https://chromewebstore.google.com/detail/bitwarden-password-manager/nngceckbapebfimnlniiiahkandclblb) · [Firefox](https://addons.mozilla.org/firefox/addon/bitwarden-password-manager/) · [Edge](https://microsoftedge.microsoft.com/addons/detail/bitwarden-password-manager/jbkfoedolllekgbhcbcoahefnbanhhlh) · [Safari (Mac App Store)](https://apps.apple.com/app/bitwarden/id1352778147). Dein Tresor läuft auf Vaultwarden, das mit diesen offiziellen Bitwarden-Apps funktioniert. Eine eigene Vaultwarden-App brauchst du nicht."
+  stepsTitle="Richte deinen Tresor Schritt für Schritt ein."
+  steps={[
+    {
+      tab: "Tresor öffnen",
+      title: "Öffne deinen Tresor im Browser.",
+      intro: "Fang am Computer an. Dein Tresor hat eine eigene Webadresse, wie eine Website, die nur dein Haushalt nutzt.",
+      clicks: [
+        "Gib deine Tresor-Adresse in die Adressleiste des Browsers ein, zum Beispiel **https://vault.home.test**, und drücke die Eingabetaste.",
+        "Klicke unter dem Anmeldefeld auf [[Create account]].",
+      ],
+      note: "Die Adresse in dieser Anleitung ist ein Beispiel. Verwende die Adresse, die du von der Person bekommen hast, die kombify eingerichtet hat.",
+      faq: { q: "Was ist eine Tresor-Adresse?", a: "Das ist die Webadresse des Passwort-Tresors deines Haushalts. Sie beginnt meist mit **https://vault.** und endet mit dem Namen deines Heimnetzwerks. Die Person, die kombify eingerichtet hat, nennt dir die genaue Adresse." },
+      check: "Du siehst das Formular [[Create account]].",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-01-open-vault.webp", width: 1088, height: 830, alt: "Vaultwarden-Anmeldeseite mit markiertem Link Create account", caption: "Anmeldeseite des Tresors", credit: "kombify-Screenshot", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · Web-Tresor 2026.7.0", captured: "2026-09-24", annotations: [{ n: 2, top: 84.3, left: 38.3, width: 23.5, height: 7.2 }] },
+    },
+    {
+      tab: "Konto erstellen",
+      title: "Erstelle dein Konto.",
+      intro: "Dein Tresor akzeptiert nur eingeladene E-Mail-Adressen. Verwende dieselbe Adresse, an die die Einladung ging.",
+      clicks: [
+        "Gib bei [[Email address]] deine eingeladene E-Mail-Adresse ein.",
+        "Gib bei [[Name]] deinen Namen ein. Die Person, die den Tresor betreibt, und alle, mit denen du Passwörter teilst, können ihn sehen.",
+        "Klicke auf [[Continue]].",
+      ],
+      faq: { q: "Ist das mein kombify-Konto?", a: "Nein. Dieses Konto gehört nur zu deinem Passwort-Tresor. Es hat eine eigene E-Mail-Adresse und ein eigenes Master-Passwort." },
+      check: "Die Seite fordert dich jetzt auf, [[Set a strong password]].",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-02-create-account.webp", width: 1088, height: 718, alt: "Formular Create account mit der E-Mail-Adresse alex@example.com und dem Namen Alex Example", caption: "Konto erstellen", credit: "kombify-Screenshot", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · Web-Tresor 2026.7.0", captured: "2026-09-24", annotations: [{ n: 1, top: 37.6, left: 16.4, width: 65.1, height: 13.4 }, { n: 2, top: 61, left: 16.4, width: 65.1, height: 13.4 }, { n: 3, top: 76.3, left: 14, width: 72.1, height: 13.9 }] },
+    },
+    {
+      tab: "Master-Passwort",
+      title: "Wähle dein Master-Passwort.",
+      intro: "Das Master-Passwort ist das einzige Passwort, das du dir noch merken musst. Es schaltet alle anderen frei.",
+      clicks: [
+        "Gib bei [[Master password]] ein langes Passwort ein. Ein kurzer Satz aus vier oder mehr Wörtern funktioniert gut.",
+        "Gib dasselbe Passwort bei [[Confirm master password]] noch einmal ein.",
+        "Klicke auf [[Create account]]. Wenn die Seite die Browser-Erweiterung vorschlägt, klicke auf [[Add it later]] und dann auf [[Skip to web app]]. Die Erweiterung verbindest du in Schritt 5.",
+      ],
+      note: "**Ein vergessenes Master-Passwort kann niemand wiederherstellen**, auch nicht die Person, die deinen Tresor betreibt. Schreib es auf und bewahre den Zettel an einem sicheren Ort außerhalb des Tresors auf.",
+      faq: { q: "Was bedeutet die Stärkeanzeige?", a: "Sie schätzt, wie schwer dein Passwort zu erraten ist. Ziel ist **Strong**. Länger ist besser als kompliziert." },
+      check: "Dein leerer Tresor öffnet sich mit dem Titel [[All vaults]].",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-03-master-password.webp", width: 1088, height: 1310, alt: "Seite Set a strong password mit zweimal eingegebenem Master-Passwort, bewertet mit Strong", caption: "Set a strong password", credit: "kombify-Screenshot", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · Web-Tresor 2026.7.0", captured: "2026-09-24", annotations: [{ n: 1, top: 25.5, left: 16.4, width: 60.7, height: 7.3 }, { n: 2, top: 52.2, left: 16.4, width: 60.7, height: 7.3 }, { n: 3, top: 87, left: 14, width: 72.1, height: 7.6 }] },
+    },
+    {
+      tab: "Erstes Passwort",
+      title: "Speichere dein erstes Passwort.",
+      intro: "Speichere eine Anmeldung zum Testen. Sie zeigt dir später, dass deine Apps mit deinem Tresor verbunden sind.",
+      clicks: [
+        "Klicke oben rechts auf [[New]] und wähle [[Login]]. Wenn zuerst ein Willkommensfenster erscheint, klicke auf [[Skip]].",
+        "Gib bei [[Item name]] einen Namen ein, den du wiedererkennst, zum Beispiel den Namen eines Shops.",
+        "Gib deinen [[Username]] ein. Klicke neben [[Password]] auf die kreisförmigen Pfeile, um ein Passwort zu erzeugen, und dann auf [[Use this password]].",
+        "Klicke auf [[Save]].",
+      ],
+      note: "Trag die Webadresse des Shops unter [[Website (URI)]] ein. Die Browser-Erweiterung schlägt diese Anmeldung dann auf dieser Website vor.",
+      check: "Die Meldung [[Item added]] erscheint und deine Anmeldung steht in der Liste.",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-04-new-login.webp", width: 1472, height: 1664, alt: "Fenster New Login mit dem Eintragsnamen Example Shop, einem Benutzernamen und einem erzeugten Passwort", caption: "New Login", credit: "kombify-Screenshot", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · Web-Tresor 2026.7.0", captured: "2026-09-24", annotations: [{ n: 2, top: 12.1, left: 7.9, width: 82.6, height: 5.8 }, { n: 3, top: 41.8, left: 7.9, width: 79.3, height: 5.8 }, { n: 3, top: 52.3, left: 87.5, width: 5.7, height: 5 }, { n: 4, top: 92.1, left: 2.7, width: 10.4, height: 6 }] },
+    },
+    {
+      tab: "Apps verbinden",
+      title: "Verbinde die Bitwarden-Apps.",
+      intro: "Jede Bitwarden-App verbindet sich zuerst mit den Servern von Bitwarden. Sag ihr einmalig, dass sie stattdessen deinen Tresor verwenden soll.",
+      clicks: [
+        "Installiere die Bitwarden-App aus der Liste oben und öffne sie.",
+        "Öffne auf dem Anmeldebildschirm das Menü [[Logging in on]] und wähle [[Self-hosted]]. In der Computer-App heißt das Menü [[Accessing]].",
+        "Gib bei [[Server URL]] deine Tresor-Adresse mit **https://** am Anfang ein und tippe auf [[Save]].",
+        "Melde dich mit deiner E-Mail-Adresse und deinem Master-Passwort an.",
+      ],
+      note: "Wiederhole diese Schritte auf jedem Handy, in jedem Browser und auf jedem Computer, den du nutzt. Jeder braucht deine Tresor-Adresse einmal.",
+      faq: { q: "Warum gibt es hier kein Bild der App?", a: "Die Nutzungsbedingungen von Bitwarden erlauben nicht, die Bilder weiterzuverwenden. Die eigene Anleitung von Bitwarden zeigt jeden Bildschirm, und die Bezeichnungen oben passen dazu." },
+      check: "Die App zeigt die Anmeldung, die du in Schritt 4 gespeichert hast.",
+      visual: {
+        tag: "BITWARDEN-ANLEITUNG",
+        title: "Bitwarden zeigt jeden Bildschirm",
+        text: "Wähle in der Bitwarden-Anleitung dein Gerät aus. Suche den Abschnitt zu einem **selbst gehosteten** Server.",
+        links: [
+          { label: "Eine App mit dem eigenen Server verbinden", detail: "bitwarden.com · alle Geräte", href: "https://bitwarden.com/help/change-client-environment/", icon: "server" },
+          { label: "Erste Schritte mit der Browser-Erweiterung", detail: "bitwarden.com", href: "https://bitwarden.com/help/getting-started-browserext/", icon: "browser" },
+          { label: "Erste Schritte mit der Mobile-App", detail: "bitwarden.com", href: "https://bitwarden.com/help/getting-started-mobile/", icon: "phone" },
+        ],
+      },
+    },
+    {
+      tab: "Prüfen",
+      title: "Ist alles verbunden?",
+      intro: "Prüfe es im Web-Tresor und in einer App. Hake nur ab, was du selbst geprüft hast.",
+      verify: [
+        "Ich kann meine Tresor-Adresse öffnen und mich anmelden.",
+        "Die von mir gespeicherte Anmeldung erscheint in einer Bitwarden-App auf meinem Handy, in meinem Browser oder auf meinem Computer.",
+        "Mein Master-Passwort ist aufgeschrieben und außerhalb des Tresors aufbewahrt.",
+      ],
+      note: "Diese Anleitung liest deinen Tresor nicht aus. Deine Haken bleiben in diesem Browser.",
+      check: "Jetzt kannst du deine anderen Passwörter in den Tresor übertragen.",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-05-first-item.webp", width: 1430, height: 300, alt: "Liste All vaults mit der gespeicherten Anmeldung Example Shop", caption: "Deine erste Anmeldung im Tresor", credit: "kombify-Screenshot", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · Web-Tresor 2026.7.0", captured: "2026-09-24", annotations: [{ n: null, top: 37.2, left: 1, width: 98, height: 58.1 }] },
+    },
+  ]}
+  nextTitle="Wie es weitergeht."
+  next={[
+    { icon: "shield", title: "Zwei-Schritt-Anmeldung aktivieren", text: "Bitwarden erklärt, wie du einen zweiten Anmeldeschritt hinzufügst.", href: "https://bitwarden.com/help/setup-two-step-login/" },
+    { icon: "server", title: "Den Tresor sichern", text: "Für die Person, die kombify betreibt: schütze die Tresordaten.", href: "/de/guides/stackkits/back-up-and-restore" },
+  ]}
+  help={[
+    { id: "kcg-passwords-no-invite", q: "Ich habe noch keine Tresor-Adresse und keine Einladung.", a: "Frag die Person, die kombify in deinem Haushalt eingerichtet hat. Sie fügt den Dienst Passwörter hinzu und lädt deine E-Mail-Adresse ein. [So funktioniert Passwörter mit kombify](/de/guides/stackkits/use-cases/passwords) · [Owner-Setup](/de/stackkits/apps/vaultwarden)." },
+    { q: "Create account meldet „Registration not allowed or user already exists“.", a: "Prüfe, ob du genau die eingeladene E-Mail-Adresse verwendest. Wenn du dein Konto schon erstellt hast, geh zurück und melde dich stattdessen an. Sonst bitte um eine neue Einladung." },
+    { q: "Die Adresse lässt sich nicht öffnen, oder der Browser warnt vor der Verbindung.", a: "Probiere die Adresse zuerst auf einem Gerät in deinem Heimnetzwerk. Wenn dein Tresor nur zu Hause läuft, verbinde dich mit deinem Heim-WLAN oder mit der Heimverbindungs-App, die du bekommen hast. Jedes Gerät muss außerdem so eingerichtet sein, dass es deinem Heimserver vertraut; das erledigt die Person, die kombify eingerichtet hat. Wenn der Browser meldet, die Verbindung sei nicht privat, brich hier ab und frag sie. Klicke nicht über die Warnung hinweg. [Über Heimadressen](/de/guides/stackkits/use-cases/network)." },
+    { q: "Ich habe mein Master-Passwort vergessen.", a: "Niemand kann es wiederherstellen. Dein Tresor ist damit verschlüsselt. Die Person, die deinen Tresor betreibt, kann dein Konto löschen, damit du neu anfangen kannst, aber die darin gespeicherten Passwörter gehen verloren. [Bitwarden zu Master-Passwörtern](https://bitwarden.com/help/master-password/)." },
+    { q: "Mein Android-Handy hat kein Google Play.", a: "Bitwarden betreibt ein eigenes F-Droid-Repository. Die Adresse steht auf der [Bitwarden-Downloadseite](https://bitwarden.com/download/)." },
+    { q: "Warum steht hier Vaultwarden und Bitwarden?", a: "Vaultwarden ist das Programm, das deinen Tresor betreibt. Es ist ein inoffizieller Server, der mit den offiziellen Bitwarden-Apps funktioniert. Vaultwarden steht in keiner Verbindung zu Bitwarden, Inc. Die Bilder zeigen Vaultwarden 1.37.2 auf Englisch; neuere Versionen und andere Sprachen können anders aussehen." },
+  ]}
+  attribution="**Vaultwarden betreibt deinen Tresor, und die Bitwarden-Apps öffnen ihn. kombify installiert ihn für dich.** kombify stellt keine der beiden Apps her. [Vaultwarden](https://github.com/dani-garcia/vaultwarden) (AGPL-3.0) · Web-Tresor: [Bitwarden-Web-Client für Vaultwarden](https://github.com/dani-garcia/bw_web_builds) (GPL-3.0) · [Bitwarden](https://bitwarden.com/)"
+  sources={{
+    summary: "Screenshots von kombify aus einer lokalen Vaultwarden-Installation · erfundenes Konto · englische Menüs.",
+    paragraphs: [
+      "**Screenshots · 24. September 2026.** kombify hat die Bilder des Web-Tresors aus einer lokalen Referenzinstallation aufgenommen: Vaultwarden 1.37.2, das Image, das der StackKits-Katalog für Passwörter ausliefert, mit dem mitgelieferten Web-Tresor 2026.7.0 (dem Bitwarden-Web-Client, GPL-3.0). Die Installation nutzte die Beispieladresse https://vault.home.test und das erfundene Konto alex@example.com. Es ist eine Referenzinstallation, kein StackKits-Rollout-Test. Diese Anleitung hat die violetten Markierungen ergänzt.",
+      "Die Bildschirme der Bitwarden-Apps werden nicht gezeigt. Die [Bedingungen von Bitwarden](https://bitwarden.com/terms/) erlauben nicht, seine Inhalte weiterzuverwenden, deshalb verweist Schritt 5 auf die eigene Anleitung von Bitwarden.",
+      "Store-Links und Hilfeseiten wurden am 24. September 2026 geprüft. Dein Fortschritt bleibt in diesem Browser. Die Anleitung verbindet keine Konten und fragt nach keinen Passwörtern.",
+    ],
+    links: [
+      { label: "Bitwarden: einzelne Apps verbinden", href: "https://bitwarden.com/help/change-client-environment/" },
+      { label: "Bitwarden-Downloads", href: "https://bitwarden.com/download/" },
+      { label: "Vaultwarden-Projekt", href: "https://github.com/dani-garcia/vaultwarden" },
+    ],
+  }}
+/>
