@@ -1,0 +1,64 @@
+---
+title: "Windows पर Techstack Alpha इंस्टॉल करें"
+description: "अहस्ताक्षरित Techstack Windows Alpha डाउनलोड करें और लोकल सर्वर कनेक्ट करें"
+sidebarTitle: "Windows Alpha इंस्टॉल करें"
+icon: "windows"
+---
+
+Techstack Alpha आपके होम नेटवर्क के सर्वरों को चलाने के लिए एक शुरुआती, लोकल-फ़र्स्ट Windows क्लाइंट है।
+यह बिना होस्टेड kombify अकाउंट के चल सकता है। सर्वर पर मौजूद StackKits फिर भी अपनी ज़रूरी लोकल
+Owner/Admin पहचान खुद बनाता है।
+
+<Warning>
+यह असली उपयोगकर्ताओं के फ़ीडबैक के लिए अहस्ताक्षरित Alpha रिलीज़ है, स्थिर या प्रोडक्शन-तैयार होने का
+दावा नहीं। Windows SmartScreen चेतावनी दिखा सकता है। आगे बढ़ने का फ़ैसला करने से पहले GitHub रिलीज़
+का स्रोत और चेकसम सत्यापित करें।
+</Warning>
+
+## डाउनलोड
+
+<CardGroup cols={2}>
+  <Card title="Windows Alpha (.exe) डाउनलोड करें" icon="download" href="https://github.com/kombifyio/TechStack/releases/latest/download/kombify-Techstack-Setup.exe">
+    मौजूदा अहस्ताक्षरित `kombify-Techstack-Setup.exe` सीधे आधिकारिक ओपन-सोर्स रिलीज़ से डाउनलोड
+    करें।
+  </Card>
+  <Card title="ओपन-सोर्स रिपॉज़िटरी" icon="github" href="https://github.com/kombifyio/TechStack">
+    सार्वजनिक सोर्स, रिलीज़ नोट, चेकसम, MSI और पोर्टेबल ZIP देखें।
+  </Card>
+</CardGroup>
+
+इंस्टॉलर खोलने से पहले उसका हैश
+[`SHA256SUMS.txt`](https://github.com/kombifyio/TechStack/releases/latest/download/SHA256SUMS.txt)
+से मिलाएँ और
+[`UNSIGNED-WINDOWS-RELEASE.txt`](https://github.com/kombifyio/TechStack/releases/latest/download/UNSIGNED-WINDOWS-RELEASE.txt)
+सूचना पढ़ें।
+
+## Techstack को लोकली इस्तेमाल करें
+
+1. Techstack शुरू करें और **Use locally** चुनें। इस मोड के लिए होस्टेड kombify अकाउंट ज़रूरी नहीं है।
+2. नए Ubuntu सर्वर के लिए **Give me a one-liner** चुनें, **Basement Kit** चुनें और लोकल Owner/Admin
+   बूटस्ट्रैप फ़ील्ड भरें।
+3. बना हुआ पेयरिंग कमांड कॉपी करें और उसे Ubuntu सर्वर पर एक बार चलाएँ। जब तक सर्वर अपना एजेंट
+   डाउनलोड करके पहला Guard हार्टबीट भेजता है, Windows क्लाइंट को चालू और लोकल सबनेट पर पहुँच-योग्य
+   रखें।
+4. तब तक इंतज़ार करें जब तक Techstack सर्वर की स्थिति **Not connected yet** से कनेक्टेड में न बदल
+   दे, फिर StackKit रोलआउट जारी रखें।
+5. जिस सर्वर पर Basement Kit पहले से चल रहा है, उसके लिए इसके बजाय **Connect my server** चुनें और
+   उसका लोकल SSH विवरण दर्ज करें।
+
+<Note>
+Windows Alpha में पिन किया हुआ Basement Kit कैटलॉग, उसका Windows वैलिडेटर और Linux रोलआउट पेलोड शामिल
+हैं; रिलीज़ नोट बताते हैं कि हर बिल्ड में StackKits का कौन-सा सटीक वर्शन है। इंस्टॉलर लोकल सबनेट तक
+सीमित TCP `5264` के लिए Windows Firewall अपवाद भी बनाता है, ताकि बना हुआ कमांड तब भी क्लाइंट तक पहुँच
+सके जब Windows होम नेटवर्क को Public मानता हो।
+</Note>
+
+<Note>
+Cloud सिंक और कनेक्टेड संचालन के लिए बाद में अलग अकाउंट चाहिए। वे लोकल Alpha रास्ते की पूर्व-शर्तें
+नहीं हैं।
+</Note>
+
+<Card title="Basement Kit सीधे इंस्टॉल करें" icon="terminal" href="/hi/stackkits/quickstart">
+  जब आप सर्वर को स्वतंत्र रूप से तैयार करना चाहें और बाद में **Connect my server** के ज़रिए जोड़ना
+  चाहें, तब स्टैंडअलोन StackKits वन-लाइनर का उपयोग करें।
+</Card>

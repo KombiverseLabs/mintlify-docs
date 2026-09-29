@@ -1,0 +1,146 @@
+---
+title: "stackkit logs"
+description: "संरचित डिप्लॉय लॉग देखें"
+sidebarTitle: "logs"
+---
+संरचित डिप्लॉय लॉग देखें।
+
+पिछले रन के संरचित डिप्लॉय लॉग देखें और फ़िल्टर करें।
+
+डिफ़ॉल्ट रूप से सबसे हाल का लॉग मानव-पठनीय फ़ॉर्मैट में दिखाता है। विशिष्ट इवेंट प्रकारों तक सीमित करने के लिए फ़िल्टर उपयोग करें।
+
+```bash
+stackkit logs [run-id] [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | पिछले JSON पेज द्वारा लौटाया गया अपारदर्शी डाइजेस्ट-बद्ध कर्सर |
+| `--decisions` | bool | — | केवल निर्णय इवेंट दिखाएँ |
+| `--errors` | bool | — | केवल त्रुटियाँ और चेतावनियाँ दिखाएँ |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+| `--jsonl` | bool | — | कच्चा JSON-Lines आउटपुट करें |
+| `--max-bytes` | int | `262144` | प्रति JSON पेज स्कैन किए जाने वाले अधिकतम कच्चे लॉग बाइट्स |
+| `--max-events` | int | `200` | प्रति JSON पेज अधिकतम संरचित इवेंट |
+| `--timing` | bool | — | समय सारांश दिखाएँ |
+
+**उदाहरण**
+
+```bash
+# Show the latest log (human-readable)
+stackkit logs
+
+# Show the latest log as structured JSON
+stackkit logs --json
+
+# Show the latest log as raw JSON Lines
+stackkit logs --jsonl
+
+# Show only decision events
+stackkit logs --decisions
+
+# Show only errors and warnings
+stackkit logs --errors
+
+# Show a timing summary
+stackkit logs --timing
+```
+
+उप-कमांड: [`stackkit logs get`](#stackkit-logs-get), [`stackkit logs latest`](#stackkit-logs-latest), [`stackkit logs list`](#stackkit-logs-list)
+
+## stackkit logs get
+
+एक सटीक संरचित रोलआउट लॉग पढ़ें।
+
+```bash
+stackkit logs get <run-id> [flags]
+```
+
+`stackkit logs` से विरासत में मिले:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | पिछले JSON पेज द्वारा लौटाया गया अपारदर्शी डाइजेस्ट-बद्ध कर्सर |
+| `--decisions` | bool | — | केवल निर्णय इवेंट दिखाएँ |
+| `--errors` | bool | — | केवल त्रुटियाँ और चेतावनियाँ दिखाएँ |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+| `--jsonl` | bool | — | कच्चा JSON-Lines आउटपुट करें |
+| `--max-bytes` | int | `262144` | प्रति JSON पेज स्कैन किए जाने वाले अधिकतम कच्चे लॉग बाइट्स |
+| `--max-events` | int | `200` | प्रति JSON पेज अधिकतम संरचित इवेंट |
+| `--timing` | bool | — | समय सारांश दिखाएँ |
+
+**उदाहरण**
+
+```bash
+# Read one run by an ID that stackkit logs list printed
+stackkit logs get <run-id>
+
+# Read that run as JSON, 50 events per page
+stackkit logs get <run-id> --json --max-events 50
+
+# Continue with the cursor the previous JSON page returned
+stackkit logs get <run-id> --json --max-events 50 --cursor <cursor>
+```
+
+## stackkit logs latest
+
+सबसे नया संरचित रोलआउट लॉग पढ़ें।
+
+```bash
+stackkit logs latest [flags]
+```
+
+`stackkit logs` से विरासत में मिले:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | पिछले JSON पेज द्वारा लौटाया गया अपारदर्शी डाइजेस्ट-बद्ध कर्सर |
+| `--decisions` | bool | — | केवल निर्णय इवेंट दिखाएँ |
+| `--errors` | bool | — | केवल त्रुटियाँ और चेतावनियाँ दिखाएँ |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+| `--jsonl` | bool | — | कच्चा JSON-Lines आउटपुट करें |
+| `--max-bytes` | int | `262144` | प्रति JSON पेज स्कैन किए जाने वाले अधिकतम कच्चे लॉग बाइट्स |
+| `--max-events` | int | `200` | प्रति JSON पेज अधिकतम संरचित इवेंट |
+| `--timing` | bool | — | समय सारांश दिखाएँ |
+
+**उदाहरण**
+
+```bash
+# Read the newest rollout log
+stackkit logs latest
+
+# Only errors and warnings from the newest log, as JSON
+stackkit logs latest --errors --json
+```
+
+## stackkit logs list
+
+उपलब्ध लॉग फ़ाइलें सूचीबद्ध करें।
+
+```bash
+stackkit logs list [flags]
+```
+
+`stackkit logs` से विरासत में मिले:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | पिछले JSON पेज द्वारा लौटाया गया अपारदर्शी डाइजेस्ट-बद्ध कर्सर |
+| `--decisions` | bool | — | केवल निर्णय इवेंट दिखाएँ |
+| `--errors` | bool | — | केवल त्रुटियाँ और चेतावनियाँ दिखाएँ |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+| `--jsonl` | bool | — | कच्चा JSON-Lines आउटपुट करें |
+| `--max-bytes` | int | `262144` | प्रति JSON पेज स्कैन किए जाने वाले अधिकतम कच्चे लॉग बाइट्स |
+| `--max-events` | int | `200` | प्रति JSON पेज अधिकतम संरचित इवेंट |
+| `--timing` | bool | — | समय सारांश दिखाएँ |
+
+**उदाहरण**
+
+```bash
+# List the run IDs of all local rollout logs
+stackkit logs list
+
+# The same list as JSON
+stackkit logs list --json
+```
+

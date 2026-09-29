@@ -1,0 +1,160 @@
+---
+title: "अपने पासवर्ड मैनेजर ऐप सेट करें"
+description: "अपना तिजोरी खाता बनाएँ, पहला पासवर्ड सहेजें, और अपने फ़ोन, ब्राउज़र और कंप्यूटर के Bitwarden ऐप को अपनी तिजोरी से जोड़ें।"
+sidebarTitle: "पासवर्ड ऐप"
+icon: "mobile-screen-button"
+mode: "wide"
+keywords: ["Passwords", "Vaultwarden", "Bitwarden", "पासवर्ड मैनेजर", "ब्राउज़र एक्सटेंशन", "iPhone", "Android", "सेल्फ-होस्टेड"]
+---
+
+import { clientSetupLabelsHi } from "/snippets/client-setup-labels-hi.jsx";
+
+import { ClientSetupGuide } from "/snippets/client-setup-guide.jsx";
+
+<ClientSetupGuide
+  labels={clientSetupLabelsHi}
+  locale="hi"
+  id="kcg-passwords"
+  meta={[
+    { icon: "phone", text: "फ़ोन, ब्राउज़र और कंप्यूटर" },
+    { icon: "steps", text: "6 छोटे चरण" },
+    { icon: "book", text: "पहले से किसी जानकारी की ज़रूरत नहीं" },
+  ]}
+  requirements={[
+    "आपकी तिजोरी का पता, उदाहरण के लिए https://vault.home.test",
+    "आपके ईमेल पते के लिए एक आमंत्रण",
+    "हर डिवाइस को kombify सेट करने वाले व्यक्ति ने आपकी घरेलू तिजोरी के लिए तैयार किया हो",
+    "एक मास्टर पासवर्ड जो आपको याद रह सके",
+  ]}
+  requirementsHelp={{ label: "अभी तक आमंत्रण नहीं मिला?", target: "kcg-passwords-no-invite" }}
+  appsTitle="सबसे पहले Bitwarden ऐप लें।"
+  vendor={{ label: "Bitwarden से सभी डाउनलोड", href: "https://bitwarden.com/download/" }}
+  apps={[
+    { platform: "apple", label: "iPhone और iPad", detail: "Bitwarden Password Manager", store: "App Store में खोलें", href: "https://apps.apple.com/app/bitwarden-password-manager/id1137397744", vendor: "Bitwarden", official: true },
+    { platform: "android", label: "Android", detail: "Bitwarden Password Manager", store: "Google Play में खोलें", href: "https://play.google.com/store/apps/details?id=com.x8bit.bitwarden", vendor: "Bitwarden", official: true },
+    { platform: "browser", label: "ब्राउज़र एक्सटेंशन", detail: "Chrome, Firefox, Edge, Safari और अन्य", store: "Bitwarden डाउनलोड पेज खोलें", href: "https://bitwarden.com/download/", vendor: "Bitwarden", official: true },
+    { platform: "desktop", label: "कंप्यूटर", detail: "Windows, macOS और Linux", store: "Bitwarden डाउनलोड पेज खोलें", href: "https://bitwarden.com/download/", vendor: "Bitwarden", official: true },
+  ]}
+  appsNote="ब्राउज़र स्टोर: [Chrome](https://chromewebstore.google.com/detail/bitwarden-password-manager/nngceckbapebfimnlniiiahkandclblb) · [Firefox](https://addons.mozilla.org/firefox/addon/bitwarden-password-manager/) · [Edge](https://microsoftedge.microsoft.com/addons/detail/bitwarden-password-manager/jbkfoedolllekgbhcbcoahefnbanhhlh) · [Safari (Mac App Store)](https://apps.apple.com/app/bitwarden/id1352778147)। आपकी तिजोरी Vaultwarden पर चलती है, जो इन आधिकारिक Bitwarden ऐप के साथ काम करता है। आपको अलग Vaultwarden ऐप की ज़रूरत नहीं।"
+  stepsTitle="अपनी तिजोरी चरण-दर-चरण सेट करें।"
+  steps={[
+    {
+      tab: "तिजोरी खोलें",
+      title: "अपनी तिजोरी ब्राउज़र में खोलें।",
+      intro: "कंप्यूटर से शुरू करें। आपकी तिजोरी का अपना वेब पता है, किसी वेबसाइट जैसा जिसे केवल आपका घर उपयोग करता है।",
+      clicks: [
+        "ब्राउज़र की एड्रेस बार में अपनी तिजोरी का पता टाइप करें, उदाहरण के लिए **https://vault.home.test**, और Enter दबाएँ।",
+        "लॉगिन बॉक्स के नीचे [[Create account]] पर क्लिक करें।",
+      ],
+      note: "इस गाइड का पता एक उदाहरण है। वही पता उपयोग करें जो आपको kombify सेट करने वाले व्यक्ति से मिला है।",
+      faq: { q: "तिजोरी का पता क्या होता है?", a: "यह आपके घर की पासवर्ड तिजोरी का वेब पता है। यह आमतौर पर **https://vault.** से शुरू होता है और आपके घरेलू नेटवर्क के नाम पर समाप्त होता है। kombify सेट करने वाला व्यक्ति आपको सटीक पता बता सकता है।" },
+      check: "आपको [[Create account]] फ़ॉर्म दिखता है।",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-01-open-vault.webp", width: 1088, height: 830, alt: "Vaultwarden लॉगिन पेज, जिसमें Create account लिंक चिह्नित है", caption: "तिजोरी का लॉगिन पेज", credit: "kombify स्क्रीनशॉट", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · वेब तिजोरी 2026.7.0", captured: "2026-09-24", annotations: [{ n: 2, top: 84.3, left: 38.3, width: 23.5, height: 7.2 }] },
+    },
+    {
+      tab: "खाता बनाएँ",
+      title: "अपना खाता बनाएँ।",
+      intro: "आपकी तिजोरी केवल आमंत्रित ईमेल पते स्वीकार करती है। वही पता उपयोग करें जिस पर आमंत्रण गया था।",
+      clicks: [
+        "[[Email address]] में अपना आमंत्रित ईमेल पता दर्ज करें।",
+        "[[Name]] में अपना नाम दर्ज करें। तिजोरी चलाने वाला व्यक्ति और जिनके साथ आप पासवर्ड साझा करते हैं, वे इसे देख सकते हैं।",
+        "[[Continue]] पर क्लिक करें।",
+      ],
+      faq: { q: "क्या यह मेरा kombify खाता है?", a: "नहीं। यह खाता केवल आपकी पासवर्ड तिजोरी का है। इसका अपना ईमेल पता और अपना मास्टर पासवर्ड है।" },
+      check: "पेज अब आपसे [[Set a strong password]] करने को कहता है।",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-02-create-account.webp", width: 1088, height: 718, alt: "Create account फ़ॉर्म, जिसमें ईमेल पता alex@example.com और नाम Alex Example है", caption: "खाता बनाएँ", credit: "kombify स्क्रीनशॉट", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · वेब तिजोरी 2026.7.0", captured: "2026-09-24", annotations: [{ n: 1, top: 37.6, left: 16.4, width: 65.1, height: 13.4 }, { n: 2, top: 61, left: 16.4, width: 65.1, height: 13.4 }, { n: 3, top: 76.3, left: 14, width: 72.1, height: 13.9 }] },
+    },
+    {
+      tab: "मास्टर पासवर्ड",
+      title: "अपना मास्टर पासवर्ड चुनें।",
+      intro: "मास्टर पासवर्ड वह इकलौता पासवर्ड है जो आपको अब भी याद रखना है। यह बाकी सभी को खोलता है।",
+      clicks: [
+        "[[Master password]] में लंबा पासवर्ड दर्ज करें। चार या अधिक शब्दों का छोटा वाक्य अच्छा रहता है।",
+        "वही पासवर्ड [[Confirm master password]] में दोबारा दर्ज करें।",
+        "[[Create account]] पर क्लिक करें। यदि पेज ब्राउज़र एक्सटेंशन सुझाए, तो [[Add it later]] और फिर [[Skip to web app]] पर क्लिक करें। एक्सटेंशन आप चरण 5 में जोड़ेंगे।",
+      ],
+      note: "**भूला हुआ मास्टर पासवर्ड कोई रिकवर नहीं कर सकता**, तिजोरी चलाने वाला व्यक्ति भी नहीं। इसे लिख लें और नोट को तिजोरी के बाहर किसी सुरक्षित जगह रखें।",
+      faq: { q: "स्ट्रेंथ बार का क्या मतलब है?", a: "यह अनुमान लगाता है कि आपका पासवर्ड अंदाज़ा लगाकर तोड़ना कितना कठिन है। **Strong** का लक्ष्य रखें। जटिल से ज़्यादा लंबा बेहतर है।" },
+      check: "आपकी खाली तिजोरी [[All vaults]] शीर्षक के साथ खुलती है।",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-03-master-password.webp", width: 1088, height: 1310, alt: "Set a strong password पेज, जिसमें मास्टर पासवर्ड दो बार दर्ज है और Strong रेटिंग मिली है", caption: "Set a strong password", credit: "kombify स्क्रीनशॉट", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · वेब तिजोरी 2026.7.0", captured: "2026-09-24", annotations: [{ n: 1, top: 25.5, left: 16.4, width: 60.7, height: 7.3 }, { n: 2, top: 52.2, left: 16.4, width: 60.7, height: 7.3 }, { n: 3, top: 87, left: 14, width: 72.1, height: 7.6 }] },
+    },
+    {
+      tab: "पहला पासवर्ड",
+      title: "अपना पहला पासवर्ड सहेजें।",
+      intro: "परीक्षण के लिए एक लॉगिन सहेजें। यह बाद में दिखाता है कि आपके ऐप आपकी तिजोरी से जुड़े हैं।",
+      clicks: [
+        "ऊपर दाईं ओर [[New]] पर क्लिक करें और [[Login]] चुनें। यदि पहले स्वागत विंडो आए, तो [[Skip]] पर क्लिक करें।",
+        "[[Item name]] में ऐसा नाम दर्ज करें जिसे आप पहचानते हों, उदाहरण के लिए किसी दुकान का नाम।",
+        "अपना [[Username]] दर्ज करें। [[Password]] के बगल में गोलाकार तीरों पर क्लिक करके पासवर्ड बनाएँ, फिर [[Use this password]] पर क्लिक करें।",
+        "[[Save]] पर क्लिक करें।",
+      ],
+      note: "दुकान का वेब पता [[Website (URI)]] के नीचे जोड़ें। तब ब्राउज़र एक्सटेंशन उस वेबसाइट पर यह लॉगिन सुझाता है।",
+      check: "संदेश [[Item added]] दिखता है और आपका लॉगिन सूची में दिखता है।",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-04-new-login.webp", width: 1472, height: 1664, alt: "New Login विंडो, जिसमें आइटम नाम Example Shop, एक यूज़रनेम और बनाया गया पासवर्ड है", caption: "New Login", credit: "kombify स्क्रीनशॉट", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · वेब तिजोरी 2026.7.0", captured: "2026-09-24", annotations: [{ n: 2, top: 12.1, left: 7.9, width: 82.6, height: 5.8 }, { n: 3, top: 41.8, left: 7.9, width: 79.3, height: 5.8 }, { n: 3, top: 52.3, left: 87.5, width: 5.7, height: 5 }, { n: 4, top: 92.1, left: 2.7, width: 10.4, height: 6 }] },
+    },
+    {
+      tab: "ऐप जोड़ें",
+      title: "Bitwarden ऐप जोड़ें।",
+      intro: "हर Bitwarden ऐप पहले Bitwarden के अपने सर्वर से जुड़ता है। उसे एक बार बताएँ कि इसके बजाय आपकी तिजोरी उपयोग करे।",
+      clicks: [
+        "ऊपर की सूची से Bitwarden ऐप इंस्टॉल करें और उसे खोलें।",
+        "लॉगिन स्क्रीन पर [[Logging in on]] मेनू खोलें और [[Self-hosted]] चुनें। कंप्यूटर ऐप में इस मेनू का नाम [[Accessing]] है।",
+        "[[Server URL]] में शुरुआत में **https://** के साथ अपनी तिजोरी का पता दर्ज करें, फिर [[Save]] पर टैप करें।",
+        "अपने ईमेल पते और मास्टर पासवर्ड से लॉग इन करें।",
+      ],
+      note: "ये चरण अपने हर फ़ोन, ब्राउज़र और कंप्यूटर पर दोहराएँ। हर एक को आपकी तिजोरी का पता एक बार चाहिए।",
+      faq: { q: "यहाँ ऐप की तस्वीर क्यों नहीं है?", a: "Bitwarden की शर्तें उसकी तस्वीरें दोबारा उपयोग करने की अनुमति नहीं देतीं। उसकी अपनी गाइड हर स्क्रीन दिखाती है, और ऊपर के लेबल उससे मेल खाते हैं।" },
+      check: "ऐप वह लॉगिन दिखाता है जो आपने चरण 4 में सहेजा था।",
+      visual: {
+        tag: "BITWARDEN गाइड",
+        title: "Bitwarden हर स्क्रीन दिखाता है",
+        text: "Bitwarden की गाइड में अपना डिवाइस चुनें। **सेल्फ-होस्टेड** सर्वर वाला सेक्शन खोजें।",
+        links: [
+          { label: "किसी ऐप को अपने सर्वर से जोड़ें", detail: "bitwarden.com · सभी डिवाइस", href: "https://bitwarden.com/help/change-client-environment/", icon: "server" },
+          { label: "ब्राउज़र एक्सटेंशन के साथ शुरुआत", detail: "bitwarden.com", href: "https://bitwarden.com/help/getting-started-browserext/", icon: "browser" },
+          { label: "मोबाइल ऐप के साथ शुरुआत", detail: "bitwarden.com", href: "https://bitwarden.com/help/getting-started-mobile/", icon: "phone" },
+        ],
+      },
+    },
+    {
+      tab: "जाँचें",
+      title: "क्या सब कुछ जुड़ गया?",
+      intro: "इसे वेब तिजोरी में और एक ऐप में जाँचें। केवल उसी पर टिक करें जिसे आपने खुद जाँचा है।",
+      verify: [
+        "मैं अपनी तिजोरी का पता खोल सकता/सकती हूँ और लॉग इन कर सकता/सकती हूँ।",
+        "मेरा सहेजा हुआ लॉगिन मेरे फ़ोन, ब्राउज़र या कंप्यूटर के Bitwarden ऐप में दिखता है।",
+        "मेरा मास्टर पासवर्ड लिखा हुआ है और तिजोरी के बाहर रखा है।",
+      ],
+      note: "यह गाइड आपकी तिजोरी को नहीं पढ़ती। आपके टिक इसी ब्राउज़र में रहते हैं।",
+      check: "अब आप अपने बाकी पासवर्ड तिजोरी में ले जा सकते हैं।",
+      screenshot: { src: "/images/guides/passwords/vaultwarden/web-05-first-item.webp", width: 1430, height: 300, alt: "All vaults सूची, जिसमें सहेजा हुआ Example Shop लॉगिन दिख रहा है", caption: "तिजोरी में आपका पहला लॉगिन", credit: "kombify स्क्रीनशॉट", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · वेब तिजोरी 2026.7.0", captured: "2026-09-24", annotations: [{ n: null, top: 37.2, left: 1, width: 98, height: 58.1 }] },
+    },
+  ]}
+  nextTitle="आगे क्या।"
+  next={[
+    { icon: "shield", title: "टू-स्टेप लॉगिन चालू करें", text: "Bitwarden समझाता है कि दूसरा लॉगिन चरण कैसे जोड़ें।", href: "https://bitwarden.com/help/setup-two-step-login/" },
+    { icon: "server", title: "तिजोरी का बैकअप लें", text: "kombify चलाने वाले व्यक्ति के लिए: तिजोरी के डेटा की सुरक्षा करें।", href: "/hi/guides/stackkits/back-up-and-restore" },
+  ]}
+  help={[
+    { id: "kcg-passwords-no-invite", q: "मेरे पास अभी तक तिजोरी का पता या आमंत्रण नहीं है।", a: "अपने घर में kombify सेट करने वाले व्यक्ति से पूछें। वे Passwords सेवा जोड़ते हैं और आपके ईमेल पते को आमंत्रित करते हैं। [kombify के साथ Passwords कैसे काम करता है](/hi/guides/stackkits/use-cases/passwords) · [ओनर सेटअप](/hi/stackkits/apps/vaultwarden)।" },
+    { q: "Create account “Registration not allowed or user already exists” बताता है।", a: "जाँचें कि आप ठीक वही आमंत्रित ईमेल पता उपयोग कर रहे हैं। यदि आपने अपना खाता पहले ही बना लिया है, तो वापस जाएँ और उसके बजाय लॉग इन करें। अन्यथा नया आमंत्रण माँगें।" },
+    { q: "पता नहीं खुलता, या ब्राउज़र कनेक्शन के बारे में चेतावनी देता है।", a: "पहले पते को अपने घरेलू नेटवर्क के किसी डिवाइस पर आज़माएँ। यदि आपकी तिजोरी केवल घर पर चलती है, तो अपने घर के Wi-Fi से या आपको दिए गए घरेलू कनेक्शन ऐप से जुड़ें। हर डिवाइस को यह भी सेट होना चाहिए कि वह आपके घरेलू सर्वर पर भरोसा करे; यह kombify सेट करने वाला व्यक्ति करता है। यदि ब्राउज़र कहे कि कनेक्शन निजी नहीं है, तो वहीं रुक जाएँ और उनसे पूछें। चेतावनी को पार करके आगे न बढ़ें। [घरेलू पतों के बारे में](/hi/guides/stackkits/use-cases/network)।" },
+    { q: "मैं अपना मास्टर पासवर्ड भूल गया/गई।", a: "इसे कोई रिकवर नहीं कर सकता। आपकी तिजोरी इसी से एन्क्रिप्टेड है। तिजोरी चलाने वाला व्यक्ति आपका खाता हटा सकता है ताकि आप फिर से शुरू कर सकें, पर उसमें सहेजे पासवर्ड खो जाते हैं। [मास्टर पासवर्ड पर Bitwarden](https://bitwarden.com/help/master-password/)।" },
+    { q: "मेरे Android फ़ोन में Google Play नहीं है।", a: "Bitwarden अपनी F-Droid रिपॉज़िटरी चलाता है। पता [Bitwarden डाउनलोड पेज](https://bitwarden.com/download/) पर दिया गया है।" },
+    { q: "यहाँ Vaultwarden और Bitwarden दोनों क्यों लिखा है?", a: "Vaultwarden वह प्रोग्राम है जो आपकी तिजोरी चलाता है। यह अनौपचारिक सर्वर है जो आधिकारिक Bitwarden ऐप के साथ काम करता है। Vaultwarden का Bitwarden, Inc. से कोई संबंध नहीं है। तस्वीरें अंग्रेज़ी में Vaultwarden 1.37.2 दिखाती हैं; नए संस्करण और अन्य भाषाएँ अलग दिख सकती हैं।" },
+  ]}
+  attribution="**Vaultwarden आपकी तिजोरी चलाता है, और Bitwarden ऐप उसे खोलते हैं। kombify उसे आपके लिए इंस्टॉल करता है।** kombify इनमें से कोई ऐप नहीं बनाता। [Vaultwarden](https://github.com/dani-garcia/vaultwarden) (AGPL-3.0) · वेब तिजोरी: [Vaultwarden के लिए बना Bitwarden वेब क्लाइंट](https://github.com/dani-garcia/bw_web_builds) (GPL-3.0) · [Bitwarden](https://bitwarden.com/)"
+  sources={{
+    summary: "kombify के स्क्रीनशॉट, स्थानीय Vaultwarden इंस्टॉल से · काल्पनिक खाता · अंग्रेज़ी मेनू।",
+    paragraphs: [
+      "**स्क्रीनशॉट · 24 सितंबर 2026।** kombify ने वेब तिजोरी की तस्वीरें स्थानीय रेफ़रेंस इंस्टॉल से लीं: Vaultwarden 1.37.2, वह इमेज जो StackKits कैटलॉग Passwords के लिए डिलीवर करता है, अपने साथ आई वेब तिजोरी 2026.7.0 (Bitwarden वेब क्लाइंट, GPL-3.0) के साथ। इंस्टॉल में उदाहरण पता https://vault.home.test और काल्पनिक खाता alex@example.com उपयोग हुआ। यह रेफ़रेंस इंस्टॉल है, StackKits रोलआउट परीक्षण नहीं। बैंगनी मार्कर इस गाइड ने जोड़े हैं।",
+      "Bitwarden ऐप की स्क्रीन नहीं दिखाई गई हैं। [Bitwarden की शर्तें](https://bitwarden.com/terms/) उसकी सामग्री दोबारा उपयोग करने की अनुमति नहीं देतीं, इसलिए चरण 5 Bitwarden की अपनी गाइड से लिंक करता है।",
+      "स्टोर लिंक और सहायता पेज 24 सितंबर 2026 को जाँचे गए। आपकी प्रगति इसी ब्राउज़र में रहती है। यह गाइड कोई खाता नहीं जोड़ती और कोई पासवर्ड नहीं माँगती।",
+    ],
+    links: [
+      { label: "Bitwarden: अलग-अलग ऐप जोड़ें", href: "https://bitwarden.com/help/change-client-environment/" },
+      { label: "Bitwarden डाउनलोड", href: "https://bitwarden.com/download/" },
+      { label: "Vaultwarden प्रोजेक्ट", href: "https://github.com/dani-garcia/vaultwarden" },
+    ],
+  }}
+/>

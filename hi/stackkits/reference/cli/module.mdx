@@ -1,0 +1,53 @@
+---
+title: "stackkit module"
+description: "स्थानीय CUE मॉड्यूल लिखें और सत्यापित करें"
+sidebarTitle: "module"
+---
+स्थानीय CUE मॉड्यूल लिखें और सत्यापित करें।
+
+मॉड्यूल तथ्यों को CUE कॉन्ट्रैक्ट में रेंडर करें और उनका डिप्लॉयमेंट कॉन्फ़िगरेशन सत्यापित करें।
+
+```bash
+stackkit module [flags]
+```
+
+उप-कमांड: [`stackkit module lint`](#stackkit-module-lint), [`stackkit module scaffold`](#stackkit-module-scaffold)
+
+## stackkit module lint
+
+पिन/हेल्थ/सुरक्षा/एक्सेस/प्लेसमेंट स्वच्छता के लिए मॉड्यूल CUE की लिंट जाँच करें (ADR-0027 G1/G3)।
+
+एक मॉड्यूल (`--module`) या पूरे ट्री (`--all`) पर निर्धारक मॉड्यूल-स्वच्छता गेट चलाएँ। जाँचें: इमेज टैग पिन किए हुए (:latest नहीं), डेमन healthCheck मौजूद (सीमित ऑटोमेशन जॉब restart=no और प्रोसेस एग्ज़िट स्टेटस उपयोग करते हैं), सुरक्षा ब्लॉक (noNewPrivileges + capDrop ALL), रूट की गई सेवाओं के लिए accessPolicy, कोई सादे-टेक्स्ट सीक्रेट नहीं, ड्राफ़्ट मॉड्यूल कोई परिदृश्य दावा नहीं करते, और docker-socket मॉड्यूल managed-serverless के योग्य नहीं हैं।
+
+एकल-मॉड्यूल रन किसी भी त्रुटि पर गैर-शून्य कोड के साथ समाप्त होते हैं। `--strict` दिए बिना `--all` केवल सलाहकारी है (एग्ज़िट 0)।
+
+```bash
+stackkit module lint [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--all` | bool | — | `--modules-dir` के अंतर्गत हर मॉड्यूल की लिंट जाँच करें |
+| `--json` | bool | — | निष्कर्षों को JSON के रूप में जारी करें |
+| `--module` | string | — | एक मॉड्यूल डायरेक्टरी का पथ (जिसमें module.cue हो) |
+| `--modules-dir` | string | `modules` | रूट मॉड्यूल डायरेक्टरी (`--all` के साथ उपयोग होती है) |
+| `--strict` | bool | — | किसी भी त्रुटि निष्कर्ष पर गैर-शून्य कोड के साथ समाप्त हों (एकल `--module` के लिए निहित) |
+
+## stackkit module scaffold
+
+module_facts.json से मॉड्यूल आर्टिफ़ैक्ट निर्धारक रूप से रेंडर करें (ADR-0027)।
+
+स्कीमा-सत्यापित module_facts.json से modules/&lt;slug&gt;/module.cue, tests/reference-compose.yml और पतली tests/integration_test.sh रेंडर करें। आउटपुट निर्धारक है (गेट G0): वही तथ्य हमेशा बाइट-दर-बाइट समान फ़ाइलें रेंडर करते हैं।
+
+```bash
+stackkit module scaffold [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--catalog` | string | — | imageSource संदर्भों के लिए कंपाइल किया गया CUE catalog.json |
+| `--facts` | string | — | module_facts.json का पथ। आवश्यक। |
+| `--force` | bool | — | मौजूदा फ़ाइलें ओवरराइट करें |
+| `--out` | string | — | आउटपुट मॉड्यूल डायरेक्टरी (डिफ़ॉल्ट modules/&lt;slug&gt;) |
+| `--print` | bool | — | लिखने के बजाय रेंडर किए गए आर्टिफ़ैक्ट stdout पर प्रिंट करें |
+

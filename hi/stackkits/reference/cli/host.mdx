@@ -1,0 +1,248 @@
+---
+title: "stackkit host"
+description: "प्रदाता-निरपेक्ष होस्ट कॉन्ट्रैक्ट ऑपरेशन"
+sidebarTitle: "host"
+---
+प्रदाता-निरपेक्ष होस्ट कॉन्ट्रैक्ट ऑपरेशन।
+
+```bash
+stackkit host [flags]
+```
+
+उप-कमांड: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host updates`](#stackkit-host-updates)
+
+## stackkit host attach-conformance
+
+प्लान जनरेशन से पहले सटीक होस्ट प्रमाण को Inventory से जोड़ें।
+
+```bash
+stackkit host attach-conformance [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--binding` | string | — | **आवश्यक।** वर्कस्पेस तक सीमित ExternalHostBinding JSON |
+| `--inventory` | string | — | **आवश्यक।** वर्कस्पेस तक सीमित inventory.json, जिसे परमाणु रूप से अपडेट करना है |
+| `--receipt` | string | — | **आवश्यक।** वर्कस्पेस तक सीमित HostConformanceReceipt JSON |
+
+## stackkit host conformance
+
+इस होस्ट पर प्रदाता-निरपेक्ष अनुरूपता रसीद बनाएँ।
+
+```bash
+stackkit host conformance [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--binding` | string | — | **आवश्यक।** स्थानीय ExternalHostBinding JSON फ़ाइल |
+| `--output, -o` | string | `-` | रसीद का गंतव्य (stdout पर JSON के लिए '-') |
+
+## stackkit host environment
+
+देखें कि यह होस्ट होम नेटवर्क जैसा दिखता है या सार्वजनिक सर्वर जैसा।
+
+इस मशीन का नेटवर्क परिवेश पहचानें।
+
+यह अवलोकन है, kit का चयन नहीं। इंस्टॉलर और init इसका उपयोग VPS पर स्थानीय होम पते या LAN होस्ट पर Cloud Kit बनाने से पहले पूछने के लिए करते हैं। STACKKIT_NETWORK_ENV=home|vps|cloud|unknown लाइव पहचान को ओवरराइड करता है।
+
+```bash
+stackkit host environment [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | अवलोकन को JSON के रूप में जारी करें |
+
+**उदाहरण**
+
+```bash
+# Show whether this host looks like a home network or a public server
+stackkit host environment
+
+# The same observation as JSON
+stackkit host environment --json
+
+# Override a wrong detection for the next command, here Basement Kit init on a home host
+STACKKIT_NETWORK_ENV=home stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com
+```
+
+## stackkit host preflight
+
+जाँचें कि यह होस्ट चुना गया StackKit चला सकता है या नहीं।
+
+इस होस्ट को मापें और kit द्वारा घोषित न्यूनतम सीमा से तुलना करें।
+
+Preflight केवल रीड-ओनली जाँच करता है: यह कभी कुछ इंस्टॉल, शुरू या कॉन्फ़िगर नहीं करता। Apply होस्ट में बदलाव करने से पहले यही प्रवेश-जाँच चलाता है।
+
+```bash
+stackkit host preflight [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | वर्ज़न वाली preflight रिपोर्ट को मशीन-पठनीय JSON के रूप में जारी करें |
+| `--local-node` | string | — | दिए गए ResolvedPlan में सटीक स्थानीय Node |
+| `--policy` | string | — | प्रवेश नीति: strict, warn (डिफ़ॉल्ट) या skip |
+| `--resolved-plan` | string | — | सत्यापित कैनोनिकल ResolvedPlan जिसके होस्ट लिसनर जाँचने हैं |
+
+**उदाहरण**
+
+```bash
+# Check this host against the kit selected in the current deployment directory
+stackkit host preflight
+
+# Also refuse on warnings and unknown facts, and print the report as JSON
+stackkit host preflight --policy strict --json
+```
+
+## stackkit host prepare
+
+Cloud Kit apply से पहले इस होस्ट को तैयार करें।
+
+होस्ट-सुरक्षा द्वारा root लॉगिन बंद करने से पहले ज़रूरी Cloud निष्पादन-चैनल अकाउंट और SSH की कस्टडी प्रोविज़न करें।
+
+Cloud Kit इंस्टॉलर और apply इसे स्वतः कॉल करते हैं। यह कमांड डायग्नोस्टिक के लिए और मैन्युअल रुकावट के बाद वर्कस्पेस को कन्वर्ज करने के लिए है। यह .stackkit/cloud-host-security/execution-channel/ के अंतर्गत वर्कस्पेस-कस्टडी वाली की बनाती या दोबारा उपयोग करती है और मिलती-जुलती पब्लिक की को निष्पादन-चैनल Linux अकाउंट पर इंस्टॉल करती है।
+
+```bash
+stackkit host prepare [flags]
+```
+
+**उदाहरण**
+
+```bash
+# Converge the execution-channel account after an interrupted Cloud Kit install (run as root in the Cloud Kit deployment directory)
+cd my-cloud
+stackkit host prepare
+```
+
+## stackkit host reboot
+
+इस नोड का रीबूट शेड्यूल करें।
+
+थोड़ी देरी के बाद इस नोड का रीबूट शेड्यूल करें और तुरंत लौट आएँ।
+
+लौटाया गया boot_id_before वर्तमान बूट की पहचान करता है, ताकि कॉलर अलग boot ID पढ़कर जान सके कि नोड वापस आ गया। कमांड उस नोड को अस्वीकार करती है जो Techstack कंट्रोल प्लेन चलाता है, जहाँ apt या dpkg लॉक रखता है या होस्ट अपडेट चल रहा है, और जो बिना निगरानी बूट नहीं हो सकता (/etc/crypttab में ऐसे वॉल्यूम जिन्हें पासफ़्रेज़ चाहिए, या apt नहीं है)।
+
+देरी समाप्त होने पर एक गार्ड फिर जाँचता है, किसी भी पैकेज ऑपरेशन के पूरा होने के लिए 15 मिनट तक प्रतीक्षा करता है और dpkg लॉक पकड़े हुए रीबूट का अनुरोध करता है। जो नोड व्यस्त रहता है उसे रीबूट नहीं किया जाता; उसकी boot ID वही रहती है।
+
+```bash
+stackkit host reboot [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--delay` | duration | `30s` | रीबूट शुरू होने तक का समय (1s से 5m) |
+| `--json` | bool | — | stackkit.host-maintenance/v1 परिणाम को मशीन-पठनीय JSON के रूप में जारी करें |
+| `--yes` | bool | — | पुष्टि करें कि यह नोड रीबूट हो सकता है |
+
+**उदाहरण**
+
+```bash
+# Reboot this node in 30 seconds
+sudo stackkit host reboot --yes
+
+# Reboot in two minutes and report the boot ID to compare against
+sudo stackkit host reboot --yes --delay 2m --json
+```
+
+## stackkit host remediate
+
+होस्ट preflight में मिली समस्याओं के सुधार दिखाएँ या लागू करें।
+
+इस होस्ट के preflight निष्कर्षों के सुधार सूचीबद्ध करें, या उनमें से एक लागू करें।
+
+`--apply` के बिना कुछ नहीं बदलता: कमांड होस्ट को मापती है और प्रिंट करती है कि हर सुधार क्या करेगा, क्या उसे पूर्ववत किया जा सकता है और क्या उसे root चाहिए।
+
+`--apply` &lt;id&gt; `--yes` के साथ नामित सुधार चलता है, और जिस जाँच ने उसे उचित ठहराया था उसे बाद में फिर मापा जाता है, ताकि परिणाम बताए कि वास्तव में क्या बदला, न कि सिर्फ़ यह कि कोशिश की गई।
+
+```bash
+stackkit host remediate [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--apply` | string | — | नामित समाधान लागू करें (`--yes` आवश्यक) |
+| `--auto-reversible` | bool | — | हर वह पूर्ववत करने योग्य सुधार लागू करें जो बिना निगरानी चल सकता है (`--yes` आवश्यक) |
+| `--json` | bool | — | सुधार प्लान या रिकॉर्ड को मशीन-पठनीय JSON के रूप में जारी करें |
+| `--policy` | string | — | निष्कर्ष खोजने के लिए उपयोग की गई preflight नीति: strict या warn (डिफ़ॉल्ट) |
+| `--yes` | bool | — | पुष्टि करें कि नामित समाधान इस होस्ट को बदल सकता है |
+
+**उदाहरण**
+
+```bash
+# List the fixes for this host's preflight findings without changing anything
+stackkit host remediate
+
+# Carry out one fix by the ID the list printed
+stackkit host remediate --apply <resolution-id> --yes
+
+# Carry out every undoable fix that may run unattended
+stackkit host remediate --auto-reversible --yes
+```
+
+## stackkit host updates
+
+इस नोड पर ऑपरेटिंग-सिस्टम पैकेज अपडेट प्लान करें और लागू करें।
+
+इस Debian या Ubuntu नोड पर ऑपरेटिंग-सिस्टम पैकेज अपडेट प्लान करें और लागू करें।
+
+कंटेनर रनटाइम (docker.io, docker-ce\*, containerd\*, runc) होल्ड पर है: वह प्लान में सूचीबद्ध है पर apply उसे कभी इंस्टॉल नहीं करता, क्योंकि उसे अपग्रेड करने से हर वर्कलोड रीस्टार्ट होता है। Apply कभी पैकेज नहीं हटाता, autoremove नहीं चलाता और रीबूट नहीं करता; उसके लिए 'stackkit host reboot' उपयोग करें।
+
+```bash
+stackkit host updates [flags]
+```
+
+उप-कमांड: [`stackkit host updates apply`](#stackkit-host-updates-apply), [`stackkit host updates plan`](#stackkit-host-updates-plan)
+
+### stackkit host updates apply
+
+ठीक वही समीक्षित अपडेट प्लान इंस्टॉल करें।
+
+समीक्षित 'stackkit host updates plan' द्वारा रिपोर्ट किया गया पैकेज सेट ठीक वैसा ही इंस्टॉल करें।
+
+लंबित सेट को पहले फिर सिमुलेट किया जाता है; उसका डाइजेस्ट `--plan-digest` से अलग होने पर कुछ इंस्टॉल नहीं होता (plan_stale)। apt एक अस्थायी systemd यूनिट (kombify-host-update-\*) में बिना इंटरैक्शन चलता है और मौजूदा कॉन्फ़िगरेशन फ़ाइलें रखता है, इसलिए CLI या एजेंट टाइमआउट केवल प्रतीक्षा रोकता है, dpkg को कभी नहीं। परिणाम हर पैकेज का पहले और बाद का वर्ज़न और यह दर्ज करता है कि नोड को अब रीबूट चाहिए या नहीं।
+
+```bash
+stackkit host updates apply [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.host-maintenance/v1 परिणाम को मशीन-पठनीय JSON के रूप में जारी करें |
+| `--plan-digest` | string | — | **आवश्यक।** समीक्षित प्लान का plan_digest (sha256:&lt;hex&gt;) |
+| `--yes` | bool | — | पुष्टि करें कि प्लान किए गए पैकेज इंस्टॉल किए जा सकते हैं |
+
+**उदाहरण**
+
+```bash
+# Apply the plan you reviewed
+sudo stackkit host updates apply --plan-digest sha256:<digest> --yes
+```
+
+### stackkit host updates plan
+
+पैकेज इंडेक्स रीफ़्रेश करें और लंबित अपडेट दिखाएँ।
+
+पैकेज इंडेक्स रीफ़्रेश करें और दिखाएँ कि 'stackkit host updates apply' क्या इंस्टॉल करेगा।
+
+परिणाम हर लंबित पैकेज को उसके वर्तमान और नए वर्ज़न के साथ, होल्ड पर रखे कंटेनर-रनटाइम पैकेज, apt द्वारा रोके गए पैकेज, रीबूट की संभावना (kernel, C library या systemd) और dpkg समस्याएँ सूचीबद्ध करता है। plan_digest सटीक पैकेज सेट को बाँधता है; मेल न खाने पर apply मना कर देता है।
+
+```bash
+stackkit host updates plan [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.host-maintenance/v1 परिणाम को मशीन-पठनीय JSON के रूप में जारी करें |
+
+**उदाहरण**
+
+```bash
+# Show the pending updates of this node
+sudo stackkit host updates plan
+
+# Machine-readable plan with its plan_digest
+sudo stackkit host updates plan --json
+```
+

@@ -1,0 +1,59 @@
+---
+title: "Cloudreve"
+description: "Files यूज़ केस के लिए Cloudreve चुनें, डिप्लॉय करें और संचालित करें"
+sidebarTitle: "Cloudreve"
+icon: folder-cloud
+---
+
+Cloudreve [Documents & Files](/hi/guides/stackkits/use-cases/documents-and-files) के Files वाले हिस्से को उपलब्ध कराता है। यह वैकल्पिक `files` वर्कलोड का डिफ़ॉल्ट विकल्प है, और शुरुआती StackSpec इसे नहीं चुनता। इसे चुनने से पहले Documents & Files पेज पर स्टोरेज और बैकअप की योजना बना लें।
+
+## जारी की गई भूमिका
+
+| Property | Value |
+| --- | --- |
+| Workload | `files` |
+| Alternative | `cloudreve` |
+| Data class | personal |
+| Route | जनरेट किया गया Files सेवा रूट |
+| Standalone adapter | `standalone-compose` |
+
+## वर्कलोड चुनें
+
+इस ऑब्जेक्ट को `stackkit init` से बने पूरे StackSpec में मर्ज करें:
+
+```json
+{
+  "workloads": {
+    "files": {
+      "alternative": "cloudreve",
+      "runtimeAdapterRef": "standalone-compose",
+      "placement": {
+        "siteRefs": ["home"],
+        "nodeRefs": ["main"]
+      }
+    }
+  }
+}
+```
+
+यह उदाहरण रिलीज़ v0.32.x के साथ सत्यापित और जनरेट किया गया था। यदि आपके जनरेट किए गए site या node ID अलग हैं, तो वही सटीक ID उपयोग करें।
+
+## डिप्लॉय करें और सत्यापित करें
+
+```bash
+stackkit validate
+stackkit generate
+stackkit plan --json
+stackkit apply
+stackkit verify --http --json
+```
+
+लागू करने से पहले पुष्टि करें कि रिज़ॉल्व किए गए प्लान में `files` वर्कलोड, `cloudreve` विकल्प और `standalone-compose` एडाप्टर शामिल हैं।
+
+सत्यापन सफल होने के बाद जनरेट किया गया Files रूट खोलें और केवल वही एप्लिकेशन अकाउंट बनाएँ जिनकी आपको ज़रूरत है।
+
+## संचालन
+
+- प्राथमिक और बैकअप रूट को ऐसे स्टोरेज पर रखें जिस पर आपका नियंत्रण हो।
+- StackKits कॉन्फ़िगरेशन बदलाव StackSpec में ही रखें। जनरेट किए गए Cloudreve वर्कलोड बंडल या Compose एनवायरनमेंट को संपादित न करें।
+- किसी फ़ाइल की एकमात्र कॉपी के लिए इस सेवा पर निर्भर होने से पहले रिकवरी सत्यापित करें। देखें [बैकअप और रिस्टोर](/hi/guides/stackkits/back-up-and-restore)।

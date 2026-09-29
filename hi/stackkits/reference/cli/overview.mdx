@@ -1,0 +1,86 @@
+---
+title: "CLI संदर्भ"
+description: "हर stackkit कमांड, उसके फ़्लैग और उदाहरणों के साथ"
+sidebarTitle: "अवलोकन"
+icon: square-terminal
+---
+पोर्टेबल StackKits के साथ अपनी सेवाएँ सेट करें और उनकी देखभाल करें। ये पेज हर `stackkit` कमांड को उसके फ़्लैग और उदाहरणों के साथ सूचीबद्ध करते हैं। ये StackKits कमांड परिभाषाओं से जनरेट होते हैं; यदि आपका इंस्टॉल किया वर्ज़न पुराना है, तो उसके लिए `stackkit <command> --help` ही प्रामाणिक है।
+
+## CLI इंस्टॉल करें
+
+```bash
+curl -sSL https://install.stackkit.cc | STACKKIT_CLI_ONLY=1 sh
+```
+
+`STACKKIT_CLI_ONLY=1` के साथ इंस्टॉलर `stackkit`, `stackkit-server`, `stackkit-mcp`, पैकेज्ड OpenTofu और सार्वजनिक kit कैटलॉग को कोई StackKit इंस्टॉल किए बिना `~/.stackkits` में रखता है। इसके बिना, इंस्टॉलर होस्ट पहचानता है और Basement Kit या Cloud Kit में आगे बढ़ता है।
+
+## ग्लोबल फ़्लैग
+
+ये फ़्लैग हर कमांड के साथ काम करते हैं।
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--chdir, -C` | string | `.` | चलाने से पहले डायरेक्टरी बदलें |
+| `--correlation-id` | string | — | सत्यापित कॉलर सहसंबंध ID जो स्थानीय रोलआउट प्रमाण में दर्ज होती है |
+| `--no-log` | bool | — | संरचित डिप्लॉय लॉगिंग अक्षम करें |
+| `--progress-jsonl` | string | — | रेडैक्ट की गई मशीन-पठनीय रोलआउट प्रगति JSONL को किसी पथ पर लिखें, या stdout के लिए '-' |
+| `--quiet, -q` | bool | — | गैर-ज़रूरी आउटपुट दबाएँ |
+| `--spec, -s` | string | `stack-spec.yaml` | स्टैक स्पेसिफ़िकेशन फ़ाइल का पथ (डिफ़ॉल्ट न मिलने पर kombination.yaml स्वीकार की जाती है) |
+| `--verbose, -v` | bool | — | विस्तृत आउटपुट सक्षम करें |
+
+## अपनी सेवाएँ सेट करें
+
+| Command | विवरण |
+| --- | --- |
+| [`stackkit apply`](/hi/stackkits/reference/cli/apply) | इन्फ्रास्ट्रक्चर बदलाव लागू करें |
+| [`stackkit generate`](/hi/stackkits/reference/cli/generate) | स्टैक स्पेसिफ़िकेशन से शासित डिप्लॉयमेंट आर्टिफ़ैक्ट जनरेट करें |
+| [`stackkit init`](/hi/stackkits/reference/cli/init) | StackKit से नया डिप्लॉयमेंट आरंभ करें |
+| [`stackkit plan`](/hi/stackkits/reference/cli/plan) | इन्फ्रास्ट्रक्चर बदलावों का प्रीव्यू देखें |
+| [`stackkit prepare`](/hi/stackkits/reference/cli/prepare) | StackKit डिप्लॉयमेंट के लिए सिस्टम तैयार करें |
+| [`stackkit setup`](/hi/stackkits/reference/cli/setup) | लागू किए गए एप्लिकेशन का ओनर अकाउंट सेट करें |
+| [`stackkit validate`](/hi/stackkits/reference/cli/validate) | कॉन्फ़िगरेशन फ़ाइलें सत्यापित करें |
+
+## जाँचें, रखरखाव करें और रिकवर करें
+
+| Command | विवरण |
+| --- | --- |
+| [`stackkit backup`](/hi/stackkits/reference/cli/backup) | बैकअप प्रबंधित करें (Kopia इंजन) |
+| [`stackkit break-glass`](/hi/stackkits/reference/cli/break-glass) | ब्रेक-ग्लास रिकवरी अकाउंट और बंडल प्रबंधित करें |
+| [`stackkit drift`](/hi/stackkits/reference/cli/drift) | स्थानीय StackKit ड्रिफ़्ट को देखें और समाधान करें |
+| [`stackkit logs`](/hi/stackkits/reference/cli/logs) | संरचित डिप्लॉय लॉग देखें |
+| [`stackkit remove`](/hi/stackkits/reference/cli/remove) | स्थानीय StackKits डिप्लॉयमेंट अनइंस्टॉल करें |
+| [`stackkit service`](/hi/stackkits/reference/cli/service) | सक्रिय StackKits प्लान में घोषित सेवाएँ नियंत्रित करें |
+| [`stackkit upgrade`](/hi/stackkits/reference/cli/upgrade) | सत्यापित StackKit रिलीज़ रिज़ॉल्व करें और इंस्टॉल करें |
+| [`stackkit user`](/hi/stackkits/reference/cli/user) | स्थानीय PocketID में घरेलू उपयोगकर्ताओं को आमंत्रित करें और प्रबंधित करें |
+| [`stackkit verify`](/hi/stackkits/reference/cli/verify) | डिप्लॉयमेंट के बाद की सत्यापन जाँचें चलाएँ |
+
+## उन्नत टूल और संदर्भ
+
+| Command | विवरण |
+| --- | --- |
+| [`stackkit address`](/hi/stackkits/reference/cli/address) | सीक्रेट-मुक्त सार्वजनिक सेवा पते प्लान करें और बाइंड करें |
+| [`stackkit advanced`](/hi/stackkits/reference/cli/advanced) | ऑफ़लाइन-अधिकृत Advanced लाइफ़साइकिल ऑपरेशन प्रबंधित करें |
+| [`stackkit agent`](/hi/stackkits/reference/cli/agent) | StackKits ऑटोमेशन के लिए एजेंट-नेटिव सहायक |
+| [`stackkit app`](/hi/stackkits/reference/cli/app) | StackKits एप्लिकेशन डिलीवरी का निरीक्षण करें और v0.6 हैंडऑफ़ प्रबंधित करें |
+| [`stackkit cluster`](/hi/stackkits/reference/cli/cluster) | StackKits मल्टी-नोड क्लस्टर सदस्यता प्रबंधित करें |
+| [`stackkit compat`](/hi/stackkits/reference/cli/compat) | OS सपोर्ट प्रमाण और होस्ट अनुरूपता डायग्नोस्टिक दिखाएँ |
+| [`stackkit completion`](/hi/stackkits/reference/cli/completion) | शेल कंप्लीशन स्क्रिप्ट जनरेट करें |
+| [`stackkit docs`](/hi/stackkits/reference/cli/docs) | निर्धारक StackKits डॉक्यूमेंटेशन प्रक्षेपण जनरेट करें |
+| [`stackkit federation`](/hi/stackkits/reference/cli/federation) | स्थानीय Federation बाइंडिंग प्रमाण प्रबंधित करें |
+| [`stackkit game`](/hi/stackkits/reference/cli/game) | इंस्टॉल किए गए Game वर्कलोड पर ओनर के गेम सर्वर संचालित करें |
+| [`stackkit host`](/hi/stackkits/reference/cli/host) | प्रदाता-निरपेक्ष होस्ट कॉन्ट्रैक्ट ऑपरेशन |
+| [`stackkit identity`](/hi/stackkits/reference/cli/identity) | स्टैंडअलोन स्थानीय पहचान प्लेन प्रबंधित करें |
+| [`stackkit kit`](/hi/stackkits/reference/cli/kit) | प्रकाशित StackKit रिलीज़ ऑपरेशन |
+| [`stackkit migrate`](/hi/stackkits/reference/cli/migrate) | StackSpec v1 को वर्गीकृत करें और उसकी माइग्रेशन रिपोर्ट जारी करें |
+| [`stackkit module`](/hi/stackkits/reference/cli/module) | स्थानीय CUE मॉड्यूल लिखें और सत्यापित करें |
+| [`stackkit operations`](/hi/stackkits/reference/cli/operations) | कैनोनिकल स्टैंडअलोन लाइफ़साइकिल ऑपरेशन कॉन्ट्रैक्ट सूचीबद्ध करें |
+| [`stackkit output-transaction`](/hi/stackkits/reference/cli/output-transaction) | स्पष्ट Architecture v2 आउटपुट-ट्रांज़ैक्शन लाइफ़साइकिल एक्शन का निरीक्षण करें |
+| [`stackkit registry`](/hi/stackkits/reference/cli/registry) | एम्बेडेड StackKits रजिस्ट्री स्नैपशॉट प्रबंधित करें |
+| [`stackkit resolve`](/hi/stackkits/reference/cli/resolve) | Architecture v2 आशय को कैनोनिकल डिप्लॉयमेंट प्लान में रिज़ॉल्व करें |
+| [`stackkit runtime`](/hi/stackkits/reference/cli/runtime) | प्रमाणित नोड-साइड रनटाइम ऑपरेशन निष्पादित करें |
+| [`stackkit secrets`](/hi/stackkits/reference/cli/secrets) | ओनर-बद्ध स्थानीय सीक्रेट कस्टडी प्रबंधित करें |
+| [`stackkit support`](/hi/stackkits/reference/cli/support) | रेडैक्ट किया गया स्थानीय सपोर्ट प्रमाण एक्सपोर्ट करें |
+| [`stackkit use-cases`](/hi/stackkits/reference/cli/use-cases) | वैकल्पिक kit यूज़ केस चुनें |
+| [`stackkit version`](/hi/stackkits/reference/cli/version) | वर्ज़न जानकारी प्रिंट करें |
+
+जिन कमांड को वर्तमान रिलीज़ अस्वीकार या प्रतिस्थापित करती हैं, वे [लेगेसी और डिप्रिकेटेड कमांड](/hi/stackkits/reference/cli/legacy) के अंतर्गत सूचीबद्ध हैं।

@@ -1,0 +1,40 @@
+---
+title: "stackkit generate"
+description: "स्टैक स्पेसिफ़िकेशन से शासित डिप्लॉयमेंट आर्टिफ़ैक्ट जनरेट करें"
+sidebarTitle: "generate"
+---
+स्टैक स्पेसिफ़िकेशन से शासित डिप्लॉयमेंट आर्टिफ़ैक्ट जनरेट करें।
+
+उपनाम: `gen`
+
+कैनोनिकल StackSpec v2 आशय को एम्बेडेड CUE प्राधिकार के ज़रिए रिज़ॉल्व करें, सटीक ResolvedPlan को परमाणु रूप से सहेजें और उसके शासित आर्टिफ़ैक्ट को प्लान-स्वामित्व वाले outputRoot के नीचे लेन-देन के रूप में रेंडर करें।
+
+StackSpec v1 जनरेशन बंद हो चुका है। पुराने वर्कस्पेस के लिए प्रकाशित exact-v0.6 बाइनरी का उपयोग करें, या जनरेट करने से पहले आशय को StackSpec v2 में माइग्रेट करें। पुराने `--force` और `--fragments` स्विच नेटिव v2 रास्ते में अस्वीकार किए जाते हैं।
+
+```bash
+stackkit generate [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--force, -f` | bool | — | बंद किया गया पुराना ओवरराइट स्विच; StackSpec v2 के लिए अस्वीकृत |
+| `--fragments` | bool | — | बंद किया गया पुराना फ़्रैगमेंट स्विच; StackSpec v2 के लिए अस्वीकृत |
+| `--inventory` | string | — | Architecture v2 का देखा गया Inventory (अन्यथा एक पारंपरिक इन्वेंटरी फ़ाइल चुनी जाती है) |
+| `--local-node` | string | — | Architecture v2 नोड जो स्पष्ट रूप से इस स्थानीय generate प्रोसेस के स्वामित्व में है |
+| `--local-site` | string | — | Architecture v2 Site जो स्पष्ट रूप से इस स्थानीय generate प्रोसेस के स्वामित्व में है |
+| `--output, -o` | string | `deploy` | प्लान-स्वामित्व वाला आउटपुट रूट बदलें |
+| `--resolved-plan` | string | — | Architecture v2 कैनोनिकल ResolvedPlan (डिफ़ॉल्ट: &lt;outputRoot&gt;/.stackkit/resolved-plan.json) |
+
+**उदाहरण**
+
+```bash
+# Resolve the plan and render deployment artifacts into deploy/
+stackkit generate
+
+# Render into an explicit output root
+stackkit generate --output ./deploy
+
+# Name the Site and node this process owns
+stackkit generate --local-node main --local-site home
+```
+

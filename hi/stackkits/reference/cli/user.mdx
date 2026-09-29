@@ -1,0 +1,161 @@
+---
+title: "stackkit user"
+description: "स्थानीय PocketID में घरेलू उपयोगकर्ताओं को आमंत्रित करें और प्रबंधित करें"
+sidebarTitle: "user"
+---
+स्थानीय PocketID में घरेलू उपयोगकर्ताओं को आमंत्रित करें और प्रबंधित करें।
+
+PocketID household समूह में Homelab उपयोगकर्ता बनाएँ, सूचीबद्ध करें और हटाएँ।
+
+Add एक बार उपयोग होने वाला पासकी सेटअप URL प्रिंट करता है। TinyAuth उन ओनर, एडमिन और household समूहों को प्रवेश देता रहता है जो OIDC क्लाइंट पर पहले से बंधे हैं। ओनर और एडमिन पहचान यहाँ बनाई या हटाई नहीं जा सकतीं।
+
+```bash
+stackkit user [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+**उदाहरण**
+
+```bash
+# Invite a household member; share the printed one-time URL only with them
+stackkit user add alex --email alex@example.com --owner-approve
+
+# List household users
+stackkit user list
+
+# Remove a household user
+stackkit user remove alex --owner-approve
+```
+
+उप-कमांड: [`stackkit user add`](#stackkit-user-add), [`stackkit user list`](#stackkit-user-list), [`stackkit user owner`](#stackkit-user-owner), [`stackkit user remove`](#stackkit-user-remove)
+
+## stackkit user add
+
+एक बार उपयोग होने वाले पासकी सेटअप URL के साथ घरेलू उपयोगकर्ता को आमंत्रित करें।
+
+```bash
+stackkit user add <username> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--display-name` | string | — | वैकल्पिक डिस्प्ले नाम |
+| `--email` | string | — | **आवश्यक।** घर के सदस्य का ईमेल |
+| `--owner-approve` | bool | — | इस घरेलू उपयोगकर्ता को बनाने को स्पष्ट रूप से स्वीकृत करें |
+
+`stackkit user` से विरासत में मिले:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+**उदाहरण**
+
+```bash
+# Invite a household member and print their one-time passkey setup URL
+stackkit user add alex --email alex@example.com --owner-approve
+
+# Set a display name and return the invitation as JSON
+stackkit user add sam --email sam@example.com --display-name "Sam Doe" --owner-approve --json
+```
+
+## stackkit user list
+
+स्थानीय PocketID में घरेलू उपयोगकर्ता सूचीबद्ध करें।
+
+```bash
+stackkit user list [flags]
+```
+
+`stackkit user` से विरासत में मिले:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+**उदाहरण**
+
+```bash
+# List household users
+stackkit user list
+
+# The same list as JSON
+stackkit user list --json
+```
+
+## stackkit user owner
+
+PocketID ओनर पासकी सक्रियण का निरीक्षण करें और उसे फिर शुरू करें।
+
+```bash
+stackkit user owner [flags]
+```
+
+`stackkit user` से विरासत में मिले:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+उप-कमांड: [`stackkit user owner activate`](#stackkit-user-owner-activate), [`stackkit user owner status`](#stackkit-user-owner-status)
+
+### stackkit user owner activate
+
+ओनर-बद्ध एक-बार वाला पासकी सक्रियण लौटाएँ या दोबारा जारी करें।
+
+```bash
+stackkit user owner activate [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | ओनर सक्रियण दिखाने या दोबारा जारी करने को स्पष्ट रूप से स्वीकृत करें |
+
+`stackkit user` से विरासत में मिले:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+### stackkit user owner status
+
+ओनर पासकी सक्रियण की स्थिति पढ़ें।
+
+```bash
+stackkit user owner status [flags]
+```
+
+`stackkit user` से विरासत में मिले:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+## stackkit user remove
+
+स्थानीय PocketID से घरेलू उपयोगकर्ता हटाएँ।
+
+```bash
+stackkit user remove <username> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | इस घरेलू उपयोगकर्ता को हटाने को स्पष्ट रूप से स्वीकृत करें |
+
+`stackkit user` से विरासत में मिले:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+**उदाहरण**
+
+```bash
+# Remove a household user
+stackkit user remove alex --owner-approve
+```
+

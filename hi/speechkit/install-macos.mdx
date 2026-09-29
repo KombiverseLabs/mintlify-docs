@@ -1,0 +1,71 @@
+---
+title: "macOS पर SpeechKit इंस्टॉल करें"
+description: "Apple Silicon Dictation बीटा इंस्टॉल करें और उसकी सीमाएँ समझें"
+sidebarTitle: "macOS पर इंस्टॉल करें"
+icon: "apple"
+---
+
+macOS के लिए SpeechKit एक शुरुआती बीटा है जो केवल Dictation करता है। यह Apple Silicon पर macOS 14 या नए में चलता है। Intel Mac
+सपोर्ट में नहीं हैं।
+
+{/* speechkit-release:begin */}
+मौजूदा सार्वजनिक रिलीज़ [v0.72.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.1) है, जो 2026-09-20 को प्रकाशित हुआ।
+{/* speechkit-release:end */}
+
+<Warning>
+macOS बंडल ad-hoc हस्ताक्षरित है, बिना Apple Developer ID और बिना नोटराइज़ेशन के। macOS उसे क्वारंटीन करता है और कह सकता है कि ऐप
+क्षतिग्रस्त है। ऐसा नहीं है। क्वारंटीन लेबल हटाने के लिए एक दस्तावेज़ित कमांड चलानी होती है, जो नीचे बताई गई है।
+</Warning>
+
+## डाउनलोड
+
+<Card title="macOS बंडल (Apple Silicon)" icon="download" href="https://github.com/kombifyio/SpeechKit/releases/latest/download/SpeechKit-macOS-arm64.zip">
+  सबसे नए प्रकाशित रिलीज़ से `SpeechKit-macOS-arm64.zip` डाउनलोड करें।
+</Card>
+
+खोलने से पहले डाउनलोड को
+[SHA256SUMS.txt](https://github.com/kombifyio/SpeechKit/releases/latest/download/SHA256SUMS.txt)
+से सत्यापित करें। उस फ़ाइल में Windows एसेट भी सूचीबद्ध हैं, इसलिए केवल macOS आर्काइव वाली पंक्ति जाँचें:
+
+```bash
+grep SpeechKit-macOS-arm64.zip SHA256SUMS.txt | shasum -a 256 -c
+```
+
+## इंस्टॉल करें
+
+1. डाउनलोड को अनज़िप करें और `SpeechKit.app` को अपने Applications फ़ोल्डर में खींचें। अगला चरण करने से पहले इसे ले जाएँ: macOS
+   Downloads में छोड़े गए ऐप को छिपी हुई रीड-ओनली कॉपी से चलाता है, और SpeechKit वहाँ से खुद को अपडेट नहीं कर सकता।
+2. Terminal में क्वारंटीन लेबल हटाएँ:
+
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/SpeechKit.app
+   ```
+
+   काम करने पर कुछ प्रिंट नहीं होता। कमांड को पासवर्ड नहीं चाहिए और यह केवल इसी ऐप पर असर डालती है।
+3. Applications से SpeechKit खोलें और पूछे जाने पर **Microphone** और **Accessibility** की अनुमति दें।
+
+हर चरण के पीछे का तर्क जानने के लिए पूरी
+[अहस्ताक्षरित-रिलीज़ सूचना](https://github.com/kombifyio/SpeechKit/releases/latest/download/UNSIGNED-MACOS-RELEASE.txt)
+पढ़ें। इस प्रक्रिया में कहीं नहीं कहा गया कि आप पूरे सिस्टम में Gatekeeper बंद करें या कुछ भी root के रूप में चलाएँ।
+
+## क्या काम करता है और क्या नहीं
+
+| क्षमता | macOS बीटा |
+| --- | --- |
+| बंडल किए लोकल मॉडल के साथ Dictation | उपलब्ध |
+| क्लाउड स्पीच-टू-टेक्स्ट प्रोवाइडर के साथ Dictation | उपलब्ध |
+| माइक्रोफ़ोन कैप्चर, टेक्स्ट इंजेक्शन, मेन्यू-बार आइटम | उपलब्ध |
+| ग्लोबल हॉटकी और होल्ड-टू-टॉक | इस बिल्ड में काम नहीं करता |
+| Assist और Voice Agent | macOS पर सत्यापित नहीं |
+| Meeting सिस्टम-ऑडियो कैप्चर, स्क्रीन स्नैपशॉट, वेक वर्ड, लोकल LLM | पोर्ट नहीं किया गया; हर एक टाइप्ड एरर के साथ मना करता है और उसके नियंत्रण छिपे हैं |
+
+हॉटकी लिसनर इंस्टॉल होता है लेकिन उसे कोई की-इवेंट नहीं मिलता, इसलिए इसे ठीक किए जाने तक डिक्टेशन शुरू करने का तरीका मेन्यू-बार आइटम
+है। जब आपको पूरा फ़ीचर सेट चाहिए, तो [Windows क्लाइंट](/hi/speechkit/install-windows) इस्तेमाल करें।
+
+## अपडेट के बाद अनुमतियाँ
+
+macOS अनुमतियाँ ऐप के सटीक हस्ताक्षर के विरुद्ध याद रखता है। हर ad-hoc हस्ताक्षरित बिल्ड का हस्ताक्षर अलग होता है, इसलिए हर अपडेट के
+बाद macOS दोबारा Microphone और Accessibility पूछता है, और कभी-कभी कीचेन एक्सेस भी। अहस्ताक्षरित बीटा के लिए यह अपेक्षित है।
+
+अगर अपडेट के बाद डिक्टेशन जवाब नहीं देता, तो **System Settings → Privacy & Security → Accessibility** खोलें और SpeechKit को
+दोबारा चालू करें। ऐप चलते-चलते अनुमति उठा लेता है; रीस्टार्ट की ज़रूरत नहीं।

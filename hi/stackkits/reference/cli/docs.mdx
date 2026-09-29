@@ -1,0 +1,99 @@
+---
+title: "stackkit docs"
+description: "निर्धारक StackKits डॉक्यूमेंटेशन प्रक्षेपण जनरेट करें"
+sidebarTitle: "docs"
+---
+निर्धारक StackKits डॉक्यूमेंटेशन प्रक्षेपण जनरेट करें।
+
+```bash
+stackkit docs [flags]
+```
+
+उप-कमांड: [`stackkit docs emit-advanced-operations`](#stackkit-docs-emit-advanced-operations), [`stackkit docs emit-cli-reference`](#stackkit-docs-emit-cli-reference), [`stackkit docs emit-release-manifests`](#stackkit-docs-emit-release-manifests), [`stackkit docs emit-use-case-overview`](#stackkit-docs-emit-use-case-overview)
+
+## stackkit docs emit-advanced-operations
+
+Advanced ऑपरेशन कैटलॉग (stackkit.advanced-operations/v1) जारी करें।
+
+हर उस Advanced ऑपरेशन का मशीन-पठनीय कैटलॉग लिखें जिसे कोई ऑर्केस्ट्रेटर डिस्पैच कर सकता है: सटीक argv टेम्पलेट, प्रवेश आवश्यकताएँ, इनपुट और परिणाम कॉन्ट्रैक्ट, रोलआउट इवेंट चरण और अस्वीकृति एनवेलप।
+
+रिलीज़ आर्काइव में यह फ़ाइल शामिल होती है। `--check` के साथ कुछ नहीं लिखा जाता; फ़ाइल कैटलॉग स्रोत से भिन्न होने पर कमांड विफल होती है।
+
+```bash
+stackkit docs emit-advanced-operations [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--check` | bool | — | कुछ न लिखें; कैटलॉग फ़ाइल गायब या पुरानी होने पर विफल हों |
+| `--out` | string | `docs/data/advanced-operations/latest.json` | कैटलॉग JSON पथ, `--chdir` के सापेक्ष |
+
+**उदाहरण**
+
+```bash
+# Regenerate the committed catalog after changing an Advanced operation
+stackkit docs emit-advanced-operations
+
+# Fail when the committed catalog is stale
+stackkit docs emit-advanced-operations --check
+```
+
+## stackkit docs emit-cli-reference
+
+मशीन-पठनीय stackkit CLI संदर्भ जारी करें।
+
+हर दृश्यमान stackkit कमांड, फ़्लैग और उदाहरण को निर्धारक JSON के रूप में लिखें।
+
+stackkit.cc CLI संदर्भ इसी फ़ाइल से रेंडर होता है। `--check` के साथ कुछ नहीं लिखा जाता; फ़ाइल वर्तमान कमांड ट्री से भिन्न होने पर कमांड विफल होती है।
+
+```bash
+stackkit docs emit-cli-reference [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--check` | bool | — | कुछ न लिखें; संदर्भ फ़ाइल गायब या पुरानी होने पर विफल हों |
+| `--out` | string | `docs/data/cli-reference/latest.json` | संदर्भ JSON पथ, `--chdir` के सापेक्ष |
+
+**उदाहरण**
+
+```bash
+# Regenerate the committed reference after changing a command, flag, or example
+stackkit docs emit-cli-reference
+
+# Fail when the committed reference is stale
+stackkit docs emit-cli-reference --check
+```
+
+## stackkit docs emit-release-manifests
+
+रिलीज़ से बंधे यूज़-केस और संगतता मैनिफ़ेस्ट जारी करें।
+
+```bash
+stackkit docs emit-release-manifests [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--output-dir` | string | — | **आवश्यक।** मैनिफ़ेस्ट आउटपुट डायरेक्टरी |
+| `--public-source-sha` | string | — | **आवश्यक।** सटीक सार्वजनिक स्रोत SHA |
+| `--release-tag` | string | — | **आवश्यक।** प्रकाशित रिलीज़ टैग (vX.Y.Z) |
+| `--release-url` | string | — | **आवश्यक।** सटीक सार्वजनिक रिलीज़ URL |
+| `--source-sha` | string | — | **आवश्यक।** सटीक निजी स्रोत SHA |
+
+## stackkit docs emit-use-case-overview
+
+आंतरिक व्युत्पन्न यूज़-केस डेवलपमेंट ओवरव्यू रेंडर करें।
+
+```bash
+stackkit docs emit-use-case-overview [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--evidence-output` | string | — | प्रमाण मैनिफ़ेस्ट आउटपुट पथ |
+| `--output` | string | — | Markdown आउटपुट पथ |
+| `--source-sha` | string | — | **आवश्यक।** सटीक स्रोत SHA |
+| `--test-receipt` | string | — | स्रोत-SHA से बंधी उत्तीर्ण टेस्ट रसीद |
+| `--tests-passed-for-source` | bool | — | कॉलर द्वारा source-sha के लिए कैटलॉग टेस्ट समकालिक रूप से पास करने के बाद टेस्ट को पूर्ण चिह्नित करें |
+

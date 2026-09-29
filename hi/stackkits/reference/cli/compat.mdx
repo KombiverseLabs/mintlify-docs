@@ -1,0 +1,49 @@
+---
+title: "stackkit compat"
+description: "OS सपोर्ट प्रमाण और होस्ट अनुरूपता डायग्नोस्टिक दिखाएँ"
+sidebarTitle: "compat"
+---
+OS सपोर्ट प्रमाण और होस्ट अनुरूपता डायग्नोस्टिक दिखाएँ।
+
+इस ऑपरेटिंग सिस्टम और उसके हाइपरवाइज़र के लिए प्रकाशित StackKits संगतता प्रमाण दिखाएँ, फिर स्थानीय कंटेनर-होस्ट पूर्वापेक्षाओं के लिए गैर-विनाशकारी डायग्नोस्टिक चलाएँ।
+
+```text
+The host diagnostics check:
+  • Virtualization type (KVM, OpenVZ, LXC, bare metal)
+  • unshare(2) syscall availability
+  • OverlayFS support
+  • Bridge networking support
+  • iptables NAT support
+  • Cgroup version
+```
+
+प्रकाशित प्रमाण किसी रिलीज़ से बंधी स्वचालित लाइफ़साइकिल रसीदों से आता है। होस्ट डायग्नोस्टिक किसी सर्वर प्रदाता को प्रमाणित, रैंक, अनुशंसित या मूल्यांकित नहीं करते।
+
+```bash
+stackkit compat [flags]
+```
+
+**उदाहरण**
+
+```bash
+# Check the published OS and hypervisor evidence and the host container prerequisites
+stackkit compat
+```
+
+उप-कमांड: [`stackkit compat emit-os-matrix`](#stackkit-compat-emit-os-matrix)
+
+## stackkit compat emit-os-matrix
+
+सार्वजनिक OS और वर्चुअलाइज़ेशन संगतता प्रक्षेपण रेंडर करें।
+
+```bash
+stackkit compat emit-os-matrix [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--archive-dir` | string | `docs/data/os-compat` | प्रति-रिलीज़ v\*.json आर्काइव रखने वाली डायरेक्टरी |
+| `--docs-out` | string | `docs/OS_COMPATIBILITY.md` | जनरेट किया गया markdown आउटपुट |
+| `--input` | string | `docs/data/os-compat/latest.json` | कमिट किया गया सार्वजनिक संगतता प्रक्षेपण |
+| `--website-out` | string | `website/public/os-compat.json` | जनरेट किया गया वेबसाइट फ़ीड आउटपुट |
+

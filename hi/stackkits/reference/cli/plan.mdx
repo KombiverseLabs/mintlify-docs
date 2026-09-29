@@ -1,0 +1,35 @@
+---
+title: "stackkit plan"
+description: "इन्फ्रास्ट्रक्चर बदलावों का प्रीव्यू देखें"
+sidebarTitle: "plan"
+---
+इन्फ्रास्ट्रक्चर बदलावों का प्रीव्यू देखें।
+
+शासित Architecture v2 प्लान का निरीक्षण करें या v0.6 इन्फ्रास्ट्रक्चर बदलावों का प्रीव्यू देखें।
+
+नेटिव v0.7 पर यह कमांड executor चलाए बिना सटीक ResolvedPlan, जनरेशन मैनिफ़ेस्ट, रसीद और जनरेट किए गए आर्टिफ़ैक्ट हैश को सत्यापित और निरीक्षित करती है। Exact v0.6 अपना पैकेज्ड OpenTofu प्रीव्यू रखता है; `--out` और `--destroy` केवल उसी प्रीव्यू पर लागू होते हैं और नेटिव लाइन पर अस्वीकार किए जाते हैं।
+
+```bash
+stackkit plan [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | Architecture v2 जनरेशन मैनिफ़ेस्ट (डिफ़ॉल्ट: &lt;outputRoot&gt;/.stackkit/generation-manifest.json) |
+| `--destroy` | bool | — | नष्ट करने का प्लान बनाएँ |
+| `--generation-receipt` | string | — | Architecture v2 जनरेशन रसीद (डिफ़ॉल्ट: &lt;outputRoot&gt;/.stackkit/generation-receipt.json) |
+| `--inventory` | string | — | Architecture v2 का देखा गया Inventory (अन्यथा एक पारंपरिक इन्वेंटरी फ़ाइल चुनी जाती है) |
+| `--json` | bool | — | नेटिव Architecture v2 प्लान निरीक्षण को JSON के रूप में जारी करें |
+| `--out, -o` | string | — | प्लान को फ़ाइल में सहेजें |
+| `--resolved-plan` | string | — | Architecture v2 कैनोनिकल ResolvedPlan (डिफ़ॉल्ट: &lt;outputRoot&gt;/.stackkit/resolved-plan.json) |
+
+**उदाहरण**
+
+```bash
+# Inspect the generated plan, its readiness, and artifact hashes
+stackkit plan
+
+# The same inspection as JSON
+stackkit plan --json
+```
+

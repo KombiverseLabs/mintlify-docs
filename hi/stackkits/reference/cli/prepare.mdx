@@ -1,0 +1,51 @@
+---
+title: "stackkit prepare"
+description: "StackKit डिप्लॉयमेंट के लिए सिस्टम तैयार करें"
+sidebarTitle: "prepare"
+---
+StackKit डिप्लॉयमेंट के लिए सिस्टम तैयार करें।
+
+उपनाम: `prep`
+
+StackKit डिप्लॉयमेंट के लिए सिस्टम तैयार करें और चुने गए StackSpec पथ का निरीक्षण करें।
+
+नेटिव Architecture v2 लाइन पर यह कमांड रीड-ओनली स्थानीय होस्ट सत्यापन करती है (Docker, Compose, कर्नेल, संसाधन, स्टोरेज और आवश्यक पोर्ट)। यह कभी होस्ट पैकेज इंस्टॉल या कॉन्फ़िगर नहीं करती और कभी होस्टेड अकाउंट उपयोग नहीं करती। exact-v0.6 संगतता एडाप्टर अपना ऐतिहासिक तैयारी प्रवाह रखता है।
+
+```text
+This command:
+  1. Selects the versioned StackSpec execution path
+  2. Checks host prerequisites on native Architecture v2
+  3. Retains historical target preparation through the exact-v0.6 compatibility adapter
+```
+
+```bash
+stackkit prepare [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--auto-fix` | bool | `true` | ठीक करने योग्य समस्याएँ स्वतः सुधारें (केवल exact-v0.6) |
+| `--dry-run` | bool | — | दिखाएँ कि क्या किया जाएगा (केवल exact-v0.6) |
+| `--force` | bool | — | डिस्क स्पेस अपर्याप्त होने पर भी जारी रखें (केवल exact-v0.6) |
+| `--host` | string | `localhost` | लक्ष्य होस्ट IP/होस्टनाम (केवल exact-v0.6) |
+| `--json` | bool | — | नेटिव-v2 होस्ट preflight रिपोर्ट को stackkit.command-result/v1 JSON के रूप में जारी करें |
+| `--key` | string | — | SSH प्राइवेट की पथ (केवल exact-v0.6) |
+| `--non-interactive` | bool | — | prepare को ऑपरेटर इनपुट चाहिए तो पूछने के बजाय विफल हों (केवल exact-v0.6) |
+| `--port` | int | `22` | रिमोट लक्ष्यों के लिए SSH पोर्ट (केवल exact-v0.6) |
+| `--skip-docker` | bool | — | Docker इंस्टॉलेशन जाँच छोड़ें (केवल exact-v0.6) |
+| `--skip-tofu` | bool | — | पैकेज्ड OpenTofu जाँच छोड़ें (केवल exact-v0.6) |
+| `--user` | string | — | SSH यूज़रनेम (केवल exact-v0.6) |
+
+**उदाहरण**
+
+```bash
+# Check this host's prerequisites for the StackSpec in the current directory
+stackkit prepare
+
+# Check the prerequisites for the deployment in another directory
+stackkit prepare -C my-homelab
+
+# Emit the host preflight report as JSON
+stackkit prepare --json
+```
+

@@ -1,0 +1,78 @@
+---
+title: "stackkit init"
+description: "StackKit से नया डिप्लॉयमेंट आरंभ करें"
+sidebarTitle: "init"
+---
+StackKit से नया डिप्लॉयमेंट आरंभ करें।
+
+अपनी डिप्लॉयमेंट डायरेक्टरी में stack-spec.yaml बनाएँ। यह आपके चुनाव सहेजता है; यह सेवाएँ इंस्टॉल नहीं करता और होस्ट नहीं बदलता। स्टैंडअलोन स्थानीय रास्ता kombify अकाउंट या Techstack के बिना काम करता है।
+
+चुने गए Kit के कैटलॉग डिफ़ॉल्ट से शुरू करें। `--owner-source=local` ओनर को इसी मशीन पर रखता है और स्थानीय PocketID ओनर के लिए `--owner-email` चाहिए। Cloud Kit kombify.me पता उपयोग करता है, जब तक `--domain` ऐसा डोमेन न बताए जो पहले से इसी होस्ट की ओर इशारा करता हो।
+
+जनरेट या लागू करने से पहले सहेजे गए कॉन्फ़िगरेशन की समीक्षा करें। डिफ़ॉल्ट स्पष्ट आशय के रूप में दर्ज होते हैं और Kit के CUE कॉन्ट्रैक्ट से सत्यापित होते हैं। ज़रूरी जानकारी, जैसे डोमेन, तब माँगी जाती है जब Kit को उसकी ज़रूरत हो। स्क्रिप्ट में पूछने के बजाय विफल होने के लिए `--non-interactive` उपयोग करें।
+
+सटीक नियंत्रण के लिए `--catalog-defaults` के बजाय `--use-case-alternative` और `--module-compute-profile` उपयोग करें। ये चयन चुने गए Kit से आते हैं। नेटिव ऑथरिंग stackkit/v2alpha2 उपयोग करती है; `--api-version` stackkit/v2alpha1 स्पष्ट लेगेसी ग्राफ़ एडाप्टर चुनता है। v0.6 compatibility चिह्नित फ़्लैग केवल स्पष्ट रूप से वर्ज़न वाली v0.6 बाइनरी स्वीकार करती है।
+
+```bash
+stackkit init [stackkit] [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--admin-email` | string | — | केवल v0.6 संगतता: लॉगिन अकाउंट के लिए एडमिन ईमेल |
+| `--api-version` | string | `stackkit/v2alpha2` | StackSpec कॉन्ट्रैक्ट (stackkit/v2alpha2; स्पष्ट लेगेसी एडाप्टर: stackkit/v2alpha1) |
+| `--candidate-spec` | string | — | केवल नेटिव v2: फ़ाइल से या stdin के लिए - से पूरा CUE-मान्य StackSpec सुरक्षित रखें; ऑथरिंग ओवरराइड को छोड़कर |
+| `--catalog-defaults` | bool | — | छोड़े गए नेटिव विकल्पों और कंप्यूट प्रोफ़ाइल के लिए CUE कैटलॉग डिफ़ॉल्ट स्वीकार करें; स्पष्ट आशय सहेजें |
+| `--cloud-oidc-client-id` | string | — | केवल v0.6 संगतता: Cloud OIDC क्लाइंट ID |
+| `--cloud-oidc-client-secret-ref` | string | — | केवल v0.6 संगतता: Cloud OIDC क्लाइंट सीक्रेट संदर्भ (जैसे secret://) |
+| `--cloud-oidc-foreign-subject` | string | — | केवल v0.6 संगतता: Cloud उपयोगकर्ता की बाहरी subject ID |
+| `--cloud-oidc-issuer` | string | — | केवल v0.6 संगतता: auto/cloud ओनर हैंडऑफ़ के लिए Cloud OIDC इश्यूअर URL |
+| `--cluster-mode` | string | `first` | केवल v0.6 संगतता: क्लस्टर मोड (first\|join) |
+| `--compute-tier` | string | — | केवल लेगेसी v2alpha1: घोषित kit ग्राफ़ (low, standard, high) |
+| `--domain` | string | — | जनरेट किए गए स्टैक स्पेक के लिए डोमेन ओवरराइड |
+| `--enable` | strings | — | केवल नेटिव v2: सक्षम करने योग्य वैकल्पिक kit क्षमताएँ (capabilities.enable, जैसे lan-dns,internal-pki) |
+| `--expected-spec-hash` | string | — | केवल नेटिव v2: बदलने के लिए वर्तमान CUE-नॉर्मलाइज़्ड स्पेक का सटीक हैश आवश्यक है |
+| `--force, -f` | bool | — | केवल v0.6 संगतता: मौजूदा फ़ाइलें ओवरराइट करें |
+| `--hardware-profile` | string | — | nodes\[0\].hardware.profile के लिए डिवाइस क्लास (standard, pi, gpu, storage)। pi एक सीमित संसाधन वाला homelab डिवाइस है, केवल Raspberry नहीं। इन्वेंटरी से स्वतः पहचाना नहीं जाता |
+| `--local-dns` | bool | — | केवल v0.6 संगतता: Kombify Point स्थानीय DNS नाम उपयोग करें |
+| `--local-name` | string | — | केवल v0.6 संगतता: `--local-dns` के लिए स्थानीय DNS संक्षिप्त नाम |
+| `--mode` | string | — | केवल v0.6 संगतता: इंस्टॉलेशन मोड (bare, bootstrapped, advanced) |
+| `--module-accelerator-profile` | stringArray | — | नेटिव v2alpha2: घोषित एक्सेलरेटर आयाम के लिए module-id=accelerator-profile |
+| `--module-compute-profile` | stringArray | — | नेटिव v2alpha2: module-id=profile; हर चुने गए वर्कलोड मॉड्यूल के लिए दोहराएँ |
+| `--module-storage-profile` | stringArray | — | नेटिव v2alpha2: घोषित स्टोरेज आयाम के लिए module-id=storage-profile |
+| `--name` | string | — | डिप्लॉयमेंट कॉन्ट्रैक्ट ID (डिफ़ॉल्ट रूप से सामान्यीकृत वर्किंग-डायरेक्टरी नाम) |
+| `--non-interactive` | bool | — | नॉन-इंटरैक्टिव मोड में चलाएँ (इनपुट ज़रूरी होने पर विफल हों) |
+| `--output, -o` | string | `deploy` | केवल v0.6 संगतता: जनरेट की गई फ़ाइलों की आउटपुट डायरेक्टरी |
+| `--owner-bootstrap-mode` | string | — | केवल v0.6 संगतता: ओनर बूटस्ट्रैप मोड (auto\|custom\|none) |
+| `--owner-display-name` | string | — | `--owner-source=local` के लिए वांछित PocketID ओनर डिस्प्ले नाम |
+| `--owner-email` | string | — | `--owner-source=local` के लिए वांछित PocketID ओनर ईमेल |
+| `--owner-source` | string | — | ओनर कस्टडी स्रोत (नेटिव स्टैंडअलोन: local; v0.6 संगतता: local\|cloud) |
+| `--owner-username` | string | — | `--owner-source=local` के लिए वांछित PocketID ओनर यूज़रनेम |
+| `--platform` | string | — | केवल नेटिव v2: चुने गए प्रदाता का प्लेटफ़ॉर्म एडाप्टर (install.platform.providerRef, जैसे coolify या komodo) |
+| `--recovery-material-ref` | string | — | केवल v0.6 संगतता: ऑर्केस्ट्रेटर के स्वामित्व वाली रिकवरी सामग्री का संदर्भ; स्टैक स्पेक में सादे-टेक्स्ट रिकवरी पासफ़्रेज़ कभी स्वीकार नहीं किए जाते |
+| `--recovery-passphrase-hash` | string | — | केवल v0.6 संगतता: रिकवरी पासफ़्रेज़ हैश (argon2id PHC); न होने पर पूछता है |
+| `--service-profile` | string | — | केवल v0.6 संगतता: BaseKit सेवा प्रोफ़ाइल |
+| `--use-case` | strings | — | सक्षम करने योग्य वैकल्पिक kit वर्कलोड (जैसे photos,files,vault); v2alpha2 में स्पष्ट विकल्प आवश्यक हैं |
+| `--use-case-alternative` | stringArray | — | नेटिव v2alpha2: use-case-id=alternative; आवश्यक कोर वर्कलोड शामिल करें |
+
+**उदाहरण**
+
+```bash
+# Basement Kit for a home server, with the Kit's catalog defaults
+mkdir my-homelab && cd my-homelab
+stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com
+
+# Basement Kit with the optional Photos and Files use cases
+stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com --use-case photos,files
+
+# Cloud Kit for a public VPS on a kombify.me address
+mkdir my-cloud && cd my-cloud
+stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email you@example.com
+
+# Cloud Kit on your own domain, without prompts (for scripts)
+stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email you@example.com --domain example.com --non-interactive
+
+# Pick the core alternative and module profile explicitly instead of catalog defaults
+stackkit init basement-kit --owner-source=local --owner-email you@example.com --use-case-alternative basement-core=standalone --module-compute-profile stackkits-basement-core-runtime=standard
+```
+

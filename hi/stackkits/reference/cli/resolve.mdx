@@ -1,0 +1,34 @@
+---
+title: "stackkit resolve"
+description: "Architecture v2 आशय को कैनोनिकल डिप्लॉयमेंट प्लान में रिज़ॉल्व करें"
+sidebarTitle: "resolve"
+---
+Architecture v2 आशय को कैनोनिकल डिप्लॉयमेंट प्लान में रिज़ॉल्व करें।
+
+StackSpec v2 दस्तावेज़ और वैकल्पिक देखे गए Inventory को उस कैनोनिकल ResolvedPlan में रिज़ॉल्व करें जिसे जनरेटर और रनटाइम उपयोग करते हैं।
+
+`--output` दिए बिना कमांड केवल पढ़ने के लिए है। फ़ाइल आउटपुट वर्किंग डायरेक्टरी के नीचे रहता है और केवल मौजूदा मान्य ResolvedPlan को बदल सकता है; यह लाइफ़साइकिल म्यूटेशन लॉक साझा करता है। StackSpec v1 को कभी चुपचाप अपग्रेड या कंपाइल नहीं किया जाता: यह साझा टाइप्ड माइग्रेशन रिपोर्ट लौटाता है और स्पष्ट माइग्रेशन वर्कफ़्लो माँगता है।
+
+```bash
+stackkit resolve [spec-file] [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--inventory` | string | — | वैकल्पिक देखे गए Inventory दस्तावेज़ का पथ |
+| `--module-root` | string | — | आर्किटेक्चर प्राधिकार रूट जिसमें cue.mod, base और सभी kit परिभाषाएँ हैं |
+| `--output, -o` | string | — | कैनोनिकल ResolvedPlan JSON को stdout के बजाय वर्किंग डायरेक्टरी के नीचे लिखें |
+
+**उदाहरण**
+
+```bash
+# Print the canonical ResolvedPlan for a StackSpec
+stackkit resolve --spec stack-spec.yaml
+
+# Resolve against an observed Inventory
+stackkit resolve stack-spec.yaml --inventory inventory.yaml
+
+# Replace the existing plan file beneath the working directory
+stackkit resolve stack-spec.yaml --output deploy/.stackkit/resolved-plan.json
+```
+

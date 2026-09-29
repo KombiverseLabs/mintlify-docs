@@ -1,0 +1,75 @@
+---
+title: "StackKits क्विकस्टार्ट"
+description: "रिलीज़ हो चुके Basement Kit को बूटस्ट्रैप करें, जाँचें और स्पष्ट रूप से लागू करें"
+sidebarTitle: "क्विकस्टार्ट"
+icon: rocket
+---
+
+यह क्विकस्टार्ट मौजूदा सार्वजनिक StackKits रिलीज़ को, Basement Kit के साथ, आपके संचालित किसी सर्वर पर इंस्टॉल करता है। शुरू करने से पहले
+प्रकाशित लाइफ़साइकल प्रमाण वाले रिलीज़ और होस्ट संयोजन के लिए [OS संगतता](/hi/stackkits/reference/os-compatibility) देखें। CLI
+ही लोकल निष्पादन का अधिकारी रहता है।
+
+## Basement Kit बूटस्ट्रैप करें
+
+समर्थित सर्वर पर, Basement इंस्टॉलर `~/my-homelab` बनाता है, रिलीज़ हो चुके आर्टिफ़ैक्ट और ज़रूरी रनटाइम इंस्टॉल करता है, लोकल ओनर कस्टडी
+इनिशियलाइज़ करता है, लोकल Admin/PocketID एक्सेस बूटस्ट्रैप करता है, बने हुए StackSpec को सत्यापित करता है, और डिफ़ॉल्ट Basement सेवाएँ लागू
+करता है:
+
+```bash
+curl -sSL https://base.stackkit.cc | sh
+cd ~/my-homelab
+stackkit version
+stackkit logs latest --json
+cat .stackkit/access.json
+```
+
+<Warning>
+  होस्टेड kombify अकाउंट ज़रूरी नहीं है। StackKits को फिर भी लोकल Owner/Admin चाहिए, जिसे यह बूटस्ट्रैप अपने-आप बनाता है। बने हुए एक्सेस विवरण
+  निजी रखें।
+</Warning>
+
+अलग इंस्टॉलर चाहिए? केवल-टूलचेन रास्ते के लिए [किट चुनें](/hi/guides/stackkits/choosing-a-kit), आपके संचालित किसी VPS के लिए
+[Cloud Kit](/hi/stackkits/kits/cloud-kit), या कॉन्फ़िगरेशन, रिव्यू, apply और वेरिफ़िकेशन के अलग-अलग चरणों के लिए
+[CLI वॉकथ्रू](/hi/guides/stackkits/cli-walkthrough) देखें।
+
+## बने हुए इरादे को जाँचें या बदलें
+
+आउटपुट जेनरेट करने से पहले `stack-spec.yaml` जाँचें। खासकर एब्सोल्यूट स्टोरेज रूट, लोकल डोमेन (Basement इंस्टॉलर `home` इस्तेमाल करता है, इसलिए डिवाइस
+एनरोलमेंट के बाद सेवाएँ `*.home` पर हल होती हैं), साइट और नोड पहचानें, और खाली वैकल्पिक वर्कलोड चयन देखें।
+
+StackSpec कॉन्फ़िगरेशन इनपुट है। सत्यापन का अधिकार CUE के पास रहता है और बनी हुई रोलआउट फ़ाइलें आउटपुट हैं, हाथ से संपादित करने की फ़ाइलें नहीं। मौजूदा उदाहरणों
+के लिए [StackSpec कॉन्फ़िगर करें](/hi/guides/stackkits/configure-stack-spec) देखें।
+
+## बदला हुआ प्लान जेनरेट करें और जाँचें
+
+```bash
+stackkit generate
+stackkit plan --json
+```
+
+पुष्टि करें कि जेनरेशन और apply की तैयारी दोनों `ready` हैं, फिर चुने हुए वर्कलोड और आर्टिफ़ैक्ट पथ जाँचें।
+
+## जान-बूझकर किया गया बदलाव लागू करें
+
+```bash
+stackkit apply
+stackkit logs latest --json
+cat .stackkit/access.json
+```
+
+Basement वन-लाइनर शुरुआती apply पहले ही कर चुका होता है। ये लाइफ़साइकल कमांड तभी चलाएँ जब आपने जान-बूझकर `stack-spec.yaml` बदली हो। लोकल लॉग और एक्सेस रिकॉर्ड
+को वर्कस्पेस के साथ रखें।
+
+## आगे बढ़ें
+
+<CardGroup cols={3}>
+  <Card title="Basement Kit" icon="house" href="/hi/stackkits/kits/basement-kit">
+    लोकल, सिंगल-एनवायरनमेंट किट के बारे में जानें।
+  </Card>
+  <Card title="Cloud Kit" icon="cloud" href="/hi/stackkits/kits/cloud-kit">
+    आपके संचालित VPS पर वही स्टैंडअलोन लाइफ़साइकल इस्तेमाल करें।
+  </Card>
+  <Card title="सुरक्षित तरीके से लागू करें" icon="clipboard-check" href="/hi/guides/stackkits/review-plan-and-apply">
+    होस्ट बदलने से पहले तैयारी और बने हुए आर्टिफ़ैक्ट जाँचें।
+  </Card>
+</CardGroup>

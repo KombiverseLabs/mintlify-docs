@@ -1,0 +1,400 @@
+---
+title: "stackkit backup"
+description: "बैकअप प्रबंधित करें (Kopia इंजन)"
+sidebarTitle: "backup"
+---
+बैकअप प्रबंधित करें (Kopia इंजन)।
+
+इस StackKit डिप्लॉयमेंट के बैकअप प्रबंधित करें।
+
+बैकअप Kopia पर आधारित हैं (ADR-0016 देखें) और Basement कोर द्वारा रेंडर की गई स्थानीय kopia-agent सेवा में चलते हैं। नेटिव configure, status और run, Kopia को छूने से पहले सटीक स्थानीय Plan, जनरेट किए गए आर्टिफ़ैक्ट, ओनर कस्टडी और Apply प्रमाण को दोबारा सत्यापित करते हैं। रिपॉज़िटरी, स्रोत, बहिष्करण, सेवा पहचान और क्रेडेंशियल CUE या ओनर कस्टडी के स्वामित्व में हैं।
+
+```bash
+stackkit backup [flags]
+```
+
+**उदाहरण**
+
+```bash
+# Configure the local Kopia repository after stackkit apply
+stackkit backup configure
+
+# Take a snapshot now
+stackkit backup run
+
+# Check repository readiness and the latest snapshot and restore receipts
+stackkit backup status
+
+# Restore a snapshot into isolated staging
+stackkit backup restore sha256:<snapshot-anchor-id> --owner-approve
+```
+
+उप-कमांड: [`stackkit backup configure`](#stackkit-backup-configure), [`stackkit backup emergency-export`](#stackkit-backup-emergency-export), [`stackkit backup emergency-restore`](#stackkit-backup-emergency-restore), [`stackkit backup init`](#stackkit-backup-init), [`stackkit backup restore`](#stackkit-backup-restore), [`stackkit backup run`](#stackkit-backup-run), [`stackkit backup schedule`](#stackkit-backup-schedule), [`stackkit backup status`](#stackkit-backup-status), [`stackkit backup target`](#stackkit-backup-target)
+
+## stackkit backup configure
+
+CUE-शासित स्थानीय Kopia रिपॉज़िटरी कॉन्फ़िगर करें।
+
+जनरेट की गई सटीक StackSpec v2 बैकअप नीति से स्थानीय Kopia रिपॉज़िटरी कॉन्फ़िगर करें।
+
+रिपॉज़िटरी पथ और kopia-agent सेवा CUE के स्वामित्व में हैं और कमांड लाइन से बदले नहीं जा सकते।
+
+```bash
+stackkit backup configure [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+**उदाहरण**
+
+```bash
+# Configure the repository once the Basement core is applied
+stackkit backup configure
+
+# Configure it and print the command result as JSON
+stackkit backup configure --json
+```
+
+## stackkit backup emergency-export
+
+चुने गए स्थानीय डेटा को एन्क्रिप्टेड पोर्टेबल रिकवरी आर्काइव के रूप में एक्सपोर्ट करें।
+
+प्रति-फ़ाइल चेकसम और रिस्टोर रनबुक के साथ पोर्टेबल age-एन्क्रिप्टेड tar/gzip आर्काइव बनाएँ। age रिसीपिएंट पब्लिक की और स्रोतों के बाहर एक नई लक्ष्य डायरेक्टरी दें। जनरेट किया गया v2 बैकअप कॉन्ट्रैक्ट (CUE emergencyExport क्लास और generate/apply source-policy वॉल्यूम) एक्सपोर्ट करने के लिए `--source` छोड़ दें। जनरेट किया गया कॉन्ट्रैक्ट न होने पर स्पष्ट CLASS=PATH स्रोत स्टैंडअलोन रास्ता बने रहते हैं। फ़ाइल कॉपी करना एप्लिकेशन की संगति साबित नहीं करता; पहले राइटर रोकें या डेटाबेस-नेटिव डंप एक्सपोर्ट करें। रिकवरी डेटा को मूल होस्ट, Kopia या Kombify अकाउंट के बिना स्टेज करती है।
+
+```bash
+stackkit backup emergency-export [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--format` | string | `tar.gz.age` | पोर्टेबल आर्काइव फ़ॉर्मैट (tar.gz.age) |
+| `--json` | bool | — | आर्काइव रसीद को JSON के रूप में आउटपुट करें |
+| `--large-media-mode` | string | `manifest-only` | मीडिया स्रोत: manifest-only, include या exclude |
+| `--recipient` | stringArray | — | age X25519 रिसीपिएंट पब्लिक की; कई रिकवरी ओनर के लिए दोहराएँ |
+| `--source` | stringArray | — | स्पष्ट CLASS=PATH स्रोत; config, secrets, platform-state, database, user-content, documents, photos, large-media, telemetry-timeseries, serverless-config या cache-generated के लिए दोहराएँ |
+| `--target` | string | — | नई आउटपुट डायरेक्टरी; उसकी पैरेंट डायरेक्टरी मौजूद होनी चाहिए |
+
+**उदाहरण**
+
+```bash
+# Export the generated backup contract, encrypted to your age public key, into a new directory
+stackkit backup emergency-export --recipient <age-public-key> --target /mnt/usb/stackkit-export
+
+# Export explicit paths when no generated contract exists
+stackkit backup emergency-export --recipient <age-public-key> --target /mnt/usb/stackkit-export --source config=/opt/stacks --source user-content=/opt/data
+```
+
+## stackkit backup emergency-restore
+
+पोर्टेबल एक्सपोर्ट को डिक्रिप्ट करें और नई स्टेजिंग डायरेक्टरी में सत्यापित करें।
+
+```bash
+stackkit backup emergency-restore [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--archive` | string | — | एन्क्रिप्टेड इमरजेंसी आर्काइव |
+| `--identity-file` | string | — | स्थानीय age आइडेंटिटी फ़ाइल; सीक्रेट की कभी कमांड लाइन पर नहीं देनी चाहिए |
+| `--json` | bool | — | सत्यापित स्टेजिंग परिणाम को JSON के रूप में आउटपुट करें |
+| `--max-bytes` | int | `549755813888` | मेटाडेटा सहित अधिकतम डीकंप्रेस्ड आर्काइव बाइट्स |
+| `--target` | string | — | नई अलग रिस्टोर डायरेक्टरी; उसकी पैरेंट डायरेक्टरी मौजूद होनी चाहिए |
+
+**उदाहरण**
+
+```bash
+# Decrypt and verify an export into a new staging directory with your age identity file
+stackkit backup emergency-restore --archive <export-dir>/<archive>.tar.gz.age --identity-file ~/.config/age/key.txt --target ./restore-staging
+```
+
+## stackkit backup init
+
+पहली बार चलाने के सेटअप निर्देश प्रिंट करें।
+
+बैकअप ऐडऑन के लिए पहली बार चलाने के सेटअप चरण प्रिंट करें।
+
+यह कमांड केवल पढ़ने के लिए है। यह उस नेटिव लाइफ़साइकिल का वर्णन करती है जो रिपॉज़िटरी कॉन्फ़िगरेशन से पहले CUE-स्वामित्व वाले स्थानीय kopia-agent को रेंडर और लागू करता है।
+
+```bash
+stackkit backup init [flags]
+```
+
+## stackkit backup restore
+
+हस्ताक्षरित स्नैपशॉट को सत्यापित करें और अलग स्टेजिंग में रिस्टोर करें।
+
+एक कंटेंट-एड्रेस्ड, ओनर-हस्ताक्षरित स्नैपशॉट एंकर को CUE-स्वामित्व वाले अलग स्टेजिंग वॉल्यूम में रिस्टोर करें। कच्चा Kopia स्नैपशॉट ID और स्टेजिंग पथ कॉल करने वाले के नियंत्रण में नहीं हैं। `--owner-approve` स्पष्ट स्थानीय ओनर प्राधिकरण दर्ज करता है; इस कमांड को कभी Kombify अकाउंट या Cloud सेवा की ज़रूरत नहीं होती।
+
+```bash
+stackkit backup restore <snapshot-anchor-id> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+| `--operation-id` | string | — | इस स्टेज्ड रिस्टोर ऑपरेशन के लिए स्थिर आइडेम्पोटेंसी की |
+| `--owner-approve` | bool | — | स्थापित स्थानीय ओनर कस्टडी से इस स्टेज्ड रिस्टोर को अधिकृत करें |
+
+**उदाहरण**
+
+```bash
+# Restore a snapshot into isolated staging; the live volumes are not touched
+stackkit backup restore sha256:<snapshot-anchor-id> --owner-approve
+
+# Print the result as JSON: data.id is the restore result ID for restore activate, data.operationId is the restore operation ID for restore abandon
+stackkit backup restore sha256:<snapshot-anchor-id> --owner-approve --json
+```
+
+उप-कमांड: [`stackkit backup restore abandon`](#stackkit-backup-restore-abandon), [`stackkit backup restore activate`](#stackkit-backup-restore-activate), [`stackkit backup restore recover`](#stackkit-backup-restore-recover)
+
+### stackkit backup restore abandon
+
+एक लंबित या स्टेज्ड रिस्टोर ऑपरेशन छोड़ दें।
+
+```bash
+stackkit backup restore abandon <restore-operation-id> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+| `--owner-approve` | bool | — | स्थापित स्थानीय ओनर कस्टडी से इस रिस्टोर को छोड़ने को अधिकृत करें |
+
+**उदाहरण**
+
+```bash
+# Discard a staged restore you do not want to activate
+stackkit backup restore abandon <restore-operation-id> --owner-approve
+```
+
+### stackkit backup restore activate
+
+एक सत्यापित स्टेज्ड रिस्टोर को लाइव Basement वॉल्यूम में सक्रिय करें।
+
+```bash
+stackkit backup restore activate <restore-result-id> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+| `--operation-id` | string | — | इस लाइव रिस्टोर सक्रियण के लिए स्थिर आइडेम्पोटेंसी की |
+| `--owner-approve` | bool | — | स्थापित स्थानीय ओनर कस्टडी से लाइव सक्रियण को अधिकृत करें |
+
+**उदाहरण**
+
+```bash
+# Replace the live volumes with a verified staged restore
+stackkit backup restore activate sha256:<restore-result-id> --owner-approve
+
+# Name the activation operation so an interrupted run can be recovered by that ID
+stackkit backup restore activate sha256:<restore-result-id> --owner-approve --operation-id restore-activate-2026-09-18
+```
+
+### stackkit backup restore recover
+
+बाधित रिस्टोर को रिकवर करें या उसका कमिट हो चुका परिणाम पूरा करें।
+
+ओनर द्वारा स्वीकृत सटीक रिस्टोर सक्रियण को रिकवर करें। कमिट से पहले रिकवरी पिछले लाइव वॉल्यूम बहाल करती है। कमिट के बाद यह सक्रिय किया गया डेटा सुरक्षित रखती है और परिणाम की सफ़ाई तथा एप्लिकेशन फ़ाइनलाइज़ेशन फिर शुरू करती है। पूरे हो चुके ऑपरेशन के लिए रिकवरी दोहराने पर उसका मूल हस्ताक्षरित परिणाम लौटता है। `--rollback` आवश्यक है।
+
+```bash
+stackkit backup restore recover <activation-operation-id> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+| `--owner-approve` | bool | — | स्थापित स्थानीय ओनर कस्टडी से रिकवरी को अधिकृत करें |
+| `--rollback` | bool | — | यदि बाधित सक्रियण कमिट नहीं हुआ है तो रोलबैक को अधिकृत करें |
+
+**उदाहरण**
+
+```bash
+# Recover an interrupted activation by its operation ID
+stackkit backup restore recover restore-activate-2026-09-18 --rollback --owner-approve
+```
+
+## stackkit backup run
+
+अभी स्नैपशॉट बलपूर्वक लें (आउट-ऑफ़-बैंड)।
+
+```bash
+stackkit backup run [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+| `--operation-id` | string | — | इस स्नैपशॉट ऑपरेशन के लिए स्थिर आइडेम्पोटेंसी की |
+| `--scheduled` | bool | — | केवल वर्तमान हस्ताक्षरित स्थानीय शेड्यूल प्राधिकरण के ज़रिए निष्पादित करें |
+
+**उदाहरण**
+
+```bash
+# Take a snapshot now; data.id in the JSON result is the snapshot anchor ID for backup restore
+stackkit backup run --json
+
+# Use your own operation ID so a retry cannot create a second snapshot
+stackkit backup run --operation-id manual-2026-09-18
+```
+
+## stackkit backup schedule
+
+ओनर द्वारा स्वीकृत स्थानीय बैकअप टाइमर नियंत्रित करें।
+
+```bash
+stackkit backup schedule [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+उप-कमांड: [`stackkit backup schedule disable`](#stackkit-backup-schedule-disable), [`stackkit backup schedule enable`](#stackkit-backup-schedule-enable), [`stackkit backup schedule status`](#stackkit-backup-schedule-status)
+
+### stackkit backup schedule disable
+
+निर्धारित बैकअप निष्पादन रद्द करें और उसका टाइमर रोकें।
+
+```bash
+stackkit backup schedule disable [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | स्थानीय निर्धारित बैकअप प्राधिकार रद्द करें |
+
+[`stackkit backup schedule`](#stackkit-backup-schedule) से विरासत में मिले:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+**उदाहरण**
+
+```bash
+# Stop scheduled snapshots and revoke their authorization
+stackkit backup schedule disable --owner-approve
+```
+
+### stackkit backup schedule enable
+
+सटीक CUE बैकअप अंतराल को स्वीकृत करें और सक्षम करें।
+
+```bash
+stackkit backup schedule enable [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | इस सटीक Plan, CLI और स्थानीय बैकअप अंतराल को स्वीकृत करें |
+
+[`stackkit backup schedule`](#stackkit-backup-schedule) से विरासत में मिले:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+**उदाहरण**
+
+```bash
+# Approve the backup cadence from the applied plan and start its timer
+stackkit backup schedule enable --owner-approve
+```
+
+### stackkit backup schedule status
+
+टाइमर, प्राधिकरण और आख़िरी निर्धारित स्नैपशॉट अलग-अलग दिखाएँ।
+
+```bash
+stackkit backup schedule status [flags]
+```
+
+[`stackkit backup schedule`](#stackkit-backup-schedule) से विरासत में मिले:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+**उदाहरण**
+
+```bash
+# Show the timer, its authorization, and the last scheduled snapshot
+stackkit backup schedule status
+
+# The same status as JSON
+stackkit backup schedule status --json
+```
+
+## stackkit backup status
+
+स्थानीय Kopia रिपॉज़िटरी की स्थिति दिखाएँ।
+
+```bash
+stackkit backup status [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+**उदाहरण**
+
+```bash
+# Show repository readiness, coverage, and the latest snapshot and restore receipts
+stackkit backup status
+
+# The same status as JSON
+stackkit backup status --json
+```
+
+## stackkit backup target
+
+ओनर द्वारा दिए गए S3 लक्ष्य को जनरेट की गई बैकअप नीति से बाइंड करें।
+
+```bash
+stackkit backup target [flags]
+```
+
+उप-कमांड: [`stackkit backup target import`](#stackkit-backup-target-import), [`stackkit backup target status`](#stackkit-backup-target-status)
+
+### stackkit backup target import
+
+stdin पर JSON से एन्क्रिप्टेड S3 कस्टडी इम्पोर्ट करें।
+
+stdin से JSON फ़ील्ड endpoint, bucket, prefix, region, accessKeyId, secretAccessKey और passphrase इम्पोर्ट करें। passphrase मौजूदा Kopia रिपॉज़िटरी के लिए एक स्ट्रिंग है। केवल अपारदर्शी लक्ष्य संदर्भ प्रिंट होते हैं। यह कस्टडी इम्पोर्ट करता है; यह बकेट नहीं बनाता और ऑफ़साइट तैयारी सत्यापित नहीं करता।
+
+```bash
+stackkit backup target import [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--candidate-digest` | string | — | इंस्टॉल किए गए StackKits रिलीज़ कैंडिडेट का सटीक sha256 डाइजेस्ट |
+| `--owner-approve` | bool | — | इस सटीक स्थानीय बैकअप लक्ष्य को अधिकृत करें |
+| `--rebind` | bool | — | मौजूदा लक्ष्य और क्रेडेंशियल बनाए रखते हुए Plan/स्रोत प्राधिकार का नवीनीकरण करें |
+
+**उदाहरण**
+
+```bash
+# Import the S3 target from a private JSON file with the fields listed above
+stackkit backup target import --owner-approve < s3-target.json
+```
+
+### stackkit backup target status
+
+S3 से संपर्क किए बिना स्थानीय लक्ष्य कस्टडी सत्यापित करें।
+
+```bash
+stackkit backup target status [flags]
+```
+
+**उदाहरण**
+
+```bash
+# Confirm the imported target custody is intact
+stackkit backup target status
+```
+
