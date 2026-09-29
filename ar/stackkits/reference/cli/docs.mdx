@@ -1,0 +1,98 @@
+---
+title: "stackkit docs"
+description: "توليد إسقاطات حتمية لتوثيق StackKits"
+sidebarTitle: "docs"
+---
+توليد إسقاطات حتمية لتوثيق StackKits.
+
+```bash
+stackkit docs [flags]
+```
+
+الأوامر الفرعية: [`stackkit docs emit-advanced-operations`](#stackkit-docs-emit-advanced-operations)، [`stackkit docs emit-cli-reference`](#stackkit-docs-emit-cli-reference)، [`stackkit docs emit-release-manifests`](#stackkit-docs-emit-release-manifests)، [`stackkit docs emit-use-case-overview`](#stackkit-docs-emit-use-case-overview)
+
+## stackkit docs emit-advanced-operations
+
+إصدار كتالوج العمليات المتقدمة (stackkit.advanced-operations/v1).
+
+كتابة الكتالوج المقروء آلياً لكل عملية متقدمة يجوز للمنسّق (orchestrator) إرسالها: قوالب argv الدقيقة، ومتطلبات القبول، وعقود المدخلات والنتائج، ومراحل أحداث النشر، ومغلف الرفض.
+
+يشحن أرشيف الإصدار هذا الملف. مع `--check` لا يُكتب شيء؛ ويفشل الأمر عندما يختلف الملف عن مصدر الكتالوج.
+
+```bash
+stackkit docs emit-advanced-operations [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--check` | bool | — | عدم كتابة شيء؛ الفشل عندما يكون ملف الكتالوج مفقوداً أو قديماً |
+| `--out` | string | `docs/data/advanced-operations/latest.json` | مسار JSON للكتالوج، نسبةً إلى `--chdir` |
+
+**أمثلة**
+
+```bash
+# Regenerate the committed catalog after changing an Advanced operation
+stackkit docs emit-advanced-operations
+
+# Fail when the committed catalog is stale
+stackkit docs emit-advanced-operations --check
+```
+
+## stackkit docs emit-cli-reference
+
+إصدار مرجع واجهة سطر أوامر stackkit المقروء آلياً.
+
+كتابة كل أمر وعلَم ومثال ظاهر في stackkit بصيغة JSON حتمية.
+
+يعرض مرجع CLI في stackkit.cc هذا الملف. مع `--check` لا يُكتب شيء؛ ويفشل الأمر عندما يختلف الملف عن شجرة الأوامر الحالية.
+
+```bash
+stackkit docs emit-cli-reference [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--check` | bool | — | عدم كتابة شيء؛ الفشل عندما يكون ملف المرجع مفقوداً أو قديماً |
+| `--out` | string | `docs/data/cli-reference/latest.json` | مسار JSON للمرجع، نسبةً إلى `--chdir` |
+
+**أمثلة**
+
+```bash
+# Regenerate the committed reference after changing a command, flag, or example
+stackkit docs emit-cli-reference
+
+# Fail when the committed reference is stale
+stackkit docs emit-cli-reference --check
+```
+
+## stackkit docs emit-release-manifests
+
+إصدار بيانات حالات الاستخدام والتوافق المرتبطة بالإصدار.
+
+```bash
+stackkit docs emit-release-manifests [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--output-dir` | string | — | **مطلوب.** مجلد إخراج البيانات |
+| `--public-source-sha` | string | — | **مطلوب.** SHA المصدر العام بدقة |
+| `--release-tag` | string | — | **مطلوب.** وسم الإصدار المنشور (vX.Y.Z) |
+| `--release-url` | string | — | **مطلوب.** عنوان URL العام الدقيق للإصدار |
+| `--source-sha` | string | — | **مطلوب.** SHA المصدر الخاص بدقة |
+
+## stackkit docs emit-use-case-overview
+
+توليد النظرة العامة الداخلية المشتقة لتطوير حالات الاستخدام.
+
+```bash
+stackkit docs emit-use-case-overview [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--evidence-output` | string | — | مسار إخراج بيان الأدلة |
+| `--output` | string | — | مسار إخراج Markdown |
+| `--source-sha` | string | — | **مطلوب.** SHA المصدر بدقة |
+| `--test-receipt` | string | — | إيصال اختبار ناجح مرتبط بـ SHA المصدر |
+| `--tests-passed-for-source` | bool | — | وسم الاختبارات بأنها مكتملة بعد أن اجتاز المستدعي اختبارات الكتالوج بشكل متزامن لـ source-sha |

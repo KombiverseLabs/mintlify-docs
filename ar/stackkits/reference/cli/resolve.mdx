@@ -1,0 +1,34 @@
+---
+title: "stackkit resolve"
+description: "تحويل نية Architecture v2 إلى خطة نشر قانونية"
+sidebarTitle: "resolve"
+---
+تحويل نية Architecture v2 إلى خطة نشر قانونية.
+
+حوّل مستند StackSpec v2 وInventory مرصودًا اختياريًا إلى ResolvedPlan القانونية التي تستهلكها المولّدات وأوقات التشغيل.
+
+الأمر للقراءة فقط ما لم يُمرَّر `--output`. يبقى إخراج الملفات تحت دليل العمل ولا يمكنه استبدال إلا ResolvedPlan صالحة موجودة؛ ويشارك قفل تعديل دورة الحياة. لا تُرقّى StackSpec v1 ولا تُصرَّف بصمت أبدًا: بل يعيد الأمر تقرير الترحيل المنمَّط المشترك ويتطلب سير عمل ترحيل صريحًا.
+
+```bash
+stackkit resolve [spec-file] [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--inventory` | string | — | مسار مستند Inventory مرصود اختياري |
+| `--module-root` | string | — | جذر مرجعية المعمارية الذي يحتوي على cue.mod وbase وكل تعريفات الـ Kit |
+| `--output, -o` | string | — | اكتب JSON الخاص بـ ResolvedPlan القانونية تحت دليل العمل بدل stdout |
+
+**أمثلة**
+
+```bash
+# Print the canonical ResolvedPlan for a StackSpec
+stackkit resolve --spec stack-spec.yaml
+
+# Resolve against an observed Inventory
+stackkit resolve stack-spec.yaml --inventory inventory.yaml
+
+# Replace the existing plan file beneath the working directory
+stackkit resolve stack-spec.yaml --output deploy/.stackkit/resolved-plan.json
+```
+

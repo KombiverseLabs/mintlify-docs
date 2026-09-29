@@ -1,0 +1,175 @@
+---
+title: "stackkit identity"
+description: "إدارة مستوى الهوية المحلي المستقل"
+sidebarTitle: "identity"
+---
+إدارة مستوى الهوية المحلي المستقل.
+
+```bash
+stackkit identity [flags]
+```
+
+الأوامر الفرعية: [`stackkit identity projection`](#stackkit-identity-projection), [`stackkit identity workload-peer`](#stackkit-identity-workload-peer)
+
+## stackkit identity projection
+
+افحص إسقاطات الهوية المطلوبة الخالية من بيانات الاعتماد ووافق عليها محليًا.
+
+```bash
+stackkit identity projection [flags]
+```
+
+الأوامر الفرعية: [`stackkit identity projection apply`](#stackkit-identity-projection-apply), [`stackkit identity projection approve`](#stackkit-identity-projection-approve), [`stackkit identity projection inspect`](#stackkit-identity-projection-inspect), [`stackkit identity projection unlink`](#stackkit-identity-projection-unlink)
+
+### stackkit identity projection apply
+
+طبّق إسقاطًا واحدًا سبقت الموافقة عليه على PocketID المحلي.
+
+```bash
+stackkit identity projection apply [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
+| `--owner-approve` | bool | — | وافق صراحةً على عملية الهوية المحلية هذه |
+| `--projection-sha256` | string | — | قيمة sha256:&lt;hex&gt; الدقيقة لإسقاط جرت الموافقة عليه محليًا |
+
+### stackkit identity projection approve
+
+أنشئ الموافقة الموقَّعة من المالك محليًا دون تعديل PocketID.
+
+```bash
+stackkit identity projection approve [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--file` | string | — | مسار مستند stackkit.desired-identity-projection/v1 القانوني |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
+| `--owner-approve` | bool | — | وافق صراحةً على استيراد هذا الإسقاط المطلوب إلى الحيازة المحلية |
+
+### stackkit identity projection inspect
+
+تحقق من إسقاط موقَّع واحد دون أي تعديل.
+
+```bash
+stackkit identity projection inspect [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--file` | string | — | مسار مستند stackkit.desired-identity-projection/v1 القانوني |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
+
+### stackkit identity projection unlink
+
+افصل المزامنة الاختيارية دون حذف أي هوية محلية.
+
+```bash
+stackkit identity projection unlink [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
+| `--owner-approve` | bool | — | وافق صراحةً على عملية الهوية المحلية هذه |
+| `--projection-sha256` | string | — | قيمة sha256:&lt;hex&gt; الدقيقة لإسقاط جرت الموافقة عليه محليًا |
+
+## stackkit identity workload-peer
+
+تبادل شهادات أحمال عمل Cloud التي وافق عليها المالك مع Home.
+
+```bash
+stackkit identity workload-peer [flags]
+```
+
+الأوامر الفرعية: [`stackkit identity workload-peer enroll`](#stackkit-identity-workload-peer-enroll), [`stackkit identity workload-peer install`](#stackkit-identity-workload-peer-install), [`stackkit identity workload-peer probe`](#stackkit-identity-workload-peer-probe), [`stackkit identity workload-peer request`](#stackkit-identity-workload-peer-request), [`stackkit identity workload-peer revoke`](#stackkit-identity-workload-peer-revoke)
+
+### stackkit identity workload-peer enroll
+
+أصدر نظيرًا وأدخله لنشر Home مثبَّت واحد.
+
+```bash
+stackkit identity workload-peer enroll [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--address` | string | — | مقبس loopback موجود للتوحيد (federation) يستخدمه فحص Cloud |
+| `--file` | string | — | ملف JSON عام للطلب أو بيانات الاعتماد |
+| `--home-root-sha256` | string | — | بصمة sha256 للجذر في Home جرى التحقق منها عبر قناة منفصلة وافق عليها المالك |
+| `--owner-approve` | bool | — | وافق صراحةً على عملية هوية حمل العمل المحلية هذه |
+| `--peer-ref` | string | — | هوية نظير حمل العمل الصريحة |
+| `--replace-key` | bool | — | استبدل مفتاح النظير المحدد صراحةً؛ وتبقى المفاتيح الملغاة مرفوضة |
+| `--server-name` | string | — | اسم خادم أصل Home المثبَّت |
+
+### stackkit identity workload-peer install
+
+ثبّت شهادة أصدرها Home باستخدام جذر جرى التحقق منه بصورة مستقلة.
+
+```bash
+stackkit identity workload-peer install [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--address` | string | — | مقبس loopback موجود للتوحيد (federation) يستخدمه فحص Cloud |
+| `--file` | string | — | ملف JSON عام للطلب أو بيانات الاعتماد |
+| `--home-root-sha256` | string | — | بصمة sha256 للجذر في Home جرى التحقق منها عبر قناة منفصلة وافق عليها المالك |
+| `--owner-approve` | bool | — | وافق صراحةً على عملية هوية حمل العمل المحلية هذه |
+| `--peer-ref` | string | — | هوية نظير حمل العمل الصريحة |
+| `--server-name` | string | — | اسم خادم أصل Home المثبَّت |
+
+### stackkit identity workload-peer probe
+
+اطلب الأصل عبر مقبس loopback موجود للتوحيد (federation).
+
+```bash
+stackkit identity workload-peer probe [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--address` | string | — | مقبس loopback موجود للتوحيد (federation) يستخدمه فحص Cloud |
+| `--file` | string | — | ملف JSON عام للطلب أو بيانات الاعتماد |
+| `--home-root-sha256` | string | — | بصمة sha256 للجذر في Home جرى التحقق منها عبر قناة منفصلة وافق عليها المالك |
+| `--owner-approve` | bool | — | وافق صراحةً على عملية هوية حمل العمل المحلية هذه |
+| `--peer-ref` | string | — | هوية نظير حمل العمل الصريحة |
+| `--server-name` | string | — | اسم خادم أصل Home المثبَّت |
+
+### stackkit identity workload-peer request
+
+أنشئ مفتاحًا يحتفظ به Cloud أو أعد استخدامه، وصدّر CSR العام الخاص به.
+
+```bash
+stackkit identity workload-peer request [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--address` | string | — | مقبس loopback موجود للتوحيد (federation) يستخدمه فحص Cloud |
+| `--file` | string | — | ملف JSON عام للطلب أو بيانات الاعتماد |
+| `--home-root-sha256` | string | — | بصمة sha256 للجذر في Home جرى التحقق منها عبر قناة منفصلة وافق عليها المالك |
+| `--owner-approve` | bool | — | وافق صراحةً على عملية هوية حمل العمل المحلية هذه |
+| `--peer-ref` | string | — | هوية نظير حمل العمل الصريحة |
+| `--rotate-key` | bool | — | أنشئ مفتاح Cloud جديدًا مع الإبقاء على بيانات الاعتماد النشطة حتى التثبيت |
+| `--server-name` | string | — | اسم خادم أصل Home المثبَّت |
+
+### stackkit identity workload-peer revoke
+
+اسحب قبول Home الحالي للنظير.
+
+```bash
+stackkit identity workload-peer revoke [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--address` | string | — | مقبس loopback موجود للتوحيد (federation) يستخدمه فحص Cloud |
+| `--file` | string | — | ملف JSON عام للطلب أو بيانات الاعتماد |
+| `--home-root-sha256` | string | — | بصمة sha256 للجذر في Home جرى التحقق منها عبر قناة منفصلة وافق عليها المالك |
+| `--owner-approve` | bool | — | وافق صراحةً على عملية هوية حمل العمل المحلية هذه |
+| `--peer-ref` | string | — | هوية نظير حمل العمل الصريحة |
+| `--server-name` | string | — | اسم خادم أصل Home المثبَّت |
+

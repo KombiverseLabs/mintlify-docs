@@ -1,0 +1,146 @@
+---
+title: "stackkit logs"
+description: "عرض سجلات النشر المنظَّمة"
+sidebarTitle: "logs"
+---
+اعرض سجلات النشر المنظَّمة.
+
+اعرض سجلات النشر المنظَّمة من التشغيلات السابقة وصفّها.
+
+افتراضيًا يعرض أحدث سجل بصيغة مقروءة للبشر. استخدم المرشّحات للتضييق إلى أنواع أحداث محددة.
+
+```bash
+stackkit logs [run-id] [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | مؤشر معتم مرتبط بالـ digest أعادته صفحة JSON سابقة |
+| `--decisions` | bool | — | اعرض أحداث القرار فقط |
+| `--errors` | bool | — | اعرض الأخطاء والتحذيرات فقط |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
+| `--jsonl` | bool | — | أخرج JSON-Lines خام |
+| `--max-bytes` | int | `262144` | الحد الأقصى لبايتات السجل الخام التي تُفحص في كل صفحة JSON |
+| `--max-events` | int | `200` | الحد الأقصى للأحداث المنظَّمة في كل صفحة JSON |
+| `--timing` | bool | — | اعرض ملخص التوقيت |
+
+**أمثلة**
+
+```bash
+# Show the latest log (human-readable)
+stackkit logs
+
+# Show the latest log as structured JSON
+stackkit logs --json
+
+# Show the latest log as raw JSON Lines
+stackkit logs --jsonl
+
+# Show only decision events
+stackkit logs --decisions
+
+# Show only errors and warnings
+stackkit logs --errors
+
+# Show a timing summary
+stackkit logs --timing
+```
+
+الأوامر الفرعية: [`stackkit logs get`](#stackkit-logs-get), [`stackkit logs latest`](#stackkit-logs-latest), [`stackkit logs list`](#stackkit-logs-list)
+
+## stackkit logs get
+
+اقرأ سجل طرح منظَّمًا واحدًا بدقة.
+
+```bash
+stackkit logs get <run-id> [flags]
+```
+
+موروثة من `stackkit logs`:
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | مؤشر معتم مرتبط بالـ digest أعادته صفحة JSON سابقة |
+| `--decisions` | bool | — | اعرض أحداث القرار فقط |
+| `--errors` | bool | — | اعرض الأخطاء والتحذيرات فقط |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
+| `--jsonl` | bool | — | أخرج JSON-Lines خام |
+| `--max-bytes` | int | `262144` | الحد الأقصى لبايتات السجل الخام التي تُفحص في كل صفحة JSON |
+| `--max-events` | int | `200` | الحد الأقصى للأحداث المنظَّمة في كل صفحة JSON |
+| `--timing` | bool | — | اعرض ملخص التوقيت |
+
+**أمثلة**
+
+```bash
+# Read one run by an ID that stackkit logs list printed
+stackkit logs get <run-id>
+
+# Read that run as JSON, 50 events per page
+stackkit logs get <run-id> --json --max-events 50
+
+# Continue with the cursor the previous JSON page returned
+stackkit logs get <run-id> --json --max-events 50 --cursor <cursor>
+```
+
+## stackkit logs latest
+
+اقرأ أحدث سجل طرح منظَّم.
+
+```bash
+stackkit logs latest [flags]
+```
+
+موروثة من `stackkit logs`:
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | مؤشر معتم مرتبط بالـ digest أعادته صفحة JSON سابقة |
+| `--decisions` | bool | — | اعرض أحداث القرار فقط |
+| `--errors` | bool | — | اعرض الأخطاء والتحذيرات فقط |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
+| `--jsonl` | bool | — | أخرج JSON-Lines خام |
+| `--max-bytes` | int | `262144` | الحد الأقصى لبايتات السجل الخام التي تُفحص في كل صفحة JSON |
+| `--max-events` | int | `200` | الحد الأقصى للأحداث المنظَّمة في كل صفحة JSON |
+| `--timing` | bool | — | اعرض ملخص التوقيت |
+
+**أمثلة**
+
+```bash
+# Read the newest rollout log
+stackkit logs latest
+
+# Only errors and warnings from the newest log, as JSON
+stackkit logs latest --errors --json
+```
+
+## stackkit logs list
+
+اعرض ملفات السجل المتاحة.
+
+```bash
+stackkit logs list [flags]
+```
+
+موروثة من `stackkit logs`:
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | مؤشر معتم مرتبط بالـ digest أعادته صفحة JSON سابقة |
+| `--decisions` | bool | — | اعرض أحداث القرار فقط |
+| `--errors` | bool | — | اعرض الأخطاء والتحذيرات فقط |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
+| `--jsonl` | bool | — | أخرج JSON-Lines خام |
+| `--max-bytes` | int | `262144` | الحد الأقصى لبايتات السجل الخام التي تُفحص في كل صفحة JSON |
+| `--max-events` | int | `200` | الحد الأقصى للأحداث المنظَّمة في كل صفحة JSON |
+| `--timing` | bool | — | اعرض ملخص التوقيت |
+
+**أمثلة**
+
+```bash
+# List the run IDs of all local rollout logs
+stackkit logs list
+
+# The same list as JSON
+stackkit logs list --json
+```
+

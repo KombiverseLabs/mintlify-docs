@@ -1,0 +1,66 @@
+---
+title: "stackkit drift"
+description: "رصد انحراف StackKit المحلي ومصالحته"
+sidebarTitle: "drift"
+---
+رصد انحراف StackKit المحلي ومصالحته.
+
+```bash
+stackkit drift [flags]
+```
+
+الأوامر الفرعية: [`stackkit drift detect`](#stackkit-drift-detect)، [`stackkit drift reconcile`](#stackkit-drift-reconcile)
+
+## stackkit drift detect
+
+قراءة الحالة المحلية المعتمدة والإبلاغ عن الانحراف.
+
+قراءة ResolvedPlan القياسية والتحقق منها، والمخرجات المولَّدة، وأدلة Apply الموقَّعة من المالك، وربط المالك المحلي، ووقت تشغيل Basement Compose الحي، دون تحديث حالة وقت التشغيل. وفي هدف التوليد terramate يشغّل أيضاً خطة OpenTofu للقراءة فقط برمز خروج مفصّل عبر Terramate في كل حزمة (stack) من مشروع المضيف المحلي، ويضيف مدخلاً واحداً في stacks لكل حزمة؛ ولا يطبّق شيئاً أبداً. يُحتفظ بالتقرير المُعنوَن بالمحتوى كدليل محلي للمالك لكل Application Kit مختارة.
+
+```bash
+stackkit drift detect [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | إصدار JSON بصيغة stackkit.command-result/v1 |
+
+**أمثلة**
+
+```bash
+# Compare the live deployment with the applied plan
+stackkit drift detect
+
+# The same drift report as JSON
+stackkit drift detect --json
+```
+
+## stackkit drift reconcile
+
+مصالحة الانحراف عبر دورة الحياة المحلية الخاضعة للحوكمة.
+
+يتطلب الوضع القياسي موافقة صريحة من المالك المحلي، ويتحقق من السلطة المحلية الحالية، وينشئ نقطة استرجاع إلزامية لـ Kopia وحالة المنفّذ، ثم يشغّل generate وapply وverify عبر سجل دورة الحياة الحصري. وتؤدي أي مرحلة هدف فاشلة إلى استعادة حالة المنفّذ السابقة الملتقطة وإعادة تطبيقها والتحقق منها تلقائياً. ويظل الوضع المتقدم مغلقاً عند الفشل إلى أن تُقدَّم قدرة (capability) مُتحقَّق منها دون اتصال؛ وبعد التعديل المتقدم يرصد تقرير الانحراف مجدداً، بما في ذلك خطة كل حزمة Terramate، ويفشل ما لم يكن التقرير بعد المصالحة نظيفاً.
+
+```bash
+stackkit drift reconcile [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--candidate-spec` | string | — | متقدم: StackSpec المرشحة الدقيقة لـ Terramate |
+| `--capability` | string | — | متقدم: ملف القدرة القياسي دون اتصال |
+| `--change-set` | string | — | متقدم: معرّف مجموعة التغييرات الدقيق الموقَّع من المالك |
+| `--expect-sha256` | string | — | متقدم: بصمة بايتات مجموعة التغييرات المخزنة بدقة |
+| `--json` | bool | — | إصدار JSON بصيغة stackkit.command-result/v1 |
+| `--mode` | string | `standard` | وضع المصالحة: standard أو advanced |
+| `--owner-approve` | bool | — | تسجيل موافقة المالك المحلي الصريحة على المصالحة القياسية |
+
+**أمثلة**
+
+```bash
+# Reconcile drift in standard mode: checkpoint, then generate, apply, and verify
+stackkit drift reconcile --owner-approve
+
+# The same reconciliation with a JSON result
+stackkit drift reconcile --owner-approve --json
+```

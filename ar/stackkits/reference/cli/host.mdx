@@ -1,0 +1,248 @@
+---
+title: "stackkit host"
+description: "عمليات عقد المضيف المحايدة للمزوّد"
+sidebarTitle: "host"
+---
+عمليات عقد المضيف المحايدة للمزوّد.
+
+```bash
+stackkit host [flags]
+```
+
+الأوامر الفرعية: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host updates`](#stackkit-host-updates)
+
+## stackkit host attach-conformance
+
+أرفق أدلة المضيف الدقيقة بـ Inventory قبل إنشاء الخطة.
+
+```bash
+stackkit host attach-conformance [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--binding` | string | — | **مطلوب.** ملف JSON لـ ExternalHostBinding مقيَّد بمساحة العمل |
+| `--inventory` | string | — | **مطلوب.** ملف inventory.json مقيَّد بمساحة العمل يُحدَّث بصورة ذرّية |
+| `--receipt` | string | — | **مطلوب.** ملف JSON لـ HostConformanceReceipt مقيَّد بمساحة العمل |
+
+## stackkit host conformance
+
+أنشئ إيصال مطابقة محايدًا للمزوّد على هذا المضيف.
+
+```bash
+stackkit host conformance [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--binding` | string | — | **مطلوب.** ملف JSON محلي لـ ExternalHostBinding |
+| `--output, -o` | string | `-` | وجهة الإيصال ('-' لإخراج JSON إلى stdout) |
+
+## stackkit host environment
+
+راقب ما إذا كان هذا المضيف يبدو شبكة منزلية أم خادمًا عامًا.
+
+اكتشف بيئة الشبكة لهذا الجهاز.
+
+هذه مراقبة وليست اختيارًا لـ Kit. يستخدمها المثبّتان وinit للسؤال قبل تأليف عناوين منزلية محلية على VPS، أو Cloud Kit على مضيف في شبكة محلية. تتجاوز القيمة STACKKIT_NETWORK_ENV=home|vps|cloud|unknown الاكتشاف المباشر.
+
+```bash
+stackkit host environment [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج المراقبة بصيغة JSON |
+
+**أمثلة**
+
+```bash
+# Show whether this host looks like a home network or a public server
+stackkit host environment
+
+# The same observation as JSON
+stackkit host environment --json
+
+# Override a wrong detection for the next command, here Basement Kit init on a home host
+STACKKIT_NETWORK_ENV=home stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com
+```
+
+## stackkit host preflight
+
+تحقق مما إذا كان هذا المضيف قادرًا على تشغيل StackKit المحدد.
+
+قِس هذا المضيف وقارنه بالحد الأدنى الذي يعلنه الـ Kit.
+
+يجري preflight فحوصات للقراءة فقط: فهو لا يثبّت شيئًا ولا يشغّله ولا يضبطه. يجري apply القبول نفسه قبل أن يعدّل المضيف.
+
+```bash
+stackkit host preflight [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج تقرير preflight المُصدَّر بصيغة JSON قابلة للقراءة الآلية |
+| `--local-node` | string | — | العقدة المحلية الدقيقة في ResolvedPlan المقدَّمة |
+| `--policy` | string | — | سياسة القبول: strict أو warn (الافتراضي) أو skip |
+| `--resolved-plan` | string | — | ResolvedPlan قانونية موثَّقة تُفحص منافذ الاستماع لمضيفها |
+
+**أمثلة**
+
+```bash
+# Check this host against the kit selected in the current deployment directory
+stackkit host preflight
+
+# Also refuse on warnings and unknown facts, and print the report as JSON
+stackkit host preflight --policy strict --json
+```
+
+## stackkit host prepare
+
+جهّز هذا المضيف قبل تنفيذ apply لـ Cloud Kit.
+
+وفّر حساب قناة التنفيذ في Cloud وحيازة مفتاح SSH المطلوبين قبل أن يعطّل host-security تسجيل الدخول بحساب root.
+
+تستدعي مثبّتات Cloud Kit وapply هذا الأمر تلقائيًا. يوجد الأمر للتشخيص ولإعادة مساحة العمل إلى حالة متسقة بعد انقطاع يدوي. وهو يُنشئ المفتاح المحفوظ في مساحة العمل تحت .stackkit/cloud-host-security/execution-channel/ أو يعيد استخدامه، ويثبّت المفتاح العام المطابق في حساب Linux الخاص بقناة التنفيذ.
+
+```bash
+stackkit host prepare [flags]
+```
+
+**أمثلة**
+
+```bash
+# Converge the execution-channel account after an interrupted Cloud Kit install (run as root in the Cloud Kit deployment directory)
+cd my-cloud
+stackkit host prepare
+```
+
+## stackkit host reboot
+
+جدولة إعادة تشغيل هذه العقدة.
+
+جدولة إعادة تشغيل هذه العقدة بعد تأخير قصير والعودة فورًا.
+
+يحدد boot_id_before الإقلاع الحالي، فيستطيع المستدعي معرفة أن العقدة عادت بقراءة معرّف إقلاع مختلف. يرفض الأمر عقدة تشغّل مستوى التحكم في Techstack، وعقدة يحتفظ فيها apt أو dpkg بقفله أو يجري فيها تحديث للمضيف، وعقدة لا تستطيع الإقلاع دون تدخل (وحدات تخزين في /etc/crypttab تحتاج إلى عبارة مرور، أو غياب apt).
+
+عند انتهاء التأخير يفحص حارس الحالة مرة أخرى، وينتظر حتى 15 دقيقة لانتهاء أي عملية حزم، ثم يطلب إعادة التشغيل وهو يمسك أقفال dpkg. لا يُعاد تشغيل العقدة التي تبقى مشغولة؛ ويبقى معرّف إقلاعها كما هو.
+
+```bash
+stackkit host reboot [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--delay` | duration | `30s` | المدة حتى بدء إعادة التشغيل (من 1s إلى 5m) |
+| `--json` | bool | — | أخرج نتيجة stackkit.host-maintenance/v1 بصيغة JSON قابلة للقراءة الآلية |
+| `--yes` | bool | — | أكّد أنه يجوز إعادة تشغيل هذه العقدة |
+
+**أمثلة**
+
+```bash
+# Reboot this node in 30 seconds
+sudo stackkit host reboot --yes
+
+# Reboot in two minutes and report the boot ID to compare against
+sudo stackkit host reboot --yes --delay 2m --json
+```
+
+## stackkit host remediate
+
+اعرض الإصلاحات لما وجده preflight للمضيف أو نفّذها.
+
+اعرض الإصلاحات التي تعالج نتائج preflight لهذا المضيف، أو نفّذ أحدها.
+
+بدون `--apply` لا يتغير شيء: يقيس الأمر المضيف ويطبع ما سيفعله كل إصلاح، وهل يمكن التراجع عنه، وهل يحتاج إلى root.
+
+مع `--apply` &lt;id&gt; `--yes` يُنفَّذ الإصلاح المسمّى، ويُقاس الفحص الذي برّره مرة أخرى بعد ذلك، فتذكر النتيجة ما تغيّر فعلًا لا أنه جرت محاولة.
+
+```bash
+stackkit host remediate [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--apply` | string | — | نفّذ القرار المسمّى (يتطلب `--yes`) |
+| `--auto-reversible` | bool | — | نفّذ كل إصلاح قابل للتراجع ويجوز تشغيله دون إشراف (يتطلب `--yes`) |
+| `--json` | bool | — | أخرج خطة المعالجة أو سجلها بصيغة JSON قابلة للقراءة الآلية |
+| `--policy` | string | — | سياسة preflight المستخدمة لإيجاد النتائج: strict أو warn (الافتراضي) |
+| `--yes` | bool | — | أكّد أنه يجوز للقرار المسمّى تغيير هذا المضيف |
+
+**أمثلة**
+
+```bash
+# List the fixes for this host's preflight findings without changing anything
+stackkit host remediate
+
+# Carry out one fix by the ID the list printed
+stackkit host remediate --apply <resolution-id> --yes
+
+# Carry out every undoable fix that may run unattended
+stackkit host remediate --auto-reversible --yes
+```
+
+## stackkit host updates
+
+خطّط لتحديثات حزم نظام التشغيل على هذه العقدة ونفّذها.
+
+خطّط لتحديثات حزم نظام التشغيل على عقدة Debian أو Ubuntu هذه ونفّذها.
+
+بيئة تشغيل الحاويات (docker.io وdocker-ce\* وcontainerd\* وrunc) محجوزة: تُدرج في الخطة لكن apply لا يثبّتها أبدًا، لأن ترقيتها تعيد تشغيل كل حمل عمل. لا يزيل apply أي حزم، ولا يشغّل autoremove، ولا يعيد التشغيل؛ استخدم 'stackkit host reboot' لذلك.
+
+```bash
+stackkit host updates [flags]
+```
+
+الأوامر الفرعية: [`stackkit host updates apply`](#stackkit-host-updates-apply), [`stackkit host updates plan`](#stackkit-host-updates-plan)
+
+### stackkit host updates apply
+
+ثبّت خطة التحديث التي جرت مراجعتها كما هي بالضبط.
+
+ثبّت مجموعة الحزم نفسها التي أبلغ عنها 'stackkit host updates plan' الذي جرت مراجعته.
+
+تُحاكى المجموعة المعلّقة مرة أخرى أولًا؛ وإذا اختلف digest الخاص بها عن `--plan-digest` فلا يُثبَّت شيء (plan_stale). يعمل apt دون تفاعل داخل وحدة systemd مؤقتة (kombify-host-update-\*)، ويحتفظ بملفات الإعداد الموجودة، فانتهاء مهلة CLI أو الوكيل يوقف الانتظار فقط ولا يوقف dpkg أبدًا. تسجّل النتيجة إصدار كل حزمة قبل التحديث وبعده، وما إذا كانت العقدة تحتاج الآن إلى إعادة تشغيل.
+
+```bash
+stackkit host updates apply [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج نتيجة stackkit.host-maintenance/v1 بصيغة JSON قابلة للقراءة الآلية |
+| `--plan-digest` | string | — | **مطلوب.** plan_digest للخطة التي جرت مراجعتها (sha256:&lt;hex&gt;) |
+| `--yes` | bool | — | أكّد أنه يجوز تثبيت الحزم المخطَّط لها |
+
+**أمثلة**
+
+```bash
+# Apply the plan you reviewed
+sudo stackkit host updates apply --plan-digest sha256:<digest> --yes
+```
+
+### stackkit host updates plan
+
+حدّث فهرس الحزم واعرض التحديثات المعلّقة.
+
+حدّث فهرس الحزم واعرض ما سيثبّته 'stackkit host updates apply'.
+
+تسرد النتيجة كل حزمة معلّقة مع إصدارها الحالي والجديد، وحزم بيئة تشغيل الحاويات المحجوزة، والحزم التي يبقيها apt دون ترقية، وما إذا كانت إعادة التشغيل مرجّحة (النواة أو مكتبة C أو systemd)، ومشكلات dpkg. يربط plan_digest مجموعة الحزم بالضبط؛ ويرفض apply إذا لم يعد مطابقًا.
+
+```bash
+stackkit host updates plan [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج نتيجة stackkit.host-maintenance/v1 بصيغة JSON قابلة للقراءة الآلية |
+
+**أمثلة**
+
+```bash
+# Show the pending updates of this node
+sudo stackkit host updates plan
+
+# Machine-readable plan with its plan_digest
+sudo stackkit host updates plan --json
+```
+

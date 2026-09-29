@@ -1,0 +1,50 @@
+---
+title: "stackkit remove"
+description: "إزالة نشر StackKits المحلي"
+sidebarTitle: "remove"
+---
+إزالة نشر StackKits المحلي.
+
+أزل وقت تشغيل StackKits على هذا الجهاز.
+
+بدون `--workload` تكون هذه إزالة المنتج: توقف وتحذف كل مشروع Compose اسمه stackkit-\* (نواة Basement ونواة Cloud وحالات الاستخدام المحددة)، بما فيها شبكاتها ووحدات تخزينها. تبحث في الدليل الحالي، ثم في ~/my-homelab أو ~/my-cloud-homelab.
+
+يزيل `--workload` حمل عمل واحدًا بعينه في Architecture v2 عبر مالك وقت التشغيل الذي طُبِّق به. يُبقي هذا المسار وحدات تخزين التطبيق ما لم يُضبط `--delete-data`.
+
+```bash
+stackkit remove [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | manifest التوليد في Architecture v2 |
+| `--auto-approve` | bool | — | تخطَّ الموافقة التفاعلية |
+| `--delete-data` | bool | — | احذف وحدات التخزين المسماة التي يملكها حمل العمل المطبَّق هذا بعينه (الافتراضي يُبقي بيانات التطبيق) |
+| `--force` | bool | — | فرض الإزالة حتى مع وجود أخطاء |
+| `--generation-receipt` | string | — | إيصال التوليد في Architecture v2 |
+| `--inventory` | string | — | Inventory المرصود في Architecture v2 (وإلا يُختار ملف inventory تقليدي واحد) |
+| `--json` | bool | — | أخرج نتيجة الإزالة القانونية في Architecture v2 بصيغة JSON |
+| `--local-execution-channel` | string | — | قناة التنفيذ المطبَّقة بعينها التي تملكها عملية الإزالة هذه |
+| `--local-node` | string | — | موضع العقدة المطبَّق بعينه الذي تملكه عملية الإزالة هذه |
+| `--local-site` | string | — | موضع Site المطبَّق بعينه الذي تملكه عملية الإزالة هذه |
+| `--purge` | bool | — | أزل كل بيانات StackKit بما فيها الصور والحالة ودليل النشر |
+| `--resolved-plan` | string | — | ResolvedPlan القانونية في Architecture v2 |
+| `--terminal-evidence-json` | bool | — | أخرج الدليل الطرفي القانوني المحدود في Architecture v2 بصيغة JSON |
+| `--workload` | string | — | مرجع حمل العمل بعينه في ResolvedPlan لـ Architecture v2 المطلوب إزالته |
+
+**أمثلة**
+
+```bash
+# Uninstall the whole local deployment after typing yes
+stackkit remove
+
+# Uninstall without the confirmation prompt
+stackkit remove --auto-approve
+
+# Remove only the Files workload and keep its data volumes
+stackkit remove --workload files
+
+# Remove the Photos workload, delete its data volumes, and print the result as JSON
+stackkit remove --workload photos --delete-data --auto-approve --json
+```
+

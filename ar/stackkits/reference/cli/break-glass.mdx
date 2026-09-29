@@ -1,0 +1,72 @@
+---
+title: "stackkit break-glass"
+description: "إدارة حسابات الاسترداد الطارئ (break-glass) وحزمه"
+sidebarTitle: "break-glass"
+---
+إدارة حسابات الاسترداد الطارئ (break-glass) وحزمه.
+
+إدارة حسابات الاسترداد الطارئ لكل عقدة والحزم المشفّرة التي تحفظ بيانات اعتمادها.
+
+يكتب الأمر 'stackkit apply' (المرحلة 1) هذه الحزم في /var/lib/stackkit/recovery/. وهي مشفّرة بعبارة الاسترداد التي عيّنتها أثناء init.
+
+```text
+To recover a node, decrypt the bundle:
+    age -d -o break-glass.txt break-glass-<node>.age
+```
+
+ثم اتبع القسم RESTORE INSTRUCTIONS داخل ملف YAML بعد فك التشفير.
+
+```bash
+stackkit break-glass [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--dir` | string | — | تجاوز مجلد الحزم (الافتراضي: /var/lib/stackkit/recovery) |
+
+الأوامر الفرعية: [`stackkit break-glass list`](#stackkit-break-glass-list)، [`stackkit break-glass show-bundle`](#stackkit-break-glass-show-bundle)
+
+## stackkit break-glass list
+
+عرض حزم الاسترداد الطارئ الموجودة على هذا المضيف.
+
+```bash
+stackkit break-glass list [flags]
+```
+
+موروث من `stackkit break-glass`:
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--dir` | string | — | تجاوز مجلد الحزم (الافتراضي: /var/lib/stackkit/recovery) |
+
+**أمثلة**
+
+```bash
+# List the encrypted recovery bundles in /var/lib/stackkit/recovery
+stackkit break-glass list
+
+# List bundles copied to another directory
+stackkit break-glass list --dir ./recovery-copy
+```
+
+## stackkit break-glass show-bundle
+
+طباعة مسار الحزمة المشفّرة الخاصة بعقدة.
+
+```bash
+stackkit break-glass show-bundle <node> [flags]
+```
+
+موروث من `stackkit break-glass`:
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--dir` | string | — | تجاوز مجلد الحزم (الافتراضي: /var/lib/stackkit/recovery) |
+
+**أمثلة**
+
+```bash
+# Print the bundle path of a node that stackkit break-glass list showed
+stackkit break-glass show-bundle <node>
+```
