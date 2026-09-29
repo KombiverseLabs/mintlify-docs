@@ -1,0 +1,60 @@
+---
+title: "Smart Home"
+description: "Überwache und steuere die Geräte, die du auswählst, mit Home Assistant auf einem Host, den du betreibst"
+sidebarTitle: "Smart Home"
+icon: house-signal
+---
+
+<Info>
+  Evidenzstand (2026-09-24, v0.41.0): Smart Home mit Home Assistant ist
+  `available, lifecycle-verified`. Smart Home wurde auf dem öffentlichen
+  v0.39.7-Archiv verifiziert, wo ein Depot-Producer-Lifecycle-Lauf auf Ubuntu 24.04 amd64
+  (Basement Kit, standalone) install, init, generate, apply, Owner-
+  Setup, verify, backup, restore und restore activation bestanden hat, wobei die
+  Anwendungs-Rückmeldung über das Gast-lokale Loopback verifiziert wurde.
+</Info>
+
+Smart Home gibt deinem Haushalt einen Ort, an dem er die Geräte überwacht und steuert, die du auswählst, auf einem Host, den du betreibst. Home Assistant betreibt die Automatisierungsplattform. Der Release-Katalog nennt diesen Anwendungsfall Smart Home und liefert ihn als optionalen Workload `smart-home` aus.
+
+## Wähle, wie Home Assistant läuft
+
+| Einstellung | Optionen | Standard |
+| --- | --- | --- |
+| Installation | Container (Home Assistant Core, ohne Supervisor oder Apps) oder Home Assistant OS auf einem dedizierten Gerät | Container |
+| Vorhandene Installation | Neu anlegen oder eine vorhandene Instanz anbinden, ohne ihre Konfiguration zu ändern | Neu anlegen |
+| USB-Geräte | Einen Zigbee-, Z-Wave- oder anderen USB-Funkstick an den Workload durchreichen | Aus |
+| Netzwerkerkennung | Lampen, Lautsprecher und Hubs in deinem Heimnetz automatisch erkennen | An |
+
+Das Anbinden einer vorhandenen Instanz bewahrt ihre aktuelle Konfiguration. StackKits setzt eine vorhandene Instanz nie zurück, um einen Neustart zu simulieren, und die Verwaltung dieser Instanz erfordert weiterhin eine separate Berechtigung.
+
+## Den Host wählen
+
+Nutze [Basement Kit](/de/stackkits/kits/basement-kit) für lokale Hardware, direkten Zugriff auf Zigbee-/Z-Wave-USB-Funksticks und Geräte in deinem LAN. Cloud Kit hat keinen Zugriff auf lokale Funksticks oder Geräte in deinem Heimnetz und eignet sich daher nicht für die lokale Seite von Smart Home.
+
+## Einrichten
+
+1. Wähle den Workload `smart-home` in deiner [StackSpec](/de/guides/stackkits/configure-stack-spec) aus, entscheide dich für Container oder Home Assistant OS und lege fest, ob ein USB-Funkstick durchgereicht wird.
+2. Generiere den Stack und wende ihn auf einem verifizierten [Basement Kit](/de/stackkits/kits/basement-kit) an.
+3. Öffne die generierte Smart-Home-Route und schließe den Home-Assistant-Einrichtungsassistenten selbst ab: Lege das Owner-Konto an, setze den Standort deines Zuhauses und füge die Integrationen für die Geräte hinzu, die du tatsächlich hast.
+4. Koppele dein erstes Gerät und bestätige, dass es den richtigen Status zeigt, bevor du weitere hinzufügst.
+
+## Node Hub prüfen
+
+Öffne den [Node Hub](/de/guides/stackkits/node-hub), um zu bestätigen, dass der Smart-Home-Workload läuft, und um seine generierte Adresse zu sehen. Homepage ist ein freigegebenes Navigationsmodul, aber die erste StackSpec wählt es nicht aus. Der Node Hub ist dein aktueller Einstiegspunkt, bis du dich anders entscheidest.
+
+## Sichern und wiederherstellen
+
+Die Konfiguration von Home Assistant und die Geräteregistrierungen sind Teil des deklarierten Backups deines Kits. Eine Wiederherstellung in einer isolierten Umgebung koppelt physische Geräte nicht automatisch neu und stellt widerrufenen Zugriff nicht wieder her. Prüfe Gerätebindungen und aktuelle Berechtigungen erneut, bevor du physische Aktionen wieder aufnimmst. Siehe [Sichern und wiederherstellen](/de/guides/stackkits/back-up-and-restore).
+
+## Die Apps besorgen
+
+<CardGroup cols={2}>
+  <Card title="Home Assistant Companion (iOS)" icon="apple" href="https://apps.apple.com/us/app/home-assistant/id1099568401">
+    Die offizielle Home-Assistant-App für iPhone und iPad.
+  </Card>
+  <Card title="Home Assistant Companion (Android)" icon="android" href="https://play.google.com/store/apps/details?id=io.homeassistant.companion.android">
+    Die offizielle Home-Assistant-App für Android.
+  </Card>
+</CardGroup>
+
+Installiere die App, wähle die manuelle Verbindung und gib deine generierte Smart-Home-URL ein, wenn sie fragt, wie sie sich verbinden soll. Melde dich mit dem Owner-Konto an, das du beim Einrichten angelegt hast.

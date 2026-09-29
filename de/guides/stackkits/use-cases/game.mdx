@@ -1,0 +1,77 @@
+---
+title: "Game"
+description: "Betreibe mit Pterodactyl einen selbst gehosteten Minecraft-Server für Freunde und Familie, neu in v0.41.0"
+sidebarTitle: "Game"
+icon: gamepad
+---
+
+<Info>
+  Evidenzstand (2026-09-24, v0.41.0): Game mit Pterodactyl ist `available,
+  not yet lifecycle-verified`. Es wurde in v0.41.0 als optionaler Workload
+  für Basement Kit, Cloud Kit und Modern Homelab ausgeliefert, mit kuratierten Minecraft-Java-
+  und Bedrock-Profilen. Noch kein automatisierter Depot-Lifecycle-Lauf hat install,
+  verify, backup oder restore abgedeckt, und Welt-Backups sind derzeit
+  absturzkonsistent; eine isolierte Wiederherstellung wurde nicht durchgängig erprobt.
+</Info>
+
+Game gibt deinem Haushalt einen selbst gehosteten Minecraft-Server für Freunde und Familie auf einem Host, den du betreibst. Pterodactyl betreibt das Panel und die Spiel-Container. Der Release-Katalog nennt diesen Anwendungsfall Game Server und liefert ihn als optionalen Workload `game` aus.
+
+## Edition wählen
+
+| Edition | Transport | Standardport |
+| --- | --- | --- |
+| Minecraft Java | TCP | 25565 |
+| Minecraft Bedrock | UDP (RakNet) | 19132 |
+
+Beide kuratierten Profile starten mit Online-Modus-Prüfung, einer Allowlist, ohne RCON und ohne automatische Operator-Rechte.
+
+## Einrichten
+
+1. Wähle den Workload `game` in deiner [StackSpec](/de/guides/stackkits/configure-stack-spec) aus, generiere und wende ihn auf einem verifizierten [Basement Kit](/de/stackkits/kits/basement-kit) oder [Cloud Kit](/de/stackkits/kits/cloud-kit) an.
+2. Lege eine private, Workspace-relative Setup-Datei an, zum Beispiel `.stackkit/setup/game.json`:
+
+```json
+{
+  "profile": "minecraft-java",
+  "name": "Family Survival",
+  "acceptEula": true,
+  "allowList": ["PlayerOne"]
+}
+```
+
+3. Lies die [Minecraft End User License Agreement](https://www.minecraft.net/en-us/eula) selbst und akzeptiere sie, bevor du `acceptEula` auf `true` setzt. Akzeptiere sie niemals im Namen einer anderen Person.
+4. Führe den Setup-Befehl aus:
+
+```bash
+stackkit setup game --owner-approve --credentials-file .stackkit/setup/game.json --json
+```
+
+Der Befehl legt einen Server mit dem gewählten Profil an, wendet die oben genannten sicheren Standards mit einem geordneten Stopp an und liest die Allowlist zurück, damit du bestätigen kannst, dass sie wirksam ist. Ein Konto, das nicht auf der Liste steht, kann nicht beitreten.
+
+## Lokales oder verwaltetes Hosting wählen
+
+- Betreibe den Workload auf einem lokalen [Basement Kit](/de/stackkits/kits/basement-kit)-Node, damit er in deinem LAN erreichbar ist.
+- Betreibe ihn auf einem [Cloud Kit](/de/stackkits/kits/cloud-kit)-VPS, damit Freunde beitreten können, während dein Heimcomputer ausgeschaltet ist.
+
+Ein Heim-Node ist aus dem Internet nicht erreichbar, es sei denn, du entscheidest dich bewusst für einen verwalteten VPS oder eine ausdrückliche Bridge. Verlass dich nicht auf Portweiterleitung am Router, um das zu umgehen.
+
+## Spieler einladen
+
+Teile die Adresse des Nodes und den Port des Profils mit den Spielern auf deiner Allowlist. Verwalte die Allowlist, den Server-Betrieb und die Ressourcen über das Pterodactyl-Panel unter deiner generierten Game-Route.
+
+## Welten sichern
+
+Game-Backups folgen dem deklarierten Zeitplan deines Kits, aber heute gelten zwei Einschränkungen:
+
+- Backups sind absturzkonsistent: Der Server wird vor dem Snapshot noch nicht in einen ruhenden Zustand versetzt.
+- Eine isolierte Wiederherstellung eines Game-Backups wurde nicht durchgängig erprobt.
+
+Übe eine Wiederherstellung in einer isolierten Umgebung, bevor du dich bei einer Welt darauf verlässt, die du nicht neu erstellen kannst. Siehe [Sichern und wiederherstellen](/de/guides/stackkits/back-up-and-restore).
+
+## Die Clients besorgen
+
+<Card title="Minecraft" icon="download" href="https://www.minecraft.net/en-us/get-minecraft">
+  Offizielle Java- und Bedrock-Clients von Mojang/Microsoft, für die Plattformen, auf denen du das Spiel tatsächlich besitzt.
+</Card>
+
+Das Pterodactyl-Panel selbst läuft im Browser, daher ist kein separater Administrations-Client nötig.

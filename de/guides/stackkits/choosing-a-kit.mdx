@@ -1,0 +1,50 @@
+---
+title: "Ein StackKit wählen"
+description: "Vergleiche die Einstiegspfade Home und Cloud mit der Modern-Homelab-Vorschau"
+sidebarTitle: "Ein Kit wählen"
+---
+
+Das öffentliche StackKits-Release enthält Basement Kit, Cloud Kit und eine
+Vorschau-Definition von Modern Homelab. Wähle einen Pfad für die Hosts, die du
+bereits betreibst. Die Live-Runtime-Nachweise für Cloud Kit bleiben
+release-spezifisch; für Modern gibt es noch keinen unterstützten vollständigen
+Installationspfad.
+
+| Wenn du betreibst... | Wähle | Warum |
+| --- | --- | --- |
+| lokale Hardware in einem Heim- oder privaten Netzwerk | [Basement Kit](/de/stackkits/kits/basement-kit) | Es ist das veröffentlichte, lokale, LAN-zuerst-Profil. |
+| einen vorhandenen VPS oder Cloud-Host mit einer Domain, die du kontrollierst | [Cloud Kit](/de/stackkits/kits/cloud-kit) | Es ist das veröffentlichte Public-Domain-Profil für diesen Host. |
+| Home- und Cloud-Umgebungen, deren Verbindung du erkunden willst | [Modern Homelab (Alpha)](/de/stackkits/kits/modern-homelab) | Die veröffentlichte Definition beschreibt beide Standorte; die vollständige Runtime-Unterstützung steht noch aus. |
+
+Beginne bei den vorhandenen Installationsanleitungen mit einer Umgebung. StackKits stellt keine Server bereit und übernimmt keine Verwahrung von Provider-Zugangsdaten. Wähle also erst ein Kit, wenn du weißt, welchen Host und welche Domain du kontrollierst.
+
+Der erste erfolgreiche Basement-Pfad ist der [Quickstart](/de/stackkits/quickstart). Für einen VPS, den du bereits betreibst, nutze [Cloud Kit](/de/stackkits/kits/cloud-kit). Auch die [StackKits-Website](https://stackkit.cc/getting-started) kann dir bei der Wahl helfen.
+
+## Nur die Toolchain installieren
+
+So installierst du die CLI und den vollständigen öffentlichen Katalog ohne den Basement-Einzeiler:
+
+```bash
+curl -sSL https://install.stackkit.cc | sh
+```
+
+Um neben der CLI nur die Definitionen eines Kits zu installieren, übergib seinen Namen:
+
+```bash
+curl -sSL https://install.stackkit.cc | sh -s -- basement-kit
+```
+
+Du kannst `cloud-kit` oder `modern-homelab` auf dieselbe Weise übergeben.
+
+<Note>
+  Der eingestellte Name `base-kit` wird abgelehnt. Aktualisiere Skripte, die ihn
+  noch übergeben, auf `basement-kit`.
+</Note>
+
+Die Shell-Installer lösen das aktuelle öffentliche Release auf und unterstützen Linux und
+macOS auf `amd64` und `arm64`. Unter Windows lädst du das `windows_amd64`-ZIP
+vom [neuesten Release](https://github.com/kombifyio/StackKits/releases/latest) herunter.
+
+Initialisiere nach einer reinen Toolchain-Installation den Workspace mit
+[Basement Kit](/de/stackkits/kits/basement-kit) oder
+[Eine StackSpec konfigurieren](/de/guides/stackkits/configure-stack-spec).

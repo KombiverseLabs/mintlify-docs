@@ -1,0 +1,36 @@
+---
+title: "Einen privaten Dienst über kombify.me erreichen"
+description: "Einen privaten HTTP(S)-Origin über den Techstack-Node-Agent weiterleiten"
+sidebarTitle: "Private Ziele"
+icon: "network-wired"
+---
+
+Nutze diesen Pfad, wenn der Dienst aus dem Internet nicht erreichbar ist.
+kombify.me ruft die private Adresse nicht selbst ab. Ein Techstack-Node-Agent im
+Homelab öffnet eine authentifizierte Verbindung und leitet begrenzte
+HTTP(S)-Anfragen weiter.
+
+## Bevor du startest
+
+- Im Homelab muss ein Techstack-Node-Agent laufen, der den Origin erreichen kann.
+- Die Route muss den Typ „privates Ziel“ verwenden, nicht den öffentlichen Proxy.
+- Die Veröffentlichung eines Dienstes ist standardmäßig aus. Aktiviere sie nur,
+  wenn der öffentliche Name Datenverkehr annehmen soll.
+
+## Den privaten Namen öffnen
+
+1. Registriere den Dienstnamen wie bei einer öffentlichen Adresse.
+2. Setze das Ziel als privaten HTTP(S)-Origin im Homelab.
+3. Halte den Techstack-Node-Agent verbunden.
+4. Veröffentliche die Dienstroute.
+5. Öffne `https://{base}-{service}.kombify.me`.
+
+Ist der Agent getrennt, bleibt der öffentliche Name nicht verfügbar und fordert
+den Client auf, es erneut zu versuchen. Sobald derselbe Owner wieder verbindet,
+funktioniert die Weiterleitung erneut. Der Agent eines anderen Owners kann die
+Route nicht bedienen.
+
+## Lokale Namen lokal halten
+
+Das Surfen nur im LAN bleibt auf dem Resolver, den StackKits im Homelab
+installiert. kombify.me veröffentlicht keine `*.lan.kombify.me`-Namen.

@@ -1,0 +1,158 @@
+---
+title: "Dein erstes CLI-Deployment"
+description: "Folge der StackKits-CLI von der lokalen Konfiguration bis zur Anwendungseinrichtung und Wiederherstellung"
+sidebarTitle: "CLI-Walkthrough"
+icon: terminal
+---
+
+Die CLI führt dich durch separate Befehle: Auswahl speichern, prüfen, das
+Deployment prüfen, anwenden und untersuchen, was noch Aufmerksamkeit braucht.
+Jeder Befehl hat seine eigene Hilfe. Die CLI läuft nicht automatisch durch das
+gesamte Deployment und wählt auch kein Kit für dich aus.
+
+Dieser Walkthrough beschreibt die native CLI, wie sie im
+[aktuellen öffentlichen Release](https://github.com/kombifyio/StackKits/releases/latest)
+ausgeliefert wird. Der Standard Mode funktioniert ohne kombify-Konto und ohne
+Techstack. Lokale Owner-Schlüssel und Deployment-Nachweise bleiben in deinem
+Workspace.
+
+## Deinen Startpunkt wählen
+
+| Einstieg | Was passiert | Weiter mit |
+| --- | --- | --- |
+| [Toolchain-Installer](/de/guides/stackkits/choosing-a-kit#nur-die-toolchain-installieren) | Installiert die CLI und den Katalog; Dienste konfigurierst und wendest du separat an. | Schritt 1 unten. |
+| [Basement-Quickstart](/de/stackkits/quickstart) | Installiert auf einem unterstützten Ubuntu-Server die Voraussetzungen, initialisiert den Workspace und den lokalen Owner und wendet die Standard-Basement-Dienste an. | Schritt 5 unten, in `~/my-homelab`. |
+
+Führe den Basement-Bootstrap nur auf dem Host aus, den du konfigurieren willst.
+Für einen ersten Blick auf die CLI ohne Dienste zu installieren, wähle den
+Toolchain-Pfad. Windows-Nutzer können die CLI aus dem ZIP des öffentlichen
+Releases beziehen; das macht Windows nicht zu einem unterstützten nativen
+Basement-Runtime-Ziel. Prüfe die
+[OS-Kompatibilitätsreferenz](/de/stackkits/reference/os-compatibility) für das
+Installationsziel.
+
+## 1. Die CLI prüfen und einen Workspace anlegen
+
+Öffne nach der Installation der Toolchain ein Terminal:
+
+```bash
+stackkit version
+stackkit --help
+mkdir my-homelab
+cd my-homelab
+```
+
+Die Hilfe gruppiert Befehle in Einrichtung, laufende Pflege und Referenz; die
+[CLI-Referenz](/de/stackkits/reference/cli/overview) listet jeden Befehl mit
+seinen Flags und Beispielen. Behalte in diesem Walkthrough ein einziges Deployment-Verzeichnis. Nutze für
+ein Experiment ein frisches Verzeichnis, statt eine bestehende Konfiguration zu ersetzen.
+
+## 2. Deine Auswahl speichern
+
+Für ein Basement Kit mit seinen Katalog-Defaults:
+
+```bash
+stackkit init basement-kit --catalog-defaults --owner-source=local
+```
+
+`init` erstellt `stack-spec.yaml` und die lokale Owner-Verwahrung. Es gibt den
+Pfad der gespeicherten Konfiguration und die nächsten Befehle `validate` und
+`generate` aus. Es hat keine Dienste installiert.
+
+Katalog-Defaults werden als ausdrückliche Entscheidungen erfasst. Erforderliche
+Eingaben werden abgefragt, wenn das gewählte Kit sie braucht. Um den
+Foto-Workload des Kits in einen neuen Workspace aufzunehmen, nutze dies
+**anstelle** des vorherigen init-Befehls:
+
+```bash
+stackkit init basement-kit --catalog-defaults --owner-source=local --use-case photos
+```
+
+Der Foto-Workload ist an dieser Stelle eine Auswahl, keine laufende
+Fotobibliothek. Prüfe Speicherpfade, Domain, ausgewählte Anwendungen und
+Node-Einstellungen in der gespeicherten Datei. Siehe
+[Eine StackSpec konfigurieren](/de/guides/stackkits/configure-stack-spec).
+
+Füge für Skripte `--non-interactive` zu `init` hinzu. Fehlende erforderliche
+Eingaben führen dann zu einem Fehler statt zu einer Rückfrage. Dieses Flag
+genehmigt keine späteren Deployment-Aktionen. `stackkit init --help` dokumentiert
+die verfügbaren Optionen; als Legacy-Kompatibilität markierte Flags liegen
+außerhalb dieses nativen Walkthroughs.
+
+## 3. Validieren, generieren und prüfen
+
+```bash
+stackkit validate
+stackkit generate
+stackkit plan --json
+```
+
+Die Validierung prüft die Konfiguration gegen den Kit-Vertrag. Die Generierung
+schreibt Deployment-Artefakte und Nachweise. Mit dem Plan kannst du ausgewählte
+Workloads, Pfade und Bereitschaft prüfen, bevor du den Host änderst.
+
+Prüfe `readiness.generation.status` und `readiness.apply.status` und lies
+alle Blocker. Korrigiere bei Bedarf die Konfiguration und generiere erneut. Ein
+bereitgestellter Plan bedeutet nicht, dass Anwendungen schon laufen.
+
+## 4. Das Ziel prüfen und anwenden
+
+Auf dem unterstützten Zielhost, mit demselben Workspace:
+
+```bash
+stackkit prepare
+stackkit apply
+```
+
+Auf dem nativen CLI-Pfad prüft `prepare` Host-Voraussetzungen wie Docker,
+Compose, Speicher und Ports. Es installiert keine fehlenden Host-Pakete. Löse
+gemeldete Voraussetzungen, bevor du anwendest.
+
+`apply` ändert den Host. Prüfe die Freigabeabfrage und die beabsichtigten
+Änderungen. Folge [Prüfen, anwenden und verifizieren](/de/guides/stackkits/review-plan-and-apply)
+für die detaillierten Lifecycle-Prüfungen. Wenn du den Basement-Bootstrap
+verwendet hast, ist das erste Apply bereits erfolgt; wiederhole es nicht nur,
+um eine Tour abzuschließen.
+
+## 5. Herausfinden, was nutzbar ist
+
+```bash
+stackkit verify --http --json
+```
+
+`verify` prüft die Stack-Spec, den Deployment-Zustand, den Docker-Daemon, die
+StackKit-Container und ihre Gesundheit sowie mit `--http` die Routen aus der
+generierten Zugriffsübersicht. Jede fehlgeschlagene Prüfung nennt ihren Grund.
+Eine konfigurierte Adresse allein belegt nicht, dass eine Anwendung erreichbar
+ist; eine bestandene HTTP-Prüfung tut das.
+
+Folge der Einrichtungsanleitung der Anwendung, wenn noch ein Konto
+konfiguriert werden muss. Nutze `stackkit setup --help` für die unterstützten
+Einrichtungsaktionen. Öffne zum Abschluss die Anwendung und führe eine kleine
+echte Aufgabe aus, etwa ein Testfoto in deine Fotobibliothek hinzuzufügen. Der
+Erfolg der CLI-Installation allein belegt nicht, dass diese Aufgabe funktioniert.
+
+## 6. Fortsetzen und Fehler beheben
+
+Kehre zum selben Deployment-Verzeichnis zurück:
+
+```bash
+stackkit verify --json
+stackkit drift detect --json
+stackkit logs list --json
+stackkit logs get <run-id> --json
+```
+
+`drift detect` vergleicht die laufende Compose-Runtime mit dem aufgelösten
+Plan, den generierten Artefakten und dem signierten Apply-Nachweis, ohne etwas
+zu ändern, und `logs get` liest das strukturierte Log eines Laufs aus
+`logs list`. Nutze den gemeldeten Grund und die nächste Aktion, um
+weiterzumachen. Bewahre den Workspace, wenn eine Operation fehlschlägt; starte
+nicht mit `init` neu und bearbeite keine generierten Dateien, um einen Blocker
+zu umgehen. Halte Owner-Schlüssel und Zugriffsprotokolle privat und prüfe
+Diagnoseausgaben, bevor du sie teilst.
+
+Für die laufende Pflege nutze [Day-2-Operationen](/de/stackkits/reference/day-2-operations)
+und [Sichern und wiederherstellen](/de/guides/stackkits/back-up-and-restore). Die Kit-Auswahl
+und die geführte Konfigurationserfahrung in Techstack sind eine optionale
+Fortsetzung; für diesen lokalen CLI-Ablauf sind sie nicht erforderlich.

@@ -1,0 +1,58 @@
+---
+title: "Prüfen, anwenden und verifizieren"
+description: "Prüfe die generierte StackKits-Absicht (Intent), bevor du einen Host änderst"
+sidebarTitle: "Sicher anwenden"
+icon: clipboard-check
+---
+
+Nutze von der Konfiguration bis zur Verifikation denselben Workspace und dieselbe veröffentlichte CLI. Generierte Dateien sind nachweistragende Ausgaben; die StackSpec bleibt die bearbeitbare Eingabe.
+
+## 1. Validieren und generieren
+
+```bash
+stackkit validate
+stackkit generate
+```
+
+Die Generierung schreibt den aufgelösten Plan, das Generierungs-Manifest, den Beleg und die geregelten Artefakte unter den konfigurierten Ausgabestamm.
+
+## 2. Den Plan prüfen
+
+```bash
+stackkit plan --json
+```
+
+Bestätige vor dem Anwenden:
+
+- die Hashes von Plan und Spec sind vorhanden
+- `readiness.generation.status` ist `ready`
+- `readiness.apply.status` ist `ready`
+- die ausgewählten Workloads, Standorte, Nodes und der Adapter entsprechen deiner Absicht
+- jedes generierte Artefakt hat einen Verantwortlichen und einen erwarteten Pfad
+
+`plan` untersucht den nativen v2-Abschluss, ohne einen Executor aufzurufen. Ein bereitgestellter Plan ist notwendig, aber kein Beweis dafür, dass sich ein Host bereits geändert hat.
+
+## 3. Ausdrücklich anwenden
+
+```bash
+stackkit apply
+```
+
+Prüfe die lokale Freigabeabfrage. `apply` ist der Schritt, der den Host ändert.
+Den Schritt überlässt dir der Toolchain-Installer; der Basement-Bootstrap unter
+`base.stackkit.cc` führt das erste Apply bereits aus. Wende nach diesem
+Bootstrap nur bei einer beabsichtigten Konfigurationsänderung erneut an.
+
+## 4. Das Ergebnis verifizieren
+
+```bash
+stackkit verify --http --json
+stackkit drift detect --json
+stackkit logs list --json
+```
+
+Bewahre die JSON-Ausgabe beim Workspace auf. Sie bindet das beobachtete Ergebnis an den lokalen Lifecycle statt an einen Screenshot oder eine bearbeitete Compose-Datei.
+
+<Warning>
+  Halte an, wenn der aufgelöste Plan einen Apply-Blocker meldet. Umgehe ihn nicht mit direkten Änderungen an Docker, Compose oder generierten Dateien; korrigiere die StackSpec oder den Zielhost und generiere erneut.
+</Warning>

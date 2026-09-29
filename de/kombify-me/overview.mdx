@@ -1,0 +1,46 @@
+---
+title: "kombify.me"
+description: "Öffentliche HTTPS-Adressen für bereits erreichbare Homelab-Dienste, plus ein optionales privates Relay"
+sidebarTitle: "Übersicht"
+icon: "globe"
+---
+
+kombify.me gibt einem Homelab-Dienst einen stabilen HTTPS-Namen unter
+`*.kombify.me`. Es ist der optionale Pfad für verbundenen Ingress: nützlich,
+wenn du eine öffentliche Adresse willst, und ungenutzt, wenn der Stack im
+lokalen Netzwerk bleibt.
+
+<Warning>
+kombify.me ist Alpha-Software. Namen, Header und Fehlerformen können sich noch
+ändern. Behandle dies nicht als Release mit allgemeiner Verfügbarkeit.
+</Warning>
+
+## Was du tun kannst
+
+- Einen Kit-Dienst unter einem `*.kombify.me`-Host öffnen, wenn der Origin
+  bereits im öffentlichen Internet erreichbar ist.
+- Kit-eigene Namen wie `auth` auf `{your-lab}-auth.kombify.me` halten, nie auf
+  einem reservierten Apex wie `auth.kombify.me`.
+- Ein privates HTTP(S)-Ziel über den Techstack-Node-Agent weiterleiten, wenn der
+  Origin nicht öffentlich ist.
+
+kombify.me ersetzt StackKits nicht. Ein lokales Kit wird auch ohne
+kombify.me-Adresse installiert, verifiziert und betrieben.
+
+## Wie es zusammenpasst
+
+| Aufgabe | Verantwortlich |
+| --- | --- |
+| Kit-Definitionen, lokaler Lifecycle und LAN-Erreichbarkeit | StackKits |
+| Orchestrierung und der Node-Agent für private Ziele | Techstack |
+| Öffentliche HTTPS-Namen, Proxy und privates HTTP-Relay | kombify.me |
+| Anmeldung für gehostete kombify-Konten | `login.kombify.io` |
+
+<CardGroup cols={2}>
+  <Card title="Einen öffentlichen Dienst veröffentlichen" icon="lock" href="/de/kombify-me/public-addresses">
+    Registriere einen HTTPS-Namen für einen bereits erreichbaren Dienst.
+  </Card>
+  <Card title="Einen privaten Dienst erreichen" icon="network-wired" href="/de/kombify-me/private-targets">
+    Nutze das optionale Relay, wenn der Origin in deinem Netzwerk bleibt.
+  </Card>
+</CardGroup>

@@ -1,0 +1,86 @@
+---
+title: "SpeechKit"
+description: "Local-first Diktat, Meeting-Aufnahme und Echtzeit-Voice-Agents"
+sidebarTitle: "Überblick"
+icon: "microphone"
+---
+
+SpeechKit ist das Local-first-Voice-Framework und die Runtime von kombify. Ein öffentliches
+Projekt liefert den Go-Voice-Kernel, einen selbst gehosteten Server, Agent-Tools,
+Android-Module und Desktop-Clients für Windows und macOS.
+
+{/* speechkit-release:begin */}
+Das aktuelle öffentliche Release ist [v0.72.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.1), veröffentlicht am 2026-09-20.
+{/* speechkit-release:end */}
+
+SpeechKit ist Beta-Software: Öffentliche APIs, Konfigurationsschlüssel und Standardwerte können sich
+zwischen Minor-Releases ändern, also pinne die Version, die du getestet hast.
+
+## Drei Modi und ein Aufnahmedienst
+
+| Oberfläche | Zweck |
+| --- | --- |
+| Dictation | Sprache ohne LLM-Umschreiben in Text umwandeln. |
+| Assist | Sprache oder Text in ein begrenztes Ergebnis umwandeln, optional gesprochen. |
+| Voice Agent | Eine Echtzeit-Audiounterhaltung für interaktive Arbeit führen. |
+| Meeting | Ein Gespräch auf zwei Kanälen aufnehmen und anschließend zusammenschreiben. |
+
+Hands-Free ist eine Aktivierungs- und Ausgabeschicht über den drei Modi und kein
+vierter Modus. Meeting ist ein separater Aufnahmedienst, der nur den
+Speech-to-Text-Transcriber mit Dictation teilt.
+
+## Wo SpeechKit läuft
+
+| Ziel | Verfügbarkeit |
+| --- | --- |
+| Windows-10/11-x64-Desktop-Client | Öffentliche Beta; alle drei Modi, Hands-Free und Meeting |
+| macOS 14+ auf Apple Silicon | Beta nur für Dictation, ad hoc signiert, mit bekannten Lücken |
+| Go-Framework | Öffentliches Modul; bette den Kernel in deinen eigenen Go-Host ein |
+| Selbst gehosteter Server | Linux-Ziel, gebaut aus öffentlichem Quellcode |
+| Android | Apache-2.0-Gradle-Module plus eine Referenz-App im Repository |
+| Browser | TypeScript-Client- und Voice-UI-Pakete im öffentlichen Repository |
+| Linux-Desktop | Nicht verfügbar; Linux ist eine Server-Runtime |
+
+## Datenschutzgrenzen, die du setzt
+
+Zwei unabhängige Einstellungen bestimmen, was SpeechKit tun darf:
+
+- **Network Scope** beantwortet, wohin der Prozess reichen darf: all networks, local
+  network only oder this device only. Das Backend setzt die Grenze für
+  Speech-Provider, Modell-Downloads, Updates, Telemetrie, Server-Verbindungen
+  und Integrationen durch. Ein strengerer Scope setzt unverträgliche Einstellungen aus, statt
+  sie zu löschen.
+- **Retention Scope** beantwortet, was die Arbeit überdauert, die es erzeugt hat: retain
+  oder zero retention. Zero retention entfernt das Rohmaterial, wenn eine Sitzung endet,
+  und behält nur das erzeugte Ergebnis.
+
+Die beiden sind orthogonal. Eine Installation nur für das Gerät schreibt Transkripte trotzdem auf die Festplatte,
+es sei denn, du wählst zusätzlich zero retention.
+
+## Ein Ziel wählen
+
+<CardGroup cols={2}>
+  <Card title="Windows-Client" icon="windows" href="/de/speechkit/install-windows">
+    Installiere die Windows-10/11-x64-Beta aus dem offiziellen Release.
+  </Card>
+  <Card title="macOS-Client" icon="apple" href="/de/speechkit/install-macos">
+    Installiere die Dictation-Beta für Apple Silicon und lies ihre bekannten Grenzen.
+  </Card>
+  <Card title="Go-Framework" icon="code" href="/de/speechkit/framework">
+    Bette den Voice-Kernel ein oder baue die Server-, Android- und Browser-Ziele.
+  </Card>
+  <Card title="Modi und Datenpfade" icon="waveform-lines" href="/de/speechkit/modes">
+    Vergleiche Dictation, Assist, Voice Agent und Provider-Grenzen.
+  </Card>
+  <Card title="Meeting" icon="users" href="/de/speechkit/meeting">
+    Nimm ein Gespräch auf zwei Kanälen auf und erzeuge eine Zusammenfassung mit Quellenangaben.
+  </Card>
+  <Card title="Öffentliches Repository" icon="github" href="https://github.com/kombifyio/SpeechKit">
+    Durchsuche Quellcode, Beispiele, API-Verträge und Release Notes.
+  </Card>
+</CardGroup>
+
+<Info>
+Die Produkt-Website [speechkit.cc](https://speechkit.cc) behandelt dasselbe
+Release aus Produktsicht, einschließlich lauffähiger Starter-Prompts.
+</Info>

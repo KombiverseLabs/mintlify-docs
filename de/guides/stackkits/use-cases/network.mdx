@@ -1,0 +1,44 @@
+---
+title: "Netzwerk"
+description: "DNS-Filterung und private Konnektivität sind geplant; das ist die Netzwerk-Baseline, die StackKits bereits einrichtet"
+sidebarTitle: "Netzwerk"
+icon: network-wired
+---
+
+<Info>
+  Evidenzstand (2026-09-24, v0.41.0): Netzwerk hat den Status `planned`. Es gibt weder
+  ein Release noch Termine, und im Release-Katalog existiert noch kein Eintrag dafür.
+  Diese Seite beschreibt eine Designrichtung, die noch geprüft wird, und nichts, das du
+  heute installieren kannst.
+</Info>
+
+Netzwerk ist noch kein Anwendungsfall, den du auswählen kannst. Diese Seite trennt, was StackKits auf jedem Kit bereits für dich einrichtet, von dem, was das Team als eigenen Anwendungsfall hinzufügen will.
+
+## Was StackKits bereits einrichtet
+
+| Fähigkeit | Was du heute bekommst |
+| --- | --- |
+| Routing | Traefik ist die freigegebene Reverse-Proxy-Komponente. Sie routet jeden generierten Dienstnamen, etwa `base.<domain>` und die eigene Route jeder Anwendung, aus deiner validierten StackSpec. |
+| Lokales DNS | Basement Kit gibt jedem Dienst eine HTTPS-Adresse unter `*.home`, der über eine Owner-Zertifizierungsstelle vertraut wird, die deine registrierten Geräte installieren. |
+| Fernzugriff | Die Geräteregistrierung kann optional einen privaten Split-Tunnel einrichten, damit dieselben `*.home`-Adressen auch außerhalb deines Heimnetzes funktionieren. |
+
+Diese Funktionen sind heute in Basement Kit und Cloud Kit eingebaut. Du brauchst den Anwendungsfall Netzwerk dafür nicht, und ein späteres Erscheinen von Netzwerk ändert nichts daran, wie sie funktionieren.
+
+## Geplantes Design
+
+| Aufgabe | Bevorzugter Kandidat | Alternative |
+| --- | --- | --- |
+| DNS auf deinen Geräten filtern | [AdGuard Home](https://adguard.com/en/adguard-home/overview.html) | [Pi-hole](https://pi-hole.net/) |
+| Deine eigenen Geräte und Server privat verbinden | [Tailscale](https://tailscale.com/) | [Headscale](https://github.com/juanfont/headscale) oder [NetBird](https://docs.netbird.io/selfhosted/selfhosted-guide) für selbst gehostete Koordination |
+| Einen eigenen Konnektivitäts-Edge statt eines gehosteten Pfads betreiben | [Pangolin](https://github.com/fosrl/pangolin) | Keine |
+| DNS-Ausfälle und Geräte-Präsenz sehen | Den vorhandenen Node-Hub-Status wiederverwenden | Keine |
+
+Nichts davon ist bereits installierbar. Netzwerk ist als Anwendungsfall geplant, der zusätzlich zur obigen Baseline gezielte Verbindungen von Gerät zu Gerät und von Standort zu Standort sowie DNS-Filterung ergänzt, und nicht als Voraussetzung, um deine vorhandenen StackKits-Anwendungen zu erreichen.
+
+## Was dich erwartet
+
+- Netzwerk ersetzt weder das eingebaute Routing noch das `*.home`-DNS noch den oben beschriebenen optionalen Fernzugriff.
+- Die Auswahl von Netzwerk erfordert keinen VPN-Client, nur um Anwendungen zu öffnen, die du bereits betreibst.
+- Das Filtern oder Verbinden von Geräten braucht ausdrückliche Geräte- und Zielentscheidungen; nichts schaltet sich automatisch ein.
+
+Im [StackKits-Changelog](/de/changelog/overview) oder im [Anwendungsfall-Katalog](/de/stackkits/reference/use-case-catalog) siehst du, ob Netzwerk die Planungsphase verlassen hat.

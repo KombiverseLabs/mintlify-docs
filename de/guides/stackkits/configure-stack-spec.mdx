@@ -1,0 +1,90 @@
+---
+title: "Eine StackSpec konfigurieren"
+description: "Ändere die Absicht (Intent) veröffentlichter StackKits, ohne generierte Deployment-Dateien zu bearbeiten"
+sidebarTitle: "Eine StackSpec konfigurieren"
+icon: sliders
+---
+
+`stack-spec.yaml` ist das Dokument der gewünschten Absicht (Intent) für einen StackKits-Workspace. Lass die veröffentlichte CLI das vollständige Dokument erstellen und ändere nur die Absicht, die du verstehst.
+
+```bash
+stackkit init basement-kit --owner-source=local
+stackkit validate
+```
+
+Die veröffentlichte CLI schreibt eine vollständige native StackSpec und richtet die lokale Owner-Verwahrung außerhalb davon ein. Behalte die generierte `apiVersion`: Die CUE-Verträge des installierten Releases liefern ihre Felder, Defaults und Constraints.
+
+## Häufige Felder zur Prüfung
+
+| Absicht | Aktuelles Feld | Hinweis |
+| --- | --- | --- |
+| Workspace-Identität | `metadata.name` | Halte sie DNS-kompatibel und nach dem ersten Apply stabil. |
+| Kit | `kit.slug` | Nutze `basement-kit` für einen Heimstandort oder `cloud-kit` für einen bestehenden Cloud-Host. |
+| Generierte Ausgabe | `generation.outputRoot` | Halte generierte Artefakte getrennt von der StackSpec. |
+| Persistente Daten | `storage.dataRoot` | Nutze einen absoluten Pfad auf Speicher, den du betreibst und sicherst. |
+| Backups | `storage.backupRoot` | Halte ihn getrennt vom primären Datenstamm. |
+| Stack-Daten | `storage.stacksRoot` | Nutze einen absoluten Pfad, der dem lokalen Operator gehört. |
+| Lokale Domain | `network.domain.base` | Der Standard des Basement-Kit-Releases ist `home.test`; nutze eine Domain, deren Auflösung du kontrollierst. |
+
+Dies ist ein Auszug, kein Ersatz für das vollständige generierte Dokument:
+
+```json
+{
+  "metadata": { "name": "family-home" },
+  "kit": { "slug": "basement-kit" },
+  "generation": {
+    "outputRoot": "deploy",
+    "strategy": "kit-template",
+    "target": "compose"
+  },
+  "storage": {
+    "dataRoot": "/opt/stackkit/data",
+    "backupRoot": "/opt/stackkit/backups",
+    "stacksRoot": "/opt/stackkit/stacks",
+    "volumeDriver": "local"
+  },
+  "network": {
+    "mode": "private",
+    "domain": { "base": "home.test" }
+  }
+}
+```
+
+## Den veröffentlichten Files-Workload auswählen
+
+Die Verträge von Basement Kit und Cloud Kit stellen `files` als optionalen Workload für den Anwendungsfall [Dokumente & Dateien](/de/guides/stackkits/use-cases/documents-and-files) bereit; der [Anwendungsfall-Katalog](/de/stackkits/reference/use-case-catalog) listet die Komponenten, die das veröffentlichte Release deklariert. Diese Auswahl wurde mit der veröffentlichten CLI validiert und generiert:
+
+```json
+{
+  "workloads": {
+    "files": {
+      "alternative": "cloudreve",
+      "runtimeAdapterRef": "standalone-compose",
+      "placement": {
+        "siteRefs": ["home"],
+        "nodeRefs": ["main"]
+      }
+    }
+  }
+}
+```
+
+Führe das `workloads`-Objekt mit der vollständigen, von `init` erzeugten StackSpec zusammen. Der Standort `home` und der Node `main` sind die veröffentlichten Basement-Defaults; nutze Bezeichner, die bereits in deinem generierten Dokument stehen.
+
+Seit v0.21.11 ist der `placement`-Block optional. Ein Workload, der ohne ihn ausgewählt wird, erhält die geregelten Defaults für leere Platzierung aus den eingebetteten CUE-Verträgen, sodass Autoren programmatischer StackSpecs keinen CLI-spezifischen Boilerplate mehr brauchen.
+
+<Warning>
+  Kopiere diese Auswahl nicht für Photos oder Vault und erfinde keine Secret-Werte. Diese Workloads erfordern eine Owner-gebundene Secret-Verwahrung. Führe seit v0.21.11 [`stackkit secrets materialize`](/de/stackkits/reference/day-2-operations#einen-workload-zu-einem-bestehenden-workspace-hinzufügen) nach der Auswahl eines solchen Workloads und vor `generate` aus, um diese Verwahrung ausdrücklich einzurichten.
+</Warning>
+
+## Jede Änderung validieren
+
+```bash
+stackkit validate
+stackkit generate
+stackkit plan --json
+```
+
+`validate` prüft die aktuelle StackSpec, `generate` erzeugt geregelte Ausgabe, und `plan` untersucht den exakten aufgelösten Plan, ohne einen Executor aufzurufen. Schlägt ein Befehl fehl, korrigiere die StackSpec; patche keine Dateien unter `deploy/`.
+
+Weiter mit [Prüfen, anwenden und verifizieren](/de/guides/stackkits/review-plan-and-apply).

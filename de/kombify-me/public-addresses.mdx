@@ -1,0 +1,43 @@
+---
+title: "Einen Dienst auf kombify.me veröffentlichen"
+description: "Gib einem öffentlich erreichbaren Homelab-Dienst einen stabilen HTTPS-Namen"
+sidebarTitle: "Öffentliche Adressen"
+icon: "lock"
+---
+
+Nutze diesen Pfad, wenn der Dienst bereits unter einer öffentlichen HTTP(S)-URL
+antwortet. kombify.me terminiert TLS und leitet den Browser per Proxy an diesen
+Origin. Private, Loopback- und Link-Local-Ziele werden auf diesem Pfad abgelehnt.
+
+## Bevor du startest
+
+- Der Origin muss aus dem Internet per HTTP oder HTTPS erreichbar sein.
+- Ein angemeldetes kombify-Konto registriert Namen über
+  [api.kombify.io](https://api.kombify.io). Selbst gehostete Installationen
+  registrieren sich nach der E-Mail-Verifizierung mit einem API-Schlüssel.
+- Verbundene StackKits- und Techstack-Abläufe können Kit-eigene Namen für dich
+  registrieren.
+
+## Dem Dienst einen Namen geben
+
+1. Registriere einen Basisnamen für das Homelab. Gehostete Konten erhalten
+   `{homelab}-{you}.kombify.me`. Selbst gehostete Installationen erhalten
+   `sh-{homelab}-{device}.kombify.me`.
+2. Registriere den Dienst unter dieser Basis. Kit-eigene Slugs wie `auth`,
+   `id` und `coolify` werden immer zu `{base}-{service}.kombify.me`.
+3. Richte den Dienst auf die öffentliche Origin-URL aus.
+4. Veröffentliche die Dienstroute. Nicht veröffentlichte Dienstnamen bleiben
+   unveröffentlicht.
+
+Öffne dann `https://{base}-{service}.kombify.me` im Browser.
+
+Reservierte Apex-Namen wie `auth.kombify.me` bleiben ungenutzt. Der Kit-Login
+landet weiterhin auf `{your-lab}-auth.kombify.me`.
+
+## Wenn der Origin nicht öffentlich ist
+
+Halte hier an und folge [Einen privaten Dienst erreichen](/de/kombify-me/private-targets).
+Veröffentliche keine localhost- oder nur im LAN gültige URL auf dem öffentlichen Proxy.
+
+Rein lokale Namen bleiben auf dem Homelab-Resolver, den StackKits installiert.
+Sie sind keine kombify.me-Namen.
