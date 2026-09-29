@@ -1,0 +1,73 @@
+---
+title: "stackkit break-glass"
+description: "管理应急（break-glass）恢复账号和恢复包"
+sidebarTitle: "break-glass"
+---
+管理应急（break-glass）恢复账号和恢复包。
+
+管理各节点的应急恢复账号，以及存放其凭据的加密恢复包。
+
+恢复包由 'stackkit apply'（阶段 1）写入 /var/lib/stackkit/recovery/。它们使用你在 init 期间设置的恢复口令加密。
+
+```text
+To recover a node, decrypt the bundle:
+    age -d -o break-glass.txt break-glass-<node>.age
+```
+
+然后按照解密后 YAML 内的 RESTORE INSTRUCTIONS 部分操作。
+
+```bash
+stackkit break-glass [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--dir` | string | — | 覆盖恢复包目录（默认：/var/lib/stackkit/recovery） |
+
+子命令：[`stackkit break-glass list`](#stackkit-break-glass-list), [`stackkit break-glass show-bundle`](#stackkit-break-glass-show-bundle)
+
+## stackkit break-glass list
+
+列出此主机上的应急恢复包。
+
+```bash
+stackkit break-glass list [flags]
+```
+
+继承自 `stackkit break-glass`：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--dir` | string | — | 覆盖恢复包目录（默认：/var/lib/stackkit/recovery） |
+
+**示例**
+
+```bash
+# List the encrypted recovery bundles in /var/lib/stackkit/recovery
+stackkit break-glass list
+
+# List bundles copied to another directory
+stackkit break-glass list --dir ./recovery-copy
+```
+
+## stackkit break-glass show-bundle
+
+输出某个节点加密恢复包的路径。
+
+```bash
+stackkit break-glass show-bundle <node> [flags]
+```
+
+继承自 `stackkit break-glass`：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--dir` | string | — | 覆盖恢复包目录（默认：/var/lib/stackkit/recovery） |
+
+**示例**
+
+```bash
+# Print the bundle path of a node that stackkit break-glass list showed
+stackkit break-glass show-bundle <node>
+```
+

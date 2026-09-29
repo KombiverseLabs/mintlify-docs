@@ -1,0 +1,41 @@
+---
+title: "网络"
+description: "DNS 过滤和私有连接正在规划中；下面是 StackKits 已经为你设置好的网络基线"
+sidebarTitle: "网络"
+icon: network-wired
+---
+
+<Info>
+  证据状态（2026-09-24，v0.41.0）：网络为 `planned`。它没有发布版本，也没有日期，发布目录中还没有对应条目。本页描述的是仍在评审中的设计方向，而不是你现在就能安装的东西。
+</Info>
+
+网络目前还不是可以选择的使用场景。本页区分了 StackKits 在任何 kit 上已经为你设置好的内容，以及团队计划作为专门的使用场景添加的内容。
+
+## StackKits 已经设置的内容
+
+| 能力 | 你现在能得到什么 |
+| --- | --- |
+| 路由 | Traefik 是已发布的反向代理组件。它根据你验证过的 StackSpec，路由每一个生成的服务名称，例如 `base.<domain>` 和每个应用自己的路由。 |
+| 本地 DNS | Basement Kit 为每个服务提供位于 `*.home` 的 HTTPS 地址，并通过所有者证书颁发机构建立信任，你已注册的设备会安装该证书。 |
+| 远程访问 | 设备注册可以选择性地设置私有分流隧道，这样同样的 `*.home` 地址在你离开家庭网络后依然可用。 |
+
+这些功能现在就内置于 Basement Kit 和 Cloud Kit。你不需要网络这个使用场景来获得它们，将来网络发布也不会改变它们的工作方式。
+
+## 规划中的设计
+
+| 任务 | 首选候选 | 备选 |
+| --- | --- | --- |
+| 在你的设备上过滤 DNS | [AdGuard Home](https://adguard.com/en/adguard-home/overview.html) | [Pi-hole](https://pi-hole.net/) |
+| 私密地连接你自己的设备和服务器 | [Tailscale](https://tailscale.com/) | [Headscale](https://github.com/juanfont/headscale) 或 [NetBird](https://docs.netbird.io/selfhosted/selfhosted-guide)，用于自托管协调 |
+| 运行你自己的连接边缘，而不是托管路径 | [Pangolin](https://github.com/fosrl/pangolin) | 无 |
+| 查看 DNS 故障和设备在线状态 | 复用现有的 Node Hub 状态 | 无 |
+
+这些目前都还无法安装。网络规划为这样一个使用场景：在上述基线之上，增加有意为之的设备到设备和站点到站点连接，以及 DNS 过滤，而不是访问你现有 StackKits 应用的前提条件。
+
+## 你可以期待什么
+
+- 网络不会取代上面描述的内置路由、`*.home` DNS 或可选的远程访问。
+- 选择网络不会要求你仅仅为了打开已经在运行的应用而使用 VPN 客户端。
+- 过滤或连接设备需要明确的设备和目的地选择；不会自动开启任何东西。
+
+请查看 [StackKits 更新日志](/zh-Hans/changelog/overview)或[使用场景目录](/zh-Hans/stackkits/reference/use-case-catalog)，了解网络是否已经走出规划阶段。

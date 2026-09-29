@@ -1,0 +1,49 @@
+---
+title: "stackkit apply"
+description: "应用基础设施变更"
+sidebarTitle: "apply"
+---
+应用基础设施变更。
+
+将规划好的变更应用到基础设施。
+
+Product Apply 通过各 Runtime Owner 执行规范的 ResolvedPlan。Standard Mode 会自动使用持久化的、由 CUE 拥有的本地 Site/节点/通道绑定；Advanced Mode 可以提供经过认证的服务/设备执行通道。两条路径使用相同的 ResolvedPlan、证据和运行时校验，且都不会提示确认：计划在生成时即已获批准。
+
+```bash
+stackkit apply [plan-file] [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | Architecture v2 生成清单（默认：&lt;outputRoot&gt;/.stackkit/generation-manifest.json） |
+| `--auto-approve` | bool | — | 为兼容而接受；原生 Apply 从不提示确认 |
+| `--expected-plan-hash` | string | — | 要求在 Apply 之前，规范的 ResolvedPlan 必须与此 sha256 摘要一致 |
+| `--generation-receipt` | string | — | Architecture v2 生成回执（默认：&lt;outputRoot&gt;/.stackkit/generation-receipt.json） |
+| `--inventory` | string | — | Architecture v2 观测到的 Inventory（否则会选取一个常规的 inventory 文件） |
+| `--json` | bool | — | 以机器可读的 JSON 输出带版本的 Apply 结果和运行时观测 |
+| `--local-execution-channel` | string | — | 由本地进程显式拥有的 Architecture v2 执行通道 |
+| `--local-node` | string | — | 由本地执行进程显式拥有的 Architecture v2 节点 |
+| `--local-site` | string | — | 由本地执行进程显式拥有的 Architecture v2 Site |
+| `--preflight` | string | — | 变更前的主机准入策略：strict、warn（默认）或 skip |
+| `--resolved-plan` | string | — | Architecture v2 规范的 ResolvedPlan（默认：&lt;outputRoot&gt;/.stackkit/resolved-plan.json） |
+| `--skip-platform-apps` | bool | — | 无效果：原生 Apply 没有单独的平台应用阶段 |
+| `--verify` | bool | — | 无效果：请改为在 Apply 之后运行 stackkit verify |
+| `--verify-http` | bool | — | 无效果：请改为在 Apply 之后运行 stackkit verify `--http` |
+| `--verify-strict` | bool | — | 无效果：请改为在 Apply 之后运行 stackkit verify |
+
+**示例**
+
+```bash
+# Apply the plan written by stackkit generate
+stackkit apply
+
+# Emit the versioned Apply result as JSON
+stackkit apply --json
+
+# Refuse to change anything unless the plan still has the hash stackkit plan printed
+stackkit apply --expected-plan-hash sha256:<plan-hash>
+
+# Also refuse on host preflight warnings and unknown facts before any change
+stackkit apply --preflight strict
+```
+

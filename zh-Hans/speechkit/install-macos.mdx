@@ -1,0 +1,61 @@
+---
+title: "在 macOS 上安装 SpeechKit"
+description: "安装 Apple Silicon 听写测试版并了解其限制"
+sidebarTitle: "在 macOS 上安装"
+icon: "apple"
+---
+
+macOS 版 SpeechKit 是早期测试版，仅支持 Dictation（听写）。它运行在 Apple Silicon 上的 macOS 14 或更新版本。不支持 Intel Mac。
+
+{/* speechkit-release:begin */}
+当前公开版本为 [v0.72.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.1)，发布于 2026-09-20。
+{/* speechkit-release:end */}
+
+<Warning>
+macOS 安装包使用临时（ad-hoc）签名，没有 Apple Developer ID，也未经公证。macOS 会将其隔离，并可能提示应用已损坏。其实并没有损坏。移除隔离标记只需一条有文档说明的命令，见下文。
+</Warning>
+
+## 下载
+
+<Card title="macOS 安装包（Apple Silicon）" icon="download" href="https://github.com/kombifyio/SpeechKit/releases/latest/download/SpeechKit-macOS-arm64.zip">
+  从最新发布的版本下载 `SpeechKit-macOS-arm64.zip`。
+</Card>
+
+打开之前，请对照 [SHA256SUMS.txt](https://github.com/kombifyio/SpeechKit/releases/latest/download/SHA256SUMS.txt) 校验下载文件。该文件同时列出了 Windows 资源，因此只需检查 macOS 压缩包对应的那一行：
+
+```bash
+grep SpeechKit-macOS-arm64.zip SHA256SUMS.txt | shasum -a 256 -c
+```
+
+## 安装
+
+1. 解压下载的文件，并将 `SpeechKit.app` 拖入“应用程序”文件夹。请在执行下一步之前完成移动：macOS 会从一个隐藏的只读副本运行留在“下载”中的应用，而 SpeechKit 无法在那里自行更新。
+2. 在“终端”中移除隔离标记：
+
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/SpeechKit.app
+   ```
+
+   成功时不会输出任何内容。该命令不需要密码，只影响这个应用。
+3. 从“应用程序”打开 SpeechKit，并在提示时授予**麦克风**和**辅助功能**权限。
+
+请阅读完整的[未签名版本说明](https://github.com/kombifyio/SpeechKit/releases/latest/download/UNSIGNED-MACOS-RELEASE.txt)，了解每一步的理由。整个流程中没有任何一步要求你在系统范围内禁用 Gatekeeper，或以 root 身份运行任何内容。
+
+## 哪些可用，哪些不可用
+
+| 功能 | macOS 测试版 |
+| --- | --- |
+| 使用随附本地模型的听写 | 可用 |
+| 使用云端语音转文字提供方的听写 | 可用 |
+| 麦克风采集、文本注入、菜单栏项目 | 可用 |
+| 全局热键和按住说话 | 此版本中无法工作 |
+| Assist 和 Voice Agent | 尚未在 macOS 上验证 |
+| 会议系统音频采集、屏幕快照、唤醒词、本地 LLM | 尚未移植；每项都会返回类型化错误并隐藏其控件 |
+
+热键监听器可以安装，但收不到任何按键事件，因此在修复之前，请通过菜单栏项目来开始听写。如果需要完整的功能集，请使用 [Windows 客户端](/zh-Hans/speechkit/install-windows)。
+
+## 更新后的权限
+
+macOS 会将权限授予记录在应用的确切签名上。每个临时签名的构建都有不同的签名，因此每次更新后 macOS 都会再次请求麦克风和辅助功能权限，有时还会请求钥匙串访问。对于未签名的测试版，这是预期行为。
+
+如果更新后听写没有响应，请打开**系统设置 → 隐私与安全性 → 辅助功能**，重新打开 SpeechKit 的开关。它会在运行时获取该权限，无需重启。

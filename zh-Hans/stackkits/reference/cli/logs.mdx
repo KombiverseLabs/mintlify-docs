@@ -1,0 +1,146 @@
+---
+title: "stackkit logs"
+description: "查看结构化的部署日志"
+sidebarTitle: "logs"
+---
+查看结构化的部署日志。
+
+查看并过滤以往运行的结构化部署日志。
+
+默认以人类可读的格式显示最近一份日志。使用过滤器可缩小到特定的事件类型。
+
+```bash
+stackkit logs [run-id] [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | 由上一页 JSON 返回的、与摘要绑定的不透明游标 |
+| `--decisions` | bool | — | 只显示决策事件 |
+| `--errors` | bool | — | 只显示错误和警告 |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+| `--jsonl` | bool | — | 输出原始 JSON-Lines |
+| `--max-bytes` | int | `262144` | 每页 JSON 扫描的原始日志字节数上限 |
+| `--max-events` | int | `200` | 每页 JSON 的结构化事件数上限 |
+| `--timing` | bool | — | 显示耗时摘要 |
+
+**示例**
+
+```bash
+# Show the latest log (human-readable)
+stackkit logs
+
+# Show the latest log as structured JSON
+stackkit logs --json
+
+# Show the latest log as raw JSON Lines
+stackkit logs --jsonl
+
+# Show only decision events
+stackkit logs --decisions
+
+# Show only errors and warnings
+stackkit logs --errors
+
+# Show a timing summary
+stackkit logs --timing
+```
+
+子命令：[`stackkit logs get`](#stackkit-logs-get), [`stackkit logs latest`](#stackkit-logs-latest), [`stackkit logs list`](#stackkit-logs-list)
+
+## stackkit logs get
+
+读取一份确切的结构化 rollout 日志。
+
+```bash
+stackkit logs get <run-id> [flags]
+```
+
+继承自 `stackkit logs`：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | 由上一页 JSON 返回的、与摘要绑定的不透明游标 |
+| `--decisions` | bool | — | 只显示决策事件 |
+| `--errors` | bool | — | 只显示错误和警告 |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+| `--jsonl` | bool | — | 输出原始 JSON-Lines |
+| `--max-bytes` | int | `262144` | 每页 JSON 扫描的原始日志字节数上限 |
+| `--max-events` | int | `200` | 每页 JSON 的结构化事件数上限 |
+| `--timing` | bool | — | 显示耗时摘要 |
+
+**示例**
+
+```bash
+# Read one run by an ID that stackkit logs list printed
+stackkit logs get <run-id>
+
+# Read that run as JSON, 50 events per page
+stackkit logs get <run-id> --json --max-events 50
+
+# Continue with the cursor the previous JSON page returned
+stackkit logs get <run-id> --json --max-events 50 --cursor <cursor>
+```
+
+## stackkit logs latest
+
+读取最新的结构化 rollout 日志。
+
+```bash
+stackkit logs latest [flags]
+```
+
+继承自 `stackkit logs`：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | 由上一页 JSON 返回的、与摘要绑定的不透明游标 |
+| `--decisions` | bool | — | 只显示决策事件 |
+| `--errors` | bool | — | 只显示错误和警告 |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+| `--jsonl` | bool | — | 输出原始 JSON-Lines |
+| `--max-bytes` | int | `262144` | 每页 JSON 扫描的原始日志字节数上限 |
+| `--max-events` | int | `200` | 每页 JSON 的结构化事件数上限 |
+| `--timing` | bool | — | 显示耗时摘要 |
+
+**示例**
+
+```bash
+# Read the newest rollout log
+stackkit logs latest
+
+# Only errors and warnings from the newest log, as JSON
+stackkit logs latest --errors --json
+```
+
+## stackkit logs list
+
+列出可用的日志文件。
+
+```bash
+stackkit logs list [flags]
+```
+
+继承自 `stackkit logs`：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | 由上一页 JSON 返回的、与摘要绑定的不透明游标 |
+| `--decisions` | bool | — | 只显示决策事件 |
+| `--errors` | bool | — | 只显示错误和警告 |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+| `--jsonl` | bool | — | 输出原始 JSON-Lines |
+| `--max-bytes` | int | `262144` | 每页 JSON 扫描的原始日志字节数上限 |
+| `--max-events` | int | `200` | 每页 JSON 的结构化事件数上限 |
+| `--timing` | bool | — | 显示耗时摘要 |
+
+**示例**
+
+```bash
+# List the run IDs of all local rollout logs
+stackkit logs list
+
+# The same list as JSON
+stackkit logs list --json
+```
+

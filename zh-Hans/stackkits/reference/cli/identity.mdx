@@ -1,0 +1,175 @@
+---
+title: "stackkit identity"
+description: "管理独立的本地身份平面"
+sidebarTitle: "identity"
+---
+管理独立的本地身份平面。
+
+```bash
+stackkit identity [flags]
+```
+
+子命令：[`stackkit identity projection`](#stackkit-identity-projection), [`stackkit identity workload-peer`](#stackkit-identity-workload-peer)
+
+## stackkit identity projection
+
+检查并在本地批准不含凭据的期望身份投影。
+
+```bash
+stackkit identity projection [flags]
+```
+
+子命令：[`stackkit identity projection apply`](#stackkit-identity-projection-apply), [`stackkit identity projection approve`](#stackkit-identity-projection-approve), [`stackkit identity projection inspect`](#stackkit-identity-projection-inspect), [`stackkit identity projection unlink`](#stackkit-identity-projection-unlink)
+
+### stackkit identity projection apply
+
+将一个先前已批准的投影应用到本地 PocketID。
+
+```bash
+stackkit identity projection apply [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+| `--owner-approve` | bool | — | 显式批准此本地身份操作 |
+| `--projection-sha256` | string | — | 本地已批准投影的确切 sha256:&lt;hex&gt; |
+
+### stackkit identity projection approve
+
+创建经本地 Owner 签名的批准，不改动 PocketID。
+
+```bash
+stackkit identity projection approve [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--file` | string | — | 指向规范 stackkit.desired-identity-projection/v1 文档的路径 |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+| `--owner-approve` | bool | — | 显式批准将此期望投影导入本地托管 |
+
+### stackkit identity projection inspect
+
+验证一个已签名的投影，不做任何改动。
+
+```bash
+stackkit identity projection inspect [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--file` | string | — | 指向规范 stackkit.desired-identity-projection/v1 文档的路径 |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+### stackkit identity projection unlink
+
+分离可选的同步，不删除任何本地身份。
+
+```bash
+stackkit identity projection unlink [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+| `--owner-approve` | bool | — | 显式批准此本地身份操作 |
+| `--projection-sha256` | string | — | 本地已批准投影的确切 sha256:&lt;hex&gt; |
+
+## stackkit identity workload-peer
+
+与 Home 交换经 Owner 批准的 Cloud 工作负载证书。
+
+```bash
+stackkit identity workload-peer [flags]
+```
+
+子命令：[`stackkit identity workload-peer enroll`](#stackkit-identity-workload-peer-enroll), [`stackkit identity workload-peer install`](#stackkit-identity-workload-peer-install), [`stackkit identity workload-peer probe`](#stackkit-identity-workload-peer-probe), [`stackkit identity workload-peer request`](#stackkit-identity-workload-peer-request), [`stackkit identity workload-peer revoke`](#stackkit-identity-workload-peer-revoke)
+
+### stackkit identity workload-peer enroll
+
+为一个已安装的 Home 发布签发并准入一个对等方。
+
+```bash
+stackkit identity workload-peer enroll [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--address` | string | — | Cloud 探测所用的现有 federation 回环套接字 |
+| `--file` | string | — | 公开的请求或凭据 JSON 文件 |
+| `--home-root-sha256` | string | — | 通过独立的、经 Owner 批准的渠道验证的 Home 根 sha256 指纹 |
+| `--owner-approve` | bool | — | 显式批准此本地工作负载身份操作 |
+| `--peer-ref` | string | — | 显式的工作负载对等方身份 |
+| `--replace-key` | bool | — | 显式替换所选对等方的密钥；已吊销的密钥仍然被拒绝 |
+| `--server-name` | string | — | 已安装 Home 源的服务器名称 |
+
+### stackkit identity workload-peer install
+
+使用独立验证的根证书安装 Home 签发的证书。
+
+```bash
+stackkit identity workload-peer install [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--address` | string | — | Cloud 探测所用的现有 federation 回环套接字 |
+| `--file` | string | — | 公开的请求或凭据 JSON 文件 |
+| `--home-root-sha256` | string | — | 通过独立的、经 Owner 批准的渠道验证的 Home 根 sha256 指纹 |
+| `--owner-approve` | bool | — | 显式批准此本地工作负载身份操作 |
+| `--peer-ref` | string | — | 显式的工作负载对等方身份 |
+| `--server-name` | string | — | 已安装 Home 源的服务器名称 |
+
+### stackkit identity workload-peer probe
+
+通过现有的 federation 回环套接字请求源站。
+
+```bash
+stackkit identity workload-peer probe [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--address` | string | — | Cloud 探测所用的现有 federation 回环套接字 |
+| `--file` | string | — | 公开的请求或凭据 JSON 文件 |
+| `--home-root-sha256` | string | — | 通过独立的、经 Owner 批准的渠道验证的 Home 根 sha256 指纹 |
+| `--owner-approve` | bool | — | 显式批准此本地工作负载身份操作 |
+| `--peer-ref` | string | — | 显式的工作负载对等方身份 |
+| `--server-name` | string | — | 已安装 Home 源的服务器名称 |
+
+### stackkit identity workload-peer request
+
+创建或复用由 Cloud 持有的密钥，并导出其公开 CSR。
+
+```bash
+stackkit identity workload-peer request [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--address` | string | — | Cloud 探测所用的现有 federation 回环套接字 |
+| `--file` | string | — | 公开的请求或凭据 JSON 文件 |
+| `--home-root-sha256` | string | — | 通过独立的、经 Owner 批准的渠道验证的 Home 根 sha256 指纹 |
+| `--owner-approve` | bool | — | 显式批准此本地工作负载身份操作 |
+| `--peer-ref` | string | — | 显式的工作负载对等方身份 |
+| `--rotate-key` | bool | — | 生成新的 Cloud 密钥，同时在安装之前保留当前有效的凭据 |
+| `--server-name` | string | — | 已安装 Home 源的服务器名称 |
+
+### stackkit identity workload-peer revoke
+
+撤回某个对等方当前的 Home 准入。
+
+```bash
+stackkit identity workload-peer revoke [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--address` | string | — | Cloud 探测所用的现有 federation 回环套接字 |
+| `--file` | string | — | 公开的请求或凭据 JSON 文件 |
+| `--home-root-sha256` | string | — | 通过独立的、经 Owner 批准的渠道验证的 Home 根 sha256 指纹 |
+| `--owner-approve` | bool | — | 显式批准此本地工作负载身份操作 |
+| `--peer-ref` | string | — | 显式的工作负载对等方身份 |
+| `--server-name` | string | — | 已安装 Home 源的服务器名称 |
+

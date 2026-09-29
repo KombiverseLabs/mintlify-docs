@@ -1,0 +1,50 @@
+---
+title: "通过 SSH 连接服务器"
+description: "让 Techstack 通过 SSH 登录你的服务器并为你连接它"
+sidebarTitle: "通过 SSH 连接"
+icon: "key"
+---
+
+当你的服务器已经接受 SSH 登录，并且你不想自己粘贴命令时，请在 Add Node 向导中选择 **Connect my device**。Techstack 会使用下面的信息登录，执行与[配对命令](/zh-Hans/techstack/pairing-command)相同的设置，并等待服务器的 Guard 注册。
+
+## 主机或 IP 地址
+
+在 **Node host or IP** 中输入 Techstack 用来访问服务器的地址，例如 `192.168.1.20` 或 `server.example.com`。
+
+该地址必须能从 Techstack 运行的位置访问。当 Techstack 运行在同一网络中时，像 `192.168.1.20` 这样的家庭地址是可用的，例如在家里的电脑上运行 [Windows Alpha](/zh-Hans/techstack/install-windows)。如果 Techstack 无法通过这种方式访问服务器，请改用[配对命令](/zh-Hans/techstack/pairing-command)：服务器会自行向外发起连接。
+
+## SSH 密钥或密码
+
+在 **Authentication** 下，选择 Techstack 的登录方式：
+
+- **SSH key.** Techstack 使用你保存在 Wallet 中的私钥。
+- **Password.** Techstack 使用你所输入用户的 SSH 密码。
+
+选择密码时，向导在你进入下一页期间只会将其保存在浏览器内存中。它不会写入浏览器的会话存储，因此如果你在设置开始之前重新加载页面，需要再次输入密码。之后 Techstack 会将密码加密保存到你的 Wallet 中，用于此 StackKit，以便重试设置。它不会以明文形式存储在 StackKit 配置或任务报告中。
+
+## SSH 密钥标签
+
+选择 **SSH key** 时，输入 **SSH key label**：即保存在你的 Wallet 中的 SSH 密钥的名称。Techstack 会查找具有该名称的 Wallet 条目（不区分大小写）并使用其私钥。你永远不需要把私钥粘贴到向导中。
+
+如果你的 Wallet 中没有该名称的 SSH 密钥，连接测试和设置都会报错并停止。请先将密钥保存到你的 Wallet，再在此处输入其名称。与任何 SSH 登录一样，密钥的公钥部分必须位于服务器用户的 `~/.ssh/authorized_keys` 文件中。
+
+## SSH 用户、端口和 sudo
+
+打开 **SSH details** 以更改默认值：
+
+- **SSH user.** Techstack 登录所用的账号。默认值是 `root`。
+- **SSH port.** 默认值是 `22`。只有当你服务器的 SSH 服务监听其他端口时才需要更改。
+- **Use sudo for setup commands.** 当 SSH 用户不是 `root` 时请开启。此时 Techstack 会使用 `sudo` 运行设置。它会先尝试不带密码提示的 `sudo`，因此当该用户无需输入密码即可运行 `sudo` 时，设置最为可靠。如果该用户完全没有 `sudo`，设置会停止。
+
+## 测试连接
+
+继续之前请选择 **Test connection**。Techstack 会尝试使用你输入的地址、用户、端口以及密钥或密码登录，并显示 **SSH connection successful** 或它收到的错误。测试只会登录，不会更改服务器上的任何内容。
+
+如果你在测试之后更改了任何字段，结果会被清除。继续之前请重新测试。
+
+测试失败的常见原因：
+
+- 主机或 IP 有误，或者无法从 Techstack 运行的位置访问；
+- SSH 端口不是 `22`；
+- 密钥标签与你 Wallet 中的任何 SSH 密钥都不匹配；
+- 服务器不接受该用户使用该密钥或密码登录。

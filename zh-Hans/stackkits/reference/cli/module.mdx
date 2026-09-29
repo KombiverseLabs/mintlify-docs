@@ -1,0 +1,53 @@
+---
+title: "stackkit module"
+description: "创作并验证本地 CUE 模块"
+sidebarTitle: "module"
+---
+创作并验证本地 CUE 模块。
+
+将模块事实渲染为 CUE 契约，并验证其部署配置。
+
+```bash
+stackkit module [flags]
+```
+
+子命令：[`stackkit module lint`](#stackkit-module-lint), [`stackkit module scaffold`](#stackkit-module-scaffold)
+
+## stackkit module lint
+
+检查模块 CUE 在版本固定/健康检查/安全/访问/放置方面的规范性（ADR-0027 G1/G3）。
+
+对单个模块（`--module`）或整棵目录树（`--all`）运行确定性的模块规范性检查关卡。检查项：镜像标签已固定（不得使用 :latest）、守护进程存在 healthCheck（有界的自动化任务使用 restart=no 加进程退出状态）、安全块（noNewPrivileges + capDrop ALL）、被路由的服务有 accessPolicy、无明文密钥、草稿模块不声明任何场景，以及 docker-socket 模块不具备托管无服务器资格。
+
+单模块运行遇到任何错误都会以非零状态退出。`--all` 仅作参考（退出码 0），除非传入 `--strict`。
+
+```bash
+stackkit module lint [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--all` | bool | — | 检查 `--modules-dir` 下的每个模块 |
+| `--json` | bool | — | 以 JSON 输出发现项 |
+| `--module` | string | — | 指向单个模块目录的路径（包含 module.cue） |
+| `--modules-dir` | string | `modules` | 模块根目录（与 `--all` 一起使用） |
+| `--strict` | bool | — | 遇到任何错误级发现项即以非零状态退出（对单个 `--module` 隐含启用） |
+
+## stackkit module scaffold
+
+根据 module_facts.json 确定性地渲染模块产物（ADR-0027）。
+
+根据经过 schema 校验的 module_facts.json 渲染 modules/&lt;slug&gt;/module.cue、tests/reference-compose.yml 和精简的 tests/integration_test.sh。输出是确定性的（关卡 G0）：相同的事实总会渲染出字节完全相同的文件。
+
+```bash
+stackkit module scaffold [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--catalog` | string | — | 用于 imageSource 引用的已编译 CUE catalog.json |
+| `--facts` | string | — | 指向 module_facts.json 的路径。必填。 |
+| `--force` | bool | — | 覆盖现有文件 |
+| `--out` | string | — | 输出模块目录（默认 modules/&lt;slug&gt;） |
+| `--print` | bool | — | 将渲染出的产物输出到 stdout，而不是写入文件 |
+

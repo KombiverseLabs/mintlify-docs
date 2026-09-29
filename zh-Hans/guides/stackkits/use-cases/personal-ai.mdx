@@ -1,0 +1,137 @@
+---
+title: "Personal AI"
+description: "在你的主机上运行私有聊天工作台，具备所有者托管和明确的模型下载"
+sidebarTitle: "Personal AI"
+icon: brain
+---
+
+<Info>
+  证据状态（2026-09-24，v0.41.0）：Personal AI 为 `available, not yet
+  lifecycle-verified`。当前版本声明了它的组件（Ollama 和 Open WebUI），目前还没有自动化的生命周期运行覆盖 install、apply、verify、backup 或 restore。运行时证据仍待完成。
+</Info>
+
+Personal AI 在你的 Linux Docker 主机上运行一个用于语言模型的聊天界面。本地所有者会得到初始的管理员账户，公开注册被禁用，也不需要 kombify 账户。发布目录把这个使用场景称为 Private AI，并作为可选的 `ai` 工作负载交付，附带 `private-ai` 备选项。
+
+## 应用
+
+- [Ollama](https://ollama.com) 提供模型服务。
+- Open WebUI 提供你登录使用的聊天界面。
+
+本页同时涵盖两者，因为它们是一起选择、一起运维的。
+
+## 先检查你的主机容量
+
+CPU 配置声明的主机最低要求是 4 个 CPU 核心、12 GiB 内存和 40 GiB 磁盘；推荐 8 个 CPU 核心、16 GiB 内存和 80 GiB 磁盘。在这个最低要求之上，还要考虑模型的大小：
+
+- Ollama 声明的内存上限为 6 GiB。下载的模型权重加上你使用的上下文必须能装进这个上限之内。
+- Open WebUI 声明的内存上限为 2 GiB。
+- 请为容器镜像和下载的模型权重一并预留磁盘空间。
+- 未启用 GPU 服务；更高的计算档位使用相同的 CPU 运行时。
+
+这些限制描述的是容量，而不是响应速度。安装之前，请检查可用的主机资源和所选模型的要求。计算配置请参见[选择 StackKit](/zh-Hans/guides/stackkits/choosing-a-kit)。
+
+## 选择 AI 工作负载
+
+从一个空的所有者工作区开始：
+
+```bash
+stackkit init basement-kit --platform standalone-compose \
+  --use-case ai --use-case-alternative ai=private-ai \
+  --use-case-alternative basement-core=standalone \
+  --module-compute-profile stackkits-basement-core-runtime=standard \
+  --module-compute-profile stackkits-private-ai-runtime=standard \
+  --owner-source=local --non-interactive
+```
+
+init 命令会创建 AI 配置及其私有凭据引用。向现有工作区添加 AI 时，请更新 [StackSpec](/zh-Hans/guides/stackkits/configure-stack-spec) 并运行 `stackkit secrets materialize`。审查并应用该配置：
+
+```bash
+stackkit validate
+stackkit generate
+stackkit plan --json
+stackkit apply
+stackkit verify
+```
+
+请使用受支持的 Linux 主机及其观察到的清单来运行 Apply；参见[审查、规划与应用](/zh-Hans/guides/stackkits/review-plan-and-apply)。
+
+## 以所有者身份打开 AI 路由
+
+应用之后，打开生成的 AI 路由。Open WebUI 会根据已建立的本地所有者的身份，以及 init 命令放入所有者托管的 `owner-password` 密钥，创建初始管理员。请在你的 StackKits 工作区中，在私密的终端里取回初始密码：
+
+```bash
+stackkit secrets reveal --workload ai --slot owner-password
+```
+
+- 请保管好显示出来的密码，不要把它复制到聊天、截图或 Git 中。
+- 首次登录之后，请在 Open WebUI 内修改密码。启动引导不会重置已有的账户，因此请自行保管你修改后的管理员密码。
+
+## 明确地选择并下载模型
+
+不会替你选择或拉取任何模型，安装、重启或升级期间都不会。在 Open WebUI 中，打开 **Admin Settings**，明确选择一个 Ollama 模型，并请求下载它。在你选定之前，请查看上游模型的许可证、下载大小、量化方式、上下文长度和内存要求。
+
+在 CPU 配置上请从小模型开始。更大的模型和更长的上下文需要更多内存。成功下载的模型仍可能超出可用的推理容量。
+
+Ollama 的 API 没有在主机上发布端口。Open WebUI 通过私有的工作负载网络访问它。Ollama 具有出站网络访问权限，用于所请求的下载。
+
+## 问出你的第一个问题
+
+在 Open WebUI 中创建新的聊天，选择已下载的模型，然后发送一个问题。模型在你的主机上运行。重新打开该聊天，检查你的对话是否已保存。
+
+## 在你的 kombify 账户中使用你的模型（可选）
+
+你还可以在你的 kombify 账户的 AI 聊天中使用这个 Ollama，而无需开放任何入站端口。Ollama 旁边的一个可选连接器会向 kombify 打开一条出站隧道。kombify 绝不会连入你的网络，对你自己的模型发起的请求也不会计入你的 Cloud AI 额度。
+
+1. 在你的 kombify 账户中，打开 **Settings → AI access → Your model endpoints** 并添加一个端点。选择 **kombify Local AI StackKit** 作为位置。
+2. 复制只显示一次的连接器令牌。
+3. 在主机上，从你的 StackKits 工作区开启连接器，在提示时粘贴令牌，然后应用：
+
+```bash
+stackkit setup ai-connect --token-file -
+stackkit generate
+stackkit apply
+```
+
+4. 回到 **Settings → AI access**，选择 **Check connection**。该端点会显示为在线，并列出你已下载的模型。
+5. 在聊天中，选择 **My endpoint** 作为 AI 来源。这是与你的模型直接进行的聊天，没有智能体工具。
+
+只有模型列表、模型详情和聊天补全请求会通过连接器到达 Ollama；模型的下载和删除仍然只在本地进行。若要停止使用，请在 **Settings → AI access** 中删除该端点，这会让令牌在任何地方都失效，然后在主机上关闭连接器：
+
+```bash
+stackkit setup ai-connect --disable
+stackkit generate
+stackkit apply
+```
+
+## 什么数据保存在哪里
+
+存储是有意分开的：
+
+| 内容 | 位置 | 备份行为 |
+| --- | --- | --- |
+| 聊天和 Open WebUI 数据 | 位于 `/app/backend/data` 的持久 `open-webui-data` 卷 | 声明的备份源；完整的 AI 恢复仍未验证 |
+| 下载的模型权重 | 位于 `/root/.ollama` 的持久 `ollama-models` 卷 | 不是备份源；已从备份中排除 |
+
+聊天和模型权重在容器被替换后依然保留。请记下模型名称和摘要，以便在它的存储丢失时能再次识别它。模型的可用性取决于它的上游来源。完整的 AI 备份和恢复仍未验证；仅有容器持久化并不能证明恢复能力。工作区生命周期请参见[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。
+
+## 故障排查
+
+| 状态 | 怎么做 |
+| --- | --- |
+| Apply 因容量原因阻塞了主机 | 检查上面的主机最低要求；主机是否满足 4 CPU / 12 GiB / 40 GiB 的最低要求，并且你打算加载的模型是否装得进 6 GiB 的 Ollama 上限？ |
+| 初始管理员登录失败 | 首次登录请使用所有者的邮箱和初始密码。修改之后请使用你的新密码；重启不会重置已有的账户。 |
+| 之前下载的模型不见了 | 检查所选的模型和持久的模型卷。普通的容器替换会保留它。新的或丢失的模型存储需要明确地重新下载。 |
+| 响应停滞或容器停止 | 检查工作负载日志和可用内存。更小的模型或更短的上下文会减少内存使用；CPU 推理也可能需要一些时间。 |
+| 你的 kombify 账户显示该端点离线 | 连接器没有在运行。检查连接器令牌是否已设置，以及工作负载是否已应用；Node Hub 会显示连接器容器。 |
+| 你的 kombify 账户提示模型未安装 | 请先在 Open WebUI 中下载模型；只会列出 Ollama 已有的模型。 |
+| 现有工作区中缺少 AI 所有者密钥引用 | 更改规范意图之后，运行现有的 `stackkit secrets materialize`；仅生成并不会产生密钥。 |
+
+如果上面没有涵盖你的问题，请在更改生成的运行时目录中的任何内容之前，先在 [Node Hub](/zh-Hans/guides/stackkits/node-hub) 中查看工作负载容器的状态。
+
+## 获取应用
+
+Open WebUI 基于浏览器：用任意现代浏览器打开你生成的 AI 路由，并使用你设置的管理员账户登录。无需安装客户端。
+
+<Card title="Ollama" icon="terminal" href="https://ollama.com">
+  Ollama 本身是 CLI/API 模型运行器，而不是面向最终用户的应用。StackKits 已经为你运行了它；如果想直接在主机上查看，上游网站记录了模型目录和 CLI。
+</Card>

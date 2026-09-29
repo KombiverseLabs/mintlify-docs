@@ -1,0 +1,142 @@
+---
+title: "stackkit federation"
+description: "管理本地 Federation 绑定证据"
+sidebarTitle: "federation"
+---
+管理本地 Federation 绑定证据。
+
+```bash
+stackkit federation [flags]
+```
+
+子命令：[`stackkit federation binding`](#stackkit-federation-binding), [`stackkit federation control`](#stackkit-federation-control), [`stackkit federation link`](#stackkit-federation-link)
+
+## stackkit federation binding
+
+管理不透明的外部 Federation 链接绑定。
+
+```bash
+stackkit federation binding [flags]
+```
+
+子命令：[`stackkit federation binding adopt`](#stackkit-federation-binding-adopt), [`stackkit federation binding import`](#stackkit-federation-binding-import)
+
+### stackkit federation binding adopt
+
+验证、经 Owner 签名并原子地采纳一个外部绑定。
+
+别名：`approve`
+
+```bash
+stackkit federation binding adopt [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--binding` | string | — | 限定在工作区内的未签名外部 Federation 绑定 JSON |
+| `--inventory` | string | — | 限定在工作区内、要原子更新的 inventory.json |
+| `--resolved-plan` | string | — | 限定在工作区内的规范 ResolvedPlan（否则在 Inventory 旁推导） |
+
+### stackkit federation binding import
+
+将经 Owner 签名的不透明绑定准入本地 Inventory。
+
+```bash
+stackkit federation binding import [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--admission` | string | — | 限定在工作区内、经 Owner 签名的 Federation 绑定准入 JSON |
+| `--inventory` | string | — | 限定在工作区内、要原子更新的 inventory.json |
+| `--resolved-plan` | string | — | 限定在工作区内的规范 ResolvedPlan（否则在 Inventory 旁推导） |
+
+## stackkit federation control
+
+在选定的 Cloud 节点上执行 Home 授权的计划并验证。
+
+```bash
+stackkit federation control [flags]
+```
+
+子命令：[`stackkit federation control bind`](#stackkit-federation-control-bind), [`stackkit federation control send`](#stackkit-federation-control-send), [`stackkit federation control sign`](#stackkit-federation-control-sign), [`stackkit federation control withdraw`](#stackkit-federation-control-withdraw)
+
+### stackkit federation control bind
+
+准入确切的公开 Home 授权和本地接收方托管。
+
+```bash
+stackkit federation control bind [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--file` | string | — | 经 Owner 审阅的接收方托管 JSON；不含私钥 |
+
+### stackkit federation control send
+
+通过确切由 Home 发起的 mTLS 连接发送已签名的操作。
+
+```bash
+stackkit federation control send [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--endpoint-file` | string | — | 本地固定的 mTLS 端点和受限的凭据路径 |
+| `--file` | string | — | 经 Home 签名的操作 JSON |
+
+### stackkit federation control sign
+
+使用当前 Home 托管为一个确切的短期操作签名。
+
+```bash
+stackkit federation control sign [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--file` | string | — | 包含计划哈希、目标和有限时间戳的确切操作 JSON |
+
+### stackkit federation control withdraw
+
+持久撤回接收方授权，包括现有的 TLS 会话。
+
+```bash
+stackkit federation control withdraw [flags]
+```
+
+## stackkit federation link
+
+绑定并停止外部 Federation 网络结构的本地部分。
+
+```bash
+stackkit federation link [flags]
+```
+
+子命令：[`stackkit federation link bind`](#stackkit-federation-link-bind), [`stackkit federation link stop`](#stackkit-federation-link-stop)
+
+### stackkit federation link bind
+
+将外部 WireGuard 句柄纳入本地 Owner 托管。
+
+```bash
+stackkit federation link bind [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--file` | string | — | 外部网络结构托管 JSON；不含私钥 |
+
+### stackkit federation link stop
+
+停止已采纳的接口，但不删除外部网络结构。
+
+```bash
+stackkit federation link stop [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--fabric-ref` | string | — | 确切的已采纳不透明网络结构引用 |
+

@@ -1,0 +1,182 @@
+---
+title: "旧版与已弃用的命令"
+description: "当前版本会拒绝或替换的命令"
+sidebarTitle: "旧版与已弃用"
+---
+这些命令存在于命令树中，但不属于当前工作流。当前版本会拒绝旧版（legacy）命令；已弃用（deprecated）的命令仍可运行，并会指明其替代命令。
+
+## stackkit app add
+
+添加或更新 v0.6 兼容的 PaaS 应用交接。
+
+<Warning>当前版本会拒绝此命令；它属于确切的 v0.6 兼容线。</Warning>
+
+```bash
+stackkit app add <name> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--auth` | string | `login-gateway` | 路由认证模式：login-gateway 或 public |
+| `--env` | stringArray | — | 普通环境变量，格式为 KEY=value；可重复 |
+| `--health-path` | string | `/health` | HTTP 健康检查路径 |
+| `--host` | string | — | 应用的路由主机 |
+| `--image` | string | — | PaaS 交接使用的容器镜像 |
+| `--kind` | string | `sveltekit` | 应用类型（目前仅支持 sveltekit） |
+| `--port` | int | `3000` | 应用暴露的容器端口 |
+| `--secret` | stringArray | — | 密钥引用，格式为 KEY=env:NAME、KEY=vault:NAME 或 KEY=file:PATH；可重复 |
+
+## stackkit backup list
+
+列出本地仓库中的快照。
+
+<Warning>当前版本会拒绝此命令；它属于确切的 v0.6 兼容线。</Warning>
+
+```bash
+stackkit backup list [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 以 JSON 输出快照 |
+
+## stackkit backup migrate-from-restic
+
+将现有的 Restic 仓库导入 Kopia（一次性）。
+
+<Warning>当前版本会拒绝此命令；它属于确切的 v0.6 兼容线。</Warning>
+
+驱动一次性的 Restic 到 Kopia 导入器。
+
+读取 v1 附加组件中配置的 Restic 仓库，遍历每个快照，并在 Kopia 中重新创建它们，同时保留原始时间戳。导入成功后，附加组件会自动将 engine: "restic-import" 切换为 "kopia"。
+
+```bash
+stackkit backup migrate-from-restic [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--dry-run` | bool | — | 输出计划，但不导入 |
+
+## stackkit backup verify
+
+对照其存储提供商验证仓库。
+
+<Warning>当前版本会拒绝此命令；它属于确切的 v0.6 兼容线。</Warning>
+
+```bash
+stackkit backup verify [flags]
+```
+
+## stackkit cluster join-token
+
+为工作节点或存储节点创建加入令牌。
+
+<Warning>当前版本会拒绝此命令；它属于确切的 v0.6 兼容线。</Warning>
+
+为工作节点或存储节点创建加入令牌。
+
+该令牌是把另一个 BaseKit 安装视为此家庭实验室成员的唯一受支持途径。Coolify 远程服务器注册和 TechStack 镜像更新会在后续的 rollout 步骤中使用此集群身份。
+
+```bash
+stackkit cluster join-token [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--endpoint` | string | — | 工作节点用于加入的主节点端点 |
+| `--homelab-id` | string | — | 家庭实验室 ID（默认为栈规格名称） |
+| `--main-node` | string | — | 主节点 ID/名称（默认为栈规格中类似主节点的节点） |
+| `--output, -o` | string | `.stackkit/cluster/join-token.json` | 令牌 JSON 的输出路径 |
+| `--ttl` | duration | `24h0m0s` | 令牌有效时长 |
+
+## stackkit kit upgrade
+
+解析并安装经过验证的 StackKit 发布版本。
+
+<Warning>已弃用：请使用 stackkit upgrade</Warning>
+
+从 GitHub 解析公开的 StackKit 发布版本，验证其归档、SPDX SBOM、GitHub OIDC/Sigstore 证明以及缓存的可信根，然后原子地将其安装到 .stackkit/releases/ 之下。
+
+使用 `--dry-run` 时，它只在有界的影子工作区中生成经过验证的目标，并报告规范的计划/产物差异。不使用 `--dry-run` 时，它会先检查该目标，创建原生 Kopia 快照以及经 Owner 签名的执行器状态恢复检查点，暂存并验证回滚数据但不激活，然后才安装并执行确切目标的 generate/apply/verify 事务。失败的目标事务只有在目标 Apply 被准入之前，才能恢复并验证先前的执行器。Apply 之后，在存在经验证的先前数据激活之前，会阻止先前运行时的重启；仅有隔离的 Kopia 暂存并不能授权重启。已完成的目标提交会保留其成功证明，以便显式收尾。全新升级需要内嵌 CUE Kit 策略的支持；现有操作的恢复则遵循其已签名的日志和检查点。
+
+```bash
+stackkit kit upgrade [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--dry-run` | bool | — | 在有界的影子工作区中验证并检查目标的生成，但不应用。 |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON。 |
+| `--recover` | string | — | 显式恢复一个确切的被中断的生命周期操作 ID。 |
+| `--to` | string | `latest` | 目标：latest、vX.Y.Z，或 channel:stable\|beta\|edge。 |
+
+**示例**
+
+```bash
+# Verify the newest stable release and preview its plan and artifact diff without applying it
+stackkit upgrade --dry-run
+
+# Upgrade to the newest stable release
+stackkit upgrade
+
+# Upgrade to the newest beta prerelease
+stackkit upgrade --to channel:beta
+
+# Recover an interrupted upgrade by its lifecycle operation ID
+stackkit upgrade --recover <operation-id>
+```
+
+## stackkit kit verify
+
+验证缓存的发布回执和证明。
+
+<Warning>已弃用：请使用 stackkit verify `--offline`</Warning>
+
+'stackkit verify `--offline`' 的已弃用别名。不会发出任何网络请求。
+
+```bash
+stackkit kit verify [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON。 |
+
+## stackkit status
+
+显示部署状态。
+
+<Warning>当前版本会拒绝此命令；它属于确切的 v0.6 兼容线。</Warning>
+
+显示 StackKit 部署的当前状态。
+
+```text
+Shows:
+  • Deployment state (running, degraded, error)
+  • Service statuses and health
+  • Resource usage
+  • URLs and endpoints
+```
+
+```bash
+stackkit status [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--http` | bool | — | 从此验证主机探测已验证的服务路由 |
+| `--inventory` | string | — | 用于识别已配置 Standard 进程运行时的 Architecture v2 观测 Inventory |
+| `--json` | bool | — | 以 JSON 输出 |
+| `--resolved-plan` | string | — | 规范的 Architecture v2 ResolvedPlan（默认：deploy/.stackkit/resolved-plan.json） |
+
+**示例**
+
+```bash
+# Show status
+stackkit status
+
+# Output as JSON
+stackkit status --json
+```
+

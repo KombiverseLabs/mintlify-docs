@@ -18,7 +18,7 @@ const docsPath = join(root, "docs.json");
 export const LOCALES = {
   de: { language: "de" },
   // es: { language: "es" },
-  // "zh-Hans": { language: "zh-Hans" },
+  "zh-Hans": { language: "zh-Hans" },
   // hi: { language: "hi" },
   // ar: { language: "ar" },
 };

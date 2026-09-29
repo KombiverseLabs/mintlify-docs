@@ -1,0 +1,161 @@
+---
+title: "stackkit advanced"
+description: "管理经离线授权的 Advanced 生命周期操作"
+sidebarTitle: "advanced"
+---
+管理经离线授权的 Advanced 生命周期操作。
+
+```bash
+stackkit advanced [flags]
+```
+
+子命令：[`stackkit advanced change-set`](#stackkit-advanced-change-set), [`stackkit advanced restore-drill`](#stackkit-advanced-restore-drill), [`stackkit advanced rollback`](#stackkit-advanced-rollback), [`stackkit advanced trust`](#stackkit-advanced-trust)
+
+## stackkit advanced change-set
+
+管理经离线授权的 Terramate 变更集。
+
+```bash
+stackkit advanced change-set [flags]
+```
+
+子命令：[`stackkit advanced change-set apply`](#stackkit-advanced-change-set-apply), [`stackkit advanced change-set create`](#stackkit-advanced-change-set-create)
+
+### stackkit advanced change-set apply
+
+应用经 Owner 精确批准的 Terramate 变更集。
+
+```bash
+stackkit advanced change-set apply [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--candidate-spec` | string | — | 指向使用 generation.target=terramate 的确切候选 StackSpec v2 的路径 |
+| `--capability` | string | — | 指向创建该变更集时使用的规范 stackkit.advanced-capability/v1 的路径 |
+| `--change-set` | string | — | 确切的 sha256:&lt;hex&gt;，即经 Owner 签名的变更集内容地址 |
+| `--expect-sha256` | string | — | 必填：所存规范变更集字节的确切 sha256:&lt;hex&gt; 摘要 |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+### stackkit advanced change-set create
+
+创建经 Owner 签名的 Terramate 变更集。
+
+```bash
+stackkit advanced change-set create [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--candidate-spec` | string | — | 指向使用 generation.target=terramate 的候选 StackSpec v2 的路径 |
+| `--capability` | string | — | 指向规范 stackkit.advanced-capability/v1 文件的路径 |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+## stackkit advanced restore-drill
+
+运行受能力限制的原生恢复演练。
+
+```bash
+stackkit advanced restore-drill [flags]
+```
+
+子命令：[`stackkit advanced restore-drill run`](#stackkit-advanced-restore-drill-run)
+
+### stackkit advanced restore-drill run
+
+暂存并验证某个备份锚点的恢复，但不激活。
+
+以 Advanced 操作的方式运行原生 v2 恢复演练。
+
+只有同时满足以下条件，演练才会被受理：持有允许 restore.drill 的离线验证能力、本地 Owner 已批准的签发方信任，以及显式的 `--owner-approve`。它会验证当前运行时，创建新的快照锚点（或验证本地托管中的 `--anchor`），暂存该锚点的恢复，验证暂存目录树，删除暂存区，并确认线上运行时未发生变化。暂存的数据绝不会被激活。
+
+```bash
+stackkit advanced restore-drill run [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--anchor` | string | — | 要演练的现有 sha256 快照锚点 ID；省略时会创建新的备份锚点 |
+| `--capability` | string | — | 指向允许 restore.drill 的规范 stackkit.advanced-capability/v1 文件的路径 |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+| `--operation-id` | string | — | 稳定的小写演练 ID（8-100 个字符）；省略时自动生成 |
+| `--owner-approve` | bool | — | 显式批准演练的备份及暂存恢复副作用 |
+
+**示例**
+
+```bash
+stackkit advanced restore-drill run --capability capability.json --owner-approve --json
+```
+
+## stackkit advanced rollback
+
+运行受能力限制、跨 Terramate 栈的协调回滚。
+
+```bash
+stackkit advanced rollback [flags]
+```
+
+子命令：[`stackkit advanced rollback run`](#stackkit-advanced-rollback-run)
+
+### stackkit advanced rollback run
+
+将本地所有 Terramate 栈回滚到同一个已验证的检查点。
+
+以 Advanced 操作 rollback.coordinated 的方式，将本地主机回滚到一个已验证的执行器状态检查点。
+
+只有同时满足以下条件，回滚才会被受理：持有允许 rollback.coordinated 的离线验证能力、本地 Owner 已批准的签发方信任，以及显式的 `--owner-approve`。`--to` 直接指定检查点，或指定其执行前检查点即为目标的变更集。各栈按相反的运行顺序处理：检查点之后新增的栈会通过 OpenTofu 销毁（docker compose down，不含卷）并移除；发生变化的栈会恢复检查点的状态、配置和负载，并被强制收敛；检查点之后被移除的栈会重新创建。检查点的 StackSpec 和 Inventory 会被还原、重新生成并验证。被中断的回滚会在下次使用相同 `--to` 运行时继续，并跳过已收敛的栈。
+
+```bash
+stackkit advanced rollback run [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--capability` | string | — | 指向允许 rollback.coordinated 的规范 stackkit.advanced-capability/v1 文件的路径 |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+| `--owner-approve` | bool | — | 显式批准销毁、恢复和重新创建栈 |
+| `--to` | string | — | 目标 sha256 执行器状态快照 ID，或其执行前检查点即为目标的 sha256 变更集 ID |
+
+**示例**
+
+```bash
+stackkit advanced rollback run --capability capability.json --to sha256:<change-set-id> --owner-approve --json
+```
+
+## stackkit advanced trust
+
+管理本地经 Owner 批准的 Advanced 签发方信任。
+
+```bash
+stackkit advanced trust [flags]
+```
+
+子命令：[`stackkit advanced trust import`](#stackkit-advanced-trust-import), [`stackkit advanced trust inspect`](#stackkit-advanced-trust-inspect)
+
+### stackkit advanced trust import
+
+导入确切固定的 Advanced 签发方信任包。
+
+```bash
+stackkit advanced trust import [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--bundle` | string | — | 指向规范 stackkit.advanced-trust-bundle/v1 文件的路径 |
+| `--expect-sha256` | string | — | 必填：信任包的确切 sha256:&lt;hex&gt; 摘要 |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+| `--owner-approve` | bool | — | 显式批准更改本地 Advanced 签发方信任 |
+
+### stackkit advanced trust inspect
+
+检查已验证的本地 Advanced 签发方信任。
+
+```bash
+stackkit advanced trust inspect [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+

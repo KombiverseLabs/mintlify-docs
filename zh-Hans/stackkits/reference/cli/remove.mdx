@@ -1,0 +1,50 @@
+---
+title: "stackkit remove"
+description: "卸载本地 StackKits 部署"
+sidebarTitle: "remove"
+---
+卸载本地 StackKits 部署。
+
+卸载这台机器上的 StackKits 运行时。
+
+不带 `--workload` 时，这是产品级卸载：它会停止并删除每个名为 stackkit-\* 的 Compose 项目（Basement 核心、Cloud 核心以及所选用例），包括它们的网络和卷。它会先查找当前目录，然后是 ~/my-homelab 或 ~/my-cloud-homelab。
+
+`--workload` 通过其已应用的运行时所有者移除一个确切的 Architecture v2 工作负载。除非设置了 `--delete-data`，否则该路径会保留应用卷。
+
+```bash
+stackkit remove [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | Architecture v2 生成清单 |
+| `--auto-approve` | bool | — | 跳过交互式确认 |
+| `--delete-data` | bool | — | 删除此确切已应用工作负载所拥有的命名卷（默认保留应用数据） |
+| `--force` | bool | — | 即使出错也强制移除 |
+| `--generation-receipt` | string | — | Architecture v2 生成回执 |
+| `--inventory` | string | — | Architecture v2 观测到的 Inventory（否则会选取一个常规的 inventory 文件） |
+| `--json` | bool | — | 以 JSON 输出规范的 Architecture v2 移除结果 |
+| `--local-execution-channel` | string | — | 此移除进程所拥有的确切已应用执行通道 |
+| `--local-node` | string | — | 此移除进程所拥有的确切已应用节点放置 |
+| `--local-site` | string | — | 此移除进程所拥有的确切已应用 Site 放置 |
+| `--purge` | bool | — | 移除所有 StackKit 数据，包括镜像、状态和部署目录 |
+| `--resolved-plan` | string | — | Architecture v2 规范的 ResolvedPlan |
+| `--terminal-evidence-json` | bool | — | 以 JSON 输出有界的、规范的 Architecture v2 终态证据 |
+| `--workload` | string | — | 要移除的确切 Architecture v2 ResolvedPlan 工作负载引用 |
+
+**示例**
+
+```bash
+# Uninstall the whole local deployment after typing yes
+stackkit remove
+
+# Uninstall without the confirmation prompt
+stackkit remove --auto-approve
+
+# Remove only the Files workload and keep its data volumes
+stackkit remove --workload files
+
+# Remove the Photos workload, delete its data volumes, and print the result as JSON
+stackkit remove --workload photos --delete-data --auto-approve --json
+```
+

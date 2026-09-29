@@ -1,0 +1,49 @@
+---
+title: "stackkit migrate"
+description: "对 StackSpec v1 进行分类并输出其迁移报告"
+sidebarTitle: "migrate"
+---
+对 StackSpec v1 进行分类并输出其迁移报告。
+
+对一个 StackSpec 进行无损分类，并运行有界的 v1 到 v2 迁移适配器。结果始终包含完整的迁移报告，并且仅在结果确定时才包含仅限架构的迁移投影。
+
+重要：不使用 `--complete-with` 时，该投影不是通过 CUE 校验的 StackSpec v2，不是 ResolvedPlan，也不授权生成或部署。请先完成报告中列出的手动操作，并让完整的 StackSpec v2 通过 CUE 解析。
+
+`--complete-with` 接受一个完整且显式的 StackSpec v2，绝不接受部分覆盖。它会协调确定性的旧版 Site、节点和硬件绑定，然后使用内嵌的受治理 Architecture v2 权威。完成后的结果包含显式的规范候选及其 ResolvedPlan 哈希。生成器资格独立于 CUE 有效性单独报告，并遵循 ResolvedPlan 的就绪状态。
+
+`--spec-output` 将确切完成的规范 StackSpec v2 以确定性 JSON 写出。它只能与 `--complete-with` 一起使用，绝不默认原地重写，并且拒绝替换已有的规范目标；规范替换需要显式的、经 CAS 授权的 StackSpec 创作流程。
+
+就绪可进入影子解析的结果会成功退出。被阻塞的结果仍会以机器可读的形式输出，随后命令以失败退出。Context 仅映射旧版的本地性和 Pi 硬件；它从不选择 Kit。
+
+```bash
+stackkit migrate [v1-spec-file] [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--complete-with` | string | — | 要用内嵌权威协调并解析的完整且显式的 StackSpec v2 候选（绝不接受部分覆盖） |
+| `--force` | bool | — | 原子地替换现有的迁移结果输出；规范 StackSpec 输出需要新路径 |
+| `--format` | string | `json` | 机器可读的输出格式：json 或 yaml |
+| `--output, -o` | string | — | 将迁移结果写入工作目录之下，而不是 stdout |
+| `--spec-output` | string | — | 将完成的规范 StackSpec v2 以确定性 JSON 写入工作目录之下（需要 `--complete-with`） |
+| `--target-kit` | string | — | 权威支持的显式目标 KitProfile（绝不从 context 推断） |
+
+**示例**
+
+```bash
+# Classify a StackSpec v1 and print its migration report
+stackkit migrate stack-spec.yaml
+
+# Report the migration toward an explicit target Kit
+stackkit migrate legacy.yaml --target-kit cloud-kit
+
+# Reconcile with a full StackSpec v2 and write the completed canonical spec
+stackkit migrate legacy.yaml --target-kit basement-kit --complete-with explicit-v2.yaml --spec-output stack-spec.v2.json
+
+# Print the report as YAML
+stackkit migrate legacy.yaml --format yaml
+
+# Write the report to a file beneath the working directory
+stackkit migrate legacy.yaml --output .stackkit/migration-result.json
+```
+
