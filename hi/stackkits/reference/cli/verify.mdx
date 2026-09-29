@@ -1,0 +1,50 @@
+---
+title: "stackkit verify"
+description: "डिप्लॉयमेंट के बाद की सत्यापन जाँचें चलाएँ"
+sidebarTitle: "verify"
+---
+डिप्लॉयमेंट के बाद की सत्यापन जाँचें चलाएँ।
+
+जिस होस्ट पर StackKit डिप्लॉय है, वहाँ से रीड-ओनली पोस्ट-डिप्लॉयमेंट जाँचें चलाएँ।
+
+वेरिफ़ायर स्टैक स्पेक, डिप्लॉयमेंट स्थिति, Docker डेमन, StackKit कंटेनर, Docker हेल्थ स्टेटस और वैकल्पिक रूप से जनरेट किए गए एक्सेस सारांश के HTTP रूट जाँचता है।
+
+`--host` और उसके SSH फ़्लैग (`--user`, `--key`, `--port`, `--remote-dir`, `--legacy-remote-transport`) उस सेवानिवृत्त raw-SSH वेरिफ़ायर को चलाते हैं जिसे केवल exact v0.6 बिल्ड अब भी चलाता है; `--strict` उस वेरिफ़ायर और v0.6 स्थानीय जाँचों पर लागू होता है। वर्तमान रिलीज़ पर verify को डिप्लॉय किए गए होस्ट पर चलाएँ।
+
+```bash
+stackkit verify [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | Architecture v2 जनरेशन मैनिफ़ेस्ट (डिफ़ॉल्ट: &lt;outputRoot&gt;/.stackkit/generation-manifest.json) |
+| `--generation-receipt` | string | — | Architecture v2 जनरेशन रसीद (डिफ़ॉल्ट: &lt;outputRoot&gt;/.stackkit/generation-receipt.json) |
+| `--host` | string | — | SSH के ज़रिए सत्यापित करने के लिए रिमोट होस्ट |
+| `--http` | bool | — | जनरेट किए गए सेवा URL को HTTP अनुरोधों से सत्यापित करें |
+| `--inventory` | string | — | Architecture v2 का देखा गया Inventory (अन्यथा एक पारंपरिक इन्वेंटरी फ़ाइल चुनी जाती है) |
+| `--json` | bool | — | मशीन-पठनीय JSON जारी करें |
+| `--key` | string | — | रिमोट सत्यापन के लिए SSH प्राइवेट की पथ |
+| `--legacy-remote-transport` | bool | — | StackSpec v1 लक्ष्य के लिए डिप्रिकेटेड raw-SSH वेरिफ़ायर को स्पष्ट रूप से अनुमति दें |
+| `--offline` | bool | — | नेटवर्क एक्सेस के बिना कैश्ड रिलीज़ रसीदें और एटेस्टेशन सत्यापित करें |
+| `--port` | int | `22` | रिमोट सत्यापन के लिए SSH पोर्ट |
+| `--remote-dir` | string | `/opt/stackkit` | रिमोट StackKit वर्किंग डायरेक्टरी |
+| `--resolved-plan` | string | — | Architecture v2 कैनोनिकल ResolvedPlan (डिफ़ॉल्ट: &lt;outputRoot&gt;/.stackkit/resolved-plan.json) |
+| `--strict` | bool | — | चेतावनियों को सत्यापन विफलता मानें |
+| `--user` | string | — | रिमोट सत्यापन के लिए SSH यूज़रनेम |
+
+**उदाहरण**
+
+```bash
+# Verify the applied deployment on this host
+stackkit verify
+
+# Also request the generated service URLs over HTTP
+stackkit verify --http
+
+# Emit the verification report as JSON
+stackkit verify --json
+
+# Check recorded Apply evidence and cached release receipts without live probes or network access
+stackkit verify --offline
+```
+

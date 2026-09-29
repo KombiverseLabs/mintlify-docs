@@ -1,0 +1,49 @@
+---
+title: "stackkit apply"
+description: "इन्फ्रास्ट्रक्चर बदलाव लागू करें"
+sidebarTitle: "apply"
+---
+इन्फ्रास्ट्रक्चर बदलाव लागू करें।
+
+इन्फ्रास्ट्रक्चर पर प्लान किए गए बदलाव लागू करें।
+
+Product Apply कैनोनिकल ResolvedPlan को अपने Runtime Owners के ज़रिए निष्पादित करता है। Standard Mode सहेजी गई CUE-स्वामित्व वाली स्थानीय Site/नोड/चैनल बाइंडिंग को स्वतः उपयोग करता है; Advanced Mode प्रमाणित सेवा/डिवाइस निष्पादन चैनल दे सकता है। दोनों रास्ते एक ही ResolvedPlan, प्रमाण और रनटाइम सत्यापन उपयोग करते हैं, और कोई भी पुष्टि नहीं माँगता: प्लान जनरेट होते समय ही स्वीकृत हो जाता है।
+
+```bash
+stackkit apply [plan-file] [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | Architecture v2 जनरेशन मैनिफ़ेस्ट (डिफ़ॉल्ट: &lt;outputRoot&gt;/.stackkit/generation-manifest.json) |
+| `--auto-approve` | bool | — | संगतता के लिए स्वीकार किया जाता है; नेटिव Apply कभी पुष्टि नहीं माँगता |
+| `--expected-plan-hash` | string | — | Apply से ठीक पहले कैनोनिकल ResolvedPlan का इस sha256 डाइजेस्ट से मेल खाना आवश्यक करें |
+| `--generation-receipt` | string | — | Architecture v2 जनरेशन रसीद (डिफ़ॉल्ट: &lt;outputRoot&gt;/.stackkit/generation-receipt.json) |
+| `--inventory` | string | — | Architecture v2 का देखा गया Inventory (अन्यथा एक पारंपरिक इन्वेंटरी फ़ाइल चुनी जाती है) |
+| `--json` | bool | — | वर्ज़न वाला Apply परिणाम और रनटाइम अवलोकन मशीन-पठनीय JSON के रूप में जारी करें |
+| `--local-execution-channel` | string | — | Architecture v2 निष्पादन चैनल जो स्पष्ट रूप से इस स्थानीय प्रोसेस के स्वामित्व में है |
+| `--local-node` | string | — | Architecture v2 नोड जो स्पष्ट रूप से इस स्थानीय निष्पादन प्रोसेस के स्वामित्व में है |
+| `--local-site` | string | — | Architecture v2 Site जो स्पष्ट रूप से इस स्थानीय निष्पादन प्रोसेस के स्वामित्व में है |
+| `--preflight` | string | — | बदलाव से पहले होस्ट प्रवेश नीति: strict, warn (डिफ़ॉल्ट) या skip |
+| `--resolved-plan` | string | — | Architecture v2 कैनोनिकल ResolvedPlan (डिफ़ॉल्ट: &lt;outputRoot&gt;/.stackkit/resolved-plan.json) |
+| `--skip-platform-apps` | bool | — | कोई प्रभाव नहीं: नेटिव Apply में अलग प्लेटफ़ॉर्म-ऐप चरण नहीं है |
+| `--verify` | bool | — | कोई प्रभाव नहीं: इसके बजाय Apply के बाद stackkit verify चलाएँ |
+| `--verify-http` | bool | — | कोई प्रभाव नहीं: इसके बजाय Apply के बाद stackkit verify `--http` चलाएँ |
+| `--verify-strict` | bool | — | कोई प्रभाव नहीं: इसके बजाय Apply के बाद stackkit verify चलाएँ |
+
+**उदाहरण**
+
+```bash
+# Apply the plan written by stackkit generate
+stackkit apply
+
+# Emit the versioned Apply result as JSON
+stackkit apply --json
+
+# Refuse to change anything unless the plan still has the hash stackkit plan printed
+stackkit apply --expected-plan-hash sha256:<plan-hash>
+
+# Also refuse on host preflight warnings and unknown facts before any change
+stackkit apply --preflight strict
+```
+

@@ -1,0 +1,161 @@
+---
+title: "stackkit advanced"
+description: "ऑफ़लाइन-अधिकृत Advanced लाइफ़साइकिल ऑपरेशन प्रबंधित करें"
+sidebarTitle: "advanced"
+---
+ऑफ़लाइन-अधिकृत Advanced लाइफ़साइकिल ऑपरेशन प्रबंधित करें।
+
+```bash
+stackkit advanced [flags]
+```
+
+उप-कमांड: [`stackkit advanced change-set`](#stackkit-advanced-change-set), [`stackkit advanced restore-drill`](#stackkit-advanced-restore-drill), [`stackkit advanced rollback`](#stackkit-advanced-rollback), [`stackkit advanced trust`](#stackkit-advanced-trust)
+
+## stackkit advanced change-set
+
+ऑफ़लाइन-अधिकृत Terramate चेंज सेट प्रबंधित करें।
+
+```bash
+stackkit advanced change-set [flags]
+```
+
+उप-कमांड: [`stackkit advanced change-set apply`](#stackkit-advanced-change-set-apply), [`stackkit advanced change-set create`](#stackkit-advanced-change-set-create)
+
+### stackkit advanced change-set apply
+
+ओनर द्वारा स्वीकृत सटीक Terramate चेंज सेट लागू करें।
+
+```bash
+stackkit advanced change-set apply [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--candidate-spec` | string | — | generation.target=terramate वाले सटीक उम्मीदवार StackSpec v2 का पथ |
+| `--capability` | string | — | चेंज सेट बनाने में उपयोग हुए कैनोनिकल stackkit.advanced-capability/v1 का पथ |
+| `--change-set` | string | — | ओनर-हस्ताक्षरित चेंज सेट का सटीक sha256:&lt;hex&gt; कंटेंट पता |
+| `--expect-sha256` | string | — | संग्रहीत कैनोनिकल चेंज-सेट बाइट्स का आवश्यक सटीक sha256:&lt;hex&gt; डाइजेस्ट |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+### stackkit advanced change-set create
+
+ओनर-हस्ताक्षरित Terramate चेंज सेट बनाएँ।
+
+```bash
+stackkit advanced change-set create [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--candidate-spec` | string | — | generation.target=terramate वाले उम्मीदवार StackSpec v2 का पथ |
+| `--capability` | string | — | कैनोनिकल stackkit.advanced-capability/v1 फ़ाइल का पथ |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+## stackkit advanced restore-drill
+
+क्षमता-नियंत्रित नेटिव रिस्टोर ड्रिल चलाएँ।
+
+```bash
+stackkit advanced restore-drill [flags]
+```
+
+उप-कमांड: [`stackkit advanced restore-drill run`](#stackkit-advanced-restore-drill-run)
+
+### stackkit advanced restore-drill run
+
+बिना सक्रिय किए बैकअप एंकर का रिस्टोर स्टेज करें और सत्यापित करें।
+
+नेटिव v2 रिस्टोर ड्रिल को Advanced ऑपरेशन के रूप में चलाएँ।
+
+ड्रिल केवल तभी स्वीकार की जाती है जब restore.drill की अनुमति देने वाली ऑफ़लाइन-सत्यापित क्षमता, स्थानीय ओनर द्वारा स्वीकृत इश्यूअर ट्रस्ट और स्पष्ट `--owner-approve` मौजूद हो। यह वर्तमान रनटाइम को सत्यापित करती है, नया स्नैपशॉट एंकर बनाती है (या स्थानीय कस्टडी में `--anchor` को सत्यापित करती है), उस एंकर का रिस्टोर स्टेज करती है, स्टेज किए गए ट्री को सत्यापित करती है, स्टेजिंग क्षेत्र हटाती है और जाँचती है कि लाइव रनटाइम अपरिवर्तित है। स्टेज किया गया डेटा कभी सक्रिय नहीं होता।
+
+```bash
+stackkit advanced restore-drill run [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--anchor` | string | — | ड्रिल के लिए मौजूदा sha256 स्नैपशॉट-एंकर ID; छोड़ने पर नया बैकअप एंकर बनता है |
+| `--capability` | string | — | restore.drill की अनुमति देने वाली कैनोनिकल stackkit.advanced-capability/v1 फ़ाइल का पथ |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+| `--operation-id` | string | — | स्थिर लोअरकेस ड्रिल ID (8-100 वर्ण); छोड़ने पर स्वतः बनती है |
+| `--owner-approve` | bool | — | ड्रिल के बैकअप और स्टेज्ड रिस्टोर के साइड इफ़ेक्ट को स्पष्ट रूप से स्वीकृत करें |
+
+**उदाहरण**
+
+```bash
+stackkit advanced restore-drill run --capability capability.json --owner-approve --json
+```
+
+## stackkit advanced rollback
+
+Terramate स्टैक में क्षमता-नियंत्रित समन्वित रोलबैक चलाएँ।
+
+```bash
+stackkit advanced rollback [flags]
+```
+
+उप-कमांड: [`stackkit advanced rollback run`](#stackkit-advanced-rollback-run)
+
+### stackkit advanced rollback run
+
+हर स्थानीय Terramate स्टैक को एक सत्यापित चेकपॉइंट पर वापस ले जाएँ।
+
+स्थानीय होस्ट को Advanced ऑपरेशन rollback.coordinated के रूप में एक सत्यापित executor-state चेकपॉइंट पर वापस ले जाएँ।
+
+रोलबैक केवल तभी स्वीकार किया जाता है जब rollback.coordinated की अनुमति देने वाली ऑफ़लाइन-सत्यापित क्षमता, स्थानीय ओनर द्वारा स्वीकृत इश्यूअर ट्रस्ट और स्पष्ट `--owner-approve` मौजूद हो। `--to` सीधे चेकपॉइंट का नाम देता है, या उस चेंज सेट का जिसका apply-पूर्व चेकपॉइंट लक्ष्य है। स्टैक उल्टे रन क्रम में चलते हैं: चेकपॉइंट के बाद जोड़े गए स्टैक OpenTofu के ज़रिए नष्ट किए जाते हैं (वॉल्यूम के बिना docker compose down) और हटा दिए जाते हैं, बदले गए स्टैक को चेकपॉइंट की स्थिति, कॉन्फ़िगरेशन और पेलोड वापस मिलते हैं और उन्हें कन्वर्ज होने के लिए बाध्य किया जाता है, और चेकपॉइंट के बाद हटाए गए स्टैक फिर से बनाए जाते हैं। चेकपॉइंट का StackSpec और Inventory बहाल, पुनः जनरेट और सत्यापित किए जाते हैं। बाधित रोलबैक अगले रन में उसी `--to` के साथ फिर शुरू होता है और पहले से कन्वर्ज हो चुके स्टैक को छोड़ देता है।
+
+```bash
+stackkit advanced rollback run [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--capability` | string | — | rollback.coordinated की अनुमति देने वाली कैनोनिकल stackkit.advanced-capability/v1 फ़ाइल का पथ |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+| `--owner-approve` | bool | — | स्टैक को नष्ट करने, बहाल करने और फिर से बनाने को स्पष्ट रूप से स्वीकृत करें |
+| `--to` | string | — | लक्ष्य sha256 executor-state स्नैपशॉट ID, या वह sha256 चेंज-सेट ID जिसका apply-पूर्व चेकपॉइंट लक्ष्य है |
+
+**उदाहरण**
+
+```bash
+stackkit advanced rollback run --capability capability.json --to sha256:<change-set-id> --owner-approve --json
+```
+
+## stackkit advanced trust
+
+स्थानीय ओनर द्वारा स्वीकृत Advanced इश्यूअर ट्रस्ट प्रबंधित करें।
+
+```bash
+stackkit advanced trust [flags]
+```
+
+उप-कमांड: [`stackkit advanced trust import`](#stackkit-advanced-trust-import), [`stackkit advanced trust inspect`](#stackkit-advanced-trust-inspect)
+
+### stackkit advanced trust import
+
+सटीक पिन किया गया Advanced इश्यूअर ट्रस्ट बंडल इम्पोर्ट करें।
+
+```bash
+stackkit advanced trust import [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--bundle` | string | — | कैनोनिकल stackkit.advanced-trust-bundle/v1 फ़ाइल का पथ |
+| `--expect-sha256` | string | — | ट्रस्ट बंडल का आवश्यक सटीक sha256:&lt;hex&gt; डाइजेस्ट |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+| `--owner-approve` | bool | — | स्थानीय Advanced इश्यूअर ट्रस्ट बदलने को स्पष्ट रूप से स्वीकृत करें |
+
+### stackkit advanced trust inspect
+
+सत्यापित स्थानीय Advanced इश्यूअर ट्रस्ट का निरीक्षण करें।
+
+```bash
+stackkit advanced trust inspect [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+

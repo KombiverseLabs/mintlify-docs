@@ -1,0 +1,182 @@
+---
+title: "लेगेसी और डिप्रिकेटेड कमांड"
+description: "ऐसी कमांड जिन्हें वर्तमान रिलीज़ अस्वीकार या प्रतिस्थापित करती हैं"
+sidebarTitle: "लेगेसी और डिप्रिकेटेड"
+---
+ये कमांड कमांड ट्री में मौजूद हैं लेकिन वर्तमान वर्कफ़्लो का हिस्सा नहीं हैं। लेगेसी कमांड वर्तमान रिलीज़ पर अस्वीकार की जाती हैं; डिप्रिकेटेड कमांड अब भी चलती हैं और अपना प्रतिस्थापन बताती हैं।
+
+## stackkit app add
+
+v0.6 संगतता PaaS ऐप हैंडऑफ़ जोड़ें या अपडेट करें।
+
+<Warning>वर्तमान रिलीज़ इस कमांड को अस्वीकार करती हैं; यह सटीक v0.6 संगतता लाइन की है।</Warning>
+
+```bash
+stackkit app add <name> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--auth` | string | `login-gateway` | रूट ऑथ मोड: login-gateway या public |
+| `--env` | stringArray | — | KEY=value के रूप में सादा एनवायरनमेंट वेरिएबल; दोहराया जा सकता है |
+| `--health-path` | string | `/health` | HTTP हेल्थ पथ |
+| `--host` | string | — | ऐप के लिए रूट होस्ट |
+| `--image` | string | — | PaaS हैंडऑफ़ के लिए कंटेनर इमेज |
+| `--kind` | string | `sveltekit` | ऐप प्रकार (फ़िलहाल केवल sveltekit) |
+| `--port` | int | `3000` | ऐप द्वारा एक्सपोज़ किया गया कंटेनर पोर्ट |
+| `--secret` | stringArray | — | सीक्रेट संदर्भ KEY=env:NAME, KEY=vault:NAME या KEY=file:PATH के रूप में; दोहराया जा सकता है |
+
+## stackkit backup list
+
+स्थानीय रिपॉज़िटरी में स्नैपशॉट सूचीबद्ध करें।
+
+<Warning>वर्तमान रिलीज़ इस कमांड को अस्वीकार करती हैं; यह सटीक v0.6 संगतता लाइन की है।</Warning>
+
+```bash
+stackkit backup list [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | स्नैपशॉट को JSON के रूप में आउटपुट करें |
+
+## stackkit backup migrate-from-restic
+
+मौजूदा Restic रिपॉज़िटरी को Kopia में इम्पोर्ट करें (एक बार)।
+
+<Warning>वर्तमान रिलीज़ इस कमांड को अस्वीकार करती हैं; यह सटीक v0.6 संगतता लाइन की है।</Warning>
+
+एक-बार वाला Restic-से-Kopia इम्पोर्टर चलाएँ।
+
+v1 ऐडऑन में कॉन्फ़िगर की गई Restic रिपॉज़िटरी पढ़ता है, हर स्नैपशॉट से गुज़रता है और मूल टाइमस्टैम्प सुरक्षित रखते हुए उसे Kopia के भीतर फिर बनाता है। सफल इम्पोर्ट के बाद ऐडऑन engine: "restic-import" को स्वतः "kopia" में बदल देता है।
+
+```bash
+stackkit backup migrate-from-restic [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--dry-run` | bool | — | इम्पोर्ट किए बिना प्लान प्रिंट करें |
+
+## stackkit backup verify
+
+रिपॉज़िटरी को उसके स्टोरेज प्रदाता के विरुद्ध सत्यापित करें।
+
+<Warning>वर्तमान रिलीज़ इस कमांड को अस्वीकार करती हैं; यह सटीक v0.6 संगतता लाइन की है।</Warning>
+
+```bash
+stackkit backup verify [flags]
+```
+
+## stackkit cluster join-token
+
+वर्कर या स्टोरेज नोड के लिए जॉइन टोकन बनाएँ।
+
+<Warning>वर्तमान रिलीज़ इस कमांड को अस्वीकार करती हैं; यह सटीक v0.6 संगतता लाइन की है।</Warning>
+
+वर्कर या स्टोरेज नोड के लिए जॉइन टोकन बनाएँ।
+
+किसी दूसरे BaseKit इंस्टॉल को इस homelab का सदस्य मानने का यही एकमात्र समर्थित रास्ता है। Coolify रिमोट-सर्वर पंजीकरण और TechStack मिरर अपडेट बाद के रोलआउट चरणों में इस क्लस्टर पहचान का उपयोग करते हैं।
+
+```bash
+stackkit cluster join-token [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--endpoint` | string | — | मुख्य नोड एंडपॉइंट जिसका उपयोग वर्कर जुड़ने के लिए करते हैं |
+| `--homelab-id` | string | — | Homelab ID (डिफ़ॉल्ट रूप से स्टैक स्पेक का नाम) |
+| `--main-node` | string | — | मुख्य नोड ID/नाम (डिफ़ॉल्ट रूप से स्टैक स्पेक का मुख्य जैसा नोड) |
+| `--output, -o` | string | `.stackkit/cluster/join-token.json` | टोकन JSON का आउटपुट पथ |
+| `--ttl` | duration | `24h0m0s` | टोकन की वैधता अवधि |
+
+## stackkit kit upgrade
+
+सत्यापित StackKit रिलीज़ रिज़ॉल्व करें और इंस्टॉल करें।
+
+<Warning>डिप्रिकेटेड: stackkit upgrade उपयोग करें</Warning>
+
+GitHub से सार्वजनिक StackKit रिलीज़ रिज़ॉल्व करें, उसका आर्काइव, SPDX SBOM, GitHub OIDC/Sigstore एटेस्टेशन और कैश्ड ट्रस्टेड रूट सत्यापित करें, फिर उसे .stackkit/releases/ के अंतर्गत परमाणु रूप से इंस्टॉल करें।
+
+`--dry-run` के साथ यह सत्यापित लक्ष्य को केवल सीमित शैडो वर्कस्पेस में जनरेट करता है और कैनोनिकल प्लान/आर्टिफ़ैक्ट अंतर रिपोर्ट करता है। `--dry-run` के बिना यह पहले उस लक्ष्य का निरीक्षण करता है, नेटिव Kopia स्नैपशॉट और ओनर-हस्ताक्षरित executor-state रिकवरी चेकपॉइंट बनाता है, रोलबैक डेटा को सक्रिय किए बिना स्टेज और सत्यापित करता है, और तभी सटीक लक्ष्य generate/apply/verify लेन-देन इंस्टॉल और निष्पादित करता है। विफल लक्ष्य लेन-देन पिछले executor को केवल लक्ष्य Apply स्वीकार होने से पहले बहाल और सत्यापित कर सकता है। Apply के बाद, सत्यापित पिछले डेटा का सक्रियण होने तक पिछले रनटाइम का रीस्टार्ट अवरुद्ध रहता है; केवल अलग Kopia स्टेजिंग उसे अधिकृत नहीं करती। पूरा हुआ लक्ष्य कमिट स्पष्ट फ़ाइनलाइज़ेशन के लिए अपना सफलता प्रमाण रखता है। नए अपग्रेड के लिए एम्बेडेड CUE Kit नीति में समर्थन ज़रूरी है; मौजूदा ऑपरेशन की रिकवरी उसकी हस्ताक्षरित जर्नल और चेकपॉइंट का पालन करती है।
+
+```bash
+stackkit kit upgrade [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--dry-run` | bool | — | लक्ष्य जनरेशन को लागू किए बिना सीमित शैडो वर्कस्पेस में सत्यापित और निरीक्षित करें। |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें। |
+| `--recover` | string | — | एक सटीक बाधित लाइफ़साइकिल ऑपरेशन ID को स्पष्ट रूप से रिकवर करें। |
+| `--to` | string | `latest` | लक्ष्य: latest, vX.Y.Z या channel:stable\|beta\|edge। |
+
+**उदाहरण**
+
+```bash
+# Verify the newest stable release and preview its plan and artifact diff without applying it
+stackkit upgrade --dry-run
+
+# Upgrade to the newest stable release
+stackkit upgrade
+
+# Upgrade to the newest beta prerelease
+stackkit upgrade --to channel:beta
+
+# Recover an interrupted upgrade by its lifecycle operation ID
+stackkit upgrade --recover <operation-id>
+```
+
+## stackkit kit verify
+
+कैश्ड रिलीज़ रसीदें और एटेस्टेशन सत्यापित करें।
+
+<Warning>डिप्रिकेटेड: stackkit verify `--offline` उपयोग करें</Warning>
+
+'stackkit verify `--offline`' का डिप्रिकेटेड उपनाम। कोई नेटवर्क अनुरोध नहीं किया जाता।
+
+```bash
+stackkit kit verify [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें। |
+
+## stackkit status
+
+डिप्लॉयमेंट की स्थिति दिखाएँ।
+
+<Warning>वर्तमान रिलीज़ इस कमांड को अस्वीकार करती हैं; यह सटीक v0.6 संगतता लाइन की है।</Warning>
+
+StackKit डिप्लॉयमेंट की वर्तमान स्थिति दिखाएँ।
+
+```text
+Shows:
+  • Deployment state (running, degraded, error)
+  • Service statuses and health
+  • Resource usage
+  • URLs and endpoints
+```
+
+```bash
+stackkit status [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--http` | bool | — | इस वेरिफ़ायर होस्ट से सत्यापित सेवा रूट की जाँच करें |
+| `--inventory` | string | — | कॉन्फ़िगर किए गए Standard प्रोसेस रनटाइम की पहचान के लिए उपयोग हुआ Architecture v2 का देखा गया Inventory |
+| `--json` | bool | — | JSON के रूप में आउटपुट करें |
+| `--resolved-plan` | string | — | कैनोनिकल Architecture v2 ResolvedPlan (डिफ़ॉल्ट: deploy/.stackkit/resolved-plan.json) |
+
+**उदाहरण**
+
+```bash
+# Show status
+stackkit status
+
+# Output as JSON
+stackkit status --json
+```
+

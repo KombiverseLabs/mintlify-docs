@@ -1,0 +1,67 @@
+---
+title: "stackkit drift"
+description: "स्थानीय StackKit ड्रिफ़्ट को देखें और समाधान करें"
+sidebarTitle: "drift"
+---
+स्थानीय StackKit ड्रिफ़्ट को देखें और समाधान करें।
+
+```bash
+stackkit drift [flags]
+```
+
+उप-कमांड: [`stackkit drift detect`](#stackkit-drift-detect), [`stackkit drift reconcile`](#stackkit-drift-reconcile)
+
+## stackkit drift detect
+
+प्रामाणिक स्थानीय स्थिति पढ़ें और ड्रिफ़्ट की रिपोर्ट दें।
+
+रनटाइम स्थिति रीफ़्रेश किए बिना कैनोनिकल ResolvedPlan, जनरेट किए गए आर्टिफ़ैक्ट, ओनर-हस्ताक्षरित Apply प्रमाण, स्थानीय ओनर बाइंडिंग और लाइव Basement Compose रनटाइम को पढ़ें और सत्यापित करें। terramate जनरेशन लक्ष्य में यह स्थानीय होस्ट प्रोजेक्ट के हर स्टैक में Terramate के ज़रिए रीड-ओनली detailed-exitcode OpenTofu प्लान भी चलाता है और हर स्टैक के लिए एक stacks प्रविष्टि जोड़ता है; यह कभी लागू नहीं करता। कंटेंट-एड्रेस्ड रिपोर्ट हर चयनित Application Kit के लिए स्थानीय ओनर प्रमाण के रूप में रखी जाती है।
+
+```bash
+stackkit drift detect [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+**उदाहरण**
+
+```bash
+# Compare the live deployment with the applied plan
+stackkit drift detect
+
+# The same drift report as JSON
+stackkit drift detect --json
+```
+
+## stackkit drift reconcile
+
+शासित स्थानीय लाइफ़साइकिल के ज़रिए ड्रिफ़्ट का समाधान करें।
+
+Standard मोड में स्पष्ट स्थानीय ओनर स्वीकृति चाहिए; यह वर्तमान स्थानीय प्राधिकार सत्यापित करता है, अनिवार्य Kopia और executor-state रोलबैक चेकपॉइंट बनाता है, फिर विशेष लाइफ़साइकिल जर्नल के ज़रिए generate, apply और verify चलाता है। विफल लक्ष्य चरण स्वतः पहले की कैप्चर की गई executor स्थिति को बहाल, दोबारा लागू और सत्यापित करता है। Advanced मोड ऑफ़लाइन-सत्यापित क्षमता दिए जाने तक फ़ेल-क्लोज़्ड रहता है; Advanced बदलाव के बाद यह हर Terramate स्टैक प्लान सहित ड्रिफ़्ट रिपोर्ट फिर देखता है और पोस्ट-रीकंसाइल रिपोर्ट साफ़ न होने पर विफल होता है।
+
+```bash
+stackkit drift reconcile [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--candidate-spec` | string | — | Advanced: सटीक Terramate उम्मीदवार StackSpec |
+| `--capability` | string | — | Advanced: कैनोनिकल ऑफ़लाइन क्षमता फ़ाइल |
+| `--change-set` | string | — | Advanced: ओनर-हस्ताक्षरित सटीक चेंज-सेट ID |
+| `--expect-sha256` | string | — | Advanced: संग्रहीत सटीक चेंज-सेट बाइट डाइजेस्ट |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+| `--mode` | string | `standard` | रीकंसाइल मोड: standard या advanced |
+| `--owner-approve` | bool | — | standard रीकंसिलिएशन के लिए स्पष्ट स्थानीय ओनर स्वीकृति दर्ज करें |
+
+**उदाहरण**
+
+```bash
+# Reconcile drift in standard mode: checkpoint, then generate, apply, and verify
+stackkit drift reconcile --owner-approve
+
+# The same reconciliation with a JSON result
+stackkit drift reconcile --owner-approve --json
+```
+

@@ -1,0 +1,142 @@
+---
+title: "stackkit federation"
+description: "स्थानीय Federation बाइंडिंग प्रमाण प्रबंधित करें"
+sidebarTitle: "federation"
+---
+स्थानीय Federation बाइंडिंग प्रमाण प्रबंधित करें।
+
+```bash
+stackkit federation [flags]
+```
+
+उप-कमांड: [`stackkit federation binding`](#stackkit-federation-binding), [`stackkit federation control`](#stackkit-federation-control), [`stackkit federation link`](#stackkit-federation-link)
+
+## stackkit federation binding
+
+अपारदर्शी बाहरी Federation-लिंक बाइंडिंग प्रबंधित करें।
+
+```bash
+stackkit federation binding [flags]
+```
+
+उप-कमांड: [`stackkit federation binding adopt`](#stackkit-federation-binding-adopt), [`stackkit federation binding import`](#stackkit-federation-binding-import)
+
+### stackkit federation binding adopt
+
+बाहरी बाइंडिंग को सत्यापित करें, ओनर से हस्ताक्षर कराएँ और परमाणु रूप से अपनाएँ।
+
+उपनाम: `approve`
+
+```bash
+stackkit federation binding adopt [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--binding` | string | — | वर्कस्पेस तक सीमित, बिना हस्ताक्षर की बाहरी Federation बाइंडिंग JSON |
+| `--inventory` | string | — | वर्कस्पेस तक सीमित inventory.json, जिसे परमाणु रूप से अपडेट करना है |
+| `--resolved-plan` | string | — | वर्कस्पेस तक सीमित कैनोनिकल ResolvedPlan (अन्यथा Inventory के बगल से निकाला जाता है) |
+
+### stackkit federation binding import
+
+ओनर-हस्ताक्षरित अपारदर्शी बाइंडिंग को स्थानीय Inventory में स्वीकार करें।
+
+```bash
+stackkit federation binding import [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--admission` | string | — | वर्कस्पेस तक सीमित, ओनर-हस्ताक्षरित Federation बाइंडिंग प्रवेश JSON |
+| `--inventory` | string | — | वर्कस्पेस तक सीमित inventory.json, जिसे परमाणु रूप से अपडेट करना है |
+| `--resolved-plan` | string | — | वर्कस्पेस तक सीमित कैनोनिकल ResolvedPlan (अन्यथा Inventory के बगल से निकाला जाता है) |
+
+## stackkit federation control
+
+Home द्वारा अधिकृत प्लान निष्पादित करें और चुने गए Cloud नोड पर सत्यापित करें।
+
+```bash
+stackkit federation control [flags]
+```
+
+उप-कमांड: [`stackkit federation control bind`](#stackkit-federation-control-bind), [`stackkit federation control send`](#stackkit-federation-control-send), [`stackkit federation control sign`](#stackkit-federation-control-sign), [`stackkit federation control withdraw`](#stackkit-federation-control-withdraw)
+
+### stackkit federation control bind
+
+सटीक सार्वजनिक Home प्राधिकार और स्थानीय रिसीवर कस्टडी स्वीकार करें।
+
+```bash
+stackkit federation control bind [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--file` | string | — | ओनर द्वारा समीक्षित रिसीवर कस्टडी JSON; कोई प्राइवेट की नहीं |
+
+### stackkit federation control send
+
+हस्ताक्षरित एक्शन को Home द्वारा शुरू किए गए सटीक mTLS कनेक्शन पर भेजें।
+
+```bash
+stackkit federation control send [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--endpoint-file` | string | — | स्थानीय पिन किया गया mTLS एंडपॉइंट और सीमित क्रेडेंशियल पथ |
+| `--file` | string | — | Home-हस्ताक्षरित एक्शन JSON |
+
+### stackkit federation control sign
+
+वर्तमान Home कस्टडी से एक सटीक अल्पकालिक एक्शन पर हस्ताक्षर करें।
+
+```bash
+stackkit federation control sign [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--file` | string | — | प्लान हैश, लक्ष्य और सीमित टाइमस्टैम्प के साथ सटीक एक्शन JSON |
+
+### stackkit federation control withdraw
+
+मौजूदा TLS सत्रों सहित रिसीवर प्राधिकार को स्थायी रूप से वापस लें।
+
+```bash
+stackkit federation control withdraw [flags]
+```
+
+## stackkit federation link
+
+बाहरी Federation फ़ैब्रिक के स्थानीय हिस्से को बाइंड करें और रोकें।
+
+```bash
+stackkit federation link [flags]
+```
+
+उप-कमांड: [`stackkit federation link bind`](#stackkit-federation-link-bind), [`stackkit federation link stop`](#stackkit-federation-link-stop)
+
+### stackkit federation link bind
+
+बाहरी WireGuard हैंडल को स्थानीय ओनर कस्टडी में अपनाएँ।
+
+```bash
+stackkit federation link bind [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--file` | string | — | बाहरी फ़ैब्रिक कस्टडी JSON; इसमें कोई प्राइवेट की नहीं है |
+
+### stackkit federation link stop
+
+बाहरी फ़ैब्रिक को हटाए बिना अपनाए गए इंटरफ़ेस को रोकें।
+
+```bash
+stackkit federation link stop [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--fabric-ref` | string | — | अपनाया गया सटीक अपारदर्शी फ़ैब्रिक संदर्भ |
+

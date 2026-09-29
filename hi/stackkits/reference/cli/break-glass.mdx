@@ -1,0 +1,73 @@
+---
+title: "stackkit break-glass"
+description: "ब्रेक-ग्लास रिकवरी अकाउंट और बंडल प्रबंधित करें"
+sidebarTitle: "break-glass"
+---
+ब्रेक-ग्लास रिकवरी अकाउंट और बंडल प्रबंधित करें।
+
+प्रति-नोड ब्रेक-ग्लास रिकवरी अकाउंट और उनके क्रेडेंशियल रखने वाले एन्क्रिप्टेड बंडल प्रबंधित करें।
+
+बंडल 'stackkit apply' (चरण 1) द्वारा /var/lib/stackkit/recovery/ में लिखे जाते हैं। वे उस रिकवरी पासफ़्रेज़ से एन्क्रिप्ट होते हैं जो आपने init के दौरान सेट किया था।
+
+```text
+To recover a node, decrypt the bundle:
+    age -d -o break-glass.txt break-glass-<node>.age
+```
+
+फिर डिक्रिप्ट किए गए YAML के भीतर RESTORE INSTRUCTIONS अनुभाग का पालन करें।
+
+```bash
+stackkit break-glass [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--dir` | string | — | बंडल डायरेक्टरी बदलें (डिफ़ॉल्ट: /var/lib/stackkit/recovery) |
+
+उप-कमांड: [`stackkit break-glass list`](#stackkit-break-glass-list), [`stackkit break-glass show-bundle`](#stackkit-break-glass-show-bundle)
+
+## stackkit break-glass list
+
+इस होस्ट पर ब्रेक-ग्लास बंडल सूचीबद्ध करें।
+
+```bash
+stackkit break-glass list [flags]
+```
+
+`stackkit break-glass` से विरासत में मिले:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--dir` | string | — | बंडल डायरेक्टरी बदलें (डिफ़ॉल्ट: /var/lib/stackkit/recovery) |
+
+**उदाहरण**
+
+```bash
+# List the encrypted recovery bundles in /var/lib/stackkit/recovery
+stackkit break-glass list
+
+# List bundles copied to another directory
+stackkit break-glass list --dir ./recovery-copy
+```
+
+## stackkit break-glass show-bundle
+
+नोड के एन्क्रिप्टेड बंडल का पथ प्रिंट करें।
+
+```bash
+stackkit break-glass show-bundle <node> [flags]
+```
+
+`stackkit break-glass` से विरासत में मिले:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--dir` | string | — | बंडल डायरेक्टरी बदलें (डिफ़ॉल्ट: /var/lib/stackkit/recovery) |
+
+**उदाहरण**
+
+```bash
+# Print the bundle path of a node that stackkit break-glass list showed
+stackkit break-glass show-bundle <node>
+```
+

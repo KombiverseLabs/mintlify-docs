@@ -1,0 +1,175 @@
+---
+title: "stackkit identity"
+description: "स्टैंडअलोन स्थानीय पहचान प्लेन प्रबंधित करें"
+sidebarTitle: "identity"
+---
+स्टैंडअलोन स्थानीय पहचान प्लेन प्रबंधित करें।
+
+```bash
+stackkit identity [flags]
+```
+
+उप-कमांड: [`stackkit identity projection`](#stackkit-identity-projection), [`stackkit identity workload-peer`](#stackkit-identity-workload-peer)
+
+## stackkit identity projection
+
+क्रेडेंशियल-मुक्त वांछित पहचान प्रक्षेपणों का निरीक्षण करें और स्थानीय रूप से स्वीकृत करें।
+
+```bash
+stackkit identity projection [flags]
+```
+
+उप-कमांड: [`stackkit identity projection apply`](#stackkit-identity-projection-apply), [`stackkit identity projection approve`](#stackkit-identity-projection-approve), [`stackkit identity projection inspect`](#stackkit-identity-projection-inspect), [`stackkit identity projection unlink`](#stackkit-identity-projection-unlink)
+
+### stackkit identity projection apply
+
+पहले से स्वीकृत एक प्रक्षेपण को स्थानीय PocketID पर लागू करें।
+
+```bash
+stackkit identity projection apply [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+| `--owner-approve` | bool | — | इस स्थानीय पहचान ऑपरेशन को स्पष्ट रूप से स्वीकृत करें |
+| `--projection-sha256` | string | — | स्थानीय रूप से स्वीकृत प्रक्षेपण का सटीक sha256:&lt;hex&gt; |
+
+### stackkit identity projection approve
+
+PocketID में बदलाव किए बिना स्थानीय ओनर-हस्ताक्षरित स्वीकृति बनाएँ।
+
+```bash
+stackkit identity projection approve [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--file` | string | — | कैनोनिकल stackkit.desired-identity-projection/v1 दस्तावेज़ का पथ |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+| `--owner-approve` | bool | — | इस वांछित प्रक्षेपण को स्थानीय कस्टडी में इम्पोर्ट करने को स्पष्ट रूप से स्वीकृत करें |
+
+### stackkit identity projection inspect
+
+बिना बदलाव किए एक हस्ताक्षरित प्रक्षेपण सत्यापित करें।
+
+```bash
+stackkit identity projection inspect [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--file` | string | — | कैनोनिकल stackkit.desired-identity-projection/v1 दस्तावेज़ का पथ |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+### stackkit identity projection unlink
+
+किसी भी स्थानीय पहचान को हटाए बिना वैकल्पिक सिंक अलग करें।
+
+```bash
+stackkit identity projection unlink [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+| `--owner-approve` | bool | — | इस स्थानीय पहचान ऑपरेशन को स्पष्ट रूप से स्वीकृत करें |
+| `--projection-sha256` | string | — | स्थानीय रूप से स्वीकृत प्रक्षेपण का सटीक sha256:&lt;hex&gt; |
+
+## stackkit identity workload-peer
+
+ओनर द्वारा स्वीकृत Cloud वर्कलोड प्रमाणपत्र Home के साथ आदान-प्रदान करें।
+
+```bash
+stackkit identity workload-peer [flags]
+```
+
+उप-कमांड: [`stackkit identity workload-peer enroll`](#stackkit-identity-workload-peer-enroll), [`stackkit identity workload-peer install`](#stackkit-identity-workload-peer-install), [`stackkit identity workload-peer probe`](#stackkit-identity-workload-peer-probe), [`stackkit identity workload-peer request`](#stackkit-identity-workload-peer-request), [`stackkit identity workload-peer revoke`](#stackkit-identity-workload-peer-revoke)
+
+### stackkit identity workload-peer enroll
+
+इंस्टॉल किए गए एक Home प्रकाशन के लिए पीयर जारी करें और स्वीकार करें।
+
+```bash
+stackkit identity workload-peer enroll [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--address` | string | — | Cloud प्रोब के लिए मौजूदा federation लूपबैक सॉकेट |
+| `--file` | string | — | सार्वजनिक अनुरोध या क्रेडेंशियल JSON फ़ाइल |
+| `--home-root-sha256` | string | — | अलग ओनर-स्वीकृत चैनल से सत्यापित Home रूट sha256 फ़िंगरप्रिंट |
+| `--owner-approve` | bool | — | इस स्थानीय वर्कलोड पहचान ऑपरेशन को स्पष्ट रूप से स्वीकृत करें |
+| `--peer-ref` | string | — | स्पष्ट वर्कलोड पीयर पहचान |
+| `--replace-key` | bool | — | चुनी गई पीयर की को स्पष्ट रूप से बदलें; रद्द की गई की अस्वीकृत ही रहती हैं |
+| `--server-name` | string | — | इंस्टॉल किए गए Home ओरिजिन का सर्वर नाम |
+
+### stackkit identity workload-peer install
+
+स्वतंत्र रूप से सत्यापित रूट का उपयोग करके Home द्वारा जारी प्रमाणपत्र इंस्टॉल करें।
+
+```bash
+stackkit identity workload-peer install [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--address` | string | — | Cloud प्रोब के लिए मौजूदा federation लूपबैक सॉकेट |
+| `--file` | string | — | सार्वजनिक अनुरोध या क्रेडेंशियल JSON फ़ाइल |
+| `--home-root-sha256` | string | — | अलग ओनर-स्वीकृत चैनल से सत्यापित Home रूट sha256 फ़िंगरप्रिंट |
+| `--owner-approve` | bool | — | इस स्थानीय वर्कलोड पहचान ऑपरेशन को स्पष्ट रूप से स्वीकृत करें |
+| `--peer-ref` | string | — | स्पष्ट वर्कलोड पीयर पहचान |
+| `--server-name` | string | — | इंस्टॉल किए गए Home ओरिजिन का सर्वर नाम |
+
+### stackkit identity workload-peer probe
+
+मौजूदा federation लूपबैक सॉकेट के ज़रिए ओरिजिन से अनुरोध करें।
+
+```bash
+stackkit identity workload-peer probe [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--address` | string | — | Cloud प्रोब के लिए मौजूदा federation लूपबैक सॉकेट |
+| `--file` | string | — | सार्वजनिक अनुरोध या क्रेडेंशियल JSON फ़ाइल |
+| `--home-root-sha256` | string | — | अलग ओनर-स्वीकृत चैनल से सत्यापित Home रूट sha256 फ़िंगरप्रिंट |
+| `--owner-approve` | bool | — | इस स्थानीय वर्कलोड पहचान ऑपरेशन को स्पष्ट रूप से स्वीकृत करें |
+| `--peer-ref` | string | — | स्पष्ट वर्कलोड पीयर पहचान |
+| `--server-name` | string | — | इंस्टॉल किए गए Home ओरिजिन का सर्वर नाम |
+
+### stackkit identity workload-peer request
+
+Cloud के पास रखी की बनाएँ या दोबारा उपयोग करें और उसका सार्वजनिक CSR एक्सपोर्ट करें।
+
+```bash
+stackkit identity workload-peer request [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--address` | string | — | Cloud प्रोब के लिए मौजूदा federation लूपबैक सॉकेट |
+| `--file` | string | — | सार्वजनिक अनुरोध या क्रेडेंशियल JSON फ़ाइल |
+| `--home-root-sha256` | string | — | अलग ओनर-स्वीकृत चैनल से सत्यापित Home रूट sha256 फ़िंगरप्रिंट |
+| `--owner-approve` | bool | — | इस स्थानीय वर्कलोड पहचान ऑपरेशन को स्पष्ट रूप से स्वीकृत करें |
+| `--peer-ref` | string | — | स्पष्ट वर्कलोड पीयर पहचान |
+| `--rotate-key` | bool | — | इंस्टॉल होने तक सक्रिय क्रेडेंशियल बनाए रखते हुए नई Cloud की जनरेट करें |
+| `--server-name` | string | — | इंस्टॉल किए गए Home ओरिजिन का सर्वर नाम |
+
+### stackkit identity workload-peer revoke
+
+पीयर का वर्तमान Home प्रवेश वापस लें।
+
+```bash
+stackkit identity workload-peer revoke [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--address` | string | — | Cloud प्रोब के लिए मौजूदा federation लूपबैक सॉकेट |
+| `--file` | string | — | सार्वजनिक अनुरोध या क्रेडेंशियल JSON फ़ाइल |
+| `--home-root-sha256` | string | — | अलग ओनर-स्वीकृत चैनल से सत्यापित Home रूट sha256 फ़िंगरप्रिंट |
+| `--owner-approve` | bool | — | इस स्थानीय वर्कलोड पहचान ऑपरेशन को स्पष्ट रूप से स्वीकृत करें |
+| `--peer-ref` | string | — | स्पष्ट वर्कलोड पीयर पहचान |
+| `--server-name` | string | — | इंस्टॉल किए गए Home ओरिजिन का सर्वर नाम |
+
