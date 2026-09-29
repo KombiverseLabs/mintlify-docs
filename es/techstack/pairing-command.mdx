@@ -1,0 +1,87 @@
+---
+title: "Comando de emparejamiento"
+description: "Conecta un servidor a Techstack ejecutando un comando personal en su terminal"
+sidebarTitle: "Comando de emparejamiento"
+icon: "terminal"
+---
+
+El comando de emparejamiento es la vía **Give me a 1-liner** del asistente Add
+Node. Copias una línea de Techstack, la pegas en el terminal de tu servidor y el
+servidor se conecta por sí mismo. No necesitas introducir datos de SSH en
+Techstack.
+
+## Qué hace el comando
+
+El comando descarga el instalador de Techstack desde tu Techstack y lo ejecuta
+con un token de emparejamiento personal y de corta duración. En el servidor, el
+instalador:
+
+1. detecta la plataforma e instala el **Guard** de Techstack, un pequeño agente
+   que informa de la salud del servidor;
+2. instala el runtime de StackKits fijado que necesita el despliegue;
+3. canjea el token de emparejamiento, que vincula este servidor a tu homelab;
+4. instala Docker con `apt-get` cuando no hay un runtime de contenedores
+   operativo;
+5. instala e inicia el servicio del sistema `techstack-agent`, para que el Guard
+   siga ejecutándose tras un reinicio.
+
+El Guard habla con Techstack solo mediante una conexión HTTPS **saliente**.
+Envía un heartbeat y un inventario medido aproximadamente cada 30 segundos. No
+abres ningún puerto entrante en el servidor para él.
+
+El token funciona una sola vez. Techstack solo almacena un hash de la
+credencial que recibe el servidor, y el comando no se conserva en los informes
+de trabajos.
+
+## Antes de ejecutarlo
+
+- **Un servidor Linux con systemd.** Ubuntu es el sistema estándar; consulta
+  [Añadir un Node](/es/techstack/add-node#sistema-operativo).
+- **Derechos de administrador.** Ejecuta el comando como `root` o como un
+  usuario que pueda usar `sudo`. El instalador escribe archivos del sistema e
+  instala un servicio.
+- **`curl` en el servidor.** El comando lo usa para descargar el instalador.
+- **El servidor puede alcanzar Techstack.** La página de progreso muestra el
+  campo **Techstack URL reachable from the server**. La dirección de ese campo
+  debe abrirse desde el servidor, no solo desde tu ordenador. Con la
+  [Windows Alpha](/es/techstack/install-windows), el servidor alcanza el
+  ordenador con Windows por el puerto TCP `5264` de tu red local, así que
+  mantén el cliente de Windows en marcha mientras emparejas.
+- **Un comando reciente.** Un token de emparejamiento caduca 15 minutos después
+  de que Techstack lo crea.
+
+## Ejecuta el comando
+
+1. Termina el asistente Add Node. Techstack abre la página de progreso del
+   nuevo Node, que muestra **Not connected yet**.
+2. Comprueba el campo **Techstack URL reachable from the server** y corrígelo
+   si el servidor usa otra dirección para alcanzar Techstack.
+3. Selecciona **Copy pairing command**.
+4. Abre un terminal en el servidor, directamente o por SSH, pega el comando y
+   pulsa Enter. No cambies el comando. Contiene tu token personal.
+5. Espera a que el instalador termine. Imprime cada paso.
+
+Si la página dice **This pairing token has expired**, selecciona **Generate new
+command** y ejecuta el nuevo comando en su lugar. El anterior ya no funciona.
+
+<Warning>
+Trata el comando como una contraseña de un solo uso. Cualquiera que lo ejecute
+antes de que caduque puede conectar un servidor a tu homelab.
+</Warning>
+
+## Cuando el Node está conectado
+
+Cuando el Guard envía su primer heartbeat, Techstack cambia el Node de **Not
+connected yet** a conectado. La página de progreso continúa entonces con el
+despliegue del StackKit para este Node. Puedes cerrar el terminal.
+
+Para comprobar el Guard en el servidor más adelante:
+
+- `sudo systemctl status techstack-agent` muestra si el servicio se está
+  ejecutando.
+- `sudo journalctl -u techstack-agent -f` sigue su log.
+
+El Node aparece ahora en tu homelab con su estado de salud. Dónde se pueden
+alcanzar sus servicios no depende de dónde esté el servidor: tanto el hardware
+local como los servidores alquilados pueden usar tu propio dominio o una
+dirección `*.kombify.me`. Consulta [kombify.me](/es/kombify-me/overview).

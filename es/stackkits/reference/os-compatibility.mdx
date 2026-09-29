@@ -1,0 +1,44 @@
+---
+title: "Compatibilidad de SO"
+description: "Evidencia del ciclo de vida de StackKits v0.39.7"
+sidebarTitle: "Compatibilidad de SO"
+icon: server
+---
+
+<Note>
+Las ejecuciones del ciclo de vida de v0.46.6 aún no están proyectadas; las filas muestran v0.39.7, el release proyectado más reciente.
+</Note>
+
+Las filas se proyectan a partir de las ejecuciones automatizadas del ciclo de vida de StackKits [v0.39.7](https://github.com/kombifyio/StackKits/releases/tag/v0.39.7) en máquinas virtuales nuevas: install, init, generate, apply, verify, backup y restore. Última ejecución del ciclo de vida: 2026-09-24.
+
+- `supported`: Todas las fases del ciclo de vida se superaron en la ejecución más reciente sobre este release.
+- `preview`: De install a verify se superó en la ejecución más reciente; una fase posterior falló.
+- `unverified`: Aún no hay una ejecución completada en este release, o la ejecución más reciente falló antes de verify.
+
+Las filas de sistema operativo e hipervisor muestran el mejor resultado entre los entornos probados en este release; «Kits por entorno» lista cada entorno por separado.
+
+| Sistema operativo | Versión | Arquitectura probada | Estado | Evidencia | Última verificación |
+| --- | --- | --- | --- | --- | --- |
+| Ubuntu | 26.04 | amd64 | `supported` | Todas las fases del ciclo de vida se superaron | v0.39.7 |
+| Ubuntu | 24.04 | amd64 | `supported` | Todas las fases del ciclo de vida se superaron | v0.39.7 |
+| Debian | 13 | amd64 | `supported` | Todas las fases del ciclo de vida se superaron | v0.39.7 |
+| Debian | 12 | — | `unverified` | Aún no cubierto por las pruebas automatizadas del ciclo de vida | — |
+
+Cada ejecución instala el sistema operativo desde cero en una máquina virtual.
+
+## Kits por entorno
+
+Cada kit se califica en el tipo de entorno para el que está construido. Una ejecución en red doméstica también abre las direcciones de servicio locales desde otra máquina de esa red.
+
+| Kit | Entorno | Estado | Evidencia | Última verificación |
+| --- | --- | --- | --- | --- |
+| Basement Kit | Máquina virtual nueva en CI | `supported` | Todas las fases del ciclo de vida se superaron | v0.39.7 |
+| Basement Kit | Máquina virtual en una red doméstica | `unverified` | Aún no hay recibo del ciclo de vida para este release | v0.35.0 |
+| Cloud Kit | VPS público con una dirección kombify.me | `supported` | Todas las fases del ciclo de vida se superaron | v0.39.7 |
+| Modern Homelab | Máquina virtual doméstica más VPS público | `unverified` | Aún no cubierto por las pruebas automatizadas del ciclo de vida | — |
+
+## Hipervisores
+
+StackKits se ejecuta dentro de una VM invitada en tu hipervisor, nunca en el propio host del hipervisor. Un estado cubre ese despliegue de extremo a extremo: el invitado se crea en el hipervisor y el ciclo de vida de StackKit se ejecuta dentro de él. No certifica un producto de un proveedor ni a un proveedor de servidores.
+
+Los despliegues en hipervisores y su evidencia del ciclo de vida para este release se listan en [stackkit.cc/compatibility](https://stackkit.cc/compatibility). Ejecuta `stackkit compat` en un host para obtener diagnósticos no destructivos y la evidencia publicada para su sistema operativo e hipervisor.

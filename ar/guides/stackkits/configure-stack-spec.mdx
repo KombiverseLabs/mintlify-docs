@@ -1,0 +1,90 @@
+---
+title: "إعداد StackSpec"
+description: "غيّر نية StackKits المُصدَرة دون تحرير ملفات النشر المولّدة"
+sidebarTitle: "إعداد StackSpec"
+icon: sliders
+---
+
+`stack-spec.yaml` هو مستند النية المطلوبة لمساحة عمل StackKits واحدة. دع CLI المُصدَر ينشئ المستند الكامل، ثم غيّر فقط النية التي تفهمها.
+
+```bash
+stackkit init basement-kit --owner-source=local
+stackkit validate
+```
+
+يكتب CLI المُصدَر StackSpec أصلياً كاملاً ويؤسس حيازة المالك المحلية خارجه. احتفظ بقيمة `apiVersion` المولّدة: تزوّد عقود CUE في الإصدار المثبّت حقولَه وقيمَه الافتراضية وقيودَه.
+
+## حقول شائعة للمراجعة
+
+| النية | الحقل الحالي | الإرشاد |
+| --- | --- | --- |
+| هوية مساحة العمل | `metadata.name` | اجعله متوافقاً مع DNS وثابتاً بعد أول تطبيق. |
+| الـ kit | `kit.slug` | استخدم `basement-kit` لموقع منزلي أو `cloud-kit` لمضيف سحابي قائم. |
+| المخرجات المولّدة | `generation.outputRoot` | أبقِ الملفات المولّدة منفصلة عن StackSpec. |
+| البيانات الدائمة | `storage.dataRoot` | استخدم مساراً مطلقاً على تخزين تشغّله وتنسخه احتياطياً. |
+| النسخ الاحتياطية | `storage.backupRoot` | أبقِه منفصلاً عن جذر البيانات الأساسي. |
+| بيانات الـ stack | `storage.stacksRoot` | استخدم مساراً مطلقاً يملكه المشغّل المحلي. |
+| النطاق المحلي | `network.domain.base` | القيمة الافتراضية في إصدار Basement Kit هي `home.test`؛ استخدم نطاقاً تتحكم بحلّه. |
+
+هذا مقتطف، لا بديل عن المستند المولّد الكامل:
+
+```json
+{
+  "metadata": { "name": "family-home" },
+  "kit": { "slug": "basement-kit" },
+  "generation": {
+    "outputRoot": "deploy",
+    "strategy": "kit-template",
+    "target": "compose"
+  },
+  "storage": {
+    "dataRoot": "/opt/stackkit/data",
+    "backupRoot": "/opt/stackkit/backups",
+    "stacksRoot": "/opt/stackkit/stacks",
+    "volumeDriver": "local"
+  },
+  "network": {
+    "mode": "private",
+    "domain": { "base": "home.test" }
+  }
+}
+```
+
+## اختيار workload الملفات المُصدَر
+
+تكشف عقود Basement وCloud Kit عن `files` كـ workload اختياري لحالة الاستخدام [المستندات والملفات](/ar/guides/stackkits/use-cases/documents-and-files)؛ ويسرد [كتالوج حالات الاستخدام](/ar/stackkits/reference/use-case-catalog) المكوّنات التي أعلنها الإصدار المنشور. جرى التحقق من هذا الاختيار وتوليده بالـ CLI المُصدَر:
+
+```json
+{
+  "workloads": {
+    "files": {
+      "alternative": "cloudreve",
+      "runtimeAdapterRef": "standalone-compose",
+      "placement": {
+        "siteRefs": ["home"],
+        "nodeRefs": ["main"]
+      }
+    }
+  }
+}
+```
+
+ادمج كائن `workloads` في StackSpec الكامل الذي أنتجه `init`. الموقع `home` والعقدة `main` هما القيمتان الافتراضيتان في إصدار Basement؛ فاستخدم المعرّفات الموجودة أصلاً في مستندك المولّد.
+
+منذ v0.21.11، أصبحت كتلة `placement` اختيارية. يتلقى الـ workload المختار دونها القيم الافتراضية المحكومة للتموضع الفارغ من عقود CUE المضمّنة، فلم يعد كتّاب StackSpec البرمجيون بحاجة إلى نص جاهز خاص بـ CLI.
+
+<Warning>
+  لا تنسخ هذا الاختيار لـ Photos أو Vault وتخترع قيماً سرية. تتطلب هذه الـ workloads حيازة أسرار مرتبطة بالمالك. منذ v0.21.11، شغّل [`stackkit secrets materialize`](/ar/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace) بعد اختيار workload كهذا وقبل `generate` لتأسيس هذه الحيازة صراحةً.
+</Warning>
+
+## تحقق من كل تغيير
+
+```bash
+stackkit validate
+stackkit generate
+stackkit plan --json
+```
+
+يفحص `validate` الـ StackSpec الحالي، وينشئ `generate` المخرجات المحكومة، ويفحص `plan` الخطة المحلولة الدقيقة دون استدعاء منفّذ. إذا فشل أي أمر، فأصلح StackSpec؛ ولا تعدّل الملفات تحت `deploy/`.
+
+تابع مع [المراجعة والتطبيق والتحقق](/ar/guides/stackkits/review-plan-and-apply).

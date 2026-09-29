@@ -1,0 +1,52 @@
+---
+title: "stackkit module"
+description: "Crea y valida módulos CUE locales"
+sidebarTitle: "module"
+---
+Crea y valida módulos CUE locales.
+
+Renderiza los hechos del módulo en contratos CUE y valida su configuración de despliegue.
+
+```bash
+stackkit module [flags]
+```
+
+Subcomandos: [`stackkit module lint`](#stackkit-module-lint), [`stackkit module scaffold`](#stackkit-module-scaffold)
+
+## stackkit module lint
+
+Aplica lint al CUE del módulo para la higiene de pin/health/security/access/placement (ADR-0027 G1/G3).
+
+Ejecuta la puerta determinista de higiene de módulos sobre un módulo (`--module`) o sobre todo el árbol (`--all`). Comprobaciones: tags de imagen fijados (sin :latest), healthCheck de daemon presente (los trabajos de automatización acotados usan restart=no más el código de salida del proceso), bloque security (noNewPrivileges + capDrop ALL), accessPolicy para los servicios enrutados, sin secretos en texto plano, los módulos en borrador no reclaman escenarios y los módulos con docker-socket no son aptos para serverless gestionado.
+
+Las ejecuciones de un solo módulo terminan con código distinto de cero ante cualquier error. `--all` es orientativo (código 0) salvo que se pase `--strict`.
+
+```bash
+stackkit module lint [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--all` | bool | — | Aplica lint a todos los módulos bajo `--modules-dir` |
+| `--json` | bool | — | Emite los hallazgos como JSON |
+| `--module` | string | — | Ruta a un único directorio de módulo (que contenga module.cue) |
+| `--modules-dir` | string | `modules` | Directorio raíz de módulos (se usa con `--all`) |
+| `--strict` | bool | — | Termina con código distinto de cero ante cualquier hallazgo de error (implícito para un único `--module`) |
+
+## stackkit module scaffold
+
+Renderiza de forma determinista los artefactos del módulo a partir de module_facts.json (ADR-0027).
+
+Renderiza modules/&lt;slug&gt;/module.cue, tests/reference-compose.yml y el ligero tests/integration_test.sh a partir de un module_facts.json validado por esquema. La salida es determinista (puerta G0): los mismos hechos siempre renderizan archivos idénticos byte a byte.
+
+```bash
+stackkit module scaffold [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--catalog` | string | — | catalog.json de CUE compilado para las referencias imageSource |
+| `--facts` | string | — | Ruta a module_facts.json. Obligatorio. |
+| `--force` | bool | — | Sobrescribe los archivos existentes |
+| `--out` | string | — | Directorio de salida del módulo (por defecto modules/&lt;slug&gt;) |
+| `--print` | bool | — | Imprime los artefactos renderizados en stdout en lugar de escribirlos |

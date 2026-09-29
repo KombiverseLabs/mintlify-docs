@@ -1,0 +1,26 @@
+---
+title: "Vaultwarden"
+description: "Vaultwarden für den Passwörter-Anwendungsfall auswählen und Bitwarden-Clients einrichten"
+sidebarTitle: "Vaultwarden"
+icon: vault
+---
+
+Vaultwarden liefert den Anwendungsfall [Passwörter](/de/guides/stackkits/use-cases/passwords). Es ist die veröffentlichte Alternative für den optionalen nativen v2-Workload `vault`, und die anfänglichen Basement- und Cloud-StackSpecs aktivieren ihn nicht.
+
+| Eigenschaft | Wert |
+| --- | --- |
+| Workload | `vault` |
+| Alternative | `vaultwarden` |
+| Datenklasse | secret |
+| Erforderliche Secret-Referenz | `admin-token` |
+| Unterstützter Standalone-Adapter | `standalone-compose` |
+
+Der Slot `admin-token` enthält eine opake `secret://`-Referenz; das eigentliche Token bleibt in der lokalen Owner-Verwahrung. Wähle Workload, Platzierung und Adapter in der [StackSpec](/de/guides/stackkits/configure-stack-spec) und folge dann [Einen Workload hinzufügen](/de/stackkits/reference/day-2-operations#einen-workload-zu-einem-bestehenden-workspace-hinzufügen), um zu validieren, die Verwahrung herzustellen, zu generieren, den Plan zu prüfen, anzuwenden und zu verifizieren.
+
+## Erste Nutzung
+
+1. Lege das Anwendungs-Owner-Konto an und wähle die Registrierungsrichtlinie, bevor du echte Secrets hinzufügst.
+2. Schließe nach dem Annehmen einer Einladung die Kontoregistrierung ab und melde dich über deinen Bitwarden-Client an.
+3. Erstelle und synchronisiere einen Vault-Eintrag, um zu bestätigen, dass das Konto bereit ist. Eine Einladung allein schließt dieses Setup nicht ab.
+
+Ändere bei einem bereits zugelassenen Workload den StackKits-Intent über die StackSpec und die Lebenszyklus-Befehle; bearbeite keine generierte Anwendungskonfiguration auf dem Ziel.

@@ -1,0 +1,76 @@
+---
+title: "المواصفة المفتوحة لـ StackKit"
+description: "العقد المنشور الرفيع خلف معيار المختبر المنزلي المفتوح: لقطة المعمارية وأفعال دورة الحياة وتصنيف التوزيع وأدلة التحقق"
+sidebarTitle: "Open Spec (v0)"
+icon: file-contract
+---
+
+المواصفة المفتوحة لـ StackKit هي العقد المنشور الرفيع خلف عبارة "معيار المختبر المنزلي المفتوح". وهي تفهرس ملفات تُشحن مع كل إصدار من StackKits؛ ولا تُدخل أي مخطط جديد. يتبع إصدار المواصفة وسم الإصدار الذي تُشحن معه، والتغييرات ضمن v0 إضافية. تقع النسخة المرجعية في المستودع العام على [docs/OPEN-SPEC.md](https://github.com/kombifyio/StackKits/blob/main/docs/OPEN-SPEC.md).
+
+كل ما في المواصفة لا يتطلب حسابًا: لا يحتاج Standard Mode إلى حساب kombify ولا إلى نقطة نهاية kombify مستضافة ولا إلى Techstack.
+
+## 1. لقطة المعمارية
+
+تصف لقطة المعمارية القائمة على الحقائق فقط إصدارًا: الأطقم والطوبولوجيا والقدرات ونموذج التوزيع والوحدات والإضافات ونضج الدعم. CUE هو مصدر الحقيقة التقني؛ واللقطة إسقاط منه. يقرأ المستهلك اللقطة، لا CUE أبدًا، ويجب أن يتسامح مع الحقول الإضافية.
+
+| الملف | الدور |
+| --- | --- |
+| [architecture-snapshot.json](https://github.com/kombifyio/StackKits/blob/main/architecture-snapshot.json) | لقطة الإصدار |
+| [architecture-snapshot.schema.json](https://github.com/kombifyio/StackKits/blob/main/architecture-snapshot.schema.json) | عقد لاحق مغلق (المخطط v3): `placement_model` و`stackkits` و`mode_matrix` و`modules` و`addons` |
+| [architecture/v2/authority-manifest.json](https://github.com/kombifyio/StackKits/blob/main/architecture/v2/authority-manifest.json) | بيان السلطة لتعريفات أطقم Architecture v2 |
+
+## 2. أفعال دورة الحياة
+
+يُدار كل طقم بالأفعال نفسها عبر CLI `stackkit` وموصّل `stackkit-mcp`. المدخلات والمخرجات موثّقة في [مرجع CLI](https://github.com/kombifyio/StackKits/blob/main/docs/CLI.md) و[شرح CLI خطوة بخطوة](/ar/guides/stackkits/cli-walkthrough).
+
+| الفعل | المعنى |
+| --- | --- |
+| `init` | إنشاء StackSpec لطقم مع حفظ مالك محلي (`--owner-source=local`) |
+| `validate` | التحقق من StackSpec مقابل عقد CUE |
+| `generate` | توليد ملفات نشر حتمية (Docker Compose مستقل افتراضيًا) |
+| `apply` | تنفيذ الخطة المولَّدة على المضيف الهدف |
+| `verify` | فحص المسارات والهوية وسلامة الخدمات بعد apply |
+| `backup` (`backup run` و`backup restore …`) | التقاط لقطة من وحدات التخزين المعلنة واستعادتها مع قراءة راجعة مُتحقَّق منها وتفعيل صريح |
+| `upgrade` | نقل طقم مثبَّت إلى إصدار أحدث مع فحوص التوافق |
+| `remove` | إزالة تطبيق أو الطقم مع إبقاء البيانات صريحة |
+
+ينتهي الفعل إما باكتمال مع دليل أو بفشل مع سبب نهائي. ولا يبلّغ أبدًا عن نجاح لعمل لم ينفّذه.
+
+## 3. تصنيف التوزيع
+
+يصف التوزيع أين يجوز تشغيل طقم أو وحدة. المفردات منشورة في [foundation/placement.cue](https://github.com/kombifyio/StackKits/blob/main/foundation/placement.cue):
+
+- `#PlacementMode`: `local-only` و`standard` و`managed-serverless`
+- `#PlacementSupport`: بيانات أهلية لكل وحدة (أي الأوضاع التي يمكن للوحدة العمل فيها)
+
+تحقق دورة الحياة مفتوحة المصدر `local-only` و`standard`. أما `managed-serverless` فهو بيانات أهلية فقط؛ وتحقيقه خارج StackKits وخارج هذه المواصفة.
+
+## 4. أدلة التحقق
+
+كلمات النضج مدعومة بالأدلة ولا تُعلن أبدًا. أشكال الأدلة هي مخططات JSON عامة؛ ويشحن الإصدار النسخ الفعلية.
+
+| الملف | الشكل |
+| --- | --- |
+| `release-evidence.json` (أصل الإصدار) | [release-evidence.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/release-evidence.schema.json): لكل فحص `pass` أو `pending` أو `not_applicable` مع سبب |
+| إيصال OSS المستقل من طرف إلى طرف | [standalone-oss-e2e-receipt.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/standalone-oss-e2e-receipt.schema.json) |
+| إسقاط التوافق | [stackkits-compatibility-v1.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/stackkits-compatibility-v1.schema.json)، ويُعرض في [توافق تسليم التطبيقات](/ar/stackkits/reference/application-delivery-compatibility) |
+| أدلة توافق نظام التشغيل ومنصة المحاكاة والتطبيقات | [os-compat-matrix.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/os-compat-matrix.schema.json)، [docs/data/os-compat/latest.json](https://github.com/kombifyio/StackKits/blob/main/docs/data/os-compat/latest.json): نتائج التثبيت والإعداد والتحقق والنسخ الاحتياطي والاستعادة على ضيف جديد لكل نظام تشغيل ومنصة محاكاة وحالة استخدام، وتُعرض في [توافق أنظمة التشغيل](/ar/stackkits/reference/os-compatibility) وفي عمود Lifecycle test من [توافق تسليم التطبيقات](/ar/stackkits/reference/application-delivery-compatibility) |
+
+المفردات:
+
+- الأطقم: `supported` (يوجد مسار تحقق مستشهَد به للخلية المثبتة)، و`preview` (يُثبَّت، لكن أدلة التحقق أو الاسترداد معلّقة)، و`alpha` (تعريف فقط).
+- صفوف التوافق (أنظمة التشغيل ومنصات المحاكاة والأطقم حسب البيئة والتطبيقات): `supported` (اجتازت كل مراحل دورة الحياة في أحدث تشغيل على إصدار الأدلة)، و`preview` (اجتاز التثبيت حتى verify؛ وفشلت مرحلة لاحقة) أو `unverified` (لا يوجد تشغيل مكتمل على ذلك الإصدار بعد، أو فشل أحدث تشغيل قبل verify). يُنشر غياب الدليل بوصفه `unverified`، لا دعمًا أبدًا.
+- لا تتسع الحالة إلا عند وجود تشغيل مستشهَد به للإصدار المحدد نفسه.
+
+## 5. المطابقة
+
+تكون الأداة أو الخدمة متوافقة مع StackKit عندما
+
+1. تستهلك لقطة المعمارية للإصدار المحدد الذي تستهدفه،
+2. تدير الأطقم فقط عبر أفعال دورة الحياة أعلاه (مباشرةً أو عبر موصّل MCP) وتحفظ أدلتها،
+3. تصف التوزيع بالتصنيف المنشور، و
+4. تنشر نتائج التحقق بأشكال الأدلة أعلاه مع وسم الإصدار الذي تنتمي إليه.
+
+## الحالة
+
+هذه مسودة v0 نُشرت مع النسخة التجريبية العامة. يتبع ذلك مستودع مواصفات منفصل مع سياسة إصدارات بعد النسخة التجريبية؛ وإلى ذلك الحين يكون مستند المستودع والملفات المرتبطة به هي المواصفة.

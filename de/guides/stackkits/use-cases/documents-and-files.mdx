@@ -1,0 +1,67 @@
+---
+title: "Dokumente & Dateien"
+description: "Speichere und teile deine Dateien mit Cloudreve und archiviere Papierkram mit dem optionalen Paperless-ngx-Add-on"
+sidebarTitle: "Dokumente & Dateien"
+icon: folder-open
+---
+
+<Info>
+  Evidenzstand (2026-09-24, v0.39.7): Dateien mit Cloudreve ist `available,
+  lifecycle-verified`. Ein Lifecycle-Lauf auf Ubuntu 24.04 amd64 (Basement Kit,
+  standalone) hat install, init, generate, apply, setup-files, verify,
+  backup und restore bestanden; die Wiederherstellung lieferte die ursprünglichen Bytes zurück, und die
+  Aktivierungs- und Anwendungs-Rückmeldung wurden über das Gast-lokale
+  Loopback verifiziert. Die öffentliche Support-Einstufung für diesen Lauf ist auf
+  [stackkit.cc/compatibility](https://stackkit.cc/compatibility) veröffentlicht. Dokumente
+  mit Paperless-ngx ist `available, not yet lifecycle-verified`: Es ist
+  heute im Katalog auswählbar, aber noch kein Lifecycle-Beleg deckt es ab.
+</Info>
+
+Dokumente & Dateien gibt deinem Haushalt Speicher und Freigabe für alltägliche
+Dateien sowie ein optionales Archiv für Papierkram, den du später durchsuchen willst.
+Cloudreve ist die standardmäßige, freigegebene Anwendung für den optionalen
+Workload `files`. Paperless-ngx ist ein optionales Add-on, das als eigener
+Workload `documents` läuft: Es nimmt gescannten oder per E-Mail eingegangenen Papierkram auf, führt OCR aus und
+behält sowohl den durchsuchbaren Text als auch die Originaldatei.
+
+## Anwendungen
+
+<CardGroup cols={2}>
+  <Card title="Cloudreve" icon="folder-cloud" href="/de/stackkits/apps/cloudreve">
+    Die Anwendung für Dateispeicher und Freigabe hinter Dateien: Auswahl, Rollout und Betrieb.
+  </Card>
+  <Card title="Paperless-ngx" icon="file-contract" href="/de/stackkits/reference/use-case-catalog#dokumente-und-dateien">
+    Das Dokumentenarchiv hinter Dokumente: OCR, Indexierung und Suche über aufgenommenen Papierkram. Jetzt auswählbar; noch keine eigene Einrichtungsanleitung.
+  </Card>
+</CardGroup>
+
+## Wann du was verwendest
+
+- Nutze **Dateien (Cloudreve)** für den alltäglichen Speicher: Arbeitsdokumente, Foto-Exporte, Backups von Ordnern und das Teilen eines Links mit einer Empfängerin oder einem Empfänger.
+- Ergänze **Dokumente (Paperless-ngx)**, wenn du gescannte Post, Belege und Papierkram in ein durchsuchbares Archiv mit OCR überführen willst, das die Originaldatei behält.
+- Die beiden Anwendungen halten getrennte Daten. Cloudreve indexiert nicht, was Paperless-ngx archiviert hat, und Paperless-ngx durchsucht deine Cloudreve-Bibliothek nicht.
+
+## Speicher zuerst planen
+
+- Wähle ein absolutes primäres Datenverzeichnis mit genug freiem Platz für beide Anwendungen, die du auswählst.
+- Halte das Backup-Verzeichnis getrennt von den Primärdaten.
+- Entscheide, welche Clients die generierte Dateien-Route erreichen dürfen.
+- Paperless-ngx hält den OCR-Textindex und die Originaldatei zusammen; dimensioniere den Speicher für das Archiv samt Datenbank und rechne damit, dass es mit jedem gescannten Dokument wächst.
+- Übe eine Wiederherstellung, bevor du unersetzliche Dateien oder Papierkram in einer der Anwendungen ablegst.
+
+## Die Apps besorgen
+
+### Cloudreve
+
+- **Web-UI**: Öffne die generierte Dateien-Route in einem beliebigen Browser, am Desktop oder mobil.
+- **Desktop-Sync-Client**: Cloudreve veröffentlicht einen [offiziellen Windows-Sync-Client](https://docs.cloudreve.org/en/usage/desktop-client) mit Dateizugriff bei Bedarf und Explorer-Integration; er setzt eine Cloudreve-Pro-Serverinstanz voraus.
+- Es gibt keine offizielle Cloudreve-Mobile-App; nutze die Web-UI im Browser deines Smartphones.
+
+### Paperless-ngx
+
+- **Web-UI**: Öffne die generierte Dokumente-Route in einem beliebigen Browser, sobald du den Workload auswählst.
+- **Mobile Apps** (von Drittanbietern, nicht von kombify oder dem Paperless-ngx-Projekt gepflegt): [Paperless Mobile](https://github.com/astubenbord/paperless-mobile) für Android und [Swift Paperless](https://apps.apple.com/app/swift-paperless/id6448698521) für iOS. Beide verbinden sich mit deiner eigenen Serveradresse und deinem Konto; prüfe ihre Berechtigungen, bevor du ihnen Zugriff auf dein Archiv gibst.
+
+## Einrichten
+
+Dateien ist ein guter erster Anwendungsfall, weil die standalone-Auswahl von Cloudreve keine Secret-Referenz braucht. Wähle, deploye und verifiziere ihn auf der Seite [Cloudreve](/de/stackkits/apps/cloudreve). Wähle Paperless-ngx als separaten Workload `documents`, wenn du das Archiv willst, und übe dann den Wiederherstellungs-Lifecycle für die Anwendungen, die du betreibst, unter [Sichern und wiederherstellen](/de/guides/stackkits/back-up-and-restore).

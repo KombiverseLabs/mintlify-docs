@@ -1,0 +1,71 @@
+---
+title: "Instalar Techstack Alpha en Windows"
+description: "Descarga la Windows Alpha sin firmar de Techstack y conecta un servidor local"
+sidebarTitle: "Instalar la Windows Alpha"
+icon: "windows"
+---
+
+Techstack Alpha es un cliente de Windows temprano y centrado en lo local para
+operar servidores de tu red doméstica. Puede funcionar sin una cuenta alojada de
+kombify. StackKits en el servidor sigue arrancando su identidad local de
+Owner/Admin requerida.
+
+<Warning>
+Este es un release Alpha sin firmar para recibir comentarios de usuarios
+reales, no una afirmación de estabilidad ni de preparación para producción.
+Windows puede mostrar una advertencia de SmartScreen. Verifica el origen del
+release de GitHub y la suma de comprobación antes de decidir si continúas.
+</Warning>
+
+## Descarga
+
+<CardGroup cols={2}>
+  <Card title="Descargar la Windows Alpha (.exe)" icon="download" href="https://github.com/kombifyio/TechStack/releases/latest/download/kombify-Techstack-Setup.exe">
+    Descarga directamente el `kombify-Techstack-Setup.exe` actual sin firmar
+    desde el release oficial de código abierto.
+  </Card>
+  <Card title="Repositorio de código abierto" icon="github" href="https://github.com/kombifyio/TechStack">
+    Revisa el código fuente público, las notas del release, las sumas de
+    comprobación, el MSI y el ZIP portable.
+  </Card>
+</CardGroup>
+
+Compara el hash del instalador con
+[`SHA256SUMS.txt`](https://github.com/kombifyio/TechStack/releases/latest/download/SHA256SUMS.txt)
+y lee el aviso
+[`UNSIGNED-WINDOWS-RELEASE.txt`](https://github.com/kombifyio/TechStack/releases/latest/download/UNSIGNED-WINDOWS-RELEASE.txt)
+antes de abrir el instalador.
+
+## Usa Techstack en local
+
+1. Inicia Techstack y elige **Use locally**. Para este modo no hace falta una
+   cuenta alojada de kombify.
+2. Para un servidor Ubuntu nuevo, elige **Give me a one-liner**, selecciona
+   **Basement Kit** y completa los campos del arranque local de Owner/Admin.
+3. Copia el comando de emparejamiento generado y ejecútalo una vez en el
+   servidor Ubuntu. Mantén el cliente de Windows en marcha y accesible en la
+   subred local mientras el servidor descarga su agente y envía el primer
+   heartbeat del Guard.
+4. Espera hasta que Techstack cambie el servidor de **Not connected yet** al
+   estado conectado y después continúa con el despliegue del StackKit.
+5. Para un servidor que ya ejecuta Basement Kit, elige **Connect my server** en
+   su lugar e introduce sus datos SSH locales.
+
+<Note>
+La Windows Alpha incluye un catálogo fijado de Basement Kit, su validador de
+Windows y la carga de despliegue de Linux; las notas del release nombran la
+versión exacta de StackKits que lleva cada build. El instalador también crea
+una excepción del Firewall de Windows para el puerto TCP `5264`, limitada a la
+subred local, para que el comando generado pueda alcanzar el cliente incluso
+cuando Windows clasifica la red doméstica como Pública.
+</Note>
+
+<Note>
+La sincronización con Cloud y la operación conectada requieren más adelante una
+cuenta aparte. No son requisitos previos de la vía Alpha local.
+</Note>
+
+<Card title="Instala Basement Kit directamente" icon="terminal" href="/es/stackkits/quickstart">
+  Usa el comando único independiente de StackKits cuando quieras preparar el
+  servidor por separado y conectarlo después mediante **Connect my server**.
+</Card>

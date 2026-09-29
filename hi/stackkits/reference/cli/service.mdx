@@ -1,0 +1,103 @@
+---
+title: "stackkit service"
+description: "सक्रिय StackKits प्लान में घोषित सेवाएँ नियंत्रित करें"
+sidebarTitle: "service"
+---
+सक्रिय StackKits प्लान में घोषित सेवाएँ नियंत्रित करें।
+
+```bash
+stackkit service [flags]
+```
+
+उप-कमांड: [`stackkit service logs`](#stackkit-service-logs), [`stackkit service restart`](#stackkit-service-restart), [`stackkit service start`](#stackkit-service-start), [`stackkit service stop`](#stackkit-service-stop)
+
+## stackkit service logs
+
+सीमित, रेडैक्ट किए गए सेवा लॉग पढ़ें।
+
+```bash
+stackkit service logs <service-key> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | पिछले परिणाम से अपारदर्शी कर्सर |
+| `--json` | bool | — | वर्ज़न वाले सेवा लॉग पेज को JSON के रूप में लिखें |
+| `--tail` | int | `100` | लौटाई जाने वाली रेडैक्ट की गई लॉग प्रविष्टियों की संख्या (1..200) |
+
+**उदाहरण**
+
+```bash
+# Read the last 50 redacted log entries of the TinyAuth login gateway
+stackkit service logs auth --tail 50
+
+# Read PocketID logs as JSON
+stackkit service logs id --json
+
+# Read the next page with the cursor the previous JSON result returned
+stackkit service logs id --json --cursor <cursor>
+```
+
+## stackkit service restart
+
+एक प्रबंधित सेवा रीस्टार्ट करें।
+
+```bash
+stackkit service restart <service-key> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | वर्ज़न वाले सेवा एक्शन परिणाम को JSON के रूप में लिखें |
+| `--owner-approve` | bool | — | ओनर-बद्ध सेवा बदलाव को स्पष्ट रूप से स्वीकृत करें |
+
+**उदाहरण**
+
+```bash
+# Restart the PocketID identity service
+stackkit service restart id --owner-approve
+
+# Restart the TinyAuth login gateway and print the result as JSON
+stackkit service restart auth --owner-approve --json
+```
+
+## stackkit service start
+
+एक प्रबंधित सेवा शुरू करें।
+
+```bash
+stackkit service start <service-key> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | वर्ज़न वाले सेवा एक्शन परिणाम को JSON के रूप में लिखें |
+| `--owner-approve` | bool | — | ओनर-बद्ध सेवा बदलाव को स्पष्ट रूप से स्वीकृत करें |
+
+**उदाहरण**
+
+```bash
+# Start a stopped service again
+stackkit service start coolify --owner-approve
+```
+
+## stackkit service stop
+
+एक प्रबंधित सेवा रोकें।
+
+```bash
+stackkit service stop <service-key> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | वर्ज़न वाले सेवा एक्शन परिणाम को JSON के रूप में लिखें |
+| `--owner-approve` | bool | — | ओनर-बद्ध सेवा बदलाव को स्पष्ट रूप से स्वीकृत करें |
+
+**उदाहरण**
+
+```bash
+# Stop a non-critical service; base, id and auth cannot be stopped
+stackkit service stop coolify --owner-approve
+```
+

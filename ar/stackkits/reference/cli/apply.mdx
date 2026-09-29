@@ -1,0 +1,48 @@
+---
+title: "stackkit apply"
+description: "تطبيق تغييرات البنية التحتية"
+sidebarTitle: "apply"
+---
+تطبيق تغييرات البنية التحتية.
+
+تطبيق التغييرات المخططة على البنية التحتية.
+
+ينفّذ Product Apply الخطة ResolvedPlan القياسية عبر مالكي وقت التشغيل الخاصين بها. يستخدم الوضع القياسي تلقائياً الربط المحلي المحفوظ (Site/node/channel) الذي تملكه CUE؛ أما الوضع المتقدم فقد يوفّر قناة تنفيذ موثَّقة للخدمة أو الجهاز. يستخدم المساران الخطة ResolvedPlan نفسها والأدلة نفسها والتحقق نفسه من وقت التشغيل، ولا يطلب أيٌّ منهما تأكيداً: تُعتمد الخطة لحظة إنشائها.
+
+```bash
+stackkit apply [plan-file] [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | بيان التوليد في Architecture v2 (الافتراضي: &lt;outputRoot&gt;/.stackkit/generation-manifest.json) |
+| `--auto-approve` | bool | — | مقبول لأغراض التوافق؛ لا يطلب Apply الأصلي أي تأكيد أبداً |
+| `--expected-plan-hash` | string | — | اشتراط تطابق ResolvedPlan القياسية مع تجزئة sha256 هذه مباشرة قبل Apply |
+| `--generation-receipt` | string | — | إيصال التوليد في Architecture v2 (الافتراضي: &lt;outputRoot&gt;/.stackkit/generation-receipt.json) |
+| `--inventory` | string | — | Inventory المرصودة في Architecture v2 (وإلا يُختار ملف جرد تقليدي واحد) |
+| `--json` | bool | — | إصدار نتيجة Apply المُصدَّرة ومشاهدات وقت التشغيل بصيغة JSON مقروءة آلياً |
+| `--local-execution-channel` | string | — | قناة التنفيذ في Architecture v2 التي تملكها هذه العملية المحلية صراحةً |
+| `--local-node` | string | — | العقدة في Architecture v2 التي تملكها عملية التنفيذ المحلية هذه صراحةً |
+| `--local-site` | string | — | Site في Architecture v2 التي تملكها عملية التنفيذ المحلية هذه صراحةً |
+| `--preflight` | string | — | سياسة قبول المضيف قبل أي تعديل: strict أو warn (الافتراضي) أو skip |
+| `--resolved-plan` | string | — | ResolvedPlan القياسية في Architecture v2 (الافتراضي: &lt;outputRoot&gt;/.stackkit/resolved-plan.json) |
+| `--skip-platform-apps` | bool | — | بلا تأثير: لا توجد في Apply الأصلي مرحلة منفصلة لتطبيقات المنصة |
+| `--verify` | bool | — | بلا تأثير: شغّل stackkit verify بعد Apply بدلاً من ذلك |
+| `--verify-http` | bool | — | بلا تأثير: شغّل stackkit verify `--http` بعد Apply بدلاً من ذلك |
+| `--verify-strict` | bool | — | بلا تأثير: شغّل stackkit verify بعد Apply بدلاً من ذلك |
+
+**أمثلة**
+
+```bash
+# Apply the plan written by stackkit generate
+stackkit apply
+
+# Emit the versioned Apply result as JSON
+stackkit apply --json
+
+# Refuse to change anything unless the plan still has the hash stackkit plan printed
+stackkit apply --expected-plan-hash sha256:<plan-hash>
+
+# Also refuse on host preflight warnings and unknown facts before any change
+stackkit apply --preflight strict
+```

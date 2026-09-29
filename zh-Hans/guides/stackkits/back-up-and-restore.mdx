@@ -1,0 +1,90 @@
+---
+title: "备份与恢复 Basement Kit"
+description: "创建绑定所有者的 Kopia 快照，并在正式启用之前先分阶段恢复"
+sidebarTitle: "备份与恢复"
+icon: clock-rotate-left
+---
+
+<Info>
+  证据状态（2026-09-17，v0.35.0）：Basement Kit 的备份与恢复周期在 v0.35.0 上，于全新的 Ubuntu 24.04 和 Debian 13 虚拟机上通过。对于[文档与文件](/zh-Hans/guides/stackkits/use-cases/documents-and-files)（Cloudreve），恢复出的字节与原始一致，激活已完成，并通过来宾本地回环验证了应用层回读。对于[密码](/zh-Hans/guides/stackkits/use-cases/passwords)（Vaultwarden），backup、isolated restore 和 restore activation 在 v0.35.0 上于 Ubuntu 24.04 amd64 通过。对于[照片](/zh-Hans/guides/stackkits/use-cases/photos)（Immich），它们最后一次验证是在 v0.33.3 上。对于密码和照片，恢复之后的应用层回读仍待完成。媒体（Jellyfin）和智能家居（Home Assistant）在已发布归档上的恢复证据仍待完成。Personal AI、开发（Gitea）和文档（Paperless-ngx）为实验性，没有运行时证据。
+</Info>
+
+已发布的 Basement Kit 包含一个本地的、由所有者控制的 Kopia 备份生命周期。请只在你打算保护其数据的、已应用的 StackKits 工作区中运行它。
+
+请把恢复演练作为设置的一部分，而不是以后再做的任务。
+
+## 在导入重要数据之前先演练恢复
+
+1. 应用并验证 Basement Kit。
+2. 确认主数据根目录和备份根目录是分开的。
+3. 配置仓库，并用下面的命令创建一个快照。
+4. 把该快照恢复到隔离的暂存区并检查结果。
+5. 任何激活之后都要再次验证服务。恢复之后的验证与快照同样重要。
+
+在存储、工作负载或版本发生重大变化之后，请重复这一演练。
+
+## 配置并检查仓库
+
+```bash
+stackkit backup configure --json
+stackkit backup status --json
+```
+
+仓库、源集合、排除项和本地托管都源自解析后的计划。不要把命令指向任意的卷，也不要绕过所有者托管。
+
+### 快照涵盖什么
+
+计划的 `backupPolicy.coverage` 选择快照会获取哪些类别的数据。它有三个嵌套的组，没有订阅支撑的栈会解析为 `content`：
+
+| 覆盖范围 | 它选择什么 |
+| --- | --- |
+| `config` | 栈配置、密钥材料、平台状态、无服务器配置 |
+| `content` | 上述内容，加上数据库、用户内容、文档和遥测时间序列 |
+| `media` | 上述内容，加上照片原件和大型媒体 |
+
+媒体是被选择的，而不是被继承的。照片和视频库会占据仓库的大部分空间，因此首次种子不会悄悄地把它拉进来：想要时请选择 `media`。
+
+上面的状态输出会报告已应用的配置所选择的确切卷和排除项，这就是对“下一个快照会包含什么”的回答。覆盖范围组是计划所要求的；状态输出则是某一个已应用配置最终解析出的结果。
+
+## 创建幂等快照
+
+```bash
+stackkit backup run --operation-id before-upgrade-2026-08-11 --json
+```
+
+请把返回的内容寻址快照锚点与你的验证证据一起保存。重复使用相同的操作 ID 会返回已有的操作，而不是意外地创建重复项。
+
+## 恢复到隔离的暂存区
+
+```bash
+stackkit backup restore sha256:<snapshot-anchor-id> \
+  --owner-approve \
+  --operation-id restore-check-2026-08-11 \
+  --json
+```
+
+这会验证快照并把它提取到由 CUE 拥有的暂存区。它不会替换线上数据。在继续之前，请检查返回的恢复结果 ID。
+
+## 激活已验证的恢复
+
+```bash
+stackkit backup restore activate sha256:<restore-result-id> \
+  --owner-approve \
+  --operation-id restore-activation-2026-08-11 \
+  --json
+```
+
+激活会创建所需的安全快照，切换到计划所拥有的那一组确切的卷，重启运行时，并验证所有者绑定和服务。
+
+如果激活被中断，请明确地恢复该确切的操作：
+
+```bash
+stackkit backup restore recover restore-activation-2026-08-11 \
+  --owner-approve \
+  --rollback \
+  --json
+```
+
+<Warning>
+  备份成功并不等于恢复得到了证明。在依赖该栈保存不可替代的文件之前，请用非关键数据演练分阶段恢复。
+</Warning>

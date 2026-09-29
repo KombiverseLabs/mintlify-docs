@@ -1,0 +1,44 @@
+---
+title: "Network"
+description: "El filtrado de DNS y la conectividad privada están previstos; esta es la base de red que StackKits ya configura"
+sidebarTitle: "Network"
+icon: network-wired
+---
+
+<Info>
+  Estado de la evidencia (2026-09-24, v0.41.0): Network está `planned`. No tiene
+  versión ni fechas, y todavía no tiene una entrada en el catálogo de la
+  versión. Esta página describe una dirección de diseño en revisión, no algo que
+  puedas instalar hoy.
+</Info>
+
+Network todavía no es un caso de uso que puedas seleccionar. Esta página separa lo que StackKits ya configura por ti en cualquier kit de lo que el equipo planea añadir como caso de uso dedicado.
+
+## Lo que StackKits ya configura
+
+| Capacidad | Qué obtienes hoy |
+| --- | --- |
+| Enrutamiento | Traefik es el componente de proxy inverso publicado. Enruta cada nombre de servicio generado, como `base.<domain>` y la ruta propia de cada aplicación, a partir de tu StackSpec validado. |
+| DNS local | Basement Kit da a cada servicio una dirección HTTPS en `*.home`, en la que se confía mediante una autoridad de certificación del propietario que instalan tus dispositivos inscritos. |
+| Acceso remoto | La inscripción de dispositivos puede configurar opcionalmente un túnel dividido privado, de modo que las mismas direcciones `*.home` sigan funcionando fuera de tu red doméstica. |
+
+Todo esto está integrado hoy en Basement Kit y Cloud Kit. No necesitas el caso de uso Network para ello, y que Network se publique en el futuro no cambiará su funcionamiento.
+
+## Diseño previsto
+
+| Tarea | Candidato preferido | Alternativa |
+| --- | --- | --- |
+| Filtrar el DNS en tus dispositivos | [AdGuard Home](https://adguard.com/en/adguard-home/overview.html) | [Pi-hole](https://pi-hole.net/) |
+| Conectar de forma privada tus propios dispositivos y servidores | [Tailscale](https://tailscale.com/) | [Headscale](https://github.com/juanfont/headscale) o [NetBird](https://docs.netbird.io/selfhosted/selfhosted-guide) para una coordinación autoalojada |
+| Ejecutar tu propio borde de conectividad en lugar de una vía alojada | [Pangolin](https://github.com/fosrl/pangolin) | Ninguna |
+| Ver los fallos de DNS y la presencia de dispositivos | Reutilizar el estado existente del Node Hub | Ninguna |
+
+Ninguno de estos se puede instalar todavía. Network está previsto como un caso de uso que añade conectividad deliberada entre dispositivos y entre sitios, además de filtrado de DNS, sobre la base anterior, no como un requisito para acceder a tus aplicaciones de StackKits existentes.
+
+## Qué esperar
+
+- Network no sustituirá el enrutamiento integrado, el DNS `*.home` ni el acceso remoto opcional descritos arriba.
+- Seleccionar Network no exigirá un cliente VPN solo para abrir las aplicaciones que ya ejecutas.
+- Filtrar o conectar dispositivos requerirá elecciones explícitas de dispositivos y destinos; nada se activa automáticamente.
+
+Consulta el [registro de cambios de StackKits](/es/changelog/overview) o el [catálogo de casos de uso](/es/stackkits/reference/use-case-catalog) para saber si Network ha salido de la fase de planificación.

@@ -1,0 +1,54 @@
+---
+title: "Identität in StackKits"
+description: "Wie lokale Owner-Identität und optionale gehostete Anmeldung getrennt bleiben."
+icon: "shield-halved"
+---
+
+# Identität in StackKits
+
+StackKits hält den Owner eines lokalen Homelabs maßgeblich. Für Installation und
+Betrieb eines Stacks ist kein gehostetes Konto nötig.
+
+## Lokale Owner-Identität
+
+Die veröffentlichte lokale Identitätsbasis nutzt:
+
+- **PocketID** als OpenID-Connect-Identitätsanbieter für den Homelab-Owner;
+- **TinyAuth** als Forward-Auth-Broker vor geschützten Anwendungen;
+- ausdrückliche Freigabe durch den Owner für Lifecycle-Operationen, die den Stack ändern.
+
+Identitätsdaten und Zugangsdaten bleiben unter der Kontrolle des lokalen Owners.
+Das Entfernen einer optionalen gehosteten Verbindung darf weder den lokalen
+Zugriff entfernen noch den eigenständigen Lifecycle verhindern.
+
+<CardGroup cols={2}>
+  <Card title="PocketID" icon="fingerprint" href="/de/stackkits/apps/pocketid">
+    Passkey-basierte lokale Identität für den Homelab-Owner.
+  </Card>
+  <Card title="TinyAuth" icon="key" href="/de/stackkits/apps/tinyauth">
+    Forward-Authentifizierung für Anwendungen, die keinen eigenen kompatiblen
+    Anmeldeablauf mitbringen.
+  </Card>
+</CardGroup>
+
+## Optionale gehostete Identität
+
+Wenn ein Nutzer sich bewusst mit einem gehosteten kombify-Dienst verbindet,
+läuft die interaktive Anmeldung über die offizielle Domain `login.kombify.io`.
+Diese gehostete Identität ist eine optionale Komfortschicht; sie ersetzt den
+lokalen Owner nicht und steht nicht über ihm.
+
+## Sicherheitsverhalten
+
+- Fehlende oder mehrdeutige Identitätsinformationen verweigern den Zugriff.
+- Tokens sind kurzlebig und auf ihre vorgesehene Zielgruppe (Audience) begrenzt.
+- Geschützte Routen werden nicht öffentlich, wenn ein Identitätsdienst
+  nicht verfügbar ist.
+- Ein Assistent, der für einen Nutzer handelt, kann nicht mehr Berechtigungen
+  erhalten als dieser Nutzer.
+
+<Note>
+Diese Seite beschreibt das öffentliche Identitätskonzept. Interne Routing-,
+Tenant-, Abrechnungs-, Deployment- und Operator-Architektur sind bewusst nicht
+Teil der öffentlichen StackKits-Dokumentation.
+</Note>

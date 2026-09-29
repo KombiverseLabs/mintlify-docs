@@ -1,0 +1,76 @@
+---
+title: "StackKit Open Spec"
+description: "Der schlanke veröffentlichte Vertrag hinter dem offenen Homelab-Standard: Architektur-Snapshot, Lebenszyklus-Verben, Platzierungs-Taxonomie, Verifikationsnachweise"
+sidebarTitle: "Open Spec (v0)"
+icon: file-contract
+---
+
+Die StackKit Open Spec ist der schlanke, veröffentlichte Vertrag hinter „dem offenen Homelab-Standard“. Sie verzeichnet Artefakte, die mit jedem StackKits-Release ausgeliefert werden, und führt kein neues Schema ein. Die Spec-Version folgt dem Release-Tag, mit dem sie ausgeliefert wird, und Änderungen innerhalb von v0 sind additiv. Die kanonische Kopie liegt im öffentlichen Repository unter [docs/OPEN-SPEC.md](https://github.com/kombifyio/StackKits/blob/main/docs/OPEN-SPEC.md).
+
+Alles in der Spec kommt ohne Konto aus: Der Standard Mode braucht kein kombify-Konto, keinen gehosteten kombify-Endpunkt und kein Techstack.
+
+## 1. Architektur-Snapshot
+
+Der Architektur-Snapshot, der nur Fakten enthält, beschreibt ein Release: Kits, Topologie, Fähigkeiten, Platzierungsmodell, Module, Add-ons und Support-Reifegrad. CUE ist die technische Source of Truth; der Snapshot ist eine Projektion davon. Ein Konsument liest den Snapshot, nie das CUE, und muss additive Felder tolerieren.
+
+| Artefakt | Rolle |
+| --- | --- |
+| [architecture-snapshot.json](https://github.com/kombifyio/StackKits/blob/main/architecture-snapshot.json) | Der Snapshot für das Release |
+| [architecture-snapshot.schema.json](https://github.com/kombifyio/StackKits/blob/main/architecture-snapshot.schema.json) | Geschlossener Downstream-Vertrag (Schema v3): `placement_model`, `stackkits`, `mode_matrix`, `modules`, `addons` |
+| [architecture/v2/authority-manifest.json](https://github.com/kombifyio/StackKits/blob/main/architecture/v2/authority-manifest.json) | Authority-Manifest für die Kit-Definitionen der Architecture v2 |
+
+## 2. Lebenszyklus-Verben
+
+Jedes Kit wird über dieselben Verben durch das `stackkit`-CLI und den `stackkit-mcp`-Connector gesteuert. Ein- und Ausgaben sind in der [CLI-Referenz](https://github.com/kombifyio/StackKits/blob/main/docs/CLI.md) und der [CLI-Schritt-für-Schritt-Anleitung](/de/guides/stackkits/cli-walkthrough) dokumentiert.
+
+| Verb | Bedeutung |
+| --- | --- |
+| `init` | Eine StackSpec für ein Kit mit lokaler Owner-Verwahrung erstellen (`--owner-source=local`) |
+| `validate` | Die StackSpec gegen den CUE-Vertrag validieren |
+| `generate` | Deterministische Rollout-Artefakte rendern (standardmäßig Standalone-Docker-Compose) |
+| `apply` | Den generierten Plan auf dem Zielhost ausführen |
+| `verify` | Routen, Identität und Dienstzustand nach dem Apply prüfen |
+| `backup` (`backup run`, `backup restore …`) | Deklarierte Volumes sichern und mit verifiziertem Readback und expliziter Aktivierung wiederherstellen |
+| `upgrade` | Ein installiertes Kit mit Kompatibilitätsprüfungen auf ein neueres Release heben |
+| `remove` | Eine Anwendung oder das Kit entfernen, ohne den Umgang mit den Daten zu verschleiern |
+
+Ein Verb endet entweder mit Nachweis oder schlägt mit einem endgültigen Grund fehl. Es meldet nie Erfolg für Arbeit, die es nicht geleistet hat.
+
+## 3. Platzierungs-Taxonomie
+
+Die Platzierung beschreibt, wo ein Kit oder Modul laufen darf. Das Vokabular ist in [foundation/placement.cue](https://github.com/kombifyio/StackKits/blob/main/foundation/placement.cue) veröffentlicht:
+
+- `#PlacementMode`: `local-only`, `standard`, `managed-serverless`
+- `#PlacementSupport`: Eignungs-Metadaten pro Modul (in welchen Modi ein Modul laufen kann)
+
+Der Open-Source-Lebenszyklus setzt `local-only` und `standard` um. `managed-serverless` sind reine Eignungs-Metadaten; die Umsetzung liegt außerhalb von StackKits und außerhalb dieser Spec.
+
+## 4. Verifikationsnachweise
+
+Reifegrad-Begriffe sind durch Nachweise belegt, nie bloß deklariert. Die Nachweisformen sind öffentliche JSON-Schemas; das Release liefert die Instanzen mit.
+
+| Artefakt | Form |
+| --- | --- |
+| `release-evidence.json` (Release-Asset) | [release-evidence.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/release-evidence.schema.json): pro Prüfung `pass`, `pending` oder `not_applicable` mit einer Begründung |
+| Standalone-OSS-End-to-End-Beleg | [standalone-oss-e2e-receipt.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/standalone-oss-e2e-receipt.schema.json) |
+| Kompatibilitätsprojektion | [stackkits-compatibility-v1.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/stackkits-compatibility-v1.schema.json), dargestellt unter [Kompatibilität der Anwendungsbereitstellung](/de/stackkits/reference/application-delivery-compatibility) |
+| Kompatibilitätsnachweise für OS, Hypervisor und Anwendungen | [os-compat-matrix.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/os-compat-matrix.schema.json), [docs/data/os-compat/latest.json](https://github.com/kombifyio/StackKits/blob/main/docs/data/os-compat/latest.json): Ergebnisse für Installation, Setup, Verifikation, Backup und Restore auf frischem Gast pro Betriebssystem, Hypervisor und Anwendungsfall, dargestellt unter [OS-Kompatibilität](/de/stackkits/reference/os-compatibility) und in der Spalte „Lebenszyklus-Test“ der [Kompatibilität der Anwendungsbereitstellung](/de/stackkits/reference/application-delivery-compatibility) |
+
+Vokabular:
+
+- Kits: `supported` (für die festgeschriebene Zelle existiert ein zitierter Verifikationspfad), `preview` (lässt sich installieren, aber Nachweise für Verifikation oder Wiederherstellung stehen aus), `alpha` (nur Definition).
+- Kompatibilitätszeilen (Betriebssysteme, Hypervisoren, Kits nach Umgebung, Anwendungen): `supported` (jede Lebenszyklus-Phase hat im neuesten Lauf auf dem Nachweis-Release bestanden), `preview` (Installation bis Verifikation bestanden; eine spätere Phase ist fehlgeschlagen) oder `unverified` (auf diesem Release noch kein abgeschlossener Lauf, oder der neueste Lauf ist vor der Verifikation fehlgeschlagen). Fehlende Nachweise werden als `unverified` veröffentlicht, nie als Unterstützung.
+- Ein Status wird nur erweitert, wenn ein zitierter Lauf für exakt dieses Release existiert.
+
+## 5. Konformität
+
+Ein Tool oder Dienst ist StackKit-kompatibel, wenn es
+
+1. den Architektur-Snapshot genau des Releases verwendet, auf das es zielt,
+2. Kits nur über die oben genannten Lebenszyklus-Verben steuert (direkt oder über den MCP-Connector) und deren Nachweise bewahrt,
+3. die Platzierung mit der veröffentlichten Taxonomie beschreibt und
+4. Verifikationsergebnisse in den oben genannten Nachweisformen mit dem Release-Tag veröffentlicht, zu dem sie gehören.
+
+## Status
+
+Dies ist ein v0-Entwurf, veröffentlicht mit der öffentlichen Beta. Ein eigenes Spezifikations-Repository mit Versionierungsrichtlinie folgt nach der Beta; bis dahin sind das Repository-Dokument und die verlinkten Artefakte die Spec.

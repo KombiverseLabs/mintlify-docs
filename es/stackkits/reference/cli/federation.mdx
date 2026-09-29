@@ -1,0 +1,141 @@
+---
+title: "stackkit federation"
+description: "Gestiona la evidencia local de vínculos de Federation"
+sidebarTitle: "federation"
+---
+Gestiona la evidencia local de vínculos de Federation.
+
+```bash
+stackkit federation [flags]
+```
+
+Subcomandos: [`stackkit federation binding`](#stackkit-federation-binding), [`stackkit federation control`](#stackkit-federation-control), [`stackkit federation link`](#stackkit-federation-link)
+
+## stackkit federation binding
+
+Gestiona vínculos externos opacos de enlaces de Federation.
+
+```bash
+stackkit federation binding [flags]
+```
+
+Subcomandos: [`stackkit federation binding adopt`](#stackkit-federation-binding-adopt), [`stackkit federation binding import`](#stackkit-federation-binding-import)
+
+### stackkit federation binding adopt
+
+Valida, firma como Owner y adopta atómicamente un vínculo externo.
+
+Alias: `approve`
+
+```bash
+stackkit federation binding adopt [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--binding` | string | — | JSON de vínculo externo de Federation sin firmar, confinado al workspace |
+| `--inventory` | string | — | inventory.json confinado al workspace que se actualiza atómicamente |
+| `--resolved-plan` | string | — | ResolvedPlan canónico confinado al workspace (si no, se deriva junto al Inventory) |
+
+### stackkit federation binding import
+
+Admite un vínculo opaco firmado por el Owner en el Inventory local.
+
+```bash
+stackkit federation binding import [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--admission` | string | — | JSON de admisión de vínculo de Federation firmado por el Owner, confinado al workspace |
+| `--inventory` | string | — | inventory.json confinado al workspace que se actualiza atómicamente |
+| `--resolved-plan` | string | — | ResolvedPlan canónico confinado al workspace (si no, se deriva junto al Inventory) |
+
+## stackkit federation control
+
+Ejecuta el plan autorizado por Home y lo verifica en el nodo Cloud seleccionado.
+
+```bash
+stackkit federation control [flags]
+```
+
+Subcomandos: [`stackkit federation control bind`](#stackkit-federation-control-bind), [`stackkit federation control send`](#stackkit-federation-control-send), [`stackkit federation control sign`](#stackkit-federation-control-sign), [`stackkit federation control withdraw`](#stackkit-federation-control-withdraw)
+
+### stackkit federation control bind
+
+Admite la autoridad pública exacta de Home y la custodia local del receptor.
+
+```bash
+stackkit federation control bind [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--file` | string | — | JSON de custodia del receptor revisado por el Owner; sin claves privadas |
+
+### stackkit federation control send
+
+Envía la acción firmada por una conexión mTLS exacta iniciada por Home.
+
+```bash
+stackkit federation control send [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--endpoint-file` | string | — | Endpoint mTLS local fijado y rutas de credenciales confinadas |
+| `--file` | string | — | JSON de la acción firmada por Home |
+
+### stackkit federation control sign
+
+Firma una acción exacta de corta duración con la custodia vigente de Home.
+
+```bash
+stackkit federation control sign [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--file` | string | — | JSON exacto de la acción con hash del plan, destino y marcas de tiempo acotadas |
+
+### stackkit federation control withdraw
+
+Retira de forma persistente la autoridad del receptor, incluidas las sesiones TLS existentes.
+
+```bash
+stackkit federation control withdraw [flags]
+```
+
+## stackkit federation link
+
+Vincula y detiene la parte local de una malla de Federation externa.
+
+```bash
+stackkit federation link [flags]
+```
+
+Subcomandos: [`stackkit federation link bind`](#stackkit-federation-link-bind), [`stackkit federation link stop`](#stackkit-federation-link-stop)
+
+### stackkit federation link bind
+
+Adopta handles de WireGuard externos en la custodia local del Owner.
+
+```bash
+stackkit federation link bind [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--file` | string | — | JSON de custodia de la malla externa; no contiene claves privadas |
+
+### stackkit federation link stop
+
+Detiene la interfaz adoptada sin eliminar la malla externa.
+
+```bash
+stackkit federation link stop [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--fabric-ref` | string | — | Referencia opaca exacta de la malla adoptada |

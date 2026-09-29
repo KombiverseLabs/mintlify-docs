@@ -1,0 +1,90 @@
+---
+title: "Ein StackKit betreiben"
+description: "Einen laufenden StackKits-Workspace prüfen und dann mit dem veröffentlichten CLI einen Workload hinzufügen oder entfernen"
+sidebarTitle: "Betrieb"
+icon: wrench
+---
+
+Beginne die tägliche Arbeit mit den schreibgeschützten Befehlen desselben veröffentlichten CLI, das den Workspace erstellt hat:
+
+```bash
+stackkit verify --json
+stackkit drift detect --json
+stackkit logs list --json
+```
+
+Bewahre deren Ausgabe beim Workspace auf, damit du den aktuell beobachteten Zustand mit dem letzten erfolgreichen Apply vergleichen kannst.
+
+## Den Stack überwachen
+
+Diese Lebenszyklus-Prüfungen sind der unterstützte Weg, den Stack selbst zu bewerten. StackKits hält die Beobachtungs- und Verifikationsnachweise lokal und braucht keinen gehosteten Monitoring-Dienst.
+
+Das veröffentlichte Modul [Uptime Kuma](/de/stackkits/apps/uptime-kuma) wird von der anfänglichen nativen v2-StackSpec nicht ausgewählt, daher hat ein frisches Basement oder Cloud Kit keine generierte Monitoring-Adresse. Wenn du einen separaten Monitor betreibst, richte Prüfungen nur für Routen ein, die du überwachen darfst. Geschützte Routen brauchen einen bewussten Health-Endpunkt oder eine erwartete Authentifizierungsantwort; den Routenschutz zu schwächen, um HTTP 200 zu erhalten, ist kein gültiges Monitor-Setup.
+
+## Vor einer Änderung
+
+1. Aktualisiere die StackSpec, nicht die generierten Artefakte.
+2. Führe `stackkit validate` und `stackkit generate` aus.
+3. Prüfe `stackkit plan --json` und brich bei jedem Bereitschafts-Blocker ab.
+4. Prüfe die Ausgabe und hole die Freigabe des lokalen Owners ein, bevor du einen verändernden Befehl ausführst.
+5. Führe nach der Änderung `stackkit verify --http --json` aus.
+
+## Einen Workload zu einem bestehenden Workspace hinzufügen
+
+Für die Auswahl eines neuen Workloads musst du weder `stackkit init` erneut ausführen noch die anfängliche StackSpec ersetzen. Bearbeite den `workloads`-Block der bestehenden StackSpec und stelle dann die Secret-Verwahrung her, bevor du neu generierst:
+
+```bash
+stackkit validate
+stackkit secrets materialize
+stackkit generate
+stackkit apply
+```
+
+StackKits v0.21.11 ergänzt `stackkit secrets materialize` als expliziten Schritt zwischen der Auswahl eines Workloads und `generate`. Stelle die Verwahrung her, generiere und wende dann an; erfinde keine Secret-Werte.
+
+## Einen angewendeten Workload entfernen
+
+`stackkit remove` entfernt mit Freigabe des lokalen Owners genau einen angewendeten Workload:
+
+```bash
+stackkit remove --workload photos
+stackkit remove --workload photos --auto-approve --json
+```
+
+Das CLI prüft den aktuellen Plan, die Generierung, das Apply-Ergebnis und die Owner-Autorität und schickt dann über den digest-gepinnten Standard-Ausführungskanal eine vom Owner signierte Entfernungsanfrage, die fünf Minuten gültig bleibt. Erfolg setzt einen `absent`-Readback für genau die Anforderung, die Instanz und den Digest des angewendeten Artefakts voraus. Die Anfrage, das Ergebnis und der begrenzte abschließende Nachweis werden unter `.stackkit/evidence/removal/` gespeichert.
+
+### Eine Platzierung bei einem Multi-Node-Ergebnis gezielt wählen
+
+Die verifizierte Apply-Zusammenfassung stellt `planHash`, `appliedRequestDigest` und eine secretfreie Liste `appliedWorkloads` bereit. Jeder Eintrag ist eine deterministische, hashgebundene Identität, die Workload, Laufzeit-Owner, Platzierungen, Ausführungskanal und referenzierte Artefakt-Digests bindet. Nutze sie, um zu erkennen, worauf sich eine spätere Entfernung richten soll; sie ist weder eine Entfernungsfreigabe noch für sich genommen ein Abwesenheitsnachweis.
+
+Seit v0.21.12 gilt: Wenn das Apply-Ergebnis einen Workload auf mehr als einer Site oder einem Node platziert hat, benenne die eine exakte Platzierung, für die diese Entfernung zuständig ist. Übernimm die Werte aus dem Eintrag in `appliedWorkloads`:
+
+```bash
+stackkit remove --workload photos \
+  --local-site <site-ref> \
+  --local-node <node-ref> \
+  --local-execution-channel <channel-ref>
+```
+
+Die benannte Platzierung muss genau einem Eintrag im verifizierten Apply-Ergebnis entsprechen. Jeder Node-lokale Abwesenheitsbeleg bleibt über den gemeinsamen `appliedRequestDigest` mit demselben ursprünglichen Apply korreliert.
+
+Füge `--terminal-evidence-json` hinzu, wenn du einen maschinenlesbaren Entfernungsdatensatz auf stdout brauchst.
+
+## Häufige Abläufe
+
+<CardGroup cols={2}>
+  <Card title="StackSpec-Intent ändern" icon="sliders" href="/de/guides/stackkits/configure-stack-spec">
+    Bearbeite den veröffentlichten Intent und generiere die gesteuerte Ausgabe neu.
+  </Card>
+  <Card title="Sichern und wiederherstellen" icon="clock-rotate-left" href="/de/guides/stackkits/back-up-and-restore">
+    Erstelle einen idempotenten Snapshot und übe die gestufte Wiederherstellung.
+  </Card>
+</CardGroup>
+
+Die genaue Befehlsoberfläche ist mit dem Release versioniert. Nutze `stackkit --help` und die befehlsspezifische Hilfe der installierten Version, bevor du ein Backup, eine Wiederherstellung, ein Upgrade oder eine Entfernung durchführst.
+
+<Warning>
+  StackKits bietet im Standard Mode keinen unbeaufsichtigten gehosteten Betriebsablauf. Behandle jeden verändernden Befehl als lokale Operation auf einem Host, den du kontrollierst.
+</Warning>
+
+Für einen Agent-verbundenen Ablauf siehe den [MCP-Connector](/de/stackkits/reference/mcp-connector).

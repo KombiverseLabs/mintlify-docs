@@ -1,0 +1,54 @@
+---
+title: "Dev"
+description: "Private Git-Repositories mit Gitea hosten, Remote-Desktop und Workspace-Runtime sind geplant"
+sidebarTitle: "Dev"
+icon: code
+---
+
+<Info>
+  Evidenzstand (2026-09-24, v0.39.7): Repositories mit Gitea ist `available,
+  not yet lifecycle-verified` — im Katalog auswählbar, aber noch kein
+  automatisierter Lifecycle-Lauf deckt es ab. Remote-Desktop mit Guacamole ist `in
+  development`: für ein künftiges Release deklariert, noch nicht installierbar. Eine gemeinsame
+  Entwicklungs-Workspace-Runtime ist `planned`, ohne Release und ohne
+  verbindlichen Termin.
+</Info>
+
+Dev vereint Repository-, Entwicklungs-Workspace- und Remote-Desktop-Ergebnisse
+in einem Anwendungsfall: Du arbeitest an einem Projekt von einem anderen Computer weiter,
+ohne selbst Git-Server, Workspace und Zugangsroute zusammenzubauen. Repositories
+und Remote-Desktop bleiben unabhängig voneinander auswählbar, und CI-Runner sind ein
+eigenes Opt-in, getrennt von der gewöhnlichen Dev-Nutzung.
+
+## Anwendungen
+
+<CardGroup cols={2}>
+  <Card title="Gitea" icon="code-branch" href="/de/stackkits/apps/gitea">
+    Der Git-Server hinter Repositories: Auswahl, HTTPS-Route, Owner-Anmeldung und die Speichergrenze.
+  </Card>
+  <Card title="Guacamole" icon="server">
+    Apache Guacamole ist der bestehende Kandidat für Remote-Desktop. In Entwicklung: für das Release deklariert, noch nicht installierbar.
+  </Card>
+</CardGroup>
+
+## Repositories, heute
+
+- Git funktioniert nur über HTTPS. SSH wird nicht bereitgestellt, und es ist kein CI-Runner installiert.
+- Jeder Client braucht einen DNS-Namen für den Git-Host und muss dem Zertifikat der internen CA dieses Hosts vertrauen.
+- Für die Wiederherstellung brauchst du beide Gitea-Volumes, gesichert bei angehaltenen Schreibvorgängen.
+
+## Remote-Desktop und Workspace, geplant
+
+- **Remote-Desktop** läuft im Browser: [Apache Guacamole](https://guacamole.apache.org/) ist der bestehende Kandidat, und eine Sitzung öffnet sich in jedem Browser, ohne dass du einen Desktop-Client installierst. Er bindet an ein ausdrückliches, bereits unterstütztes Desktop-Ziel; er richtet nicht selbst einen Betriebssystem-Desktop ein.
+- Ein **Entwicklungs-Workspace** (ein Projekt mit der deklarierten Toolchain öffnen, bearbeiten und fortsetzen) braucht eine ausdrückliche Wahl der Runtime und ist noch nicht zugelassen.
+- Beides bleibt in Evaluierung. Keines von beiden ändert, was Repositories heute leistet, und die Auswahl des einen setzt das andere nicht voraus: Wer nur Git braucht, benötigt keinen Desktop, und wer nur einen Desktop braucht, keinen Git-Server.
+
+## Die Tools besorgen
+
+- **Git-Clients**: Nutze deinen vorhandenen nativen Git-Client oder deine IDE-Integration mit der generierten HTTPS-Route.
+- **tea, die Gitea-CLI**: für skriptgesteuerte Repository-, Issue- und Pull-Request-Vorgänge im Terminal siehe [gitea.com/gitea/tea](https://gitea.com/gitea/tea).
+- **Guacamole**: Sobald es erscheint, musst du keinen Client installieren — es läuft vollständig in deinem Browser.
+
+## Einrichten
+
+Folge der Seite [Gitea](/de/stackkits/apps/gitea) ab einem leeren Owner-Workspace. Pushe von einem echten Client in ein Test-Repository, bevor du dich darauf verlässt.

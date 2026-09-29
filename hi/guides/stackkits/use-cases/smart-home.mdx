@@ -1,0 +1,60 @@
+---
+title: "Smart Home"
+description: "अपने चलाए होस्ट पर Home Assistant से अपने चुने डिवाइस देखें और नियंत्रित करें"
+sidebarTitle: "Smart Home"
+icon: house-signal
+---
+
+<Info>
+  प्रमाण स्थिति (2026-09-24, v0.41.0): Home Assistant के साथ Smart Home
+  `available, lifecycle-verified` है। Smart Home को सार्वजनिक
+  v0.39.7 आर्काइव पर सत्यापित किया गया, जहाँ Ubuntu 24.04 amd64
+  (Basement Kit, standalone) पर Depot प्रोड्यूसर लाइफ़साइकल रन ने install, init, generate, apply, ओनर
+  सेटअप, verify, backup, restore और restore activation पास किए, और
+  एप्लिकेशन रीडबैक गेस्ट-लोकल लूपबैक पर सत्यापित किया गया।
+</Info>
+
+Smart Home आपके घर को अपने चलाए होस्ट पर अपने चुने डिवाइस देखने और नियंत्रित करने की एक जगह देता है। Home Assistant ऑटोमेशन प्लेटफ़ॉर्म चलाता है। रिलीज़ कैटलॉग इस उपयोग केस को Smart Home कहता है और इसे वैकल्पिक `smart-home` वर्कलोड के रूप में डिलीवर करता है।
+
+## चुनें कि Home Assistant कैसे चले
+
+| सेटिंग | विकल्प | डिफ़ॉल्ट |
+| --- | --- | --- |
+| इंस्टॉलेशन | कंटेनर (Home Assistant Core, बिना Supervisor या Apps) या समर्पित उपकरण पर Home Assistant OS | कंटेनर |
+| मौजूदा इंस्टॉलेशन | नया बनाएँ, या किसी मौजूदा इंस्टेंस को उसका कॉन्फ़िगरेशन बदले बिना जोड़ें | नया बनाएँ |
+| USB डिवाइस | Zigbee, Z-Wave या अन्य USB रेडियो को वर्कलोड में पास-थ्रू करें | बंद |
+| नेटवर्क डिस्कवरी | अपने घरेलू नेटवर्क पर लाइट, स्पीकर और हब अपने-आप खोजें | चालू |
+
+मौजूदा इंस्टेंस जोड़ने से उसका वर्तमान कॉन्फ़िगरेशन सुरक्षित रहता है। StackKits नई शुरुआत का दिखावा करने के लिए कभी किसी मौजूदा इंस्टेंस को रीसेट नहीं करता, और उस इंस्टेंस को प्रबंधित करने के लिए अब भी अलग अनुमति (grant) चाहिए।
+
+## होस्ट चुनें
+
+स्थानीय हार्डवेयर, Zigbee/Z-Wave USB रेडियो तक सीधे एक्सेस और आपके LAN के डिवाइस के लिए [Basement Kit](/hi/stackkits/kits/basement-kit) उपयोग करें। Cloud Kit के पास स्थानीय रेडियो या आपके घरेलू नेटवर्क के डिवाइस तक एक्सेस नहीं है, इसलिए वह Smart Home के स्थानीय पक्ष के लिए उपयुक्त नहीं।
+
+## इसे सेटअप करें
+
+1. अपने [StackSpec](/hi/guides/stackkits/configure-stack-spec) में `smart-home` वर्कलोड चुनें, Container या Home Assistant OS चुनें, और तय करें कि USB रेडियो पास-थ्रू करना है या नहीं।
+2. सत्यापित [Basement Kit](/hi/stackkits/kits/basement-kit) पर स्टैक जनरेट करें और लागू करें।
+3. जनरेट किया गया Smart Home रूट खोलें और Home Assistant ऑनबोर्डिंग विज़ार्ड खुद पूरा करें: ओनर खाता बनाएँ, अपने घर की लोकेशन सेट करें, और अपने वास्तविक डिवाइस के इंटीग्रेशन जोड़ें।
+4. अपना पहला डिवाइस पेयर करें और अधिक जोड़ने से पहले पुष्टि करें कि वह सही स्थिति दिखाता है।
+
+## Node Hub जाँचें
+
+Smart Home वर्कलोड चल रहा है और उसका जनरेट किया गया पता क्या है, यह देखने के लिए [Node Hub](/hi/guides/stackkits/node-hub) खोलें। Homepage रिलीज़ किया गया नेविगेशन मॉड्यूल है, पर शुरुआती StackSpec उसे नहीं चुनता। जब तक आप अन्यथा न चुनें, Node Hub आपका वर्तमान एंट्रीपॉइंट है।
+
+## बैकअप और रिकवरी
+
+Home Assistant का कॉन्फ़िगरेशन और डिवाइस रजिस्ट्रेशन आपके Kit के घोषित बैकअप का हिस्सा हैं। आइसोलेटेड वातावरण में रीस्टोर करने से भौतिक डिवाइस अपने-आप दोबारा पेयर नहीं होते और रद्द किया गया एक्सेस दोबारा लागू नहीं होता। भौतिक क्रियाएँ फिर शुरू करने से पहले डिवाइस बाइंडिंग और वर्तमान अनुमतियाँ दोबारा सत्यापित करें। देखें [बैकअप और रीस्टोर](/hi/guides/stackkits/back-up-and-restore)।
+
+## ऐप्स प्राप्त करें
+
+<CardGroup cols={2}>
+  <Card title="Home Assistant Companion (iOS)" icon="apple" href="https://apps.apple.com/us/app/home-assistant/id1099568401">
+    iPhone और iPad के लिए आधिकारिक Home Assistant ऐप।
+  </Card>
+  <Card title="Home Assistant Companion (Android)" icon="android" href="https://play.google.com/store/apps/details?id=io.homeassistant.companion.android">
+    Android के लिए आधिकारिक Home Assistant ऐप।
+  </Card>
+</CardGroup>
+
+ऐप इंस्टॉल करें, मैन्युअल रूप से कनेक्ट करना चुनें, और जब वह पूछे कि कैसे कनेक्ट करना है तब अपना जनरेट किया गया Smart Home URL दर्ज करें। ऑनबोर्डिंग के दौरान बनाए ओनर खाते से साइन इन करें।

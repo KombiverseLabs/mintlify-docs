@@ -1,0 +1,90 @@
+---
+title: "配置 StackSpec"
+description: "更改已发布的 StackKits 意图，而不编辑生成的部署文件"
+sidebarTitle: "配置 StackSpec"
+icon: sliders
+---
+
+`stack-spec.yaml` 是一个 StackKits 工作区的期望意图文档。让已发布的 CLI 创建完整的文档，然后只修改你理解的那部分意图。
+
+```bash
+stackkit init basement-kit --owner-source=local
+stackkit validate
+```
+
+已发布的 CLI 会写出完整的原生 StackSpec，并在它之外建立本地所有者托管。请保留生成的 `apiVersion`：已安装版本的 CUE 契约会提供它的字段、默认值和约束。
+
+## 需要检查的常见字段
+
+| 意图 | 当前字段 | 指引 |
+| --- | --- | --- |
+| 工作区标识 | `metadata.name` | 保持与 DNS 兼容，并在首次应用之后保持稳定。 |
+| Kit | `kit.slug` | 家庭站点使用 `basement-kit`，已有的云主机使用 `cloud-kit`。 |
+| 生成的输出 | `generation.outputRoot` | 让生成的产物与 StackSpec 分开存放。 |
+| 持久化数据 | `storage.dataRoot` | 使用你运营并备份的存储上的绝对路径。 |
+| 备份 | `storage.backupRoot` | 与主数据根目录分开存放。 |
+| 栈数据 | `storage.stacksRoot` | 使用由本地运维人员拥有的绝对路径。 |
+| 本地域名 | `network.domain.base` | Basement Kit 版本的默认值是 `home.test`；请使用你能控制解析的域名。 |
+
+这只是节选，不能替代完整生成的文档：
+
+```json
+{
+  "metadata": { "name": "family-home" },
+  "kit": { "slug": "basement-kit" },
+  "generation": {
+    "outputRoot": "deploy",
+    "strategy": "kit-template",
+    "target": "compose"
+  },
+  "storage": {
+    "dataRoot": "/opt/stackkit/data",
+    "backupRoot": "/opt/stackkit/backups",
+    "stacksRoot": "/opt/stackkit/stacks",
+    "volumeDriver": "local"
+  },
+  "network": {
+    "mode": "private",
+    "domain": { "base": "home.test" }
+  }
+}
+```
+
+## 选择已发布的 Files 工作负载
+
+Basement 和 Cloud Kit 的契约把 `files` 作为可选工作负载，提供给[文档与文件](/zh-Hans/guides/stackkits/use-cases/documents-and-files)使用场景；[使用场景目录](/zh-Hans/stackkits/reference/use-case-catalog)列出了已发布版本声明的组件。这个选择已经用已发布的 CLI 验证并生成过：
+
+```json
+{
+  "workloads": {
+    "files": {
+      "alternative": "cloudreve",
+      "runtimeAdapterRef": "standalone-compose",
+      "placement": {
+        "siteRefs": ["home"],
+        "nodeRefs": ["main"]
+      }
+    }
+  }
+}
+```
+
+把 `workloads` 对象合并到 `init` 生成的完整 StackSpec 中。`home` 站点和 `main` 节点是已发布的 Basement 默认值；请使用你生成的文档中已有的标识符。
+
+自 v0.21.11 起，`placement` 块是可选的。未带 placement 而被选择的工作负载，会从内嵌的 CUE 契约获得受管控的空 placement 默认值，因此以编程方式编写 StackSpec 的作者不再需要 CLI 专用的样板代码。
+
+<Warning>
+  不要把这个选择照搬到照片或 Vault，并自己编造密钥值。这些工作负载需要绑定所有者的密钥托管。自 v0.21.11 起，选择这类工作负载之后、`generate` 之前，请运行 [`stackkit secrets materialize`](/zh-Hans/stackkits/reference/day-2-operations#向现有工作区添加工作负载)，明确建立该托管。
+</Warning>
+
+## 验证每一次更改
+
+```bash
+stackkit validate
+stackkit generate
+stackkit plan --json
+```
+
+`validate` 检查当前的 StackSpec，`generate` 创建受管控的输出，`plan` 在不调用执行器的情况下检查确切解析后的计划。如果任何命令失败，请修正 StackSpec；不要修补 `deploy/` 下的文件。
+
+继续阅读[审查、应用与验证](/zh-Hans/guides/stackkits/review-plan-and-apply)。

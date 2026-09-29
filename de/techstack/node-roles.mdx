@@ -1,0 +1,74 @@
+---
+title: "Node-Rollen und StackKit-Grundlage"
+description: "Was Foundation-, Worker- und Storage-Nodes tun und wann ein neuer Node ein eigenes StackKit startet"
+sidebarTitle: "Node-Rollen"
+icon: "sitemap"
+---
+
+Jeder Node, den du mit dem Assistenten hinzufügst, ist an ein StackKit gebunden
+und hat darin eine Rolle. Die Rolle sagt Techstack, wofür der Node gedacht ist.
+Die StackKit-Grundlage sagt ihm, welcher Kit-Definition der Node folgt.
+
+## Foundation-Node
+
+Der Foundation-Node ist der erste und wichtigste Node eines StackKits. Er
+betreibt den Kern dieses StackKits. Jedes StackKit hat genau einen
+Foundation-Node.
+
+Du erstellst einen Foundation-Node, wenn du dein erstes Homelab einrichtest
+oder beim Hinzufügen eines Nodes **New StackKit / main Node** wählst. Einem
+bestehenden StackKit kannst du keinen zweiten Foundation-Node hinzufügen; ein
+zweiter Haupt-Node startet immer ein neues StackKit.
+
+## Worker-Node
+
+Ein Worker-Node fügt einem bestehenden StackKit Rechenleistung hinzu. Das
+StackKit kann Dienste darauf platzieren. Wähle **Worker Node**, wenn du eine
+zweite Maschine hinzufügst, um die Last zu verteilen, zum Beispiel einen
+übrigen Mini-PC neben deinem ersten Server.
+
+Ein Worker-Node tritt dem StackKit bei, dem du ihn hinzufügst, und nutzt die
+Grundlage dieses StackKits.
+
+## Storage-Node
+
+Ein Storage-Node ist ein zusätzlicher Node für Dienste, die viel Speicherplatz
+brauchen, etwa Fotos, Dateien oder Medien. Wähle **Storage Node**, wenn die
+Stärke der Maschine vor allem ihre Festplatten sind.
+
+Wie ein Worker-Node tritt ein Storage-Node einem bestehenden StackKit bei und
+nutzt dessen Grundlage.
+
+## StackKit-Grundlage
+
+Eine StackKit-Grundlage ist die Kit-Definition, auf der ein StackKit aufbaut.
+Techstack bietet zwei:
+
+- **[Basement Kit](/de/stackkits/kits/basement-kit)** für lokale oder eigene
+  Hardware, etwa einen Server zu Hause oder einen VPS, den du selbst mietest.
+- **[Cloud Kit](/de/stackkits/kits/cloud-kit)** für einen VPS. Ein
+  [verwalteter Server](/de/techstack/managed-servers) nutzt Cloud Kit.
+
+Jeder Node ist an genau eine Grundlage gebunden. Wenn du nicht sicher bist,
+welches Kit passt, lies [Ein Kit auswählen](/de/guides/stackkits/choosing-a-kit).
+
+## Einem bestehenden StackKit beitreten
+
+Wähle **Worker or storage for this StackKit**, wenn der neue Node einem
+StackKit helfen soll, das du bereits betreibst. Der Node
+
+- übernimmt die Grundlage dieses StackKits; du wählst sie nicht noch einmal;
+- behält deinen bestehenden Zugriff, deine Personen und deine Anmeldung;
+- wird ein **Worker Node** oder ein **Storage Node**. Die Foundation-Rolle wird
+  hier nicht angeboten, weil das StackKit bereits seinen Haupt-Node hat.
+
+## Ein neues StackKit starten
+
+Wähle **New StackKit / main Node**, wenn die neue Maschine ein eigenes StackKit
+im selben Homelab betreiben soll. Der Node wird zum Foundation-Node dieses
+neuen StackKits, und du wählst dessen Grundlage.
+
+Ein häufiger Aufbau sind zwei StackKits in einem Homelab: ein Basement Kit auf
+Hardware zu Hause und ein Cloud Kit auf einem VPS. Jedes hat seinen eigenen
+Haupt-Node. Beide sind von überall über deine eigene Domain oder eine
+`*.kombify.me`-Adresse erreichbar; siehe [kombify.me](/de/kombify-me/overview).

@@ -1,0 +1,42 @@
+---
+title: "Basement Kit"
+description: "面向你所掌控硬件的已发布本地 StackKits 配置"
+sidebarTitle: "Basement Kit"
+icon: house
+---
+
+<Info>
+  证据状态（2026-09-17，v0.35.0）：Basement Kit 是当前公开版本所支持的一条命令路径。在公开的 v0.35.0 归档上，Basement Kit 在全新的 Ubuntu 24.04 和 Debian 13 虚拟机上，以及在家庭网络中的一台虚拟机上，通过了 install、init、generate、apply、verify、backup 和 restore；在家庭网络中，其本地服务地址也可以从该网络中的另一台机器访问。手机 passkey 和客户端证书信任仍待完成。Cloud Kit 是预览版，Modern Homelab 是 alpha 定义归档，不是安装目标；两者目前都还没有自动化的生命周期运行。
+</Info>
+
+Basement Kit 是当前公开 StackKits 版本所支持的本地配置。请把它用于你已经掌控的硬件上的 homelab，包含一个家庭站点和一个本地所有者。
+
+## 它提供什么
+
+最小可用的 Basement Kit 是一个家庭站点加一个本地节点。它带来：
+
+- 经 CUE 验证的 StackSpec 和本地 `stackkit` 生命周期
+- 由 PocketID 和 TinyAuth 提供的本地所有者托管
+- 通过 Traefik 路由
+- 位于生成的 `base.<domain>` 地址的 Node Hub
+- 带有绑定所有者的恢复的本地备份策略
+
+创作时的默认域名是 `home.test`。在把生成的路由视为可达之前，请确保客户端使用的是你所控制的 DNS 路径；StackKits 不会悄悄修改每一个客户端或路由器。
+
+基线保持独立运行。StackKits 网站帮助你选择并引导一条路径，但不会操作主机。
+
+## 完成基线
+
+1. 使用[快速开始](/zh-Hans/stackkits/quickstart)引导该 kit。
+2. 在 [Node Hub](/zh-Hans/guides/stackkits/node-hub) 中完成首次运行保护：创建本地 PocketID 所有者，并确认 TinyAuth 保护了预期的路由。
+3. 配置本地备份仓库并演练一次恢复。参见[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。
+
+请更改 StackSpec 并重新验证，而不要编辑生成的文件。
+
+## 添加用例
+
+只有在基线通过验证之后再添加工作负载。[文档与文件](/zh-Hans/guides/stackkits/use-cases/documents-and-files)是一个不错的首选用例，因为 Cloudreve 的独立选择不需要密钥引用。[用例](/zh-Hans/guides/stackkits/use-cases/overview)列出了所有已有文档的用例。
+
+## 何时使用其他 kit
+
+当单一环境是你已有的、带有你所运营域名的 VPS 或云主机时，请选择 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。StackKits 不会配置该主机。

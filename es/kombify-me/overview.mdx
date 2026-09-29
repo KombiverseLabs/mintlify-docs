@@ -1,0 +1,48 @@
+---
+title: "kombify.me"
+description: "Direcciones HTTPS públicas para servicios de homelab que ya son accesibles, más un relay privado opcional"
+sidebarTitle: "Resumen"
+icon: "globe"
+---
+
+kombify.me da a un servicio de homelab un nombre HTTPS estable en
+`*.kombify.me`. Es la vía opcional de ingress conectado: resulta útil cuando
+quieres una dirección pública y no se usa cuando el stack permanece en la red
+local.
+
+<Warning>
+kombify.me es software Alpha. Los nombres, las cabeceras y la forma de los
+errores todavía pueden cambiar. No lo consideres una versión de disponibilidad
+general.
+</Warning>
+
+## Qué puedes hacer
+
+- Abrir un servicio de un kit en un host `*.kombify.me` cuando el origen ya es
+  accesible desde internet.
+- Mantener los nombres de kit propios, como `auth`, en
+  `{your-lab}-auth.kombify.me`, nunca en un apex reservado como
+  `auth.kombify.me`.
+- Reenviar un destino HTTP(S) privado a través del agente de nodo de Techstack
+  cuando el origen no es público.
+
+kombify.me no sustituye a StackKits. Un kit local sigue instalándose,
+verificándose y funcionando sin una dirección de kombify.me.
+
+## Cómo encaja
+
+| Aspecto | Responsable |
+| --- | --- |
+| Definiciones de kits, ciclo de vida local y accesibilidad en la LAN | StackKits |
+| Orquestación y agente de nodo para destinos privados | Techstack |
+| Nombres HTTPS públicos, proxy y relay HTTP privado | kombify.me |
+| Inicio de sesión de las cuentas alojadas de kombify | `login.kombify.io` |
+
+<CardGroup cols={2}>
+  <Card title="Publicar un servicio público" icon="lock" href="/es/kombify-me/public-addresses">
+    Registra un nombre HTTPS para un servicio que ya es accesible.
+  </Card>
+  <Card title="Acceder a un servicio privado" icon="network-wired" href="/es/kombify-me/private-targets">
+    Usa el relay opcional cuando el origen permanece en tu red.
+  </Card>
+</CardGroup>

@@ -1,0 +1,92 @@
+---
+title: "تشغيل StackKit"
+description: "افحص مساحة عمل StackKits قيد التشغيل، ثم أضف حمل عمل أو أزله باستخدام CLI المنشور"
+sidebarTitle: "العمليات"
+icon: wrench
+---
+
+ابدأ العمل اليومي بأوامر القراءة فقط من CLI المنشور نفسه الذي أنشأ مساحة العمل:
+
+```bash
+stackkit verify --json
+stackkit drift detect --json
+stackkit logs list --json
+```
+
+احتفظ بمخرجاتها مع مساحة العمل لتتمكن من مقارنة الحالة المرصودة الحالية بآخر تطبيق ناجح.
+
+<span id="monitor-the-stack"></span>
+## مراقبة الحزمة
+
+فحوص دورة الحياة هذه هي الطريقة المدعومة لتقييم الحزمة نفسها. تحتفظ StackKits بأدلة الرصد والتحقق محليًا ولا تحتاج إلى خدمة مراقبة مستضافة.
+
+وحدة [Uptime Kuma](/ar/stackkits/apps/uptime-kuma) المنشورة لا يختارها StackSpec الأصلي الأولي v2، لذا لا يملك Basement أو Cloud Kit جديد عنوان مراقبة مولَّدًا. إذا شغّلت مراقبًا منفصلًا، فأضف فحوصًا فقط للمسارات المصرّح لك بمراقبتها. تحتاج المسارات المحمية إلى نقطة فحص صحة مقصودة أو استجابة مصادقة متوقعة؛ وإضعاف حماية المسار للحصول على HTTP 200 ليس إعداد مراقبة صالحًا.
+
+## قبل التغيير
+
+1. حدّث StackSpec، لا الملفات المولَّدة.
+2. شغّل `stackkit validate` و`stackkit generate`.
+3. افحص `stackkit plan --json` وتوقف عند أي عائق جاهزية.
+4. راجع المخرجات واحصل على موافقة المالك المحلي قبل أي أمر يغيّر الحالة.
+5. شغّل `stackkit verify --http --json` بعد التغيير.
+
+<span id="add-a-workload-to-an-existing-workspace"></span>
+## إضافة حمل عمل إلى مساحة عمل قائمة
+
+لا يتطلب اختيار حمل عمل جديد إعادة تشغيل `stackkit init` ولا استبدال StackSpec الأولي. حرّر كتلة `workloads` في StackSpec القائم، ثم أنشئ حفظ الأسرار قبل إعادة التوليد:
+
+```bash
+stackkit validate
+stackkit secrets materialize
+stackkit generate
+stackkit apply
+```
+
+أضافت StackKits v0.21.11 الأمر `stackkit secrets materialize` كخطوة صريحة بين اختيار حمل العمل وتشغيل `generate`. أنشئ الحفظ، ثم ولّد وطبّق؛ ولا تخترع قيم أسرار.
+
+## إزالة حمل عمل مطبَّق
+
+يزيل `stackkit remove` حمل عمل مطبَّقًا واحدًا محددًا بموافقة المالك المحلي:
+
+```bash
+stackkit remove --workload photos
+stackkit remove --workload photos --auto-approve --json
+```
+
+يتحقق CLI من الخطة الحالية والتوليد ونتيجة التطبيق وسلطة المالك، ثم يرسل طلب إزالة موقَّعًا من المالك يبقى صالحًا خمس دقائق عبر قناة تنفيذ Standard المثبّتة بالبصمة (digest). يتطلب النجاح قراءة راجعة `absent` للمتطلب المحدد والنسخة والبصمة المحددة للملف المطبَّق. تُحفظ الطلبات والنتائج والأدلة النهائية المحدودة تحت `.stackkit/evidence/removal/`.
+
+### استهداف توزيع واحد في نتيجة متعددة العقد
+
+يعرض ملخص التطبيق الذي جرى التحقق منه `planHash` و`appliedRequestDigest` وقائمة `appliedWorkloads` الخالية من الأسرار. كل مدخل هو هوية حتمية مرتبطة بالتجزئة (hash) تربط حمل العمل ومالك وقت التشغيل والتوزيعات وقناة التنفيذ وبصمات الملفات المشار إليها. استخدمها لتحديد ما ينبغي أن تستهدفه إزالة لاحقة؛ فهي ليست تفويضًا بالإزالة ولا دليلًا على الغياب بمفردها.
+
+منذ v0.21.12، عندما تضع نتيجة التطبيق حمل عمل على أكثر من موقع أو عقدة، سمِّ التوزيع الواحد المحدد الذي تملكه هذه الإزالة. خذ القيم من مدخل `appliedWorkloads`:
+
+```bash
+stackkit remove --workload photos \
+  --local-site <site-ref> \
+  --local-node <node-ref> \
+  --local-execution-channel <channel-ref>
+```
+
+يجب أن يطابق التوزيع المسمّى مدخلًا واحدًا بالضبط في نتيجة التطبيق التي جرى التحقق منها. يبقى كل إيصال غياب على مستوى العقدة مرتبطًا بالتطبيق الأصلي نفسه عبر `appliedRequestDigest` المشترك.
+
+أضف `--terminal-evidence-json` عندما تحتاج إلى سجل إزالة مقروء آليًا على stdout.
+
+## سير العمل الشائعة
+
+<CardGroup cols={2}>
+  <Card title="تغيير نية StackSpec" icon="sliders" href="/ar/guides/stackkits/configure-stack-spec">
+    حرّر النية المنشورة وأعد توليد المخرجات المحكومة.
+  </Card>
+  <Card title="النسخ الاحتياطي والاستعادة" icon="clock-rotate-left" href="/ar/guides/stackkits/back-up-and-restore">
+    أنشئ لقطة idempotent وتمرّن على استرداد مرحلي.
+  </Card>
+</CardGroup>
+
+تُصدَّر واجهة الأوامر الدقيقة مع الإصدار. استخدم `stackkit --help` ومساعدة الأمر المحدد للإصدار المثبَّت قبل تنفيذ نسخ احتياطي أو استعادة أو ترقية أو إزالة.
+
+<Warning>
+  لا توفّر StackKits سير عمل عمليات مستضافة دون إشراف في Standard Mode. تعامل مع كل أمر يغيّر الحالة بوصفه عملية محلية على مضيف تتحكم فيه.
+</Warning>
+
+لسير عمل متصل بوكيل، راجع [موصّل MCP](/ar/stackkits/reference/mcp-connector).

@@ -1,0 +1,45 @@
+---
+title: "在 Windows 上安装 Techstack Alpha"
+description: "下载未签名的 Techstack Windows Alpha 并连接本地服务器"
+sidebarTitle: "安装 Windows Alpha"
+icon: "windows"
+---
+
+Techstack Alpha 是一个早期的、本地优先的 Windows 客户端，用于运维你家庭网络中的服务器。它无需托管的 kombify 账号即可运行。服务器上的 StackKits 仍会引导创建其所需的本地 Owner/Admin 身份。
+
+<Warning>
+这是面向真实用户反馈的未签名 Alpha 版本，不代表稳定版或已达到生产就绪。Windows 可能会显示 SmartScreen 警告。在决定是否继续之前，请先验证 GitHub 发布来源和校验和。
+</Warning>
+
+## 下载
+
+<CardGroup cols={2}>
+  <Card title="下载 Windows Alpha (.exe)" icon="download" href="https://github.com/kombifyio/TechStack/releases/latest/download/kombify-Techstack-Setup.exe">
+    直接从官方开源发布页下载当前未签名的 `kombify-Techstack-Setup.exe`。
+  </Card>
+  <Card title="开源仓库" icon="github" href="https://github.com/kombifyio/TechStack">
+    查看公开源码、发布说明、校验和、MSI 以及便携版 ZIP。
+  </Card>
+</CardGroup>
+
+在打开安装程序之前，请将安装程序的哈希值与 [`SHA256SUMS.txt`](https://github.com/kombifyio/TechStack/releases/latest/download/SHA256SUMS.txt) 进行比对，并阅读 [`UNSIGNED-WINDOWS-RELEASE.txt`](https://github.com/kombifyio/TechStack/releases/latest/download/UNSIGNED-WINDOWS-RELEASE.txt) 说明。
+
+## 在本地使用 Techstack
+
+1. 启动 Techstack 并选择 **Use locally**。此模式不需要托管的 kombify 账号。
+2. 对于全新的 Ubuntu 服务器，选择 **Give me a one-liner**，选择 **Basement Kit**，并填写本地 Owner/Admin 引导字段。
+3. 复制生成的配对命令，并在 Ubuntu 服务器上运行一次。在服务器下载其代理并发送第一次 Guard 心跳期间，请保持 Windows 客户端运行，并在本地子网内可达。
+4. 等待 Techstack 将服务器从 **Not connected yet** 更改为已连接状态，然后继续进行 StackKit 部署。
+5. 对于已经运行 Basement Kit 的服务器，请改为选择 **Connect my server**，并输入其本地 SSH 信息。
+
+<Note>
+Windows Alpha 捆绑了固定版本的 Basement Kit 目录、其 Windows 验证器和 Linux 部署载荷；发布说明中会写明每个构建所携带的确切 StackKits 版本。安装程序还会为 TCP `5264` 创建一条仅限本地子网的 Windows 防火墙例外，这样即使 Windows 将家庭网络归类为公用网络，生成的命令也能访问客户端。
+</Note>
+
+<Note>
+云同步和联网运行需要稍后另行创建账号。它们不是本地 Alpha 路径的前提条件。
+</Note>
+
+<Card title="直接安装 Basement Kit" icon="terminal" href="/zh-Hans/stackkits/quickstart">
+  当你想独立准备服务器，并在之后通过 **Connect my server** 接入时，请使用独立的 StackKits 单行命令。
+</Card>

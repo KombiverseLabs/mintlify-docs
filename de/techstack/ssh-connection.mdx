@@ -1,0 +1,87 @@
+---
+title: "Einen Server über SSH verbinden"
+description: "Lass Techstack sich per SSH an deinem Server anmelden und ihn für dich verbinden"
+sidebarTitle: "Über SSH verbinden"
+icon: "key"
+---
+
+Wähle im Assistenten Add Node **Connect my device**, wenn dein Server bereits
+SSH-Anmeldungen akzeptiert und du keinen Befehl selbst einfügen möchtest.
+Techstack meldet sich mit den unten genannten Angaben an, führt dasselbe Setup
+aus wie der [Pairing-Befehl](/de/techstack/pairing-command) und wartet, bis
+sich der Guard des Servers registriert.
+
+## Host oder IP-Adresse
+
+Gib die Adresse, unter der Techstack den Server erreicht, in **Node host or IP**
+ein, zum Beispiel `192.168.1.20` oder `server.example.com`.
+
+Die Adresse muss von dort erreichbar sein, wo Techstack läuft. Eine
+Heimadresse wie `192.168.1.20` funktioniert, wenn Techstack im selben Netzwerk
+läuft, zum Beispiel die [Windows Alpha](/de/techstack/install-windows) auf
+einem Computer zu Hause. Erreicht Techstack den Server so nicht, nutze
+stattdessen den [Pairing-Befehl](/de/techstack/pairing-command): Der Server
+verbindet sich dann von sich aus nach außen.
+
+## SSH-Schlüssel oder Passwort
+
+Wähle unter **Authentication**, wie Techstack sich anmeldet:
+
+- **SSH key.** Techstack nutzt einen privaten Schlüssel, den du in deiner
+  Wallet gespeichert hast.
+- **Password.** Techstack nutzt das SSH-Passwort des Benutzers, den du
+  eingibst.
+
+Wenn du ein Passwort wählst, hält der Assistent es nur im Arbeitsspeicher des
+Browsers, während du zur nächsten Seite wechselst. Es wird nicht im
+Session-Speicher des Browsers abgelegt; lädst du die Seite also neu, bevor das
+Setup startet, gib das Passwort erneut ein. Techstack speichert das Passwort
+dann verschlüsselt in deiner Wallet für dieses StackKit, damit es das Setup
+wiederholen kann. Es wird weder im Klartext in der StackKit-Konfiguration noch
+in Job-Berichten gespeichert.
+
+## SSH-Schlüsselbezeichnung
+
+Gib bei **SSH key** die **SSH key label** ein: den Namen eines SSH-Schlüssels,
+der in deiner Wallet gespeichert ist. Techstack sucht den Wallet-Eintrag mit
+diesem Namen (Groß- und Kleinschreibung spielen keine Rolle) und nutzt dessen
+privaten Schlüssel. Den privaten Schlüssel fügst du nie in den Assistenten ein.
+
+Hat kein SSH-Schlüssel in deiner Wallet diesen Namen, brechen der
+Verbindungstest und das Setup mit einem Fehler ab. Speichere den Schlüssel
+zuerst in deiner Wallet und gib dann hier seinen Namen ein. Die öffentliche
+Hälfte des Schlüssels muss in der Datei `~/.ssh/authorized_keys` des
+Server-Benutzers stehen, wie bei jeder SSH-Anmeldung.
+
+## SSH-Benutzer, Port und sudo
+
+Öffne **SSH details**, um die Vorgaben zu ändern:
+
+- **SSH user.** Das Konto, mit dem Techstack sich anmeldet. Vorgabe ist `root`.
+- **SSH port.** Vorgabe ist `22`. Ändere ihn nur, wenn der SSH-Dienst deines
+  Servers auf einem anderen Port lauscht.
+- **Use sudo for setup commands.** Aktiviere das, wenn der SSH-Benutzer nicht
+  `root` ist. Techstack führt das Setup dann mit `sudo` aus. Es versucht
+  zuerst `sudo` ohne Passwortabfrage, das Setup ist also am zuverlässigsten,
+  wenn dieser Benutzer `sudo` ohne Passworteingabe ausführen darf. Das Setup
+  bricht ab, wenn der Benutzer gar kein `sudo` hat.
+
+## Verbindung testen
+
+Wähle **Test connection**, bevor du fortfährst. Techstack versucht, sich mit
+der Adresse, dem Benutzer, dem Port und dem Schlüssel oder Passwort
+anzumelden, die du eingegeben hast, und zeigt **SSH connection successful**
+oder den erhaltenen Fehler. Der Test meldet sich nur an. Er ändert nichts auf
+dem Server.
+
+Änderst du nach einem Test ein Feld, wird das Ergebnis gelöscht. Teste erneut,
+bevor du fortfährst.
+
+Häufige Gründe für einen fehlgeschlagenen Test:
+
+- Der Host oder die IP ist falsch oder von dort, wo Techstack läuft, nicht
+  erreichbar;
+- der SSH-Port weicht von `22` ab;
+- die Schlüsselbezeichnung passt zu keinem SSH-Schlüssel in deiner Wallet;
+- der Server akzeptiert diesen Schlüssel oder dieses Passwort für diesen
+  Benutzer nicht.

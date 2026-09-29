@@ -1,0 +1,58 @@
+---
+title: "Revisar, aplicar y verificar"
+description: "Inspecciona la intención generada de StackKits antes de modificar un host"
+sidebarTitle: "Aplicar con seguridad"
+icon: clipboard-check
+---
+
+Usa el mismo workspace y la misma CLI publicada desde la configuración hasta la verificación. Los archivos generados son salidas que contienen evidencia; el StackSpec sigue siendo la entrada editable.
+
+## 1. Valida y genera
+
+```bash
+stackkit validate
+stackkit generate
+```
+
+La generación escribe el plan resuelto, el manifiesto de generación, el recibo y los artefactos gobernados bajo la raíz de salida configurada.
+
+## 2. Inspecciona el plan
+
+```bash
+stackkit plan --json
+```
+
+Antes de aplicar, confirma que:
+
+- los hashes del plan y de la especificación están presentes
+- `readiness.generation.status` es `ready`
+- `readiness.apply.status` es `ready`
+- los workloads, los sitios, los nodos y el adaptador seleccionados coinciden con tu intención
+- cada artefacto generado tiene un responsable y una ruta esperada
+
+`plan` inspecciona el cierre v2 nativo sin invocar a un ejecutor. Un plan listo es necesario, pero no es prueba de que un host ya haya cambiado.
+
+## 3. Aplica de forma explícita
+
+```bash
+stackkit apply
+```
+
+Revisa la solicitud de aprobación local. `apply` es el paso que modifica el host.
+El instalador de la cadena de herramientas te deja ese paso a ti; el arranque de Basement en
+`base.stackkit.cc` ya realiza la aplicación inicial. Tras ese arranque,
+vuelve a aplicar solo para un cambio de configuración intencionado.
+
+## 4. Verifica el resultado
+
+```bash
+stackkit verify --http --json
+stackkit drift detect --json
+stackkit logs list --json
+```
+
+Conserva la salida JSON junto con el workspace. Vincula el resultado observado al ciclo de vida local en lugar de a una captura de pantalla o a un archivo Compose editado.
+
+<Warning>
+  Detente cuando el plan resuelto indique un bloqueo de aplicación. No lo eludas con ediciones directas de Docker, de Compose o de los archivos generados; corrige el StackSpec o el host de destino y vuelve a generar.
+</Warning>

@@ -1,0 +1,72 @@
+---
+title: "stackkit game"
+description: "Opera los servidores de juegos del propietario en el workload Game instalado"
+sidebarTitle: "game"
+---
+Opera los servidores de juegos del propietario en el workload Game instalado.
+
+Lista los servidores de juegos y ejecuta las operaciones rutinarias del propietario (encendido, lista de permitidos) a través del Pterodactyl Panel del workload Game aplicado. Crear un servidor es `stackkit setup game`.
+
+```bash
+stackkit game [flags]
+```
+
+Subcomandos: [`stackkit game allow`](#stackkit-game-allow), [`stackkit game list`](#stackkit-game-list), [`stackkit game power`](#stackkit-game-power)
+
+## stackkit game allow
+
+Admite a un jugador en un servidor de juegos con lista de permitidos de StackKits.
+
+```bash
+stackkit game allow <server> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+| `--owner-approve` | bool | — | Autoriza el cambio de la lista de permitidos con la custodia local establecida del Owner |
+| `--player` | string | — | **Obligatorio.** Nombre exacto de la cuenta de juego (nombre de cuenta de Minecraft o gamertag de Xbox) |
+
+**Ejemplos**
+
+```bash
+stackkit game allow 92c66407 --player Notch --owner-approve
+```
+
+## stackkit game list
+
+Lista los servidores de juegos del propietario con su estado y puerto.
+
+```bash
+stackkit game list [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+**Ejemplos**
+
+```bash
+stackkit game list --json
+```
+
+## stackkit game power
+
+Inicia, detiene o reinicia un servidor de juegos y espera el resultado.
+
+```bash
+stackkit game power <server> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+| `--owner-approve` | bool | — | Autoriza el cambio de encendido con la custodia local establecida del Owner |
+| `--signal` | string | — | **Obligatorio.** Señal de encendido: start, stop o restart |
+
+**Ejemplos**
+
+```bash
+stackkit game power 92c66407 --signal restart --owner-approve
+```

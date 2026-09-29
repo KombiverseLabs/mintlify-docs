@@ -1,0 +1,91 @@
+---
+title: "Mit SpeechKit entwickeln"
+description: "Bette den Go-Voice-Kernel ein oder nutze die Server-, Android- und Browser-Ziele"
+sidebarTitle: "Framework"
+icon: "code"
+---
+
+Das öffentliche SpeechKit-Modul enthält den plattformneutralen Voice-Kernel. Nutze es,
+wenn deine Anwendung ihren eigenen Prozess, ihre Konfiguration und ihre Provider-Zugangsdaten
+selbst verantworten soll, statt von einem separaten SpeechKit-Server abzuhängen.
+
+{/* speechkit-release:begin */}
+Das aktuelle öffentliche Release ist [v0.72.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.1), veröffentlicht am 2026-09-20.
+{/* speechkit-release:end */}
+
+## Voraussetzungen
+
+- Go 1.26 oder neuer
+- eine Anwendung, die die gewählte Mikrofon-, Audio- oder Texteingabe bereitstellen kann
+- Provider-Zugangsdaten nur, wenn du einen externen Provider wählst
+
+## Das Modul hinzufügen
+
+```bash
+go get github.com/kombifyio/SpeechKit@latest
+```
+
+`@latest` löst auf das neueste veröffentlichte Release auf. Notiere die exakte Version,
+die dein Build aufgelöst hat, und pinne sie vor der Auslieferung: Dies ist Beta-Software,
+und öffentliche APIs, Konfigurationsschlüssel und Standardwerte können sich zwischen
+Minor-Releases ändern.
+
+Importiere nur die Pakete, die dein Host braucht: `pkg/speechkit/dictation` für
+Diktat, `pkg/speechkit/wakeword` für die Aktivierung, `pkg/speechkit/tts` für
+gesprochene Ausgabe, `pkg/speechkit/companion` plus Assist- und Text-to-Speech-
+Adapter für One-Shot-Hosts, `pkg/speechkit/speaker` für sprechererkennende Apps,
+`pkg/speechkit/meeting` für Aufnahmesitzungen und `pkg/speechkit/client` für
+serverangebundene Apps. Das Root-Paket `speechkit` enthält nur Verträge und Werttypen.
+
+Wenn du das Framework aus einer `config.toml` steuern willst, statt Einstellungen
+von Hand aufzubauen, macht `pkg/speechkit/hostconfig` aus einer Konfigurationsdatei
+in einem Aufruf die öffentlichen Modus-Einstellungen und eine Start-Runtime-Policy:
+
+```go
+settings, policy, err := hostconfig.Load("config.toml")
+```
+
+Eine fehlende Datei liefert die ausgelieferten Standardwerte — nur lokal, keine Cloud-Schlüssel. Der
+Desktop-Client delegiert an denselben Loader, sodass ein Embedder und die Referenz-App
+eine `config.toml` identisch lesen.
+
+Einige Pakete brauchen cgo (Windows-Audioaufnahme, das ONNX-Wake-Word) oder eine
+externe Binärdatei (`whisper-server`). Jedes schlägt mit einem Sentinel-Fehler
+geschlossen fehl, wenn seine Abhängigkeit fehlt, statt so zu tun, als würde es funktionieren.
+
+## Weitere Ziele
+
+<CardGroup cols={2}>
+  <Card title="Selbst gehosteter Server" icon="server" href="https://github.com/kombifyio/SpeechKit/blob/main/docs/server/README.md">
+    Ein Linux-HTTP- und WebSocket-Dienst über demselben Kernel, gebaut aus dem öffentlichen
+    Quellcode. Er stellt Dictation, Assist und Voice Agent unter einer URL bereit.
+  </Card>
+  <Card title="Agent-Tools" icon="robot" href="https://github.com/kombifyio/SpeechKit/blob/main/docs/mcp/README.md">
+    Mit `speechkit-mcp` und `speechkit-cli` können ein Agent oder Operator das
+    Framework inspizieren, Starter scaffolden, Payloads validieren und einen Server betreiben.
+  </Card>
+  <Card title="Android-Module" icon="android" href="https://github.com/kombifyio/SpeechKit/blob/main/android/README.md">
+    Apache-2.0-Gradle-Module für Server-Auflösung, Aufnahme und Turn-Taking,
+    das Wire-Protokoll und eine Compose-Voice-UI, plus eine Referenz-App im Repository.
+  </Card>
+  <Card title="Browser-Clients" icon="js" href="https://github.com/kombifyio/SpeechKit/tree/main/clients/typescript">
+    TypeScript-Pakete für die Server-REST-API, das Voice-Agent-WebSocket-
+    Protokoll und ein frameworkneutrales Voice-UI-Kit, als Quellcode im
+    Repository veröffentlicht.
+  </Card>
+</CardGroup>
+
+## Weiter mit der öffentlichen Dokumentation
+
+- [SDK in 10 Minuten](https://github.com/kombifyio/SpeechKit/blob/main/docs/sdk/README.md)
+- [Framework-API](https://github.com/kombifyio/SpeechKit/blob/main/docs/speechkit-framework-api.md)
+- [Einen eigenen Provider hinzufügen](https://github.com/kombifyio/SpeechKit/blob/main/docs/sdk/custom-provider.md)
+- [Words and Replacements](https://github.com/kombifyio/SpeechKit/blob/main/docs/words-and-replacements-standard.md)
+- [Grenze der SDK-Oberfläche](https://github.com/kombifyio/SpeechKit/blob/main/docs/architecture/sdk-surface-boundary.md)
+- [Lauffähige Beispiele](https://github.com/kombifyio/SpeechKit/tree/main/examples)
+
+<Note>
+Diese Links folgen dem Standard-Branch des öffentlichen Repositorys, sodass sie gültig
+bleiben, während sich das Projekt weiterentwickelt. Pinne einen Tag in der URL, wenn du
+die Dokumentation brauchst, die zu genau einem Release passt.
+</Note>

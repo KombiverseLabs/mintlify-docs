@@ -1,0 +1,84 @@
+---
+title: "البدء السريع مع StackKits"
+description: "هيّئ Basement Kit منشورًا وافحصه وطبّقه صراحةً"
+sidebarTitle: "البدء السريع"
+icon: rocket
+---
+
+يثبّت هذا الدليل السريع إصدار StackKits العام الحالي مع Basement
+Kit على خادم تديره بالفعل. راجع [توافق أنظمة التشغيل](/ar/stackkits/reference/os-compatibility)
+لمعرفة تركيبة الإصدار والمضيف التي لها أدلة دورة حياة منشورة قبل
+أن تبدأ. يبقى CLI هو مرجع التنفيذ المحلي.
+
+## تهيئة Basement Kit
+
+على خادم مدعوم، ينشئ مثبّت Basement المجلد `~/my-homelab`،
+ويثبّت الملفات المنشورة ووقت التشغيل المطلوب، ويهيّئ حفظ المالك المحلي،
+ويجهّز وصول Admin/PocketID المحلي، ويتحقق من StackSpec المولَّد،
+ويطبّق خدمات Basement الافتراضية:
+
+```bash
+curl -sSL https://base.stackkit.cc | sh
+cd ~/my-homelab
+stackkit version
+stackkit logs latest --json
+cat .stackkit/access.json
+```
+
+<Warning>
+  لا حاجة إلى حساب kombify مستضاف. لكن StackKits نفسها لا تزال تتطلب
+  Owner/Admin محليًا، وتنشئه هذه التهيئة تلقائيًا. أبقِ تفاصيل الوصول
+  المولَّدة خاصة.
+</Warning>
+
+هل تحتاج إلى مثبّت مختلف؟ استخدم [اختيار طقم](/ar/guides/stackkits/choosing-a-kit)
+لمسار أدوات البناء فقط، أو [Cloud Kit](/ar/stackkits/kits/cloud-kit) لخادم VPS
+تديره بالفعل، أو [شرح CLI خطوة بخطوة](/ar/guides/stackkits/cli-walkthrough)
+لخطوات الإعداد والمراجعة والتطبيق والتحقق المنفصلة.
+
+## مراجعة النية المولَّدة أو تغييرها
+
+افحص `stack-spec.yaml` قبل توليد المخرجات. راجع على وجه الخصوص
+جذور التخزين المطلقة، والنطاق المحلي (يستخدم مثبّت Basement القيمة `home`،
+لذا تُحلّ الخدمات على `*.home` بعد تسجيل الأجهزة)، وهويات الموقع والعقدة،
+واختيار أحمال العمل الاختيارية الفارغ.
+
+StackSpec هو مدخل الإعدادات. ويبقى CUE مرجع التحقق
+والملفات المولَّدة مخرجات، لا ملفات تُحرَّر يدويًا. راجع
+[إعداد StackSpec](/ar/guides/stackkits/configure-stack-spec) للاطلاع على الأمثلة الحالية.
+
+## توليد خطة معدّلة وفحصها
+
+```bash
+stackkit generate
+stackkit plan --json
+```
+
+تأكد من أن جاهزية التوليد وجاهزية التطبيق كلتيهما `ready`، ثم راجع
+أحمال العمل المختارة ومسارات الملفات المولَّدة.
+
+## تطبيق تغيير مقصود
+
+```bash
+stackkit apply
+stackkit logs latest --json
+cat .stackkit/access.json
+```
+
+ينفّذ أمر Basement ذو السطر الواحد التطبيق الأولي بالفعل. شغّل أوامر دورة
+الحياة هذه فقط بعد أن تغيّر `stack-spec.yaml` عمدًا. احتفظ بالسجلات
+المحلية وسجل الوصول مع مساحة العمل.
+
+## المتابعة
+
+<CardGroup cols={3}>
+  <Card title="Basement Kit" icon="house" href="/ar/stackkits/kits/basement-kit">
+    تعرّف على الطقم المحلي ذي البيئة الواحدة.
+  </Card>
+  <Card title="Cloud Kit" icon="cloud" href="/ar/stackkits/kits/cloud-kit">
+    استخدم دورة الحياة المستقلة نفسها على VPS تديره.
+  </Card>
+  <Card title="طبّق بأمان" icon="clipboard-check" href="/ar/guides/stackkits/review-plan-and-apply">
+    راجع الجاهزية والملفات المولَّدة قبل تغيير المضيف.
+  </Card>
+</CardGroup>

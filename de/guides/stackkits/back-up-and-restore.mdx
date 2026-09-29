@@ -1,0 +1,102 @@
+---
+title: "Ein Basement Kit sichern und wiederherstellen"
+description: "Erstelle Owner-gebundene Kopia-Snapshots und stage eine Wiederherstellung vor der Live-Aktivierung"
+sidebarTitle: "Sichern und wiederherstellen"
+icon: clock-rotate-left
+---
+
+<Info>
+  Nachweisstand (2026-09-17, v0.35.0): Der Backup-und-Restore-Zyklus des
+  Basement Kit hat auf frischen virtuellen Maschinen mit Ubuntu 24.04 und
+  Debian 13 unter v0.35.0 bestanden. Für [Dokumente & Dateien](/de/guides/stackkits/use-cases/documents-and-files) (Cloudreve)
+  stimmen die wiederhergestellten Bytes mit dem Original überein, die
+  Aktivierung wurde abgeschlossen, und das Auslesen der Anwendung wurde über das
+  Loopback des Gasts verifiziert. Für [Passwörter](/de/guides/stackkits/use-cases/passwords) (Vaultwarden) haben Backup,
+  isolierte Wiederherstellung und Restore-Aktivierung auf Ubuntu 24.04 amd64
+  unter v0.35.0 bestanden. Für [Fotos](/de/guides/stackkits/use-cases/photos) (Immich) wurden sie
+  zuletzt unter v0.33.3 verifiziert. Für Passwörter und Fotos steht das Auslesen
+  auf Anwendungsebene nach der Wiederherstellung noch aus. Restore-Nachweise auf
+  einem veröffentlichten Archiv stehen für Medien (Jellyfin) und Smart Home
+  (Home Assistant) noch aus. Persönliche KI, Entwicklung (Gitea) und Dokumente
+  (Paperless-ngx) sind experimentell und haben keine Laufzeitnachweise.
+</Info>
+
+Das veröffentlichte Basement Kit enthält einen lokalen, vom Owner kontrollierten Kopia-Backup-Lifecycle. Führe ihn nur aus dem angewendeten StackKits-Workspace aus, dessen Daten du schützen willst.
+
+Mach die Restore-Übung zum Teil des Setups, nicht zu einer späteren Aufgabe.
+
+## Recovery üben, bevor du wichtige Daten importierst
+
+1. Wende das Basement Kit an und verifiziere es.
+2. Bestätige, dass die primären Daten- und Backup-Wurzeln getrennt sind.
+3. Konfiguriere das Repository und erstelle mit den folgenden Befehlen einen Snapshot.
+4. Stelle diesen Snapshot in einem isolierten Staging wieder her und prüfe das Ergebnis.
+5. Verifiziere die Dienste nach jeder Aktivierung erneut. Die Verifikation nach der Wiederherstellung ist genauso wichtig wie der Snapshot.
+
+Wiederhole die Übung nach wesentlichen Änderungen an Speicher, Workloads oder Release.
+
+## Das Repository konfigurieren und prüfen
+
+```bash
+stackkit backup configure --json
+stackkit backup status --json
+```
+
+Repository, Quellmenge, Ausschlüsse und lokale Verwahrung werden aus dem aufgelösten Plan abgeleitet. Richte den Befehl nicht auf ein beliebiges Volume und umgehe die Verwahrung durch den Owner nicht.
+
+### Was ein Snapshot abdeckt
+
+Die `backupPolicy.coverage` des Plans wählt aus, welche Datenklassen der Snapshot erfasst. Es gibt drei verschachtelte Gruppen, und ein Stack ohne Subscription dahinter wird zu `content` aufgelöst:
+
+| Abdeckung | Was sie auswählt |
+| --- | --- |
+| `config` | Stack-Konfiguration, Secret-Material, Plattformzustand, Serverless-Konfiguration |
+| `content` | Das Obige plus Datenbanken, Nutzerinhalte, Dokumente und Telemetrie-Zeitreihen |
+| `media` | Das Obige plus Foto-Originale und große Medien |
+
+Media wird gewählt, nie geerbt. Foto- und Videobibliotheken dominieren ein Repository, daher zieht ein erster Seed nicht unbemerkt eine hinein: Wähle `media`, wenn du sie willst.
+
+Die obige Status-Ausgabe nennt die genauen Volumes und Ausschlüsse, die die angewendete Konfiguration gewählt hat. Das beantwortet die Frage „Was enthält der nächste Snapshot?“. Die Abdeckungsgruppe ist das, was der Plan angefordert hat; die Status-Ausgabe zeigt, wozu eine angewendete Konfiguration aufgelöst wurde.
+
+## Einen idempotenten Snapshot erstellen
+
+```bash
+stackkit backup run --operation-id before-upgrade-2026-08-11 --json
+```
+
+Speichere den zurückgegebenen inhaltsadressierten Snapshot-Anker zusammen mit deinen Verifikationsnachweisen. Wird dieselbe Operation-ID erneut verwendet, gibt der Befehl die vorhandene Operation zurück, statt versehentlich ein Duplikat zu erzeugen.
+
+## In isoliertes Staging wiederherstellen
+
+```bash
+stackkit backup restore sha256:<snapshot-anchor-id> \
+  --owner-approve \
+  --operation-id restore-check-2026-08-11 \
+  --json
+```
+
+Das verifiziert den Snapshot und entpackt ihn in das von CUE verwaltete Staging. Live-Daten werden nicht ersetzt. Prüfe die zurückgegebene Restore-Result-ID, bevor du fortfährst.
+
+## Die verifizierte Wiederherstellung aktivieren
+
+```bash
+stackkit backup restore activate sha256:<restore-result-id> \
+  --owner-approve \
+  --operation-id restore-activation-2026-08-11 \
+  --json
+```
+
+Die Aktivierung erstellt den erforderlichen Sicherheits-Snapshot, schaltet die exakte, vom Plan verwaltete Volume-Menge um, startet die Laufzeit neu und verifiziert die Owner-Bindung und die Dienste.
+
+Wird die Aktivierung unterbrochen, stelle genau diese Operation ausdrücklich wieder her:
+
+```bash
+stackkit backup restore recover restore-activation-2026-08-11 \
+  --owner-approve \
+  --rollback \
+  --json
+```
+
+<Warning>
+  Ein erfolgreiches Backup ist kein Recovery-Beweis. Übe die gestagte Wiederherstellung mit unkritischen Daten, bevor du dich für unersetzliche Dateien auf den Stack verlässt.
+</Warning>

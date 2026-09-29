@@ -1,0 +1,53 @@
+---
+title: "stackkit module"
+description: "تأليف وحدات CUE المحلية والتحقق منها"
+sidebarTitle: "module"
+---
+تأليف وحدات CUE المحلية والتحقق منها.
+
+حوّل حقائق الوحدة إلى عقود CUE وتحقق من إعداد نشرها.
+
+```bash
+stackkit module [flags]
+```
+
+الأوامر الفرعية: [`stackkit module lint`](#stackkit-module-lint), [`stackkit module scaffold`](#stackkit-module-scaffold)
+
+## stackkit module lint
+
+افحص CUE الخاص بالوحدة للتأكد من سلامة التثبيت/الصحة/الأمان/الوصول/التوزيع (ADR-0027 G1/G3).
+
+شغّل بوابة سلامة الوحدات الحتمية على وحدة واحدة (`--module`) أو على الشجرة كلها (`--all`). الفحوصات: وسوم الصور مثبَّتة (دون :latest)، وجود healthCheck للخدمة الخلفية (تستخدم مهام الأتمتة المحدودة restart=no مع حالة خروج العملية)، كتلة الأمان (noNewPrivileges + capDrop ALL)، وaccessPolicy للخدمات الموجَّهة، وعدم وجود أسرار بنص عادي، وألّا تدّعي الوحدات المسودة أي سيناريوهات، وألّا تكون وحدات docker-socket مؤهلة للخدمات المُدارة بلا خادم.
+
+تنتهي تشغيلات الوحدة الواحدة برمز غير صفري عند أي خطأ. أما `--all` فاستشاري (رمز الخروج 0) ما لم يُمرَّر `--strict`.
+
+```bash
+stackkit module lint [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--all` | bool | — | افحص كل وحدة تحت `--modules-dir` |
+| `--json` | bool | — | أخرج النتائج بصيغة JSON |
+| `--module` | string | — | مسار دليل وحدة واحدة (يحتوي على module.cue) |
+| `--modules-dir` | string | `modules` | الدليل الجذر للوحدات (يُستخدم مع `--all`) |
+| `--strict` | bool | — | اخرج برمز غير صفري عند أي نتيجة من نوع خطأ (مُضمَّن لـ `--module` المفرد) |
+
+## stackkit module scaffold
+
+أنشئ مخرجات الوحدة بصورة حتمية من module_facts.json (ADR-0027).
+
+أنشئ modules/&lt;slug&gt;/module.cue وtests/reference-compose.yml وtests/integration_test.sh الرقيق من module_facts.json تم التحقق من مخططه. الإخراج حتمي (البوابة G0): تنتج الحقائق نفسها دائمًا ملفات متطابقة بايتًا ببايت.
+
+```bash
+stackkit module scaffold [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--catalog` | string | — | ملف catalog.json المُصرَّف لـ CUE لمراجع imageSource |
+| `--facts` | string | — | مسار module_facts.json. مطلوب. |
+| `--force` | bool | — | اكتب فوق الملفات الموجودة |
+| `--out` | string | — | دليل الوحدة الناتج (الافتراضي modules/&lt;slug&gt;) |
+| `--print` | bool | — | اطبع المخرجات المُنشأة إلى stdout بدل الكتابة |
+

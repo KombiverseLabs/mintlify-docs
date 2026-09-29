@@ -1,0 +1,86 @@
+---
+title: "CLI-Referenz"
+description: "Jeder stackkit-Befehl mit seinen Flags und Beispielen"
+sidebarTitle: "Übersicht"
+icon: square-terminal
+---
+Richte deine eigenen Services mit portablen StackKits ein und pflege sie. Diese Seiten listen jeden `stackkit`-Befehl mit seinen Flags und Beispielen auf. Sie werden aus den StackKits-Befehlsdefinitionen generiert; wenn deine installierte Version älter ist, ist `stackkit <command> --help` für sie maßgeblich.
+
+## Das CLI installieren
+
+```bash
+curl -sSL https://install.stackkit.cc | STACKKIT_CLI_ONLY=1 sh
+```
+
+Mit `STACKKIT_CLI_ONLY=1` legt der Installer `stackkit`, `stackkit-server`, `stackkit-mcp`, das mitgelieferte OpenTofu und den öffentlichen Kit-Katalog in `~/.stackkits` ab, ohne ein StackKit zu installieren. Ohne diese Variable erkennt der Installer den Host und fährt mit Basement Kit oder Cloud Kit fort.
+
+## Globale Flags
+
+Diese Flags funktionieren mit jedem Befehl.
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--chdir, -C` | string | `.` | Vor der Ausführung in das Verzeichnis wechseln |
+| `--correlation-id` | string | — | Validierte Korrelations-ID des Aufrufers, die in lokalen Rollout-Nachweisen festgehalten wird |
+| `--no-log` | bool | — | Strukturiertes Deploy-Logging deaktivieren |
+| `--progress-jsonl` | string | — | Geschwärzten maschinenlesbaren Rollout-Fortschritt als JSONL in einen Pfad schreiben, oder '-' für stdout |
+| `--quiet, -q` | bool | — | Nicht wesentliche Ausgaben unterdrücken |
+| `--spec, -s` | string | `stack-spec.yaml` | Pfad zur Stack-Spezifikationsdatei (kombination.yaml wird akzeptiert, wenn der Standard fehlt) |
+| `--verbose, -v` | bool | — | Ausführliche Ausgabe aktivieren |
+
+## Deine Services einrichten
+
+| Befehl | Beschreibung |
+| --- | --- |
+| [`stackkit apply`](/de/stackkits/reference/cli/apply) | Infrastrukturänderungen anwenden |
+| [`stackkit generate`](/de/stackkits/reference/cli/generate) | Gesteuerte Deployment-Artefakte aus einer Stack-Spezifikation generieren |
+| [`stackkit init`](/de/stackkits/reference/cli/init) | Ein neues Deployment aus einem StackKit initialisieren |
+| [`stackkit plan`](/de/stackkits/reference/cli/plan) | Infrastrukturänderungen in der Vorschau anzeigen |
+| [`stackkit prepare`](/de/stackkits/reference/cli/prepare) | Ein System für das StackKit-Deployment vorbereiten |
+| [`stackkit setup`](/de/stackkits/reference/cli/setup) | Den Owner-Account einer angewendeten Anwendung einrichten |
+| [`stackkit validate`](/de/stackkits/reference/cli/validate) | Konfigurationsdateien validieren |
+
+## Prüfen, warten und wiederherstellen
+
+| Befehl | Beschreibung |
+| --- | --- |
+| [`stackkit backup`](/de/stackkits/reference/cli/backup) | Backups verwalten (Kopia-Engine) |
+| [`stackkit break-glass`](/de/stackkits/reference/cli/break-glass) | Break-Glass-Wiederherstellungskonten und -Bundles verwalten |
+| [`stackkit drift`](/de/stackkits/reference/cli/drift) | Lokalen StackKit-Drift beobachten und abgleichen |
+| [`stackkit logs`](/de/stackkits/reference/cli/logs) | Strukturierte Deploy-Logs ansehen |
+| [`stackkit remove`](/de/stackkits/reference/cli/remove) | Das lokale StackKits-Deployment deinstallieren |
+| [`stackkit service`](/de/stackkits/reference/cli/service) | Vom aktiven StackKits-Plan deklarierte Services steuern |
+| [`stackkit upgrade`](/de/stackkits/reference/cli/upgrade) | Ein verifiziertes StackKit-Release auflösen und installieren |
+| [`stackkit user`](/de/stackkits/reference/cli/user) | Haushaltsmitglieder im lokalen PocketID einladen und verwalten |
+| [`stackkit verify`](/de/stackkits/reference/cli/verify) | Verifikationsprüfungen nach dem Deployment ausführen |
+
+## Erweiterte Werkzeuge und Referenz
+
+| Befehl | Beschreibung |
+| --- | --- |
+| [`stackkit address`](/de/stackkits/reference/cli/address) | Secretfreie öffentliche Service-Adressen planen und binden |
+| [`stackkit advanced`](/de/stackkits/reference/cli/advanced) | Offline autorisierte Advanced-Lebenszyklus-Operationen verwalten |
+| [`stackkit agent`](/de/stackkits/reference/cli/agent) | Agent-native Helfer für die StackKits-Automatisierung |
+| [`stackkit app`](/de/stackkits/reference/cli/app) | StackKits-Anwendungsauslieferung prüfen und v0.6-Übergaben verwalten |
+| [`stackkit cluster`](/de/stackkits/reference/cli/cluster) | StackKits-Multi-Node-Cluster-Mitgliedschaft verwalten |
+| [`stackkit compat`](/de/stackkits/reference/cli/compat) | Nachweise zur OS-Unterstützung und Host-Konformitätsdiagnosen anzeigen |
+| [`stackkit completion`](/de/stackkits/reference/cli/completion) | Shell-Completion-Skripte generieren |
+| [`stackkit docs`](/de/stackkits/reference/cli/docs) | Deterministische StackKits-Dokumentationsprojektionen generieren |
+| [`stackkit federation`](/de/stackkits/reference/cli/federation) | Lokale Federation-Bindungsnachweise verwalten |
+| [`stackkit game`](/de/stackkits/reference/cli/game) | Die Gameserver des Owners auf dem installierten Game-Workload betreiben |
+| [`stackkit host`](/de/stackkits/reference/cli/host) | Anbieterneutrale Operationen des Host-Vertrags |
+| [`stackkit identity`](/de/stackkits/reference/cli/identity) | Die lokale Standalone-Identity-Ebene verwalten |
+| [`stackkit kit`](/de/stackkits/reference/cli/kit) | Operationen für veröffentlichte StackKit-Releases |
+| [`stackkit migrate`](/de/stackkits/reference/cli/migrate) | Eine StackSpec v1 klassifizieren und ihren Migrationsbericht ausgeben |
+| [`stackkit module`](/de/stackkits/reference/cli/module) | Lokale CUE-Module erstellen und validieren |
+| [`stackkit operations`](/de/stackkits/reference/cli/operations) | Die kanonischen Operationsverträge des Standalone-Lebenszyklus auflisten |
+| [`stackkit output-transaction`](/de/stackkits/reference/cli/output-transaction) | Explizite Lebenszyklus-Aktionen von Architecture-v2-Output-Transaktionen prüfen |
+| [`stackkit registry`](/de/stackkits/reference/cli/registry) | Den eingebetteten StackKits-Registry-Snapshot verwalten |
+| [`stackkit resolve`](/de/stackkits/reference/cli/resolve) | Architecture-v2-Intent in einen kanonischen Deployment-Plan auflösen |
+| [`stackkit runtime`](/de/stackkits/reference/cli/runtime) | Authentifizierte Runtime-Operationen auf dem Node ausführen |
+| [`stackkit secrets`](/de/stackkits/reference/cli/secrets) | Owner-gebundene lokale Secret-Verwahrung verwalten |
+| [`stackkit support`](/de/stackkits/reference/cli/support) | Geschwärzte lokale Support-Nachweise exportieren |
+| [`stackkit use-cases`](/de/stackkits/reference/cli/use-cases) | Optionale Anwendungsfälle eines Kits auswählen |
+| [`stackkit version`](/de/stackkits/reference/cli/version) | Versionsinformationen ausgeben |
+
+Befehle, die aktuelle Releases ablehnen oder ersetzen, findest du unter [veraltete und abgelöste Befehle](/de/stackkits/reference/cli/legacy).

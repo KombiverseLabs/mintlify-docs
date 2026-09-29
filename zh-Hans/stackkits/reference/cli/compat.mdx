@@ -1,0 +1,49 @@
+---
+title: "stackkit compat"
+description: "显示操作系统支持证据和主机一致性诊断"
+sidebarTitle: "compat"
+---
+显示操作系统支持证据和主机一致性诊断。
+
+显示此操作系统及其虚拟化管理程序已发布的 StackKits 兼容性证据，然后对本地容器主机的前置条件运行非破坏性诊断。
+
+```text
+The host diagnostics check:
+  • Virtualization type (KVM, OpenVZ, LXC, bare metal)
+  • unshare(2) syscall availability
+  • OverlayFS support
+  • Bridge networking support
+  • iptables NAT support
+  • Cgroup version
+```
+
+已发布的证据来自与某个发布版本绑定的自动化生命周期回执。主机诊断不会认证、排名、推荐任何服务器提供商，也不会为其定价。
+
+```bash
+stackkit compat [flags]
+```
+
+**示例**
+
+```bash
+# Check the published OS and hypervisor evidence and the host container prerequisites
+stackkit compat
+```
+
+子命令：[`stackkit compat emit-os-matrix`](#stackkit-compat-emit-os-matrix)
+
+## stackkit compat emit-os-matrix
+
+渲染公开的操作系统与虚拟化兼容性投影。
+
+```bash
+stackkit compat emit-os-matrix [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--archive-dir` | string | `docs/data/os-compat` | 存放各发布版本 v\*.json 归档的目录 |
+| `--docs-out` | string | `docs/OS_COMPATIBILITY.md` | 生成的 markdown 输出 |
+| `--input` | string | `docs/data/os-compat/latest.json` | 已提交的公开兼容性投影 |
+| `--website-out` | string | `website/public/os-compat.json` | 生成的网站 feed 输出 |
+

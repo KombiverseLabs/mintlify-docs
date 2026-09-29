@@ -1,0 +1,103 @@
+---
+title: "stackkit service"
+description: "التحكم في الخدمات التي تعلنها خطة StackKits النشطة"
+sidebarTitle: "service"
+---
+التحكم في الخدمات التي تعلنها خطة StackKits النشطة.
+
+```bash
+stackkit service [flags]
+```
+
+الأوامر الفرعية: [`stackkit service logs`](#stackkit-service-logs), [`stackkit service restart`](#stackkit-service-restart), [`stackkit service start`](#stackkit-service-start), [`stackkit service stop`](#stackkit-service-stop)
+
+## stackkit service logs
+
+اقرأ سجلات الخدمة المحدودة والمحجوبة البيانات الحساسة.
+
+```bash
+stackkit service logs <service-key> [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | مؤشر معتم من نتيجة سابقة |
+| `--json` | bool | — | اكتب صفحة سجل الخدمة المُصدَّرة بصيغة JSON |
+| `--tail` | int | `100` | عدد مدخلات السجل المحجوبة البيانات الحساسة المطلوب إرجاعها (1..200) |
+
+**أمثلة**
+
+```bash
+# Read the last 50 redacted log entries of the TinyAuth login gateway
+stackkit service logs auth --tail 50
+
+# Read PocketID logs as JSON
+stackkit service logs id --json
+
+# Read the next page with the cursor the previous JSON result returned
+stackkit service logs id --json --cursor <cursor>
+```
+
+## stackkit service restart
+
+أعد تشغيل خدمة مُدارة واحدة.
+
+```bash
+stackkit service restart <service-key> [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | اكتب نتيجة إجراء الخدمة المُصدَّرة بصيغة JSON |
+| `--owner-approve` | bool | — | وافق صراحةً على تعديل الخدمة المرتبط بالمالك |
+
+**أمثلة**
+
+```bash
+# Restart the PocketID identity service
+stackkit service restart id --owner-approve
+
+# Restart the TinyAuth login gateway and print the result as JSON
+stackkit service restart auth --owner-approve --json
+```
+
+## stackkit service start
+
+شغّل خدمة مُدارة واحدة.
+
+```bash
+stackkit service start <service-key> [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | اكتب نتيجة إجراء الخدمة المُصدَّرة بصيغة JSON |
+| `--owner-approve` | bool | — | وافق صراحةً على تعديل الخدمة المرتبط بالمالك |
+
+**أمثلة**
+
+```bash
+# Start a stopped service again
+stackkit service start coolify --owner-approve
+```
+
+## stackkit service stop
+
+أوقف خدمة مُدارة واحدة.
+
+```bash
+stackkit service stop <service-key> [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | اكتب نتيجة إجراء الخدمة المُصدَّرة بصيغة JSON |
+| `--owner-approve` | bool | — | وافق صراحةً على تعديل الخدمة المرتبط بالمالك |
+
+**أمثلة**
+
+```bash
+# Stop a non-critical service; base, id and auth cannot be stopped
+stackkit service stop coolify --owner-approve
+```
+

@@ -1,0 +1,50 @@
+---
+title: "stackkit verify"
+description: "运行部署后验证检查"
+sidebarTitle: "verify"
+---
+运行部署后验证检查。
+
+在部署了 StackKit 的主机上运行只读的部署后检查。
+
+验证器会检查栈规格、部署状态、Docker 守护进程、StackKit 容器、Docker 健康状态，以及可选地检查生成的访问摘要中的 HTTP 路由。
+
+`--host` 及其 SSH 标志（`--user`、`--key`、`--port`、`--remote-dir`、`--legacy-remote-transport`）驱动已停用的原始 SSH 验证器，只有确切的 v0.6 构建才仍会运行它；`--strict` 适用于该验证器和 v0.6 的本地检查。在当前版本上，请在已部署的主机上运行 verify。
+
+```bash
+stackkit verify [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | Architecture v2 生成清单（默认：&lt;outputRoot&gt;/.stackkit/generation-manifest.json） |
+| `--generation-receipt` | string | — | Architecture v2 生成回执（默认：&lt;outputRoot&gt;/.stackkit/generation-receipt.json） |
+| `--host` | string | — | 通过 SSH 验证的远程主机 |
+| `--http` | bool | — | 通过 HTTP 请求验证生成的服务 URL |
+| `--inventory` | string | — | Architecture v2 观测到的 Inventory（否则会选取一个常规的 inventory 文件） |
+| `--json` | bool | — | 输出机器可读的 JSON |
+| `--key` | string | — | 用于远程验证的 SSH 私钥路径 |
+| `--legacy-remote-transport` | bool | — | 显式允许对 StackSpec v1 目标使用已弃用的原始 SSH 验证器 |
+| `--offline` | bool | — | 在无网络访问的情况下验证缓存的发布回执和证明 |
+| `--port` | int | `22` | 用于远程验证的 SSH 端口 |
+| `--remote-dir` | string | `/opt/stackkit` | 远程 StackKit 工作目录 |
+| `--resolved-plan` | string | — | Architecture v2 规范的 ResolvedPlan（默认：&lt;outputRoot&gt;/.stackkit/resolved-plan.json） |
+| `--strict` | bool | — | 将警告视为验证失败 |
+| `--user` | string | — | 用于远程验证的 SSH 用户名 |
+
+**示例**
+
+```bash
+# Verify the applied deployment on this host
+stackkit verify
+
+# Also request the generated service URLs over HTTP
+stackkit verify --http
+
+# Emit the verification report as JSON
+stackkit verify --json
+
+# Check recorded Apply evidence and cached release receipts without live probes or network access
+stackkit verify --offline
+```
+

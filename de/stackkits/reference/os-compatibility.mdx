@@ -1,0 +1,44 @@
+---
+title: "OS-Kompatibilität"
+description: "Lebenszyklus-Nachweise für StackKits v0.39.7"
+sidebarTitle: "OS-Kompatibilität"
+icon: server
+---
+
+<Note>
+Lebenszyklus-Läufe für v0.46.6 sind noch nicht projiziert; die Zeilen zeigen v0.39.7, das neueste projizierte Release.
+</Note>
+
+Die Zeilen werden aus den automatisierten Lebenszyklus-Läufen von StackKits [v0.39.7](https://github.com/kombifyio/StackKits/releases/tag/v0.39.7) auf frischen virtuellen Maschinen projiziert: install, init, generate, apply, verify, backup und restore. Letzter Lebenszyklus-Lauf: 2026-09-24.
+
+- `supported`: Jede Lebenszyklus-Phase hat im neuesten Lauf auf diesem Release bestanden.
+- `preview`: Installation bis Verifikation bestanden im neuesten Lauf; eine spätere Phase ist fehlgeschlagen.
+- `unverified`: Auf diesem Release noch kein abgeschlossener Lauf, oder der neueste Lauf ist vor der Verifikation fehlgeschlagen.
+
+Die Zeilen für Betriebssysteme und Hypervisoren zeigen das beste Ergebnis über die auf diesem Release getesteten Umgebungen; unter „Kits nach Umgebung“ ist jede Umgebung einzeln aufgeführt.
+
+| Betriebssystem | Version | Getestete Architektur | Status | Nachweis | Zuletzt verifiziert |
+| --- | --- | --- | --- | --- | --- |
+| Ubuntu | 26.04 | amd64 | `supported` | Alle Lebenszyklus-Phasen bestanden | v0.39.7 |
+| Ubuntu | 24.04 | amd64 | `supported` | Alle Lebenszyklus-Phasen bestanden | v0.39.7 |
+| Debian | 13 | amd64 | `supported` | Alle Lebenszyklus-Phasen bestanden | v0.39.7 |
+| Debian | 12 | — | `unverified` | Von den automatisierten Lebenszyklus-Tests noch nicht abgedeckt | — |
+
+Jeder Lauf installiert das Betriebssystem frisch in einer virtuellen Maschine.
+
+## Kits nach Umgebung
+
+Jedes Kit wird in der Art von Umgebung bewertet, für die es gebaut ist. Ein Lauf im Heimnetz öffnet die lokalen Dienstadressen zusätzlich von einem anderen Rechner in diesem Netz.
+
+| Kit | Umgebung | Status | Nachweis | Zuletzt verifiziert |
+| --- | --- | --- | --- | --- |
+| Basement Kit | Frische virtuelle Maschine in der CI | `supported` | Alle Lebenszyklus-Phasen bestanden | v0.39.7 |
+| Basement Kit | Virtuelle Maschine in einem Heimnetz | `unverified` | Für dieses Release noch kein Lebenszyklus-Beleg | v0.35.0 |
+| Cloud Kit | Öffentlicher VPS mit einer kombify.me-Adresse | `supported` | Alle Lebenszyklus-Phasen bestanden | v0.39.7 |
+| Modern Homelab | Virtuelle Maschine zu Hause plus öffentlicher VPS | `unverified` | Von den automatisierten Lebenszyklus-Tests noch nicht abgedeckt | — |
+
+## Hypervisoren
+
+StackKits laufen in einer Gast-VM auf deinem Hypervisor, nie auf dem Hypervisor-Host selbst. Ein Status deckt diesen Rollout durchgängig ab: Der Gast wird auf dem Hypervisor erstellt und der StackKit-Lebenszyklus läuft darin. Er zertifiziert weder ein Hersteller-Produkt noch einen Server-Provider.
+
+Die Hypervisor-Rollouts und ihre Lebenszyklus-Nachweise für dieses Release sind auf [stackkit.cc/compatibility](https://stackkit.cc/compatibility) aufgeführt. Führe `stackkit compat` auf einem Host aus, um nicht-destruktive Diagnosen und die für sein Betriebssystem und seinen Hypervisor veröffentlichten Nachweise zu erhalten.

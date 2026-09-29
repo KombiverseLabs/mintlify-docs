@@ -1,0 +1,50 @@
+---
+title: "stackkit verify"
+description: "تشغيل فحوصات التحقق بعد النشر"
+sidebarTitle: "verify"
+---
+تشغيل فحوصات التحقق بعد النشر.
+
+شغّل فحوصات ما بعد النشر للقراءة فقط من المضيف الذي نُشر عليه StackKit.
+
+يفحص المدقّق stack spec وحالة النشر وخدمة Docker وحاويات StackKit وحالة صحة Docker، واختياريًا مسارات HTTP من ملخص الوصول المُنشأ.
+
+يتحكم `--host` وخيارات SSH الخاصة به (`--user` و`--key` و`--port` و`--remote-dir` و`--legacy-remote-transport`) في مدقّق SSH الخام المتقاعد الذي لا يشغّله الآن إلا إصدار v0.6 الدقيق؛ وينطبق `--strict` على ذلك المدقّق وعلى فحوصات v0.6 المحلية. على الإصدارات الحالية، شغّل verify على المضيف المنشور عليه.
+
+```bash
+stackkit verify [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | manifest التوليد في Architecture v2 (الافتراضي: &lt;outputRoot&gt;/.stackkit/generation-manifest.json) |
+| `--generation-receipt` | string | — | إيصال التوليد في Architecture v2 (الافتراضي: &lt;outputRoot&gt;/.stackkit/generation-receipt.json) |
+| `--host` | string | — | المضيف البعيد المطلوب التحقق منه عبر SSH |
+| `--http` | bool | — | تحقق من عناوين URL للخدمات المُنشأة بطلبات HTTP |
+| `--inventory` | string | — | Inventory المرصود في Architecture v2 (وإلا يُختار ملف inventory تقليدي واحد) |
+| `--json` | bool | — | أخرج JSON قابلًا للقراءة الآلية |
+| `--key` | string | — | مسار مفتاح SSH الخاص للتحقق عن بُعد |
+| `--legacy-remote-transport` | bool | — | اسمح صراحةً بمدقّق SSH الخام المهجور لهدف StackSpec v1 |
+| `--offline` | bool | — | تحقق من إيصالات الإصدارات وشهاداتها المخزَّنة مؤقتًا دون وصول إلى الشبكة |
+| `--port` | int | `22` | منفذ SSH للتحقق عن بُعد |
+| `--remote-dir` | string | `/opt/stackkit` | دليل عمل StackKit البعيد |
+| `--resolved-plan` | string | — | ResolvedPlan القانونية في Architecture v2 (الافتراضي: &lt;outputRoot&gt;/.stackkit/resolved-plan.json) |
+| `--strict` | bool | — | اعتبر التحذيرات فشلًا في التحقق |
+| `--user` | string | — | اسم مستخدم SSH للتحقق عن بُعد |
+
+**أمثلة**
+
+```bash
+# Verify the applied deployment on this host
+stackkit verify
+
+# Also request the generated service URLs over HTTP
+stackkit verify --http
+
+# Emit the verification report as JSON
+stackkit verify --json
+
+# Check recorded Apply evidence and cached release receipts without live probes or network access
+stackkit verify --offline
+```
+

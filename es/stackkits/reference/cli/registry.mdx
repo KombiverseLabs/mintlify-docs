@@ -1,0 +1,81 @@
+---
+title: "stackkit registry"
+description: "Gestiona la instantánea integrada del registro de StackKits"
+sidebarTitle: "registry"
+---
+Gestiona la instantánea integrada del registro de StackKits.
+
+Gestiona la instantánea del registro, segura para OSS, incorporada en el binario de la CLI.
+
+La instantánea reside en internal/registry/data/registry_snapshot.json. Inspecciona los datos integrados o reprodúcelos de forma determinista a partir del árbol CUE local.
+
+```bash
+stackkit registry [flags]
+```
+
+Subcomandos: [`stackkit registry artifacts`](#stackkit-registry-artifacts), [`stackkit registry bake-from-cue`](#stackkit-registry-bake-from-cue), [`stackkit registry emit-cue`](#stackkit-registry-emit-cue), [`stackkit registry info`](#stackkit-registry-info)
+
+## stackkit registry artifacts
+
+Imprime los pathspecs de artefactos de registro/generados del manifiesto de propiedad.
+
+Imprime los pathspecs del repositorio a partir del manifiesto de propiedad de artefactos generados.
+
+El workflow generate-cue y la puerta de paridad de CI usan este comando para que los archivos generados propiedad del bot sean explícitos. Los artefactos congelados permanecen en sus rutas actuales pero no se preparan ni se comparan como salida generada hasta que cambie el estado en su manifiesto.
+
+```bash
+stackkit registry artifacts [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--kind` | string | `all` | Filtro por tipo de artefacto (all, cue, snapshot) |
+| `--manifest` | string | `internal/registry/generated_artifacts.json` | Manifiesto de propiedad de artefactos generados |
+| `--state` | string | `generated` | Filtro por estado del artefacto (all, generated, frozen) |
+
+## stackkit registry bake-from-cue
+
+Produce una instantánea del registro a partir del árbol local de Git/CUE.
+
+Recorre modules/&lt;slug&gt;/module.cue más las definiciones canónicas de producto, calcula sus hashes de contrato y escribe la Snapshot resultante en internal/registry/data/registry_snapshot.json (o en `--output`).
+
+Este comando es la vía de arranque OSS sin conexión y funciona sobre un checkout puro del repositorio público kombifyio/stackKits.
+
+```bash
+stackkit registry bake-from-cue [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--modules-dir` | string | `modules` | Directorio que contiene module/&lt;slug&gt;/module.cue |
+| `--output` | string | `internal/registry/data/registry_snapshot.json` | Ruta de salida del JSON de la instantánea |
+
+## stackkit registry emit-cue
+
+Renderiza los artefactos CUE de foundation/generated a partir de la instantánea del registro.
+
+Renderiza foundation/generated/tool_catalog.cue a partir de la instantánea del registro más el árbol local de módulos CUE.
+
+Lee el JSON de la instantánea (por defecto internal/registry/data/registry_snapshot.json; refréscalo antes con 'registry bake-from-cue'), renderiza de forma determinista y escribe el artefacto. La cabecera registra el content_hash y el generated_at de la instantánea para que se pueda detectar la deriva entre instantánea y artefacto; CI regenera desde la instantánea confirmada y compara.
+
+```bash
+stackkit registry emit-cue [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--input` | string | `internal/registry/data/registry_snapshot.json` | JSON de la instantánea desde el que se renderiza |
+| `--modules-dir` | string | `modules` | Directorio que contiene modules/&lt;slug&gt;/module.cue (fuente del catálogo de servicios) |
+| `--output-dir` | string | `foundation/generated` | Directorio para los archivos CUE renderizados |
+
+## stackkit registry info
+
+Muestra un resumen de la instantánea integrada del registro.
+
+```bash
+stackkit registry info [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Imprime la instantánea integrada completa como JSON |

@@ -1,0 +1,55 @@
+---
+title: "配对命令"
+description: "通过在服务器终端中运行一条个人专属命令，将其连接到 Techstack"
+sidebarTitle: "配对命令"
+icon: "terminal"
+---
+
+配对命令是 Add Node 向导中的 **Give me a 1-liner** 路径。你从 Techstack 复制一行命令，粘贴到服务器的终端中，服务器就会自行连接。你不需要在 Techstack 中输入任何 SSH 信息。
+
+## 命令做了什么
+
+该命令会从你的 Techstack 下载 Techstack 安装程序，并使用一个个人专属的、短期有效的配对令牌来运行它。在服务器上，安装程序会：
+
+1. 检测平台并安装 Techstack **Guard**，这是一个上报服务器健康状况的小型代理；
+2. 安装部署所需的固定版本 StackKits 运行时；
+3. 兑换配对令牌，将这台服务器链接到你的家庭实验室；
+4. 在没有可用的容器运行时时，通过 `apt-get` 安装 Docker；
+5. 安装并启动 `techstack-agent` 系统服务，使 Guard 在重启后继续运行。
+
+Guard 仅通过**出站** HTTPS 连接与 Techstack 通信。它大约每 30 秒发送一次心跳和实测的清单。你不需要为此在服务器上开放任何入站端口。
+
+令牌只能使用一次。Techstack 只存储服务器所收到凭据的哈希值，并且该命令不会保留在任务报告中。
+
+## 运行之前
+
+- **带有 systemd 的 Linux 服务器。** Ubuntu 是标准系统；请参阅[添加节点](/zh-Hans/techstack/add-node#操作系统)。
+- **管理员权限。** 以 `root` 或可以使用 `sudo` 的用户运行该命令。安装程序会写入系统文件并安装服务。
+- **服务器上有 `curl`。** 命令使用它来下载安装程序。
+- **服务器可以访问 Techstack。** 进度页面显示 **Techstack URL reachable from the server** 字段。该字段中的地址必须能从服务器打开，而不仅仅是从你的电脑打开。使用 [Windows Alpha](/zh-Hans/techstack/install-windows) 时，服务器通过本地网络中的 TCP 端口 `5264` 访问 Windows 电脑，因此配对期间请保持 Windows 客户端运行。
+- **一条新的命令。** 配对令牌在 Techstack 创建后 15 分钟过期。
+
+## 运行命令
+
+1. 完成 Add Node 向导。Techstack 会为新节点打开进度页面，显示 **Not connected yet**。
+2. 检查 **Techstack URL reachable from the server** 字段，如果服务器使用不同的地址访问 Techstack，请进行修正。
+3. 选择 **Copy pairing command**。
+4. 直接或通过 SSH 在服务器上打开终端，粘贴命令并按 Enter。不要修改命令。它包含你的个人令牌。
+5. 等待安装程序完成。它会打印每一步。
+
+如果页面显示 **This pairing token has expired**，请选择 **Generate new command** 并改为运行新命令。旧命令已不再有效。
+
+<Warning>
+请将该命令视为一次性密码。任何人只要在它过期前运行它，就可以把服务器连接到你的家庭实验室。
+</Warning>
+
+## 节点连接之后
+
+当 Guard 发送第一次心跳时，Techstack 会将节点从 **Not connected yet** 更改为已连接。随后进度页面会继续进行该节点的 StackKit 部署。你可以关闭终端。
+
+之后如需在服务器上检查 Guard：
+
+- `sudo systemctl status techstack-agent` 显示服务是否在运行。
+- `sudo journalctl -u techstack-agent -f` 跟踪其日志。
+
+节点现在会连同其健康状态出现在你的家庭实验室中。其服务在哪里可以访问，并不取决于服务器放在哪里：本地硬件和租用的服务器都可以使用你自己的域名或 `*.kombify.me` 地址。请参阅 [kombify.me](/zh-Hans/kombify-me/overview)。

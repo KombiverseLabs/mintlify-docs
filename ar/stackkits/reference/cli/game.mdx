@@ -1,0 +1,72 @@
+---
+title: "stackkit game"
+description: "تشغيل خوادم الألعاب الخاصة بالمالك على حمل عمل Game المثبَّت"
+sidebarTitle: "game"
+---
+تشغيل خوادم الألعاب الخاصة بالمالك على حمل عمل Game المثبَّت.
+
+عرض خوادم الألعاب وتنفيذ عمليات المالك الروتينية (التشغيل والإيقاف، وقائمة السماح) عبر لوحة Pterodactyl Panel الخاصة بحمل عمل Game المطبَّق. إنشاء خادم يتم عبر `stackkit setup game`.
+
+```bash
+stackkit game [flags]
+```
+
+الأوامر الفرعية: [`stackkit game allow`](#stackkit-game-allow)، [`stackkit game list`](#stackkit-game-list)، [`stackkit game power`](#stackkit-game-power)
+
+## stackkit game allow
+
+السماح للاعب واحد على خادم ألعاب من StackKits يعتمد قائمة سماح.
+
+```bash
+stackkit game allow <server> [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | إصدار JSON بصيغة stackkit.command-result/v1 |
+| `--owner-approve` | bool | — | تفويض تغيير قائمة السماح بحيازة المالك المحلي المعتمدة |
+| `--player` | string | — | **مطلوب.** اسم حساب اللعبة بدقة (اسم حساب Minecraft أو Xbox gamertag) |
+
+**أمثلة**
+
+```bash
+stackkit game allow 92c66407 --player Notch --owner-approve
+```
+
+## stackkit game list
+
+عرض خوادم ألعاب المالك مع حالتها ومنفذها.
+
+```bash
+stackkit game list [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | إصدار JSON بصيغة stackkit.command-result/v1 |
+
+**أمثلة**
+
+```bash
+stackkit game list --json
+```
+
+## stackkit game power
+
+تشغيل خادم ألعاب واحد أو إيقافه أو إعادة تشغيله وانتظار النتيجة.
+
+```bash
+stackkit game power <server> [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | إصدار JSON بصيغة stackkit.command-result/v1 |
+| `--owner-approve` | bool | — | تفويض تغيير الطاقة بحيازة المالك المحلي المعتمدة |
+| `--signal` | string | — | **مطلوب.** إشارة الطاقة: start أو stop أو restart |
+
+**أمثلة**
+
+```bash
+stackkit game power 92c66407 --signal restart --owner-approve
+```

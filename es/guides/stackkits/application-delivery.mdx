@@ -1,0 +1,50 @@
+---
+title: "Elige la entrega de aplicaciones"
+description: "Selecciona un adaptador de workload publicado sin crear rutas de aplicación en conflicto"
+sidebarTitle: "Entrega de aplicaciones"
+icon: route
+---
+
+StackKits mantiene la elección de la aplicación separada de su entrega. Un workload como Files elige su alternativa de aplicación, mientras que `runtimeAdapterRef` elige cómo se entrega ese workload concreto.
+
+Consulta la matriz incluida en tu versión instalada:
+
+```bash
+stackkit app compatibility --json
+```
+
+## Elige un adaptador
+
+| Adaptador | Estado actual | Úsalo cuando |
+| --- | --- | --- |
+| `standalone-compose` | Compatible | Necesitas la vía de workload local con capacidad declarada de copia de seguridad y restauración y sin una plataforma de aplicaciones aparte. |
+| [Coolify](/es/stackkits/apps/coolify) | Compatible | Ya operas la plataforma de aplicaciones generada y aceptas que la copia de seguridad y la restauración del workload quedan fuera de este adaptador. |
+| [Komodo](/es/stackkits/apps/komodo) | Beta | Aceptas deliberadamente la madurez beta del adaptador y lo validas en tu propio workspace. |
+
+La madurez describe el contrato del catálogo, no el estado de salud observado en tu host. La matriz generada de [compatibilidad de la entrega de aplicaciones](/es/stackkits/reference/application-delivery-compatibility) enumera las capacidades de despliegue, ruta, TLS, copia de seguridad y restauración de cada workload y adaptador en la versión publicada. Consulta la fila de la aplicación que has seleccionado; la compatibilidad de despliegue de una plataforma por sí sola no establece su capacidad de recuperación. No deduzcas compatibilidad pública para un componente que la matriz no enumera.
+
+Para un Basement Kit independiente, empieza con `standalone-compose`, salvo que operes de forma intencionada una de las plataformas de aplicaciones:
+
+```json
+{
+  "workloads": {
+    "files": {
+      "alternative": "cloudreve",
+      "runtimeAdapterRef": "standalone-compose",
+      "placement": {
+        "siteRefs": ["home"],
+        "nodeRefs": ["main"]
+      }
+    }
+  }
+}
+```
+
+## Mantén un único responsable por workload
+
+- No enrutes el mismo workload a través de Coolify y de Compose independiente al mismo tiempo.
+- No añadas a mano etiquetas de Docker ni rutas generadas.
+- Trata Komodo como una opción beta en esta versión, no como la alternativa por defecto.
+- Valida la intención modificada e inspecciona el plan resuelto antes de aplicar un adaptador distinto.
+
+Consulta [Servicios de plataforma](/es/stackkits/apps/overview) para las integraciones de plataforma y [Configura un StackSpec](/es/guides/stackkits/configure-stack-spec) para el flujo de edición completo.

@@ -1,0 +1,79 @@
+---
+title: "Game"
+description: "Ejecuta un servidor de Minecraft autoalojado para amigos y familia con Pterodactyl, novedad de la v0.41.0"
+sidebarTitle: "Game"
+icon: gamepad
+---
+
+<Info>
+  Estado de la evidencia (2026-09-24, v0.41.0): Game con Pterodactyl es
+  `available, not yet lifecycle-verified`. Se distribuyó como workload
+  opcional en la v0.41.0 para Basement Kit, Cloud Kit y Modern Homelab, con
+  perfiles seleccionados de Minecraft Java y Bedrock. Ninguna ejecución
+  automatizada del ciclo de vida en Depot ha cubierto todavía install, verify,
+  backup ni restore; además, las copias de seguridad de los mundos son
+  actualmente consistentes ante fallos (crash-consistent) y aún no se ha
+  ejercitado de extremo a extremo una restauración aislada.
+</Info>
+
+Game da a tu hogar un servidor de Minecraft autoalojado para amigos y familia, en un host que tú operas. Pterodactyl ejecuta el panel y los contenedores de juego. El catálogo de la versión llama a este caso de uso Game Server y lo entrega como el workload opcional `game`.
+
+## Elige tu edición
+
+| Edición | Transporte | Puerto por defecto |
+| --- | --- | --- |
+| Minecraft Java | TCP | 25565 |
+| Minecraft Bedrock | UDP (RakNet) | 19132 |
+
+Ambos perfiles seleccionados arrancan con verificación de modo online, una lista de permitidos, sin RCON y sin derechos de operador automáticos.
+
+## Configúralo
+
+1. Selecciona el workload `game` en tu [StackSpec](/es/guides/stackkits/configure-stack-spec), genera y aplícala en un [Basement Kit](/es/stackkits/kits/basement-kit) o [Cloud Kit](/es/stackkits/kits/cloud-kit) verificado.
+2. Crea un archivo de configuración privado, relativo al workspace, por ejemplo `.stackkit/setup/game.json`:
+
+```json
+{
+  "profile": "minecraft-java",
+  "name": "Family Survival",
+  "acceptEula": true,
+  "allowList": ["PlayerOne"]
+}
+```
+
+3. Lee y acepta tú mismo el [Contrato de Licencia de Usuario Final de Minecraft](https://www.minecraft.net/en-us/eula) antes de establecer `acceptEula` en `true`. Nunca lo aceptes en nombre de otra persona.
+4. Ejecuta el comando de configuración:
+
+```bash
+stackkit setup game --owner-approve --credentials-file .stackkit/setup/game.json --json
+```
+
+El comando crea un servidor con el perfil que elegiste, aplica los valores seguros por defecto anteriores con una parada ordenada y vuelve a leer la lista de permitidos para que confirmes que surtió efecto. Una cuenta que no figure en la lista no puede unirse.
+
+## Elige alojamiento local o gestionado
+
+- Ejecuta el workload en un nodo local de [Basement Kit](/es/stackkits/kits/basement-kit) para que sea accesible en tu LAN.
+- Ejecútala en un VPS de [Cloud Kit](/es/stackkits/kits/cloud-kit) para que tus amigos puedan unirse mientras tu ordenador de casa está apagado.
+
+Un nodo doméstico no es accesible desde internet, a menos que elijas deliberadamente un VPS gestionado o un puente explícito. No confíes en la redirección de puertos del router para sortearlo.
+
+## Invita a los jugadores
+
+Comparte la dirección del nodo y el puerto del perfil con los jugadores de tu lista de permitidos. Gestiona la lista de permitidos, el encendido del servidor y los recursos desde el panel de Pterodactyl en tu ruta de Game generada.
+
+## Copia de seguridad de los mundos
+
+Las copias de seguridad de Game siguen la programación declarada de tu kit, pero hoy se aplican dos límites:
+
+- Las copias de seguridad son consistentes ante fallos: el servidor todavía no se detiene de forma ordenada antes de ejecutar la instantánea.
+- Aún no se ha ejercitado de extremo a extremo una restauración aislada de una copia de seguridad de Game.
+
+Practica una restauración en un entorno aislado antes de depender de ella para un mundo que no puedas recrear. Consulta [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).
+
+## Consigue los clientes
+
+<Card title="Minecraft" icon="download" href="https://www.minecraft.net/en-us/get-minecraft">
+  Clientes oficiales de Java y Bedrock de Mojang/Microsoft, para las plataformas en las que realmente tienes el juego.
+</Card>
+
+El propio panel de Pterodactyl funciona en el navegador, así que no se necesita un cliente de administración aparte.

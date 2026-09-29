@@ -1,0 +1,72 @@
+---
+title: "الألعاب (Game)"
+description: "شغّل خادم Minecraft مستضافاً ذاتياً للأصدقاء والعائلة عبر Pterodactyl، جديد في v0.41.0"
+sidebarTitle: "Game"
+icon: gamepad
+---
+
+<Info>
+  حالة الأدلة (2026-09-24، الإصدار v0.41.0): Game عبر Pterodactyl في حالة `available, not yet lifecycle-verified`. صدر كـ workload اختياري في v0.41.0 لـ Basement Kit وCloud Kit وModern Homelab، مع ملفات Minecraft Java وBedrock المنتقاة. لم يغطِّ أي تشغيل آلي لدورة الحياة على Depot مراحل install وverify وbackup وrestore بعد، والنسخ الاحتياطية للعوالم حالياً متسقة عند الانهيار (crash-consistent)، ولم تُجرَّب استعادة معزولة من البداية إلى النهاية.
+</Info>
+
+توفّر Game لأسرتك خادم Minecraft مستضافاً ذاتياً للأصدقاء والعائلة، على مضيف تشغّله أنت. يشغّل Pterodactyl اللوحة وحاويات اللعبة. ويسمي كتالوج الإصدار حالة الاستخدام هذه Game Server ويسلّمها كـ workload اختياري هو `game`.
+
+## اختر إصدارك
+
+| الإصدار | النقل | المنفذ الافتراضي |
+| --- | --- | --- |
+| Minecraft Java | TCP | 25565 |
+| Minecraft Bedrock | UDP (RakNet) | 19132 |
+
+يبدأ كلا الملفين المنتقيين بالتحقق من online-mode وقائمة سماح ودون RCON ودون صلاحيات مشغّل تلقائية.
+
+## أعدّه
+
+1. اختر الـ workload `game` في [StackSpec](/ar/guides/stackkits/configure-stack-spec)، وولّد، وطبّق على [Basement Kit](/ar/stackkits/kits/basement-kit) أو [Cloud Kit](/ar/stackkits/kits/cloud-kit) تم التحقق منه.
+2. أنشئ ملف إعداد خاصاً بمسار نسبي لمساحة العمل، مثل `.stackkit/setup/game.json`:
+
+```json
+{
+  "profile": "minecraft-java",
+  "name": "Family Survival",
+  "acceptEula": true,
+  "allowList": ["PlayerOne"]
+}
+```
+
+3. اقرأ [اتفاقية ترخيص المستخدم النهائي لـ Minecraft](https://www.minecraft.net/en-us/eula) ووافق عليها بنفسك قبل أن تضبط `acceptEula` على `true`. لا توافق عليها نيابةً عن أي شخص آخر.
+4. شغّل أمر الإعداد:
+
+```bash
+stackkit setup game --owner-approve --credentials-file .stackkit/setup/game.json --json
+```
+
+ينشئ الأمر خادماً واحداً على الملف الذي اخترته، ويطبّق الإعدادات الافتراضية الآمنة أعلاه مع إيقاف سلس، ويقرأ قائمة السماح ليتسنى لك التأكد من نفاذها. الحساب غير المدرج يفشل في الانضمام.
+
+## اختر الاستضافة المحلية أو المُدارة
+
+- شغّل الـ workload على عقدة [Basement Kit](/ar/stackkits/kits/basement-kit) محلية ليكون قابلاً للوصول على شبكتك المحلية.
+- شغّله على VPS من [Cloud Kit](/ar/stackkits/kits/cloud-kit) ليتمكن الأصدقاء من الانضمام بينما حاسوبك المنزلي مطفأ.
+
+عقدة المنزل لا يمكن الوصول إليها من الإنترنت ما لم تختر عن قصد VPS مُدارة أو جسراً صريحاً. لا تعتمد على إعادة توجيه المنافذ في الموجّه للالتفاف على ذلك.
+
+## ادعُ اللاعبين
+
+شارك عنوان العقدة ومنفذ الملف مع اللاعبين المدرجين في قائمة السماح. أدر قائمة السماح وتشغيل الخادم والموارد عبر لوحة Pterodactyl على مسار Game المولّد.
+
+## انسخ العوالم احتياطياً
+
+تتبع النسخ الاحتياطية لـ Game الجدول المعلن لـ kit لديك، لكن ينطبق حدّان اليوم:
+
+- النسخ الاحتياطية متسقة عند الانهيار: لا يُهدَّأ الخادم بعد قبل تشغيل اللقطة.
+- لم تُجرَّب استعادة معزولة لنسخة Game الاحتياطية من البداية إلى النهاية.
+
+تمرّن على الاستعادة في بيئة معزولة قبل أن تعتمد عليها لعالم لا يمكنك إعادة إنشائه. راجع [النسخ الاحتياطي والاستعادة](/ar/guides/stackkits/back-up-and-restore).
+
+## احصل على العملاء
+
+<Card title="Minecraft" icon="download" href="https://www.minecraft.net/en-us/get-minecraft">
+  عملاء Java وBedrock الرسميون من Mojang/Microsoft، للمنصات التي تملك اللعبة عليها فعلاً.
+</Card>
+
+لوحة Pterodactyl نفسها تعمل في المتصفح، فلا حاجة إلى عميل إدارة منفصل.

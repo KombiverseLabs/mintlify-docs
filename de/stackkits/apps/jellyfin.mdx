@@ -1,0 +1,62 @@
+---
+title: "Jellyfin"
+description: "Der Medienbibliotheks-Workload mit schreibgeschützten Medien, nativer Owner-Einrichtung und getrennten Wiederherstellungswegen"
+sidebarTitle: "Jellyfin"
+icon: film
+---
+
+Jellyfin liefert den Anwendungsfall [Medien](/de/guides/stackkits/use-cases/media) über den `media`-Workload auf einem Standalone-Compose-Host. Richte es ein, nachdem die Basis deines [Basement Kit](/de/stackkits/kits/basement-kit) verifiziert ist. Mit `stackkit app compatibility --json` kannst du die Adapter-Fähigkeiten des installierten Releases einsehen.
+
+## Den Workload auf ein bestehendes Medienverzeichnis zeigen lassen
+
+Um eine bestehende Bibliothek zu nutzen, setze `storage.mediaRoot` in der StackSpec auf das absolute Verzeichnis der Medien auf dem Laufzeit-Host, zum Beispiel `/srv/household-media`, bevor du den Stack generierst und anwendest:
+
+- StackKits bindet dieses Verzeichnis schreibgeschützt unter `/media` ein. Jellyfin kann diese Dateien scannen und streamen, aber nicht bearbeiten oder löschen.
+- Das Verzeichnis muss bereits existieren. StackKits legt es nicht an und ändert seine Berechtigungen nicht; ein fehlendes Verzeichnis lässt die Bereitstellung scheitern, also bereite den Host-Speicher selbst vor und sichere ihn ab.
+- Lasse `storage.mediaRoot` weg, um stattdessen ein vom Plan verwaltetes benanntes Bibliotheks-Volume zu behalten.
+- Der Pfad bezeichnet Speicher auf dem Laufzeit-Host, nicht auf dem Rechner, auf dem ein Remote-Viewer läuft.
+
+## Das Owner-Konto einrichten
+
+Erstelle eine private, Workspace-relative Zugangsdatendatei `.stackkit/setup/media-owner.json`:
+
+```json
+{
+  "username": "<your administrator name>",
+  "password": "<your unique password>"
+}
+```
+
+Beschränke diese Datei auf den Workspace-Owner und halte ihren Inhalt aus Befehlsargumenten und Chat-Nachrichten heraus. Führe dann aus:
+
+```bash
+stackkit setup media --credentials-file .stackkit/setup/media-owner.json --owner-approve --json
+```
+
+Der Befehl prüft vor dem Handeln den aktuellen Plan, das signierte Apply, den exakten lokalen Container und die gepinnte Jellyfin-Version. Beim ersten Lauf setzt er die von dir gewählten Administrator-Zugangsdaten – er verwendet nie ein Standard-Passwort für den ersten Nutzer. Bei einer bestehenden Installation führt er stattdessen eine normale Anmeldung und einen Administrator-Readback durch. Die temporäre Setup-Sitzung wird widerrufen, bevor das signierte Ergebnis aufgezeichnet wird.
+
+## Den Assistenten abschließen und Bibliotheken hinzufügen
+
+Ohne weitere Flags bleibt ein unfertiger Jellyfin-Startassistent unfertig: Öffne Medien unter seiner deklarierten privaten Route und wähle Bibliothekspfade, Sprache und Haushaltseinstellungen selbst. Um den Startassistenten stattdessen mit den aktuellen Anwendungseinstellungen abzuschließen und deine Bibliotheken danach zu konfigurieren, füge `--complete-onboarding` hinzu:
+
+```bash
+stackkit setup media --credentials-file .stackkit/setup/media-owner.json --owner-approve --complete-onboarding --json
+```
+
+Das Flag schließt nur den Startassistenten ab. Es fügt keine Bibliotheken hinzu, ändert keine Einstellungen für den Fernzugriff und konfiguriert kein Transcoding. Wenn du eine Bibliothek hinzufügst, folge der Medien-Volume-Zuordnung des Plans – dem schreibgeschützten `/media`-Mount für ein vom Owner verwahrtes Verzeichnis. Gib Haushaltsmitgliedern als Zuschauern getrennte Jellyfin-Konten ohne Administratorrechte und verbinde jeden Player direkt mit der deklarierten Medien-URL.
+
+## Wiederherstellungsgrenzen
+
+Anwendungskonfiguration und Medien-Bytes werden getrennt verwahrt:
+
+- Jellyfins Konfiguration und der Transcoding-Cache liegen in getrennten Volumes. Prüfe die Backup-Deklaration der Anwendung auf enthaltene Daten; schreibbarer Speicher allein bedeutet keine Backup-Abdeckung.
+- Deine Medienquelle ist kein StackKits-Backup. Was auch immer du für `storage.mediaRoot` festlegst: Halte für diese Bytes eine unabhängige Wiederherstellungsquelle bereit und dokumentiere sie außerhalb des Stacks.
+- Container-Gesundheit und ein verifiziertes Administrator-Setup beweisen weder Bibliotheksinhalt noch Wiederherstellung; prüfe beides ausdrücklich.
+
+## Einen echten Client testen
+
+Teste die Wiedergabe einer deiner eigenen Dateien von einem vorgesehenen Client. Prüfe zuerst Direct Play und Transcoding nur, wenn du es ausdrücklich konfiguriert hast. Client-Kompatibilität, Bandbreite und Transcoding-Qualität werden durch einen gesunden Container nicht belegt – verifiziere sie auf den Geräten, auf denen du tatsächlich schauen willst.
+
+## Ein unterbrochenes Setup fortsetzen
+
+Wenn ein Setup-Lauf unterbrochen wird, wiederhole ihn mit der gemeldeten `--operation-id`. Der Befehl prüft den Anwendungszustand erneut und öffnet einen bereits abgeschlossenen Startassistenten nie wieder.

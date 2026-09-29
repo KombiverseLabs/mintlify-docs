@@ -1,0 +1,99 @@
+---
+title: "stackkit docs"
+description: "生成确定性的 StackKits 文档投影"
+sidebarTitle: "docs"
+---
+生成确定性的 StackKits 文档投影。
+
+```bash
+stackkit docs [flags]
+```
+
+子命令：[`stackkit docs emit-advanced-operations`](#stackkit-docs-emit-advanced-operations), [`stackkit docs emit-cli-reference`](#stackkit-docs-emit-cli-reference), [`stackkit docs emit-release-manifests`](#stackkit-docs-emit-release-manifests), [`stackkit docs emit-use-case-overview`](#stackkit-docs-emit-use-case-overview)
+
+## stackkit docs emit-advanced-operations
+
+输出 Advanced 操作目录（stackkit.advanced-operations/v1）。
+
+写出机器可读的目录，涵盖编排器可能派发的每一个 Advanced 操作：确切的 argv 模板、准入要求、输入与结果契约、rollout 事件阶段以及拒绝信封。
+
+发布归档会附带此文件。使用 `--check` 时不会写入任何内容；当文件与目录源不一致时，命令会失败。
+
+```bash
+stackkit docs emit-advanced-operations [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--check` | bool | — | 不写入任何内容；当目录文件缺失或已过期时失败 |
+| `--out` | string | `docs/data/advanced-operations/latest.json` | 目录 JSON 路径，相对于 `--chdir` |
+
+**示例**
+
+```bash
+# Regenerate the committed catalog after changing an Advanced operation
+stackkit docs emit-advanced-operations
+
+# Fail when the committed catalog is stale
+stackkit docs emit-advanced-operations --check
+```
+
+## stackkit docs emit-cli-reference
+
+输出机器可读的 stackkit CLI 参考。
+
+以确定性的 JSON 写出每一个可见的 stackkit 命令、标志和示例。
+
+stackkit.cc 的 CLI 参考会渲染此文件。使用 `--check` 时不会写入任何内容；当文件与当前命令树不一致时，命令会失败。
+
+```bash
+stackkit docs emit-cli-reference [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--check` | bool | — | 不写入任何内容；当参考文件缺失或已过期时失败 |
+| `--out` | string | `docs/data/cli-reference/latest.json` | 参考 JSON 路径，相对于 `--chdir` |
+
+**示例**
+
+```bash
+# Regenerate the committed reference after changing a command, flag, or example
+stackkit docs emit-cli-reference
+
+# Fail when the committed reference is stale
+stackkit docs emit-cli-reference --check
+```
+
+## stackkit docs emit-release-manifests
+
+输出与发布版本绑定的用例和兼容性清单。
+
+```bash
+stackkit docs emit-release-manifests [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--output-dir` | string | — | **必填。** 清单输出目录 |
+| `--public-source-sha` | string | — | **必填。** 确切的公开源 SHA |
+| `--release-tag` | string | — | **必填。** 已发布的发布标签（vX.Y.Z） |
+| `--release-url` | string | — | **必填。** 确切的公开发布 URL |
+| `--source-sha` | string | — | **必填。** 确切的私有源 SHA |
+
+## stackkit docs emit-use-case-overview
+
+渲染内部派生的用例开发概览。
+
+```bash
+stackkit docs emit-use-case-overview [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--evidence-output` | string | — | 证据清单输出路径 |
+| `--output` | string | — | Markdown 输出路径 |
+| `--source-sha` | string | — | **必填。** 确切的源 SHA |
+| `--test-receipt` | string | — | 与源 SHA 绑定的已通过测试回执 |
+| `--tests-passed-for-source` | bool | — | 在调用方针对 source-sha 同步通过目录测试之后，将测试标记为完成 |
+

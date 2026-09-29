@@ -1,0 +1,73 @@
+---
+title: "stackkit game"
+description: "इंस्टॉल किए गए Game वर्कलोड पर ओनर के गेम सर्वर संचालित करें"
+sidebarTitle: "game"
+---
+इंस्टॉल किए गए Game वर्कलोड पर ओनर के गेम सर्वर संचालित करें।
+
+लागू किए गए Game वर्कलोड के Pterodactyl Panel के ज़रिए गेम सर्वर सूचीबद्ध करें और नियमित ओनर ऑपरेशन (पावर, अलाउ-लिस्ट) चलाएँ। सर्वर बनाना `stackkit setup game` है।
+
+```bash
+stackkit game [flags]
+```
+
+उप-कमांड: [`stackkit game allow`](#stackkit-game-allow), [`stackkit game list`](#stackkit-game-list), [`stackkit game power`](#stackkit-game-power)
+
+## stackkit game allow
+
+StackKits अलाउ-लिस्ट गेम सर्वर पर एक खिलाड़ी को प्रवेश दें।
+
+```bash
+stackkit game allow <server> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+| `--owner-approve` | bool | — | स्थापित स्थानीय ओनर कस्टडी से अलाउ-लिस्ट बदलाव को अधिकृत करें |
+| `--player` | string | — | **आवश्यक।** सटीक गेम अकाउंट नाम (Minecraft अकाउंट नाम या Xbox गेमरटैग) |
+
+**उदाहरण**
+
+```bash
+stackkit game allow 92c66407 --player Notch --owner-approve
+```
+
+## stackkit game list
+
+ओनर के गेम सर्वर स्थिति और पोर्ट के साथ सूचीबद्ध करें।
+
+```bash
+stackkit game list [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+**उदाहरण**
+
+```bash
+stackkit game list --json
+```
+
+## stackkit game power
+
+एक गेम सर्वर शुरू, बंद या रीस्टार्ट करें और परिणाम की प्रतीक्षा करें।
+
+```bash
+stackkit game power <server> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+| `--owner-approve` | bool | — | स्थापित स्थानीय ओनर कस्टडी से पावर बदलाव को अधिकृत करें |
+| `--signal` | string | — | **आवश्यक।** पावर सिग्नल: start, stop या restart |
+
+**उदाहरण**
+
+```bash
+stackkit game power 92c66407 --signal restart --owner-approve
+```
+

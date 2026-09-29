@@ -1,0 +1,40 @@
+---
+title: "Anwendungsfälle"
+description: "Die elf wichtigsten Anwendungsfälle, die du auf einem StackKit betreiben kannst, ihre Apps und ihr aktueller Status"
+sidebarTitle: "Anwendungsfälle"
+icon: diagram-project
+---
+
+Ein Anwendungsfall ist etwas, worauf sich dein Haushalt verlässt, etwa eine Fotobibliothek oder ein Passwort-Tresor. Jeder läuft als Workload auf einem Kit, das du bereits verifiziert hast, und eine oder mehrere Anwendungen stellen ihn bereit. Dein Kit bringt Anmeldung, Routing, den Node Hub und Backups mit; ein Anwendungsfall ergänzt die Anwendung darauf.
+
+Die erste StackSpec wählt keinen Anwendungsfall aus. Du wählst die, die du willst.
+
+## Die elf wichtigsten Anwendungsfälle
+
+| Anwendungsfall | Was du bekommst | Standard-App (Alternativen) | Status | Anleitung |
+| --- | --- | --- | --- | --- |
+| Fotos | Eine Familienbibliothek für Fotos und Videos, mit Backup von deinem Smartphone | [Immich](/de/stackkits/apps/immich) | Verfügbar, Lifecycle-verifiziert | [Fotos](/de/guides/stackkits/use-cases/photos) |
+| Dokumente & Dateien | Speicher und Freigabe für deine Dateien, plus ein optionales durchsuchbares Dokumentenarchiv | [Cloudreve](/de/stackkits/apps/cloudreve) (Dateien) + Paperless-ngx (Add-on für Dokumente) | Dateien: verfügbar, Lifecycle-verifiziert · Dokumente: verfügbar, noch nicht Lifecycle-verifiziert | [Dokumente & Dateien](/de/guides/stackkits/use-cases/documents-and-files) |
+| Vault | Ein Passwort-Tresor, mit geplanten Erweiterungen für Dienst-Secrets und Bitcoin | [Vaultwarden](/de/stackkits/apps/vaultwarden) (Passwörter) | Passwörter: verfügbar, Lifecycle-verifiziert · Erweiterungen: geplant | [Vault](/de/guides/stackkits/use-cases/vault) |
+| Medien | Streaming für die Filme, die Musik und die Videos, die dir gehören | [Jellyfin](/de/stackkits/apps/jellyfin) | Verfügbar, Lifecycle-verifiziert | [Medien](/de/guides/stackkits/use-cases/media) |
+| Smart Home | Heimautomatisierung rund um eine neue oder angebundene Home-Assistant-Instanz | Home Assistant | Verfügbar, Lifecycle-verifiziert | [Smart Home](/de/guides/stackkits/use-cases/smart-home) |
+| Dev | Private Git-Repositories, mit geplantem Remote-Desktop und Workspace-Runtime | [Gitea](/de/stackkits/apps/gitea) (Repositories) | Repositories: verfügbar, noch nicht Lifecycle-verifiziert · Remote-Desktop: in Entwicklung · Workspace: geplant | [Dev](/de/guides/stackkits/use-cases/development) |
+| Mail | Ein für das Release deklarierter Mailserver, vor einer Client-zuerst-Einrichtungsanleitung | Stalwart | In Entwicklung | [Mail](/de/guides/stackkits/use-cases/mail) |
+| Game | Selbst gehostete Spielserver, zunächst mit Pterodactyl | Pterodactyl | Verfügbar, noch nicht Lifecycle-verifiziert (neu in v0.41.0) | [Game](/de/guides/stackkits/use-cases/game) |
+| Netzwerk | DNS und Konnektivität zwischen den Geräten, Servern und Netzwerken, die du wählst | — | Geplant | [Netzwerk](/de/guides/stackkits/use-cases/network) |
+| Automatisierung | Geprüfte Routinen für wiederkehrende anwendungsübergreifende Arbeit | — | Geplant | [Automatisierung](/de/guides/stackkits/use-cases/automation) |
+| KI | Eine Chat-Oberfläche für Sprachmodelle, die auf deinem Host laufen | Ollama und Open WebUI | Verfügbar, noch nicht Lifecycle-verifiziert | [KI](/de/guides/stackkits/use-cases/personal-ai) |
+
+„Verfügbar, Lifecycle-verifiziert" bedeutet, dass das aktuelle Release einen öffentlichen Depot-Producer-Beleg hat: Von install bis restore wurde auf dem getesteten Betriebssystem alles bestanden, und die Support-Einstufung des Laufs ist auf [stackkit.cc/compatibility](https://stackkit.cc/compatibility) veröffentlicht. „Verfügbar, noch nicht Lifecycle-verifiziert" bedeutet, dass du ihn heute im Katalog auswählen kannst, aber noch kein Lifecycle-Beleg ihn abdeckt. „In Entwicklung" bedeutet, dass das Release ihn deklariert, er aber noch nicht installierbar ist. „Geplant" bedeutet, dass es ein Zieldesign ohne Release und ohne verbindlichen Termin ist.
+
+Der [Anwendungsfall-Katalog](/de/stackkits/reference/use-case-catalog) listet jeden Anwendungsfall auf, den das aktuelle Release deklariert, generiert aus dem veröffentlichten Manifest. Er hat kein eigenes Reifegrad-Feld; lies den Status auf dieser Seite ab. Die [OS-Kompatibilität](/de/stackkits/reference/os-compatibility) enthält die Lifecycle-Evidenz hinter „Lifecycle-verifiziert".
+
+## So kommt ein Anwendungsfall hinzu
+
+1. Beginne mit einem verifizierten Kit. Der [Quickstart](/de/stackkits/quickstart) richtet ein Basement Kit ein.
+2. Plane Speicher und Wiederherstellung auf der Seite des Anwendungsfalls.
+3. Wähle den Workload in deiner [StackSpec](/de/guides/stackkits/configure-stack-spec) aus und folge dann [Einen Workload hinzufügen](/de/stackkits/reference/day-2-operations#einen-workload-zu-einem-bestehenden-workspace-hinzufügen), um Secret-Verwahrung einzurichten, zu generieren, anzuwenden und zu verifizieren.
+4. Schließe die Einrichtung auf der Anwendungsseite ab und probiere eine echte Aufgabe aus, etwa ein Foto hochzuladen.
+5. Übe eine Wiederherstellung, bevor der Anwendungsfall Daten enthält, die du nicht ersetzen kannst. Siehe [Sichern und wiederherstellen](/de/guides/stackkits/back-up-and-restore).
+
+Dokumente & Dateien ist ein guter erster Anwendungsfall, weil die standalone-Auswahl von Cloudreve keine Secret-Referenz braucht.

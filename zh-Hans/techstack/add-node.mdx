@@ -1,0 +1,75 @@
+---
+title: "添加节点"
+description: "选择新节点的来源、它运行的系统，以及它在你的 StackKit 中承担的角色"
+sidebarTitle: "添加节点"
+icon: "server"
+---
+
+节点（Node）是你的家庭实验室中的一台服务器：橱柜里的迷你主机、一台旧笔记本、一台 VPS，或是 kombify 为你准备的服务器。Techstack 的 **Add Node** 向导在 Node 步骤中会问三个问题：服务器从哪里来、它运行什么系统，以及它在你的 StackKit 中承担什么工作。
+
+<Note>
+Techstack 仍处于 1.0 之前。Windows Alpha 和托管预览版显示的是同一个向导，但部分选项取决于你的 kombify 账号启用了什么。请参阅[可用性](/zh-Hans/techstack/availability)。
+</Note>
+
+## 节点从哪里来
+
+向导首先会问你从哪里开始。
+
+**I already have a device.** 这台电脑、家用服务器或 VPS 归你所有。接着你选择 Techstack 如何连接它：
+
+- **Give me a 1-liner.** 完成向导后，Techstack 会显示一条个人专属命令。你只需在服务器的终端中粘贴一次，服务器随后会自行连接。这是最简单的路径，不需要任何 SSH 信息。请参阅[配对命令](/zh-Hans/techstack/pairing-command)。
+- **Connect my device.** 你输入服务器的地址以及 SSH 密钥或密码。Techstack 通过 SSH 登录，并为你执行同样的设置。请参阅[通过 SSH 连接服务器](/zh-Hans/techstack/ssh-connection)。
+
+**I need a server.** 你还没有机器。你有两个选择：
+
+- **kombify VPS.** kombify 与合作提供商一起准备一台虚拟服务器并为你连接。此选项处于预览阶段，只有当你的账号启用了托管服务器时才能选择。请参阅[托管服务器](/zh-Hans/techstack/managed-servers)。
+- **Find a server with a partner.** 你直接向合作伙伴租用一台 VPS。准备就绪后，返回向导，选择 **My device is ready — connect it**，并通过命令或 SSH 连接它。你在向导中的其他选择会保留。
+
+每条路径最终得到的都是同一类节点。通过你自己的域名或 `*.kombify.me` 地址进行远程访问，对本地硬件和租用的服务器同样适用；请参阅 [kombify.me](/zh-Hans/kombify-me/overview)。
+
+## 操作系统
+
+对于你自己的设备，向导默认从 **Ubuntu / Linux** 开始。这是标准配置。安装程序会检查你设备上的操作系统。
+
+- 当缺少 Docker 时，安装过程会使用 Ubuntu 的包管理器（`apt-get`）安装它。
+- 请查看 [操作系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)，了解 StackKits 有生命周期证据支持的操作系统。
+
+kombify VPS 始终从 Ubuntu 24.04 开始，因此你无需为它选择系统。
+
+对于运行虚拟机的主机，向导还可能提供虚拟机管理程序（hypervisor）选项。该选项属于预览范围，公开文档尚未涵盖。
+
+## 节点配置
+
+当你向现有家庭实验室添加节点时，向导会询问新节点的用途：
+
+- **Worker or storage for this StackKit.** 该节点加入你打开向导时所在的 StackKit。它使用相同的基础（例如 Basement Kit），并保留你现有的访问、人员和登录。然后你选择 **Worker Node** 或 **Storage Node**。
+- **New StackKit / main Node.** 该节点成为同一家庭实验室内一个新 StackKit 的主节点，例如在你家里的 Basement Kit 旁边，在一台 VPS 上运行的 Cloud Kit。
+
+向导在这里也可能列出虚拟机管理程序主机。该选项属于预览范围，公开文档尚未记录。
+
+[节点角色与 StackKit 基础](/zh-Hans/techstack/node-roles)解释了每种角色，以及何时应该启动新的 StackKit。
+
+## 接下来会发生什么
+
+确认之后，Techstack 会为新节点打开一个进度页面。
+
+1. **使用配对命令时**，页面会显示命令和一个复制按钮。在你于服务器上运行该命令且其 Guard 上报之前，节点会显示 **Not connected yet**。
+2. **使用 SSH 时**，Techstack 登录服务器，安装 Guard，并等待其注册。你无需粘贴任何内容。
+3. **使用 kombify VPS 时**，kombify 会准备服务器并连接它。
+
+节点连接后，Techstack 会继续进行 StackKit 的部署，并在同一页面上显示进度。完成后，该节点会连同其健康状态和服务一起出现在你的家庭实验室中。
+
+<CardGroup cols={2}>
+  <Card title="配对命令" icon="terminal" href="/zh-Hans/techstack/pairing-command">
+    这条单行命令做了什么，以及如何运行它。
+  </Card>
+  <Card title="通过 SSH 连接" icon="key" href="/zh-Hans/techstack/ssh-connection">
+    地址、SSH 密钥或密码、用户、端口和 sudo。
+  </Card>
+  <Card title="节点角色" icon="sitemap" href="/zh-Hans/techstack/node-roles">
+    基础节点、工作节点和存储节点。
+  </Card>
+  <Card title="托管服务器" icon="cloud" href="/zh-Hans/techstack/managed-servers">
+    由 kombify 为你准备的服务器（预览）。
+  </Card>
+</CardGroup>

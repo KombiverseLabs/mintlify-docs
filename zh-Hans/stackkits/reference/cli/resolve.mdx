@@ -1,0 +1,34 @@
+---
+title: "stackkit resolve"
+description: "将 Architecture v2 意图解析为规范的部署计划"
+sidebarTitle: "resolve"
+---
+将 Architecture v2 意图解析为规范的部署计划。
+
+解析一份 StackSpec v2 文档和可选的观测 Inventory，得到供生成器和运行时使用的规范 ResolvedPlan。
+
+除非提供 `--output`，否则此命令是只读的。文件输出保持在工作目录之下，并且只能替换已有的有效 ResolvedPlan；它共用生命周期变更锁。StackSpec v1 绝不会被静默升级或编译：它会返回共用的类型化迁移报告，并要求走显式的迁移工作流。
+
+```bash
+stackkit resolve [spec-file] [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--inventory` | string | — | 可选的观测 Inventory 文档的路径 |
+| `--module-root` | string | — | 架构权威根目录，包含 cue.mod、base 和所有 Kit 定义 |
+| `--output, -o` | string | — | 将规范的 ResolvedPlan JSON 写入工作目录之下，而不是 stdout |
+
+**示例**
+
+```bash
+# Print the canonical ResolvedPlan for a StackSpec
+stackkit resolve --spec stack-spec.yaml
+
+# Resolve against an observed Inventory
+stackkit resolve stack-spec.yaml --inventory inventory.yaml
+
+# Replace the existing plan file beneath the working directory
+stackkit resolve stack-spec.yaml --output deploy/.stackkit/resolved-plan.json
+```
+

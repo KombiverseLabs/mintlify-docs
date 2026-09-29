@@ -1,0 +1,102 @@
+---
+title: "stackkit service"
+description: "Controla los servicios declarados por el plan activo de StackKits"
+sidebarTitle: "service"
+---
+Controla los servicios declarados por el plan activo de StackKits.
+
+```bash
+stackkit service [flags]
+```
+
+Subcomandos: [`stackkit service logs`](#stackkit-service-logs), [`stackkit service restart`](#stackkit-service-restart), [`stackkit service start`](#stackkit-service-start), [`stackkit service stop`](#stackkit-service-stop)
+
+## stackkit service logs
+
+Lee logs de servicio acotados y redactados.
+
+```bash
+stackkit service logs <service-key> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | Cursor opaco de un resultado anterior |
+| `--json` | bool | — | Escribe la página versionada de logs del servicio como JSON |
+| `--tail` | int | `100` | Número de entradas de log redactadas que se devuelven (1..200) |
+
+**Ejemplos**
+
+```bash
+# Read the last 50 redacted log entries of the TinyAuth login gateway
+stackkit service logs auth --tail 50
+
+# Read PocketID logs as JSON
+stackkit service logs id --json
+
+# Read the next page with the cursor the previous JSON result returned
+stackkit service logs id --json --cursor <cursor>
+```
+
+## stackkit service restart
+
+Reinicia un servicio gestionado.
+
+```bash
+stackkit service restart <service-key> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Escribe el resultado versionado de la acción sobre el servicio como JSON |
+| `--owner-approve` | bool | — | Aprueba explícitamente la mutación del servicio ligada al propietario |
+
+**Ejemplos**
+
+```bash
+# Restart the PocketID identity service
+stackkit service restart id --owner-approve
+
+# Restart the TinyAuth login gateway and print the result as JSON
+stackkit service restart auth --owner-approve --json
+```
+
+## stackkit service start
+
+Inicia un servicio gestionado.
+
+```bash
+stackkit service start <service-key> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Escribe el resultado versionado de la acción sobre el servicio como JSON |
+| `--owner-approve` | bool | — | Aprueba explícitamente la mutación del servicio ligada al propietario |
+
+**Ejemplos**
+
+```bash
+# Start a stopped service again
+stackkit service start coolify --owner-approve
+```
+
+## stackkit service stop
+
+Detiene un servicio gestionado.
+
+```bash
+stackkit service stop <service-key> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Escribe el resultado versionado de la acción sobre el servicio como JSON |
+| `--owner-approve` | bool | — | Aprueba explícitamente la mutación del servicio ligada al propietario |
+
+**Ejemplos**
+
+```bash
+# Stop a non-critical service; base, id and auth cannot be stopped
+stackkit service stop coolify --owner-approve
+```

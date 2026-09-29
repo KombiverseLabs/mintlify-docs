@@ -1,0 +1,49 @@
+---
+title: "stackkit migrate"
+description: "صنّف StackSpec v1 وأصدر تقرير ترحيلها"
+sidebarTitle: "migrate"
+---
+صنّف StackSpec v1 وأصدر تقرير ترحيلها.
+
+صنّف StackSpec واحدة دون فقدان وشغّل محوّل الترحيل المحدود من v1 إلى v2. تتضمن النتيجة دائمًا تقرير الترحيل الكامل، وإسقاطَ ترحيلٍ للمعمارية فقط عندما يكون حتميًا.
+
+مهم: بدون `--complete-with` لا يكون الإسقاط StackSpec v2 صالحة في CUE، ولا يكون ResolvedPlan، ولا يجيز الإنشاء أو النشر. أكمل الإجراءات اليدوية المبلَّغ عنها ومرّر StackSpec v2 كاملة عبر حل CUE أولًا.
+
+يقبل `--complete-with` StackSpec v2 كاملة وصريحة واحدة، وليس تراكبًا جزئيًا أبدًا. فهو يوفّق ارتباطات Site والعقد والعتاد القديمة الحتمية، ثم يستخدم مرجعية Architecture v2 المحكومة المضمَّنة. تحتوي النتيجة المكتملة على المرشّح القانوني الصريح وتجزئة ResolvedPlan الخاصة به. يُبلَّغ عن أهلية المولّد بصورة مستقلة عن صلاحية CUE، وتتبع جاهزية ResolvedPlan.
+
+يكتب `--spec-output` بالضبط StackSpec v2 القانونية المكتملة بصيغة JSON حتمية. وهو صالح فقط مع `--complete-with`، ولا يعيد الكتابة في المكان نفسه افتراضيًا، ويرفض استبدال هدف قانوني موجود؛ فالاستبدال القانوني يتطلب مسار تأليف StackSpec صريحًا مصرَّحًا بـ CAS.
+
+تنتهي النتيجة الجاهزة لحل الظل بنجاح. أما النتيجة المحجوبة فتُصدَر أيضًا كإخراج قابل للقراءة الآلية، ثم ينتهي الأمر بفشل. يربط السياق المحلية القديمة وعتاد Pi فقط؛ ولا يختار Kit أبدًا.
+
+```bash
+stackkit migrate [v1-spec-file] [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--complete-with` | string | — | مرشّح StackSpec v2 كامل وصريح للتوفيق والحل بالمرجعية المضمَّنة (وليس تراكبًا جزئيًا أبدًا) |
+| `--force` | bool | — | استبدل بصورة ذرّية إخراج نتيجة ترحيل موجودًا؛ ويتطلب إخراج StackSpec القانونية مسارًا جديدًا |
+| `--format` | string | `json` | صيغة الإخراج القابلة للقراءة الآلية: json أو yaml |
+| `--output, -o` | string | — | اكتب نتيجة الترحيل تحت دليل العمل بدل stdout |
+| `--spec-output` | string | — | اكتب StackSpec v2 القانونية المكتملة بصيغة JSON حتمية تحت دليل العمل (يتطلب `--complete-with`) |
+| `--target-kit` | string | — | KitProfile الهدف الصريح الذي تدعمه المرجعية (لا يُستنتج من السياق أبدًا) |
+
+**أمثلة**
+
+```bash
+# Classify a StackSpec v1 and print its migration report
+stackkit migrate stack-spec.yaml
+
+# Report the migration toward an explicit target Kit
+stackkit migrate legacy.yaml --target-kit cloud-kit
+
+# Reconcile with a full StackSpec v2 and write the completed canonical spec
+stackkit migrate legacy.yaml --target-kit basement-kit --complete-with explicit-v2.yaml --spec-output stack-spec.v2.json
+
+# Print the report as YAML
+stackkit migrate legacy.yaml --format yaml
+
+# Write the report to a file beneath the working directory
+stackkit migrate legacy.yaml --output .stackkit/migration-result.json
+```
+

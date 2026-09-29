@@ -1,0 +1,59 @@
+---
+title: "Cloudreve"
+description: "为 Files 用例选择、部署并运维 Cloudreve"
+sidebarTitle: "Cloudreve"
+icon: folder-cloud
+---
+
+Cloudreve 提供[文档与文件](/zh-Hans/guides/stackkits/use-cases/documents-and-files)中的 Files 部分。它是可选 `files` 工作负载的默认备选方案，初始 StackSpec 不会选择它。选择它之前，请先在“文档与文件”页面规划存储和备份。
+
+## 已发布的角色
+
+| 属性 | 值 |
+| --- | --- |
+| 工作负载 | `files` |
+| 备选方案 | `cloudreve` |
+| 数据类别 | personal |
+| 路由 | 生成的 Files 服务路由 |
+| 独立适配器 | `standalone-compose` |
+
+## 选择工作负载
+
+把下面这个对象合并到由 `stackkit init` 创建的完整 StackSpec 中：
+
+```json
+{
+  "workloads": {
+    "files": {
+      "alternative": "cloudreve",
+      "runtimeAdapterRef": "standalone-compose",
+      "placement": {
+        "siteRefs": ["home"],
+        "nodeRefs": ["main"]
+      }
+    }
+  }
+}
+```
+
+该示例已在 v0.32.x 版本上验证并生成。如果你生成的站点或节点 ID 与此不同，请使用你自己的确切 ID。
+
+## 部署并验证
+
+```bash
+stackkit validate
+stackkit generate
+stackkit plan --json
+stackkit apply
+stackkit verify --http --json
+```
+
+在应用之前，请确认解析后的计划包含 `files` 工作负载、`cloudreve` 备选方案和 `standalone-compose` 适配器。
+
+验证成功后，打开生成的 Files 路由，只创建你需要的应用账户。
+
+## 运维
+
+- 让主存储根目录和备份根目录位于你自己控制的存储上。
+- StackKits 的配置变更请保留在 StackSpec 中。不要编辑生成的 Cloudreve 工作负载包或 Compose 环境。
+- 在把该服务当作某个文件的唯一副本之前，先验证恢复。参见[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。

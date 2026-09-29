@@ -1,0 +1,39 @@
+---
+title: "stackkit generate"
+description: "Gesteuerte Deployment-Artefakte aus einer Stack-Spezifikation generieren"
+sidebarTitle: "generate"
+---
+Gesteuerte Deployment-Artefakte aus einer Stack-Spezifikation generieren.
+
+Aliase: `gen`
+
+Die kanonische StackSpec-v2-Absicht über die eingebettete CUE-Autorität auflösen, den exakten ResolvedPlan atomar persistieren und dessen gesteuerte Artefakte transaktional unter dem vom Plan verwalteten outputRoot rendern.
+
+Die StackSpec-v1-Generierung ist eingestellt. Verwende für einen historischen Workspace ein veröffentlichtes exaktes v0.6-Binary oder migriere die Absicht auf StackSpec v2, bevor du generierst. Die veralteten Schalter `--force` und `--fragments` werden vom nativen v2-Pfad abgelehnt.
+
+```bash
+stackkit generate [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--force, -f` | bool | — | Eingestellter veralteter Überschreib-Schalter; für StackSpec v2 abgelehnt |
+| `--fragments` | bool | — | Eingestellter veralteter Fragment-Schalter; für StackSpec v2 abgelehnt |
+| `--inventory` | string | — | Beobachtetes Architecture-v2-Inventory (andernfalls wird eine übliche Inventory-Datei gewählt) |
+| `--local-node` | string | — | Architecture-v2-Node, der ausdrücklich diesem lokalen generate-Prozess gehört |
+| `--local-site` | string | — | Architecture-v2-Site, die ausdrücklich diesem lokalen generate-Prozess gehört |
+| `--output, -o` | string | `deploy` | Den vom Plan verwalteten Output-Root überschreiben |
+| `--resolved-plan` | string | — | Kanonischer Architecture-v2-ResolvedPlan (Standard: &lt;outputRoot&gt;/.stackkit/resolved-plan.json) |
+
+**Beispiele**
+
+```bash
+# Resolve the plan and render deployment artifacts into deploy/
+stackkit generate
+
+# Render into an explicit output root
+stackkit generate --output ./deploy
+
+# Name the Site and node this process owns
+stackkit generate --local-node main --local-site home
+```

@@ -1,0 +1,35 @@
+---
+title: "stackkit plan"
+description: "معاينة تغييرات البنية التحتية"
+sidebarTitle: "plan"
+---
+معاينة تغييرات البنية التحتية.
+
+افحص خطة Architecture v2 المحكومة أو عاين تغييرات بنية v0.6 التحتية.
+
+على v0.7 الأصلي يتحقق هذا الأمر من ResolvedPlan وmanifest التوليد والإيصال وتجزئات المخرجات المُنشأة بعينها ويفحصها دون استدعاء منفِّذ. يحتفظ v0.6 بمعاينة OpenTofu المُحزَّمة؛ ولا ينطبق `--out` و`--destroy` إلا على تلك المعاينة ويُرفضان في الخط الأصلي.
+
+```bash
+stackkit plan [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | manifest التوليد في Architecture v2 (الافتراضي: &lt;outputRoot&gt;/.stackkit/generation-manifest.json) |
+| `--destroy` | bool | — | أنشئ خطة هدم |
+| `--generation-receipt` | string | — | إيصال التوليد في Architecture v2 (الافتراضي: &lt;outputRoot&gt;/.stackkit/generation-receipt.json) |
+| `--inventory` | string | — | Inventory المرصود في Architecture v2 (وإلا يُختار ملف inventory تقليدي واحد) |
+| `--json` | bool | — | أخرج فحص خطة Architecture v2 الأصلية بصيغة JSON |
+| `--out, -o` | string | — | احفظ الخطة في ملف |
+| `--resolved-plan` | string | — | ResolvedPlan القانونية في Architecture v2 (الافتراضي: &lt;outputRoot&gt;/.stackkit/resolved-plan.json) |
+
+**أمثلة**
+
+```bash
+# Inspect the generated plan, its readiness, and artifact hashes
+stackkit plan
+
+# The same inspection as JSON
+stackkit plan --json
+```
+

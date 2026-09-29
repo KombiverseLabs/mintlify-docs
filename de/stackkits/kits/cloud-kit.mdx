@@ -1,0 +1,46 @@
+---
+title: "Cloud Kit"
+description: "Die veröffentlichte StackKits-Definition für einen bestehenden Cloud-Host und eine eigene Domain"
+sidebarTitle: "Cloud Kit"
+icon: cloud
+---
+
+Cloud Kit ist im aktuellen öffentlichen Release (v0.35.x) als Preview enthalten. Kein automatisierter Lebenszyklus-Lauf deckt bisher einen öffentlichen VPS ab, daher führt die [OS-Kompatibilität](/de/stackkits/reference/os-compatibility) es als `unverified`. Es nutzt denselben Standalone-Lebenszyklus zum Erstellen wie Basement Kit, ist aber für einen bestehenden Cloud-Host mit öffentlichem DNS und TLS unter deiner Kontrolle gedacht.
+
+<Note>
+  Das Release enthält die Cloud-Kit-Definition und den Installer. Behandle den Konfigurations-Bootstrap und release-spezifische Live-Laufzeit-Nachweise als getrennte Aussagen.
+</Note>
+
+## Bevor du startest
+
+Bereite diese Dinge außerhalb von StackKits vor:
+
+- einen bereits verfügbaren Host, den du betreiben darfst
+- eine Domain und DNS-Einträge, die du kontrollierst
+- eine für öffentliche Dienste geeignete Host- und Netzwerkabsicherung
+
+StackKits validiert und wendet seine eigene Systemdefinition auf diesen Host an. Es stellt keinen Server bereit, wählt keinen Provider aus und hält keine Provider-Zugangsdaten.
+
+## Ein Cloud Kit starten
+
+Bootstrappe den veröffentlichten Workspace unter Linux oder macOS:
+
+```bash
+curl -sSL https://cloud.stackkit.cc | DOMAIN=example.com sh
+cd ~/my-cloud-homelab
+```
+
+Verwende anstelle von `example.com` eine Domain, die dir gehört. Bewahre die StackSpec und die Verifikationsausgabe beim Workspace auf und ändere nur die StackSpec, bevor du Artefakte neu generierst.
+
+Wenn du das CLI schon hast, [wähle ein Kit](/de/guides/stackkits/choosing-a-kit) und [konfiguriere die StackSpec](/de/guides/stackkits/configure-stack-spec).
+
+## Mit Basement Kit vergleichen
+
+<CardGroup cols={2}>
+  <Card title="Basement Kit" icon="house" href="/de/stackkits/kits/basement-kit">
+    Nutze lokale Hardware und eine LAN-zentrierte Umgebung.
+  </Card>
+  <Card title="Anwendungskatalog" icon="grid-2" href="/de/stackkits/apps/overview">
+    Sieh dir die veröffentlichten Plattform- und Anwendungsmodule an.
+  </Card>
+</CardGroup>

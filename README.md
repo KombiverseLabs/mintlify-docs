@@ -55,6 +55,47 @@ The old Kombify documentation repository is not an upstream source and must
 not be used for migration or content recovery. Product repositories and their
 public release artifacts are the verification sources.
 
+## Localization
+
+English is the source language and keeps its URLs unchanged (`/stackkits/quickstart`).
+Every other locale is a Mintlify language branch in `docs.json` under
+`navigation.languages` with its pages in a folder named after the locale code
+(`de/stackkits/quickstart` is served at `/de/stackkits/quickstart`). Mintlify
+renders the language switcher from that array. The published locales are
+listed in `allowedNavigationLanguages` of `public-safety-policy.json`.
+Supported codes: `ar`, `de`, `en`, `es`, `hi`, `zh-Hans` (Traditional Chinese
+is `zh-Hant` and is never mapped to Simplified).
+
+Translator workflow, shown for German and identical for `es`, `zh-Hans`, `hi`
+and `ar`:
+
+1. Create `scripts/i18n/labels/<code>.json`, mapping each English tab and group
+   name to its translation, and enable the code in `LOCALES` of
+   `scripts/i18n/sync-navigation.mjs`.
+2. Translate every English page `P.mdx` to `<code>/P.mdx`. Keep frontmatter keys,
+   MDX components and props, and images. Translate only prose, `title`,
+   `description`, `sidebarTitle` and human-readable props. Copy fenced code
+   blocks byte for byte. Never translate product names (kombify, StackKits,
+   Techstack, Companion, SpeechKit, Paperwork, kombify Cloud, kombify Sites,
+   Simulate, CUE) or CLI commands, flags, paths and identifiers. Rewrite
+   internal links to `/<code>/...`; heading anchors follow the translated
+   heading. Guide pages import a translated message catalog or snippet copy
+   (`snippets/client-setup-labels-de.jsx`, `snippets/photo-backup-guide-de.jsx`).
+   Right-to-left locales need the guide components checked with `dir="rtl"`.
+3. Run `node scripts/i18n/sync-navigation.mjs <code>` to rebuild the locale branch
+   of `docs.json` from the English tree.
+4. Add the code to `allowedNavigationLanguages`, the localized tab names to
+   `allowedNavigationTabs` and `<code>/` to `allowedPagePrefixes` in
+   `public-safety-policy.json`.
+5. Run `node scripts/i18n/check.mjs <code>` (also part of `mise run check`). It
+   fails on a missing counterpart, changed frontmatter keys, differing code
+   blocks or component tags, and any internal link or anchor that does not
+   resolve inside the locale.
+
+Generated English pages (`stackkits/reference/cli/*`, release pages) are
+rendered from release data; regenerate or re-translate their localized copies
+after each release. A locale is advertised only after a competent-speaker review.
+
 ## Runtime And Dependencies
 
 | Concern | Choice |

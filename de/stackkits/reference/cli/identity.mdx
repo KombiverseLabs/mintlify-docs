@@ -1,0 +1,174 @@
+---
+title: "stackkit identity"
+description: "Die lokale Standalone-Identity-Ebene verwalten"
+sidebarTitle: "identity"
+---
+Die lokale Standalone-Identity-Ebene verwalten.
+
+```bash
+stackkit identity [flags]
+```
+
+Subcommands: [`stackkit identity projection`](#stackkit-identity-projection), [`stackkit identity workload-peer`](#stackkit-identity-workload-peer)
+
+## stackkit identity projection
+
+Credential-freie gewünschte Identity-Projektionen prüfen und lokal freigeben.
+
+```bash
+stackkit identity projection [flags]
+```
+
+Subcommands: [`stackkit identity projection apply`](#stackkit-identity-projection-apply), [`stackkit identity projection approve`](#stackkit-identity-projection-approve), [`stackkit identity projection inspect`](#stackkit-identity-projection-inspect), [`stackkit identity projection unlink`](#stackkit-identity-projection-unlink)
+
+### stackkit identity projection apply
+
+Eine zuvor freigegebene Projektion auf das lokale PocketID anwenden.
+
+```bash
+stackkit identity projection apply [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+| `--owner-approve` | bool | — | Diese lokale Identity-Operation explizit freigeben |
+| `--projection-sha256` | string | — | Exaktes sha256:&lt;hex&gt; einer lokal freigegebenen Projektion |
+
+### stackkit identity projection approve
+
+Die lokale, vom Owner signierte Freigabe ohne PocketID-Änderung erstellen.
+
+```bash
+stackkit identity projection approve [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--file` | string | — | Pfad zu einem kanonischen stackkit.desired-identity-projection/v1-Dokument |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+| `--owner-approve` | bool | — | Den Import dieser gewünschten Projektion in die lokale Verwahrung explizit freigeben |
+
+### stackkit identity projection inspect
+
+Eine signierte Projektion ohne Änderung verifizieren.
+
+```bash
+stackkit identity projection inspect [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--file` | string | — | Pfad zu einem kanonischen stackkit.desired-identity-projection/v1-Dokument |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+
+### stackkit identity projection unlink
+
+Optionalen Sync lösen, ohne eine lokale Identity zu löschen.
+
+```bash
+stackkit identity projection unlink [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+| `--owner-approve` | bool | — | Diese lokale Identity-Operation explizit freigeben |
+| `--projection-sha256` | string | — | Exaktes sha256:&lt;hex&gt; einer lokal freigegebenen Projektion |
+
+## stackkit identity workload-peer
+
+Vom Owner freigegebene Cloud-Workload-Zertifikate mit Home austauschen.
+
+```bash
+stackkit identity workload-peer [flags]
+```
+
+Subcommands: [`stackkit identity workload-peer enroll`](#stackkit-identity-workload-peer-enroll), [`stackkit identity workload-peer install`](#stackkit-identity-workload-peer-install), [`stackkit identity workload-peer probe`](#stackkit-identity-workload-peer-probe), [`stackkit identity workload-peer request`](#stackkit-identity-workload-peer-request), [`stackkit identity workload-peer revoke`](#stackkit-identity-workload-peer-revoke)
+
+### stackkit identity workload-peer enroll
+
+Einen Peer für eine installierte Home-Veröffentlichung ausstellen und zulassen.
+
+```bash
+stackkit identity workload-peer enroll [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--address` | string | — | Bestehender Federation-Loopback-Socket für die Cloud-Probe |
+| `--file` | string | — | Öffentliche Request- oder Credential-JSON-Datei |
+| `--home-root-sha256` | string | — | SHA-256-Fingerprint des Home-Roots, verifiziert über einen separaten, vom Owner freigegebenen Kanal |
+| `--owner-approve` | bool | — | Diese lokale Workload-Identity-Operation explizit freigeben |
+| `--peer-ref` | string | — | Explizite Workload-Peer-Identity |
+| `--replace-key` | bool | — | Den Schlüssel des ausgewählten Peers explizit ersetzen; widerrufene Schlüssel bleiben abgelehnt |
+| `--server-name` | string | — | Server-Name des installierten Home-Origins |
+
+### stackkit identity workload-peer install
+
+Ein von Home ausgestelltes Zertifikat mit einem unabhängig verifizierten Root installieren.
+
+```bash
+stackkit identity workload-peer install [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--address` | string | — | Bestehender Federation-Loopback-Socket für die Cloud-Probe |
+| `--file` | string | — | Öffentliche Request- oder Credential-JSON-Datei |
+| `--home-root-sha256` | string | — | SHA-256-Fingerprint des Home-Roots, verifiziert über einen separaten, vom Owner freigegebenen Kanal |
+| `--owner-approve` | bool | — | Diese lokale Workload-Identity-Operation explizit freigeben |
+| `--peer-ref` | string | — | Explizite Workload-Peer-Identity |
+| `--server-name` | string | — | Server-Name des installierten Home-Origins |
+
+### stackkit identity workload-peer probe
+
+Den Origin über einen bestehenden Federation-Loopback-Socket anfragen.
+
+```bash
+stackkit identity workload-peer probe [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--address` | string | — | Bestehender Federation-Loopback-Socket für die Cloud-Probe |
+| `--file` | string | — | Öffentliche Request- oder Credential-JSON-Datei |
+| `--home-root-sha256` | string | — | SHA-256-Fingerprint des Home-Roots, verifiziert über einen separaten, vom Owner freigegebenen Kanal |
+| `--owner-approve` | bool | — | Diese lokale Workload-Identity-Operation explizit freigeben |
+| `--peer-ref` | string | — | Explizite Workload-Peer-Identity |
+| `--server-name` | string | — | Server-Name des installierten Home-Origins |
+
+### stackkit identity workload-peer request
+
+Einen von Cloud gehaltenen Schlüssel erstellen oder wiederverwenden und seinen öffentlichen CSR exportieren.
+
+```bash
+stackkit identity workload-peer request [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--address` | string | — | Bestehender Federation-Loopback-Socket für die Cloud-Probe |
+| `--file` | string | — | Öffentliche Request- oder Credential-JSON-Datei |
+| `--home-root-sha256` | string | — | SHA-256-Fingerprint des Home-Roots, verifiziert über einen separaten, vom Owner freigegebenen Kanal |
+| `--owner-approve` | bool | — | Diese lokale Workload-Identity-Operation explizit freigeben |
+| `--peer-ref` | string | — | Explizite Workload-Peer-Identity |
+| `--rotate-key` | bool | — | Einen neuen Cloud-Schlüssel erzeugen und das aktive Credential bis zur Installation beibehalten |
+| `--server-name` | string | — | Server-Name des installierten Home-Origins |
+
+### stackkit identity workload-peer revoke
+
+Die aktuelle Home-Zulassung eines Peers zurückziehen.
+
+```bash
+stackkit identity workload-peer revoke [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--address` | string | — | Bestehender Federation-Loopback-Socket für die Cloud-Probe |
+| `--file` | string | — | Öffentliche Request- oder Credential-JSON-Datei |
+| `--home-root-sha256` | string | — | SHA-256-Fingerprint des Home-Roots, verifiziert über einen separaten, vom Owner freigegebenen Kanal |
+| `--owner-approve` | bool | — | Diese lokale Workload-Identity-Operation explizit freigeben |
+| `--peer-ref` | string | — | Explizite Workload-Peer-Identity |
+| `--server-name` | string | — | Server-Name des installierten Home-Origins |

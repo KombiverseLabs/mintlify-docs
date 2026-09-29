@@ -1,0 +1,86 @@
+---
+title: "CLI 参考"
+description: "每个 stackkit 命令及其标志和示例"
+sidebarTitle: "概览"
+icon: square-terminal
+---
+用可移植的 StackKits 搭建并维护你自己的服务。这些页面列出了每个 `stackkit` 命令及其标志和示例。它们由 StackKits 命令定义生成；如果你安装的版本较旧，请以 `stackkit <command> --help` 为准。
+
+## 安装 CLI
+
+```bash
+curl -sSL https://install.stackkit.cc | STACKKIT_CLI_ONLY=1 sh
+```
+
+使用 `STACKKIT_CLI_ONLY=1` 时，安装器会把 `stackkit`、`stackkit-server`、`stackkit-mcp`、打包好的 OpenTofu 和公开的 Kit 目录放入 `~/.stackkits`，而不安装任何 StackKit。不使用它时，安装器会检测主机并继续安装 Basement Kit 或 Cloud Kit。
+
+## 全局标志
+
+这些标志适用于所有命令。
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--chdir, -C` | string | `.` | 运行前切换到该目录 |
+| `--correlation-id` | string | — | 经过验证的调用方关联 ID，记录在本地 rollout 证据中 |
+| `--no-log` | bool | — | 禁用结构化部署日志 |
+| `--progress-jsonl` | string | — | 将已脱敏的机器可读 rollout 进度 JSONL 写入某个路径，或用 '-' 写入 stdout |
+| `--quiet, -q` | bool | — | 抑制非必要的输出 |
+| `--spec, -s` | string | `stack-spec.yaml` | 栈规格文件的路径（默认文件缺失时接受 kombination.yaml） |
+| `--verbose, -v` | bool | — | 启用详细输出 |
+
+## 搭建你的服务
+
+| 命令 | 说明 |
+| --- | --- |
+| [`stackkit apply`](/zh-Hans/stackkits/reference/cli/apply) | 应用基础设施变更 |
+| [`stackkit generate`](/zh-Hans/stackkits/reference/cli/generate) | 根据栈规格生成受治理的部署产物 |
+| [`stackkit init`](/zh-Hans/stackkits/reference/cli/init) | 根据 StackKit 初始化新的部署 |
+| [`stackkit plan`](/zh-Hans/stackkits/reference/cli/plan) | 预览基础设施变更 |
+| [`stackkit prepare`](/zh-Hans/stackkits/reference/cli/prepare) | 为 StackKit 部署准备系统 |
+| [`stackkit setup`](/zh-Hans/stackkits/reference/cli/setup) | 设置已应用应用的 Owner 账号 |
+| [`stackkit validate`](/zh-Hans/stackkits/reference/cli/validate) | 校验配置文件 |
+
+## 检查、维护与恢复
+
+| 命令 | 说明 |
+| --- | --- |
+| [`stackkit backup`](/zh-Hans/stackkits/reference/cli/backup) | 管理备份（Kopia 引擎） |
+| [`stackkit break-glass`](/zh-Hans/stackkits/reference/cli/break-glass) | 管理应急（break-glass）恢复账号和恢复包 |
+| [`stackkit drift`](/zh-Hans/stackkits/reference/cli/drift) | 观察并协调本地 StackKit 漂移 |
+| [`stackkit logs`](/zh-Hans/stackkits/reference/cli/logs) | 查看结构化的部署日志 |
+| [`stackkit remove`](/zh-Hans/stackkits/reference/cli/remove) | 卸载本地 StackKits 部署 |
+| [`stackkit service`](/zh-Hans/stackkits/reference/cli/service) | 控制当前 StackKits 计划声明的服务 |
+| [`stackkit upgrade`](/zh-Hans/stackkits/reference/cli/upgrade) | 解析并安装经过验证的 StackKit 发布版本 |
+| [`stackkit user`](/zh-Hans/stackkits/reference/cli/user) | 在本地 PocketID 中邀请并管理家庭用户 |
+| [`stackkit verify`](/zh-Hans/stackkits/reference/cli/verify) | 运行部署后验证检查 |
+
+## 高级工具与参考
+
+| 命令 | 说明 |
+| --- | --- |
+| [`stackkit address`](/zh-Hans/stackkits/reference/cli/address) | 规划并绑定不含密钥的公开服务地址 |
+| [`stackkit advanced`](/zh-Hans/stackkits/reference/cli/advanced) | 管理经离线授权的 Advanced 生命周期操作 |
+| [`stackkit agent`](/zh-Hans/stackkits/reference/cli/agent) | 面向 Agent 的 StackKits 自动化辅助工具 |
+| [`stackkit app`](/zh-Hans/stackkits/reference/cli/app) | 检查 StackKits 应用交付并管理 v0.6 交接 |
+| [`stackkit cluster`](/zh-Hans/stackkits/reference/cli/cluster) | 管理 StackKits 多节点集群成员 |
+| [`stackkit compat`](/zh-Hans/stackkits/reference/cli/compat) | 显示操作系统支持证据和主机一致性诊断 |
+| [`stackkit completion`](/zh-Hans/stackkits/reference/cli/completion) | 生成 shell 补全脚本 |
+| [`stackkit docs`](/zh-Hans/stackkits/reference/cli/docs) | 生成确定性的 StackKits 文档投影 |
+| [`stackkit federation`](/zh-Hans/stackkits/reference/cli/federation) | 管理本地 Federation 绑定证据 |
+| [`stackkit game`](/zh-Hans/stackkits/reference/cli/game) | 在已安装的 Game 工作负载上操作 Owner 的游戏服务器 |
+| [`stackkit host`](/zh-Hans/stackkits/reference/cli/host) | 与提供商无关的主机契约操作 |
+| [`stackkit identity`](/zh-Hans/stackkits/reference/cli/identity) | 管理独立的本地身份平面 |
+| [`stackkit kit`](/zh-Hans/stackkits/reference/cli/kit) | 已发布的 StackKit 发布版本操作 |
+| [`stackkit migrate`](/zh-Hans/stackkits/reference/cli/migrate) | 对 StackSpec v1 进行分类并输出其迁移报告 |
+| [`stackkit module`](/zh-Hans/stackkits/reference/cli/module) | 创作并验证本地 CUE 模块 |
+| [`stackkit operations`](/zh-Hans/stackkits/reference/cli/operations) | 列出规范的独立生命周期操作契约 |
+| [`stackkit output-transaction`](/zh-Hans/stackkits/reference/cli/output-transaction) | 检查显式的 Architecture v2 输出事务生命周期操作 |
+| [`stackkit registry`](/zh-Hans/stackkits/reference/cli/registry) | 管理内嵌的 StackKits 注册表快照 |
+| [`stackkit resolve`](/zh-Hans/stackkits/reference/cli/resolve) | 将 Architecture v2 意图解析为规范的部署计划 |
+| [`stackkit runtime`](/zh-Hans/stackkits/reference/cli/runtime) | 执行经过认证的节点侧运行时操作 |
+| [`stackkit secrets`](/zh-Hans/stackkits/reference/cli/secrets) | 管理与 Owner 绑定的本地密钥托管 |
+| [`stackkit support`](/zh-Hans/stackkits/reference/cli/support) | 导出已脱敏的本地支持证据 |
+| [`stackkit use-cases`](/zh-Hans/stackkits/reference/cli/use-cases) | 选择可选的 Kit 用例 |
+| [`stackkit version`](/zh-Hans/stackkits/reference/cli/version) | 输出版本信息 |
+
+当前版本会拒绝或替换的命令列在[旧版与已弃用的命令](/zh-Hans/stackkits/reference/cli/legacy)之下。

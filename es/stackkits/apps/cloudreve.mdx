@@ -1,0 +1,59 @@
+---
+title: "Cloudreve"
+description: "Selecciona, despliega y opera Cloudreve para el caso de uso Files"
+sidebarTitle: "Cloudreve"
+icon: folder-cloud
+---
+
+Cloudreve aporta la parte de Files de [Documentos y archivos](/es/guides/stackkits/use-cases/documents-and-files). Es la alternativa predeterminada del workload opcional `files`, y la StackSpec inicial no la selecciona. Planifica el almacenamiento y las copias de seguridad en la página Documentos y archivos antes de seleccionarla.
+
+## Rol publicado
+
+| Propiedad | Valor |
+| --- | --- |
+| Workload | `files` |
+| Alternativa | `cloudreve` |
+| Clase de datos | personal |
+| Ruta | ruta de servicio Files generada |
+| Adaptador independiente | `standalone-compose` |
+
+## Selecciona el workload
+
+Fusiona este objeto en la StackSpec completa creada por `stackkit init`:
+
+```json
+{
+  "workloads": {
+    "files": {
+      "alternative": "cloudreve",
+      "runtimeAdapterRef": "standalone-compose",
+      "placement": {
+        "siteRefs": ["home"],
+        "nodeRefs": ["main"]
+      }
+    }
+  }
+}
+```
+
+El ejemplo se validó y generó con el release v0.32.x. Si los ID de site o de nodo generados en tu caso son distintos, usa esos ID exactos.
+
+## Despliega y verifica
+
+```bash
+stackkit validate
+stackkit generate
+stackkit plan --json
+stackkit apply
+stackkit verify --http --json
+```
+
+Antes de aplicar, confirma que el plan resuelto contiene el workload `files`, la alternativa `cloudreve` y el adaptador `standalone-compose`.
+
+Cuando la verificación termine con éxito, abre la ruta de Files generada y crea solo las cuentas de aplicación que necesites.
+
+## Operación
+
+- Mantén las raíces principal y de copia de seguridad en almacenamiento que controles.
+- Mantén los cambios de configuración de StackKits en la StackSpec. No edites el paquete de workload de Cloudreve generado ni el entorno de Compose.
+- Verifica la recuperación antes de confiar en el servicio para la única copia de un archivo. Consulta [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).

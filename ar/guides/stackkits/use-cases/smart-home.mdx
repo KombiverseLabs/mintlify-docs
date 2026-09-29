@@ -1,0 +1,55 @@
+---
+title: "المنزل الذكي (Smart Home)"
+description: "راقب الأجهزة التي تختارها وتحكم بها عبر Home Assistant، على مضيف تشغّله أنت"
+sidebarTitle: "Smart Home"
+icon: house-signal
+---
+
+<Info>
+  حالة الأدلة (2026-09-24، الإصدار v0.41.0): Smart Home عبر Home Assistant في حالة `available, lifecycle-verified`. جرى التحقق من Smart Home على أرشيف v0.39.7 العام، حيث اجتاز تشغيل منتِج لدورة الحياة على Depot، على Ubuntu 24.04 amd64 (Basement Kit، مستقل)، مراحل install وinit وgenerate وapply وإعداد المالك وverify وbackup وrestore وتفعيل الاستعادة، مع التحقق من قراءة التطبيق عبر حلقة loopback المحلية للضيف.
+</Info>
+
+يمنح Smart Home أسرتك مكاناً واحداً لمراقبة الأجهزة التي تختارها والتحكم بها، على مضيف تشغّله أنت. يشغّل Home Assistant منصة الأتمتة. ويسمي كتالوج الإصدار حالة الاستخدام هذه Smart Home ويسلّمها كـ workload اختياري هو `smart-home`.
+
+## اختر كيف يعمل Home Assistant
+
+| الإعداد | الخيارات | الافتراضي |
+| --- | --- | --- |
+| التثبيت | حاوية (Home Assistant Core، دون Supervisor أو Apps) أو Home Assistant OS على جهاز مخصص | حاوية |
+| تثبيت قائم | إنشاء جديد، أو ربط نسخة قائمة دون تغيير إعدادها | إنشاء جديد |
+| أجهزة USB | تمرير راديو Zigbee أو Z-Wave أو USB آخر إلى الـ workload | معطّل |
+| اكتشاف الشبكة | اكتشاف المصابيح والسماعات والمحاور تلقائياً على شبكتك المنزلية | مفعّل |
+
+ربط نسخة قائمة يحافظ على إعدادها الحالي. لا يعيد StackKits أبداً ضبط نسخة قائمة لمحاكاة بداية جديدة، وتظل إدارة تلك النسخة تتطلب منحاً منفصلاً.
+
+## اختر المضيف
+
+استخدم [Basement Kit](/ar/stackkits/kits/basement-kit) للعتاد المحلي والوصول المباشر إلى راديوهات Zigbee/Z-Wave عبر USB والأجهزة على شبكتك المحلية. لا يملك Cloud Kit وصولاً إلى الراديوهات المحلية ولا إلى الأجهزة على شبكتك المنزلية، فليس مناسباً للجانب المحلي من Smart Home.
+
+## أعدّه
+
+1. اختر الـ workload `smart-home` في [StackSpec](/ar/guides/stackkits/configure-stack-spec)، واختر حاوية أو Home Assistant OS، وقرر هل تمرّر راديو USB.
+2. ولّد الـ stack وطبّقه على [Basement Kit](/ar/stackkits/kits/basement-kit) تم التحقق منه.
+3. افتح مسار Smart Home المولّد وأكمل بنفسك معالج تهيئة Home Assistant: أنشئ حساب المالك، واضبط موقع منزلك، وأضف تكاملات الأجهزة التي تملكها فعلاً.
+4. اقرن أول جهاز وتأكد من ظهور حالته الصحيحة قبل أن تضيف المزيد.
+
+## افحص Node Hub
+
+افتح [Node Hub](/ar/guides/stackkits/node-hub) لتأكيد أن workload Smart Home يعمل ولرؤية عنوانه المولّد. Homepage وحدة تنقل مُصدَرة، لكن StackSpec الأولي لا يختارها. وNode Hub هو نقطة دخولك الحالية إلى أن تختار غير ذلك.
+
+## النسخ الاحتياطي والاسترداد
+
+إعدادات Home Assistant وتسجيلات الأجهزة جزء من النسخ الاحتياطي المعلن لـ kit لديك. الاستعادة في بيئة معزولة لا تعيد اقتران الأجهزة الفعلية تلقائياً ولا تعيد تطبيق وصول أُلغي. أعد التحقق من ارتباطات الأجهزة والمنوح الحالية قبل أن تستأنف الإجراءات الفعلية. راجع [النسخ الاحتياطي والاستعادة](/ar/guides/stackkits/back-up-and-restore).
+
+## احصل على التطبيقات
+
+<CardGroup cols={2}>
+  <Card title="Home Assistant Companion (iOS)" icon="apple" href="https://apps.apple.com/us/app/home-assistant/id1099568401">
+    تطبيق Home Assistant الرسمي لـ iPhone وiPad.
+  </Card>
+  <Card title="Home Assistant Companion (Android)" icon="android" href="https://play.google.com/store/apps/details?id=io.homeassistant.companion.android">
+    تطبيق Home Assistant الرسمي لنظام Android.
+  </Card>
+</CardGroup>
+
+ثبّت التطبيق، واختر الاتصال يدوياً، وأدخل عنوان Smart Home المولّد لديك عندما يسأل عن كيفية الاتصال. وسجّل الدخول بحساب المالك الذي أنشأته أثناء التهيئة.

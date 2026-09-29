@@ -1,0 +1,47 @@
+---
+title: "开发"
+description: "用 Gitea 托管私有 Git 仓库，远程桌面和工作区运行时正在规划中"
+sidebarTitle: "开发"
+icon: code
+---
+
+<Info>
+  证据状态（2026-09-24，v0.39.7）：使用 Gitea 的仓库为 `available,
+  not yet lifecycle-verified`，即可以在目录中选择，但目前还没有自动化的生命周期运行覆盖它。使用 Guacamole 的远程桌面为 `in
+  development`：已为未来版本声明，但还无法安装。共享的开发工作区运行时为 `planned`，没有发布版本，也没有确定的日期。
+</Info>
+
+开发把仓库、开发工作区和远程桌面这几项成果合并在一个使用场景之下：无需自己拼装 Git 服务器、工作区和访问路由，就能在另一台电脑上继续一个项目。仓库和远程桌面仍然可以独立选择，CI 运行器与普通的开发使用是分开的可选项。
+
+## 应用
+
+<CardGroup cols={2}>
+  <Card title="Gitea" icon="code-branch" href="/zh-Hans/stackkits/apps/gitea">
+    仓库背后的 Git 服务器：选择、HTTPS 路由、所有者登录和存储边界。
+  </Card>
+  <Card title="Guacamole" icon="server">
+    Apache Guacamole 是远程桌面现有的候选方案。开发中：已为该版本声明，但还无法安装。
+  </Card>
+</CardGroup>
+
+## 仓库（目前可用）
+
+- Git 只通过 HTTPS 工作。不会暴露 SSH，也不会安装 CI 运行器。
+- 每个客户端都需要 Git 主机的 DNS 名称，并且必须信任该主机的内部 CA 证书。
+- 恢复需要两个 Gitea 卷，并且要在停止写入时捕获。
+
+## 远程桌面和工作区（规划中）
+
+- **远程桌面**基于浏览器：[Apache Guacamole](https://guacamole.apache.org/) 是现有的候选方案，会话可以通过任意浏览器打开，无需安装桌面客户端。它绑定到一个明确的、已受支持的桌面目标；它本身不会配置操作系统桌面。
+- **开发工作区**（用声明的工具链打开、编辑并继续一个项目）需要明确选择运行时，目前尚未获准。
+- 两者都仍在评估中。它们都不会改变仓库目前的行为，选择其中一个也不需要另一个：只用 Git 的所有者不需要桌面，只用桌面的所有者也不需要 Git 服务器。
+
+## 获取工具
+
+- **Git 客户端**：针对生成的 HTTPS 路由，使用你现有的原生 Git 客户端或 IDE 集成。
+- **tea，Gitea 的 CLI**：如需在终端中以脚本方式执行仓库、issue 和拉取请求操作，请参见 [gitea.com/gitea/tea](https://gitea.com/gitea/tea)。
+- **Guacamole**：发布后无需安装客户端，它完全在你的浏览器中运行。
+
+## 设置
+
+从一个空的所有者工作区开始，按照 [Gitea](/zh-Hans/stackkits/apps/gitea) 页面操作。在依赖它之前，先从真实客户端推送到一个测试仓库。

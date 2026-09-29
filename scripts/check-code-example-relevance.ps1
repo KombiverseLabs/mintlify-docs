@@ -108,7 +108,10 @@ $structuredBlockCount = 0
 $inlineCommandCount = 0
 
 foreach ($file in $mdxFiles) {
-    $relative = $file.FullName.Substring($RepoRoot.Length).TrimStart("\", "/").Replace("\", "/")
+    $fullRelative = $file.FullName.Substring($RepoRoot.Length).TrimStart("\", "/").Replace("\", "/")
+    # A localized page follows the approvals of its English source page.
+    $relative = $fullRelative -replace '^(?:de|es|zh-Hans|hi|ar)/', ''
+    $isLocalized = $relative -ne $fullRelative
     # Release history records shipped CLI contracts; it is not a topic workflow.
     if ($relative -eq "changelog/overview.mdx") {
         continue
@@ -118,7 +121,7 @@ foreach ($file in $mdxFiles) {
     # Generated CLI reference pages show each command's own usage and examples;
     # the command tree decides their relevance, not a topic workflow.
     if ($relative -like "stackkits/reference/cli/*.mdx" -and
-        $content -match '(?m)^generated_by: "stackkit docs emit-cli-reference"$') {
+        ($isLocalized -or $content -match '(?m)^generated_by: "stackkit docs emit-cli-reference"$')) {
         continue
     }
     if ($relative -like "techstack/reference/cli/*.mdx" -and

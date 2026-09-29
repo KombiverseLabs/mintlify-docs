@@ -1,0 +1,34 @@
+---
+title: "CUE وStackKits"
+description: "كيف يتحقق CUE من نية StackKits قبل تطبيق الملفات المولَّدة"
+sidebarTitle: "CUE"
+icon: cubes
+---
+
+تستخدم StackKits لغة CUE كمصدر الحقيقة لعقود الأطقم. يُفحص StackSpec الخاص بك مقابل ذلك العقد قبل توليد الملفات أو تغيير أي هدف.
+
+## سير العمل
+
+تنشئ التهيئة StackSpec كاملًا للطقم المختار. يتحقق التحقق من تلك النية مقابل عقود CUE الخاصة بالإصدار. ثم يشتق التوليد ملفات نشر قابلة للاستبدال من المدخلات التي جرى التحقق منها. وعند تغيّر أي إعداد، حدّث StackSpec وكرّر التحقق والتوليد؛ ولا تحرّر الملفات المولَّدة مباشرةً.
+
+## حزمة المخطط المشتركة
+
+تتشارك عقود الأطقم حزمة CUE `foundation`، وتُستورد باسم `github.com/kombifyio/stackkits/foundation`. وتعرّف `#FoundationStackKit`، وهو العقد المشترك الذي توسّعه مخططات المنصة والأطقم بخدماتها وقيودها الخاصة.
+
+تتضمن الأرشيفات المنشورة والمثبّت هذه الحزمة باسم `foundation/`، وعقد الطقم المشترك فيها في `foundation/stackkit.cue`.
+
+<Note>
+  الإصدارات السابقة لـ v0.18.22 كانت تسمّي هذه الحزمة `base` وتعرض
+  `#BaseStackKit`. كلا الاسمين أُلغيا. يجب على مؤلفي الأطقم والأدوات استيراد
+  `github.com/kombifyio/stackkits/foundation` وتوسيع `#FoundationStackKit`.
+</Note>
+
+## الحدود
+
+يصف StackSpec المستقل نية StackKits. أما بيانات اعتماد المزوّد ودورة حياته وشراء الخوادم فتبقى خارج ذلك العقد. وتبقى مساحة عمل StackKits قابلة للاستخدام دون أي اعتماد على kombify مستضاف.
+
+## صفحات ذات صلة
+
+- [صيغة المواصفة](/ar/stackkits/reference/spec-format)
+- [Basement Kit](/ar/stackkits/kits/basement-kit)
+- [Cloud Kit](/ar/stackkits/kits/cloud-kit)

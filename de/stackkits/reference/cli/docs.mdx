@@ -1,0 +1,98 @@
+---
+title: "stackkit docs"
+description: "Deterministische StackKits-Dokumentationsprojektionen generieren"
+sidebarTitle: "docs"
+---
+Deterministische StackKits-Dokumentationsprojektionen generieren.
+
+```bash
+stackkit docs [flags]
+```
+
+Unterbefehle: [`stackkit docs emit-advanced-operations`](#stackkit-docs-emit-advanced-operations), [`stackkit docs emit-cli-reference`](#stackkit-docs-emit-cli-reference), [`stackkit docs emit-release-manifests`](#stackkit-docs-emit-release-manifests), [`stackkit docs emit-use-case-overview`](#stackkit-docs-emit-use-case-overview)
+
+## stackkit docs emit-advanced-operations
+
+Den Advanced-Operations-Katalog ausgeben (stackkit.advanced-operations/v1).
+
+Den maschinenlesbaren Katalog jeder Advanced-Operation schreiben, die ein Orchestrator auslösen darf: exakte argv-Templates, Zulassungsanforderungen, Eingabe- und Ergebnisverträge, Rollout-Event-Phasen und das Denial-Envelope.
+
+Das Release-Archiv liefert diese Datei mit. Mit `--check` wird nichts geschrieben; der Befehl schlägt fehl, wenn die Datei von der Katalogquelle abweicht.
+
+```bash
+stackkit docs emit-advanced-operations [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--check` | bool | — | Nichts schreiben; fehlschlagen, wenn die Katalogdatei fehlt oder veraltet ist |
+| `--out` | string | `docs/data/advanced-operations/latest.json` | Pfad der Katalog-JSON, relativ zu `--chdir` |
+
+**Beispiele**
+
+```bash
+# Regenerate the committed catalog after changing an Advanced operation
+stackkit docs emit-advanced-operations
+
+# Fail when the committed catalog is stale
+stackkit docs emit-advanced-operations --check
+```
+
+## stackkit docs emit-cli-reference
+
+Die maschinenlesbare stackkit-CLI-Referenz ausgeben.
+
+Jeden sichtbaren stackkit-Befehl, jedes Flag und jedes Beispiel als deterministisches JSON schreiben.
+
+Die stackkit.cc-CLI-Referenz rendert diese Datei. Mit `--check` wird nichts geschrieben; der Befehl schlägt fehl, wenn die Datei vom aktuellen Befehlsbaum abweicht.
+
+```bash
+stackkit docs emit-cli-reference [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--check` | bool | — | Nichts schreiben; fehlschlagen, wenn die Referenzdatei fehlt oder veraltet ist |
+| `--out` | string | `docs/data/cli-reference/latest.json` | Pfad der Referenz-JSON, relativ zu `--chdir` |
+
+**Beispiele**
+
+```bash
+# Regenerate the committed reference after changing a command, flag, or example
+stackkit docs emit-cli-reference
+
+# Fail when the committed reference is stale
+stackkit docs emit-cli-reference --check
+```
+
+## stackkit docs emit-release-manifests
+
+An Releases gebundene Anwendungsfall- und Kompatibilitätsmanifeste ausgeben.
+
+```bash
+stackkit docs emit-release-manifests [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--output-dir` | string | — | **Erforderlich.** Ausgabeverzeichnis der Manifeste |
+| `--public-source-sha` | string | — | **Erforderlich.** exakter öffentlicher Source-SHA |
+| `--release-tag` | string | — | **Erforderlich.** veröffentlichter Release-Tag (vX.Y.Z) |
+| `--release-url` | string | — | **Erforderlich.** exakte öffentliche Release-URL |
+| `--source-sha` | string | — | **Erforderlich.** exakter privater Source-SHA |
+
+## stackkit docs emit-use-case-overview
+
+Die interne, abgeleitete Entwicklungsübersicht der Anwendungsfälle rendern.
+
+```bash
+stackkit docs emit-use-case-overview [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--evidence-output` | string | — | Ausgabepfad des Evidence-Manifests |
+| `--output` | string | — | Markdown-Ausgabepfad |
+| `--source-sha` | string | — | **Erforderlich.** exakter Source-SHA |
+| `--test-receipt` | string | — | an den Source-SHA gebundener Beleg über bestandene Tests |
+| `--tests-passed-for-source` | bool | — | Tests als abgeschlossen markieren, nachdem der Aufrufer die Katalogtests für source-sha synchron bestanden hat |

@@ -1,0 +1,114 @@
+---
+title: "stackkit agent"
+description: "StackKits ऑटोमेशन के लिए एजेंट-नेटिव सहायक"
+sidebarTitle: "agent"
+---
+StackKits ऑटोमेशन के लिए एजेंट-नेटिव सहायक।
+
+एजेंट-नेटिव सहायक रोलआउट में बदलाव किए बिना इंस्टॉल प्लान, सेल्फ़-चेक, प्रॉम्प्ट और MCP कॉन्फ़िगरेशन जारी करते हैं।
+
+```bash
+stackkit agent [flags]
+```
+
+उप-कमांड: [`stackkit agent install-plan`](#stackkit-agent-install-plan), [`stackkit agent mcp-config`](#stackkit-agent-mcp-config), [`stackkit agent prompt`](#stackkit-agent-prompt), [`stackkit agent self-check`](#stackkit-agent-self-check)
+
+## stackkit agent install-plan
+
+बिना इंटरैक्शन वाला StackKits इंस्टॉल प्लान प्रिंट करें।
+
+```bash
+stackkit agent install-plan [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--dir` | string | `my-homelab` | वर्कस्पेस डायरेक्टरी |
+| `--json` | bool | — | JSON जारी करें |
+| `--kit` | string | `basement-kit` | जिस StackKit के लिए प्लान बनाना है |
+| `--target` | string | `local` | लक्ष्य प्रकार: local, ssh, vm या ci |
+
+**उदाहरण**
+
+```bash
+# Print the install steps for a Basement Kit workspace named my-homelab
+stackkit agent install-plan
+
+# A Cloud Kit plan for an agent working over SSH, as JSON
+stackkit agent install-plan --kit cloud-kit --target ssh --dir my-cloud --json
+```
+
+## stackkit agent mcp-config
+
+एक StackKits MCP क्लाइंट कनेक्शन कॉन्फ़िग प्रिंट करें।
+
+"stackkit" नाम का सीधे पेस्ट करने योग्य MCP क्लाइंट कॉन्फ़िगरेशन प्रिंट करें।
+
+उपयोगकर्ताओं के लिए यह एक ही StackKits MCP कनेक्शन है। स्थानीय रूप से यह stackkit-mcp एडाप्टर शुरू करता है; इंस्टॉल के बाद, संरक्षित एंडपॉइंट स्पष्ट रूप से सक्षम करने पर यही कनेक्टर stackkit-server /mcp के रूप में भी पहुँचा जा सकता है।
+
+```bash
+stackkit agent mcp-config [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--client` | string | `generic` | क्लाइंट फ़ॉर्मैट: generic, codex या claude |
+| `--mode` | string | `docs,local,server,actions` | MCP मोड; actions रीड-ओनली लाइफ़साइकिल टूल जोड़ता है, और राइट टूल के लिए अब भी STACKKIT_MCP_ALLOW_WRITE=true चाहिए |
+| `--server-url` | string | `http://localhost:8082` | stackkit-server URL |
+
+**उदाहरण**
+
+```bash
+# Print the connection as Claude mcpServers JSON
+stackkit agent mcp-config --client claude
+
+# Print the Codex config.toml block
+stackkit agent mcp-config --client codex
+```
+
+## stackkit agent prompt
+
+कॉपी के लिए तैयार StackKits एजेंट प्रॉम्प्ट प्रिंट करें।
+
+```bash
+stackkit agent prompt [scenario] [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | JSON जारी करें |
+| `--list` | bool | — | उपलब्ध प्रॉम्प्ट परिदृश्य सूचीबद्ध करें |
+
+**उदाहरण**
+
+```bash
+# List the available prompt scenarios
+stackkit agent prompt --list
+
+# Print the prompt for diagnosing a failed rollout
+stackkit agent prompt diagnose-failed-rollout
+```
+
+## stackkit agent self-check
+
+एजेंट के लिए ज़रूरी स्थानीय StackKits पूर्वापेक्षाएँ जाँचें।
+
+```bash
+stackkit agent self-check [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | JSON जारी करें |
+| `--server-url` | string | `http://localhost:8082` | stackkit-server URL |
+
+**उदाहरण**
+
+```bash
+# Check that stackkit, stackkit-server, and stackkit-mcp are on PATH
+stackkit agent self-check
+
+# The same checks as JSON
+stackkit agent self-check --json
+```
+

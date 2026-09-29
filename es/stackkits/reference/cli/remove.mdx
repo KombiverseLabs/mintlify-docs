@@ -1,0 +1,49 @@
+---
+title: "stackkit remove"
+description: "Desinstala el despliegue local de StackKits"
+sidebarTitle: "remove"
+---
+Desinstala el despliegue local de StackKits.
+
+Desinstala el runtime de StackKits en esta máquina.
+
+Sin `--workload`, es la desinstalación del producto: detiene y elimina cada proyecto Compose llamado stackkit-\* (núcleo de Basement, núcleo de Cloud y casos de uso seleccionados), incluidas sus redes y volúmenes. Busca en el directorio actual y después en ~/my-homelab o ~/my-cloud-homelab.
+
+`--workload` elimina un workload exacto de Architecture v2 a través de su propietario de runtime aplicado. Esa vía conserva los volúmenes de la aplicación salvo que se establezca `--delete-data`.
+
+```bash
+stackkit remove [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | Manifiesto de generación de Architecture v2 |
+| `--auto-approve` | bool | — | Omite la aprobación interactiva |
+| `--delete-data` | bool | — | Elimina los volúmenes con nombre propiedad de este workload aplicado exacto (por defecto se conservan los datos de la aplicación) |
+| `--force` | bool | — | Fuerza la eliminación incluso con errores |
+| `--generation-receipt` | string | — | Recibo de generación de Architecture v2 |
+| `--inventory` | string | — | Inventory observado de Architecture v2 (si no, se selecciona un archivo de inventario convencional) |
+| `--json` | bool | — | Emite como JSON el resultado canónico de eliminación de Architecture v2 |
+| `--local-execution-channel` | string | — | Canal de ejecución aplicado exacto propiedad de este proceso de eliminación |
+| `--local-node` | string | — | Ubicación exacta de nodo aplicada, propiedad de este proceso de eliminación |
+| `--local-site` | string | — | Ubicación exacta de Site aplicada, propiedad de este proceso de eliminación |
+| `--purge` | bool | — | Elimina todos los datos de StackKit, incluidas imágenes, estado y el directorio de despliegue |
+| `--resolved-plan` | string | — | ResolvedPlan canónico de Architecture v2 |
+| `--terminal-evidence-json` | bool | — | Emite como JSON la evidencia terminal canónica y acotada de Architecture v2 |
+| `--workload` | string | — | Referencia exacta del workload del ResolvedPlan de Architecture v2 que se elimina |
+
+**Ejemplos**
+
+```bash
+# Uninstall the whole local deployment after typing yes
+stackkit remove
+
+# Uninstall without the confirmation prompt
+stackkit remove --auto-approve
+
+# Remove only the Files workload and keep its data volumes
+stackkit remove --workload files
+
+# Remove the Photos workload, delete its data volumes, and print the result as JSON
+stackkit remove --workload photos --delete-data --auto-approve --json
+```

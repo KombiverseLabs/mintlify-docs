@@ -1,0 +1,90 @@
+---
+title: "运维 StackKit"
+description: "使用已发布的 CLI 检查运行中的 StackKits 工作区，然后添加或移除工作负载"
+sidebarTitle: "运维"
+icon: wrench
+---
+
+日常工作请从只读命令开始，使用创建该工作区的同一个已发布 CLI：
+
+```bash
+stackkit verify --json
+stackkit drift detect --json
+stackkit logs list --json
+```
+
+请把它们的输出与工作区放在一起，以便你把当前观测到的状态与上一次成功的 apply 进行比较。
+
+## 监控栈
+
+这些生命周期检查是评估栈本身的受支持方式。StackKits 把观测和验证证据保存在本地，不需要托管的监控服务。
+
+已发布的 [Uptime Kuma](/zh-Hans/stackkits/apps/uptime-kuma) 模块不会被初始的原生 v2 StackSpec 选择，因此全新的 Basement Kit 或 Cloud Kit 没有生成的监控地址。如果你另行运行了一个监控，请只为你有权监控的路由添加检查。受保护的路由需要专门设计的健康端点或预期的认证响应；为了得到 HTTP 200 而削弱路由保护，不是有效的监控设置。
+
+## 变更之前
+
+1. 更新 StackSpec，而不是生成的产物。
+2. 运行 `stackkit validate` 和 `stackkit generate`。
+3. 检查 `stackkit plan --json`，遇到任何就绪阻塞项就停止。
+4. 审查输出，并在执行会变更状态的命令之前获得本地所有者的批准。
+5. 变更之后运行 `stackkit verify --http --json`。
+
+## 向现有工作区添加工作负载
+
+选择新的工作负载不需要重新运行 `stackkit init`，也不需要替换初始的 StackSpec。请编辑现有 StackSpec 的 `workloads` 块，然后在重新生成之前建立密钥托管：
+
+```bash
+stackkit validate
+stackkit secrets materialize
+stackkit generate
+stackkit apply
+```
+
+StackKits v0.21.11 新增了 `stackkit secrets materialize`，作为选择工作负载与运行 `generate` 之间的显式步骤。先建立托管，再生成并应用；不要自行编造密钥值。
+
+## 移除已应用的工作负载
+
+`stackkit remove` 会在本地所有者批准下，移除某一个确切的已应用工作负载：
+
+```bash
+stackkit remove --workload photos
+stackkit remove --workload photos --auto-approve --json
+```
+
+CLI 会验证当前的计划、生成、apply 结果和所有者权限，然后通过固定了摘要的 Standard 执行通道，分派一个由所有者签名、有效期为五分钟的移除请求。只有针对确切的需求、实例和已应用产物摘要读回到 `absent` 才算成功。请求、结果和有界的终态证据会持久保存在 `.stackkit/evidence/removal/` 之下。
+
+### 在多节点结果上针对某一个放置位置
+
+经过验证的 apply 摘要会暴露 `planHash`、`appliedRequestDigest` 和一个不含密钥的 `appliedWorkloads` 列表。每一项都是确定性的、绑定哈希的身份，它绑定了工作负载、运行时所有者、放置位置、执行通道和被引用的产物摘要。用它来确定之后的移除应针对什么；它本身既不是移除授权，也不是缺失的证据。
+
+自 v0.21.12 起，当 apply 结果把某个工作负载放置在多个站点或节点上时，请指明本次移除所负责的那一个确切的放置位置。请从 `appliedWorkloads` 条目中取值：
+
+```bash
+stackkit remove --workload photos \
+  --local-site <site-ref> \
+  --local-node <node-ref> \
+  --local-execution-channel <channel-ref>
+```
+
+所指明的放置位置必须与经过验证的 apply 结果中恰好一项匹配。每一份节点本地的缺失回执，都通过共享的 `appliedRequestDigest` 与同一次原始 apply 保持关联。
+
+当你需要在标准输出上获得机器可读的移除记录时，请添加 `--terminal-evidence-json`。
+
+## 常见工作流
+
+<CardGroup cols={2}>
+  <Card title="更改 StackSpec 意图" icon="sliders" href="/zh-Hans/guides/stackkits/configure-stack-spec">
+    编辑已发布的意图并重新生成受管控的输出。
+  </Card>
+  <Card title="备份与恢复" icon="clock-rotate-left" href="/zh-Hans/guides/stackkits/back-up-and-restore">
+    创建幂等的快照并演练分阶段恢复。
+  </Card>
+</CardGroup>
+
+确切的命令面随版本而变。在执行备份、恢复、升级或移除之前，请对已安装的版本使用 `stackkit --help` 和各命令的帮助。
+
+<Warning>
+  在 Standard Mode 中，StackKits 不提供无人值守的托管运维工作流。请把每一个会变更状态的命令都当作对你所掌控主机的本地操作。
+</Warning>
+
+关于与智能体连接的工作流，请参见 [MCP 连接器](/zh-Hans/stackkits/reference/mcp-connector)。

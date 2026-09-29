@@ -1,0 +1,72 @@
+---
+title: "stackkit break-glass"
+description: "Break-Glass-Wiederherstellungskonten und -Bundles verwalten"
+sidebarTitle: "break-glass"
+---
+Break-Glass-Wiederherstellungskonten und -Bundles verwalten.
+
+Break-Glass-Wiederherstellungskonten pro Node und die verschlüsselten Bundles verwalten, die deren Zugangsdaten enthalten.
+
+Bundles werden von 'stackkit apply' (Phase 1) nach /var/lib/stackkit/recovery/ geschrieben. Sie sind mit der Wiederherstellungs-Passphrase verschlüsselt, die du bei init festgelegt hast.
+
+```text
+To recover a node, decrypt the bundle:
+    age -d -o break-glass.txt break-glass-<node>.age
+```
+
+Folge danach dem Abschnitt RESTORE INSTRUCTIONS im entschlüsselten YAML.
+
+```bash
+stackkit break-glass [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--dir` | string | — | Das Bundle-Verzeichnis überschreiben (Standard: /var/lib/stackkit/recovery) |
+
+Unterbefehle: [`stackkit break-glass list`](#stackkit-break-glass-list), [`stackkit break-glass show-bundle`](#stackkit-break-glass-show-bundle)
+
+## stackkit break-glass list
+
+Break-Glass-Bundles auf diesem Host auflisten.
+
+```bash
+stackkit break-glass list [flags]
+```
+
+Geerbt von `stackkit break-glass`:
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--dir` | string | — | Das Bundle-Verzeichnis überschreiben (Standard: /var/lib/stackkit/recovery) |
+
+**Beispiele**
+
+```bash
+# List the encrypted recovery bundles in /var/lib/stackkit/recovery
+stackkit break-glass list
+
+# List bundles copied to another directory
+stackkit break-glass list --dir ./recovery-copy
+```
+
+## stackkit break-glass show-bundle
+
+Den Pfad zum verschlüsselten Bundle eines Nodes ausgeben.
+
+```bash
+stackkit break-glass show-bundle <node> [flags]
+```
+
+Geerbt von `stackkit break-glass`:
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--dir` | string | — | Das Bundle-Verzeichnis überschreiben (Standard: /var/lib/stackkit/recovery) |
+
+**Beispiele**
+
+```bash
+# Print the bundle path of a node that stackkit break-glass list showed
+stackkit break-glass show-bundle <node>
+```

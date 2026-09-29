@@ -1,0 +1,39 @@
+---
+title: "stackkit generate"
+description: "Genera artefactos de despliegue gobernados a partir de una especificación de stack"
+sidebarTitle: "generate"
+---
+Genera artefactos de despliegue gobernados a partir de una especificación de stack.
+
+Alias: `gen`
+
+Resuelve la intención canónica de StackSpec v2 a través de la autoridad CUE integrada, persiste atómicamente el ResolvedPlan exacto y renderiza de forma transaccional sus artefactos gobernados bajo el outputRoot propiedad del plan.
+
+La generación de StackSpec v1 está retirada. Usa un binario publicado exacto v0.6 para un workspace histórico o migra la intención a StackSpec v2 antes de generar. La ruta v2 nativa rechaza los switches heredados `--force` y `--fragments`.
+
+```bash
+stackkit generate [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--force, -f` | bool | — | Switch heredado de sobrescritura, retirado; se rechaza para StackSpec v2 |
+| `--fragments` | bool | — | Switch heredado de fragmentos, retirado; se rechaza para StackSpec v2 |
+| `--inventory` | string | — | Inventory observado de Architecture v2 (si no, se selecciona un archivo de inventario convencional) |
+| `--local-node` | string | — | Nodo de Architecture v2 que este proceso local de generate posee explícitamente |
+| `--local-site` | string | — | Site de Architecture v2 que este proceso local de generate posee explícitamente |
+| `--output, -o` | string | `deploy` | Sobrescribe la raíz de salida propiedad del plan |
+| `--resolved-plan` | string | — | ResolvedPlan canónico de Architecture v2 (predeterminado: &lt;outputRoot&gt;/.stackkit/resolved-plan.json) |
+
+**Ejemplos**
+
+```bash
+# Resolve the plan and render deployment artifacts into deploy/
+stackkit generate
+
+# Render into an explicit output root
+stackkit generate --output ./deploy
+
+# Name the Site and node this process owns
+stackkit generate --local-node main --local-site home
+```

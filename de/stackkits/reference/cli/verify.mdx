@@ -1,0 +1,49 @@
+---
+title: "stackkit verify"
+description: "Verifikationsprüfungen nach dem Deployment ausführen"
+sidebarTitle: "verify"
+---
+Verifikationsprüfungen nach dem Deployment ausführen.
+
+Führt schreibgeschützte Prüfungen nach dem Deployment auf dem Host aus, auf dem das StackKit bereitgestellt ist.
+
+Der Verifier prüft die Stack-Spezifikation, den Deployment-Zustand, den Docker-Daemon, die StackKit-Container, den Docker-Health-Status und optional HTTP-Routen aus der generierten Zugriffsübersicht.
+
+`--host` und seine SSH-Flags (`--user`, `--key`, `--port`, `--remote-dir`, `--legacy-remote-transport`) steuern den stillgelegten Raw-SSH-Verifier, den nur noch ein exakter v0.6-Build ausführt; `--strict` gilt für diesen Verifier und die lokalen v0.6-Prüfungen. Führe verify auf aktuellen Releases auf dem bereitgestellten Host aus.
+
+```bash
+stackkit verify [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | Architecture-v2-Generierungs-Manifest (Standard: &lt;outputRoot&gt;/.stackkit/generation-manifest.json) |
+| `--generation-receipt` | string | — | Architecture-v2-Generierungsbeleg (Standard: &lt;outputRoot&gt;/.stackkit/generation-receipt.json) |
+| `--host` | string | — | Remote-Host, der über SSH verifiziert wird |
+| `--http` | bool | — | Generierte Service-URLs mit HTTP-Requests verifizieren |
+| `--inventory` | string | — | Beobachtetes Architecture-v2-Inventory (andernfalls wird eine übliche Inventory-Datei ausgewählt) |
+| `--json` | bool | — | Maschinenlesbares JSON ausgeben |
+| `--key` | string | — | Pfad zum privaten SSH-Schlüssel für die Remote-Verifikation |
+| `--legacy-remote-transport` | bool | — | Den veralteten Raw-SSH-Verifier für ein StackSpec-v1-Ziel explizit erlauben |
+| `--offline` | bool | — | Zwischengespeicherte Release-Belege und Attestierungen ohne Netzwerkzugriff verifizieren |
+| `--port` | int | `22` | SSH-Port für die Remote-Verifikation |
+| `--remote-dir` | string | `/opt/stackkit` | Remote-Arbeitsverzeichnis von StackKit |
+| `--resolved-plan` | string | — | Kanonischer Architecture-v2-ResolvedPlan (Standard: &lt;outputRoot&gt;/.stackkit/resolved-plan.json) |
+| `--strict` | bool | — | Warnungen als Verifikationsfehler behandeln |
+| `--user` | string | — | SSH-Benutzername für die Remote-Verifikation |
+
+**Examples**
+
+```bash
+# Verify the applied deployment on this host
+stackkit verify
+
+# Also request the generated service URLs over HTTP
+stackkit verify --http
+
+# Emit the verification report as JSON
+stackkit verify --json
+
+# Check recorded Apply evidence and cached release receipts without live probes or network access
+stackkit verify --offline
+```

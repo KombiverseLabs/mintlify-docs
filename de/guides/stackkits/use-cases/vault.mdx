@@ -1,0 +1,82 @@
+---
+title: "Vault"
+description: "Heute ein Passwort-Tresor, mit geplanten Erweiterungen für Dienst-Secrets und Bitcoin unter Verwahrung durch den Owner"
+sidebarTitle: "Vault"
+icon: vault
+---
+
+<Info>
+  Evidenzstand (2026-09-24, v0.39.7): Passwörter mit Vaultwarden ist
+  `available, lifecycle-verified`. Ein Lifecycle-Lauf auf Ubuntu 24.04 amd64
+  (Basement Kit, standalone) hat install, init, generate, apply,
+  setup-vault, verify, backup, isolated restore und restore activation bestanden. Die unten genannten
+  Erweiterungen für Dienst-Secrets und Bitcoin sind `planned`: nur Zieldesign,
+  ohne Release und ohne verbindlichen Termin.
+</Info>
+
+Vault hält Passwörter, Maschinen-Secrets und Bitcoin-Rollen unter getrennter
+Kontrolle des Owners. Heute liefert es ein Erlebnis aus, Passwörter, auf Vaultwarden. Die
+Erweiterungen auf dieser Seite sind geplante Richtungen und nichts, das du
+schon auswählen kannst.
+
+## Passwörter, heute
+
+<Card title="Passwörter" icon="key" href="/de/guides/stackkits/use-cases/passwords">
+  Vaultwarden und Bitwarden-Clients: freigegebener Vertrag, Owner-Setup und Client-Registrierung.
+</Card>
+
+Auf der Seite [Passwörter](/de/guides/stackkits/use-cases/passwords) und der
+Anwendungsseite [Vaultwarden](/de/stackkits/apps/vaultwarden) wählst du das aktuelle,
+Lifecycle-verifizierte Erlebnis aus und richtest es ein.
+
+## Geplante Erweiterungen
+
+Keines der unten genannten Erlebnisse ist bereits auswählbar. Es sind Designvorschläge
+für einen breiteren Vault-&-Sovereignty-Rahmen, und bestehende Vaultwarden-Nutzer
+erhalten keinen Bitcoin-Node und keinen neuen Credential-Broker, nur weil
+Vault wächst.
+
+<CardGroup cols={2}>
+  <Card title="Dienst-Secrets" icon="lock-keyhole">
+    Gib Anwendungen begrenzte Maschinen-Zugangsdaten, getrennt von menschlichen Passwörtern und der Verwahrung durch den Owner. OpenBao ist der erste Kandidat in der Evaluierung; Infisical ist ein Vergleichskandidat.
+  </Card>
+  <Card title="Bitcoin-Node und Verifikation" icon="server">
+    Validiere und prüfe Bitcoin mit deinem eigenen Node. Bitcoin Core, mit ausdrücklichem Pruned- oder Full-Data-Modus. Keine Verwahrung von Geldern.
+  </Card>
+  <Card title="Explorer" icon="network-wired">
+    Private indizierte Abfragen und eine vertraute Explorer-Ansicht, auf einem Full-Data-Node plus electrs und mempool.
+  </Card>
+  <Card title="Zahlungen" icon="file-contract">
+    Empfange Rechnungszahlungen, ohne die Signierberechtigung auf den Server zu verlagern. BTCPay Server mit einer Watch-only- oder Externe-Signatur-Wallet-Konfiguration.
+  </Card>
+  <Card title="Portfolio (schreibgeschützt)" icon="chart-line">
+    Prüfe ausgewählte Multi-Asset-Datensätze privat mit rotki, ausschließlich mit schreibgeschützten Quellen.
+  </Card>
+  <Card title="Lightning" icon="clock-rotate-left">
+    Zurückgestellt, bis Wiederherstellung und Verwahrung gezielt entworfen sind; keine Belohnung dafür, das Bitcoin-Onboarding abgeschlossen zu haben.
+  </Card>
+</CardGroup>
+
+## Sicherheitsprinzipien hinter dem Design
+
+- **Getrennte Vertrauensdomänen.** Ein Passwort-Client, eine Dienst-Secret-Berechtigung,
+  die Blockchain-Daten eines Bitcoin-Nodes und die Schlüssel eines externen Signers sind vier
+  verschiedene Dinge. Das Design hält sie auf getrennten Zugangsdaten und
+  legt sie nicht in einem generischen Secrets-Bündel ab.
+- **Keine Hot Keys auf dem Server.** Die vorgeschlagenen Bitcoin-Pfade halten Signierschlüssel
+  auf einem externen Signer, außerhalb von StackKits und jeder Workflow-Historie oder jedem Agent-
+  Kontext. Nichts verlangt von dir, eine Seed-Phrase in das Onboarding, einen Chat oder
+  ein Support-Ticket einzutippen.
+- **Watch-only-Daten sind trotzdem sensibel.** Deskriptoren, erweiterte öffentliche Schlüssel,
+  Adressen und Rechnungsdatensätze können finanzielle Aktivität offenlegen, auch wenn
+  sie keine Ausgabeberechtigung verleihen, und das Design behandelt sie
+  entsprechend.
+- **Wiederherstellung ist nicht ein generischer Snapshot.** Ein Passwort-Tresor, eine Dienst-Secret-
+  Engine, ein Blockchain-Index und ein Hardware-Signer brauchen jeweils eine andere
+  Wiederherstellungsbehandlung; wiederaufbaubare öffentliche Chain-Daten werden nicht wie
+  private Metadaten in der Hand des Owners behandelt.
+
+## Den Host wählen
+
+- Nutze [Basement Kit](/de/stackkits/kits/basement-kit) für lokale Hardware und LAN-first-Zugriff.
+- Nutze [Cloud Kit](/de/stackkits/kits/cloud-kit) für einen vorhandenen VPS oder Cloud-Host mit einer Domain, die du kontrollierst.

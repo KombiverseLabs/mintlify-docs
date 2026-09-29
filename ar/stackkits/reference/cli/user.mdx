@@ -1,0 +1,161 @@
+---
+title: "stackkit user"
+description: "دعوة مستخدمي الأسرة وإدارتهم في PocketID المحلي"
+sidebarTitle: "user"
+---
+دعوة مستخدمي الأسرة وإدارتهم في PocketID المحلي.
+
+أنشئ مستخدمي Homelab في مجموعة الأسرة في PocketID واعرضهم وأزلهم.
+
+يطبع add عنوان URL لإعداد passkey لمرة واحدة. يواصل TinyAuth قبول مجموعات المالكين والمسؤولين والأسرة المرتبطة بالفعل بعميل OIDC. لا يمكن إنشاء هويات المالك والمسؤول أو إزالتها هنا.
+
+```bash
+stackkit user [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
+
+**أمثلة**
+
+```bash
+# Invite a household member; share the printed one-time URL only with them
+stackkit user add alex --email alex@example.com --owner-approve
+
+# List household users
+stackkit user list
+
+# Remove a household user
+stackkit user remove alex --owner-approve
+```
+
+الأوامر الفرعية: [`stackkit user add`](#stackkit-user-add), [`stackkit user list`](#stackkit-user-list), [`stackkit user owner`](#stackkit-user-owner), [`stackkit user remove`](#stackkit-user-remove)
+
+## stackkit user add
+
+ادعُ مستخدمًا من الأسرة بعنوان URL لإعداد passkey لمرة واحدة.
+
+```bash
+stackkit user add <username> [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--display-name` | string | — | اسم عرض اختياري |
+| `--email` | string | — | **مطلوب.** البريد الإلكتروني لفرد الأسرة |
+| `--owner-approve` | bool | — | وافق صراحةً على إنشاء مستخدم الأسرة هذا |
+
+موروثة من `stackkit user`:
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
+
+**أمثلة**
+
+```bash
+# Invite a household member and print their one-time passkey setup URL
+stackkit user add alex --email alex@example.com --owner-approve
+
+# Set a display name and return the invitation as JSON
+stackkit user add sam --email sam@example.com --display-name "Sam Doe" --owner-approve --json
+```
+
+## stackkit user list
+
+اعرض مستخدمي الأسرة في PocketID المحلي.
+
+```bash
+stackkit user list [flags]
+```
+
+موروثة من `stackkit user`:
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
+
+**أمثلة**
+
+```bash
+# List household users
+stackkit user list
+
+# The same list as JSON
+stackkit user list --json
+```
+
+## stackkit user owner
+
+افحص تفعيل passkey للمالك في PocketID واستأنفه.
+
+```bash
+stackkit user owner [flags]
+```
+
+موروثة من `stackkit user`:
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
+
+الأوامر الفرعية: [`stackkit user owner activate`](#stackkit-user-owner-activate), [`stackkit user owner status`](#stackkit-user-owner-status)
+
+### stackkit user owner activate
+
+أعد تفعيل passkey لمرة واحدة المرتبط بالمالك أو أصدره من جديد.
+
+```bash
+stackkit user owner activate [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | وافق صراحةً على كشف تفعيل المالك أو إعادة إصداره |
+
+موروثة من `stackkit user`:
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
+
+### stackkit user owner status
+
+اقرأ حالة تفعيل passkey للمالك.
+
+```bash
+stackkit user owner status [flags]
+```
+
+موروثة من `stackkit user`:
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
+
+## stackkit user remove
+
+أزل مستخدم أسرة من PocketID المحلي.
+
+```bash
+stackkit user remove <username> [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | وافق صراحةً على إزالة مستخدم الأسرة هذا |
+
+موروثة من `stackkit user`:
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
+
+**أمثلة**
+
+```bash
+# Remove a household user
+stackkit user remove alex --owner-approve
+```
+

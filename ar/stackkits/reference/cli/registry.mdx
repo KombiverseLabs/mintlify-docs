@@ -1,0 +1,82 @@
+---
+title: "stackkit registry"
+description: "إدارة لقطة سجل StackKits المضمَّنة"
+sidebarTitle: "registry"
+---
+إدارة لقطة سجل StackKits المضمَّنة.
+
+إدارة لقطة السجل الآمنة لـ OSS المدمجة في الملف التنفيذي لـ CLI.
+
+تقع اللقطة في internal/registry/data/registry_snapshot.json. افحص البيانات المضمَّنة أو أعد إنتاجها بصورة حتمية من شجرة CUE المحلية.
+
+```bash
+stackkit registry [flags]
+```
+
+الأوامر الفرعية: [`stackkit registry artifacts`](#stackkit-registry-artifacts), [`stackkit registry bake-from-cue`](#stackkit-registry-bake-from-cue), [`stackkit registry emit-cue`](#stackkit-registry-emit-cue), [`stackkit registry info`](#stackkit-registry-info)
+
+## stackkit registry artifacts
+
+اطبع مسارات registry/المخرجات المُنشأة (pathspecs) من manifest الملكية.
+
+اطبع pathspecs المستودع من manifest ملكية المخرجات المُنشأة.
+
+يستخدم سير عمل generate-cue وبوابة تكافؤ CI هذا الأمر لتكون الملفات المُنشأة المملوكة للروبوت صريحة. تبقى المخرجات المجمّدة في مساراتها الحالية لكنها لا تُضاف إلى staging ولا يُقارن فرقها بوصفها مخرجات مُنشأة إلى أن تتغير حالتها في manifest.
+
+```bash
+stackkit registry artifacts [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--kind` | string | `all` | مرشّح نوع المخرجات (all وcue وsnapshot) |
+| `--manifest` | string | `internal/registry/generated_artifacts.json` | manifest ملكية المخرجات المُنشأة |
+| `--state` | string | `generated` | مرشّح حالة المخرجات (all وgenerated وfrozen) |
+
+## stackkit registry bake-from-cue
+
+أنشئ لقطة سجل من شجرة Git/CUE المحلية.
+
+امرّ على modules/&lt;slug&gt;/module.cue إضافةً إلى تعريفات المنتج القانونية، واحسب تجزئات عقودها، واكتب اللقطة الناتجة في internal/registry/data/registry_snapshot.json (أو `--output`).
+
+هذا الأمر هو مسار bootstrap لـ OSS دون اتصال، ويعمل على checkout نقي لمستودع kombifyio/stackKits العام.
+
+```bash
+stackkit registry bake-from-cue [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--modules-dir` | string | `modules` | الدليل الذي يحتوي على module/&lt;slug&gt;/module.cue |
+| `--output` | string | `internal/registry/data/registry_snapshot.json` | مسار إخراج JSON الخاص باللقطة |
+
+## stackkit registry emit-cue
+
+أنشئ مخرجات CUE في foundation/generated من لقطة السجل.
+
+أنشئ foundation/generated/tool_catalog.cue من لقطة السجل إضافةً إلى شجرة وحدات CUE المحلية.
+
+يقرأ JSON اللقطة (الافتراضي: internal/registry/data/registry_snapshot.json، حدّثه أولًا عبر 'registry bake-from-cue')، ويولّد الناتج بصورة حتمية، ويكتب المخرجات. يسجّل الترويس content_hash وgenerated_at الخاصين باللقطة ليمكن اكتشاف الانحراف بين اللقطة والمخرجات؛ ويعيد CI التوليد من اللقطة الملتزَم بها ويقارن الفروق.
+
+```bash
+stackkit registry emit-cue [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--input` | string | `internal/registry/data/registry_snapshot.json` | JSON اللقطة المطلوب التوليد منه |
+| `--modules-dir` | string | `modules` | الدليل الذي يحتوي على modules/&lt;slug&gt;/module.cue (مصدر كتالوج الخدمات) |
+| `--output-dir` | string | `foundation/generated` | دليل ملفات CUE المُنشأة |
+
+## stackkit registry info
+
+اعرض ملخصًا للقطة السجل المضمَّنة.
+
+```bash
+stackkit registry info [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | اطبع اللقطة المضمَّنة كاملة بصيغة JSON |
+

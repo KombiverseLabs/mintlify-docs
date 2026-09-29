@@ -1,0 +1,76 @@
+---
+title: "StackKit Open Spec"
+description: "खुले होमलैब स्टैंडर्ड के पीछे का पतला प्रकाशित अनुबंध: आर्किटेक्चर स्नैपशॉट, लाइफ़साइकल क्रियाएँ, प्लेसमेंट वर्गीकरण, सत्यापन प्रमाण"
+sidebarTitle: "Open Spec (v0)"
+icon: file-contract
+---
+
+StackKit Open Spec "खुले होमलैब स्टैंडर्ड" के पीछे का पतला, प्रकाशित अनुबंध है। यह उन आर्टिफ़ैक्ट की सूची बनाता है जो हर StackKits रिलीज़ के साथ शिप होते हैं; यह कोई नया स्कीमा नहीं लाता। स्पेक का वर्शन उस रिलीज़ टैग का अनुसरण करता है जिसके साथ वह शिप होता है, और v0 के भीतर बदलाव केवल जोड़ने वाले होते हैं। मानक प्रति सार्वजनिक रिपॉज़िटरी में [docs/OPEN-SPEC.md](https://github.com/kombifyio/StackKits/blob/main/docs/OPEN-SPEC.md) पर है।
+
+स्पेक में सब कुछ बिना-अकाउंट है: Standard Mode को kombify अकाउंट, होस्टेड kombify एंडपॉइंट और Techstack की ज़रूरत नहीं।
+
+## 1. आर्किटेक्चर स्नैपशॉट
+
+केवल-तथ्यों वाला आर्किटेक्चर स्नैपशॉट किसी रिलीज़ का वर्णन करता है: किट, टोपोलॉजी, क्षमताएँ, प्लेसमेंट मॉडल, मॉड्यूल, ऐड-ऑन और सपोर्ट परिपक्वता। तकनीकी सत्य का स्रोत CUE है; स्नैपशॉट उसका प्रक्षेपण है। उपभोक्ता स्नैपशॉट पढ़ता है, CUE कभी नहीं, और उसे जोड़े गए फ़ील्ड सहन करने चाहिए।
+
+| आर्टिफ़ैक्ट | भूमिका |
+| --- | --- |
+| [architecture-snapshot.json](https://github.com/kombifyio/StackKits/blob/main/architecture-snapshot.json) | रिलीज़ का स्नैपशॉट |
+| [architecture-snapshot.schema.json](https://github.com/kombifyio/StackKits/blob/main/architecture-snapshot.schema.json) | बंद डाउनस्ट्रीम अनुबंध (स्कीमा v3): `placement_model`, `stackkits`, `mode_matrix`, `modules`, `addons` |
+| [architecture/v2/authority-manifest.json](https://github.com/kombifyio/StackKits/blob/main/architecture/v2/authority-manifest.json) | Architecture v2 किट परिभाषाओं का अथॉरिटी मैनिफ़ेस्ट |
+
+## 2. लाइफ़साइकल क्रियाएँ
+
+हर किट को `stackkit` CLI और `stackkit-mcp` कनेक्टर के ज़रिए एक ही क्रियाओं से चलाया जाता है। इनपुट और आउटपुट [CLI संदर्भ](https://github.com/kombifyio/StackKits/blob/main/docs/CLI.md) और [CLI वॉकथ्रू](/hi/guides/stackkits/cli-walkthrough) में दस्तावेज़ित हैं।
+
+| क्रिया | अर्थ |
+| --- | --- |
+| `init` | लोकल ओनर कस्टडी (`--owner-source=local`) के साथ किट के लिए StackSpec बनाएँ |
+| `validate` | StackSpec को CUE अनुबंध के विरुद्ध सत्यापित करें |
+| `generate` | निर्धारक रोलआउट आर्टिफ़ैक्ट रेंडर करें (डिफ़ॉल्ट रूप से स्टैंडअलोन Docker Compose) |
+| `apply` | बने हुए प्लान को लक्ष्य होस्ट पर निष्पादित करें |
+| `verify` | apply के बाद रूट, पहचान और सेवा की सेहत जाँचें |
+| `backup` (`backup run`, `backup restore …`) | घोषित वॉल्यूम का स्नैपशॉट लें और उन्हें सत्यापित रीडबैक और स्पष्ट सक्रियण के साथ रिस्टोर करें |
+| `upgrade` | संगतता जाँच के साथ इंस्टॉल की हुई किट को नए रिलीज़ पर ले जाएँ |
+| `remove` | डेटा को स्पष्ट रखते हुए किसी एप्लिकेशन या किट को हटाएँ |
+
+कोई क्रिया या तो प्रमाण के साथ पूरी होती है या अंतिम कारण के साथ विफल होती है। वह उस काम की सफलता कभी रिपोर्ट नहीं करती जो उसने किया नहीं।
+
+## 3. प्लेसमेंट वर्गीकरण
+
+प्लेसमेंट बताता है कि कोई किट या मॉड्यूल कहाँ चल सकता है। शब्दावली [foundation/placement.cue](https://github.com/kombifyio/StackKits/blob/main/foundation/placement.cue) में प्रकाशित है:
+
+- `#PlacementMode`: `local-only`, `standard`, `managed-serverless`
+- `#PlacementSupport`: प्रति-मॉड्यूल पात्रता मेटाडेटा (मॉड्यूल किन मोड में चल सकता है)
+
+ओपन-सोर्स लाइफ़साइकल `local-only` और `standard` को साकार करता है। `managed-serverless` केवल पात्रता मेटाडेटा है; उसका साकार रूप StackKits और इस स्पेक के बाहर है।
+
+## 4. सत्यापन प्रमाण
+
+परिपक्वता के शब्द प्रमाण-समर्थित होते हैं, घोषित नहीं। प्रमाण के रूप सार्वजनिक JSON Schema हैं; रिलीज़ इंस्टेंस शिप करता है।
+
+| आर्टिफ़ैक्ट | रूप |
+| --- | --- |
+| `release-evidence.json` (रिलीज़ एसेट) | [release-evidence.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/release-evidence.schema.json): प्रति-जाँच `pass`, `pending` या `not_applicable`, कारण के साथ |
+| स्टैंडअलोन OSS एंड-टू-एंड रसीद | [standalone-oss-e2e-receipt.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/standalone-oss-e2e-receipt.schema.json) |
+| संगतता प्रक्षेपण | [stackkits-compatibility-v1.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/stackkits-compatibility-v1.schema.json), जो [एप्लिकेशन डिलीवरी संगतता](/hi/stackkits/reference/application-delivery-compatibility) पर रेंडर होता है |
+| OS, हाइपरवाइज़र और एप्लिकेशन संगतता प्रमाण | [os-compat-matrix.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/os-compat-matrix.schema.json), [docs/data/os-compat/latest.json](https://github.com/kombifyio/StackKits/blob/main/docs/data/os-compat/latest.json): हर ऑपरेटिंग सिस्टम, हाइपरवाइज़र और उपयोग-मामले के लिए ताज़ा-गेस्ट इंस्टॉल, सेटअप, verify, बैकअप और रिस्टोर नतीजे, जो [OS संगतता](/hi/stackkits/reference/os-compatibility) पर और [एप्लिकेशन डिलीवरी संगतता](/hi/stackkits/reference/application-delivery-compatibility) के Lifecycle test कॉलम में रेंडर होते हैं |
+
+शब्दावली:
+
+- किट: `supported` (प्रतिबद्ध सेल के लिए उद्धृत सत्यापन पथ मौजूद है), `preview` (इंस्टॉल होती है, लेकिन सत्यापन या रिकवरी प्रमाण लंबित है), `alpha` (केवल परिभाषा)।
+- संगतता पंक्तियाँ (ऑपरेटिंग सिस्टम, हाइपरवाइज़र, एनवायरनमेंट के अनुसार किट, एप्लिकेशन): `supported` (प्रमाण रिलीज़ पर सबसे नए रन में हर लाइफ़साइकल चरण पास हुआ), `preview` (इंस्टॉल से verify तक पास हुआ; बाद का चरण विफल रहा) या `unverified` (उस रिलीज़ पर अभी कोई पूरा रन नहीं, या सबसे नया रन verify से पहले विफल रहा)। प्रमाण की अनुपस्थिति `unverified` के रूप में प्रकाशित होती है, सपोर्ट के रूप में कभी नहीं।
+- स्थिति तभी चौड़ी होती है जब सटीक रिलीज़ के लिए उद्धृत रन मौजूद हो।
+
+## 5. अनुरूपता
+
+कोई टूल या सेवा StackKit-संगत तब है जब वह
+
+1. उस सटीक रिलीज़ का आर्किटेक्चर स्नैपशॉट इस्तेमाल करे जिसे वह लक्षित करता है,
+2. किट को केवल ऊपर दी लाइफ़साइकल क्रियाओं से चलाए (सीधे या MCP कनेक्टर के ज़रिए) और उनके प्रमाण सुरक्षित रखे,
+3. प्लेसमेंट को प्रकाशित वर्गीकरण से बताए, और
+4. सत्यापन नतीजे ऊपर के प्रमाण रूपों में, उस रिलीज़ टैग के साथ प्रकाशित करे जिससे वे संबंधित हैं।
+
+## स्थिति
+
+यह सार्वजनिक बीटा के साथ प्रकाशित v0 ड्राफ़्ट है। वर्शनिंग नीति के साथ एक अलग स्पेसिफ़िकेशन रिपॉज़िटरी बीटा के बाद आएगी; तब तक रिपॉज़िटरी दस्तावेज़ और लिंक किए आर्टिफ़ैक्ट ही स्पेक हैं।

@@ -1,0 +1,247 @@
+---
+title: "stackkit host"
+description: "Anbieterneutrale Operationen des Host-Vertrags"
+sidebarTitle: "host"
+---
+Anbieterneutrale Operationen des Host-Vertrags.
+
+```bash
+stackkit host [flags]
+```
+
+Unterbefehle: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host updates`](#stackkit-host-updates)
+
+## stackkit host attach-conformance
+
+Exakte Host-Nachweise vor der Plan-Generierung an das Inventory anhängen.
+
+```bash
+stackkit host attach-conformance [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--binding` | string | — | **Erforderlich.** Auf den Workspace beschränkte ExternalHostBinding-JSON |
+| `--inventory` | string | — | **Erforderlich.** Auf den Workspace beschränkte inventory.json, die atomar aktualisiert wird |
+| `--receipt` | string | — | **Erforderlich.** Auf den Workspace beschränkte HostConformanceReceipt-JSON |
+
+## stackkit host conformance
+
+Auf diesem Host einen anbieterneutralen Konformitätsbeleg erzeugen.
+
+```bash
+stackkit host conformance [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--binding` | string | — | **Erforderlich.** Lokale ExternalHostBinding-JSON-Datei |
+| `--output, -o` | string | `-` | Ziel des Belegs ('-' für JSON auf stdout) |
+
+## stackkit host environment
+
+Beobachten, ob dieser Host wie ein Heimnetz oder wie ein öffentlicher Server aussieht.
+
+Die Netzwerkumgebung dieses Rechners erkennen.
+
+Das ist eine Beobachtung, keine Kit-Auswahl. Installer und init nutzen sie, um nachzufragen, bevor sie lokale Heimadressen auf einem VPS oder Cloud Kit auf einem LAN-Host anlegen. STACKKIT_NETWORK_ENV=home|vps|cloud|unknown überschreibt die Live-Erkennung.
+
+```bash
+stackkit host environment [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Die Beobachtung als JSON ausgeben |
+
+**Beispiele**
+
+```bash
+# Show whether this host looks like a home network or a public server
+stackkit host environment
+
+# The same observation as JSON
+stackkit host environment --json
+
+# Override a wrong detection for the next command, here Basement Kit init on a home host
+STACKKIT_NETWORK_ENV=home stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com
+```
+
+## stackkit host preflight
+
+Prüfen, ob dieser Host das gewählte StackKit ausführen kann.
+
+Diesen Host vermessen und mit der Untergrenze vergleichen, die das Kit deklariert.
+
+Preflight führt nur schreibgeschützte Probes aus: Es installiert, startet oder konfiguriert nie etwas. Apply führt dieselbe Zulassungsprüfung aus, bevor es den Host verändert.
+
+```bash
+stackkit host preflight [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Den versionierten Preflight-Report als maschinenlesbares JSON ausgeben |
+| `--local-node` | string | — | Exakter lokaler Node im übergebenen ResolvedPlan |
+| `--policy` | string | — | Zulassungsrichtlinie: strict, warn (Standard) oder skip |
+| `--resolved-plan` | string | — | Verifizierter kanonischer ResolvedPlan, dessen Host-Listener geprüft werden |
+
+**Beispiele**
+
+```bash
+# Check this host against the kit selected in the current deployment directory
+stackkit host preflight
+
+# Also refuse on warnings and unknown facts, and print the report as JSON
+stackkit host preflight --policy strict --json
+```
+
+## stackkit host prepare
+
+Diesen Host vor dem Cloud-Kit-Apply vorbereiten.
+
+Das Konto des Cloud-Ausführungskanals und die SSH-Schlüsselverwahrung bereitstellen, die nötig sind, bevor die Host-Security den Root-Login deaktiviert.
+
+Cloud-Kit-Installer und Apply rufen das automatisch auf. Der Befehl existiert für Diagnosen und um einen Workspace nach einer manuellen Unterbrechung zu konvergieren. Er erzeugt oder verwendet den vom Workspace verwahrten Schlüssel unter .stackkit/cloud-host-security/execution-channel/ wieder und installiert den passenden öffentlichen Schlüssel auf dem Linux-Konto des Ausführungskanals.
+
+```bash
+stackkit host prepare [flags]
+```
+
+**Beispiele**
+
+```bash
+# Converge the execution-channel account after an interrupted Cloud Kit install (run as root in the Cloud Kit deployment directory)
+cd my-cloud
+stackkit host prepare
+```
+
+## stackkit host reboot
+
+Einen Neustart dieses Nodes planen.
+
+Einen Neustart dieses Nodes nach kurzer Verzögerung planen und sofort zurückkehren.
+
+Die zurückgegebene boot_id_before identifiziert den aktuellen Boot, sodass ein Aufrufer am geänderten Boot-ID-Wert erkennt, dass der Node zurückgekehrt ist. Der Befehl verweigert sich bei einem Node, auf dem die Techstack-Control-Plane läuft, bei einem Node, auf dem apt oder dpkg seine Sperre hält oder ein Host-Update läuft, und bei einem Node, der nicht unbeaufsichtigt booten kann (Volumes in /etc/crypttab, die eine Passphrase brauchen, oder kein apt).
+
+Wenn die Verzögerung endet, prüft ein Guard erneut, wartet bis zu 15 Minuten, bis jede Paketoperation beendet ist, und fordert den Neustart an, während er die dpkg-Sperren hält. Ein Node, der beschäftigt bleibt, wird nicht neu gestartet; seine Boot-ID bleibt gleich.
+
+```bash
+stackkit host reboot [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--delay` | duration | `30s` | Zeit bis zum Start des Neustarts (1 s bis 5 min) |
+| `--json` | bool | — | Das stackkit.host-maintenance/v1-Ergebnis als maschinenlesbares JSON ausgeben |
+| `--yes` | bool | — | Bestätigen, dass dieser Node neu starten darf |
+
+**Beispiele**
+
+```bash
+# Reboot this node in 30 seconds
+sudo stackkit host reboot --yes
+
+# Reboot in two minutes and report the boot ID to compare against
+sudo stackkit host reboot --yes --delay 2m --json
+```
+
+## stackkit host remediate
+
+Korrekturen für die Preflight-Befunde des Hosts anzeigen oder ausführen.
+
+Die Korrekturen auflisten, die zu den Preflight-Befunden dieses Hosts passen, oder eine davon ausführen.
+
+Ohne `--apply` wird nichts geändert: Der Befehl vermisst den Host und gibt aus, was jede Korrektur tun würde, ob sie sich rückgängig machen lässt und ob sie Root braucht.
+
+Mit `--apply` &lt;id&gt; `--yes` läuft die benannte Korrektur, und die Prüfung, die sie begründet hat, wird danach erneut gemessen, sodass das Ergebnis aussagt, was sich tatsächlich geändert hat, und nicht nur, dass etwas versucht wurde.
+
+```bash
+stackkit host remediate [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--apply` | string | — | Die benannte Auflösung ausführen (erfordert `--yes`) |
+| `--auto-reversible` | bool | — | Jede rückgängig machbare Korrektur ausführen, die unbeaufsichtigt laufen darf (erfordert `--yes`) |
+| `--json` | bool | — | Den Remediation-Plan oder -Eintrag als maschinenlesbares JSON ausgeben |
+| `--policy` | string | — | Preflight-Richtlinie zum Finden der Befunde: strict oder warn (Standard) |
+| `--yes` | bool | — | Bestätigen, dass die benannte Auflösung diesen Host verändern darf |
+
+**Beispiele**
+
+```bash
+# List the fixes for this host's preflight findings without changing anything
+stackkit host remediate
+
+# Carry out one fix by the ID the list printed
+stackkit host remediate --apply <resolution-id> --yes
+
+# Carry out every undoable fix that may run unattended
+stackkit host remediate --auto-reversible --yes
+```
+
+## stackkit host updates
+
+Betriebssystem-Paketupdates auf diesem Node planen und anwenden.
+
+Betriebssystem-Paketupdates auf diesem Debian- oder Ubuntu-Node planen und anwenden.
+
+Die Container-Runtime (docker.io, docker-ce\*, containerd\*, runc) wird zurückgehalten: Sie steht im Plan, wird von apply aber nie installiert, weil ihr Upgrade jeden Workload neu startet. Apply entfernt nie Pakete, führt nie autoremove aus und startet nie neu; nutze dafür 'stackkit host reboot'.
+
+```bash
+stackkit host updates [flags]
+```
+
+Unterbefehle: [`stackkit host updates apply`](#stackkit-host-updates-apply), [`stackkit host updates plan`](#stackkit-host-updates-plan)
+
+### stackkit host updates apply
+
+Genau den geprüften Update-Plan installieren.
+
+Genau die Paketmenge installieren, die ein geprüfter 'stackkit host updates plan' gemeldet hat.
+
+Die ausstehende Menge wird zuerst erneut simuliert; weicht ihr Digest von `--plan-digest` ab, wird nichts installiert (plan_stale). apt läuft nicht-interaktiv in einer transienten systemd-Unit (kombify-host-update-\*) und behält bestehende Konfigurationsdateien, sodass ein Timeout von CLI oder Agent nur das Warten beendet und nie dpkg. Das Ergebnis hält die Version jedes Pakets vor und nach dem Update fest und ob der Node jetzt einen Neustart benötigt.
+
+```bash
+stackkit host updates apply [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Das stackkit.host-maintenance/v1-Ergebnis als maschinenlesbares JSON ausgeben |
+| `--plan-digest` | string | — | **Erforderlich.** plan_digest des geprüften Plans (sha256:&lt;hex&gt;) |
+| `--yes` | bool | — | Bestätigen, dass die geplanten Pakete installiert werden dürfen |
+
+**Beispiele**
+
+```bash
+# Apply the plan you reviewed
+sudo stackkit host updates apply --plan-digest sha256:<digest> --yes
+```
+
+### stackkit host updates plan
+
+Den Paketindex aktualisieren und die ausstehenden Updates anzeigen.
+
+Den Paketindex aktualisieren und anzeigen, was 'stackkit host updates apply' installieren würde.
+
+Das Ergebnis listet jedes ausstehende Paket mit aktueller und neuer Version, die zurückgehaltenen Container-Runtime-Pakete, von apt zurückgehaltene Pakete, ob ein Neustart wahrscheinlich ist (Kernel, C-Bibliothek oder systemd) und dpkg-Probleme auf. plan_digest bindet die exakte Paketmenge; apply verweigert sich, wenn sie nicht mehr passt.
+
+```bash
+stackkit host updates plan [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Das stackkit.host-maintenance/v1-Ergebnis als maschinenlesbares JSON ausgeben |
+
+**Beispiele**
+
+```bash
+# Show the pending updates of this node
+sudo stackkit host updates plan
+
+# Machine-readable plan with its plan_digest
+sudo stackkit host updates plan --json
+```

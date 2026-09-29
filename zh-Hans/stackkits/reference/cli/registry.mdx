@@ -1,0 +1,82 @@
+---
+title: "stackkit registry"
+description: "管理内嵌的 StackKits 注册表快照"
+sidebarTitle: "registry"
+---
+管理内嵌的 StackKits 注册表快照。
+
+管理内置于 CLI 二进制文件中的 OSS 安全注册表快照。
+
+该快照位于 internal/registry/data/registry_snapshot.json。你可以检查内嵌数据，或从本地 CUE 树确定性地重现它。
+
+```bash
+stackkit registry [flags]
+```
+
+子命令：[`stackkit registry artifacts`](#stackkit-registry-artifacts), [`stackkit registry bake-from-cue`](#stackkit-registry-bake-from-cue), [`stackkit registry emit-cue`](#stackkit-registry-emit-cue), [`stackkit registry info`](#stackkit-registry-info)
+
+## stackkit registry artifacts
+
+根据所有权清单输出注册表/生成产物的路径规格。
+
+根据生成产物所有权清单输出仓库路径规格。
+
+generate-cue 工作流和 CI 一致性关卡使用此命令，以便明确由机器人拥有的生成文件。冻结的产物保留在原有路径，但在其清单状态改变之前，不会作为生成输出被暂存或比较差异。
+
+```bash
+stackkit registry artifacts [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--kind` | string | `all` | 产物类型过滤器（all、cue、snapshot） |
+| `--manifest` | string | `internal/registry/generated_artifacts.json` | 生成产物所有权清单 |
+| `--state` | string | `generated` | 产物状态过滤器（all、generated、frozen） |
+
+## stackkit registry bake-from-cue
+
+根据本地 Git/CUE 树生成注册表快照。
+
+遍历 modules/&lt;slug&gt;/module.cue 以及规范的产品定义，计算它们的契约哈希，并将得到的 Snapshot 写入 internal/registry/data/registry_snapshot.json（或 `--output`）。
+
+此命令是离线的 OSS 引导路径，可在公开 kombifyio/stackKits 仓库的纯检出上工作。
+
+```bash
+stackkit registry bake-from-cue [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--modules-dir` | string | `modules` | 包含 module/&lt;slug&gt;/module.cue 的目录 |
+| `--output` | string | `internal/registry/data/registry_snapshot.json` | 快照 JSON 的输出路径 |
+
+## stackkit registry emit-cue
+
+根据注册表快照渲染 foundation/generated CUE 产物。
+
+根据注册表快照加上本地 CUE 模块树渲染 foundation/generated/tool_catalog.cue。
+
+读取快照 JSON（默认：internal/registry/data/registry_snapshot.json，请先通过 'registry bake-from-cue' 刷新），确定性地渲染并写出产物。头部会记录快照的 content_hash 和 generated_at，因此可以检测快照与产物之间的漂移；CI 会根据已提交的快照重新生成并比较差异。
+
+```bash
+stackkit registry emit-cue [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--input` | string | `internal/registry/data/registry_snapshot.json` | 用于渲染的快照 JSON |
+| `--modules-dir` | string | `modules` | 包含 modules/&lt;slug&gt;/module.cue 的目录（服务目录来源） |
+| `--output-dir` | string | `foundation/generated` | 渲染出的 CUE 文件所在目录 |
+
+## stackkit registry info
+
+显示内嵌注册表快照的摘要。
+
+```bash
+stackkit registry info [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 以 JSON 输出完整的内嵌快照 |
+

@@ -1,0 +1,49 @@
+---
+title: "stackkit verify"
+description: "Ejecuta las comprobaciones de verificación posteriores al despliegue"
+sidebarTitle: "verify"
+---
+Ejecuta las comprobaciones de verificación posteriores al despliegue.
+
+Ejecuta comprobaciones posteriores al despliegue, de solo lectura, desde el host donde está desplegado el StackKit.
+
+El verificador comprueba la stack spec, el estado del despliegue, el daemon de Docker, los contenedores de StackKit, el estado de salud de Docker y, opcionalmente, las rutas HTTP del resumen de acceso generado.
+
+`--host` y sus flags SSH (`--user`, `--key`, `--port`, `--remote-dir`, `--legacy-remote-transport`) controlan el verificador SSH sin procesar retirado, que solo un build v0.6 exacto sigue ejecutando; `--strict` se aplica a ese verificador y a las comprobaciones locales de v0.6. En los releases actuales, ejecuta verify en el host desplegado.
+
+```bash
+stackkit verify [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | Manifiesto de generación de Architecture v2 (predeterminado: &lt;outputRoot&gt;/.stackkit/generation-manifest.json) |
+| `--generation-receipt` | string | — | Recibo de generación de Architecture v2 (predeterminado: &lt;outputRoot&gt;/.stackkit/generation-receipt.json) |
+| `--host` | string | — | Host remoto que se verifica por SSH |
+| `--http` | bool | — | Verifica las URL de servicio generadas con peticiones HTTP |
+| `--inventory` | string | — | Inventory observado de Architecture v2 (si no, se selecciona un archivo de inventario convencional) |
+| `--json` | bool | — | Emite JSON legible por máquinas |
+| `--key` | string | — | Ruta de la clave privada SSH para la verificación remota |
+| `--legacy-remote-transport` | bool | — | Permite explícitamente el verificador SSH sin procesar obsoleto para un destino StackSpec v1 |
+| `--offline` | bool | — | Verifica los recibos y atestaciones de release en caché sin acceso a la red |
+| `--port` | int | `22` | Puerto SSH para la verificación remota |
+| `--remote-dir` | string | `/opt/stackkit` | Directorio de trabajo remoto de StackKit |
+| `--resolved-plan` | string | — | ResolvedPlan canónico de Architecture v2 (predeterminado: &lt;outputRoot&gt;/.stackkit/resolved-plan.json) |
+| `--strict` | bool | — | Trata las advertencias como fallo de verificación |
+| `--user` | string | — | Nombre de usuario SSH para la verificación remota |
+
+**Ejemplos**
+
+```bash
+# Verify the applied deployment on this host
+stackkit verify
+
+# Also request the generated service URLs over HTTP
+stackkit verify --http
+
+# Emit the verification report as JSON
+stackkit verify --json
+
+# Check recorded Apply evidence and cached release receipts without live probes or network access
+stackkit verify --offline
+```

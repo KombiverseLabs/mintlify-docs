@@ -1,0 +1,54 @@
+---
+title: "Identidad en StackKits"
+description: "Cómo la identidad local del propietario y el inicio de sesión alojado opcional se mantienen separados."
+icon: "shield-halved"
+---
+
+# Identidad en StackKits
+
+StackKits mantiene como autoridad al propietario de un homelab local. Instalar
+y operar un stack no requiere una cuenta alojada.
+
+## Identidad local del propietario
+
+La base de identidad local publicada usa:
+
+- **PocketID** como proveedor de identidad OpenID Connect del propietario del homelab;
+- **TinyAuth** como intermediario de autenticación directa (forward-auth) delante de las aplicaciones protegidas;
+- aprobación explícita del propietario para las operaciones del ciclo de vida que modifican el stack.
+
+Los datos de identidad y las credenciales permanecen bajo el control del
+propietario local. Quitar una conexión alojada opcional no debe eliminar el
+acceso local ni impedir el ciclo de vida independiente.
+
+<CardGroup cols={2}>
+  <Card title="PocketID" icon="fingerprint" href="/es/stackkits/apps/pocketid">
+    Identidad local basada en passkeys para el propietario del homelab.
+  </Card>
+  <Card title="TinyAuth" icon="key" href="/es/stackkits/apps/tinyauth">
+    Autenticación directa para aplicaciones que no ofrecen un flujo de inicio
+    de sesión compatible propio.
+  </Card>
+</CardGroup>
+
+## Identidad alojada opcional
+
+Cuando un usuario se conecta deliberadamente a un servicio alojado de kombify,
+el inicio de sesión interactivo usa el dominio oficial `login.kombify.io`. Esa
+identidad alojada es una capa de comodidad opcional; no sustituye ni supera al
+propietario local.
+
+## Comportamiento de seguridad
+
+- La información de identidad ausente o ambigua deniega el acceso.
+- Los tokens tienen una vida corta y un alcance limitado a su audiencia prevista.
+- Las rutas protegidas no se vuelven públicas cuando un servicio de identidad
+  no está disponible.
+- Un asistente que actúa en nombre de un usuario no puede recibir más autoridad
+  que ese usuario.
+
+<Note>
+Esta página describe el concepto público de identidad. La arquitectura interna
+de enrutamiento, tenants, facturación, despliegue y operadores no forma parte,
+de forma deliberada, de la documentación pública de StackKits.
+</Note>

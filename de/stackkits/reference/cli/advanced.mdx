@@ -1,0 +1,160 @@
+---
+title: "stackkit advanced"
+description: "Offline autorisierte Advanced-Lifecycle-Operationen verwalten"
+sidebarTitle: "advanced"
+---
+Offline autorisierte Advanced-Lifecycle-Operationen verwalten.
+
+```bash
+stackkit advanced [flags]
+```
+
+Unterbefehle: [`stackkit advanced change-set`](#stackkit-advanced-change-set), [`stackkit advanced restore-drill`](#stackkit-advanced-restore-drill), [`stackkit advanced rollback`](#stackkit-advanced-rollback), [`stackkit advanced trust`](#stackkit-advanced-trust)
+
+## stackkit advanced change-set
+
+Offline autorisierte Terramate-Change-Sets verwalten.
+
+```bash
+stackkit advanced change-set [flags]
+```
+
+Unterbefehle: [`stackkit advanced change-set apply`](#stackkit-advanced-change-set-apply), [`stackkit advanced change-set create`](#stackkit-advanced-change-set-create)
+
+### stackkit advanced change-set apply
+
+Ein exaktes, vom Owner freigegebenes Terramate-Change-Set anwenden.
+
+```bash
+stackkit advanced change-set apply [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--candidate-spec` | string | — | Pfad zur exakten Kandidaten-StackSpec v2 mit generation.target=terramate |
+| `--capability` | string | — | Pfad zur kanonischen stackkit.advanced-capability/v1, mit der das Change-Set erstellt wurde |
+| `--change-set` | string | — | Exakte sha256:&lt;hex&gt;-Inhaltsadresse des vom Owner signierten Change-Sets |
+| `--expect-sha256` | string | — | Erforderlicher exakter sha256:&lt;hex&gt;-Digest der kanonischen gespeicherten Change-Set-Bytes |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+
+### stackkit advanced change-set create
+
+Ein vom Owner signiertes Terramate-Change-Set erstellen.
+
+```bash
+stackkit advanced change-set create [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--candidate-spec` | string | — | Pfad zur Kandidaten-StackSpec v2 mit generation.target=terramate |
+| `--capability` | string | — | Pfad zu einer kanonischen stackkit.advanced-capability/v1-Datei |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+
+## stackkit advanced restore-drill
+
+Capability-gesteuerte native Restore-Drills ausführen.
+
+```bash
+stackkit advanced restore-drill [flags]
+```
+
+Unterbefehle: [`stackkit advanced restore-drill run`](#stackkit-advanced-restore-drill-run)
+
+### stackkit advanced restore-drill run
+
+Eine Wiederherstellung eines Backup-Ankers bereitstellen und verifizieren, ohne sie zu aktivieren.
+
+Einen nativen v2-Restore-Drill als Advanced-Operation ausführen.
+
+Der Drill wird nur mit einer offline verifizierten Capability zugelassen, die restore.drill erlaubt, mit dem lokalen, vom Owner freigegebenen Issuer-Trust und mit explizitem `--owner-approve`. Er verifiziert die aktuelle Runtime, erstellt einen neuen Snapshot-Anker (oder validiert `--anchor` in lokaler Verwahrung), stellt eine Wiederherstellung dieses Ankers bereit, verifiziert den bereitgestellten Baum, entfernt den Staging-Bereich und verifiziert, dass die Live-Runtime unverändert ist. Bereitgestellte Daten werden nie aktiviert.
+
+```bash
+stackkit advanced restore-drill run [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--anchor` | string | — | Vorhandene sha256-Snapshot-Anker-ID für den Drill; ohne Angabe wird ein neuer Backup-Anker erstellt |
+| `--capability` | string | — | Pfad zu einer kanonischen stackkit.advanced-capability/v1-Datei, die restore.drill erlaubt |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+| `--operation-id` | string | — | Stabile Drill-ID in Kleinbuchstaben (8–100 Zeichen); wird generiert, wenn sie fehlt |
+| `--owner-approve` | bool | — | Die Backup- und Staged-Restore-Nebenwirkungen des Drills ausdrücklich freigeben |
+
+**Beispiele**
+
+```bash
+stackkit advanced restore-drill run --capability capability.json --owner-approve --json
+```
+
+## stackkit advanced rollback
+
+Capability-gesteuerte koordinierte Rollbacks über Terramate-Stacks ausführen.
+
+```bash
+stackkit advanced rollback [flags]
+```
+
+Unterbefehle: [`stackkit advanced rollback run`](#stackkit-advanced-rollback-run)
+
+### stackkit advanced rollback run
+
+Jeden lokalen Terramate-Stack auf einen verifizierten Checkpoint zurücksetzen.
+
+Den lokalen Host als Advanced-Operation rollback.coordinated auf einen verifizierten Executor-State-Checkpoint zurücksetzen.
+
+Der Rollback wird nur mit einer offline verifizierten Capability zugelassen, die rollback.coordinated erlaubt, mit dem lokalen, vom Owner freigegebenen Issuer-Trust und mit explizitem `--owner-approve`. `--to` benennt entweder den Checkpoint direkt oder das Change-Set, dessen Pre-Apply-Checkpoint das Ziel ist. Stacks laufen in umgekehrter Ausführungsreihenfolge: Stacks, die nach dem Checkpoint hinzugefügt wurden, werden über OpenTofu zerstört (docker compose down ohne Volumes) und entfernt, geänderte Stacks erhalten State, Konfiguration und Payload des Checkpoints zurück und werden zur Konvergenz gezwungen, und Stacks, die nach dem Checkpoint entfernt wurden, werden neu erstellt. StackSpec und Inventory des Checkpoints werden wiederhergestellt, neu generiert und verifiziert. Ein unterbrochener Rollback wird beim nächsten Lauf mit demselben `--to` fortgesetzt und überspringt Stacks, die bereits konvergiert sind.
+
+```bash
+stackkit advanced rollback run [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--capability` | string | — | Pfad zu einer kanonischen stackkit.advanced-capability/v1-Datei, die rollback.coordinated erlaubt |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+| `--owner-approve` | bool | — | Das Zerstören, Wiederherstellen und Neuerstellen von Stacks ausdrücklich freigeben |
+| `--to` | string | — | Ziel-sha256-Executor-State-Snapshot-ID oder die sha256-Change-Set-ID, deren Pre-Apply-Checkpoint das Ziel ist |
+
+**Beispiele**
+
+```bash
+stackkit advanced rollback run --capability capability.json --to sha256:<change-set-id> --owner-approve --json
+```
+
+## stackkit advanced trust
+
+Den lokalen, vom Owner freigegebenen Advanced-Issuer-Trust verwalten.
+
+```bash
+stackkit advanced trust [flags]
+```
+
+Unterbefehle: [`stackkit advanced trust import`](#stackkit-advanced-trust-import), [`stackkit advanced trust inspect`](#stackkit-advanced-trust-inspect)
+
+### stackkit advanced trust import
+
+Ein exakt gepinntes Advanced-Issuer-Trust-Bundle importieren.
+
+```bash
+stackkit advanced trust import [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--bundle` | string | — | Pfad zu einer kanonischen stackkit.advanced-trust-bundle/v1-Datei |
+| `--expect-sha256` | string | — | Erforderlicher exakter sha256:&lt;hex&gt;-Digest des Trust-Bundles |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+| `--owner-approve` | bool | — | Die Änderung des lokalen Advanced-Issuer-Trusts ausdrücklich freigeben |
+
+### stackkit advanced trust inspect
+
+Den verifizierten lokalen Advanced-Issuer-Trust prüfen.
+
+```bash
+stackkit advanced trust inspect [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |

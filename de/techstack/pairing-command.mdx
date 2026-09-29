@@ -1,0 +1,89 @@
+---
+title: "Pairing-Befehl"
+description: "Verbinde einen Server mit Techstack, indem du einen persönlichen Befehl in seinem Terminal ausführst"
+sidebarTitle: "Pairing-Befehl"
+icon: "terminal"
+---
+
+Der Pairing-Befehl ist der Weg **Give me a 1-liner** im Assistenten Add Node.
+Du kopierst eine Zeile aus Techstack, fügst sie im Terminal deines Servers ein,
+und der Server verbindet sich selbst. Du musst in Techstack keine SSH-Angaben
+eingeben.
+
+## Was der Befehl tut
+
+Der Befehl lädt den Techstack-Installer von deinem Techstack herunter und führt
+ihn mit einem persönlichen, kurzlebigen Pairing-Token aus. Auf dem Server
+
+1. erkennt der Installer die Plattform und installiert den Techstack-**Guard**,
+   einen kleinen Agent, der den Zustand des Servers meldet;
+2. installiert er die gepinnte StackKits-Laufzeit, die der Rollout braucht;
+3. löst er das Pairing-Token ein, das diesen Server mit deinem Homelab
+   verknüpft;
+4. installiert er Docker mit `apt-get`, wenn keine funktionierende
+   Container-Laufzeit vorhanden ist;
+5. installiert und startet er den Systemdienst `techstack-agent`, damit der
+   Guard nach einem Neustart weiterläuft.
+
+Der Guard spricht mit Techstack nur über eine **ausgehende** HTTPS-Verbindung.
+Er sendet etwa alle 30 Sekunden einen Heartbeat und ein gemessenes Inventar.
+Du öffnest dafür keinen eingehenden Port auf dem Server.
+
+Das Token funktioniert einmal. Techstack speichert nur einen Hash der
+Zugangsdaten, die der Server erhält, und der Befehl wird nicht in
+Job-Berichten aufbewahrt.
+
+## Bevor du ihn ausführst
+
+- **Ein Linux-Server mit systemd.** Ubuntu ist das Standardsystem; siehe
+  [Einen Node hinzufügen](/de/techstack/add-node#betriebssystem).
+- **Administratorrechte.** Führe den Befehl als `root` oder als Benutzer aus,
+  der `sudo` verwenden darf. Der Installer schreibt Systemdateien und
+  installiert einen Dienst.
+- **`curl` auf dem Server.** Der Befehl nutzt es, um den Installer
+  herunterzuladen.
+- **Der Server erreicht Techstack.** Die Fortschrittsseite zeigt das Feld
+  **Techstack URL reachable from the server**. Die Adresse in diesem Feld muss
+  sich vom Server aus öffnen lassen, nicht nur von deinem Computer. Mit der
+  [Windows Alpha](/de/techstack/install-windows) erreicht der Server den
+  Windows-Computer über TCP-Port `5264` in deinem lokalen Netzwerk, lass den
+  Windows-Client also während des Pairings laufen.
+- **Ein frischer Befehl.** Ein Pairing-Token läuft 15 Minuten nach seiner
+  Erstellung durch Techstack ab.
+
+## Den Befehl ausführen
+
+1. Schließe den Assistenten Add Node ab. Techstack öffnet die
+   Fortschrittsseite für den neuen Node, die **Not connected yet** zeigt.
+2. Prüfe das Feld **Techstack URL reachable from the server** und korrigiere
+   es, wenn der Server Techstack unter einer anderen Adresse erreicht.
+3. Wähle **Copy pairing command**.
+4. Öffne ein Terminal auf dem Server, direkt oder über SSH, füge den Befehl ein
+   und drücke die Eingabetaste. Ändere den Befehl nicht. Er enthält dein
+   persönliches Token.
+5. Warte, bis der Installer fertig ist. Er gibt jeden Schritt aus.
+
+Meldet die Seite **This pairing token has expired**, wähle **Generate new
+command** und führe stattdessen den neuen Befehl aus. Der alte funktioniert
+nicht mehr.
+
+<Warning>
+Behandle den Befehl wie ein Einmalpasswort. Wer ihn ausführt, bevor er
+abläuft, kann einen Server mit deinem Homelab verbinden.
+</Warning>
+
+## Wenn der Node verbunden ist
+
+Sobald der Guard seinen ersten Heartbeat sendet, ändert Techstack den Node von
+**Not connected yet** auf verbunden. Die Fortschrittsseite setzt dann mit dem
+StackKit-Rollout für diesen Node fort. Du kannst das Terminal schließen.
+
+So prüfst du den Guard später auf dem Server:
+
+- `sudo systemctl status techstack-agent` zeigt, ob der Dienst läuft.
+- `sudo journalctl -u techstack-agent -f` verfolgt sein Log.
+
+Der Node erscheint jetzt mit seinem Zustand in deinem Homelab. Wo seine Dienste
+erreichbar sind, hängt nicht davon ab, wo der Server steht: lokale Hardware und
+gemietete Server können beide deine eigene Domain oder eine
+`*.kombify.me`-Adresse nutzen. Siehe [kombify.me](/de/kombify-me/overview).

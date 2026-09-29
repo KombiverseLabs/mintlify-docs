@@ -1,0 +1,80 @@
+---
+title: "Ein Meeting aufnehmen und prüfen"
+description: "Zweikanal-Meeting-Aufnahme, Notizen, Screenshots und Zusammenfassungen mit Quellenangaben"
+sidebarTitle: "Meeting"
+icon: "users"
+---
+
+Meeting nimmt ein Gespräch als zwei unabhängige Kanäle auf — dein Mikrofon und den
+System-Loopback —, transkribiert beide in einer Sitzung und schreibt das Meeting
+aus dem Transkript, deinen eigenen Notizen und einer Vorlage zusammen. Es ist ein separater Aufnahme-
+Dienst und kein vierter Modus: Es teilt nur den Speech-to-Text-Transcriber mit
+Dictation.
+
+<Info>
+Meeting ist eine Windows-Desktop-Funktion. Die Systemaudio-Aufnahme ist nicht in die
+macOS-Beta portiert.
+</Info>
+
+## Was ein Meeting erzeugt
+
+- Ein Transkript mit beiden Kanälen, gekennzeichnet nach Aufnahmekanal. Kanalbezeichnungen
+  zeigen, von welcher Seite des Gesprächs eine Zeile stammt; sie identifizieren nicht
+  jeden entfernten Sprecher.
+- Deine eigenen Notizen, wörtlich in der Zusammenfassung wiedergegeben.
+- Ein dauerhaftes **Meeting Review**: eine Kurzfassung in fünf Sätzen, Aktionspunkte
+  und ein Hauptteil, der das Transkript zitiert, aus dem er stammt.
+- Reviews auf Englisch, Deutsch, Spanisch, Chinesisch, Hindi und Arabisch.
+
+Audio wird nie gespeichert. Transkript, Notizen und Review bleiben übrig,
+und der [Retention Scope](/de/speechkit/modes#retention-scope) entscheidet, wie lange.
+
+## Eine Aufnahme starten und beenden
+
+1. Starte ein Meeting im Desktop-Client oder lass die Anruferkennung eines anbieten,
+   wenn du einen Anruf annimmst. Die Erkennung ist ein Vorschlag, den du annimmst, keine
+   automatische Aufnahme.
+2. Ein kompaktes transparentes Overlay zeigt während des Gesprächs Aufnahmezustand und Steuerung
+   und lässt sich für Notizen aufklappen.
+3. Fortlaufende Zusammenfassungen laufen in Batches, während die Aufnahme weitergeht, sodass ein langes Gespräch
+   nicht bis zum Ende warten muss, bis es ausgewertet wird.
+4. SpeechKit stoppt kurz, nachdem die anrufende Anwendung das
+   Mikrofon freigegeben hat, und benachrichtigt dich, wenn das Review fertig ist oder warum es fehlgeschlagen ist.
+   Eine Aufnahme, die du von Hand gestartet hast, wird nie automatisch gestoppt.
+
+Genau eine Aufnahme belegt das Mikrofon zur selben Zeit. Wenn du Dictation, Assist
+oder Voice Agent startest, während ein Meeting aufgenommen wird, wird das abgelehnt, statt
+das Gerät stillschweigend zu übernehmen.
+
+## Bildschirm-Snapshots
+
+Drücke während eines Meetings `Ctrl+Alt+S`, um ein gewähltes Fenster oder den Monitor
+unter dem Cursor aufzunehmen. Snapshots erscheinen als Markierungen in der Transkript-Zeitleiste, werden
+im erzeugten Review zitiert und kurz in der Meeting-Pille als Vorschau gezeigt, damit du
+bestätigen kannst, dass das richtige Fenster erfasst wurde. Kein Bild verlässt das Gerät.
+
+## Finden und exportieren
+
+Die Meeting-Liste gruppiert Sitzungen danach, wann sie stattfanden. Die Suche umfasst Titel,
+Transkripte, Notizen und Zusammenfassungen. Notizen werden als formatiertes Markdown dargestellt, und die
+vollständige Zusammenfassung bietet **Copy Markdown** und **Save .md**.
+
+## Review-Erzeugung
+
+Der lokale Pfad braucht keine Cloud-Zugangsdaten: Das mitgelieferte lokale Modell erzeugt
+das Review auf dem Gerät. GitHub Copilot ist ein optionaler Provider für die Review-Erzeugung
+hinter einer separaten, widerrufbaren Berechtigung zur Transkriptverarbeitung.
+
+Export-Connectors und Cloud-Review-Provider sind unter den
+[Network Scopes](/de/speechkit/modes#network-scope) **local network only** und **this device only**
+nicht verfügbar. Eine frische Installation konfiguriert keinen
+Connector, daher verlässt nichts den Rechner, bis du es wählst.
+
+<CardGroup cols={2}>
+  <Card title="Unter Windows installieren" icon="windows" href="/de/speechkit/install-windows">
+    Meeting wird mit dem Windows-Desktop-Client ausgeliefert.
+  </Card>
+  <Card title="Modi und Datenpfade" icon="waveform-lines" href="/de/speechkit/modes">
+    Sieh, wie die Provider-Wahl und die beiden Datenschutz-Scopes funktionieren.
+  </Card>
+</CardGroup>

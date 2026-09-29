@@ -1,0 +1,104 @@
+---
+title: "Copia de seguridad y restauración de un Basement Kit"
+description: "Crea instantáneas de Kopia vinculadas al propietario y prepara una restauración antes de la activación en vivo"
+sidebarTitle: "Copia y restauración"
+icon: clock-rotate-left
+---
+
+<Info>
+  Estado de la evidencia (2026-09-17, v0.35.0): el ciclo de copia de seguridad y
+  restauración del Basement Kit pasó en máquinas virtuales nuevas de Ubuntu
+  24.04 y Debian 13 con la v0.35.0. Para
+  [Documents & Files](/es/guides/stackkits/use-cases/documents-and-files) (Cloudreve),
+  los bytes restaurados coinciden con los originales, la activación se completó y
+  la lectura de vuelta de la aplicación se verificó a través del loopback local
+  del invitado. Para [Passwords](/es/guides/stackkits/use-cases/passwords)
+  (Vaultwarden), la copia de seguridad, la restauración aislada y la activación
+  de la restauración pasaron en Ubuntu 24.04 amd64 con la v0.35.0. Para
+  [Photos](/es/guides/stackkits/use-cases/photos) (Immich), se verificaron por
+  última vez en la v0.33.3. Para Passwords y Photos, la lectura de vuelta a nivel
+  de aplicación tras la restauración está pendiente. La evidencia de restauración
+  sobre un archivo publicado está pendiente para Media (Jellyfin) y Smart Home
+  (Home Assistant). Personal AI, Development (Gitea) y Documents (Paperless-ngx)
+  son experimentales y no tienen evidencia de ejecución.
+</Info>
+
+El Basement Kit publicado incluye un ciclo de vida de copia de seguridad con Kopia local y controlado por el propietario. Ejecútalo solo desde el workspace de StackKits aplicado cuyos datos quieras proteger.
+
+Haz del ejercicio de restauración parte de la configuración, no una tarea posterior.
+
+## Practica la recuperación antes de importar datos importantes
+
+1. Aplica y verifica el Basement Kit.
+2. Confirma que las raíces de datos principal y de copia de seguridad están separadas.
+3. Configura el repositorio y crea una instantánea con los comandos de abajo.
+4. Restaura esa instantánea en un área de preparación aislada y revisa el resultado.
+5. Verifica de nuevo los servicios tras cualquier activación. La verificación tras la recuperación importa tanto como la instantánea.
+
+Repite el ejercicio tras cambios relevantes de almacenamiento, de workloads o de versión.
+
+## Configura y comprueba el repositorio
+
+```bash
+stackkit backup configure --json
+stackkit backup status --json
+```
+
+El repositorio, el conjunto de orígenes, las exclusiones y la custodia local se derivan del plan resuelto. No apuntes el comando a un volumen arbitrario ni eludas la custodia del propietario.
+
+### Qué cubre una instantánea
+
+El `backupPolicy.coverage` del plan selecciona qué clases de datos incluye la instantánea. Hay tres grupos anidados, y un stack sin suscripción detrás se resuelve a `content`:
+
+| Cobertura | Qué selecciona |
+| --- | --- |
+| `config` | Configuración del stack, material secreto, estado de la plataforma, configuración serverless |
+| `content` | Lo anterior más bases de datos, contenido de usuario, documentos y series temporales de telemetría |
+| `media` | Lo anterior más originales de fotos y medios grandes |
+
+Los medios se eligen, nunca se heredan. Las bibliotecas de fotos y vídeo dominan un repositorio, así que una primera siembra no incorporará ninguna en silencio: selecciona `media` cuando la quieras.
+
+La salida de estado anterior informa de los volúmenes y exclusiones exactos que seleccionó la configuración aplicada, que es la respuesta a «qué contendrá la próxima instantánea». El grupo de cobertura es lo que pidió el plan; la salida de estado es en lo que se resolvió una configuración aplicada.
+
+## Crea una instantánea idempotente
+
+```bash
+stackkit backup run --operation-id before-upgrade-2026-08-11 --json
+```
+
+Guarda el ancla de la instantánea direccionada por contenido que se devuelve junto con tu evidencia de verificación. Reutilizar el mismo ID de operación devuelve la operación existente en lugar de crear un duplicado accidental.
+
+## Restaura en un área de preparación aislada
+
+```bash
+stackkit backup restore sha256:<snapshot-anchor-id> \
+  --owner-approve \
+  --operation-id restore-check-2026-08-11 \
+  --json
+```
+
+Esto verifica y extrae la instantánea en un área de preparación propiedad de CUE. No reemplaza los datos en vivo. Revisa el ID del resultado de restauración devuelto antes de continuar.
+
+## Activa la restauración verificada
+
+```bash
+stackkit backup restore activate sha256:<restore-result-id> \
+  --owner-approve \
+  --operation-id restore-activation-2026-08-11 \
+  --json
+```
+
+La activación crea la instantánea de seguridad necesaria, cambia el conjunto exacto de volúmenes propiedad del plan, reinicia el runtime y verifica el vínculo con el propietario y los servicios.
+
+Si la activación se interrumpe, recupera la operación exacta de forma explícita:
+
+```bash
+stackkit backup restore recover restore-activation-2026-08-11 \
+  --owner-approve \
+  --rollback \
+  --json
+```
+
+<Warning>
+  Una copia de seguridad correcta no es una prueba de recuperación. Practica la restauración preparada con datos no críticos antes de confiar en el stack para archivos irremplazables.
+</Warning>

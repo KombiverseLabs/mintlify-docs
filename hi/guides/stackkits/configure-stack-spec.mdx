@@ -1,0 +1,90 @@
+---
+title: "StackSpec कॉन्फ़िगर करें"
+description: "जनरेट की गई डिप्लॉयमेंट फ़ाइलें संपादित किए बिना रिलीज़ किए गए StackKits इरादे को बदलें"
+sidebarTitle: "StackSpec कॉन्फ़िगर करें"
+icon: sliders
+---
+
+`stack-spec.yaml` एक StackKits वर्कस्पेस के लिए वांछित-इरादे का दस्तावेज़ है। रिलीज़ की गई CLI से पूरा दस्तावेज़ बनवाएँ, फिर केवल वही इरादा बदलें जिसे आप समझते हैं।
+
+```bash
+stackkit init basement-kit --owner-source=local
+stackkit validate
+```
+
+रिलीज़ की गई CLI पूरा नेटिव StackSpec लिखती है और उसके बाहर स्थानीय ओनर कस्टडी स्थापित करती है। जनरेट किया गया `apiVersion` बनाए रखें: इंस्टॉल की गई रिलीज़ के CUE अनुबंध उसके फ़ील्ड, डिफ़ॉल्ट और बाधाएँ देते हैं।
+
+## समीक्षा के लिए सामान्य फ़ील्ड
+
+| इरादा | वर्तमान फ़ील्ड | मार्गदर्शन |
+| --- | --- | --- |
+| वर्कस्पेस पहचान | `metadata.name` | इसे DNS-संगत रखें और पहले apply के बाद स्थिर रखें। |
+| Kit | `kit.slug` | घरेलू साइट के लिए `basement-kit` या मौजूदा क्लाउड होस्ट के लिए `cloud-kit` उपयोग करें। |
+| जनरेट किया गया आउटपुट | `generation.outputRoot` | जनरेट किए गए आर्टिफ़ैक्ट को StackSpec से अलग रखें। |
+| स्थायी डेटा | `storage.dataRoot` | उस स्टोरेज पर निरपेक्ष पथ उपयोग करें जिसे आप चलाते हैं और जिसका बैकअप लेते हैं। |
+| बैकअप | `storage.backupRoot` | इसे प्राथमिक डेटा रूट से अलग रखें। |
+| स्टैक डेटा | `storage.stacksRoot` | स्थानीय ऑपरेटर के स्वामित्व वाला निरपेक्ष पथ उपयोग करें। |
+| स्थानीय डोमेन | `network.domain.base` | Basement Kit रिलीज़ का डिफ़ॉल्ट `home.test` है; ऐसा डोमेन उपयोग करें जिसका रिज़ॉल्यूशन आपके नियंत्रण में हो। |
+
+यह एक अंश है, जनरेट किए गए पूरे दस्तावेज़ का विकल्प नहीं:
+
+```json
+{
+  "metadata": { "name": "family-home" },
+  "kit": { "slug": "basement-kit" },
+  "generation": {
+    "outputRoot": "deploy",
+    "strategy": "kit-template",
+    "target": "compose"
+  },
+  "storage": {
+    "dataRoot": "/opt/stackkit/data",
+    "backupRoot": "/opt/stackkit/backups",
+    "stacksRoot": "/opt/stackkit/stacks",
+    "volumeDriver": "local"
+  },
+  "network": {
+    "mode": "private",
+    "domain": { "base": "home.test" }
+  }
+}
+```
+
+## रिलीज़ किया गया Files वर्कलोड चुनें
+
+Basement और Cloud Kit अनुबंध [Documents & Files](/hi/guides/stackkits/use-cases/documents-and-files) उपयोग केस के लिए `files` को वैकल्पिक वर्कलोड के रूप में उपलब्ध कराते हैं; [उपयोग केस कैटलॉग](/hi/stackkits/reference/use-case-catalog) प्रकाशित रिलीज़ द्वारा घोषित कॉम्पोनेंट सूचीबद्ध करता है। यह चयन रिलीज़ की गई CLI से सत्यापित और जनरेट किया गया था:
+
+```json
+{
+  "workloads": {
+    "files": {
+      "alternative": "cloudreve",
+      "runtimeAdapterRef": "standalone-compose",
+      "placement": {
+        "siteRefs": ["home"],
+        "nodeRefs": ["main"]
+      }
+    }
+  }
+}
+```
+
+`workloads` ऑब्जेक्ट को `init` से बने पूरे StackSpec में मर्ज करें। `home` साइट और `main` नोड रिलीज़ किए गए Basement डिफ़ॉल्ट हैं; अपने जनरेट किए गए दस्तावेज़ में पहले से मौजूद आइडेंटिफ़ायर उपयोग करें।
+
+v0.21.11 से `placement` ब्लॉक वैकल्पिक है। बिना उसके चुने गए वर्कलोड को एम्बेडेड CUE अनुबंधों से शासित खाली-प्लेसमेंट डिफ़ॉल्ट मिलते हैं, इसलिए प्रोग्रामेटिक StackSpec लेखकों को अब CLI-विशिष्ट बॉयलरप्लेट की ज़रूरत नहीं।
+
+<Warning>
+  इस चयन को Photos या Vault के लिए कॉपी न करें और सीक्रेट मान न गढ़ें। इन वर्कलोड को ओनर-बद्ध सीक्रेट कस्टडी चाहिए। v0.21.11 से ऐसा वर्कलोड चुनने के बाद और `generate` से पहले [`stackkit secrets materialize`](/hi/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace) चलाएँ ताकि वह कस्टडी स्पष्ट रूप से स्थापित हो।
+</Warning>
+
+## हर बदलाव को सत्यापित करें
+
+```bash
+stackkit validate
+stackkit generate
+stackkit plan --json
+```
+
+`validate` मौजूदा StackSpec जाँचता है, `generate` शासित आउटपुट बनाता है, और `plan` बिना एक्ज़ीक्यूटर चलाए हल किए गए सटीक प्लान की जाँच करता है। यदि कोई कमांड विफल हो, तो StackSpec ठीक करें; `deploy/` के नीचे की फ़ाइलों को पैच न करें।
+
+[समीक्षा करें, लागू करें और सत्यापित करें](/hi/guides/stackkits/review-plan-and-apply) के साथ आगे बढ़ें।

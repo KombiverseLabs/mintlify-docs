@@ -1,6 +1,6 @@
 # Customer documentation entry localization
 
-Status: implementation foundation; translation and publication pending.
+Status: `de` is a full translation of every English page under `de/`; other locales pending. Translator process: README section Localization.
 
 The workspace `LANGUAGE-LOCALIZATION-STANDARD.md` owns locale semantics and
 review requirements. `public-docs` remains planned in its localization surface
@@ -8,9 +8,9 @@ manifest. This contributor document is excluded by `.mintignore`.
 
 ## Published scope
 
-English is the only published locale. Keep the current English routes and
-`docs.json` navigation intact. The public-safety allowlist now admits only `en`
-and existing public pages. The previous target-language entries, including
+English is the default locale and keeps its routes. German (`de`) is a language
+branch of `navigation.languages`. The public-safety allowlist admits `en` and
+`de` and existing public pages. The previous target-language entries, including
 `cn/index`, were not evidence of reviewed content and have been removed.
 
 Use ignored `drafts/` for translation proposals. Do not put proposals into

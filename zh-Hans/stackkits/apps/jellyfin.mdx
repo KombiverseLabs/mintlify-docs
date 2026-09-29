@@ -1,0 +1,62 @@
+---
+title: "Jellyfin"
+description: "媒体库工作负载：只读媒体、原生所有者设置，以及独立的恢复路径"
+sidebarTitle: "Jellyfin"
+icon: film
+---
+
+Jellyfin 通过 Standalone Compose 主机上的 `media` 工作负载提供[媒体](/zh-Hans/guides/stackkits/use-cases/media)用例。请在你的 [Basement Kit](/zh-Hans/stackkits/kits/basement-kit) 基线通过验证之后再设置它。使用 `stackkit app compatibility --json` 检查已安装版本的适配器能力。
+
+## 让工作负载指向已有的媒体目录
+
+要使用已有的媒体库，请在生成并应用栈之前，把 StackSpec 中的 `storage.mediaRoot` 设置为媒体在运行时主机上的绝对目录，例如 `/srv/household-media`：
+
+- StackKits 会把该目录以只读方式绑定到 `/media`。Jellyfin 可以扫描并串流这些文件，但不能编辑或删除它们。
+- 该目录必须已经存在。StackKits 不会创建它，也不会更改它的权限；目录缺失会导致交付失败，因此请自行准备并保护主机存储。
+- 不设置 `storage.mediaRoot`，则由计划管理一个命名的媒体库卷。
+- 该路径指的是运行时主机上的存储，而不是运行远程查看器的那台机器。
+
+## 设置所有者账户
+
+创建一个私有的、相对于工作区的凭据文件 `.stackkit/setup/media-owner.json`：
+
+```json
+{
+  "username": "<your administrator name>",
+  "password": "<your unique password>"
+}
+```
+
+把该文件的权限限制为仅工作区所有者可访问，并且不要把其内容放进命令参数或聊天消息。然后运行：
+
+```bash
+stackkit setup media --credentials-file .stackkit/setup/media-owner.json --owner-approve --json
+```
+
+该命令在执行前会验证当前计划、已签名的 Apply、确切的本地容器以及固定的 Jellyfin 版本。首次运行时，它会设置你选择的管理员凭据，绝不使用默认的首个用户密码。对于已有的安装，它会改为执行正常登录并回读管理员信息。临时的设置会话会在已签名的结果被记录之前撤销。
+
+## 完成向导并添加媒体库
+
+不带其他标志时，未完成的 Jellyfin 启动向导会保持未完成：请在 Media 声明的私有路由上打开它，自行选择媒体库路径、语言和家庭设置。如果想用当前的应用设置来完成启动向导，并在之后再配置你的媒体库，请添加 `--complete-onboarding`：
+
+```bash
+stackkit setup media --credentials-file .stackkit/setup/media-owner.json --owner-approve --complete-onboarding --json
+```
+
+该标志只会完成启动向导。它不会添加媒体库、更改远程访问设置或配置转码。添加媒体库时，请遵循计划中的媒体卷映射，即由所有者托管目录对应的只读 `/media` 挂载。给家庭中的观看者分配单独的、非管理员的 Jellyfin 账户，并让每个播放器直接连接到声明的 Media URL。
+
+## 恢复限制
+
+应用配置和媒体字节是分开托管的：
+
+- Jellyfin 的配置和转码缓存位于不同的卷中。请检查应用的备份声明，了解包含哪些数据；仅有可写存储并不意味着有备份覆盖。
+- 你的媒体源不是 StackKits 备份。无论你把 `storage.mediaRoot` 设置成什么，都要为这些字节保留一个独立的恢复来源，并在栈之外把它记录下来。
+- 容器健康以及已验证的管理员设置并不能证明媒体库内容或恢复，请分别显式检查这两项。
+
+## 测试真实的客户端
+
+请从目标客户端测试播放你自己的某个文件。先检查直接播放，只有在你显式配置了转码时才检查转码。客户端兼容性、带宽和转码质量并不能由一个健康的容器来证明，请在你实际打算观看的设备上验证。
+
+## 恢复被中断的设置
+
+如果某次设置运行被中断，请使用报告出的 `--operation-id` 重试。该命令会重新检查应用状态，并且绝不会重新打开已经完成的启动向导。

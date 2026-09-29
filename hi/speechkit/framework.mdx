@@ -1,0 +1,82 @@
+---
+title: "SpeechKit के साथ बनाएँ"
+description: "Go वॉइस कर्नेल एम्बेड करें, या सर्वर, Android और ब्राउज़र लक्ष्य इस्तेमाल करें"
+sidebarTitle: "फ़्रेमवर्क"
+icon: "code"
+---
+
+सार्वजनिक SpeechKit मॉड्यूल में प्लेटफ़ॉर्म-निरपेक्ष वॉइस कर्नेल है। इसका उपयोग तब करें जब आपका एप्लिकेशन अलग SpeechKit
+सर्वर पर निर्भर रहने के बजाय अपनी प्रक्रिया, कॉन्फ़िगरेशन और प्रोवाइडर क्रेडेंशियल खुद संभाले।
+
+{/* speechkit-release:begin */}
+मौजूदा सार्वजनिक रिलीज़ [v0.72.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.1) है, जो 2026-09-20 को प्रकाशित हुआ।
+{/* speechkit-release:end */}
+
+## आवश्यकताएँ
+
+- Go 1.26 या नया
+- ऐसा एप्लिकेशन जो चुना हुआ माइक्रोफ़ोन, ऑडियो या टेक्स्ट इनपुट दे सके
+- प्रोवाइडर क्रेडेंशियल केवल तब, जब आप बाहरी प्रोवाइडर चुनें
+
+## मॉड्यूल जोड़ें
+
+```bash
+go get github.com/kombifyio/SpeechKit@latest
+```
+
+`@latest` सबसे नए प्रकाशित रिलीज़ पर हल होता है। आपके बिल्ड ने जो सटीक वर्शन चुना उसे दर्ज करें और शिप करने से पहले
+पिन करें: यह बीटा सॉफ़्टवेयर है, और सार्वजनिक API, कॉन्फ़िगरेशन कुंजियाँ और डिफ़ॉल्ट माइनर रिलीज़ के बीच बदल सकते हैं।
+
+केवल वही पैकेज इम्पोर्ट करें जिनकी आपके होस्ट को ज़रूरत है: डिक्टेशन के लिए `pkg/speechkit/dictation`, सक्रियण के लिए
+`pkg/speechkit/wakeword`, बोले हुए आउटपुट के लिए `pkg/speechkit/tts`, वन-शॉट होस्ट के लिए `pkg/speechkit/companion` के साथ
+Assist और टेक्स्ट-टू-स्पीच अडैप्टर, स्पीकर-सचेत ऐप के लिए `pkg/speechkit/speaker`, रिकॉर्डिंग सेशन के लिए
+`pkg/speechkit/meeting`, और सर्वर से जुड़े ऐप के लिए `pkg/speechkit/client`। रूट `speechkit` पैकेज में केवल अनुबंध और वैल्यू
+टाइप हैं।
+
+सेटिंग हाथ से बनाने के बजाय `config.toml` से फ़्रेमवर्क चलाने के लिए, `pkg/speechkit/hostconfig` एक कॉल में कॉन्फ़िग फ़ाइल को
+सार्वजनिक मोड सेटिंग और शुरुआती रनटाइम पॉलिसी में बदल देता है:
+
+```go
+settings, policy, err := hostconfig.Load("config.toml")
+```
+
+फ़ाइल न होने पर शिप किए गए डिफ़ॉल्ट मिलते हैं — केवल लोकल, कोई क्लाउड कुंजी नहीं। डेस्कटॉप क्लाइंट उसी लोडर को सौंपता है, इसलिए
+एम्बेडर और रेफ़रेंस ऐप एक `config.toml` को एक जैसे पढ़ते हैं।
+
+कुछ पैकेज को cgo (Windows ऑडियो कैप्चर, ONNX वेक वर्ड) या बाहरी बाइनरी (`whisper-server`) चाहिए। निर्भरता न होने पर हर एक
+काम करने का दिखावा करने के बजाय सेंटिनल एरर के साथ बंद हो जाता है (fail closed)।
+
+## अन्य लक्ष्य
+
+<CardGroup cols={2}>
+  <Card title="सेल्फ़-होस्टेड सर्वर" icon="server" href="https://github.com/kombifyio/SpeechKit/blob/main/docs/server/README.md">
+    उसी कर्नेल पर Linux HTTP और WebSocket सेवा, जो सार्वजनिक सोर्स से बनती है। यह एक URL के नीचे Dictation, Assist और
+    Voice Agent देती है।
+  </Card>
+  <Card title="एजेंट टूल" icon="robot" href="https://github.com/kombifyio/SpeechKit/blob/main/docs/mcp/README.md">
+    `speechkit-mcp` और `speechkit-cli` किसी एजेंट या ऑपरेटर को फ़्रेमवर्क जाँचने, स्टार्टर बनाने, पेलोड सत्यापित करने और सर्वर
+    चलाने देते हैं।
+  </Card>
+  <Card title="Android मॉड्यूल" icon="android" href="https://github.com/kombifyio/SpeechKit/blob/main/android/README.md">
+    सर्वर रिज़ॉल्यूशन, कैप्चर और टर्न-टेकिंग, वायर प्रोटोकॉल और Compose वॉइस UI के लिए Apache-2.0 Gradle मॉड्यूल, साथ में
+    रिपॉज़िटरी में एक रेफ़रेंस ऐप।
+  </Card>
+  <Card title="ब्राउज़र क्लाइंट" icon="js" href="https://github.com/kombifyio/SpeechKit/tree/main/clients/typescript">
+    सर्वर REST API, Voice Agent WebSocket प्रोटोकॉल और फ़्रेमवर्क-निरपेक्ष वॉइस UI किट के लिए TypeScript पैकेज, जो रिपॉज़िटरी में
+    सोर्स के रूप में प्रकाशित हैं।
+  </Card>
+</CardGroup>
+
+## सार्वजनिक दस्तावेज़ों के साथ आगे बढ़ें
+
+- [10 मिनट में SDK](https://github.com/kombifyio/SpeechKit/blob/main/docs/sdk/README.md)
+- [फ़्रेमवर्क API](https://github.com/kombifyio/SpeechKit/blob/main/docs/speechkit-framework-api.md)
+- [कस्टम प्रोवाइडर जोड़ें](https://github.com/kombifyio/SpeechKit/blob/main/docs/sdk/custom-provider.md)
+- [Words और Replacements](https://github.com/kombifyio/SpeechKit/blob/main/docs/words-and-replacements-standard.md)
+- [SDK सतह सीमा](https://github.com/kombifyio/SpeechKit/blob/main/docs/architecture/sdk-surface-boundary.md)
+- [चलाने योग्य उदाहरण](https://github.com/kombifyio/SpeechKit/tree/main/examples)
+
+<Note>
+ये लिंक सार्वजनिक रिपॉज़िटरी की डिफ़ॉल्ट ब्रांच का अनुसरण करते हैं, इसलिए प्रोजेक्ट आगे बढ़ने पर भी वैध रहते हैं। जब आपको किसी
+एक सटीक रिलीज़ से मेल खाते दस्तावेज़ चाहिए, तो URL में कोई टैग पिन करें।
+</Note>

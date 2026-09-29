@@ -1,0 +1,97 @@
+---
+title: "SpeechKit-Modi und Datenpfade"
+description: "Verstehe Dictation, Assist, Voice Agent und Provider-Grenzen"
+sidebarTitle: "Modi und Datenpfade"
+icon: "waveform-lines"
+---
+
+SpeechKit nutzt drei strikte Modi. Wähle den kleinsten Modus, der zur
+Aufgabe passt, damit die erwartete Verarbeitung und Ausgabe klar bleiben.
+
+## Dictation
+
+Dictation wandelt Sprache in Text um. Es führt kein LLM-Umschreiben durch, führt keine
+Utilities aus und erzeugt keine gesprochenen Antworten. Nutze es für Notizen, Formulare, Nachrichten und
+andere direkte Transkriptionsaufgaben.
+
+## Assist
+
+Assist wandelt Sprache oder Text in ein begrenztes Ergebnis um. Dieses Ergebnis kann aus
+einer deterministischen Ersetzung, einem Utility oder einem LLM stammen und optional
+vorgelesen werden. Nutze es, wenn du eine Transformation oder eine einzelne Antwort willst und keine
+Live-Unterhaltung.
+
+## Voice Agent
+
+Voice Agent ist eine Echtzeit-Audiounterhaltung. Er ist gedacht für interaktives
+Brainstorming, Support und Folgefragen, bei denen Turn-Erkennung und gesprochene
+Ausgabe wichtig sind.
+
+## Hands-Free und Anpassung
+
+Hands-Free steuert Aktivierung, Mikrofonaufnahme, automatisches Sprachende
+und optionale Lautsprecherausgabe über die drei Modi hinweg. Words bringen SpeechKit Begriffe bei,
+die es erkennen soll; Replacements wenden deterministische Text-, Befehls-, Snippet-,
+Synonym- oder Vorlagen-Transformationen an.
+
+[Meeting](/de/speechkit/meeting) steht neben den drei Modi und nicht in
+ihnen. Es nimmt ein Gespräch in seiner eigenen Pipeline auf und teilt nur den
+Speech-to-Text-Transcriber mit Dictation, sodass Gesprächsaudio nie das
+Dictation-Overlay, den Verlauf oder Zwischenablage-Shortcuts erreicht.
+
+## Lokale und externe Provider
+
+Die Provider-Wahl bestimmt den Datenpfad:
+
+| Provider-Typ | Datengrenze |
+| --- | --- |
+| Lokales Speech-to-Text oder lokales Modell | Die Verarbeitung bleibt auf dem Gerät. |
+| Selbst gehosteter SpeechKit-Server oder lokale Runtime | Daten gehen an den Rechner, den du betreibst. |
+| Externer Voice-Provider | Audio, Text oder beides können unter seinen Bedingungen an diesen Provider gesendet werden. |
+
+SpeechKit liefert Adapter für lokales `whisper.cpp` und Piper, einen selbst gehosteten
+`whisper-server`, Ollama und andere OpenAI-kompatible Endpunkte sowie die
+externen Provider OpenAI, Groq, Deepgram, AssemblyAI, Hugging Face,
+OpenRouter, Azure Speech und Microsoft Foundry. Google Speech-to-Text,
+Google Text-to-Speech und Gemini Live wurden entfernt; Konfigurationen, die sie noch
+nennen, schlagen geschlossen fehl, statt stillschweigend einen anderen Provider zu wählen.
+
+SpeechKit macht einen externen Provider nicht zu einem lokalen. Prüfe die Provider-
+Konfiguration und die Datenschutzbedingungen, bevor du sensibles Audio sendest.
+
+## Network Scope
+
+Der Network Scope ist die Grenze, die du einmal setzt und die das Backend
+überall durchsetzt — bei Provider-Zusammenstellung, Modell-Downloads, Updates, Telemetrie, Server-
+Verbindungen und Integrationen.
+
+| Scope | Was kontaktiert werden darf |
+| --- | --- |
+| All networks | Jeder konfigurierte Provider und jede Integration, einschließlich öffentlicher Cloud-Endpunkte. |
+| Local network only | Geräteinterne Runtimes plus Dienste auf Loopback oder privaten Adressen, etwa ein Ollama-Host in deinem LAN oder dein eigener SpeechKit-Server. Öffentliche Endpunkte sind blockiert, auch beim Verbindungsaufbau nach der DNS-Auflösung. |
+| This device only | Nur Runtimes, die SpeechKit selbst als lokale Kindprozesse verwaltet. Jeder externe Dienst ist blockiert, auch einer auf demselben Rechner, weil sein eigener Egress nicht belegt werden kann. |
+
+Die Wahl eines strengeren Scopes setzt unverträgliche Einstellungen aus, statt sie zu löschen,
+und die Einstellungen erklären, was deaktiviert ist und warum.
+
+## Retention Scope
+
+Der Retention Scope ist die zweite, unabhängige Achse: Er beantwortet, was die
+Arbeit überdauert, die es erzeugt hat.
+
+| Scope | Wirkung |
+| --- | --- |
+| Retain | Inhalte sind dauerhaft und verschwinden nur durch Aufbewahrungseinstellungen, eine Löschung oder eine Löschanfrage. |
+| Zero retention | Rohmaterial wird geschrieben, solange die Arbeit läuft, und beim Ende der Sitzung entfernt. Das erzeugte Ergebnis bleibt bestehen; das Transkript dahinter nicht. Provider-Oberflächen, die kein No-Store zusichern können, werden abgelehnt. |
+
+Eine Installation ohne Netzwerkzugriff schreibt Transkripte trotzdem auf die Festplatte. Setze beide
+Scopes bewusst.
+
+<CardGroup cols={2}>
+  <Card title="Den Windows-Client installieren" icon="windows" href="/de/speechkit/install-windows">
+    Lade die aktuelle öffentliche Beta herunter und verifiziere sie.
+  </Card>
+  <Card title="Ein Meeting aufnehmen" icon="users" href="/de/speechkit/meeting">
+    Nimm ein Gespräch auf zwei Kanälen auf und erzeuge eine Zusammenfassung mit Quellenangaben.
+  </Card>
+</CardGroup>

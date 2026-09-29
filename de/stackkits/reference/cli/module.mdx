@@ -1,0 +1,52 @@
+---
+title: "stackkit module"
+description: "Lokale CUE-Module erstellen und validieren"
+sidebarTitle: "module"
+---
+Lokale CUE-Module erstellen und validieren.
+
+Rendert Modul-Fakten in CUE-Verträge und validiert ihre Deployment-Konfiguration.
+
+```bash
+stackkit module [flags]
+```
+
+Subcommands: [`stackkit module lint`](#stackkit-module-lint), [`stackkit module scaffold`](#stackkit-module-scaffold)
+
+## stackkit module lint
+
+Modul-CUE auf Hygiene bei Pinning, Health, Sicherheit, Zugriff und Platzierung linten (ADR-0027 G1/G3).
+
+Führt das deterministische Modul-Hygiene-Gate über ein Modul (`--module`) oder den gesamten Baum (`--all`) aus. Geprüft wird: Image-Tags sind gepinnt (kein :latest), ein Daemon-healthCheck ist vorhanden (begrenzte Automatisierungs-Jobs verwenden restart=no plus den Exit-Status des Prozesses), Security-Block (noNewPrivileges + capDrop ALL), accessPolicy für geroutete Services, keine Klartext-Secrets, Entwurfs-Module beanspruchen keine Szenarien, und Module mit Docker-Socket kommen für Managed Serverless nicht infrage.
+
+Läufe für ein einzelnes Modul enden bei jedem Fehler mit einem Exit-Code ungleich null. `--all` ist nur beratend (Exit 0), sofern nicht `--strict` übergeben wird.
+
+```bash
+stackkit module lint [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--all` | bool | — | Jedes Modul unter `--modules-dir` linten |
+| `--json` | bool | — | Befunde als JSON ausgeben |
+| `--module` | string | — | Pfad zu einem einzelnen Modulverzeichnis (mit module.cue) |
+| `--modules-dir` | string | `modules` | Wurzelverzeichnis der Module (mit `--all` verwendet) |
+| `--strict` | bool | — | Bei jedem Fehlerbefund mit Exit-Code ungleich null enden (bei einzelnem `--module` implizit) |
+
+## stackkit module scaffold
+
+Modul-Artefakte deterministisch aus module_facts.json rendern (ADR-0027).
+
+Rendert modules/&lt;slug&gt;/module.cue, tests/reference-compose.yml und das schlanke tests/integration_test.sh aus einer schemavalidierten module_facts.json. Die Ausgabe ist deterministisch (Gate G0): Dieselben Fakten rendern immer byte-identische Dateien.
+
+```bash
+stackkit module scaffold [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--catalog` | string | — | Kompiliertes CUE-catalog.json für imageSource-Referenzen |
+| `--facts` | string | — | Pfad zu module_facts.json. Erforderlich. |
+| `--force` | bool | — | Bestehende Dateien überschreiben |
+| `--out` | string | — | Ausgabe-Modulverzeichnis (Standard modules/&lt;slug&gt;) |
+| `--print` | bool | — | Gerenderte Artefakte nach stdout ausgeben, statt zu schreiben |

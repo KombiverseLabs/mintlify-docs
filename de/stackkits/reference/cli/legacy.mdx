@@ -1,0 +1,181 @@
+---
+title: "Veraltete und abgelöste Befehle"
+description: "Befehle, die aktuelle Releases ablehnen oder ersetzen"
+sidebarTitle: "Veraltet und abgelöst"
+---
+Diese Befehle existieren im Befehlsbaum, gehören aber nicht zum aktuellen Workflow. Legacy-Befehle werden von aktuellen Releases abgelehnt; veraltete Befehle laufen weiterhin und nennen ihren Ersatz.
+
+## stackkit app add
+
+Eine PaaS-App-Übergabe der v0.6-Kompatibilität hinzufügen oder aktualisieren.
+
+<Warning>Aktuelle Releases lehnen diesen Befehl ab; er gehört zur exakten v0.6-Kompatibilitätslinie.</Warning>
+
+```bash
+stackkit app add <name> [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--auth` | string | `login-gateway` | Auth-Modus der Route: login-gateway oder public |
+| `--env` | stringArray | — | Einfache Umgebungsvariable als KEY=value; wiederholbar |
+| `--health-path` | string | `/health` | HTTP-Health-Pfad |
+| `--host` | string | — | Route-Host für die App |
+| `--image` | string | — | Container-Image für die PaaS-Übergabe |
+| `--kind` | string | `sveltekit` | App-Art (derzeit nur sveltekit) |
+| `--port` | int | `3000` | Vom Container der App bereitgestellter Port |
+| `--secret` | stringArray | — | Secret-Referenz als KEY=env:NAME, KEY=vault:NAME oder KEY=file:PATH; wiederholbar |
+
+## stackkit backup list
+
+Snapshots im lokalen Repository auflisten.
+
+<Warning>Aktuelle Releases lehnen diesen Befehl ab; er gehört zur exakten v0.6-Kompatibilitätslinie.</Warning>
+
+```bash
+stackkit backup list [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Snapshots als JSON ausgeben |
+
+## stackkit backup migrate-from-restic
+
+Ein bestehendes Restic-Repository in Kopia importieren (einmalig).
+
+<Warning>Aktuelle Releases lehnen diesen Befehl ab; er gehört zur exakten v0.6-Kompatibilitätslinie.</Warning>
+
+Steuert den einmaligen Restic-zu-Kopia-Importer.
+
+Liest das im v1-Addon konfigurierte Restic-Repository, durchläuft jeden Snapshot und legt ihn in Kopia unter Beibehaltung der ursprünglichen Zeitstempel neu an. Nach einem erfolgreichen Import stellt das Addon engine: "restic-import" automatisch auf "kopia" um.
+
+```bash
+stackkit backup migrate-from-restic [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--dry-run` | bool | — | Den Plan ausgeben, ohne zu importieren |
+
+## stackkit backup verify
+
+Das Repository gegen seinen Storage-Provider validieren.
+
+<Warning>Aktuelle Releases lehnen diesen Befehl ab; er gehört zur exakten v0.6-Kompatibilitätslinie.</Warning>
+
+```bash
+stackkit backup verify [flags]
+```
+
+## stackkit cluster join-token
+
+Ein Join-Token für Worker- oder Storage-Nodes erstellen.
+
+<Warning>Aktuelle Releases lehnen diesen Befehl ab; er gehört zur exakten v0.6-Kompatibilitätslinie.</Warning>
+
+Erstellt ein Join-Token für Worker- oder Storage-Nodes.
+
+Das Token ist der einzige unterstützte Weg, eine weitere BaseKit-Installation als Mitglied dieses Homelabs zu behandeln. Die Registrierung von Coolify-Remote-Servern und Aktualisierungen des TechStack-Spiegels nutzen diese Cluster-Identity in späteren Rollout-Schritten.
+
+```bash
+stackkit cluster join-token [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--endpoint` | string | — | Endpunkt des Main-Nodes, über den Worker beitreten |
+| `--homelab-id` | string | — | Homelab-ID (Standard ist der Name der Stack-Spezifikation) |
+| `--main-node` | string | — | ID/Name des Main-Nodes (Standard ist der Main-artige Node in der Stack-Spezifikation) |
+| `--output, -o` | string | `.stackkit/cluster/join-token.json` | Ausgabepfad für das Token-JSON |
+| `--ttl` | duration | `24h0m0s` | Gültigkeitsdauer des Tokens |
+
+## stackkit kit upgrade
+
+Ein verifiziertes StackKit-Release auflösen und installieren.
+
+<Warning>Veraltet: verwende stackkit upgrade</Warning>
+
+Löst einen öffentlichen StackKit-Release von GitHub auf, verifiziert Archiv, SPDX-SBOM, GitHub-OIDC/Sigstore-Attestierung und den zwischengespeicherten Trusted Root und installiert ihn dann atomar unter .stackkit/releases/.
+
+Mit `--dry-run` generiert er das verifizierte Ziel nur in einem begrenzten Shadow-Workspace und meldet einen kanonischen Plan-/Artefakt-Diff. Ohne `--dry-run` prüft er zuerst dieses Ziel, erstellt einen nativen Kopia-Snapshot plus einen vom Owner signierten Wiederherstellungs-Checkpoint des Executor-Zustands, stellt die Rollback-Daten bereit und verifiziert sie, ohne sie zu aktivieren, und installiert und führt erst dann die exakte Ziel-Transaktion aus generate/apply/verify aus. Eine fehlgeschlagene Ziel-Transaktion kann den vorherigen Executor nur wiederherstellen und verifizieren, bevor Ziel-Apply zugelassen wird. Nach Apply ist ein Neustart der vorherigen Runtime blockiert, bis eine verifizierte Aktivierung der vorherigen Daten existiert; isoliertes Kopia-Staging allein berechtigt dazu nicht. Ein abgeschlossener Ziel-Commit behält seinen Erfolgsnachweis für die explizite Finalisierung. Frische Upgrades erfordern Unterstützung in der eingebetteten CUE-Kit-Policy; die Wiederherstellung einer bestehenden Operation folgt ihrem signierten Journal und Checkpoint.
+
+```bash
+stackkit kit upgrade [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--dry-run` | bool | — | Die Zielgenerierung in einem begrenzten Shadow-Workspace verifizieren und prüfen, ohne sie anzuwenden. |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben. |
+| `--recover` | string | — | Eine exakte unterbrochene Lifecycle-Operations-ID explizit wiederherstellen. |
+| `--to` | string | `latest` | Ziel: latest, vX.Y.Z oder channel:stable\|beta\|edge. |
+
+**Examples**
+
+```bash
+# Verify the newest stable release and preview its plan and artifact diff without applying it
+stackkit upgrade --dry-run
+
+# Upgrade to the newest stable release
+stackkit upgrade
+
+# Upgrade to the newest beta prerelease
+stackkit upgrade --to channel:beta
+
+# Recover an interrupted upgrade by its lifecycle operation ID
+stackkit upgrade --recover <operation-id>
+```
+
+## stackkit kit verify
+
+Zwischengespeicherte Release-Belege und Attestierungen verifizieren.
+
+<Warning>Veraltet: verwende stackkit verify `--offline`</Warning>
+
+Veralteter Alias für 'stackkit verify `--offline`'. Es wird keine Netzwerkanfrage ausgeführt.
+
+```bash
+stackkit kit verify [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben. |
+
+## stackkit status
+
+Den Deployment-Status anzeigen.
+
+<Warning>Aktuelle Releases lehnen diesen Befehl ab; er gehört zur exakten v0.6-Kompatibilitätslinie.</Warning>
+
+Zeigt den aktuellen Status des StackKit-Deployments an.
+
+```text
+Shows:
+  • Deployment state (running, degraded, error)
+  • Service statuses and health
+  • Resource usage
+  • URLs and endpoints
+```
+
+```bash
+stackkit status [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--http` | bool | — | Verifizierte Service-Routen von diesem Verifier-Host aus prüfen |
+| `--inventory` | string | — | Beobachtetes Architecture-v2-Inventory, mit dem eine konfigurierte Standard-Prozess-Runtime identifiziert wird |
+| `--json` | bool | — | Als JSON ausgeben |
+| `--resolved-plan` | string | — | Kanonischer Architecture-v2-ResolvedPlan (Standard: deploy/.stackkit/resolved-plan.json) |
+
+**Examples**
+
+```bash
+# Show status
+stackkit status
+
+# Output as JSON
+stackkit status --json
+```

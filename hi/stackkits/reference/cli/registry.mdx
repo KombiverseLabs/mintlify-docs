@@ -1,0 +1,82 @@
+---
+title: "stackkit registry"
+description: "एम्बेडेड StackKits रजिस्ट्री स्नैपशॉट प्रबंधित करें"
+sidebarTitle: "registry"
+---
+एम्बेडेड StackKits रजिस्ट्री स्नैपशॉट प्रबंधित करें।
+
+CLI बाइनरी में शामिल OSS-सुरक्षित रजिस्ट्री स्नैपशॉट प्रबंधित करें।
+
+स्नैपशॉट internal/registry/data/registry_snapshot.json में रहता है। एम्बेडेड डेटा का निरीक्षण करें या उसे स्थानीय CUE ट्री से निर्धारक रूप से दोबारा बनाएँ।
+
+```bash
+stackkit registry [flags]
+```
+
+उप-कमांड: [`stackkit registry artifacts`](#stackkit-registry-artifacts), [`stackkit registry bake-from-cue`](#stackkit-registry-bake-from-cue), [`stackkit registry emit-cue`](#stackkit-registry-emit-cue), [`stackkit registry info`](#stackkit-registry-info)
+
+## stackkit registry artifacts
+
+स्वामित्व मैनिफ़ेस्ट से registry/जनरेट किए गए आर्टिफ़ैक्ट पाथस्पेक प्रिंट करें।
+
+जनरेट-आर्टिफ़ैक्ट स्वामित्व मैनिफ़ेस्ट से रिपॉज़िटरी पाथस्पेक प्रिंट करें।
+
+generate-cue वर्कफ़्लो और CI समता गेट इस कमांड का उपयोग करते हैं ताकि बॉट-स्वामित्व वाली जनरेट फ़ाइलें स्पष्ट रहें। फ़्रोज़न आर्टिफ़ैक्ट अपने मौजूदा पथों में रहते हैं लेकिन उनकी मैनिफ़ेस्ट स्थिति बदलने तक जनरेट आउटपुट के रूप में स्टेज या डिफ़ नहीं किए जाते।
+
+```bash
+stackkit registry artifacts [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--kind` | string | `all` | आर्टिफ़ैक्ट प्रकार फ़िल्टर (all, cue, snapshot) |
+| `--manifest` | string | `internal/registry/generated_artifacts.json` | जनरेट किए गए आर्टिफ़ैक्ट का स्वामित्व मैनिफ़ेस्ट |
+| `--state` | string | `generated` | आर्टिफ़ैक्ट स्थिति फ़िल्टर (all, generated, frozen) |
+
+## stackkit registry bake-from-cue
+
+स्थानीय Git/CUE ट्री से रजिस्ट्री स्नैपशॉट बनाएँ।
+
+modules/&lt;slug&gt;/module.cue और कैनोनिकल उत्पाद परिभाषाओं से गुज़रें, उनके कॉन्ट्रैक्ट हैश निकालें और परिणामी Snapshot को internal/registry/data/registry_snapshot.json (या `--output`) में लिखें।
+
+यह कमांड ऑफ़लाइन OSS बूटस्ट्रैप रास्ता है और सार्वजनिक kombifyio/stackKits रिपो के शुद्ध चेकआउट पर काम करती है।
+
+```bash
+stackkit registry bake-from-cue [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--modules-dir` | string | `modules` | वह डायरेक्टरी जिसमें module/&lt;slug&gt;/module.cue है |
+| `--output` | string | `internal/registry/data/registry_snapshot.json` | स्नैपशॉट JSON का आउटपुट पथ |
+
+## stackkit registry emit-cue
+
+रजिस्ट्री स्नैपशॉट से foundation/generated CUE आर्टिफ़ैक्ट रेंडर करें।
+
+रजिस्ट्री स्नैपशॉट और स्थानीय CUE मॉड्यूल ट्री से foundation/generated/tool_catalog.cue रेंडर करें।
+
+स्नैपशॉट JSON पढ़ता है (डिफ़ॉल्ट: internal/registry/data/registry_snapshot.json, पहले उसे 'registry bake-from-cue' से रीफ़्रेश करें), निर्धारक रूप से रेंडर करता है और आर्टिफ़ैक्ट लिखता है। हेडर स्नैपशॉट का content_hash और generated_at दर्ज करता है ताकि स्नैपशॉट और आर्टिफ़ैक्ट के बीच ड्रिफ़्ट पहचाना जा सके; CI कमिट किए गए स्नैपशॉट से दोबारा जनरेट करता है और डिफ़ करता है।
+
+```bash
+stackkit registry emit-cue [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--input` | string | `internal/registry/data/registry_snapshot.json` | जिससे रेंडर करना है वह स्नैपशॉट JSON |
+| `--modules-dir` | string | `modules` | वह डायरेक्टरी जिसमें modules/&lt;slug&gt;/module.cue है (सेवा कैटलॉग स्रोत) |
+| `--output-dir` | string | `foundation/generated` | रेंडर की गई CUE फ़ाइलों की डायरेक्टरी |
+
+## stackkit registry info
+
+एम्बेडेड रजिस्ट्री स्नैपशॉट का सारांश दिखाएँ।
+
+```bash
+stackkit registry info [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | पूरा एम्बेडेड स्नैपशॉट JSON के रूप में प्रिंट करें |
+

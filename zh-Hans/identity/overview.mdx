@@ -1,0 +1,43 @@
+---
+title: "StackKits 中的身份"
+description: "本地所有者身份与可选的托管登录如何保持相互独立。"
+icon: "shield-halved"
+---
+
+# StackKits 中的身份
+
+StackKits 让本地家庭实验室的所有者始终拥有最高权限。安装和运行技术栈不需要托管账号。
+
+## 本地所有者身份
+
+已发布的本地身份基线使用：
+
+- **PocketID** 作为家庭实验室所有者的 OpenID Connect 身份提供方；
+- **TinyAuth** 作为受保护应用前面的转发认证代理；
+- 对会改变技术栈的生命周期操作，需要所有者明确批准。
+
+身份数据和凭据始终由本地所有者掌控。移除可选的托管连接，不得导致本地访问被移除，也不得妨碍独立的生命周期。
+
+<CardGroup cols={2}>
+  <Card title="PocketID" icon="fingerprint" href="/zh-Hans/stackkits/apps/pocketid">
+    面向家庭实验室所有者、以通行密钥优先的本地身份。
+  </Card>
+  <Card title="TinyAuth" icon="key" href="/zh-Hans/stackkits/apps/tinyauth">
+    为未自带兼容登录流程的应用提供转发认证。
+  </Card>
+</CardGroup>
+
+## 可选的托管身份
+
+当用户主动连接到托管的 kombify 服务时，交互式登录使用官方的 `login.kombify.io` 域名。该托管身份只是一个可选的便利层，不会取代本地所有者，也不会凌驾于其之上。
+
+## 安全行为
+
+- 缺失或含糊的身份信息会导致访问被拒绝。
+- 令牌有效期短，并限定在其预期受众范围内。
+- 身份服务不可用时，受保护的路由不会变为公开。
+- 代表用户行事的助手所获得的权限不能超过该用户本人。
+
+<Note>
+本页介绍公开的身份概念。内部路由、租户、计费、部署和运维架构有意不属于公开的 StackKits 文档。
+</Note>

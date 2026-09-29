@@ -1,0 +1,33 @@
+---
+title: "stackkit resolve"
+description: "Resuelve la intención de Architecture v2 en un plan de despliegue canónico"
+sidebarTitle: "resolve"
+---
+Resuelve la intención de Architecture v2 en un plan de despliegue canónico.
+
+Resuelve un documento StackSpec v2 y un Inventory observado opcional en el ResolvedPlan canónico que consumen los generadores y los runtimes.
+
+El comando es de solo lectura salvo que se indique `--output`. La salida a archivo permanece bajo el directorio de trabajo y solo puede reemplazar un ResolvedPlan válido existente; comparte el bloqueo de mutación del ciclo de vida. StackSpec v1 nunca se actualiza ni se compila en silencio: devuelve el informe de migración tipado compartido y requiere un flujo de migración explícito.
+
+```bash
+stackkit resolve [spec-file] [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--inventory` | string | — | Ruta a un documento de Inventory observado opcional |
+| `--module-root` | string | — | Raíz de autoridad de la arquitectura que contiene cue.mod, base y todas las definiciones de kits |
+| `--output, -o` | string | — | Escribe el JSON canónico del ResolvedPlan bajo el directorio de trabajo en lugar de stdout |
+
+**Ejemplos**
+
+```bash
+# Print the canonical ResolvedPlan for a StackSpec
+stackkit resolve --spec stack-spec.yaml
+
+# Resolve against an observed Inventory
+stackkit resolve stack-spec.yaml --inventory inventory.yaml
+
+# Replace the existing plan file beneath the working directory
+stackkit resolve stack-spec.yaml --output deploy/.stackkit/resolved-plan.json
+```
