@@ -1,0 +1,170 @@
+---
+title: "techstack api monitor"
+description: "مرجع مولَّد لأوامر techstack api monitor"
+sidebarTitle: "monitor"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api monitor alerts list
+
+عرض تنبيهات المراقبة النشطة.
+
+```bash
+techstack api monitor alerts list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/alerts` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_monitor_alerts` |
+
+## techstack api monitor alerts rules
+
+عرض قواعد تنبيهات المراقبة.
+
+```bash
+techstack api monitor alerts rules [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/alerts/rules` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_monitor_alert_rules` |
+
+## techstack api monitor availability
+
+التوفر وفترات التوقف والحالة اليومية، مشتقة من الخط الزمني للانتقالات.
+
+إسقاط فوق الخط الزمني لانتقالات الخادم القائم على الإلحاق فقط، وليس أداة أخذ عينات: كل فترة محصورة بانتقالين مسجَّلين وتحمل رموز الأسباب التي كُتبا بها. تنشر الاستجابة مفردات الاحتساب الخاصة بها، ليتمكن القارئ من معرفة حالات الاتصال التي احتُسبت توقفاً دون قراءة المصدر.
+
+```bash
+techstack api monitor availability [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/availability` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_availability_report` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--window` | string | مجموعة مغلقة؛ فالنافذة غير المحدودة ستكون منفذاً لهجمات حجب الخدمة. إحدى القيم: `24h`، `7d`، `30d`، `90d`. الافتراضي `"30d"`. |
+| `--server-id` | string | حصر التقرير في خادم واحد، لصفحة تفاصيل الخادم. |
+
+## techstack api monitor health
+
+جلب تشخيصات الحالة الصحية لاستيعاب بيانات المراقبة واستعلامها.
+
+```bash
+techstack api monitor health [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/health` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_monitor_health` |
+
+## techstack api monitor metrics label-values
+
+عرض قيم تسمية مقياس.
+
+```bash
+techstack api monitor metrics label-values [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/values` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_monitor_metric_label_values` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--name` | string | **مطلوب.** |
+
+## techstack api monitor metrics labels
+
+عرض أسماء تسميات المقاييس.
+
+```bash
+techstack api monitor metrics labels [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/labels` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_monitor_metric_labels` |
+
+## techstack api monitor metrics names
+
+عرض أسماء المقاييس.
+
+```bash
+techstack api monitor metrics names [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/names` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_monitor_metric_names` |
+
+## techstack api monitor query
+
+تشغيل استعلام PromQL لحظي.
+
+```bash
+techstack api monitor query [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/instant` |
+| يغيّر الحالة | لا |
+| أداة MCP | `instant_monitor_query` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--q` | string | **مطلوب.** |
+| `--time` | string | — |
+
+## techstack api monitor query-range
+
+تشغيل استعلام PromQL لنطاق زمني.
+
+```bash
+techstack api monitor query-range [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/query` |
+| يغيّر الحالة | لا |
+| أداة MCP | `range_monitor_query` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--q` | string | **مطلوب.** |
+| `--start` | string | — |
+| `--end` | string | — |
+| `--step` | string | — |
+
+## techstack api monitor status
+
+جلب حالة الواجهة الخلفية للمراقبة والبيانات الوصفية لوقت التشغيل.
+
+```bash
+techstack api monitor status [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/status` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_monitor_status` |

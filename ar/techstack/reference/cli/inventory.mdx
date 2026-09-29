@@ -1,0 +1,128 @@
+---
+title: "techstack api inventory"
+description: "مرجع مولَّد لأوامر techstack api inventory"
+sidebarTitle: "inventory"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api inventory servers access-context
+
+جلب سياق وصول منقّى لخادم واحد مملوك.
+
+يُرجع فقط البيانات الوصفية للعنوان وحالة القناة وروابط الخدمات الموسومة بحداثتها. ولا يُرجع أبداً مراجع نقاط النهاية أو مراجع ملفات تعريف الوصول أو معرّفات المسارات أو بيانات الاعتماد أو الرموز المميزة أو مستخدمي SSH أو المنافذ أو المفاتيح أو الأوامر أو السجلات. يتطلب هذا السطح صلاحية operate على الجرد؛ ولا تكفي صلاحية read وحدها.
+
+```bash
+techstack api inventory servers access-context <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers/{serverId}/access-context` |
+| يغيّر الحالة | لا |
+| أداة MCP | `server_access_context` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف وقت تشغيل الخادم القياسي. |
+
+## techstack api inventory servers health
+
+جلب الحالة الصحية الموسومة بحداثتها لخادم واحد مملوك.
+
+```bash
+techstack api inventory servers health <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers/{serverId}/health` |
+| يغيّر الحالة | لا |
+| أداة MCP | `server_health` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف وقت تشغيل الخادم القياسي. |
+
+## techstack api inventory servers list
+
+عرض جرد الخوادم المنقّى للمالك المصادَق عليه.
+
+يُرجع فقط الخوادم التي يملكها الكيان المصادَق عليه ضمن سياق المستأجر الموثوق. ولا تُقبل تجاوزات المستأجر أو المالك. ولا تُرجَع أبداً البيانات الوصفية الخام أو نقاط نهاية القنوات أو مراجع موارد المزوّد أو بيانات الاعتماد أو مواد SSH أو الرموز المميزة أو السجلات. يحتوي إسقاط عقد الإيجار على معرّف معتم وحالة فقط. تشترك صفحات المؤشر في علامة مائية واحدة للمجموعة مرتبطة بالتفويض والمرشح، وتستبعد الإدخالات اللاحقة.
+
+```bash
+techstack api inventory servers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_servers` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--limit` | integer | الافتراضي `50`. |
+| `--cursor` | string | — |
+
+## techstack api inventory servers ports
+
+جلب المستمعين المرغوبين والمحجوزين والمرصودين والمكشوفين لخادم واحد مملوك.
+
+يُسقط مطالبات المستمعين التي يعلنها المترجم والحجوزات المسيّجة بالجيل بجانب أدلة وقت تشغيل Guard الرتيبة. تبقى الملاحظات المفقودة أو القديمة صريحة ولا تتحول أبداً إلى توفر متفائل.
+
+```bash
+techstack api inventory servers ports <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers/{serverId}/ports` |
+| يغيّر الحالة | لا |
+| أداة MCP | `server_ports` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف وقت تشغيل الخادم القياسي. |
+
+## techstack api inventory servers rename
+
+تعيين الاسم الذي اختاره المالك لخادم واحد مملوك أو مسحه.
+
+يكتب servers.display_name، الذي لا تستبدله إسقاطات وقت التشغيل أبداً. تمسح القيمة `null` أو السلسلة الفارغة إعادة التسمية. يتطلب استحقاق techstack.inventory.write الموقَّع وعلاقة `caller` على الخادم في FGA؛ والكتابة مرتبطة بالمستأجر والمالك المصادَق عليهما، ويُرفض أي خادم خارج هذا النطاق دون الكشف عن وجوده من عدمه. يعرض `name` في الجرد القياسي الاسم المختار عند تعيينه.
+
+```bash
+techstack api inventory servers rename <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PATCH /api/v1/inventory/servers/{serverId}` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `rename_server` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف وقت تشغيل الخادم القياسي. |
+| `--display-name` | string | **مطلوب.** |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api inventory services list
+
+عرض الخدمات المنقّاة لخوادم المالك المصادَق عليه.
+
+```bash
+techstack api inventory services list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/services` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_services` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--server-id` | string | مرشح اختياري دقيق لخادم مملوك؛ ويُرجَع الخادم الأجنبي على أنه غير موجود. |
+| `--limit` | integer | الافتراضي `50`. |
+| `--cursor` | string | مؤشر معتم مرتبط بالنطاق المصادَق عليه وبمرشح server_id الدقيق. |

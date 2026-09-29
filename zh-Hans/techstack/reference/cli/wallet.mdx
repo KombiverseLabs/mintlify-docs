@@ -1,0 +1,79 @@
+---
+title: "techstack api wallet"
+description: "techstack api wallet 命令的生成参考"
+sidebarTitle: "wallet"
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api wallet list
+
+列出已脱敏的 Wallet 恢复条目。
+
+列出调用方在已解析租户下的 Wallet 恢复条目。`secret` 和 `totp` 值始终会从此响应中剥离；只暴露存在标志（`has_secret`、`has_totp`）。
+
+```bash
+techstack api wallet list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/wallet` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_wallet_items` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--stack-id` | string | — |
+
+## techstack api wallet reauth-proof
+
+在新近完成平台重新认证后，签发一个短期有效的重新认证证明。
+
+在新近完成生物识别/平台重新认证后，签发一个短期有效的可信重新认证 HMAC 证明（时间戳 + 签名），可用于在 5 分钟窗口内授权后续的揭示操作。请求中需要包含有效的、新近的平台重新认证断言。
+
+```bash
+techstack api wallet reauth-proof <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/wallet/{id}/reauth-proof` |
+| 更改状态 | 是 |
+| MCP 工具 | 无 |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+| `--platform-reauth-at` | string | — |
+| `--reason` | string | — |
+| `--reauth-assertion` | string | — |
+| `--reauth-signature` | string | — |
+| `--reauth-timestamp` | string | — |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api wallet reveal
+
+揭示 Wallet 恢复密钥/TOTP，受新近重新认证证明的保护。
+
+受生物识别保护。需要在正文或 `X-Kombify-Reauth-\*` / `X-TechStack-Reauth-\*` 标头中提供新近的可信重新认证 HMAC 证明（时间戳 + 签名，5 分钟窗口）。以明文形式返回一次恢复值；揭示操作会在服务器端审计。
+
+```bash
+techstack api wallet reveal <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/wallet/{id}/reveal` |
+| 更改状态 | 是 |
+| MCP 工具 | 无 |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+| `--platform-reauth-at` | string | — |
+| `--reason` | string | — |
+| `--reauth-assertion` | string | — |
+| `--reauth-signature` | string | **必填。** |
+| `--reauth-timestamp` | string | **必填。** |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |

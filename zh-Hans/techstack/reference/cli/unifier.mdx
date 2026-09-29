@@ -1,0 +1,123 @@
+---
+title: "techstack api unifier"
+description: "techstack api unifier 命令的生成参考"
+sidebarTitle: "unifier"
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api unifier analyze
+
+分析规格以获取需求（阶段 1）。
+
+安全、幂等。返回硬件需求、检测到的附加组件和所需凭据。
+
+```bash
+techstack api unifier analyze [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/analyze` |
+| 更改状态 | 是 |
+| MCP 工具 | `analyze_spec` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--body` | json | **必填。** JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api unifier pipeline preview
+
+预览流水线结果，不产生副作用。
+
+安全、幂等。显示将会生成的内容。后端校验或 StackKit 解析失败时返回 200，并带有 data.valid=false 和结构化的 data.errors；格式错误的输入和认证失败仍为 HTTP 错误。
+
+```bash
+techstack api unifier pipeline preview [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/pipeline/preview` |
+| 更改状态 | 是 |
+| MCP 工具 | `preview_pipeline` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--body` | json | **必填。** JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api unifier pipeline run
+
+运行完整的 Unifier 流水线（validate + analyze + unify + generate）。
+
+有副作用：会生成 IaC 输出文件。
+
+```bash
+techstack api unifier pipeline run [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/pipeline` |
+| 更改状态 | 是 |
+| MCP 工具 | `run_pipeline` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--body` | json | **必填。** JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api unifier pipeline validate
+
+校验流水线输入而不执行。
+
+```bash
+techstack api unifier pipeline validate [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/pipeline/validate` |
+| 更改状态 | 是 |
+| MCP 工具 | `validate_pipeline` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--body` | json | **必填。** JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api unifier unify
+
+统一规格（阶段 2）。
+
+```bash
+techstack api unifier unify [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/unify` |
+| 更改状态 | 是 |
+| MCP 工具 | `unify_spec` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--body` | json | **必填。** JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api unifier validate
+
+根据 CUE 模式校验栈规格。
+
+安全、幂等。无副作用。
+
+```bash
+techstack api unifier validate [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/validate` |
+| 更改状态 | 是 |
+| MCP 工具 | `validate_spec` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--body` | json | **必填。** JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |

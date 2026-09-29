@@ -1,0 +1,63 @@
+---
+title: "techstack api pairing-tokens"
+description: "مرجع مولَّد لأوامر techstack api pairing-tokens"
+sidebarTitle: "pairing-tokens"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api pairing-tokens create
+
+إنشاء رمز اقتران لتسجيل العامل.
+
+```bash
+techstack api pairing-tokens create [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/trust/pairing-tokens` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `create_pairing_token` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--environment-class` | string | إعلان صريح عن موضع المالك؛ احذفه إذا كان غير معروف. إحدى القيم: `local`، `cloud`. |
+| `--name` | string | — |
+| `--server-provisioning-mode` | string | إحدى القيم: `install-command`، `connect-remote`. |
+| `--stack-id` | string | — |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api pairing-tokens delete
+
+حذف رمز الاقتران.
+
+```bash
+techstack api pairing-tokens delete <id> [flags]
+```
+
+<Warning>يتطلب تأكيداً: تلغي هذه العملية رمز الاقتران؛ ولن تتمكن الأجهزة التي لم تقترن بعد من استخدامه. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/trust/pairing-tokens/{id}` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `delete_pairing_token` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+
+## techstack api pairing-tokens list
+
+عرض رموز الاقتران.
+
+```bash
+techstack api pairing-tokens list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/trust/pairing-tokens` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_pairing_tokens` |

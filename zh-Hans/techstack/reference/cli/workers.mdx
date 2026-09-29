@@ -1,0 +1,87 @@
+---
+title: "techstack api workers"
+description: "techstack api workers 命令的生成参考"
+sidebarTitle: "workers"
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api workers approve
+
+批准待处理的 Worker。
+
+```bash
+techstack api workers approve <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/approve` |
+| 更改状态 | 是 |
+| MCP 工具 | `approve_worker` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+
+## techstack api workers list
+
+列出已注册的 Worker（按所有者筛选）。
+
+```bash
+techstack api workers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_workers` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--page` | integer | 页码（默认 1）。 |
+| `--per-page` | integer | 每页条目数（默认 20，最多 100）。 |
+
+## techstack api workers prechecks list
+
+获取 Worker 的预检结果。
+
+```bash
+techstack api workers prechecks list <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/{id}/prechecks` |
+| 更改状态 | 否 |
+| MCP 工具 | 无 |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+| `--page` | integer | 页码（默认 1）。 |
+| `--per-page` | integer | 每页条目数（默认 20，最多 100）。 |
+
+## techstack api workers prechecks run
+
+在 Worker 上运行预检。
+
+```bash
+techstack api workers prechecks run <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/prechecks` |
+| 更改状态 | 是 |
+| MCP 工具 | 无 |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+| `--checks` | object\[\] | **必填。** |
+| `--stack-id` | string | — |
+| `--timeout-seconds` | integer | 默认值：`30`。 |
+| `--worker-id` | string | — |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |

@@ -1,0 +1,210 @@
+---
+title: "techstack api discovery"
+description: "Referencia generada de los comandos techstack api discovery"
+sidebarTitle: "discovery"
+release: "v0.32.8"
+---
+<Note>Generado a partir del release v0.32.8 de Techstack (fuente `4c7d219a5d56`). Para una versión instalada, `techstack api <command> --help` es la fuente autorizada.</Note>
+
+## techstack api discovery cache clear
+
+Vacía la caché de descubrimiento (solo administradores).
+
+```bash
+techstack api discovery cache clear [flags]
+```
+
+<Warning>Requiere confirmación. Esta operación descarta todos los resultados de descubrimiento en caché; el siguiente descubrimiento vuelve a escanear la red. Pasa `--yes` o responde a la pregunta; una ejecución no interactiva sin `--yes` se detiene antes de cualquier solicitud con el código de salida 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/discovery/cache` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `clear_discovery_cache` |
+
+## techstack api discovery devices get
+
+Obtiene un dispositivo descubierto propiedad de quien llama.
+
+```bash
+techstack api discovery devices get <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/discovery/devices/{id}` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_device` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<id>` | string | **Obligatorio.** ID del recurso. |
+
+## techstack api discovery devices list
+
+Lista los dispositivos descubiertos propiedad de quien llama.
+
+Devuelve solo los dispositivos producidos por escaneos cuyo propietario es quien llama autenticado.
+
+```bash
+techstack api discovery devices list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/discovery/devices` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_devices` |
+
+## techstack api discovery devices probe
+
+Sondea en profundidad un dispositivo propiedad de quien llama.
+
+Quienes llaman sin ser administradores solo pueden sondear IP de sus propios resultados de descubrimiento; los administradores pueden sondear cualquier IP.
+
+```bash
+techstack api discovery devices probe [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/discovery/probe` |
+| Cambia el estado | Sí |
+| Herramienta MCP | Ninguna |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--ip` | string | **Obligatorio.** |
+| `--ssh-key` | string | — |
+| `--ssh-user` | string | — |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api discovery networks
+
+Obtiene las interfaces de red locales.
+
+```bash
+techstack api discovery networks [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/discovery/networks` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_networks` |
+
+## techstack api discovery scans cancel
+
+Cancela el escaneo en curso.
+
+```bash
+techstack api discovery scans cancel <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/discovery/scan/{id}/cancel` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `cancel_scan` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<id>` | string | **Obligatorio.** ID del recurso. |
+
+## techstack api discovery scans enrich
+
+Enriquece los resultados del escaneo con datos adicionales.
+
+```bash
+techstack api discovery scans enrich <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/discovery/scan/{id}/enrich` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `enrich_scan` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<id>` | string | **Obligatorio.** ID del recurso. |
+
+## techstack api discovery scans get
+
+Obtiene el estado y los resultados del escaneo.
+
+```bash
+techstack api discovery scans get <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/discovery/scan/{id}` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_scan` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<id>` | string | **Obligatorio.** ID del recurso. |
+
+## techstack api discovery scans start
+
+Inicia un escaneo de red (asíncrono).
+
+```bash
+techstack api discovery scans start [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/discovery/scan` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `start_scan` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--exclude-ips` | string\[\] | — |
+| `--max-concurrent` | integer | Predeterminado: `50`. |
+| `--profile` | string | Uno de `passive`, `active`. Predeterminado: `"passive"`. |
+| `--subnet` | string | — |
+| `--target-ips` | string\[\] | — |
+| `--timeout-seconds` | integer | Predeterminado: `30`. |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api discovery stats
+
+Obtiene las estadísticas de descubrimiento (solo administradores).
+
+```bash
+techstack api discovery stats [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/discovery/stats` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_discovery_stats` |
+
+## techstack api discovery test-ssh
+
+Prueba la conectividad SSH con un dispositivo.
+
+Quienes llaman sin ser administradores solo pueden probar IP de sus propios resultados de descubrimiento; los administradores pueden probar cualquier IP.
+
+```bash
+techstack api discovery test-ssh [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/discovery/test-ssh` |
+| Cambia el estado | Sí |
+| Herramienta MCP | Ninguna |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--ip` | string | **Obligatorio.** |
+| `--password` | string | — |
+| `--port` | integer | Predeterminado: `22`. |
+| `--user` | string | — |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |

@@ -1,0 +1,47 @@
+---
+title: "techstack api client-pairing"
+description: "techstack api client-pairing कमांड के लिए जनरेट किया गया संदर्भ"
+sidebarTitle: "client-pairing"
+release: "v0.32.8"
+---
+<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+
+## techstack api client-pairing issue
+
+अल्पकालिक ClientPairingEnvelope v1 जारी करें।
+
+प्रमाणित इंस्टेंस एडमिनिस्ट्रेटर आवश्यक है। केवल ऐसे HTTPS सेल्फ़-होस्टेड इंस्टेंस के लिए उपलब्ध है जिसमें टेनेंट और नेटिव OIDC अथॉरिटी कॉन्फ़िगर हों। लोकल सिंगल-ओनर मोड फ़ेल-क्लोज़्ड रहता है।
+
+```bash
+techstack api client-pairing issue [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/client-pairing/issue` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+## techstack api client-pairing redeem
+
+ClientPairingEnvelope v1 कोड को एटॉमिक रूप से रिडीम करें।
+
+क्लाइंट यह रिक्वेस्ट भेजने से पहले HTTPS सर्टिफ़िकेट फ़िंगरप्रिंट सत्यापित करता है। सफल होने पर कोड ठीक एक बार उपयोग होता है और सामान्य OIDC अकाउंट फ़्लो के लिए सार्वजनिक मेटाडेटा लौटाता है; यह कभी सेशन नहीं लौटाता और लोकल ओनर पहचान की नकल नहीं बनाता।
+
+```bash
+techstack api client-pairing redeem [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/client-pairing/redeem` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--instance-id` | string | **आवश्यक।** |
+| `--one-time-code` | string | **आवश्यक।** |
+| `--tls-fingerprint-sha256` | string | **आवश्यक।** |
+| `--version` | string | **आवश्यक।** |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |

@@ -1,0 +1,106 @@
+---
+title: "techstack api agents"
+description: "مرجع مولَّد لأوامر techstack api agents"
+sidebarTitle: "agents"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api agents get
+
+جلب الوكيل حسب المعرّف مع موارده.
+
+```bash
+techstack api agents get <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/agents/{id}` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_agent` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+
+## techstack api agents list
+
+عرض وكلاء gRPC المتصلين.
+
+```bash
+techstack api agents list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/agents` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_agents` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--page` | integer | رقم الصفحة (الافتراضي 1). |
+| `--per-page` | integer | عدد العناصر في الصفحة (الافتراضي 20، والحد الأقصى 100). |
+
+## techstack api agents logs
+
+جلب سجلات الوكيل الأخيرة.
+
+```bash
+techstack api agents logs <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/agents/{id}/logs` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_agent_logs` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+
+## techstack api agents remove
+
+إزالة الوكيل/إلغاء تسجيله.
+
+```bash
+techstack api agents remove <id> [flags]
+```
+
+<Warning>يتطلب تأكيداً: تلغي هذه العملية تسجيل الوكيل؛ وتتوقف العقدة عن الإبلاغ حتى تُسجَّل مجدداً. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/agents/{id}` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `remove_agent` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+
+## techstack api agents send-command
+
+إرسال أمر إلى الوكيل.
+
+```bash
+techstack api agents send-command <id> [flags]
+```
+
+<Warning>يتطلب تأكيداً: تشغّل هذه العملية الأمر على وكيل العقدة المتصل. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/agents/{id}/command` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `send_agent_command` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+| `--args` | string\[\] | — |
+| `--command` | string | **مطلوب.** |
+| `--type` | string | **مطلوب.** |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |

@@ -1,0 +1,44 @@
+---
+title: "techstack api homelab"
+description: "مرجع مولَّد لأوامر techstack api homelab"
+sidebarTitle: "homelab"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api homelab get
+
+جلب المختبر المنزلي للمستدعي وعمليات نشر StackKit التابعة له.
+
+يحدد مظلة Homelab القياسية للمالك المصادَق عليه مع عمليات نشر StackKit التابعة لها. تكون `homelab` قيمة null عندما يحتوي ملء البيانات السابقة (backfill) على عمليات نشر دون صف Homelab بعد؛ وإذا غاب الاثنان فإن المسار يُرجع 404.
+
+```bash
+techstack api homelab get [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/homelab` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_homelab` |
+
+## techstack api homelab rename
+
+إعادة تسمية المختبر المنزلي للمستدعي.
+
+يعيد تسمية المختبر المنزلي للمالك المصادَق عليه. اسم المختبر المنزلي هو اسم Stack Identity، ويُزامَن مع kombify Cloud عند الاتصال. العملية قابلة للتراجع؛ ويُحدَّد المختبر المنزلي من المالك المصادَق عليه، وليس من وسيط أبداً.
+
+```bash
+techstack api homelab rename <name> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PATCH /api/v1/homelab` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `rename_homelab` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<name>` | string | **مطلوب.** |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |

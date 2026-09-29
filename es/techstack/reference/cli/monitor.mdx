@@ -1,0 +1,170 @@
+---
+title: "techstack api monitor"
+description: "Referencia generada de los comandos techstack api monitor"
+sidebarTitle: "monitor"
+release: "v0.32.8"
+---
+<Note>Generado a partir del release v0.32.8 de Techstack (fuente `4c7d219a5d56`). Para una versión instalada, `techstack api <command> --help` es la fuente autorizada.</Note>
+
+## techstack api monitor alerts list
+
+Lista las alertas de monitorización activas.
+
+```bash
+techstack api monitor alerts list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/alerts` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_monitor_alerts` |
+
+## techstack api monitor alerts rules
+
+Lista las reglas de alertas de monitorización.
+
+```bash
+techstack api monitor alerts rules [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/alerts/rules` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_monitor_alert_rules` |
+
+## techstack api monitor availability
+
+Disponibilidad, episodios de caída y estado diario, derivados de la línea temporal de transiciones.
+
+Una proyección sobre la línea temporal de transiciones del servidor, de solo anexado, y no un muestreador: cada episodio está delimitado por dos transiciones registradas y lleva los códigos de motivo con los que se escribieron. La respuesta publica su propio vocabulario de contabilidad, de modo que un lector puede ver qué estados de conexión se contaron como caída sin leer el código fuente.
+
+```bash
+techstack api monitor availability [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/availability` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_availability_report` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--window` | string | Conjunto cerrado; una ventana ilimitada sería un mando para la denegación de servicio. Uno de `24h`, `7d`, `30d`, `90d`. Predeterminado: `"30d"`. |
+| `--server-id` | string | Limita el informe a un servidor, para la página de detalle del servidor. |
+
+## techstack api monitor health
+
+Obtiene los diagnósticos de salud de la ingesta y las consultas de monitorización.
+
+```bash
+techstack api monitor health [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/health` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_monitor_health` |
+
+## techstack api monitor metrics label-values
+
+Lista los valores de una etiqueta de métrica.
+
+```bash
+techstack api monitor metrics label-values [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/values` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_monitor_metric_label_values` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--name` | string | **Obligatorio.** |
+
+## techstack api monitor metrics labels
+
+Lista los nombres de las etiquetas de métricas.
+
+```bash
+techstack api monitor metrics labels [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/labels` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_monitor_metric_labels` |
+
+## techstack api monitor metrics names
+
+Lista los nombres de las métricas.
+
+```bash
+techstack api monitor metrics names [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/names` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_monitor_metric_names` |
+
+## techstack api monitor query
+
+Ejecuta una consulta instantánea de PromQL.
+
+```bash
+techstack api monitor query [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/instant` |
+| Cambia el estado | No |
+| Herramienta MCP | `instant_monitor_query` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--q` | string | **Obligatorio.** |
+| `--time` | string | — |
+
+## techstack api monitor query-range
+
+Ejecuta una consulta de rango de PromQL.
+
+```bash
+techstack api monitor query-range [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/metrics/query` |
+| Cambia el estado | No |
+| Herramienta MCP | `range_monitor_query` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--q` | string | **Obligatorio.** |
+| `--start` | string | — |
+| `--end` | string | — |
+| `--step` | string | — |
+
+## techstack api monitor status
+
+Obtiene el estado del backend de monitorización y los metadatos del runtime.
+
+```bash
+techstack api monitor status [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/status` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_monitor_status` |

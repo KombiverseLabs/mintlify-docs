@@ -1,0 +1,175 @@
+---
+title: "techstack api servers"
+description: "Referencia generada de los comandos techstack api servers"
+sidebarTitle: "servers"
+release: "v0.32.8"
+---
+<Note>Generado a partir del release v0.32.8 de Techstack (fuente `4c7d219a5d56`). Para una versión instalada, `techstack api <command> --help` es la fuente autorizada.</Note>
+
+## techstack api servers detach
+
+Revoca y desvincula un servidor BYO exacto operado por el cliente.
+
+Conserva el recibo terminal del servidor canónico y no realiza ninguna llamada a la API del proveedor.
+
+```bash
+techstack api servers detach <server-id> [flags]
+```
+
+<Warning>Requiere confirmación. Esta operación revoca las credenciales del servidor y lo retira de la gestión sin tocar la máquina. Pasa `--yes` o responde a la pregunta; una ejecución no interactiva sin `--yes` se detiene antes de cualquier solicitud con el código de salida 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/detach` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `detach_self_owned_server` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
+| `--confirm-server-id` | string | **Obligatorio.** Debe ser exactamente igual al parámetro de ruta serverId. |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api servers get
+
+Obtiene el ciclo de vida, la conexión, la salud y los canales canónicos del servidor.
+
+```bash
+techstack api servers get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_server_runtime` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
+
+## techstack api servers list
+
+Lista el estado canónico del runtime de los Node.
+
+Devuelve los Node limitados al propietario con las identidades canónicas `node_id` y `kit_deployment_id`.
+
+```bash
+techstack api servers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_server_runtimes` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--kit-deployment-id` | string | — |
+
+## techstack api servers maintenance get
+
+Lee un trabajo de mantenimiento de un servidor propio.
+
+Con el mismo ámbito que el POST: el derecho `techstack.servers.maintenance` firmado por el Edge, el tenant, la propiedad del servidor y un trabajo que pertenece a este servidor y que solicitó quien llama. Cualquier otra cosa devuelve 404. Los trabajos de mantenimiento tienen su propio registro y no se sirven mediante `/api/v1/jobs/&#123;id&#125;`. No hay endpoint de logs: el trabajo lleva su resultado y un fallo lleva su código estable con indicaciones para el usuario.
+
+```bash
+techstack api servers maintenance get <server-id> <job-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/actions/{jobId}` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_server_maintenance_job` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
+| `<job-id>` | string | **Obligatorio.** |
+
+## techstack api servers maintenance run
+
+Pone en cola un plan de actualización del SO, una actualización del SO o un reinicio aprobados por el propietario.
+
+Requiere el derecho `techstack.servers.maintenance` firmado por el Edge, la propiedad del servidor en el tenant y, para `reboot` y `os_update`, un inicio de sesión multifactor de como máximo 300 segundos de antigüedad procedente del sobre verificado del edge. El cuerpo se decodifica de forma estricta: claves exactas en minúsculas, sin duplicados y sin campos desconocidos. Una repetición con el mismo Idempotency-Key devuelve el recibo guardado antes de validar el destino. Por servidor puede haber activo un reinicio o una actualización del SO y, por separado, un plan de actualización; un trabajo que no termina antes de su plazo falla con `deadline_exceeded` y libera su ranura. La acción solo se ofrece en `allowed_actions` cuando el agente del servidor anuncia `stackkit.host-maintenance.v1`, y `reboot` solo cuando el servidor además informa `host_boot_id`. Los rechazos son documentos client-error-envelope/v1; el `reason_code` de 409 es uno de control_plane_host, substrate_node, protected_demo_server, service_locked, maintenance_active, node_operation_active, plan_stale, agent_capability_missing, boot_id_unknown, agent_not_connected, heartbeat_stale, inventory_revision_stale o idempotency_key_reused; 403 lleva entitlement_required o server_maintenance_step_up_required.
+
+```bash
+techstack api servers maintenance run <server-id> [flags]
+```
+
+<Warning>Requiere confirmación. Esta operación reinicia, actualiza o planifica una actualización del sistema operativo del servidor, según lo solicitado. Pasa `--yes` o responde a la pregunta; una ejecución no interactiva sin `--yes` se detiene antes de cualquier solicitud con el código de salida 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/actions` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `run_server_maintenance_action` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
+| `--action` | string | **Obligatorio.** Uno de `os_update_plan`, `os_update`, `reboot`. |
+| `--expected-inventory-revision` | integer | **Obligatorio.** |
+| `--expected-plan-digest` | string | Solo para os_update: el plan_digest de un os_update_plan completado para este servidor con una antigüedad máxima de 15 minutos. |
+| `--owner-approved` | boolean | Debe ser true para os_update y reboot. |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api servers ports
+
+Obtiene el inventario de puertos del propietario autenticado para un servidor canónico.
+
+Proyección de la UI de detalle del servidor sobre la misma autoridad central de puertos que la superficie de Inventory/MCP, autorizada a través del límite canónico de lectura de servidores limitado al propietario.
+
+```bash
+techstack api servers ports <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/ports` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_server_runtime_ports` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
+
+## techstack api servers summary
+
+Lee el resumen de presencia de servidores del propietario autenticado.
+
+Devuelve solo un recuento y un indicador de presencia bajo el mismo ámbito de política de tenant y propietario que la lista canónica del inventario. La consulta opcional de tenant existe por compatibilidad con el Gateway y debe coincidir exactamente con el tenant de la identidad autenticada; una discrepancia se rechaza antes de cualquier lectura del almacén. No se devuelven identificadores de servidor, tenant ni sujeto.
+
+```bash
+techstack api servers summary [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/summary` |
+| Cambia el estado | No |
+| Herramienta MCP | Ninguna |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--tenant` | string | — |
+
+## techstack api servers transitions
+
+Lista la línea temporal persistida del estado del servidor.
+
+```bash
+techstack api servers transitions <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/transitions` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_server_runtime_transitions` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |

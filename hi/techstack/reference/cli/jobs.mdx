@@ -1,0 +1,84 @@
+---
+title: "techstack api jobs"
+description: "techstack api jobs कमांड के लिए जनरेट किया गया संदर्भ"
+sidebarTitle: "jobs"
+release: "v0.32.8"
+---
+<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+
+## techstack api jobs get
+
+स्वामित्व वाले एक जॉब की वर्तमान स्टेट प्राप्त करें।
+
+यह UI, API क्लाइंट, MCP टूल और एजेंटों के लिए कैनोनिकल पोलिंग सरफ़ेस है। `waiting_enrollment` एक गैर-टर्मिनल प्रतीक्षा दिखाता है; जब तक जॉब फिर से शुरू होकर टर्मिनल सफलता स्टेट तक नहीं पहुँचता, तब तक लक्ष्य तक पहुँच अनुपलब्ध रहती है।
+
+```bash
+techstack api jobs get <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs/{id}` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_job` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<id>` | string | **आवश्यक।** संसाधन ID। |
+
+## techstack api jobs list
+
+प्रमाणित उपयोगकर्ता के स्वामित्व वाले जॉब सूचीबद्ध करें।
+
+वही ओनर-स्कोप्ड जॉब स्टेट लौटाता है जिसका उपयोग ऑपरेटर UI और ऑटोमेशन क्लाइंट करते हैं। `state: waiting` वाला जॉब सक्रिय रहता है और वर्तमान ऑर्केस्ट्रेटर प्रोसेस उसकी अगली जाँच शेड्यूल करता है; यह विफल प्रोवाइडर एक्शन नहीं है। अगर प्रोसेस रीस्टार्ट के बाद वह शेड्यूल पुराना हो जाए, तो सटीक लक्ष्य वाला `resumeStackEnrollment` ऑपरेशन उपयोग करें।
+
+```bash
+techstack api jobs list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_jobs` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--page` | integer | पेज नंबर (डिफ़ॉल्ट 1)। |
+| `--per-page` | integer | डिफ़ॉल्ट `50`। |
+| `--stack-id` | string | — |
+| `--state` | string | इनमें से एक: `pending`, `running`, `waiting`, `completed`, `failed`, `canceled`। |
+| `--type` | string | — |
+| `--search` | string | — |
+
+## techstack api jobs logs
+
+जॉब लॉग प्राप्त करें।
+
+```bash
+techstack api jobs logs <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs/{id}/logs` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_job_logs` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<id>` | string | **आवश्यक।** संसाधन ID। |
+
+## techstack api jobs stats
+
+जॉब कतार के आँकड़े प्राप्त करें।
+
+```bash
+techstack api jobs stats [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs/stats` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_job_stats` |

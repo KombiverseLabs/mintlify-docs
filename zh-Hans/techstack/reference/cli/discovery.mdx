@@ -1,0 +1,210 @@
+---
+title: "techstack api discovery"
+description: "techstack api discovery 命令的生成参考"
+sidebarTitle: "discovery"
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api discovery cache clear
+
+清除发现缓存（仅限管理员）。
+
+```bash
+techstack api discovery cache clear [flags]
+```
+
+<Warning>需要确认：此操作会丢弃所有已缓存的发现结果；下一次发现会重新扫描网络。传入 `--yes` 或回答提示；未使用 `--yes` 的非交互式运行会在发出任何请求之前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/discovery/cache` |
+| 更改状态 | 是 |
+| MCP 工具 | `clear_discovery_cache` |
+
+## techstack api discovery devices get
+
+获取调用方拥有的已发现设备。
+
+```bash
+techstack api discovery devices get <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/discovery/devices/{id}` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_device` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+
+## techstack api discovery devices list
+
+列出调用方拥有的已发现设备。
+
+只返回由经过认证的调用方所拥有的扫描产生的设备。
+
+```bash
+techstack api discovery devices list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/discovery/devices` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_devices` |
+
+## techstack api discovery devices probe
+
+深度探测调用方拥有的设备。
+
+非管理员调用方只能探测自己发现结果中的 IP；管理员可以探测任意 IP。
+
+```bash
+techstack api discovery devices probe [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/discovery/probe` |
+| 更改状态 | 是 |
+| MCP 工具 | 无 |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--ip` | string | **必填。** |
+| `--ssh-key` | string | — |
+| `--ssh-user` | string | — |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api discovery networks
+
+获取本地网络接口。
+
+```bash
+techstack api discovery networks [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/discovery/networks` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_networks` |
+
+## techstack api discovery scans cancel
+
+取消正在运行的扫描。
+
+```bash
+techstack api discovery scans cancel <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/discovery/scan/{id}/cancel` |
+| 更改状态 | 是 |
+| MCP 工具 | `cancel_scan` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+
+## techstack api discovery scans enrich
+
+用附加数据丰富扫描结果。
+
+```bash
+techstack api discovery scans enrich <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/discovery/scan/{id}/enrich` |
+| 更改状态 | 是 |
+| MCP 工具 | `enrich_scan` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+
+## techstack api discovery scans get
+
+获取扫描状态和结果。
+
+```bash
+techstack api discovery scans get <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/discovery/scan/{id}` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_scan` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+
+## techstack api discovery scans start
+
+启动网络扫描（异步）。
+
+```bash
+techstack api discovery scans start [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/discovery/scan` |
+| 更改状态 | 是 |
+| MCP 工具 | `start_scan` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--exclude-ips` | string\[\] | — |
+| `--max-concurrent` | integer | 默认值：`50`。 |
+| `--profile` | string | 可选值：`passive`、`active`。默认值：`"passive"`。 |
+| `--subnet` | string | — |
+| `--target-ips` | string\[\] | — |
+| `--timeout-seconds` | integer | 默认值：`30`。 |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api discovery stats
+
+获取发现统计信息（仅限管理员）。
+
+```bash
+techstack api discovery stats [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/discovery/stats` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_discovery_stats` |
+
+## techstack api discovery test-ssh
+
+测试到设备的 SSH 连通性。
+
+非管理员调用方只能测试自己发现结果中的 IP；管理员可以测试任意 IP。
+
+```bash
+techstack api discovery test-ssh [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/discovery/test-ssh` |
+| 更改状态 | 是 |
+| MCP 工具 | 无 |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--ip` | string | **必填。** |
+| `--password` | string | — |
+| `--port` | integer | 默认值：`22`。 |
+| `--user` | string | — |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |

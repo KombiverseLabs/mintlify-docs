@@ -1,0 +1,63 @@
+---
+title: "techstack api pairing-tokens"
+description: "techstack api pairing-tokens कमांड के लिए जनरेट किया गया संदर्भ"
+sidebarTitle: "pairing-tokens"
+release: "v0.32.8"
+---
+<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+
+## techstack api pairing-tokens create
+
+वर्कर रजिस्ट्रेशन के लिए पेयरिंग टोकन बनाएँ।
+
+```bash
+techstack api pairing-tokens create [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/trust/pairing-tokens` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `create_pairing_token` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--environment-class` | string | ओनर प्लेसमेंट की स्पष्ट घोषणा; अज्ञात हो तो छोड़ दें। इनमें से एक: `local`, `cloud`। |
+| `--name` | string | — |
+| `--server-provisioning-mode` | string | इनमें से एक: `install-command`, `connect-remote`। |
+| `--stack-id` | string | — |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api pairing-tokens delete
+
+पेयरिंग टोकन हटाएँ।
+
+```bash
+techstack api pairing-tokens delete <id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन पेयरिंग टोकन रद्द करता है; जो डिवाइस अभी तक पेयर नहीं हुए हैं, वे इसका उपयोग नहीं कर पाएँगे। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/trust/pairing-tokens/{id}` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `delete_pairing_token` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<id>` | string | **आवश्यक।** संसाधन ID। |
+
+## techstack api pairing-tokens list
+
+पेयरिंग टोकन सूचीबद्ध करें।
+
+```bash
+techstack api pairing-tokens list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/trust/pairing-tokens` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_pairing_tokens` |

@@ -1,0 +1,85 @@
+---
+title: "techstack api services"
+description: "مرجع مولَّد لأوامر techstack api services"
+sidebarTitle: "services"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api services get
+
+جلب الحالة المرغوبة والمرصودة والحالة الصحية وقدرات الوصول والإجراءات لخدمة واحدة.
+
+```bash
+techstack api services get <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_service_runtime` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<service-id>` | string | **مطلوب.** معرّف وقت تشغيل الخدمة القياسي. |
+
+## techstack api services list
+
+عرض حالة وقت تشغيل الخدمات المقيسة القياسية.
+
+```bash
+techstack api services list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_service_runtimes` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--stack-id` | string | — |
+| `--server-id` | string | — |
+
+## techstack api services logs
+
+قراءة أحدث صفحة محدودة ومحجوبة البيانات الحساسة من سجل خدمة StackKits.
+
+```bash
+techstack api services logs <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/registry/services/{serviceId}/logs` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_managed_service_logs` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<service-id>` | string | **مطلوب.** معرّف وقت تشغيل الخدمة القياسي. |
+| `--limit` | integer | الافتراضي `100`. |
+| `--cursor` | string | — |
+
+## techstack api services run-action
+
+وضع إجراء خدمة StackKits أذن به المالك في الطابور.
+
+يشتق سلطة الـ stack والخادم والوكيل والـ kit والخدمة من جرد قياسي حديث. تتقارب عمليات إعادة الإرسال الدقيقة عبر إيصال مهمة دائم؛ ولا يُحفظ مفتاح Idempotency-Key الخام أبداً. يلي كل تعديلٍ تشغيلُ StackKits verify قبل تغيير الحالة المقيسة. ترفض الإجراءات التي ينفذها الوكيل بالرمز 409 `maintenance_active` أثناء إعادة تشغيل الخادم أو تحديثه.
+
+```bash
+techstack api services run-action <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/registry/services/{serviceId}/actions` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `run_managed_service_action` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<service-id>` | string | **مطلوب.** معرّف وقت تشغيل الخدمة القياسي. |
+| `--body` | json | **مطلوب.** جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |

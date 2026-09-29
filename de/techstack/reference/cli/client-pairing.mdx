@@ -1,0 +1,47 @@
+---
+title: "techstack api client-pairing"
+description: "Generierte Referenz für die Befehle unter techstack api client-pairing"
+sidebarTitle: "client-pairing"
+release: "v0.32.8"
+---
+<Note>Generiert aus dem Techstack-Release v0.32.8 (Quelle `4c7d219a5d56`). Für eine installierte Version ist `techstack api <command> --help` maßgeblich.</Note>
+
+## techstack api client-pairing issue
+
+Ein kurzlebiges ClientPairingEnvelope v1 ausstellen.
+
+Erfordert einen authentifizierten Instanz-Administrator. Nur für eine selbst gehostete HTTPS-Instanz mit konfiguriertem Tenant und nativer OIDC-Autorität verfügbar. Im lokalen Single-Owner-Modus bricht die Operation sicher ab.
+
+```bash
+techstack api client-pairing issue [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/client-pairing/issue` |
+| Ändert Zustand | Ja |
+| MCP-Tool | Keine |
+
+## techstack api client-pairing redeem
+
+Einen ClientPairingEnvelope-v1-Code atomar einlösen.
+
+Der Client prüft den Fingerabdruck des HTTPS-Zertifikats, bevor er diese Anfrage sendet. Bei Erfolg wird der Code genau einmal verbraucht, und die Antwort liefert öffentliche Metadaten für den normalen OIDC-Account-Ablauf; sie gibt nie eine Session zurück und dupliziert nie die lokale Owner-Identität.
+
+```bash
+techstack api client-pairing redeem [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/client-pairing/redeem` |
+| Ändert Zustand | Ja |
+| MCP-Tool | Keine |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `--instance-id` | string | **Erforderlich.** |
+| `--one-time-code` | string | **Erforderlich.** |
+| `--tls-fingerprint-sha256` | string | **Erforderlich.** |
+| `--version` | string | **Erforderlich.** |
+| `--body` | json | JSON-Request-Body (`application/json`) als Literal, `@path` oder `-` für stdin. |

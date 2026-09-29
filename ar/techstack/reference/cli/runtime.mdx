@@ -1,0 +1,35 @@
+---
+title: "techstack api runtime"
+description: "مرجع مولَّد لأوامر techstack api runtime"
+sidebarTitle: "runtime"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api runtime logs
+
+جلب سجلات وقت التشغيل/النشر الأخيرة.
+
+يُرجع إدخالات سجل وقت التشغيل/النشر الأخيرة (تقدّم المهام/النشر إضافة إلى ذيل سجل الحاوية) من مخزن سجلات وقت التشغيل المؤقت في خادم gRPC، مرشَّحة حسب معاملات الاستعلام المقدَّمة. يتطلب المصادقة وخادم gRPC متاحاً.
+
+```bash
+techstack api runtime logs [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/runtime/logs` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_runtime_logs` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--stack-id` | string | — |
+| `--job-id` | string | — |
+| `--lease-id` | string | — |
+| `--agent-id` | string | — |
+| `--provider` | string | — |
+| `--service-name` | string | اسم الخدمة (يُقبل أيضاً الاسم البديل `service`). |
+| `--min-level` | string | الحد الأدنى لمستوى السجل (يُقبل أيضاً الاسم البديل `level`). إحدى القيم: `debug`، `info`، `warn`، `error`. |
+| `--since` | string | الحد الأدنى بتنسيق RFC3339 لطوابع زمن السجل. |
+| `--limit` | integer | الافتراضي `200`. |

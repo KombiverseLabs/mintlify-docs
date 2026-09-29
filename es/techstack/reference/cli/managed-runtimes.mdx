@@ -1,0 +1,27 @@
+---
+title: "techstack api managed-runtimes"
+description: "Referencia generada de los comandos techstack api managed-runtimes"
+sidebarTitle: "managed-runtimes"
+release: "v0.32.8"
+---
+<Note>Generado a partir del release v0.32.8 de Techstack (fuente `4c7d219a5d56`). Para una versión instalada, `techstack api <command> --help` es la fuente autorizada.</Note>
+
+## techstack api managed-runtimes authority
+
+Verifica la autoridad de runtime gestionado ligada a la solicitud sin crear ningún recurso.
+
+Preflight de solo lectura de la cadena de autoridad desde el Gateway hasta la admisión nativa. Las solicitudes alojadas deben llevar la decisión `cloud.runtime.credits` `managed_servers`, firmada con v2 por el Gateway, sobre runtime gestionado, Cloud Kit y derecho del proveedor, ligada exactamente a esta solicitud. Una respuesta correcta nunca reserva capacidad ni crea un despliegue de StackKit, un trabajo en cola, un arrendamiento, una proyección de Node ni una operación del proveedor; la solicitud real de Add-Server repite de forma atómica cada comprobación de admisión mutable.
+
+```bash
+techstack api managed-runtimes authority [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/managed-runtimes/authority` |
+| Cambia el estado | No |
+| Herramienta MCP | `preflight_managed_runtime_authority` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--provider-id` | string | **Obligatorio.** Proveedor canónico exacto cuya autoridad de runtime gestionado se comprueba. Uno de `centron`, `ionos`. |

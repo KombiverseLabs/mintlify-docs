@@ -1,0 +1,185 @@
+---
+title: "techstack api backups"
+description: "مرجع مولَّد لأوامر techstack api backups"
+sidebarTitle: "backups"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api backups cleanup
+
+تطبيق سياسة الاحتفاظ (للمسؤولين فقط).
+
+```bash
+techstack api backups cleanup [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/backups/cleanup` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا شيء |
+
+## techstack api backups create
+
+إنشاء نسخة احتياطية لقاعدة البيانات (للمسؤولين فقط).
+
+```bash
+techstack api backups create [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/backups` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا شيء |
+
+## techstack api backups delete
+
+حذف نسخة احتياطية (للمسؤولين فقط).
+
+```bash
+techstack api backups delete <name> [flags]
+```
+
+<Warning>يتطلب تأكيداً: تحذف هذه العملية أرشيف النسخة الاحتياطية المحلي نهائياً. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/backups/{name}` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا شيء |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<name>` | string | **مطلوب.** |
+
+## techstack api backups download
+
+تنزيل ملف النسخة الاحتياطية (للمسؤولين فقط).
+
+```bash
+techstack api backups download <name> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups/{name}/download` |
+| يغيّر الحالة | لا |
+| أداة MCP | لا شيء |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<name>` | string | **مطلوب.** |
+
+## techstack api backups latest
+
+جلب معلومات أحدث نسخة احتياطية (للمسؤولين فقط).
+
+```bash
+techstack api backups latest [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups/latest` |
+| يغيّر الحالة | لا |
+| أداة MCP | لا شيء |
+
+## techstack api backups list
+
+عرض النسخ الاحتياطية (للمسؤولين فقط).
+
+```bash
+techstack api backups list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups` |
+| يغيّر الحالة | لا |
+| أداة MCP | لا شيء |
+
+## techstack api backups s3 delete
+
+حذف نسخة احتياطية من S3 (للمسؤولين فقط).
+
+```bash
+techstack api backups s3 delete <name> [flags]
+```
+
+<Warning>يتطلب تأكيداً: تحذف هذه العملية النسخة الاحتياطية من تخزين S3 نهائياً. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/backups/s3/{name}` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا شيء |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<name>` | string | **مطلوب.** |
+
+## techstack api backups s3 download
+
+تنزيل نسخة احتياطية من S3 (للمسؤولين فقط).
+
+```bash
+techstack api backups s3 download <name> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/backups/s3/{name}/download` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا شيء |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<name>` | string | **مطلوب.** |
+
+## techstack api backups s3 list
+
+عرض نسخ S3 الاحتياطية (للمسؤولين فقط).
+
+```bash
+techstack api backups s3 list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups/s3` |
+| يغيّر الحالة | لا |
+| أداة MCP | لا شيء |
+
+## techstack api backups s3 status
+
+جلب حالة الاتصال بـ S3 (للمسؤولين فقط).
+
+```bash
+techstack api backups s3 status [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/backups/s3/status` |
+| يغيّر الحالة | لا |
+| أداة MCP | لا شيء |
+
+## techstack api backups upload-s3
+
+رفع نسخة احتياطية إلى S3 (للمسؤولين فقط).
+
+```bash
+techstack api backups upload-s3 <name> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/backups/{name}/upload-s3` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا شيء |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<name>` | string | **مطلوب.** |

@@ -1,0 +1,44 @@
+---
+title: "techstack api homelab"
+description: "techstack api homelab कमांड के लिए जनरेट किया गया संदर्भ"
+sidebarTitle: "homelab"
+release: "v0.32.8"
+---
+<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+
+## techstack api homelab get
+
+कॉलर का होमलैब और उसके StackKit डिप्लॉयमेंट प्राप्त करें।
+
+प्रमाणित ओनर के कैनोनिकल Homelab अम्ब्रेला को उसके StackKit डिप्लॉयमेंट के साथ रिज़ॉल्व करता है। जब बैकफ़िल में डिप्लॉयमेंट हों लेकिन अभी कोई Homelab पंक्ति न हो, तब `homelab` null होता है; दोनों न हों तो रूट 404 लौटाता है।
+
+```bash
+techstack api homelab get [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/homelab` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_homelab` |
+
+## techstack api homelab rename
+
+कॉलर के होमलैब का नाम बदलें।
+
+प्रमाणित ओनर के होमलैब का नाम बदलता है। होमलैब का नाम ही Stack Identity नाम है और कनेक्ट होने पर kombify Cloud से सिंक होता है। यह बदलाव वापस लिया जा सकता है; होमलैब प्रमाणित ओनर से रिज़ॉल्व होता है, कभी किसी आर्ग्युमेंट से नहीं।
+
+```bash
+techstack api homelab rename <name> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PATCH /api/v1/homelab` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `rename_homelab` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<name>` | string | **आवश्यक।** |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |

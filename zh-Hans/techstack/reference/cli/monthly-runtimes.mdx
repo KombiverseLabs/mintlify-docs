@@ -1,0 +1,270 @@
+---
+title: "techstack api monthly-runtimes"
+description: "techstack api monthly-runtimes 命令的生成参考"
+sidebarTitle: "monthly-runtimes"
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api monthly-runtimes cleanup-readback
+
+读取已脱敏的托管运行时清理状态事实。
+
+返回按租户和所有者限定的、针对该租约当前确切的提供商控制资源代际的状态事实。此只读端点从不调用提供商或运行时代理，也从不返回提供商资源句柄、命令、证据文档或凭据。终态操作表示已不再运行，但其本身并不能证明清理成功：提供商侧的不存在需要 absence_evidence_ref，容量释放需要 capacity_released。
+
+```bash
+techstack api monthly-runtimes cleanup-readback <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/{lease_id}/cleanup-readback` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_monthly_runtime_cleanup_readback` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<lease-id>` | string | **必填。** 月度运行时租约 ID。 |
+
+## techstack api monthly-runtimes decommission
+
+停用月度运行时租约。
+
+```bash
+techstack api monthly-runtimes decommission <lease-id> [flags]
+```
+
+<Warning>需要确认：此操作会停用月度运行时并拆除其提供商资源。传入 `--yes` 或回答提示；未使用 `--yes` 的非交互式运行会在发出任何请求之前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/decommission` |
+| 更改状态 | 是 |
+| MCP 工具 | `decommission_monthly_runtime` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<lease-id>` | string | **必填。** 月度运行时租约 ID。 |
+| `--force-query` | boolean | 当运行时不可达时，请求精确的、按代际绑定的提供商协调。只有当控制平面在取消租约前能证明具备重启安全、HA 隔离的持久托管时，才接受 force。也可以作为 &#123;"force": true&#125; JSON 正文传入。空请求默认为 false。默认值：`false`。 |
+| `--expected-resource-generation-digest` | string | 可选的乐观并发声明。除非此摘要仍能标识当前的租约资源代际，否则提供商拆除会以 409 被拒绝。 |
+| `--force` | boolean | 默认值：`false`。 |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api monthly-runtimes get
+
+获取月度运行时状态。
+
+```bash
+techstack api monthly-runtimes get <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/{lease_id}` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_monthly_runtime_status` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<lease-id>` | string | **必填。** 月度运行时租约 ID。 |
+
+## techstack api monthly-runtimes offerings
+
+列出月度运行时套餐。
+
+返回公开的、不含提供商信息的订阅运行时套餐。
+
+```bash
+techstack api monthly-runtimes offerings [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/offerings` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_monthly_runtime_offerings` |
+
+## techstack api monthly-runtimes operations
+
+列出月度运行时的操作历史。
+
+```bash
+techstack api monthly-runtimes operations <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/{lease_id}/operations` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_monthly_runtime_operations` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<lease-id>` | string | **必填。** 月度运行时租约 ID。 |
+| `--limit` | integer | 要返回的最大操作事件数。默认值：`50`。 |
+
+## techstack api monthly-runtimes reconnect
+
+恢复托管运行时的 Guard 会话。
+
+探测规范聚合；当它无法证明存在 Guard 连接时，会为正在运行的服务器中具备权益的所有者，通过固定的执行通道重启 Guard，并在有界窗口内重新观测该连接，然后使注册收敛到 enrolled。已停止的运行时会被拒绝（managed_runtime_stopped）。不会触碰任何提供商资源。
+
+```bash
+techstack api monthly-runtimes reconnect <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/reconnect` |
+| 更改状态 | 是 |
+| MCP 工具 | `reconnect_monthly_runtime` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<lease-id>` | string | **必填。** 月度运行时租约 ID。 |
+
+## techstack api monthly-runtimes recreate
+
+重建一个已完全释放的托管服务器代际。
+
+在代际 N 具备终态的租约和规范服务器状态、终态的提供商操作状态、不透明的提供商原生不存在证据以及精确的容量释放之后，为同一个与提供商无关的运行时槽位显式预配代际 N+1。不可变的提供商、区域、套餐、角色、StackKit 和服务意图从旧的、按所有者限定的租约中恢复；客户端无法替换它。该端点委托给与 Add Node 相同的托管运行时扩展授权，因此注册、Guard 证据、端点和 StackKit rollout 都会经过完整的创建流程。标准的 Idempotency-Key 是必需的，并会安全地重放已接受的代际。
+
+```bash
+techstack api monthly-runtimes recreate <lease-id> [flags]
+```
+
+<Warning>需要确认：此操作会用新预配的服务器替换该运行时的提供商服务器，并会产生费用。传入 `--yes` 或回答提示；未使用 `--yes` 的非交互式运行会在发出任何请求之前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/recreate` |
+| 更改状态 | 是 |
+| MCP 工具 | `recreate_monthly_runtime` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<lease-id>` | string | **必填。** 月度运行时租约 ID。 |
+| `--confirmed` | boolean | **必填。** 显式确认 Recreate 会预配一个新的托管服务器代际并为其计费。可选值：`true`。 |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api monthly-runtimes resolve-custody
+
+在提供商清理之后，归档旧版或未绑定的托管记录。
+
+仅在所有者确认其提供商资源已被移除后，才从活动仪表板中移除不可执行的旧版或未绑定租约。此操作从不联系或删除提供商资源，并且对于由 Techstack 提供商控制的代际会被拒绝。
+
+```bash
+techstack api monthly-runtimes resolve-custody <lease-id> [flags]
+```
+
+<Warning>需要确认：此操作会记录提供商资源已被清理，并释放该租约的托管。传入 `--yes` 或回答提示；未使用 `--yes` 的非交互式运行会在发出任何请求之前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/resolve-custody` |
+| 更改状态 | 是 |
+| MCP 工具 | `resolve_monthly_runtime_custody` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<lease-id>` | string | **必填。** 月度运行时租约 ID。 |
+| `--provider-cleanup-confirmed` | boolean | **必填。** 可选值：`true`。 |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api monthly-runtimes ssh disable
+
+为此代际禁用所有者 SSH 访问。
+
+从节点中移除所有由所有者授权的密钥，同时保留 Kombify 的执行通道密钥，并记录已禁用的授权，使新的所有者密钥在重新启用 SSH 之前一律被拒绝。
+
+```bash
+techstack api monthly-runtimes ssh disable <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/disable-ssh` |
+| 更改状态 | 是 |
+| MCP 工具 | `disable_monthly_runtime_ssh` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<lease-id>` | string | **必填。** 月度运行时租约 ID。 |
+
+## techstack api monthly-runtimes ssh enable
+
+为此代际启用所有者 SSH 访问。
+
+通过固定的执行通道重新启用与代际绑定的所有者 SSH 授权，并重新安装所有者为此代际授权的密钥。新密钥只能通过重新认证后的服务器访问路由进行授权。
+
+```bash
+techstack api monthly-runtimes ssh enable <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/enable-ssh` |
+| 更改状态 | 是 |
+| MCP 工具 | `enable_monthly_runtime_ssh` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<lease-id>` | string | **必填。** 月度运行时租约 ID。 |
+
+## techstack api monthly-runtimes ssh get
+
+获取月度运行时租约的 SSH 连接信息。
+
+```bash
+techstack api monthly-runtimes ssh get <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/{lease_id}/ssh` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_monthly_runtime_ssh_info` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<lease-id>` | string | **必填。** 月度运行时租约 ID。 |
+
+## techstack api monthly-runtimes start
+
+启动同一代际中已停止的托管服务器。
+
+接纳一次与代际绑定、朝向运行状态的提供商控制协调。提供商开机操作在至多一次的声明下只运行一次；在收敛期间重复的请求会重放同一个操作。在任何提供商调用之前都需要托管运行时权益。
+
+```bash
+techstack api monthly-runtimes start <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/start` |
+| 更改状态 | 是 |
+| MCP 工具 | `start_monthly_runtime` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<lease-id>` | string | **必填。** 月度运行时租约 ID。 |
+
+## techstack api monthly-runtimes stop
+
+停止托管服务器但不销毁它。
+
+接纳一次与代际绑定、朝向停止状态的提供商控制协调。centron 使用其来宾系统正常关机操作；IONOS 则通过执行通道关闭来宾系统，因为 IONOS 提供商的停止操作会释放已绑定的 DHCP IPv4。服务器会保留其磁盘、地址、租约、容量预留和月度计费。
+
+```bash
+techstack api monthly-runtimes stop <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/stop` |
+| 更改状态 | 是 |
+| MCP 工具 | `stop_monthly_runtime` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<lease-id>` | string | **必填。** 月度运行时租约 ID。 |

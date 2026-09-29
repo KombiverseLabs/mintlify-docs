@@ -1,0 +1,175 @@
+---
+title: "techstack api servers"
+description: "مرجع مولَّد لأوامر techstack api servers"
+sidebarTitle: "servers"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api servers detach
+
+إبطال وفصل خادم BYO واحد محدد يشغّله العميل.
+
+يحتفظ بإيصال الخادم القياسي النهائي ولا يجري أي استدعاء لـ API المزوّد.
+
+```bash
+techstack api servers detach <server-id> [flags]
+```
+
+<Warning>يتطلب تأكيداً: تبطل هذه العملية بيانات اعتماد الخادم وتزيله من الإدارة دون المساس بالجهاز. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/detach` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `detach_self_owned_server` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف وقت تشغيل الخادم القياسي. |
+| `--confirm-server-id` | string | **مطلوب.** يجب أن يساوي تماماً معامل المسار serverId. |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api servers get
+
+جلب دورة حياة الخادم القياسي واتصاله وحالته الصحية وقنواته.
+
+```bash
+techstack api servers get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_server_runtime` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف وقت تشغيل الخادم القياسي. |
+
+## techstack api servers list
+
+عرض حالة وقت التشغيل القياسية للعقد.
+
+يُرجع العقد المحصورة بالمالك مع الهويتين القياسيتين `node_id` و`kit_deployment_id`.
+
+```bash
+techstack api servers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_server_runtimes` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--kit-deployment-id` | string | — |
+
+## techstack api servers maintenance get
+
+قراءة مهمة صيانة واحدة لخادم مملوك.
+
+محصورة مثل POST: استحقاق `techstack.servers.maintenance` الموقَّع من Edge، والمستأجر، وملكية الخادم، ومهمة تخص هذا الخادم وطلبها المستدعي. وأي شيء آخر يُرجع 404. لمهام الصيانة دفتر خاص بها ولا تُقدَّم عبر `/api/v1/jobs/&#123;id&#125;`. لا توجد نقطة نهاية للسجلات: تحمل المهمة نتيجتها، ويحمل الفشل رمزه الثابت مع إرشادات للمستخدم.
+
+```bash
+techstack api servers maintenance get <server-id> <job-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/actions/{jobId}` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_server_maintenance_job` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف وقت تشغيل الخادم القياسي. |
+| `<job-id>` | string | **مطلوب.** |
+
+## techstack api servers maintenance run
+
+وضع خطة تحديث لنظام التشغيل أو تحديث لنظام التشغيل أو إعادة تشغيل وافق عليها المالك في الطابور.
+
+يتطلب استحقاق `techstack.servers.maintenance` الموقَّع من Edge، وملكية الخادم في المستأجر، وبالنسبة إلى `reboot` و`os_update` تسجيل دخول متعدد العوامل لا يزيد عمره عن 300 ثانية من غلاف edge الموثَّق. يُفك ترميز الجسم بصرامة: مفاتيح دقيقة بأحرف صغيرة، دون تكرارات، ودون حقول غير معروفة. تُرجع إعادة الإرسال بمفتاح Idempotency-Key نفسه الإيصال المخزن قبل التحقق من الهدف. يمكن أن تكون إعادة تشغيل واحدة أو تحديث واحد لنظام التشغيل، وبشكل منفصل خطة تحديث واحدة، نشطة لكل خادم؛ والمهمة التي لا تنتهي قبل موعدها النهائي تفشل بـ `deadline_exceeded` وتحرر خانتها. لا يُعرض الإجراء في `allowed_actions` إلا عندما يعلن وكيل الخادم عن `stackkit.host-maintenance.v1`، ولا يُعرض `reboot` إلا عندما يبلّغ الخادم أيضاً عن `host_boot_id`. حالات الرفض مستندات client-error-envelope/v1؛ وقيمة `reason_code` للرمز 409 إحدى: control_plane_host، substrate_node، protected_demo_server، service_locked، maintenance_active، node_operation_active، plan_stale، agent_capability_missing، boot_id_unknown، agent_not_connected، heartbeat_stale، inventory_revision_stale أو idempotency_key_reused؛ ويحمل 403 القيمة entitlement_required أو server_maintenance_step_up_required.
+
+```bash
+techstack api servers maintenance run <server-id> [flags]
+```
+
+<Warning>يتطلب تأكيداً: تعيد هذه العملية تشغيل نظام تشغيل الخادم أو تحدّثه أو تخطط لتحديثه حسب الطلب. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/actions` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `run_server_maintenance_action` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف وقت تشغيل الخادم القياسي. |
+| `--action` | string | **مطلوب.** إحدى القيم: `os_update_plan`، `os_update`، `reboot`. |
+| `--expected-inventory-revision` | integer | **مطلوب.** |
+| `--expected-plan-digest` | string | لـ os_update فقط: قيمة plan_digest لخطة os_update_plan مكتملة لهذا الخادم لا يزيد عمرها عن 15 دقيقة. |
+| `--owner-approved` | boolean | يجب أن تكون true لـ os_update وreboot. |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api servers ports
+
+جلب جرد المنافذ للمالك المصادَق عليه لخادم قياسي واحد.
+
+إسقاط واجهة تفاصيل الخادم فوق سلطة المنافذ المركزية نفسها التي يستخدمها سطح Inventory/MCP، مع تفويض عبر حد القراءة القياسي للخوادم المحصور بالمالك.
+
+```bash
+techstack api servers ports <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/ports` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_server_runtime_ports` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف وقت تشغيل الخادم القياسي. |
+
+## techstack api servers summary
+
+قراءة ملخص وجود الخوادم للمالك المصادَق عليه.
+
+يُرجع فقط عدداً وعلامة وجود ضمن نطاق سياسة المستأجر والمالك نفسه الخاص بقائمة الجرد القياسية. يوجد استعلام tenant الاختياري للتوافق مع Gateway ويجب أن يطابق تماماً المستأجر في الهوية المصادَق عليها؛ ويُرفض عدم التطابق قبل أي قراءة من المخزن. ولا تُرجَع أي معرّفات للخوادم أو المستأجرين أو الكيانات.
+
+```bash
+techstack api servers summary [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/summary` |
+| يغيّر الحالة | لا |
+| أداة MCP | لا شيء |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--tenant` | string | — |
+
+## techstack api servers transitions
+
+عرض الخط الزمني المحفوظ لحالة الخادم.
+
+```bash
+techstack api servers transitions <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/transitions` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_server_runtime_transitions` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف وقت تشغيل الخادم القياسي. |

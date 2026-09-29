@@ -1,0 +1,47 @@
+---
+title: "techstack api client-pairing"
+description: "مرجع مولَّد لأوامر techstack api client-pairing"
+sidebarTitle: "client-pairing"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api client-pairing issue
+
+إصدار ClientPairingEnvelope v1 قصير العمر.
+
+يتطلب مسؤول مثيل مصادَقاً عليه. متاح فقط لمثيل مستضاف ذاتياً عبر HTTPS مع مستأجر مهيأ وسلطة OIDC أصلية. يفشل وضع المالك الواحد المحلي بشكل مغلق.
+
+```bash
+techstack api client-pairing issue [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/client-pairing/issue` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا شيء |
+
+## techstack api client-pairing redeem
+
+استرداد رمز ClientPairingEnvelope v1 بشكل ذرّي.
+
+يتحقق العميل من بصمة شهادة HTTPS قبل إرسال هذا الطلب. عند النجاح يُستهلك الرمز مرة واحدة بالضبط وتُرجَع بيانات وصفية عامة لمسار حساب OIDC العادي؛ ولا يُرجع أبداً جلسة ولا يكرر هوية المالك المحلي.
+
+```bash
+techstack api client-pairing redeem [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/client-pairing/redeem` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا شيء |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--instance-id` | string | **مطلوب.** |
+| `--one-time-code` | string | **مطلوب.** |
+| `--tls-fingerprint-sha256` | string | **مطلوب.** |
+| `--version` | string | **مطلوب.** |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |

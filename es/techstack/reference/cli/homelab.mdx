@@ -1,0 +1,44 @@
+---
+title: "techstack api homelab"
+description: "Referencia generada de los comandos techstack api homelab"
+sidebarTitle: "homelab"
+release: "v0.32.8"
+---
+<Note>Generado a partir del release v0.32.8 de Techstack (fuente `4c7d219a5d56`). Para una versión instalada, `techstack api <command> --help` es la fuente autorizada.</Note>
+
+## techstack api homelab get
+
+Obtiene el homelab de quien llama y sus despliegues de StackKit.
+
+Resuelve el Homelab canónico del propietario autenticado junto con sus despliegues de StackKit. `homelab` es null mientras un backfill tiene despliegues pero todavía no hay ninguna fila de Homelab; si no hay ninguno de los dos, la ruta devuelve 404.
+
+```bash
+techstack api homelab get [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/homelab` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_homelab` |
+
+## techstack api homelab rename
+
+Cambia el nombre del homelab de quien llama.
+
+Cambia el nombre del homelab del propietario autenticado. El nombre del homelab es el nombre de la Stack Identity y se sincroniza con kombify Cloud cuando hay conexión. Es reversible; el homelab se resuelve a partir del propietario autenticado, nunca a partir de un argumento.
+
+```bash
+techstack api homelab rename <name> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PATCH /api/v1/homelab` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `rename_homelab` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<name>` | string | **Obligatorio.** |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |

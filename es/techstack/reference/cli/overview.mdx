@@ -1,0 +1,90 @@
+---
+title: "Referencia de la CLI techstack api"
+description: "Cada comando de techstack api con sus opciones y códigos de salida"
+sidebarTitle: "Resumen"
+icon: square-terminal
+release: "v0.32.8"
+---
+<Note>Generado a partir del release v0.32.8 de Techstack (fuente `4c7d219a5d56`). Para una versión instalada, `techstack api <command> --help` es la fuente autorizada.</Note>
+
+`techstack api` llama a la API de Techstack exactamente como la describe la [referencia de la API](#referencia-de-la-api): un comando por operación pública, generado a partir del contrato de API del release. Cada comando imprime JSON en stdout sin el sobre de la respuesta; los errores van a stderr como el objeto de error estructurado.
+
+## Autenticación
+
+| Variable | Significado |
+| --- | --- |
+| `TECHSTACK_API_URL` | URL base de la API. El valor predeterminado es `https://api.kombify.io/v1/techstack`; configúrala con la dirección de tu propia instancia de Techstack para llamar directamente a esa instancia. |
+| `TECHSTACK_API_TOKEN` | Token Bearer que se envía con cada solicitud. Sin él, la CLI usa la sesión guardada por `techstack login` y falla con el código de salida 3 cuando no hay ninguna o ha caducado. |
+
+## Opciones universales
+
+| Opción | Se aplica a | Descripción |
+| --- | --- | --- |
+| `--fields <paths>` | todos los comandos | Rutas con puntos, separadas por comas, que se conservan en la salida; en los arrays se aplican a cada elemento. |
+| `--ndjson` | todos los comandos | Imprime los arrays como un valor JSON compacto por línea. |
+| `--dry-run` | comandos que modifican | Imprime la solicitud resuelta como JSON sin autorizarla ni enviarla. |
+| `--idempotency-key <key>` | comandos que modifican | Encabezado Idempotency-Key; de forma predeterminada, un UUID nuevo. |
+| `--body <json\|@path\|->` | comandos con un cuerpo JSON | Cuerpo base de la solicitud como literal, archivo o stdin; los flags de argumentos sobrescriben sus propiedades. |
+| `--file <path\|->` | comandos con un cuerpo de archivo | Archivo del cuerpo de la solicitud enviado con el tipo de contenido declarado. |
+| `--yes` | comandos que requieren confirmación | Confirma sin preguntar; obligatorio cuando no es interactivo. |
+
+Los comandos marcados como que requieren confirmación piden `yes` en un terminal. Sin terminal, se niegan a enviar la solicitud salvo que se indique `--yes`, imprimen un error `CONFIRMATION_REQUIRED` y salen con el código 9.
+
+## Códigos de salida
+
+| Código | Significado |
+| --- | --- |
+| 0 | Éxito. |
+| 1 | Cualquier otro fallo. |
+| 2 | Entrada no válida (HTTP 400/422). |
+| 3 | No autenticado (HTTP 401). |
+| 4 | Denegado, pago requerido o límite de frecuencia alcanzado (HTTP 402/403/429). |
+| 5 | No encontrado (HTTP 404). |
+| 6 | Conflicto (HTTP 409). |
+| 7 | Fallo del servidor o del transporte (HTTP 5xx). |
+| 9 | Confirmación requerida o rechazada. |
+
+## Contexto para agentes
+
+`techstack api agent-context` imprime este catálogo de comandos para agentes de IA en Markdown, o en JSON con `--json`: cada comando con su uso, argumentos, confirmación, disponibilidad y nombre de herramienta MCP, además de las opciones universales y los códigos de salida anteriores.
+
+## Comandos
+
+| Grupo de comandos | Abarca |
+| --- | --- |
+| [`techstack api addons`](/es/techstack/reference/cli/addons) | Complementos |
+| [`techstack api agents`](/es/techstack/reference/cli/agents) | Agentes |
+| [`techstack api auth`](/es/techstack/reference/cli/auth) | Autenticación |
+| [`techstack api autoinstall`](/es/techstack/reference/cli/autoinstall) | Salud |
+| [`techstack api backups`](/es/techstack/reference/cli/backups) | Copias de seguridad |
+| [`techstack api client-pairing`](/es/techstack/reference/cli/client-pairing) | Vinculación de clientes |
+| [`techstack api discovery`](/es/techstack/reference/cli/discovery) | Descubrimiento |
+| [`techstack api drift`](/es/techstack/reference/cli/drift) | Stacks - Deriva |
+| [`techstack api features`](/es/techstack/reference/cli/features) | Funciones |
+| [`techstack api health`](/es/techstack/reference/cli/health) | Salud |
+| [`techstack api homelab`](/es/techstack/reference/cli/homelab) | Stacks |
+| [`techstack api install-scripts`](/es/techstack/reference/cli/install-scripts) | Workers |
+| [`techstack api instance`](/es/techstack/reference/cli/instance) | Instancia |
+| [`techstack api inventory`](/es/techstack/reference/cli/inventory) | Inventario |
+| [`techstack api jobs`](/es/techstack/reference/cli/jobs) | Trabajos |
+| [`techstack api managed-runtimes`](/es/techstack/reference/cli/managed-runtimes) | Trabajos, Stacks |
+| [`techstack api monitor`](/es/techstack/reference/cli/monitor) | Métricas |
+| [`techstack api monthly-runtimes`](/es/techstack/reference/cli/monthly-runtimes) | Trabajos, Runtime mensual, Stacks |
+| [`techstack api pairing-tokens`](/es/techstack/reference/cli/pairing-tokens) | Confianza |
+| [`techstack api prechecks`](/es/techstack/reference/cli/prechecks) | Comprobaciones previas |
+| [`techstack api runtime`](/es/techstack/reference/cli/runtime) | Runtime |
+| [`techstack api servers`](/es/techstack/reference/cli/servers) | Inventario, Trabajos, RIL, Servidores |
+| [`techstack api services`](/es/techstack/reference/cli/services) | Trabajos, Servicios |
+| [`techstack api stack-identity`](/es/techstack/reference/cli/stack-identity) | Autenticación |
+| [`techstack api stackkits`](/es/techstack/reference/cli/stackkits) | StackKits |
+| [`techstack api stacks`](/es/techstack/reference/cli/stacks) | Inventario, Trabajos, Stacks, Stacks - Deriva, Stacks - Importación/exportación, Stacks - Especificaciones |
+| [`techstack api system`](/es/techstack/reference/cli/system) | Salud, Métricas |
+| [`techstack api system-accounts`](/es/techstack/reference/cli/system-accounts) | Autenticación |
+| [`techstack api tunnel`](/es/techstack/reference/cli/tunnel) | Túnel |
+| [`techstack api unifier`](/es/techstack/reference/cli/unifier) | Unifier |
+| [`techstack api wallet`](/es/techstack/reference/cli/wallet) | Wallet |
+| [`techstack api workers`](/es/techstack/reference/cli/workers) | Comprobaciones previas, Workers |
+
+## Referencia de la API
+
+La referencia de la API de Techstack de esta sección se genera a partir del documento OpenAPI público del mismo release.

@@ -1,0 +1,84 @@
+---
+title: "techstack api jobs"
+description: "Generierte Referenz für die Befehle unter techstack api jobs"
+sidebarTitle: "jobs"
+release: "v0.32.8"
+---
+<Note>Generiert aus dem Techstack-Release v0.32.8 (Quelle `4c7d219a5d56`). Für eine installierte Version ist `techstack api <command> --help` maßgeblich.</Note>
+
+## techstack api jobs get
+
+Den aktuellen Zustand eines eigenen Jobs abrufen.
+
+Dies ist die kanonische Polling-Schnittstelle für die UI, API-Clients, MCP-Tools und Agents. `waiting_enrollment` zeigt eine nicht terminale Wartephase an; der Zugriff auf das Ziel bleibt nicht verfügbar, bis der Job fortgesetzt wird und einen terminalen Erfolgszustand erreicht.
+
+```bash
+techstack api jobs get <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs/{id}` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `get_job` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<id>` | string | **Erforderlich.** Ressourcen-ID. |
+
+## techstack api jobs list
+
+Jobs des authentifizierten Benutzers auflisten.
+
+Gibt denselben Owner-bezogenen Job-Zustand zurück, den die Operator-UI und Automatisierungs-Clients verwenden. Ein Job mit `state: waiting` bleibt aktiv, und der aktuelle Orchestrator-Prozess plant seine nächste Prüfung; das ist keine fehlgeschlagene Anbieter-Aktion. Wird diese Planung nach einem Prozess-Neustart veraltet, verwende die zielgenaue Operation `resumeStackEnrollment`.
+
+```bash
+techstack api jobs list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `list_jobs` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `--page` | integer | Seitennummer (Standard 1). |
+| `--per-page` | integer | Standard `50`. |
+| `--stack-id` | string | — |
+| `--state` | string | Mögliche Werte: `pending`, `running`, `waiting`, `completed`, `failed`, `canceled`. |
+| `--type` | string | — |
+| `--search` | string | — |
+
+## techstack api jobs logs
+
+Job-Logs abrufen.
+
+```bash
+techstack api jobs logs <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs/{id}/logs` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `get_job_logs` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<id>` | string | **Erforderlich.** Ressourcen-ID. |
+
+## techstack api jobs stats
+
+Statistiken der Job-Warteschlange abrufen.
+
+```bash
+techstack api jobs stats [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs/stats` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `get_job_stats` |

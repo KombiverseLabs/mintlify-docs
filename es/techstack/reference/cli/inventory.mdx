@@ -1,0 +1,128 @@
+---
+title: "techstack api inventory"
+description: "Referencia generada de los comandos techstack api inventory"
+sidebarTitle: "inventory"
+release: "v0.32.8"
+---
+<Note>Generado a partir del release v0.32.8 de Techstack (fuente `4c7d219a5d56`). Para una versión instalada, `techstack api <command> --help` es la fuente autorizada.</Note>
+
+## techstack api inventory servers access-context
+
+Obtiene el contexto de acceso saneado de un servidor propio.
+
+Devuelve solo metadatos de direcciones, el estado del canal y enlaces de servicio con indicación de actualidad. Nunca devuelve referencias de endpoints, referencias de perfiles de acceso, ID de rutas, credenciales, tokens, usuarios SSH, puertos, claves, comandos ni logs. Esta superficie requiere el permiso de operación del inventario; el permiso de lectura por sí solo no basta.
+
+```bash
+techstack api inventory servers access-context <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers/{serverId}/access-context` |
+| Cambia el estado | No |
+| Herramienta MCP | `server_access_context` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
+
+## techstack api inventory servers health
+
+Obtiene la salud con indicación de actualidad de un servidor propio.
+
+```bash
+techstack api inventory servers health <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers/{serverId}/health` |
+| Cambia el estado | No |
+| Herramienta MCP | `server_health` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
+
+## techstack api inventory servers list
+
+Lista el inventario saneado de servidores del propietario autenticado.
+
+Devuelve solo los servidores cuyo propietario es el sujeto autenticado en el contexto de tenant de confianza. No se aceptan sustituciones de tenant ni de propietario. Nunca se devuelven metadatos sin procesar, endpoints de canal, referencias a recursos del proveedor, credenciales, material SSH, tokens ni logs. La proyección del arrendamiento contiene solo un identificador opaco y el estado. Las páginas de cursor comparten una marca de agua de colección ligada a la autorización y al filtro, y excluyen las inserciones posteriores.
+
+```bash
+techstack api inventory servers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_servers` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--limit` | integer | Predeterminado: `50`. |
+| `--cursor` | string | — |
+
+## techstack api inventory servers ports
+
+Obtiene los listeners deseados, reservados, observados y expuestos de un servidor propio.
+
+Proyecta las reclamaciones de listeners declaradas por el compilador y las reservas delimitadas por generación junto a la evidencia monótona del runtime de Guard. Las observaciones ausentes u obsoletas siguen siendo explícitas y nunca se convierten en una disponibilidad optimista.
+
+```bash
+techstack api inventory servers ports <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers/{serverId}/ports` |
+| Cambia el estado | No |
+| Herramienta MCP | `server_ports` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
+
+## techstack api inventory servers rename
+
+Establece o borra el nombre elegido por el propietario para un servidor propio.
+
+Escribe servers.display_name, que las proyecciones del runtime nunca sobrescriben. `null` o una cadena vacía borran el nuevo nombre. Requiere el derecho firmado techstack.inventory.write y la relación FGA `caller` del servidor; la escritura queda ligada al tenant y al propietario autenticados, y un servidor fuera de ese ámbito se deniega sin revelar si existe. El `name` canónico del inventario indica el nombre elegido cuando hay uno establecido.
+
+```bash
+techstack api inventory servers rename <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PATCH /api/v1/inventory/servers/{serverId}` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `rename_server` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
+| `--display-name` | string | **Obligatorio.** |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api inventory services list
+
+Lista los servicios saneados de los servidores del propietario autenticado.
+
+```bash
+techstack api inventory services list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/services` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_services` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--server-id` | string | Filtro opcional por un servidor propio exacto; un servidor ajeno se devuelve como no encontrado. |
+| `--limit` | integer | Predeterminado: `50`. |
+| `--cursor` | string | Cursor opaco ligado al ámbito autenticado y al filtro exacto de server_id. |

@@ -1,0 +1,64 @@
+---
+title: "techstack api drift"
+description: "مرجع مولَّد لأوامر techstack api drift"
+sidebarTitle: "drift"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api drift results delete
+
+حذف نتيجة انحراف.
+
+```bash
+techstack api drift results delete <id> [flags]
+```
+
+<Warning>يتطلب تأكيداً: تحذف هذه العملية نتيجة الانحراف المخزنة نهائياً. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/drift/results/{id}` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `delete_drift_result` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+
+## techstack api drift results get
+
+جلب نتيجة انحراف واحدة.
+
+```bash
+techstack api drift results get <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/drift/results/{id}` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_drift_result` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+
+## techstack api drift results list
+
+عرض كل نتائج الانحراف (مقسّمة إلى صفحات).
+
+```bash
+techstack api drift results list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/drift/results` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_drift_results` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--page` | integer | رقم الصفحة (الافتراضي 1). |
+| `--per-page` | integer | عدد العناصر في الصفحة (الافتراضي 20، والحد الأقصى 100). |

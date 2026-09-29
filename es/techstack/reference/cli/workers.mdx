@@ -1,0 +1,87 @@
+---
+title: "techstack api workers"
+description: "Referencia generada de los comandos techstack api workers"
+sidebarTitle: "workers"
+release: "v0.32.8"
+---
+<Note>Generado a partir del release v0.32.8 de Techstack (fuente `4c7d219a5d56`). Para una versión instalada, `techstack api <command> --help` es la fuente autorizada.</Note>
+
+## techstack api workers approve
+
+Aprueba un worker pendiente.
+
+```bash
+techstack api workers approve <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/approve` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `approve_worker` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<id>` | string | **Obligatorio.** ID del recurso. |
+
+## techstack api workers list
+
+Lista los workers registrados (filtrados por propietario).
+
+```bash
+techstack api workers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_workers` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--page` | integer | Número de página (predeterminado: 1). |
+| `--per-page` | integer | Elementos por página (predeterminado: 20, máximo: 100). |
+
+## techstack api workers prechecks list
+
+Obtiene los resultados de las comprobaciones previas de un worker.
+
+```bash
+techstack api workers prechecks list <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/{id}/prechecks` |
+| Cambia el estado | No |
+| Herramienta MCP | Ninguna |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<id>` | string | **Obligatorio.** ID del recurso. |
+| `--page` | integer | Número de página (predeterminado: 1). |
+| `--per-page` | integer | Elementos por página (predeterminado: 20, máximo: 100). |
+
+## techstack api workers prechecks run
+
+Ejecuta las comprobaciones previas en un worker.
+
+```bash
+techstack api workers prechecks run <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/prechecks` |
+| Cambia el estado | Sí |
+| Herramienta MCP | Ninguna |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<id>` | string | **Obligatorio.** ID del recurso. |
+| `--checks` | object\[\] | **Obligatorio.** |
+| `--stack-id` | string | — |
+| `--timeout-seconds` | integer | Predeterminado: `30`. |
+| `--worker-id` | string | — |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |

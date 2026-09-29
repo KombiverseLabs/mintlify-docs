@@ -1,0 +1,84 @@
+---
+title: "techstack api jobs"
+description: "techstack api jobs 命令的生成参考"
+sidebarTitle: "jobs"
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api jobs get
+
+获取某个自有任务的当前状态。
+
+这是供 UI、API 客户端、MCP 工具和代理使用的规范轮询接口。`waiting_enrollment` 表示非终态的等待；在任务恢复并达到终态成功状态之前，对目标的访问仍不可用。
+
+```bash
+techstack api jobs get <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs/{id}` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_job` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+
+## techstack api jobs list
+
+列出经过认证的用户所拥有的任务。
+
+返回运维 UI 和自动化客户端所使用的同一份按所有者限定的任务状态。处于 `state: waiting` 的任务仍然是活动的，当前的编排器进程会安排它的下一次检查；这并不是失败的提供商操作。如果进程重启后该安排已过时，请使用针对精确目标的 `resumeStackEnrollment` 操作。
+
+```bash
+techstack api jobs list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_jobs` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--page` | integer | 页码（默认 1）。 |
+| `--per-page` | integer | 默认值：`50`。 |
+| `--stack-id` | string | — |
+| `--state` | string | 可选值：`pending`、`running`、`waiting`、`completed`、`failed`、`canceled`。 |
+| `--type` | string | — |
+| `--search` | string | — |
+
+## techstack api jobs logs
+
+获取任务日志。
+
+```bash
+techstack api jobs logs <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs/{id}/logs` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_job_logs` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+
+## techstack api jobs stats
+
+获取任务队列统计信息。
+
+```bash
+techstack api jobs stats [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs/stats` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_job_stats` |

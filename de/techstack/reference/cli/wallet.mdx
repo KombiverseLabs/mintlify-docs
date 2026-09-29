@@ -1,0 +1,79 @@
+---
+title: "techstack api wallet"
+description: "Generierte Referenz für die Befehle unter techstack api wallet"
+sidebarTitle: "wallet"
+release: "v0.32.8"
+---
+<Note>Generiert aus dem Techstack-Release v0.32.8 (Quelle `4c7d219a5d56`). Für eine installierte Version ist `techstack api <command> --help` maßgeblich.</Note>
+
+## techstack api wallet list
+
+Geschwärzte Wallet-Wiederherstellungseinträge auflisten.
+
+Listet die Wallet-Wiederherstellungseinträge des Aufrufers für den aufgelösten Tenant auf. Die Werte `secret` und `totp` werden aus dieser Antwort immer entfernt; nur Präsenz-Flags (`has_secret`, `has_totp`) werden ausgegeben.
+
+```bash
+techstack api wallet list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/wallet` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `list_wallet_items` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `--stack-id` | string | — |
+
+## techstack api wallet reauth-proof
+
+Nach einer frischen Plattform-Neuauthentifizierung einen kurzlebigen Reauth-Nachweis ausstellen.
+
+Stellt nach einer frischen biometrischen bzw. Plattform-Neuauthentifizierung einen kurzlebigen Trusted-Reauth-HMAC-Nachweis (Zeitstempel + Signatur) aus, mit dem sich ein anschließendes Aufdecken innerhalb des 5-Minuten-Fensters autorisieren lässt. Erfordert eine gültige frische Plattform-Reauth-Assertion in der Anfrage.
+
+```bash
+techstack api wallet reauth-proof <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/wallet/{id}/reauth-proof` |
+| Ändert Zustand | Ja |
+| MCP-Tool | Keine |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<id>` | string | **Erforderlich.** Ressourcen-ID. |
+| `--platform-reauth-at` | string | — |
+| `--reason` | string | — |
+| `--reauth-assertion` | string | — |
+| `--reauth-signature` | string | — |
+| `--reauth-timestamp` | string | — |
+| `--body` | json | JSON-Request-Body (`application/json`) als Literal, `@path` oder `-` für stdin. |
+
+## techstack api wallet reveal
+
+Ein Wallet-Wiederherstellungsgeheimnis bzw. einen TOTP aufdecken, abgesichert durch einen frischen Reauth-Nachweis.
+
+Biometrisch abgesichert. Erfordert einen frischen Trusted-Reauth-HMAC-Nachweis (Zeitstempel + Signatur, 5-Minuten-Fenster), übergeben im Body oder in den Headern `X-Kombify-Reauth-\*` / `X-TechStack-Reauth-\*`. Gibt die Klartext-Wiederherstellungswerte einmal zurück; das Aufdecken wird serverseitig auditiert.
+
+```bash
+techstack api wallet reveal <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/wallet/{id}/reveal` |
+| Ändert Zustand | Ja |
+| MCP-Tool | Keine |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<id>` | string | **Erforderlich.** Ressourcen-ID. |
+| `--platform-reauth-at` | string | — |
+| `--reason` | string | — |
+| `--reauth-assertion` | string | — |
+| `--reauth-signature` | string | **Erforderlich.** |
+| `--reauth-timestamp` | string | **Erforderlich.** |
+| `--body` | json | JSON-Request-Body (`application/json`) als Literal, `@path` oder `-` für stdin. |

@@ -1,0 +1,149 @@
+---
+title: "techstack api tunnel"
+description: "techstack api tunnel 命令的生成参考"
+sidebarTitle: "tunnel"
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api tunnel install-command
+
+生成带隧道 URL 的 Worker 安装命令。
+
+```bash
+techstack api tunnel install-command [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/tunnel/install-command` |
+| 更改状态 | 是 |
+| MCP 工具 | 无 |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--token` | string | **必填。** |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api tunnel registry-url
+
+获取公开的隧道注册表 URL。
+
+```bash
+techstack api tunnel registry-url [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/tunnel/registry-url` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_tunnel_registry_url` |
+
+## techstack api tunnel start
+
+启动 Cloudflare 隧道。
+
+```bash
+techstack api tunnel start [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/tunnel/start` |
+| 更改状态 | 是 |
+| MCP 工具 | `start_tunnel` |
+
+## techstack api tunnel status
+
+获取隧道连接状态。
+
+```bash
+techstack api tunnel status [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/tunnel/status` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_tunnel_status` |
+
+## techstack api tunnel stop
+
+停止 Cloudflare 隧道。
+
+```bash
+techstack api tunnel stop [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/tunnel/stop` |
+| 更改状态 | 是 |
+| MCP 工具 | `stop_tunnel` |
+
+## techstack api tunnel subdomains list
+
+列出调用方自己的 kombify.me 子域名以供诊断；注册由 StackKits 负责。
+
+需要经过认证的调用方。使用共享平台身份时，列表限定于调用方的所有者绑定。
+
+```bash
+techstack api tunnel subdomains list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/tunnel/subdomains` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_tunnel_subdomains` |
+
+## techstack api tunnel subdomains services
+
+列出调用方自己的某个 kombify.me 基础子域名下的服务。
+
+```bash
+techstack api tunnel subdomains services <base-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/tunnel/subdomains/{baseId}/services` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_tunnel_subdomain_services` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<base-id>` | string | **必填。** |
+
+## techstack api tunnel topology
+
+检测网络拓扑。
+
+```bash
+techstack api tunnel topology [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/tunnel/topology` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_topology` |
+
+## techstack api tunnel validate-url
+
+校验自定义隧道 URL。
+
+```bash
+techstack api tunnel validate-url [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/tunnel/validate-url` |
+| 更改状态 | 是 |
+| MCP 工具 | `validate_tunnel_url` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--url` | string | — |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |

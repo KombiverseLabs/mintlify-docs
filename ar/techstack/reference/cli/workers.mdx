@@ -1,0 +1,87 @@
+---
+title: "techstack api workers"
+description: "مرجع مولَّد لأوامر techstack api workers"
+sidebarTitle: "workers"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api workers approve
+
+الموافقة على عامل معلّق.
+
+```bash
+techstack api workers approve <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/approve` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `approve_worker` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+
+## techstack api workers list
+
+عرض العمّال المسجلين (مرشَّحين حسب المالك).
+
+```bash
+techstack api workers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_workers` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--page` | integer | رقم الصفحة (الافتراضي 1). |
+| `--per-page` | integer | عدد العناصر في الصفحة (الافتراضي 20، والحد الأقصى 100). |
+
+## techstack api workers prechecks list
+
+جلب نتائج الفحص المسبق للعامل.
+
+```bash
+techstack api workers prechecks list <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/{id}/prechecks` |
+| يغيّر الحالة | لا |
+| أداة MCP | لا شيء |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+| `--page` | integer | رقم الصفحة (الافتراضي 1). |
+| `--per-page` | integer | عدد العناصر في الصفحة (الافتراضي 20، والحد الأقصى 100). |
+
+## techstack api workers prechecks run
+
+تشغيل الفحوصات المسبقة على العامل.
+
+```bash
+techstack api workers prechecks run <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/prechecks` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا شيء |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+| `--checks` | object\[\] | **مطلوب.** |
+| `--stack-id` | string | — |
+| `--timeout-seconds` | integer | الافتراضي `30`. |
+| `--worker-id` | string | — |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |

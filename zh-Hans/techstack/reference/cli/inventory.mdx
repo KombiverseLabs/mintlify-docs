@@ -1,0 +1,128 @@
+---
+title: "techstack api inventory"
+description: "techstack api inventory 命令的生成参考"
+sidebarTitle: "inventory"
+release: "v0.32.8"
+---
+<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api inventory servers access-context
+
+获取某台自有服务器的已脱敏访问上下文。
+
+只返回地址元数据、通道状态和带新鲜度限定的服务链接。它从不返回端点引用、访问配置文件引用、路由 ID、凭据、令牌、SSH 用户、端口、密钥、命令或日志。此接口需要清单操作权限；仅有读取权限是不够的。
+
+```bash
+techstack api inventory servers access-context <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers/{serverId}/access-context` |
+| 更改状态 | 否 |
+| MCP 工具 | `server_access_context` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<server-id>` | string | **必填。** 规范的服务器运行时 ID。 |
+
+## techstack api inventory servers health
+
+获取某台自有服务器带新鲜度限定的健康状况。
+
+```bash
+techstack api inventory servers health <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers/{serverId}/health` |
+| 更改状态 | 否 |
+| MCP 工具 | `server_health` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<server-id>` | string | **必填。** 规范的服务器运行时 ID。 |
+
+## techstack api inventory servers list
+
+列出经过认证的所有者的已脱敏服务器清单。
+
+只返回在受信任的租户上下文中由经过认证的主体拥有的服务器。不接受租户和所有者覆盖。从不返回原始元数据、通道端点、提供商资源引用、凭据、SSH 材料、令牌和日志。租约投影只包含一个不透明标识符和状态。游标分页共享一个与授权和筛选条件绑定的集合水位线，并排除之后插入的条目。
+
+```bash
+techstack api inventory servers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_servers` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--limit` | integer | 默认值：`50`。 |
+| `--cursor` | string | — |
+
+## techstack api inventory servers ports
+
+获取某台自有服务器期望的、已预留的、已观测的和已暴露的监听器。
+
+将编译器声明的监听器声明和按代际隔离的预留与单调的 Guard 运行时证据并列投影。缺失或过时的观测会保持显式，绝不会变成乐观的可用性。
+
+```bash
+techstack api inventory servers ports <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers/{serverId}/ports` |
+| 更改状态 | 否 |
+| MCP 工具 | `server_ports` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<server-id>` | string | **必填。** 规范的服务器运行时 ID。 |
+
+## techstack api inventory servers rename
+
+设置或清除某台自有服务器由所有者选定的名称。
+
+写入 servers.display_name，运行时投影从不会覆盖它。`null` 或空字符串会清除重命名。需要已签名的 techstack.inventory.write 权益以及服务器的 FGA `caller` 关系；写入绑定到经过认证的租户和所有者，超出该范围的服务器会被拒绝，且不会透露其是否存在。设置了名称时，规范清单中的 `name` 会报告所选名称。
+
+```bash
+techstack api inventory servers rename <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PATCH /api/v1/inventory/servers/{serverId}` |
+| 更改状态 | 是 |
+| MCP 工具 | `rename_server` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<server-id>` | string | **必填。** 规范的服务器运行时 ID。 |
+| `--display-name` | string | **必填。** |
+| `--body` | json | JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+
+## techstack api inventory services list
+
+列出经过认证的所有者名下服务器的已脱敏服务。
+
+```bash
+techstack api inventory services list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/services` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_services` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--server-id` | string | 可选的精确自有服务器筛选条件；他人的服务器会作为未找到返回。 |
+| `--limit` | integer | 默认值：`50`。 |
+| `--cursor` | string | 绑定到已认证范围和精确 server_id 筛选条件的不透明游标。 |

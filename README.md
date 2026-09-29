@@ -92,7 +92,7 @@ and `ar`:
    blocks or component tags, and any internal link or anchor that does not
    resolve inside the locale.
 
-Generated English pages (`stackkits/reference/cli/*`, release pages) are
+Generated English pages (`stackkits/reference/cli/*`, `techstack/reference/cli/*`, release pages) are
 rendered from release data; regenerate or re-translate their localized copies
 after each release. A locale is advertised only after a competent-speaker review.
 

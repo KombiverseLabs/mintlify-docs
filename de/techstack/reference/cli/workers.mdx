@@ -1,0 +1,87 @@
+---
+title: "techstack api workers"
+description: "Generierte Referenz für die Befehle unter techstack api workers"
+sidebarTitle: "workers"
+release: "v0.32.8"
+---
+<Note>Generiert aus dem Techstack-Release v0.32.8 (Quelle `4c7d219a5d56`). Für eine installierte Version ist `techstack api <command> --help` maßgeblich.</Note>
+
+## techstack api workers approve
+
+Ausstehenden Worker freigeben.
+
+```bash
+techstack api workers approve <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/approve` |
+| Ändert Zustand | Ja |
+| MCP-Tool | `approve_worker` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<id>` | string | **Erforderlich.** Ressourcen-ID. |
+
+## techstack api workers list
+
+Registrierte Worker auflisten (nach Owner gefiltert).
+
+```bash
+techstack api workers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `list_workers` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `--page` | integer | Seitennummer (Standard 1). |
+| `--per-page` | integer | Einträge pro Seite (Standard 20, max. 100). |
+
+## techstack api workers prechecks list
+
+Pre-Check-Ergebnisse für einen Worker abrufen.
+
+```bash
+techstack api workers prechecks list <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/{id}/prechecks` |
+| Ändert Zustand | Nein |
+| MCP-Tool | Keine |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<id>` | string | **Erforderlich.** Ressourcen-ID. |
+| `--page` | integer | Seitennummer (Standard 1). |
+| `--per-page` | integer | Einträge pro Seite (Standard 20, max. 100). |
+
+## techstack api workers prechecks run
+
+Pre-Checks auf einem Worker ausführen.
+
+```bash
+techstack api workers prechecks run <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/prechecks` |
+| Ändert Zustand | Ja |
+| MCP-Tool | Keine |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<id>` | string | **Erforderlich.** Ressourcen-ID. |
+| `--checks` | object\[\] | **Erforderlich.** |
+| `--stack-id` | string | — |
+| `--timeout-seconds` | integer | Standard `30`. |
+| `--worker-id` | string | — |
+| `--body` | json | JSON-Request-Body (`application/json`) als Literal, `@path` oder `-` für stdin. |
