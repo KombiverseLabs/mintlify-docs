@@ -1,0 +1,33 @@
+---
+title: "stackkit resolve"
+description: "Architecture-v2-Intent in einen kanonischen Deployment-Plan auflösen"
+sidebarTitle: "resolve"
+---
+Architecture-v2-Intent in einen kanonischen Deployment-Plan auflösen.
+
+Löst ein StackSpec-v2-Dokument und ein optionales beobachtetes Inventory in den kanonischen ResolvedPlan auf, den Generatoren und Runtimes verarbeiten.
+
+Der Befehl ist schreibgeschützt, solange kein `--output` angegeben ist. Dateiausgaben bleiben unterhalb des Arbeitsverzeichnisses und können nur einen bestehenden gültigen ResolvedPlan ersetzen; sie teilen sich den Mutationslock des Lebenszyklus. StackSpec v1 wird nie stillschweigend aktualisiert oder kompiliert: Es liefert den gemeinsamen typisierten Migrationsbericht und verlangt einen expliziten Migrations-Workflow.
+
+```bash
+stackkit resolve [spec-file] [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--inventory` | string | — | Pfad zu einem optionalen beobachteten Inventory-Dokument |
+| `--module-root` | string | — | Architecture-Authority-Root mit cue.mod, base und allen Kit-Definitionen |
+| `--output, -o` | string | — | Kanonisches ResolvedPlan-JSON unterhalb des Arbeitsverzeichnisses schreiben statt nach stdout |
+
+**Examples**
+
+```bash
+# Print the canonical ResolvedPlan for a StackSpec
+stackkit resolve --spec stack-spec.yaml
+
+# Resolve against an observed Inventory
+stackkit resolve stack-spec.yaml --inventory inventory.yaml
+
+# Replace the existing plan file beneath the working directory
+stackkit resolve stack-spec.yaml --output deploy/.stackkit/resolved-plan.json
+```

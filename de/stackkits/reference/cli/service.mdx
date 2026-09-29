@@ -1,0 +1,102 @@
+---
+title: "stackkit service"
+description: "Vom aktiven StackKits-Plan deklarierte Services steuern"
+sidebarTitle: "service"
+---
+Vom aktiven StackKits-Plan deklarierte Services steuern.
+
+```bash
+stackkit service [flags]
+```
+
+Subcommands: [`stackkit service logs`](#stackkit-service-logs), [`stackkit service restart`](#stackkit-service-restart), [`stackkit service start`](#stackkit-service-start), [`stackkit service stop`](#stackkit-service-stop)
+
+## stackkit service logs
+
+Begrenzte, geschwärzte Service-Logs lesen.
+
+```bash
+stackkit service logs <service-key> [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--cursor` | string | — | Opaker Cursor aus einem vorherigen Ergebnis |
+| `--json` | bool | — | Die versionierte Service-Log-Seite als JSON schreiben |
+| `--tail` | int | `100` | Anzahl der zurückzugebenden geschwärzten Log-Einträge (1..200) |
+
+**Examples**
+
+```bash
+# Read the last 50 redacted log entries of the TinyAuth login gateway
+stackkit service logs auth --tail 50
+
+# Read PocketID logs as JSON
+stackkit service logs id --json
+
+# Read the next page with the cursor the previous JSON result returned
+stackkit service logs id --json --cursor <cursor>
+```
+
+## stackkit service restart
+
+Einen verwalteten Service neu starten.
+
+```bash
+stackkit service restart <service-key> [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Das versionierte Service-Aktionsergebnis als JSON schreiben |
+| `--owner-approve` | bool | — | Die an den Owner gebundene Service-Änderung explizit freigeben |
+
+**Examples**
+
+```bash
+# Restart the PocketID identity service
+stackkit service restart id --owner-approve
+
+# Restart the TinyAuth login gateway and print the result as JSON
+stackkit service restart auth --owner-approve --json
+```
+
+## stackkit service start
+
+Einen verwalteten Service starten.
+
+```bash
+stackkit service start <service-key> [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Das versionierte Service-Aktionsergebnis als JSON schreiben |
+| `--owner-approve` | bool | — | Die an den Owner gebundene Service-Änderung explizit freigeben |
+
+**Examples**
+
+```bash
+# Start a stopped service again
+stackkit service start coolify --owner-approve
+```
+
+## stackkit service stop
+
+Einen verwalteten Service stoppen.
+
+```bash
+stackkit service stop <service-key> [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Das versionierte Service-Aktionsergebnis als JSON schreiben |
+| `--owner-approve` | bool | — | Die an den Owner gebundene Service-Änderung explizit freigeben |
+
+**Examples**
+
+```bash
+# Stop a non-critical service; base, id and auth cannot be stopped
+stackkit service stop coolify --owner-approve
+```

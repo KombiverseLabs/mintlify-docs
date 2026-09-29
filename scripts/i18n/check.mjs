@@ -42,7 +42,9 @@ const split = (src) => {
   const m = src.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
   return m ? { fm: m[1], body: m[2] } : null;
 };
-const fmKeys = (fm) => [...fm.matchAll(/^([A-Za-z][\w-]*):/gm)].map((m) => m[1]);
+// Generator provenance keys describe the English render, not a translation.
+const GENERATED_KEYS = new Set(["generated", "generated_by", "content_hash", "source_hash"]);
+const fmKeys = (fm) => [...fm.matchAll(/^([A-Za-z][\w-]*):/gm)].map((m) => m[1]).filter((k) => !GENERATED_KEYS.has(k));
 const fmValue = (fm, k) => fm.match(new RegExp(`^${k}:\s*(.*)$`, "m"))?.[1].trim().replace(/^["']|["']$/g, "");
 const fences = (body) => [...body.matchAll(/^([ \t]*)(`{3,})[^\n]*\n[\s\S]*?\n\1\2[ \t]*$/gm)].map((m) => m[0].split("\n").map((l) => l.trimStart()).join("\n"));
 const stripCode = (body) => body.replace(/^([ \t]*)(`{3,})[^\n]*\n[\s\S]*?\n\1\2[ \t]*$/gm, "").replace(/`[^`\n]*`/g, "");
@@ -77,6 +79,7 @@ for (const page of pages) {
   if (!isPage(dePath)) { add(page, "missing translation"); continue; }
   const en = split(enSrc), de = split(read(dePath));
   if (!en || !de) { add(page, "frontmatter missing or malformed"); continue; }
+  for (const k of GENERATED_KEYS) if (fmValue(de.fm, k) !== undefined) add(page, `frontmatter ${k} must not be copied to a translation`);
   if (fmKeys(en.fm).join() !== fmKeys(de.fm).join()) add(page, `frontmatter keys differ (${fmKeys(en.fm)} vs ${fmKeys(de.fm)})`);
   for (const k of ["icon", "mode", "hidden", "public"]) if (fmValue(en.fm, k) !== fmValue(de.fm, k)) add(page, `frontmatter ${k} changed`);
   for (const k of ["title", "description"]) if (!fmValue(de.fm, k)) add(page, `frontmatter ${k} empty`);

@@ -1,0 +1,141 @@
+---
+title: "stackkit federation"
+description: "Lokale Federation-Bindungsnachweise verwalten"
+sidebarTitle: "federation"
+---
+Lokale Federation-Bindungsnachweise verwalten.
+
+```bash
+stackkit federation [flags]
+```
+
+Unterbefehle: [`stackkit federation binding`](#stackkit-federation-binding), [`stackkit federation control`](#stackkit-federation-control), [`stackkit federation link`](#stackkit-federation-link)
+
+## stackkit federation binding
+
+Opake externe Federation-Link-Bindungen verwalten.
+
+```bash
+stackkit federation binding [flags]
+```
+
+Unterbefehle: [`stackkit federation binding adopt`](#stackkit-federation-binding-adopt), [`stackkit federation binding import`](#stackkit-federation-binding-import)
+
+### stackkit federation binding adopt
+
+Eine externe Bindung validieren, vom Owner signieren und atomar übernehmen.
+
+Aliase: `approve`
+
+```bash
+stackkit federation binding adopt [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--binding` | string | — | Auf den Workspace beschränkte, unsignierte externe Federation-Binding-JSON |
+| `--inventory` | string | — | Auf den Workspace beschränkte inventory.json, die atomar aktualisiert wird |
+| `--resolved-plan` | string | — | Auf den Workspace beschränkter kanonischer ResolvedPlan (andernfalls neben dem Inventory abgeleitet) |
+
+### stackkit federation binding import
+
+Eine vom Owner signierte opake Bindung in das lokale Inventory aufnehmen.
+
+```bash
+stackkit federation binding import [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--admission` | string | — | Auf den Workspace beschränkte, vom Owner signierte Federation-Binding-Admission-JSON |
+| `--inventory` | string | — | Auf den Workspace beschränkte inventory.json, die atomar aktualisiert wird |
+| `--resolved-plan` | string | — | Auf den Workspace beschränkter kanonischer ResolvedPlan (andernfalls neben dem Inventory abgeleitet) |
+
+## stackkit federation control
+
+Einen von Home autorisierten Plan ausführen und am gewählten Cloud-Node verifizieren.
+
+```bash
+stackkit federation control [flags]
+```
+
+Unterbefehle: [`stackkit federation control bind`](#stackkit-federation-control-bind), [`stackkit federation control send`](#stackkit-federation-control-send), [`stackkit federation control sign`](#stackkit-federation-control-sign), [`stackkit federation control withdraw`](#stackkit-federation-control-withdraw)
+
+### stackkit federation control bind
+
+Die exakte öffentliche Home-Autorität und die lokale Empfänger-Verwahrung zulassen.
+
+```bash
+stackkit federation control bind [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--file` | string | — | Vom Owner geprüfte JSON zur Empfänger-Verwahrung; keine privaten Schlüssel |
+
+### stackkit federation control send
+
+Die signierte Aktion über eine exakte, von Home initiierte mTLS-Verbindung senden.
+
+```bash
+stackkit federation control send [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--endpoint-file` | string | — | Lokaler gepinnter mTLS-Endpunkt und beschränkte Credential-Pfade |
+| `--file` | string | — | Von Home signierte Aktions-JSON |
+
+### stackkit federation control sign
+
+Eine exakte, kurzlebige Aktion mit der aktuellen Home-Verwahrung signieren.
+
+```bash
+stackkit federation control sign [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--file` | string | — | Exakte Aktions-JSON mit Plan-Hash, Ziel und begrenzten Zeitstempeln |
+
+### stackkit federation control withdraw
+
+Die Empfänger-Autorität dauerhaft entziehen, einschließlich bestehender TLS-Sitzungen.
+
+```bash
+stackkit federation control withdraw [flags]
+```
+
+## stackkit federation link
+
+Den lokalen Teil eines externen Federation-Fabrics binden und stoppen.
+
+```bash
+stackkit federation link [flags]
+```
+
+Unterbefehle: [`stackkit federation link bind`](#stackkit-federation-link-bind), [`stackkit federation link stop`](#stackkit-federation-link-stop)
+
+### stackkit federation link bind
+
+Externe WireGuard-Handles in die lokale Owner-Verwahrung übernehmen.
+
+```bash
+stackkit federation link bind [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--file` | string | — | JSON zur Verwahrung des externen Fabrics; enthält keine privaten Schlüssel |
+
+### stackkit federation link stop
+
+Die übernommene Schnittstelle stoppen, ohne das externe Fabric zu löschen.
+
+```bash
+stackkit federation link stop [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--fabric-ref` | string | — | Exakte übernommene opake Fabric-Referenz |

@@ -1,0 +1,48 @@
+---
+title: "stackkit apply"
+description: "Infrastrukturänderungen anwenden"
+sidebarTitle: "apply"
+---
+Infrastrukturänderungen anwenden.
+
+Die geplanten Änderungen auf die Infrastruktur anwenden.
+
+Product Apply führt den kanonischen ResolvedPlan über seine Runtime Owners aus. Der Standard Mode nutzt automatisch die persistierte, von CUE verwaltete lokale Bindung aus Site, Node und Channel; der Advanced Mode kann einen authentifizierten Service- oder Geräte-Ausführungskanal bereitstellen. Beide Pfade nutzen denselben ResolvedPlan, dieselben Nachweise und dieselbe Runtime-Validierung, und keiner fragt nach: Der Plan wird freigegeben, wenn er generiert wird.
+
+```bash
+stackkit apply [plan-file] [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--artifact-manifest` | string | — | Architecture-v2-Generierungsmanifest (Standard: &lt;outputRoot&gt;/.stackkit/generation-manifest.json) |
+| `--auto-approve` | bool | — | Aus Kompatibilitätsgründen akzeptiert; natives Apply fragt nie nach |
+| `--expected-plan-hash` | string | — | Verlangt, dass der kanonische ResolvedPlan unmittelbar vor Apply zu diesem sha256-Digest passt |
+| `--generation-receipt` | string | — | Architecture-v2-Generierungsbeleg (Standard: &lt;outputRoot&gt;/.stackkit/generation-receipt.json) |
+| `--inventory` | string | — | Beobachtetes Architecture-v2-Inventory (andernfalls wird eine übliche Inventory-Datei gewählt) |
+| `--json` | bool | — | Das versionierte Apply-Ergebnis und die Runtime-Beobachtungen als maschinenlesbares JSON ausgeben |
+| `--local-execution-channel` | string | — | Architecture-v2-Ausführungskanal, der ausdrücklich diesem lokalen Prozess gehört |
+| `--local-node` | string | — | Architecture-v2-Node, der ausdrücklich diesem lokalen Ausführungsprozess gehört |
+| `--local-site` | string | — | Architecture-v2-Site, die ausdrücklich diesem lokalen Ausführungsprozess gehört |
+| `--preflight` | string | — | Host-Zulassungsrichtlinie vor jeder Änderung: strict, warn (Standard) oder skip |
+| `--resolved-plan` | string | — | Kanonischer Architecture-v2-ResolvedPlan (Standard: &lt;outputRoot&gt;/.stackkit/resolved-plan.json) |
+| `--skip-platform-apps` | bool | — | Ohne Wirkung: Natives Apply hat keine separate Platform-App-Stufe |
+| `--verify` | bool | — | Ohne Wirkung: Führe stattdessen nach Apply stackkit verify aus |
+| `--verify-http` | bool | — | Ohne Wirkung: Führe stattdessen nach Apply stackkit verify `--http` aus |
+| `--verify-strict` | bool | — | Ohne Wirkung: Führe stattdessen nach Apply stackkit verify aus |
+
+**Beispiele**
+
+```bash
+# Apply the plan written by stackkit generate
+stackkit apply
+
+# Emit the versioned Apply result as JSON
+stackkit apply --json
+
+# Refuse to change anything unless the plan still has the hash stackkit plan printed
+stackkit apply --expected-plan-hash sha256:<plan-hash>
+
+# Also refuse on host preflight warnings and unknown facts before any change
+stackkit apply --preflight strict
+```

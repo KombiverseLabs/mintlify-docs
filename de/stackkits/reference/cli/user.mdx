@@ -1,0 +1,160 @@
+---
+title: "stackkit user"
+description: "Haushaltsmitglieder im lokalen PocketID einladen und verwalten"
+sidebarTitle: "user"
+---
+Haushaltsmitglieder im lokalen PocketID einladen und verwalten.
+
+Erstellt, listet und entfernt Homelab-Benutzer in der PocketID-Haushaltsgruppe.
+
+Add gibt eine einmalige Passkey-Setup-URL aus. TinyAuth lässt weiterhin die Owner-, Admin- und Haushaltsgruppen zu, die bereits am OIDC-Client gebunden sind. Owner- und Admin-Identities können hier weder erstellt noch entfernt werden.
+
+```bash
+stackkit user [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+
+**Examples**
+
+```bash
+# Invite a household member; share the printed one-time URL only with them
+stackkit user add alex --email alex@example.com --owner-approve
+
+# List household users
+stackkit user list
+
+# Remove a household user
+stackkit user remove alex --owner-approve
+```
+
+Subcommands: [`stackkit user add`](#stackkit-user-add), [`stackkit user list`](#stackkit-user-list), [`stackkit user owner`](#stackkit-user-owner), [`stackkit user remove`](#stackkit-user-remove)
+
+## stackkit user add
+
+Ein Haushaltsmitglied mit einer einmaligen Passkey-Setup-URL einladen.
+
+```bash
+stackkit user add <username> [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--display-name` | string | — | Optionaler Anzeigename |
+| `--email` | string | — | **Erforderlich.** E-Mail des Haushaltsmitglieds |
+| `--owner-approve` | bool | — | Das Anlegen dieses Haushaltsmitglieds explizit freigeben |
+
+Geerbt von `stackkit user`:
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+
+**Examples**
+
+```bash
+# Invite a household member and print their one-time passkey setup URL
+stackkit user add alex --email alex@example.com --owner-approve
+
+# Set a display name and return the invitation as JSON
+stackkit user add sam --email sam@example.com --display-name "Sam Doe" --owner-approve --json
+```
+
+## stackkit user list
+
+Haushaltsmitglieder im lokalen PocketID auflisten.
+
+```bash
+stackkit user list [flags]
+```
+
+Geerbt von `stackkit user`:
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+
+**Examples**
+
+```bash
+# List household users
+stackkit user list
+
+# The same list as JSON
+stackkit user list --json
+```
+
+## stackkit user owner
+
+Die Passkey-Aktivierung des PocketID-Owners prüfen und fortsetzen.
+
+```bash
+stackkit user owner [flags]
+```
+
+Geerbt von `stackkit user`:
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+
+Subcommands: [`stackkit user owner activate`](#stackkit-user-owner-activate), [`stackkit user owner status`](#stackkit-user-owner-status)
+
+### stackkit user owner activate
+
+Die an den Owner gebundene einmalige Passkey-Aktivierung zurückgeben oder neu ausstellen.
+
+```bash
+stackkit user owner activate [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Das Offenlegen oder Neuausstellen der Owner-Aktivierung explizit freigeben |
+
+Geerbt von `stackkit user`:
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+
+### stackkit user owner status
+
+Den Status der Passkey-Aktivierung des Owners lesen.
+
+```bash
+stackkit user owner status [flags]
+```
+
+Geerbt von `stackkit user`:
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+
+## stackkit user remove
+
+Ein Haushaltsmitglied aus dem lokalen PocketID entfernen.
+
+```bash
+stackkit user remove <username> [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Das Entfernen dieses Haushaltsmitglieds explizit freigeben |
+
+Geerbt von `stackkit user`:
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+
+**Examples**
+
+```bash
+# Remove a household user
+stackkit user remove alex --owner-approve
+```

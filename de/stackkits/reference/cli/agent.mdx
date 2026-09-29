@@ -1,0 +1,113 @@
+---
+title: "stackkit agent"
+description: "Agent-native Helfer für StackKits-Automatisierung"
+sidebarTitle: "agent"
+---
+Agent-native Helfer für StackKits-Automatisierung.
+
+Agent-native Helfer geben Installationspläne, Selbstchecks, Prompts und MCP-Konfiguration aus, ohne einen Rollout zu verändern.
+
+```bash
+stackkit agent [flags]
+```
+
+Unterbefehle: [`stackkit agent install-plan`](#stackkit-agent-install-plan), [`stackkit agent mcp-config`](#stackkit-agent-mcp-config), [`stackkit agent prompt`](#stackkit-agent-prompt), [`stackkit agent self-check`](#stackkit-agent-self-check)
+
+## stackkit agent install-plan
+
+Einen nicht-interaktiven StackKits-Installationsplan ausgeben.
+
+```bash
+stackkit agent install-plan [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--dir` | string | `my-homelab` | Workspace-Verzeichnis |
+| `--json` | bool | — | JSON ausgeben |
+| `--kit` | string | `basement-kit` | StackKit, für das geplant wird |
+| `--target` | string | `local` | Zieltyp: local, ssh, vm oder ci |
+
+**Beispiele**
+
+```bash
+# Print the install steps for a Basement Kit workspace named my-homelab
+stackkit agent install-plan
+
+# A Cloud Kit plan for an agent working over SSH, as JSON
+stackkit agent install-plan --kit cloud-kit --target ssh --dir my-cloud --json
+```
+
+## stackkit agent mcp-config
+
+Eine StackKits-MCP-Client-Verbindungskonfiguration ausgeben.
+
+Eine sofort einfügbare MCP-Client-Konfiguration mit dem Namen "stackkit" ausgeben.
+
+Für Nutzer ist das eine einzige StackKits-MCP-Verbindung. Lokal startet sie den stackkit-mcp-Adapter; nach der Installation ist derselbe Connector auch als stackkit-server /mcp erreichbar, wenn ein geschützter Endpunkt ausdrücklich aktiviert wird.
+
+```bash
+stackkit agent mcp-config [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--client` | string | `generic` | Client-Format: generic, codex oder claude |
+| `--mode` | string | `docs,local,server,actions` | MCP-Modi; actions fügt die schreibgeschützten Lifecycle-Tools hinzu, und Schreib-Tools benötigen weiterhin STACKKIT_MCP_ALLOW_WRITE=true |
+| `--server-url` | string | `http://localhost:8082` | stackkit-server-URL |
+
+**Beispiele**
+
+```bash
+# Print the connection as Claude mcpServers JSON
+stackkit agent mcp-config --client claude
+
+# Print the Codex config.toml block
+stackkit agent mcp-config --client codex
+```
+
+## stackkit agent prompt
+
+Einen kopierfertigen StackKits-Agent-Prompt ausgeben.
+
+```bash
+stackkit agent prompt [scenario] [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | JSON ausgeben |
+| `--list` | bool | — | Verfügbare Prompt-Szenarien auflisten |
+
+**Beispiele**
+
+```bash
+# List the available prompt scenarios
+stackkit agent prompt --list
+
+# Print the prompt for diagnosing a failed rollout
+stackkit agent prompt diagnose-failed-rollout
+```
+
+## stackkit agent self-check
+
+Lokale, für Agents relevante StackKits-Voraussetzungen prüfen.
+
+```bash
+stackkit agent self-check [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | JSON ausgeben |
+| `--server-url` | string | `http://localhost:8082` | stackkit-server-URL |
+
+**Beispiele**
+
+```bash
+# Check that stackkit, stackkit-server, and stackkit-mcp are on PATH
+stackkit agent self-check
+
+# The same checks as JSON
+stackkit agent self-check --json
+```

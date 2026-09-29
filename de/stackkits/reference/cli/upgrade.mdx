@@ -1,0 +1,37 @@
+---
+title: "stackkit upgrade"
+description: "Ein verifiziertes StackKit-Release auflösen und installieren"
+sidebarTitle: "upgrade"
+---
+Ein verifiziertes StackKit-Release auflösen und installieren.
+
+Löst einen öffentlichen StackKit-Release von GitHub auf, verifiziert Archiv, SPDX-SBOM, GitHub-OIDC/Sigstore-Attestierung und den zwischengespeicherten Trusted Root und installiert ihn dann atomar unter .stackkit/releases/.
+
+Mit `--dry-run` generiert er das verifizierte Ziel nur in einem begrenzten Shadow-Workspace und meldet einen kanonischen Plan-/Artefakt-Diff. Ohne `--dry-run` prüft er zuerst dieses Ziel, erstellt einen nativen Kopia-Snapshot plus einen vom Owner signierten Wiederherstellungs-Checkpoint des Executor-Zustands, stellt die Rollback-Daten bereit und verifiziert sie, ohne sie zu aktivieren, und installiert und führt erst dann die exakte Ziel-Transaktion aus generate/apply/verify aus. Eine fehlgeschlagene Ziel-Transaktion kann den vorherigen Executor nur wiederherstellen und verifizieren, bevor Ziel-Apply zugelassen wird. Nach Apply ist ein Neustart der vorherigen Runtime blockiert, bis eine verifizierte Aktivierung der vorherigen Daten existiert; isoliertes Kopia-Staging allein berechtigt dazu nicht. Ein abgeschlossener Ziel-Commit behält seinen Erfolgsnachweis für die explizite Finalisierung. Frische Upgrades erfordern Unterstützung in der eingebetteten CUE-Kit-Policy; die Wiederherstellung einer bestehenden Operation folgt ihrem signierten Journal und Checkpoint.
+
+```bash
+stackkit upgrade [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--dry-run` | bool | — | Die Zielgenerierung in einem begrenzten Shadow-Workspace verifizieren und prüfen, ohne sie anzuwenden. |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben. |
+| `--recover` | string | — | Eine exakte unterbrochene Lifecycle-Operations-ID explizit wiederherstellen. |
+| `--to` | string | `latest` | Ziel: latest, vX.Y.Z oder channel:stable\|beta\|edge. |
+
+**Examples**
+
+```bash
+# Verify the newest stable release and preview its plan and artifact diff without applying it
+stackkit upgrade --dry-run
+
+# Upgrade to the newest stable release
+stackkit upgrade
+
+# Upgrade to the newest beta prerelease
+stackkit upgrade --to channel:beta
+
+# Recover an interrupted upgrade by its lifecycle operation ID
+stackkit upgrade --recover <operation-id>
+```
