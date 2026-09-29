@@ -17,7 +17,7 @@ const docsPath = join(root, "docs.json");
 // code = Mintlify language code = folder prefix = URL prefix.
 export const LOCALES = {
   de: { language: "de" },
-  // es: { language: "es" },
+  es: { language: "es" },
   // "zh-Hans": { language: "zh-Hans" },
   // hi: { language: "hi" },
   // ar: { language: "ar" },
