@@ -1,0 +1,173 @@
+name: Techstack Release Docs
+
+# Projects the public API contract of one published Techstack release into the
+# Techstack API reference and the `techstack api` CLI reference
+# (DOCUMENTATION-STANDARD.md §Current Publication Scope; API-FIRST-STANDARD.md
+# §9). Only a published, non-draft release is accepted; a release without both
+# api/surface artifacts leaves the committed reference unchanged.
+
+on:
+  repository_dispatch:
+    types: [techstack-docs-release]
+  schedule:
+    - cron: "29 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Published Techstack tag; empty reconciles the newest published release"
+        required: false
+        type: string
+
+concurrency:
+  group: techstack-release-docs
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  reconcile:
+    if: github.repository == 'KombiverseLabs/mintlify-docs'
+    runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'ubuntu-24.04' }}
+    timeout-minutes: 6
+    env:
+      SOURCE_REPO: KombiverseLabs/kombify-Techstack
+      AUTH_GUIDANCE: "Re-set this repository's REPO_SYNC_PAT from its documented custody after the last canonical PAT rotation."
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          token: ${{ github.token }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.21.0
+      - name: Resolve the published release
+        id: release
+        env:
+          # The Techstack source repository is internal, so the workflow token
+          # cannot read it; REPO_SYNC_PAT is the repository's cross-repo reader.
+          GH_TOKEN: ${{ secrets.REPO_SYNC_PAT }}
+          DISPATCH_TAG: ${{ github.event.client_payload.tag }}
+          INPUT_TAG: ${{ inputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${GH_TOKEN:-}" ] || ! gh api "repos/$SOURCE_REPO" --jq .full_name >/dev/null 2>&1; then
+            echo "::error::REPO_SYNC_PAT cannot read $SOURCE_REPO. $AUTH_GUIDANCE"
+            exit 1
+          fi
+          tag="${DISPATCH_TAG:-${INPUT_TAG:-}}"
+          if [ -z "$tag" ]; then
+            # Techstack publishes Alpha builds as prereleases, so "latest" is the
+            # newest non-draft release rather than the releases/latest endpoint.
+            tag="$(gh api "repos/$SOURCE_REPO/releases?per_page=30" --jq '[.[] | select(.draft == false)][0].tag_name')"
+          fi
+          if ! [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::'$tag' is not a Techstack release tag."
+            exit 1
+          fi
+          # Drafts are not addressable by tag, so a draft or an unreleased tag
+          # fails here as well as on the explicit check below.
+          if ! release="$(gh api "repos/$SOURCE_REPO/releases/tags/$tag" 2>/dev/null)"; then
+            echo "::error::$tag is not a published Techstack release."
+            exit 1
+          fi
+          if [ "$(jq -r '.draft == false and .published_at != null' <<<"$release")" != true ]; then
+            echo "::error::$tag is not a published Techstack release."
+            exit 1
+          fi
+          source_sha="$(gh api "repos/$SOURCE_REPO/commits/$tag" --jq .sha)"
+          [[ "$source_sha" =~ ^[0-9a-f]{40}$ ]]
+          available=true
+          for artifact in api/surface/api-surface.json api/surface/openapi.public.yaml; do
+            gh api "repos/$SOURCE_REPO/contents/$artifact?ref=$source_sha" --jq .sha >/dev/null 2>&1 || available=false
+          done
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "source_sha=$source_sha" >> "$GITHUB_OUTPUT"
+          echo "available=$available" >> "$GITHUB_OUTPUT"
+          if [ "$available" != true ]; then
+            echo "## TechstackReferencePending" >> "$GITHUB_STEP_SUMMARY"
+            echo "$tag does not contain both api/surface/api-surface.json and api/surface/openapi.public.yaml; the committed reference stays unchanged." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Download, validate and render
+        if: steps.release.outputs.available == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.REPO_SYNC_PAT }}
+          TAG: ${{ steps.release.outputs.tag }}
+          SOURCE_SHA: ${{ steps.release.outputs.source_sha }}
+          EXPECTED_SURFACE_DIGEST: ${{ github.event.client_payload.surface_digest }}
+          EXPECTED_OPENAPI_DIGEST: ${{ github.event.client_payload.openapi_digest }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          dir=.tmp/techstack-docs
+          mkdir -p "$dir"
+          for artifact in api-surface.json openapi.public.yaml; do
+            gh api -H "Accept: application/vnd.github.raw" \
+              "repos/$SOURCE_REPO/contents/api/surface/$artifact?ref=$SOURCE_SHA" > "$dir/$artifact"
+          done
+          if [ -n "${EXPECTED_SURFACE_DIGEST:-}" ]; then
+            [ "sha256:$(sha256sum "$dir/api-surface.json" | cut -d' ' -f1)" = "$EXPECTED_SURFACE_DIGEST" ]
+          fi
+          if [ -n "${EXPECTED_OPENAPI_DIGEST:-}" ]; then
+            [ "sha256:$(sha256sum "$dir/openapi.public.yaml" | cut -d' ' -f1)" = "$EXPECTED_OPENAPI_DIGEST" ]
+          fi
+          # The renderer refuses artifacts that expose an internal operation.
+          args=(--product techstack --surface "$dir/api-surface.json" --openapi "$dir/openapi.public.yaml" --release "$TAG" --source-sha "$SOURCE_SHA")
+          node scripts/render-api-surface-reference.mjs "${args[@]}" --write
+          node scripts/render-api-surface-reference.mjs "${args[@]}" --check
+      - name: Open or update generated-only PR
+        if: steps.release.outputs.available == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.REPO_SYNC_PAT }}
+          BRANCH: bot/techstack-release-docs
+          TAG: ${{ steps.release.outputs.tag }}
+          SOURCE_SHA: ${{ steps.release.outputs.source_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # REPO_SYNC_PAT is a repository-level copy of the canonical PAT
+          # (kombify-Core/standards/DOPPLER-SECRETS-MAP.md). It is not rotated
+          # with the organization GH_PAT, so a rejection here almost always means
+          # this copy missed a rotation.
+          if ! writer="$(gh api user 2>/dev/null)"; then
+            echo "::error::REPO_SYNC_PAT authentication was rejected. $AUTH_GUIDANCE"
+            exit 1
+          fi
+          if ! can_push="$(gh api repos/KombiverseLabs/mintlify-docs --jq '.permissions.push' 2>/dev/null)" || [ "$can_push" != true ]; then
+            echo "::error::REPO_SYNC_PAT cannot write KombiverseLabs/mintlify-docs. $AUTH_GUIDANCE"
+            exit 1
+          fi
+          writer_login="$(jq -r '.login // empty' <<<"$writer")"
+          writer_id="$(jq -r '.id // empty' <<<"$writer")"
+          [ -n "$writer_login" ] && [[ "$writer_id" =~ ^[0-9]+$ ]] || {
+            echo "::error::REPO_SYNC_PAT returned an invalid GitHub writer identity. $AUTH_GUIDANCE"
+            exit 1
+          }
+          generated=(techstack/reference docs.json)
+          # Untracked files count: the first release and every new command group add pages.
+          if [ -z "$(git status --porcelain --untracked-files=all -- "${generated[@]}")" ]; then
+            echo "No public reference drift."
+            exit 0
+          fi
+          # Fails closed on any changed path outside the generated set.
+          unexpected="$(git status --porcelain --untracked-files=all | cut -c4- | grep -Ev '^(techstack/reference/api/openapi\.yaml|techstack/reference/cli/[a-z0-9-]+\.mdx|docs\.json)$' || true)"
+          [ -z "$unexpected" ] || { echo "::error::unexpected generated paths: $unexpected"; exit 1; }
+          git config user.name "$writer_login"
+          git config user.email "$writer_id+$writer_login@users.noreply.github.com"
+          gh auth setup-git --hostname github.com
+          git fetch origin "refs/heads/$BRANCH:refs/remotes/origin/$BRANCH" || true
+          git checkout -B "$BRANCH"
+          git add -A -- "${generated[@]}"
+          git commit -m "docs(techstack): sync $TAG API and CLI reference"
+          git push --force-with-lease origin "$BRANCH"
+          # `gh pr view <branch>` also matches merged PRs of the reused bot
+          # branch, so only an open PR counts as already existing.
+          if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq length)" = "0" ]; then
+            gh pr create --base main --head "$BRANCH" \
+              --title "docs(techstack): sync $TAG API and CLI reference" \
+              --body "Automated projection of api/surface/openapi.public.yaml and api/surface/api-surface.json from the published Techstack $TAG release (source $SOURCE_SHA)."
+          fi
+          gh pr merge "$BRANCH" --auto --squash

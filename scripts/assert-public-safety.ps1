@@ -313,6 +313,66 @@ foreach ($page in $publicPages) {
     }
 }
 
+# Mintlify turns every navigation `openapi` reference into API pages that are
+# not MDX files, so each reference must be an exact approved spec and page
+# directory, and the spec must be a published artifact without internal
+# annotations.
+function Add-NavigationOpenApi {
+    param(
+        $Node,
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [System.Collections.Generic.List[object]]$References
+    )
+
+    if ($null -eq $Node -or $Node -is [string]) {
+        return
+    }
+    if ($Node -is [System.Array]) {
+        foreach ($item in $Node) {
+            Add-NavigationOpenApi -Node $item -References $References
+        }
+        return
+    }
+    foreach ($property in $Node.PSObject.Properties) {
+        if ($property.Name -eq "openapi") {
+            $References.Add($property.Value) | Out-Null
+        }
+        elseif ($property.Name -in @("pages", "groups", "tabs", "languages", "anchors", "dropdowns", "versions")) {
+            Add-NavigationOpenApi -Node $property.Value -References $References
+        }
+    }
+}
+
+$allowedOpenApiReferences = @(
+    if ($policy.PSObject.Properties.Name -contains "allowedOpenApiReferences") {
+        foreach ($entry in @($policy.allowedOpenApiReferences)) {
+            "$(([string]$entry.source).TrimStart('/'))|$(([string]$entry.directory).Trim('/'))"
+        }
+    }
+)
+$openApiReferences = [System.Collections.Generic.List[object]]::new()
+Add-NavigationOpenApi -Node $docs.navigation -References $openApiReferences
+foreach ($reference in $openApiReferences) {
+    $source = if ($reference -is [string]) { $reference } elseif ($reference.PSObject.Properties.Name -contains "source") { [string]$reference.source } else { "" }
+    $directory = if ($reference -isnot [string] -and $reference.PSObject.Properties.Name -contains "directory") { [string]$reference.directory } else { "" }
+    $source = $source.TrimStart("/")
+    $key = "$source|$($directory.Trim('/'))"
+    if ($key -notin $allowedOpenApiReferences) {
+        $errors.Add("navigation OpenAPI reference '$key' is outside the approved public scope") | Out-Null
+        continue
+    }
+    $specPath = Join-Path $RepoRoot $source
+    if (-not (Test-Path -LiteralPath $specPath -PathType Leaf)) {
+        $errors.Add("navigation OpenAPI reference '$source' does not exist") | Out-Null
+        continue
+    }
+    $spec = Get-Content -LiteralPath $specPath -Raw
+    if ($spec -cmatch '(?m)^\s*(?:-\s+)?[''"]?x-kombify-[a-z-]+[''"]?\s*:') {
+        $errors.Add("OpenAPI reference '$source' carries x-kombify-* annotations; only the published public artifact may be referenced") | Out-Null
+    }
+}
+
 $publicPageSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 foreach ($page in $publicPages) {
     $null = $publicPageSet.Add($page)
