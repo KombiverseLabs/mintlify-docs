@@ -1,0 +1,91 @@
+---
+title: "techstack api workers"
+description: "Generated reference for the techstack api workers commands"
+sidebarTitle: "workers"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.32.8"
+content_hash: "sha256:a1f98a90541e05b5334ee62c2cbcc732dff6b859fef9b203110ec8a4305e5a82"
+source_hash: "4c7d219a5d56d94c5e817e28e0ca5be6dfa98d59"
+---
+<Note>Generated from the Techstack v0.32.8 release (source `4c7d219a5d56`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api workers approve
+
+Approve pending worker.
+
+```bash
+techstack api workers approve <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/approve` |
+| Changes state | Yes |
+| MCP tool | `approve_worker` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<id>` | string | **Required.** Resource ID. |
+
+## techstack api workers list
+
+List registered workers (filtered by owner).
+
+```bash
+techstack api workers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers` |
+| Changes state | No |
+| MCP tool | `list_workers` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--page` | integer | Page number (default 1). |
+| `--per-page` | integer | Items per page (default 20, max 100). |
+
+## techstack api workers prechecks list
+
+Get pre-check results for worker.
+
+```bash
+techstack api workers prechecks list <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/{id}/prechecks` |
+| Changes state | No |
+| MCP tool | None |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<id>` | string | **Required.** Resource ID. |
+| `--page` | integer | Page number (default 1). |
+| `--per-page` | integer | Items per page (default 20, max 100). |
+
+## techstack api workers prechecks run
+
+Run pre-checks on worker.
+
+```bash
+techstack api workers prechecks run <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/prechecks` |
+| Changes state | Yes |
+| MCP tool | None |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<id>` | string | **Required.** Resource ID. |
+| `--checks` | object\[\] | **Required.** |
+| `--stack-id` | string | — |
+| `--timeout-seconds` | integer | Default `30`. |
+| `--worker-id` | string | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |

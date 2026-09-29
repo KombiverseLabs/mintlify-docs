@@ -1,0 +1,132 @@
+---
+title: "techstack api inventory"
+description: "Generated reference for the techstack api inventory commands"
+sidebarTitle: "inventory"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.32.8"
+content_hash: "sha256:a1f98a90541e05b5334ee62c2cbcc732dff6b859fef9b203110ec8a4305e5a82"
+source_hash: "4c7d219a5d56d94c5e817e28e0ca5be6dfa98d59"
+---
+<Note>Generated from the Techstack v0.32.8 release (source `4c7d219a5d56`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api inventory servers access-context
+
+Get sanitized access context for one owned server.
+
+Returns address metadata, channel state, and freshness-qualified service links only. It never returns endpoint references, access-profile references, route IDs, credentials, tokens, SSH users, ports, keys, commands, or logs. This surface requires inventory operate permission; read permission alone is insufficient.
+
+```bash
+techstack api inventory servers access-context <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers/{serverId}/access-context` |
+| Changes state | No |
+| MCP tool | `server_access_context` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+
+## techstack api inventory servers health
+
+Get freshness-qualified health for one owned server.
+
+```bash
+techstack api inventory servers health <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers/{serverId}/health` |
+| Changes state | No |
+| MCP tool | `server_health` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+
+## techstack api inventory servers list
+
+List sanitized server inventory for the authenticated owner.
+
+Returns only servers owned by the authenticated subject in the trusted tenant context. Tenant and owner overrides are not accepted. Raw metadata, channel endpoints, provider-resource references, credentials, SSH material, tokens, and logs are never returned. The lease projection contains only an opaque identifier and state. Cursor pages share one authorization- and filter-bound collection watermark and exclude later inserts.
+
+```bash
+techstack api inventory servers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers` |
+| Changes state | No |
+| MCP tool | `list_servers` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--limit` | integer | Default `50`. |
+| `--cursor` | string | — |
+
+## techstack api inventory servers ports
+
+Get desired, reserved, observed, and exposed listeners for one owned server.
+
+Projects compiler-declared listener claims and generation-fenced reservations beside monotone Guard runtime evidence. Missing or stale observations remain explicit and never become optimistic availability.
+
+```bash
+techstack api inventory servers ports <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/servers/{serverId}/ports` |
+| Changes state | No |
+| MCP tool | `server_ports` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+
+## techstack api inventory servers rename
+
+Set or clear the owner-chosen name of one owned server.
+
+Writes servers.display_name, which runtime projections never overwrite. `null` or an empty string clears the rename. Requires the signed techstack.inventory.write entitlement and the FGA server `caller` relation; the write is bound to the authenticated tenant and owner, and a server outside that scope is denied without revealing whether it exists. The canonical inventory `name` reports the chosen name when one is set.
+
+```bash
+techstack api inventory servers rename <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PATCH /api/v1/inventory/servers/{serverId}` |
+| Changes state | Yes |
+| MCP tool | `rename_server` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `--display-name` | string | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api inventory services list
+
+List sanitized services for the authenticated owner's servers.
+
+```bash
+techstack api inventory services list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/inventory/services` |
+| Changes state | No |
+| MCP tool | `list_services` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--server-id` | string | Optional exact owned server filter; a foreign server is returned as not found. |
+| `--limit` | integer | Default `50`. |
+| `--cursor` | string | Opaque cursor bound to the authenticated scope and exact server_id filter. |

@@ -1,0 +1,95 @@
+---
+title: "techstack api jobs"
+description: "Generated reference for the techstack api jobs commands"
+sidebarTitle: "jobs"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.32.8"
+content_hash: "sha256:a1f98a90541e05b5334ee62c2cbcc732dff6b859fef9b203110ec8a4305e5a82"
+source_hash: "4c7d219a5d56d94c5e817e28e0ca5be6dfa98d59"
+---
+<Note>Generated from the Techstack v0.32.8 release (source `4c7d219a5d56`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api jobs get
+
+Get the current state of one owned job.
+
+This is the canonical polling surface for the UI, API clients, MCP
+tools, and agents. `waiting_enrollment` exposes a non-terminal wait;
+access to the target remains unavailable until the job resumes and
+reaches a terminal success state.
+
+```bash
+techstack api jobs get <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs/{id}` |
+| Changes state | No |
+| MCP tool | `get_job` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<id>` | string | **Required.** Resource ID. |
+
+## techstack api jobs list
+
+List jobs owned by the authenticated user.
+
+Returns the same owner-scoped job state used by the operator UI and
+automation clients. A job with `state: waiting` remains active and the
+current orchestrator process schedules its next check; it is not a
+failed provider action. If that schedule becomes stale after a process
+restart, use the exact-target `resumeStackEnrollment` operation.
+
+```bash
+techstack api jobs list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs` |
+| Changes state | No |
+| MCP tool | `list_jobs` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--page` | integer | Page number (default 1). |
+| `--per-page` | integer | Default `50`. |
+| `--stack-id` | string | — |
+| `--state` | string | One of `pending`, `running`, `waiting`, `completed`, `failed`, `canceled`. |
+| `--type` | string | — |
+| `--search` | string | — |
+
+## techstack api jobs logs
+
+Get job logs.
+
+```bash
+techstack api jobs logs <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs/{id}/logs` |
+| Changes state | No |
+| MCP tool | `get_job_logs` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<id>` | string | **Required.** Resource ID. |
+
+## techstack api jobs stats
+
+Get job queue statistics.
+
+```bash
+techstack api jobs stats [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs/stats` |
+| Changes state | No |
+| MCP tool | `get_job_stats` |

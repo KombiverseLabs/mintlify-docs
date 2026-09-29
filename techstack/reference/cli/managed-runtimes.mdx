@@ -1,0 +1,37 @@
+---
+title: "techstack api managed-runtimes"
+description: "Generated reference for the techstack api managed-runtimes commands"
+sidebarTitle: "managed-runtimes"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.32.8"
+content_hash: "sha256:a1f98a90541e05b5334ee62c2cbcc732dff6b859fef9b203110ec8a4305e5a82"
+source_hash: "4c7d219a5d56d94c5e817e28e0ca5be6dfa98d59"
+---
+<Note>Generated from the Techstack v0.32.8 release (source `4c7d219a5d56`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api managed-runtimes authority
+
+Verify request-bound managed-runtime authority without creating a resource.
+
+Read-only preflight for the Gateway-to-native-admission authority chain.
+Hosted requests must carry the Gateway's v2-signed managed-runtime,
+Cloud Kit, provider entitlement, and `cloud.runtime.credits`
+`managed_servers` decision bound to this exact request. A successful
+response never reserves capacity or creates a StackKit deployment, queue
+job, lease, Node projection, or provider operation; the real Add-Server request
+repeats every mutable admission check atomically.
+
+```bash
+techstack api managed-runtimes authority [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/managed-runtimes/authority` |
+| Changes state | No |
+| MCP tool | `preflight_managed_runtime_authority` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--provider-id` | string | **Required.** Exact canonical provider whose managed-runtime authority is being checked. One of `centron`, `ionos`. |

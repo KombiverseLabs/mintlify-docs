@@ -1,0 +1,67 @@
+---
+title: "techstack api pairing-tokens"
+description: "Generated reference for the techstack api pairing-tokens commands"
+sidebarTitle: "pairing-tokens"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.32.8"
+content_hash: "sha256:a1f98a90541e05b5334ee62c2cbcc732dff6b859fef9b203110ec8a4305e5a82"
+source_hash: "4c7d219a5d56d94c5e817e28e0ca5be6dfa98d59"
+---
+<Note>Generated from the Techstack v0.32.8 release (source `4c7d219a5d56`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api pairing-tokens create
+
+Create pairing token for worker registration.
+
+```bash
+techstack api pairing-tokens create [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/trust/pairing-tokens` |
+| Changes state | Yes |
+| MCP tool | `create_pairing_token` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--environment-class` | string | Explicit owner placement declaration; omit when unknown. One of `local`, `cloud`. |
+| `--name` | string | — |
+| `--server-provisioning-mode` | string | One of `install-command`, `connect-remote`. |
+| `--stack-id` | string | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api pairing-tokens delete
+
+Delete pairing token.
+
+```bash
+techstack api pairing-tokens delete <id> [flags]
+```
+
+<Warning>Requires confirmation: This operation revokes the pairing token; devices that have not paired yet can no longer use it. Pass `--yes` or answer the prompt; a non-interactive run without `--yes` stops before any request with exit code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/trust/pairing-tokens/{id}` |
+| Changes state | Yes |
+| MCP tool | `delete_pairing_token` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<id>` | string | **Required.** Resource ID. |
+
+## techstack api pairing-tokens list
+
+List pairing tokens.
+
+```bash
+techstack api pairing-tokens list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/trust/pairing-tokens` |
+| Changes state | No |
+| MCP tool | `list_pairing_tokens` |
