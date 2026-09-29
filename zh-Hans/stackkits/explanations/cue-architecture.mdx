@@ -1,0 +1,32 @@
+---
+title: "CUE 与 StackKits"
+description: "在应用生成的产物之前，CUE 如何验证 StackKits 意图"
+sidebarTitle: "CUE"
+icon: cubes
+---
+
+StackKits 使用 CUE 作为 kit 契约的事实来源。在生成产物或更改目标之前，你的 StackSpec 会先对照该契约进行检查。
+
+## 工作流程
+
+初始化会为所选的 kit 创建一份完整的 StackSpec。验证会对照该版本的 CUE 契约检查这份意图。然后，生成会从已验证的输入派生出可随时丢弃的部署产物。当某项设置变化时，请更新 StackSpec 并重复验证和生成；不要直接编辑生成的文件。
+
+## 共享的 schema 包
+
+kit 契约共享 `foundation` CUE 包，其导入路径为 `github.com/kombifyio/stackkits/foundation`。它定义了 `#FoundationStackKit`，这是平台和 kit 的 schema 在自己的服务和约束之外所扩展的共享契约。
+
+已发布的归档和安装程序把该包作为 `foundation/` 一并提供，其共享的 kit 契约位于 `foundation/stackkit.cue`。
+
+<Note>
+  v0.18.22 之前的版本把这个包命名为 `base`，并暴露 `#BaseStackKit`。这两个名称都已废弃。kit 作者和工具必须导入 `github.com/kombifyio/stackkits/foundation` 并扩展 `#FoundationStackKit`。
+</Note>
+
+## 边界
+
+独立的 StackSpec 描述的是 StackKits 意图。提供商凭据、提供商生命周期和服务器采购都不在该契约之内。StackKits 工作区无需依赖托管的 kombify 服务即可使用。
+
+## 相关页面
+
+- [规范格式](/zh-Hans/stackkits/reference/spec-format)
+- [Basement Kit](/zh-Hans/stackkits/kits/basement-kit)
+- [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)

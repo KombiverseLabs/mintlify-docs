@@ -1,0 +1,40 @@
+---
+title: "StackKits MCP 连接器"
+description: "把 MCP 客户端连接到已发布的本地 StackKits 生命周期"
+sidebarTitle: "MCP 连接器"
+icon: plug
+---
+
+StackKits 暴露一个面向用户、名为 `stackkit` 的 MCP 连接。本地适配器是 `stackkit-mcp`；安装之后，同一个连接器也可以由 `stackkit-server` 在其受保护的 `/mcp` 端点上提供。
+
+## 配置本地客户端
+
+从已安装的版本生成客户端片段：
+
+```bash
+stackkit agent mcp-config --client codex
+```
+
+默认的本地形式是：
+
+```toml
+[mcp_servers.stackkit]
+command = "stackkit-mcp"
+args = ["--mode", "docs,local,server"]
+```
+
+## 安全模型
+
+- 默认提供只读的文档和诊断工具。
+- 具备写入能力的工具需要显式的写入模式，以及针对具体操作的本地 Owner 批准。
+- 可从远程访问的端点必须经过刻意的保护；不要把它直接暴露到公共互联网。
+- 该连接器使用与终端命令相同的本地 CLI 生命周期和证据契约。
+
+## State Console
+
+可选的 State Console 是本地的状态审查和操作批准适配器。它可以显示所选的工作区、计划、状态、日志和证据。它不会推荐 kit，也不会自行实现生命周期操作。
+
+## 相关页面
+
+- [快速开始](/zh-Hans/stackkits/quickstart)
+- [运维 StackKit](/zh-Hans/stackkits/reference/day-2-operations)

@@ -1,0 +1,210 @@
+---
+title: "更新日志"
+description: "StackKits 和 kombify 平台的最新动态"
+icon: "newspaper"
+mode: "center"
+---
+
+产品更新，按时间倒序排列。每个版本的更多细节，请参阅 GitHub 上 [StackKits](https://github.com/kombifyio/stackKits/releases)、[SpeechKit](https://github.com/kombifyio/SpeechKit/releases) 和 [Techstack](https://github.com/kombifyio/TechStack/releases) 的发布说明。
+
+<Update label="2026-09-16" description="9 月 5 日 – 9 月 16 日">
+
+## SpeechKit 登陆 macOS、Google AI 停用，以及能自动选择 Kit 的 StackKits 安装器
+
+SpeechKit 从 [v0.68.24](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.24) 升级到 [v0.70.3](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.3)：首个 macOS 构建、把 Microsoft Foundry 作为语音和模型的统一连接，并移除了所有 Google 语音适配器。StackKits 发布了 [v0.25.1](https://github.com/kombifyio/stackKits/releases/tag/v0.25.1) 至 [v0.32.1](https://github.com/kombifyio/stackKits/releases/tag/v0.32.1)：能检测主机并推荐 Kit 的安装器、Homelab 路由前的登录门禁，以及通过 PocketID 管理的家庭用户。
+
+### 新功能
+
+- **SpeechKit 可以在 Mac 上运行。** [v0.70.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.0) 在 Windows 资源旁发布了 `SpeechKit-macOS-arm64.zip`：面向 Apple Silicon 上 macOS 14+ 的 Dictation 测试版，采用 ad-hoc 签名，支持麦克风采集、文本注入、菜单栏项、内置本地模型以及云端语音转文字服务商。随之而来的还有一个已知缺口：全局热键监听器会安装，但收不到任何按键事件，因此按住说话（hold-to-talk）暂时无法使用，入口是菜单栏项。参见[在 macOS 上安装](/zh-Hans/speechkit/install-macos)。
+- **Microsoft Foundry，三种连接方式。** [v0.69.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.69.0) 新增 Connect 对话框：可使用项目端点和 API 密钥、你机器上已有的 Azure CLI 账户，或你所在组织自己的 Microsoft 应用注册。一个连接同时服务于 Dictation、语音输出、Assist 和 Voice Agent；点击 Test 会列出该项目实际拥有的部署和语音。
+- **每种模式一个标签页的 Library。** [v0.70.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.0) 为 Transcriptions、Quick Notes 和 Voice Sessions 各自提供标签页，历史记录按页向前加载，任意一行都可以原地展开，并且你可以像固定 Quick Note 一样固定一条转写记录。
+- **StackKits 安装器自动选择 Kit。** [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) 让 `install.stackkit.cc` 检测主机，在 Basement 和 Cloud 之间选择，每次安装前询问所有者和用例，并在 CLI 就绪后提供安装 StackKit 的选项。错误的安装器 URL 现在会自行恢复，而不是直接失败。参见 [CLI 演练](/zh-Hans/guides/stackkits/cli-walkthrough)。
+- **无需手动创建账户的家庭用户。** [v0.29.0](https://github.com/kombifyio/stackKits/releases/tag/v0.29.0) 通过 PocketID 组来配置家庭用户，[v0.30.0](https://github.com/kombifyio/stackKits/releases/tag/v0.30.0) 新增了 `stackkit user add`、`list` 和 `remove`。参见 [PocketID](/zh-Hans/stackkits/apps/pocketid)。
+
+### 更新
+
+- **Google 语音适配器已移除。** [v0.70.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.2) 移除了 Google 语音转文字、Google 文字转语音和 Gemini Live。仍然指定其中任何一个的配置会以拒绝（fail closed）方式失败，而不是悄悄解析成别的东西；空的设备配置默认使用 AssemblyAI。参见[模式与数据路径](/zh-Hans/speechkit/modes)。
+- **唤醒词是 `hey_kubi`。** [v0.70.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.2) 将其设为默认，并保留 `hey_quby` 作为别名，因此现有配置仍可继续使用。
+- **Homelab 路由前的登录门禁。** [v0.31.0](https://github.com/kombifyio/stackKits/releases/tag/v0.31.0) 把 TinyAuth 放在照片、文件、密码库、媒体、智能家居、AI、开发者、文档和 Coolify 路由之前，验证会把登录重定向视为健康，而不是当作失败。参见 [TinyAuth](/zh-Hans/stackkits/apps/tinyauth)。
+- **Cloud Kit 不需要你自己的域名。** [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) 在没有提供自定义域名时，默认使用 kombify.me 名称，并在禁用 root 登录之前生成执行通道的 SSH 密钥。参见 [kombify.me](/zh-Hans/kombify-me/overview)。
+- **Apply 会等待证书。** [v0.31.5](https://github.com/kombifyio/stackKits/releases/tag/v0.31.5) 在验证公共 TLS 和内部 PKI 叶证书之前等待签发完成，[v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) 在 generate 和 apply 运行期间显示进度，而不是静默停顿。
+- **这些文档跟随当前版本。** SpeechKit 下载链接现在指向最新发布的版本，而不是某个冻结的版本；macOS 客户端和 Meeting 有了各自的页面，每个页面所标注的发布版本会自动与公开发布版本对齐。
+
+### 问题修复
+
+- **macOS 首次运行可以启动。** [v0.70.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.0) 修复了全新安装会把 Windows 音频后端写入配置、因此拒绝打开麦克风，并且退出时没有任何消息、日志和崩溃报告的问题。
+- **Voice Agent 不再启动到已停用的服务商上。** [v0.70.3](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.3) 修复了服务器内置配置仍选择 Gemini Live，因而在 Google 停用后无法启动的问题。
+- **Dictation 先打开麦克风。** [v0.70.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.1) 在实时流握手之前而不是之后打开设备，并且安装更新后应用只会重新启动一次。
+- **移除操作会清理原生栈。** [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) 让 `stackkit remove` 卸载原生 Compose 栈并找到安装器工作区，[v0.31.1](https://github.com/kombifyio/stackKits/releases/tag/v0.31.1) 把应用观察推迟到恢复激活时，因此恢复不再检查尚未运行的应用。
+
+</Update>
+
+<Update label="2026-09-07" description="kombify.me 公共地址">
+
+## kombify.me 公共 HTTPS 名称
+
+公开文档现在在 Techstack 下介绍 [kombify.me](/zh-Hans/kombify-me/overview)：为已经可访问的 Homelab 服务提供稳定的 HTTPS 名称、`{your-lab}-auth.kombify.me` 这类第一方 Kit 名称，以及通过 Techstack 节点代理提供的可选私有 HTTP 中继。仅限本地的浏览仍使用 Homelab 解析器。kombify.me 目前处于 Alpha 阶段。
+
+</Update>
+
+<Update label="2026-09-04" description="8 月 29 日 – 9 月 4 日当周">
+
+## SpeechKit Meeting Mode 与网络隐私范围，StackKits 智能家居与媒体
+
+SpeechKit 从 [v0.65.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.65.0) 升级到 [v0.68.24](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.24)：完整的 Meeting Mode（支持六种语言的评审）、划定硬性网络边界的隐私设置，以及绝不离开设备的会议内截图。StackKits 发布了 [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) 至 [v0.24.27](https://github.com/kombifyio/stackKits/releases/tag/v0.24.27)：智能家居和媒体用例、位于 stackkit.cc/planner 的浏览器端规划器，以及模块本地的计算配置。
+
+### 新功能
+
+- **Meeting Mode 成为一等模式。** [SpeechKit v0.67.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.67.0) 让 Meeting Mode 与 Dictation、Assist 和 Voice Agent 并列，并提供专属的采集、评审生成、语言和保留设置。通话期间，紧凑的透明浮层会显示采集状态和控制项，滚动摘要不会阻塞采集，会议结束后会生成持久的 Meeting Review、五句话的 Executive Brief，以及英语、德语、西班牙语、中文、印地语和阿拉伯语的待办事项。GitHub Copilot 是可选的评审生成服务商，需要单独且可撤销的转录处理授权；本地路径不需要任何云端凭据。参见 [SpeechKit 模式](/zh-Hans/speechkit/modes)。
+- **选定网络边界，SpeechKit 强制执行。** [v0.67.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.67.0) 新增 Network Scope（网络范围）设置：所有网络、仅本地网络或仅此设备。后端会对语音服务商、模型下载、更新、遥测、服务器连接和集成强制执行该边界。切换到更严格的范围时，不兼容的设置会被暂停而不是删除，Settings 会说明哪些被禁用以及原因。参见 [SpeechKit 概览](/zh-Hans/speechkit/overview)。
+- **会议中的截图，保留在你的机器上。** [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) 可以捕获选定的窗口或光标所在的显示器，快捷键 `Ctrl+Alt+S` 可配置。截图会作为标记出现在转录时间线中，并在生成的 Meeting Review 中被引用；紧凑的会议标签会短暂展开预览，让你确认捕获的是正确的窗口。任何图像都不会离开设备。
+- **查找并导出任意会议。** [v0.68 补丁版本](https://github.com/kombifyio/SpeechKit/releases)按会议发生的时间对会议列表分组，新增对标题、转录、笔记和总结的搜索，把笔记渲染为格式化的 Markdown，并为完整总结新增 Copy Markdown 和 Save .md。
+- **StackKits 中的智能家居用例。** [StackKits v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) 在 Basement、Cloud 和 Modern Kit 上新增 Home Assistant 工作负载。Generate 会写入反向代理基线和原生 MCP 客户端片段，设置过程会创建 Homelab 所有者账户。参见[用例目录](/zh-Hans/stackkits/reference/use-case-catalog)。
+- **使用 Jellyfin 的媒体用例。** [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) 在 `standard` 和 `high` 计算档位上新增 Jellyfin 工作负载。媒体库由所有者自行保管，并且有意不作为 StackKits 的备份来源。参见 [Jellyfin](/zh-Hans/stackkits/apps/jellyfin)。
+- **在浏览器中规划 Homelab。** [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) 在 stackkit.cc/planner 推出 StackKits 规划器：基于公共目录的只读、以 schema 优先的工具，会把 `init → validate → resolve → generate → plan` 序列交给 CLI。Apply 仍然是你在自己机器上执行的显式步骤。参见 [MCP 连接器](/zh-Hans/stackkits/reference/mcp-connector)。
+
+### 更新
+
+- **会议自动结束。** [SpeechKit v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) 会在通话应用释放麦克风后不久停止录制，并通过通知告诉你 Meeting Review 何时就绪或失败原因。手动启动的录制不会被自动停止。
+- **StackKits 中模块本地的计算配置。** [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) 至 [v0.24.27](https://github.com/kombifyio/stackKits/releases/tag/v0.24.27) 把计算、存储和加速器配置移到每个模块上，并为每个工作负载提供替代方案。所需的主机事实必须在 Apply 之前在清单中被观察到，而不是从声明的硬件推断。参见[选择 Kit](/zh-Hans/guides/stackkits/choosing-a-kit)。
+- **低档位获得真正的精简版本。** [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) 让 Basement 的 `low` generate 输出独立的 Compose 精简变体：不含 Coolify 的核心，以及不含机器学习的 Immich。在有精简替代之前，`low` 上不包含媒体，并在 init 时以拒绝方式失败，而不是部署一个规格不足的东西。
+- **集成会显示其成熟度。** [SpeechKit v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) 在 Settings 中把每个集成标记为 Ready、Partial、Planned 或 Unavailable，并附带各模式的标签。此版本无法运行的内容会被置灰，而不是在启用时失败。
+- **更精简的 SpeechKit SDK。** [v0.65.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.65.0) 移除了 v0.64.0 中弃用的服务商名称，因此只使用 Deepgram 的应用编译 49 个外部包，而不是 286 个。[v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) 把根包拆分为契约与实现，并通过机械化的导入重写完成迁移。[v0.66.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.66.0) 把全部五个 Android 模块作为 Apache-2.0 制品发布到 JitPack，可匿名解析。参见 [SpeechKit 框架](/zh-Hans/speechkit/framework)。
+- **浮层设置变成了设计器。** [v0.68 补丁版本](https://github.com/kombifyio/SpeechKit/releases)把 General 设置重绘为紧凑卡片，并实时预览浮层：样式、位置以及悬停条上的快捷按钮都会立即在预览中更新。
+
+### 问题修复
+
+- **不再有静默失败。** [SpeechKit v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) 会在活动日志中报告被丢弃的 Voice Agent 语音、浮层定位失败、静默的截图错误和停滞的会议摘要，并附上原因，而不是让你去猜。
+- **会议音频不再进入听写。** [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) 让会议转录运行在自己的管线上。通话音频不再闪现听写浮层、不再填充听写历史，也不再成为复制和插入快捷键所复用的“上一次转录”。
+- **长会议也能生成总结。** [v0.68 补丁版本](https://github.com/kombifyio/SpeechKit/releases)为内置本地模型调整摘要批次大小，在句子边界处拆分过长的转录片段，恢复因重启而中断的总结，并在本地模型暂时不可达时重试，而不是让评审永久失败。
+- **本地听写可在非 ASCII 安装路径下启动。** [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) 修复了模型路径包含变音符号时，内置 whisper-server 在全新安装上启动失败的问题。如果本地语音转文字仍无法启动，活动日志会指出原因，并说明听写是离线，还是回退到了某个具名的云端服务商。
+- **多语言评审依次运行。** [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) 阻止并行的评审运行饿死本地模型并一起错过截止时间，进度会跟随实际运行的语言，而不是卡在 0% 的排队任务上。
+- **仪表盘以合适的尺寸打开。** [v0.68 补丁版本](https://github.com/kombifyio/SpeechKit/releases)不再让窗口打开得比缩放后的笔记本屏幕更高，把最小尺寸保持在 13 英寸显示器范围内，并保留你选择的尺寸。
+- **Connect 按钮如实反映状态。** [v0.67.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.67.0) 修复了托管连接在从未获得凭据的情况下声称已就绪的问题；Android 应用现在会在 Companion 配对因两个已安装的应用不匹配而失败时明确说明，而不是显示一般性失败。
+- **StackKits 发布归档自带文档。** [v0.24.2](https://github.com/kombifyio/stackKits/releases/tag/v0.24.2) 在发布归档中包含公开的备份和应用就绪文档，并通过兼容适配器保持引导式 Basement 和 Cloud 方案显式可见。
+
+</Update>
+
+<Update label="2026-08-28" description="8 月 22 日 – 8 月 28 日当周">
+
+## SpeechKit 会议笔记与局域网发现，StackKits 公共地址与计算档位
+
+SpeechKit 从 [v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) 升级到 [v0.64.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.64.0)：从你手写的笔记出发的会议笔记、让设备无需输入地址就能找到你的 Homelab 服务器的局域网发现，以及所有客户端上的点按打断。StackKits 发布了 [v0.21.10](https://github.com/kombifyio/stackKits/releases/tag/v0.21.10) 至 [v0.22.0](https://github.com/kombifyio/stackKits/releases/tag/v0.22.0)：Cloud Kit 上带自动 TLS 的托管公共服务地址，以及让 Kit 与你实际拥有的硬件相匹配的计算档位。
+
+### 新功能
+
+- **从你自己的笔记开始的会议笔记。** [SpeechKit v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) 新增会议记事本：你的笔记为主，转录补全其余内容，总结会引用其出处的原话。麦克风和系统音频保持在各自独立的音轨上，因此说话人标签自然可得，且音频不会被保留。当通话应用占用麦克风时，SpeechKit 会注意到并提议做笔记；在你接受之前不会录制任何内容。会议一结束，总结就会出现在仪表盘中。参见 [SpeechKit 模式](/zh-Hans/speechkit/modes)。
+- **在家庭网络中找到你的 SpeechKit 服务器。** [v0.60.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.60.0) 让 Homelab 服务器通过 mDNS/DNS-SD 自我宣告，桌面应用、Android 应用和 `speechkitctl discover` 无需输入地址就能找到它。发现功能需主动开启、默认关闭，因此托管实例保持静默；宣告只说明去哪里敲门：设备连接后仍需登录。参见 [SpeechKit 概览](/zh-Hans/speechkit/overview)。
+- **Cloud Kit 上带自动 TLS 的托管公共地址。** [StackKits v0.21.20](https://github.com/kombifyio/stackKits/releases/tag/v0.21.20) 至 [v0.21.24](https://github.com/kombifyio/stackKits/releases/tag/v0.21.24) 为 Cloud Kit 服务提供托管的 kombify.me 公共地址：不含密钥的地址计划、根据你已验证的子域名前缀渲染的路由，以及通过 ACME HTTP-01 签发的证书，使 Cloudflare 网关可以验证源站 TLS，同时服务流量保持 HTTPS。参见 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。
+- **计算档位让 Kit 匹配你的硬件。** [StackKits v0.22.0](https://github.com/kombifyio/stackKits/releases/tag/v0.22.0) 为每个 Kit 新增 `low`、`standard` 和 `high` 计算档位。Apply 在解析之前会证明本地 CPU、内存和磁盘，并在给出明确原因后阻止部署，而不是部署到规格不足的主机上。参见[选择 Kit](/zh-Hans/guides/stackkits/choosing-a-kit)和[审查、计划与应用](/zh-Hans/guides/stackkits/review-plan-and-apply)。
+- **可从任意客户端打断助手。** [SpeechKit v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) 把点按停止语音回答的功能带到了 Web 和 Android 客户端，而不仅限于桌面应用。开启说话人识别后，Web 和 Android 上的转录会带有说话人标签，每个客户端也会显示当前会话使用的语音后端。参见 [SpeechKit 模式](/zh-Hans/speechkit/modes)。
+- **Android 上的语音笔记转录与摘要。** [v0.60.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.60.0) 可以在 SpeechKit 应用中转录语音笔记，并对 WhatsApp 和 Telegram 的语音消息生成摘要。
+- **为现有 Homelab 增加密钥保管。** [StackKits v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) 新增显式且幂等的 `stackkit secrets materialize` 命令，使独立 Homelab 在选择新工作负载后可以建立与所有者绑定的保管，而无需重新运行其初始 StackSpec。参见[第二天运维](/zh-Hans/stackkits/reference/day-2-operations)。
+
+### 更新
+
+- **Words 和 Replacements 可管理。** [SpeechKit v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) 让自定义 Words 和 Replacements 在 Settings 中可搜索、可分页、可删除。多种口语形式可以改写为同一个词条，别名在 Dictation、Assist 和 Voice Agent 中生效。
+- **一个控件选择你的听写引擎。** [v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) 在一个 Dictation 设置中切换 Deepgram Nova-3 和 AssemblyAI Universal 3.5，AssemblyAI 的 LLM Gateway 成为原生后端，使用与语音转文字相同的 API 密钥。
+- **浮层就是控制条。** [v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) 让你选择哪些操作放在 Windows 浮层上、轮换语音语言，并从浮层启动会议。参见 [SpeechKit 框架](/zh-Hans/speechkit/framework)。
+- **每个语音服务商一个 Go 包。** [v0.64.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.64.0) 把每个语音和实时语音服务商拆分为独立的 SDK 包，因此只对接一个后端的应用不再编译其余部分。旧名称在 v0.64 之前仍可使用，并附有迁移表，将在 v0.65.0 中移除。模型目录现在是单一来源，条目带有 `modality` 字段。
+- **所有者批准的移除只针对一个节点。** [StackKits v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) 至 [v0.21.13](https://github.com/kombifyio/stackKits/releases/tag/v0.21.13) 让所有者批准的工作负载移除可以从已验证的多节点 Apply 结果中选择一个确切的节点放置，缺失证据仍与同一次 Apply 相关联。
+- **更丰富的访问清单。** [v0.21.16](https://github.com/kombifyio/stackKits/releases/tag/v0.21.16) 把原生访问清单扩展到 v3，加入应用分组、显示名称、生命周期影响，以及运行中服务不含密钥的内部地址。
+
+### 问题修复
+
+- **Cloud 加固不会再把你锁在外面。** [StackKits v0.21.10](https://github.com/kombifyio/stackKits/releases/tag/v0.21.10) 在 Cloud 主机安全禁用 root 登录之前，保留一个使用密钥认证的非 root 账户；[v0.21.17](https://github.com/kombifyio/stackKits/releases/tag/v0.21.17) 让加固后的 sshd 策略优先于服务商和 cloud-init 的默认值，因此 root 密钥登录保持禁用。
+- **在 80 和 443 端口上重复运行 Apply 是安全的。** [v0.21.18](https://github.com/kombifyio/stackKits/releases/tag/v0.21.18) 仅当 Docker 证明 80 和 443 端口属于当前工作区的 Cloud 核心时，幂等的 Apply 才会复用它们。外来或过期的监听器仍会阻止。
+- **没有 placement 块的工作负载也能正常工作。** [v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) 在 StackSpec 作者选择了没有 `placement` 块的工作负载时，应用受管控的放置默认值。参见[配置 stack spec](/zh-Hans/guides/stackkits/configure-stack-spec)。
+- **失败的 Apply 会告诉你下一步怎么做。** [v0.22.0](https://github.com/kombifyio/stackKits/releases/tag/v0.22.0) 让失败的 Product Apply 以重试、`status` 和 `logs` 指引以及 Run-ID 结束，安装器会恢复现有工作区，而不是中途失败退出。
+- **被拒绝的语音会话会自行说明原因。** [SpeechKit v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) 让被拒绝的 Voice Agent 会话指出唯一需要更改的一处，并且每个错误都带有支持人员查找该请求所需的 ID。
+- **口语数字输出为阿拉伯数字。** [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) 把口语数字写成阿拉伯数字，并去除德语填充词，如 äh 和 ähm，包括语言设置为所有语言时。
+- **助手不再打断自己。** [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) 拒绝把代理自己的声音当作插话（barge-in），避免挂起的服务商关闭操作让会话卡在结束状态，并以正确的 24 kHz 采样率播放回复。
+- **Windows 在更新后显示真实版本。** [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) 让 Install and restart 显示已发布的版本，而不是之前的版本。
+- **完整采集的 Dictation 遵循你的引擎选择。** [v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) 使用所选的语音引擎，而不是总是先尝试 Deepgram。
+- **键盘在 Android 上表现正常。** [v0.60.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.60.0) 让 SpeechKit 出现在 Gboard 建议栏上并恢复键盘上的服务商按钮，[v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) 让测试连接保持可用，直到你明确切换到托管连接。
+
+</Update>
+
+<Update label="2026-08-21" description="8 月 15 日 – 8 月 21 日当周">
+
+## Techstack 开源 Alpha、Android 键盘上的 SpeechKit、StackKits Cloud 核心
+
+Techstack 现已公开：一个未签名的 Windows Alpha，以及一个可以安装在你自己机器上的开源客户端，无需托管的 kombify 账户即可操作本地服务器。SpeechKit 推出了自己的 Android 键盘，让听写和 Voice Agent 就在按键上方一点即达，可选择设备端、SpeechKit 服务器、Deepgram、AssemblyAI 或 GPT。StackKits [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) 补齐了十个一等用例，并落地了与服务商无关的 Cloud 核心运行时，随后直到 [v0.21.9](https://github.com/kombifyio/stackKits/releases/tag/v0.21.9) 又有一系列 Cloud Apply 和 Verify 修复。
+
+### 新功能
+
+- **Techstack Windows Alpha，开源。** Techstack 开放核心客户端现已在 [kombifyio/TechStack](https://github.com/kombifyio/TechStack) 以 AGPL-3.0 发布，未签名的 Windows Alpha 可用于本地服务器的反馈。Techstack 是构建在 StackKits 之上的可选编排与运维体验，这个 Alpha 支持无需账户的本地路径。参见 [Techstack 概览](/zh-Hans/techstack/overview)、[可用性](/zh-Hans/techstack/availability)以及[在 Windows 上安装 Techstack Alpha](/zh-Hans/techstack/install-windows)。
+- **Dictation 和 Voice Agent，就在按键上方一点即达。** [SpeechKit v0.58.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.58.0) 在 Android 键盘上方新增一行，可在设备上或通过你的 SpeechKit 服务器听写，也可以与 Deepgram、AssemblyAI 或 GPT 对话。需要服务器的操作会明确告知，而不是在点击时失败。参见 [SpeechKit 模式](/zh-Hans/speechkit/modes)。
+- **SpeechKit 自带 Android 键盘。** [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) 用带有 SpeechKit 品牌的键盘（HeliBoard 分支）取代了借用的输入法。点按语音键，听写面板就在键盘内部、你正在输入的位置打开，无需切换应用，也不会丢失光标。完整的对应源代码随版本一同发布。
+- **在开启 SpeechKit 模式之前先配置它。** [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) 在模式关闭时仍保持 Transcribe、Assist 和 Voice Agent 设置可打开、可编辑，并且切换关闭某个模式时不再把你踢出页面。参见 [SpeechKit 框架](/zh-Hans/speechkit/framework)。
+- **StackKits 中的十个一等用例。** [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) 补全了全部十个用例的 CUE 权威定义，包括 Vault、Media，以及草案阶段的 AI/Dev/Remote，外加 1.0 之后的草案 Mail 和 Game。现有的 Basement 和 Cloud Kit 角色都已绑定到它们。参见[选择 Kit](/zh-Hans/guides/stackkits/choosing-a-kit)。
+- **与服务商无关的 Cloud 核心运行时。** [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) 实现了与服务商无关的 Cloud 核心运行时，包含受保护的本地 Product Apply、实时 Verify 观察，以及针对 `base`、`auth`、`id` 和 `coolify` 的确切 access-manifest v2 投影。服务商和凭据保管仍在 Techstack 中。参见 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。
+
+### 更新
+
+- **桌面外壳品牌化为“SpeechKit UI”。** [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) 给桌面窗口加上 SpeechKit 标志和标题，使其不再自称通用外壳。
+- **`foundation` 取代 `base` schema 包。** [StackKits v0.18.22](https://github.com/kombifyio/stackKits/releases/tag/v0.18.22) 把共享的 CUE schema 包从 `base` 重命名为 `foundation`，并要求已发布归档中包含 `foundation/stackkit.cue`。产品 Kit 不变，仍然扩展 `#FoundationStackKit`。
+- **退役 `base-kit` 安装器参数。** [v0.18.22](https://github.com/kombifyio/stackKits/releases/tag/v0.18.22) 拒绝已退役的 `base-kit` slug，而不是悄悄把它改写为 `basement-kit`。请使用 `basement-kit`。参见[选择 Kit](/zh-Hans/guides/stackkits/choosing-a-kit)。
+
+### 问题修复
+
+- **Cloud Apply 在标准 Ubuntu 主机上达到其声明的安全态势。** [StackKits v0.21.9](https://github.com/kombifyio/stackKits/releases/tag/v0.21.9) 会安装支撑 Cloud 主机安全单元及其规则集的软件包，而不是因缺少 `nft` 和 `fail2ban` 而失败，并且只重新加载正在运行的 `sshd`，同时在套接字激活的主机上确保权限分离目录存在。
+- **Cloud 主机安全失败现在会指出出错的单元。** [v0.21.8](https://github.com/kombifyio/stackKits/releases/tag/v0.21.8) 在 Cloud 主机安全协调失败时保留有界的命令和进程输出，因此线上目标会报告确切出错的单元。
+- **精确的 Cloud 核心 Verify 能处理套接字代理和带健康检查的服务。** [v0.21.6](https://github.com/kombifyio/stackKits/releases/tag/v0.21.6) 接受有意不带健康检查的套接字代理的 `not-configured` 观察结果，[v0.21.7](https://github.com/kombifyio/stackKits/releases/tag/v0.21.7) 在对照 Cloud 核心模块探针验证之后，保留运行时拥有的公共路由健康结果。
+- **Cloud Kit Apply 不再因调度器元数据而拒绝失败。** [v0.21.4](https://github.com/kombifyio/stackKits/releases/tag/v0.21.4) 在 Cloud Kit 所有者和主机准入上接受调度器的计划类元数据，使 Product Apply 不再以 `health:stackkits-host-admission=executor-failed` 失败。[v0.21.5](https://github.com/kombifyio/stackKits/releases/tag/v0.21.5) 通过确切的本地路由器执行全本地的 Cloud Kit 所有者。参见[审查、计划与应用](/zh-Hans/guides/stackkits/review-plan-and-apply)。
+- **Verify 和 Status 拒绝过期的 Cloud 服务投影。** [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) 在 Verify 和 Status 回读期间拒绝过期、外来或被篡改的 Cloud 服务投影。
+- **Android 上不再有重复的 SpeechKit 启动器图标。** [v0.58.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.58.0) 阻止键盘分支再添加第二个启动器，该启动器打开的是键盘设置而不是应用。
+- **安装 SpeechKit 时语音键就在那里。** [v0.58.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.58.0) 让语音键无需启用第二个输入法即可显示，并且听写面板现在在按键上方打开，而不是在屏幕顶部。
+- **Android 上的 Voice Agent 状态如实呈现。** [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) 不再宣称 Voice Agent 尚未发布，并让 SpeechKit 键盘真正出现，听写面板挂载在它的输入视图内。
+
+</Update>
+
+<Update label="2026-08-14" description="8 月 10 日 – 8 月 14 日当周">
+
+## StackKits v0.15.0 – v0.18.1：引导式安装器、可按服务控制的发布，以及与服务商无关的 Cloud 核心
+
+本周 StackKits 从 v0.14.28 升级到 [v0.18.1](https://github.com/kombifyio/stackKits/releases/tag/v0.18.1)。全新的引导式安装器以三种模式把一台未经准备的机器带到运行中的 Homelab。Cloud Kit 新增了与服务商无关的 Cloud 核心、公共 TLS 路由所有权，以及可选的异地备份。`apply`、`status`、`verify` 和 `logs` 在每种结果下都完全机器可读，新的 `stackkit service` 命令可以在完整 apply 之间控制单个服务。
+
+## SpeechKit v0.53.0 – v0.57.0：随处可用的统一语音助手、Android Voice Agent、托管的 Web 助手
+
+SpeechKit 发布了 [v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0)。Android 应用现在可以进行真正的口语对话，并可直接从 SpeechKit 键盘访问助手。每个 SpeechKit 服务器都提供开箱即用的 `/assistant` 网页。同一个动画助手在 Android、Windows 浮层和 Web 上呈现一致，由同一个共享库驱动。Deepgram Flux v2 现在可用于实时、语音转文字和文字转语音。
+
+### 新功能
+
+- **通往运行中 Homelab 的引导式安装器。** [StackKits v0.17.0](https://github.com/kombifyio/stackKits/releases/tag/v0.17.0) 提供完整的引导式安装，含三种模式，以及接受 `--use-case`、`--platform` 和 `--enable` 的 `v2 init` 流程。安装器直接引导 Docker 和存储根目录，在 `sudo` 下安全运行，并打印真实的原生凭据。参见[快速开始](/zh-Hans/stackkits/quickstart)和[选择 Kit](/zh-Hans/guides/stackkits/choosing-a-kit)。
+- **带公共 TLS 路由的、与服务商无关的 Cloud 核心。** [StackKits v0.15.0](https://github.com/kombifyio/stackKits/releases/tag/v0.15.0) 为 `base`、`auth`、`id` 和 `coolify` 解析必需的 `cloud-core` 工作负载，渲染一个固定摘要的 Compose 项目，并通过封闭的本地运行时所有者在外部提供的主机上执行。[v0.18.0](https://github.com/kombifyio/stackKits/releases/tag/v0.18.0) 让 Cloud Kit 端到端地拥有并落实公共 TLS 路由。Cloud 运行时保管只存放限定到服务的 PocketID、TinyAuth 和 Coolify 材料。服务商凭据、服务器凭据、租约和清单都保留在 StackKits 之外。参见 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。
+- **用于发布后控制的 `stackkit service` 命令。** [v0.16.0](https://github.com/kombifyio/stackKits/releases/tag/v0.16.0) 为 StackKits 管理的 Cloud 核心服务新增 `stackkit service start|stop|restart <service-key>` 和 `stackkit service logs <service-key>`。变更操作需要 `--owner-approve`，`--json` 会返回带版本的动作结果。可用它在完整 apply 之间重启或检查单个服务。参见[第二天运维](/zh-Hans/stackkits/reference/day-2-operations)。
+
+```bash
+stackkit service restart coolify --owner-approve --json
+stackkit service logs auth --tail 100
+```
+
+- **apply、status、verify 和 logs 的完整机器可读输出。** [v0.15.8](https://github.com/kombifyio/stackKits/releases/tag/v0.15.8) 让 `stackkit apply --json`、`stackkit status --json` 和 `stackkit verify --json` 在成功、拒绝和失败时都可解析。`stackkit logs` 返回经过脱敏、有界的分页，带有与摘要绑定的游标和明确的截断元数据。MCP 连接器暴露同样的结构化证据。参见 [MCP 连接器](/zh-Hans/stackkits/reference/mcp-connector)和[运维 StackKit](/zh-Hans/stackkits/reference/day-2-operations)。
+- **面向产品自有应用交付的 Architecture v2 运行时监听器。** [v0.15.3](https://github.com/kombifyio/stackKits/releases/tag/v0.15.3) 在 Architecture v2 目录投影上暴露运行时监听器，使应用可以驱动自己的交付，而无需把生命周期权限移出 StackKits。参见[应用交付](/zh-Hans/guides/stackkits/application-delivery)。
+- **Android Voice Agent 客户端。** [SpeechKit v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0) 为 Android 应用新增实时 Voice Agent。按下说话，听取回答，并在说话时看着转录逐步生成。SpeechKit 键盘会就地打开助手，因此对话不会进入文本框，而听写仍然写入其中。参见 [SpeechKit 模式](/zh-Hans/speechkit/modes)。
+- **每个 SpeechKit 服务器上的托管 `/assistant` 网页。** [v0.55.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.55.0) 提供开箱即用的 Voice Assistant 页面。在任意浏览器中打开、连接，然后开始说话。参见 [SpeechKit 概览](/zh-Hans/speechkit/overview)。
+- **Voice Assistant 外观设置，以及随处一致的视觉语言。** [v0.55.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.55.0) 新增 Settings，可选择动画（Aura 球体或 Waveform）、中心标志，以及默认是否显示实时转录，并带有实时预览。[v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0) 发布共享球体，使 Android 应用、Windows 浮层和托管网页基于同一来源绘制同一个助手。参见 [SpeechKit 框架](/zh-Hans/speechkit/framework)。
+- **覆盖所有语音路径的 Deepgram Flux v2。** [v0.54.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.10) 让 Deepgram Flux v2 可用于实时 Voice Agent、语音转文字和文字转语音。
+- **Local Box 媒体生命周期。** [v0.54.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.0) 通过已配对 Kombify Box 上的本地设备代理播放媒体，因此音频路径保持在你自己的网络内。
+
+### 更新
+
+- **Cloud Kit 异地备份现在需主动开启。** [v0.16.1](https://github.com/kombifyio/stackKits/releases/tag/v0.16.1) 让异地备份成为 Cloud Kit 上的显式选择。参见[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。
+- **Cloud Kit 上的 Traefik 管理 API 仅限 localhost。** [v0.18.1](https://github.com/kombifyio/stackKits/releases/tag/v0.18.1) 在产品契约和公开发布契约中都让 Traefik 管理 API 保持绑定到 localhost。
+- **重建的 Windows Voice Agent 浮层。** [SpeechKit v0.56.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.56.0) 把浮层变成一个深色、易读、以动画和对话为中心的面板。控制项只在你伸手去用时才出现。Quick Note 移到了浮层上，每个浮层图标都有工具提示。
+- **带独立验证阶段的静默更新器。** [v0.52.11](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.11) 静默安装更新，[v0.52.12](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.12) 让 SpeechKit 在安装后自行重新启动，[v0.54.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.10) 显示独立的验证阶段，而不是看起来停在 100%。
+- **数字形式的 1.0 之前版本重新回到公开渠道。** [v0.52.9](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.9) 把数字形式的 `v0.x` 版本作为普通 GitHub Release 发布，并推进规范的 `latest` 别名，使网站、安装器镜像和应用内更新器对最新构建保持一致。[v0.52.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.10) 恢复了 v0.51.37 至 v0.52.9 缺失的公开发布说明。
+
+### 问题修复
+
+- **Apply 把变更绑定到预期的计划哈希。** [StackKits v0.17.0](https://github.com/kombifyio/stackKits/releases/tag/v0.17.0) 防止 apply 针对在其底层已发生变化的计划运行。参见[审查、计划与应用](/zh-Hans/guides/stackkits/review-plan-and-apply)。
+- **经过认证的公共运行时镜像拉取。** [v0.16.8](https://github.com/kombifyio/stackKits/releases/tag/v0.16.8) 对全新安装所执行的公共运行时镜像拉取进行认证。
+- **松开按住说话会结束对话。** [SpeechKit v0.56.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.56.0) 在松开 hold-to-talk 时关闭对话。短暂的时间窗口仍允许立即再次按下并接着上次继续。
+- **启动 SpeechKit 就会打开 SpeechKit。** [v0.56.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.56.0) 从任务栏或开始菜单调出窗口，重复点击时返回到正在运行的应用。
+- **Android 键盘设置能检测到我们自己的键盘。** [v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0) 不再让设置流程在某一步尚未完成时就声称已完成。
+- **转录保持其自身语言。** [v0.54.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.0) 不再无论说的是什么都把转录标记为德语，因此自定义词汇和替换会应用于你实际使用的语言。静默录音被丢弃的情况也不再出现：当录音因所说语言与配置语言不匹配而没有产生文本时，SpeechKit 会告知，而不是直接丢弃。
+- **服务器在探测偶发失败时继续运行。** [v0.54.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.1) 阻止单次探测失败杀死 SpeechKit 服务器，并在本地 Whisper 恢复时清除其就绪标志的锁定。
+- **模型设置会重试偶发的 Whisper 下载。** [v0.54.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.10) 在偶发网络错误时重试，而不是让安装失败。
+
+</Update>

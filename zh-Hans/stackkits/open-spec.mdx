@@ -1,0 +1,76 @@
+---
+title: "StackKit Open Spec"
+description: "开放 homelab 标准背后精简的已发布契约：架构快照、生命周期动词、放置分类、验证证据"
+sidebarTitle: "Open Spec (v0)"
+icon: file-contract
+---
+
+StackKit Open Spec 是“开放 homelab 标准”背后精简的已发布契约。它为随每个 StackKits 版本一同发布的产物建立索引，不引入新的 schema。规范版本跟随其一同发布的版本标签，v0 内的更改都是增量的。规范的正式副本位于公开仓库中的 [docs/OPEN-SPEC.md](https://github.com/kombifyio/StackKits/blob/main/docs/OPEN-SPEC.md)。
+
+规范中的所有内容都无需账户：Standard Mode 不需要 kombify 账户、不需要托管的 kombify 端点，也不需要 Techstack。
+
+## 1. 架构快照
+
+仅含事实的架构快照描述一个版本：kit、拓扑、能力、放置模型、模块、附加组件和支持成熟度。CUE 是技术上的事实来源；快照是它的投影。使用方读取快照，而不是 CUE，并且必须容忍新增字段。
+
+| 产物 | 角色 |
+| --- | --- |
+| [architecture-snapshot.json](https://github.com/kombifyio/StackKits/blob/main/architecture-snapshot.json) | 该版本的快照 |
+| [architecture-snapshot.schema.json](https://github.com/kombifyio/StackKits/blob/main/architecture-snapshot.schema.json) | 封闭的下游契约（schema v3）：`placement_model`、`stackkits`、`mode_matrix`、`modules`、`addons` |
+| [architecture/v2/authority-manifest.json](https://github.com/kombifyio/StackKits/blob/main/architecture/v2/authority-manifest.json) | Architecture v2 kit 定义的权威清单 |
+
+## 2. 生命周期动词
+
+每个 kit 都通过 `stackkit` CLI 和 `stackkit-mcp` 连接器，由同一组动词驱动。输入和输出记载在 [CLI 参考](https://github.com/kombifyio/StackKits/blob/main/docs/CLI.md)和 [CLI 演练](/zh-Hans/guides/stackkits/cli-walkthrough)中。
+
+| 动词 | 含义 |
+| --- | --- |
+| `init` | 为某个 kit 创建带有本地所有者托管的 StackSpec（`--owner-source=local`） |
+| `validate` | 对照 CUE 契约验证 StackSpec |
+| `generate` | 渲染确定性的部署产物（默认是独立的 Docker Compose） |
+| `apply` | 在目标主机上执行生成的计划 |
+| `verify` | 在 apply 之后检查路由、身份和服务健康状况 |
+| `backup`（`backup run`、`backup restore …`） | 对声明的卷做快照，并通过已验证的回读和显式激活来恢复它们 |
+| `upgrade` | 通过兼容性检查，把已安装的 kit 升级到更新的版本 |
+| `remove` | 移除某个应用或该 kit，同时让数据保持显式 |
+
+一个动词要么带着证据完成，要么带着终止原因失败。它绝不会为没有做过的工作报告成功。
+
+## 3. 放置分类
+
+放置描述 kit 或模块可以在哪里运行。该词汇表发布在 [foundation/placement.cue](https://github.com/kombifyio/StackKits/blob/main/foundation/placement.cue) 中：
+
+- `#PlacementMode`：`local-only`、`standard`、`managed-serverless`
+- `#PlacementSupport`：每个模块的适用性元数据（模块可以在哪些模式下运行）
+
+开源生命周期实现了 `local-only` 和 `standard`。`managed-serverless` 仅是适用性元数据；它的实现不在 StackKits 之内，也不在本规范之内。
+
+## 4. 验证证据
+
+成熟度用词以证据为依据，绝不是自行声明的。证据的形态是公开的 JSON Schema；版本会附带其实例。
+
+| 产物 | 形态 |
+| --- | --- |
+| `release-evidence.json`（版本资产） | [release-evidence.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/release-evidence.schema.json)：逐项检查为 `pass`、`pending` 或 `not_applicable`，并附带原因 |
+| 独立 OSS 端到端回执 | [standalone-oss-e2e-receipt.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/standalone-oss-e2e-receipt.schema.json) |
+| 兼容性投影 | [stackkits-compatibility-v1.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/stackkits-compatibility-v1.schema.json)，渲染在[应用交付兼容性](/zh-Hans/stackkits/reference/application-delivery-compatibility)页面 |
+| 操作系统、虚拟机管理程序和应用兼容性证据 | [os-compat-matrix.schema.json](https://github.com/kombifyio/StackKits/blob/main/schemas/os-compat-matrix.schema.json)、[docs/data/os-compat/latest.json](https://github.com/kombifyio/StackKits/blob/main/docs/data/os-compat/latest.json)：按操作系统、虚拟机管理程序和用例划分的全新来宾安装、设置、验证、备份和恢复结果，渲染在[操作系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)页面，以及[应用交付兼容性](/zh-Hans/stackkits/reference/application-delivery-compatibility)的 Lifecycle test 列中 |
+
+词汇：
+
+- Kit：`supported`（已提交的单元格存在有引用的验证路径）、`preview`（可以安装，但验证或恢复证据尚待完成）、`alpha`（仅有定义）。
+- 兼容性行（操作系统、虚拟机管理程序、按环境划分的 kit、应用）：`supported`（在证据版本上最新一次运行中，每个生命周期阶段都通过）、`preview`（安装到验证通过；后续阶段失败）或 `unverified`（该版本上还没有完成的运行，或最新一次运行在验证之前就失败了）。缺乏证据会被发布为 `unverified`，绝不会被当作支持。
+- 只有当确切版本存在有引用的运行时，状态才会放宽。
+
+## 5. 一致性
+
+当一个工具或服务满足以下条件时，它就是与 StackKit 兼容的：
+
+1. 使用它所面向的确切版本的架构快照，
+2. 只通过上述生命周期动词（直接或通过 MCP 连接器）驱动 kit，并保留它们的证据，
+3. 使用已发布的分类来描述放置，并且
+4. 以上述证据形态，连同其所属的版本标签一起发布验证结果。
+
+## 状态
+
+这是随公开 beta 发布的 v0 草案。带有版本策略的独立规范仓库将在 beta 之后跟进；在此之前，仓库文档和链接的产物就是规范。
