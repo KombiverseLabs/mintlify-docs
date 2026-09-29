@@ -1,0 +1,89 @@
+---
+title: "techstack api services"
+description: "Generated reference for the techstack api services commands"
+sidebarTitle: "services"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.32.8"
+content_hash: "sha256:a1f98a90541e05b5334ee62c2cbcc732dff6b859fef9b203110ec8a4305e5a82"
+source_hash: "4c7d219a5d56d94c5e817e28e0ca5be6dfa98d59"
+---
+<Note>Generated from the Techstack v0.32.8 release (source `4c7d219a5d56`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api services get
+
+Get desired, observed, health, access, and action capabilities for one service.
+
+```bash
+techstack api services get <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}` |
+| Changes state | No |
+| MCP tool | `get_service_runtime` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<service-id>` | string | **Required.** Canonical service runtime ID. |
+
+## techstack api services list
+
+List canonical measured service runtime state.
+
+```bash
+techstack api services list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services` |
+| Changes state | No |
+| MCP tool | `list_service_runtimes` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--stack-id` | string | — |
+| `--server-id` | string | — |
+
+## techstack api services logs
+
+Read the latest bounded, redacted StackKits service log page.
+
+```bash
+techstack api services logs <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/registry/services/{serviceId}/logs` |
+| Changes state | No |
+| MCP tool | `get_managed_service_logs` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<service-id>` | string | **Required.** Canonical service runtime ID. |
+| `--limit` | integer | Default `100`. |
+| `--cursor` | string | — |
+
+## techstack api services run-action
+
+Queue an owner-authorized StackKits service action.
+
+Derives stack, server, agent, kit and service authority from fresh canonical inventory. Exact replays converge through a durable job receipt; the raw Idempotency-Key is never persisted. Mutations are followed by StackKits verify before measured state changes. Agent-executed actions refuse with 409 `maintenance_active` while the server is being rebooted or updated.
+
+```bash
+techstack api services run-action <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/registry/services/{serviceId}/actions` |
+| Changes state | Yes |
+| MCP tool | `run_managed_service_action` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<service-id>` | string | **Required.** Canonical service runtime ID. |
+| `--body` | json | **Required.** JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |

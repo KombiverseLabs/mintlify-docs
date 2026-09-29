@@ -1,0 +1,274 @@
+---
+title: "techstack api monthly-runtimes"
+description: "Generated reference for the techstack api monthly-runtimes commands"
+sidebarTitle: "monthly-runtimes"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.32.8"
+content_hash: "sha256:a1f98a90541e05b5334ee62c2cbcc732dff6b859fef9b203110ec8a4305e5a82"
+source_hash: "4c7d219a5d56d94c5e817e28e0ca5be6dfa98d59"
+---
+<Note>Generated from the Techstack v0.32.8 release (source `4c7d219a5d56`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api monthly-runtimes cleanup-readback
+
+Read redacted managed runtime cleanup state facts.
+
+Returns tenant- and owner-scoped state facts for the lease's exact current provider-control resource generation. This read-only endpoint never calls a provider or a runtime agent and never returns provider resource handles, commands, evidence documents, or credentials. A terminal operation is no longer running, but is not by itself proof of successful cleanup: provider absence requires absence_evidence_ref, and capacity release requires capacity_released.
+
+```bash
+techstack api monthly-runtimes cleanup-readback <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/{lease_id}/cleanup-readback` |
+| Changes state | No |
+| MCP tool | `get_monthly_runtime_cleanup_readback` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<lease-id>` | string | **Required.** Monthly runtime lease ID. |
+
+## techstack api monthly-runtimes decommission
+
+Decommission a monthly runtime lease.
+
+```bash
+techstack api monthly-runtimes decommission <lease-id> [flags]
+```
+
+<Warning>Requires confirmation: This operation decommissions the monthly runtime and tears down its provider resources. Pass `--yes` or answer the prompt; a non-interactive run without `--yes` stops before any request with exit code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/decommission` |
+| Changes state | Yes |
+| MCP tool | `decommission_monthly_runtime` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<lease-id>` | string | **Required.** Monthly runtime lease ID. |
+| `--force-query` | boolean | Request exact generation-bound provider reconciliation when the runtime is unreachable. Force is accepted only when the control plane can prove restart-safe, HA-fenced durable custody before it cancels the lease. Also accepted as a &#123;"force": true&#125; JSON body. An empty request defaults to false. Default `false`. |
+| `--expected-resource-generation-digest` | string | Optional optimistic concurrency claim. Provider teardown is refused with 409 unless this digest still identifies the current lease resource generation. |
+| `--force` | boolean | Default `false`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api monthly-runtimes get
+
+Get monthly runtime status.
+
+```bash
+techstack api monthly-runtimes get <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/{lease_id}` |
+| Changes state | No |
+| MCP tool | `get_monthly_runtime_status` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<lease-id>` | string | **Required.** Monthly runtime lease ID. |
+
+## techstack api monthly-runtimes offerings
+
+List monthly runtime offerings.
+
+Returns public, provider-free subscription runtime offerings.
+
+```bash
+techstack api monthly-runtimes offerings [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/offerings` |
+| Changes state | No |
+| MCP tool | `list_monthly_runtime_offerings` |
+
+## techstack api monthly-runtimes operations
+
+List monthly runtime operation history.
+
+```bash
+techstack api monthly-runtimes operations <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/{lease_id}/operations` |
+| Changes state | No |
+| MCP tool | `list_monthly_runtime_operations` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<lease-id>` | string | **Required.** Monthly runtime lease ID. |
+| `--limit` | integer | Maximum operation events to return. Default `50`. |
+
+## techstack api monthly-runtimes reconnect
+
+Recover the Guard session of a managed runtime.
+
+Probes the canonical aggregate; when it cannot prove a Guard connection, restarts Guard over the pinned execution channel for an entitled owner of a running server and re-observes the connection within a bounded window, then converges enrollment to enrolled. A stopped runtime is refused (managed_runtime_stopped). No provider resource is touched.
+
+```bash
+techstack api monthly-runtimes reconnect <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/reconnect` |
+| Changes state | Yes |
+| MCP tool | `reconnect_monthly_runtime` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<lease-id>` | string | **Required.** Monthly runtime lease ID. |
+
+## techstack api monthly-runtimes recreate
+
+Recreate one fully released managed server generation.
+
+Explicitly provisions generation N+1 for the same provider-neutral runtime slot after generation N has terminal lease and canonical server state, terminal provider operation state, opaque provider-native absence evidence, and exact capacity release. The immutable provider, region, offering, role, StackKit, and service intent is recovered from the old owner-scoped lease; clients cannot replace it. The endpoint delegates to the same managed-runtime expansion authority as Add Node, so enrollment, Guard evidence, endpoints, and StackKit rollout proceed through the full Creation flow. A standard Idempotency-Key is mandatory and safely replays the accepted generation.
+
+```bash
+techstack api monthly-runtimes recreate <lease-id> [flags]
+```
+
+<Warning>Requires confirmation: This operation replaces the runtime's provider server with a newly provisioned one and is billed. Pass `--yes` or answer the prompt; a non-interactive run without `--yes` stops before any request with exit code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/recreate` |
+| Changes state | Yes |
+| MCP tool | `recreate_monthly_runtime` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<lease-id>` | string | **Required.** Monthly runtime lease ID. |
+| `--confirmed` | boolean | **Required.** Explicit acknowledgement that Recreate provisions and bills a new managed server generation. One of `true`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api monthly-runtimes resolve-custody
+
+Archive a legacy or unbound custody record after provider cleanup.
+
+Removes a non-executable legacy or unbound lease from the active dashboard only after the owner confirms that its provider resource was already removed. This operation never contacts or deletes a provider resource and is rejected for Techstack provider-controlled generations.
+
+```bash
+techstack api monthly-runtimes resolve-custody <lease-id> [flags]
+```
+
+<Warning>Requires confirmation: This operation records that the provider resources were cleaned up and releases the lease custody. Pass `--yes` or answer the prompt; a non-interactive run without `--yes` stops before any request with exit code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/resolve-custody` |
+| Changes state | Yes |
+| MCP tool | `resolve_monthly_runtime_custody` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<lease-id>` | string | **Required.** Monthly runtime lease ID. |
+| `--provider-cleanup-confirmed` | boolean | **Required.** One of `true`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api monthly-runtimes ssh disable
+
+Disable owner SSH access for this generation.
+
+Removes every owner-authorized key from the node while keeping Kombify's execution-channel key, and records the disabled grant so new owner keys are refused until SSH is enabled again.
+
+```bash
+techstack api monthly-runtimes ssh disable <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/disable-ssh` |
+| Changes state | Yes |
+| MCP tool | `disable_monthly_runtime_ssh` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<lease-id>` | string | **Required.** Monthly runtime lease ID. |
+
+## techstack api monthly-runtimes ssh enable
+
+Enable owner SSH access for this generation.
+
+Re-enables the generation-bound owner SSH grant over the pinned execution channel and reinstalls the keys the owner authorized for this generation. New keys are authorized only through the re-authenticated server access route.
+
+```bash
+techstack api monthly-runtimes ssh enable <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/enable-ssh` |
+| Changes state | Yes |
+| MCP tool | `enable_monthly_runtime_ssh` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<lease-id>` | string | **Required.** Monthly runtime lease ID. |
+
+## techstack api monthly-runtimes ssh get
+
+Get SSH connection information for a monthly runtime lease.
+
+```bash
+techstack api monthly-runtimes ssh get <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monthly-runtimes/{lease_id}/ssh` |
+| Changes state | No |
+| MCP tool | `get_monthly_runtime_ssh_info` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<lease-id>` | string | **Required.** Monthly runtime lease ID. |
+
+## techstack api monthly-runtimes start
+
+Start a stopped managed server of the same generation.
+
+Admits one generation-bound provider-control reconcile toward running. The provider power-on runs once under an at-most-once claim; a repeated request while it converges replays the same operation. Requires the managed runtime entitlement before any provider call.
+
+```bash
+techstack api monthly-runtimes start <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/start` |
+| Changes state | Yes |
+| MCP tool | `start_monthly_runtime` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<lease-id>` | string | **Required.** Monthly runtime lease ID. |
+
+## techstack api monthly-runtimes stop
+
+Stop a managed server without destroying it.
+
+Admits one generation-bound provider-control reconcile toward stopped. centron uses its graceful guest shutdown action; IONOS shuts the guest down over the execution channel because the IONOS provider stop releases the bound DHCP IPv4. The server keeps its disk, address, lease, capacity reservation and monthly billing.
+
+```bash
+techstack api monthly-runtimes stop <lease-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/monthly-runtimes/{lease_id}/stop` |
+| Changes state | Yes |
+| MCP tool | `stop_monthly_runtime` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<lease-id>` | string | **Required.** Monthly runtime lease ID. |

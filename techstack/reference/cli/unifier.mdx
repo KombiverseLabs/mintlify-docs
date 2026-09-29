@@ -1,0 +1,127 @@
+---
+title: "techstack api unifier"
+description: "Generated reference for the techstack api unifier commands"
+sidebarTitle: "unifier"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.32.8"
+content_hash: "sha256:a1f98a90541e05b5334ee62c2cbcc732dff6b859fef9b203110ec8a4305e5a82"
+source_hash: "4c7d219a5d56d94c5e817e28e0ca5be6dfa98d59"
+---
+<Note>Generated from the Techstack v0.32.8 release (source `4c7d219a5d56`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api unifier analyze
+
+Analyze spec to get requirements (Phase 1).
+
+Safe, idempotent. Returns hardware requirements, detected add-ons, required credentials.
+
+```bash
+techstack api unifier analyze [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/analyze` |
+| Changes state | Yes |
+| MCP tool | `analyze_spec` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--body` | json | **Required.** JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api unifier pipeline preview
+
+Preview pipeline results without side effects.
+
+Safe, idempotent. Shows what would be generated. Backend validation or StackKit resolution failures return 200 with data.valid=false and structured data.errors; malformed input and auth failures remain HTTP errors.
+
+```bash
+techstack api unifier pipeline preview [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/pipeline/preview` |
+| Changes state | Yes |
+| MCP tool | `preview_pipeline` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--body` | json | **Required.** JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api unifier pipeline run
+
+Run full unifier pipeline (validate + analyze + unify + generate).
+
+Side-effecting -- generates IaC output files.
+
+```bash
+techstack api unifier pipeline run [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/pipeline` |
+| Changes state | Yes |
+| MCP tool | `run_pipeline` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--body` | json | **Required.** JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api unifier pipeline validate
+
+Validate pipeline inputs without executing.
+
+```bash
+techstack api unifier pipeline validate [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/pipeline/validate` |
+| Changes state | Yes |
+| MCP tool | `validate_pipeline` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--body` | json | **Required.** JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api unifier unify
+
+Unify specifications (Phase 2).
+
+```bash
+techstack api unifier unify [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/unify` |
+| Changes state | Yes |
+| MCP tool | `unify_spec` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--body` | json | **Required.** JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api unifier validate
+
+Validate a stack specification against CUE schemas.
+
+Safe, idempotent. No side effects.
+
+```bash
+techstack api unifier validate [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/validate` |
+| Changes state | Yes |
+| MCP tool | `validate_spec` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--body` | json | **Required.** JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |

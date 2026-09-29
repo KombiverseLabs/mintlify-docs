@@ -1,0 +1,48 @@
+---
+title: "techstack api homelab"
+description: "Generated reference for the techstack api homelab commands"
+sidebarTitle: "homelab"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.32.8"
+content_hash: "sha256:a1f98a90541e05b5334ee62c2cbcc732dff6b859fef9b203110ec8a4305e5a82"
+source_hash: "4c7d219a5d56d94c5e817e28e0ca5be6dfa98d59"
+---
+<Note>Generated from the Techstack v0.32.8 release (source `4c7d219a5d56`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api homelab get
+
+Get the caller's homelab and its StackKit deployments.
+
+Resolves the authenticated owner's canonical Homelab umbrella together with its StackKit deployments. `homelab` is null while a backfill has deployments but no Homelab row yet; with neither, the route is 404.
+
+```bash
+techstack api homelab get [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/homelab` |
+| Changes state | No |
+| MCP tool | `get_homelab` |
+
+## techstack api homelab rename
+
+Rename the caller's homelab.
+
+Renames the authenticated owner's homelab. The homelab name is the Stack Identity name and syncs to kombify Cloud when connected. Reversible; the homelab is resolved from the authenticated owner, never from an argument.
+
+```bash
+techstack api homelab rename <name> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PATCH /api/v1/homelab` |
+| Changes state | Yes |
+| MCP tool | `rename_homelab` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<name>` | string | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
