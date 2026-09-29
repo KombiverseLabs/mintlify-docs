@@ -1,0 +1,48 @@
+---
+title: "StackKit चुनें"
+description: "Home और Cloud एंट्री पथों की तुलना Modern Homelab प्रीव्यू से करें"
+sidebarTitle: "Kit चुनें"
+---
+
+सार्वजनिक StackKits रिलीज़ में Basement Kit, Cloud Kit और Modern Homelab प्रीव्यू परिभाषा शामिल हैं। उन होस्ट के लिए पथ चुनें जिन्हें आप पहले से चला रहे हैं।
+Cloud Kit का लाइव-रनटाइम प्रमाण रिलीज़-विशिष्ट रहता है; Modern के लिए अभी कोई समर्थित पूर्ण इंस्टॉलेशन पथ नहीं है।
+
+| यदि आप चलाते हैं... | चुनें | क्यों |
+| --- | --- | --- |
+| घर या निजी नेटवर्क पर स्थानीय हार्डवेयर | [Basement Kit](/hi/stackkits/kits/basement-kit) | यह रिलीज़ की गई स्थानीय, LAN-प्रथम प्रोफ़ाइल है। |
+| मौजूदा VPS या क्लाउड होस्ट, जिसके डोमेन पर आपका नियंत्रण है | [Cloud Kit](/hi/stackkits/kits/cloud-kit) | यह उस होस्ट के लिए रिलीज़ की गई सार्वजनिक-डोमेन प्रोफ़ाइल है। |
+| Home और Cloud वातावरण, जिनके कनेक्शन को आप खोजना चाहते हैं | [Modern Homelab (alpha)](/hi/stackkits/kits/modern-homelab) | रिलीज़ की गई परिभाषा दोनों स्थानों का वर्णन करती है; पूर्ण रनटाइम समर्थन लंबित है। |
+
+मौजूदा इंस्टॉलेशन गाइड के लिए एक वातावरण से शुरू करें। StackKits सर्वर प्रोविज़न नहीं करता और प्रोवाइडर क्रेडेंशियल की कस्टडी नहीं लेता, इसलिए Kit तभी चुनें जब आप जानते हों कि किस होस्ट और डोमेन पर आपका नियंत्रण है।
+
+पहला सफल Basement पथ [क्विकस्टार्ट](/hi/stackkits/quickstart) है। जिस VPS को आप पहले से चला रहे हैं, उसके लिए [Cloud Kit](/hi/stackkits/kits/cloud-kit) उपयोग करें। [StackKits वेबसाइट](https://stackkit.cc/getting-started) भी चुनने में मदद कर सकती है।
+
+<span id="install-only-the-toolchain"></span>
+## केवल टूलचेन इंस्टॉल करें
+
+Basement वन-लाइनर के बिना CLI और पूरा सार्वजनिक कैटलॉग इंस्टॉल करने के लिए:
+
+```bash
+curl -sSL https://install.stackkit.cc | sh
+```
+
+CLI के साथ केवल एक Kit की परिभाषाएँ इंस्टॉल करने के लिए उसका नाम दें:
+
+```bash
+curl -sSL https://install.stackkit.cc | sh -s -- basement-kit
+```
+
+आप `cloud-kit` या `modern-homelab` भी इसी तरह दे सकते हैं।
+
+<Note>
+  रिटायर किया गया `base-kit` नाम अस्वीकार कर दिया जाता है। जो स्क्रिप्ट अब भी इसे देती हैं, उन्हें
+  `basement-kit` उपयोग करने के लिए अपडेट करें।
+</Note>
+
+शेल इंस्टॉलर वर्तमान सार्वजनिक रिलीज़ को हल करते हैं और `amd64` तथा `arm64` पर Linux और
+macOS का समर्थन करते हैं। Windows उपयोगकर्ता [नवीनतम रिलीज़](https://github.com/kombifyio/StackKits/releases/latest) से `windows_amd64`
+ZIP डाउनलोड कर सकते हैं।
+
+टूलचेन-केवल इंस्टॉल के बाद वर्कस्पेस को
+[Basement Kit](/hi/stackkits/kits/basement-kit) या
+[StackSpec कॉन्फ़िगर करें](/hi/guides/stackkits/configure-stack-spec) पर इनिशियलाइज़ करें।

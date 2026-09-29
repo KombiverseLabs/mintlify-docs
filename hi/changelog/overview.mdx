@@ -1,0 +1,213 @@
+---
+title: "चेंजलॉग"
+description: "StackKits और kombify प्लेटफ़ॉर्म में नया क्या है"
+icon: "newspaper"
+mode: "center"
+---
+
+प्रोडक्ट अपडेट, सबसे नया पहले। हर रिलीज़ के विस्तृत ब्योरे के लिए GitHub पर [StackKits](https://github.com/kombifyio/stackKits/releases), [SpeechKit](https://github.com/kombifyio/SpeechKit/releases) और [Techstack](https://github.com/kombifyio/TechStack/releases) के रिलीज़ नोट्स देखें।
+
+<Update label="2026-09-16" description="5 सितंबर – 16 सितंबर">
+
+## macOS पर SpeechKit, Google AI रिटायर, और Kit चुनने वाला StackKits इंस्टॉलर
+
+SpeechKit [v0.68.24](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.24) से [v0.70.3](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.3) तक पहुँचा: पहला macOS बिल्ड, वॉइस और मॉडल के लिए एक ही कनेक्शन के रूप में Microsoft Foundry, और हर Google वॉइस एडैप्टर का हटाया जाना। StackKits ने [v0.25.1](https://github.com/kombifyio/stackKits/releases/tag/v0.25.1) से [v0.32.1](https://github.com/kombifyio/stackKits/releases/tag/v0.32.1) तक शिप किया: होस्ट पहचानकर Kit सुझाने वाला इंस्टॉलर, होमलैब रूट के आगे लॉगिन गेट, और PocketID के ज़रिए घरेलू उपयोगकर्ता।
+
+### नई सुविधाएँ
+
+- **SpeechKit अब Mac पर चलता है।** [v0.70.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.0) Windows एसेट के साथ `SpeechKit-macOS-arm64.zip` प्रकाशित करता है: Apple Silicon पर macOS 14+ के लिए ad-hoc साइन किया हुआ Dictation बीटा, जिसमें माइक्रोफ़ोन कैप्चर, टेक्स्ट इंजेक्शन, मेन्यू-बार आइटम, बंडल किया लोकल मॉडल और क्लाउड स्पीच-टू-टेक्स्ट प्रोवाइडर हैं। एक ज्ञात कमी साथ आती है: ग्लोबल-हॉटकी लिसनर इंस्टॉल होता है पर उसे कोई की-इवेंट नहीं मिलता, इसलिए होल्ड-टू-टॉक अभी काम नहीं करता और मेन्यू-बार आइटम ही प्रवेश का रास्ता है। देखें [macOS पर इंस्टॉल करें](/hi/speechkit/install-macos)।
+- **Microsoft Foundry, तीन तरह से जुड़ा।** [v0.69.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.69.0) एक Connect डायलॉग जोड़ता है, जिसमें प्रोजेक्ट एंडपॉइंट और API कुंजी, आपकी मशीन पर पहले से मौजूद Azure CLI खाता, या आपके संगठन का अपना Microsoft ऐप रजिस्ट्रेशन चुना जा सकता है। एक कनेक्शन Dictation, स्पीच आउटपुट, Assist और Voice Agent की सेवा करता है; Test वे डिप्लॉयमेंट और आवाज़ें सूचीबद्ध करता है जो प्रोजेक्ट में वाकई हैं।
+- **हर मोड के लिए एक टैब वाली Library।** [v0.70.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.0) Transcriptions, Quick Notes और Voice Sessions को अपने टैब देता है, इतिहास में एक बार में एक पेज पीछे तक लोड करता है, किसी भी पंक्ति को उसी जगह फैलाता है, और आपको ट्रांसक्रिप्शन पिन करने देता है, जैसे क्विक नोट पहले से पिन हो सकता था।
+- **StackKits इंस्टॉलर Kit चुनता है।** [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) `install.stackkit.cc` को होस्ट पहचानने, Basement और Cloud में से चुनने, हर इंस्टॉल से पहले ओनर और उपयोग केस पूछने, और CLI लग जाने के बाद StackKit इंस्टॉल करने की पेशकश करने वाला बनाता है। गलत इंस्टॉलर URL विफल होने के बजाय ठीक हो जाता है। देखें [CLI वॉकथ्रू](/hi/guides/stackkits/cli-walkthrough)।
+- **हाथ से बने खातों के बिना घरेलू उपयोगकर्ता।** [v0.29.0](https://github.com/kombifyio/stackKits/releases/tag/v0.29.0) PocketID समूहों से घरेलू उपयोगकर्ता प्रोविज़न करता है, और [v0.30.0](https://github.com/kombifyio/stackKits/releases/tag/v0.30.0) `stackkit user add`, `list` और `remove` जोड़ता है। देखें [PocketID](/hi/stackkits/apps/pocketid)।
+
+### अपडेट
+
+- **Google वॉइस एडैप्टर हट गए।** [v0.70.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.2) Google स्पीच-टू-टेक्स्ट, Google टेक्स्ट-टू-स्पीच और Gemini Live हटाता है। जो कॉन्फ़िगरेशन अब भी किसी का नाम लेता है वह चुपचाप कुछ और हल होने के बजाय बंद विफल (fail closed) होता है, और खाली डिवाइस कॉन्फ़िगरेशन डिफ़ॉल्ट रूप से AssemblyAI पर जाता है। देखें [मोड और डेटा पथ](/hi/speechkit/modes)।
+- **वेक वर्ड `hey_kubi` है।** [v0.70.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.2) इसे डिफ़ॉल्ट बनाता है और `hey_quby` को उपनाम के रूप में रखता है, इसलिए मौजूदा सेटअप चलता रहता है।
+- **होमलैब रूट के आगे लॉगिन गेट।** [v0.31.0](https://github.com/kombifyio/stackKits/releases/tag/v0.31.0) फ़ोटो, फ़ाइलें, तिजोरी, मीडिया, स्मार्ट-होम, AI, डेवलपर, दस्तावेज़ और Coolify रूट के आगे TinyAuth रखता है, और सत्यापन लॉगिन रीडायरेक्ट को विफलता मानने के बजाय स्वस्थ मानता है। देखें [TinyAuth](/hi/stackkits/apps/tinyauth)।
+- **Cloud Kit को अपने डोमेन की ज़रूरत नहीं।** [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) कस्टम डोमेन न देने पर डिफ़ॉल्ट रूप से kombify.me नाम देता है, और root लॉगिन बंद होने से पहले एक्ज़ीक्यूशन-चैनल SSH कुंजी बनाता है। देखें [kombify.me](/hi/kombify-me/overview)।
+- **Apply प्रमाणपत्र का इंतज़ार करता है।** [v0.31.5](https://github.com/kombifyio/stackKits/releases/tag/v0.31.5) सार्वजनिक TLS और आंतरिक PKI लीफ़ सत्यापित करने से पहले जारी होने का इंतज़ार करता है, और [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) generate और apply चलने के दौरान चुप ठहराव के बजाय प्रगति दिखाता है।
+- **ये दस्तावेज़ वर्तमान रिलीज़ का अनुसरण करते हैं।** SpeechKit डाउनलोड लिंक अब एक जमे हुए संस्करण के बजाय नवीनतम प्रकाशित रिलीज़ पर हल होते हैं, macOS क्लाइंट और Meeting के अपने पेज हैं, और हर पेज जो रिलीज़ लाइन बताता है वह सार्वजनिक रिलीज़ से अपने-आप मिलाया जाता है।
+
+### बग फ़िक्स
+
+- **macOS का पहला रन शुरू होता है।** [v0.70.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.0) ताज़ा इंस्टॉल द्वारा अपने कॉन्फ़िगरेशन में Windows ऑडियो बैकएंड लिखने, उसके साथ माइक्रोफ़ोन खोलने से इनकार करने, और बिना संदेश, लॉग या क्रैश रिपोर्ट के बाहर निकल जाने को ठीक करता है।
+- **Voice Agent अब रिटायर प्रोवाइडर पर बूट नहीं होता।** [v0.70.3](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.3) उस सर्वर को ठीक करता है जिसका बेक किया कॉन्फ़िगरेशन अब भी Gemini Live चुनता था और इसलिए Google के रिटायर होने के बाद शुरू नहीं हो पाता था।
+- **Dictation पहले माइक्रोफ़ोन खोलता है।** [v0.70.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.1) डिवाइस को लाइव-स्ट्रीम हैंडशेक के बाद के बजाय पहले खोलता है, और अपडेट इंस्टॉल करने पर ऐप ठीक एक बार रीलॉन्च होता है।
+- **रिमूवल नेटिव स्टैक साफ़ करता है।** [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) `stackkit remove` को नेटिव Compose स्टैक अनइंस्टॉल करने और इंस्टॉलर वर्कस्पेस ढूँढने वाला बनाता है, और [v0.31.1](https://github.com/kombifyio/stackKits/releases/tag/v0.31.1) एप्लिकेशन निरीक्षण को रीस्टोर एक्टिवेशन तक टालता है ताकि रीस्टोर अब उन एप्लिकेशन को न जाँचे जो अभी चल नहीं रहे।
+
+</Update>
+
+<Update label="2026-09-07" description="kombify.me सार्वजनिक पते">
+
+## kombify.me सार्वजनिक HTTPS नाम
+
+सार्वजनिक दस्तावेज़ अब Techstack के तहत [kombify.me](/hi/kombify-me/overview) को कवर करते हैं: पहले से पहुँच योग्य होमलैब सेवाओं के लिए स्थिर
+HTTPS नाम, `{your-lab}-auth.kombify.me` जैसे फ़र्स्ट-पार्टी Kit
+नाम, और Techstack नोड एजेंट के ज़रिए वैकल्पिक निजी HTTP रिले। केवल-स्थानीय ब्राउज़िंग
+होमलैब रिज़ॉल्वर पर ही रहती है। kombify.me Alpha है।
+
+</Update>
+
+<Update label="2026-09-04" description="29 अगस्त – 4 सितंबर का सप्ताह">
+
+## SpeechKit Meeting Mode और नेटवर्क प्राइवेसी स्कोप, StackKits Smart Home और Media
+
+SpeechKit [v0.65.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.65.0) से [v0.68.24](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.24) तक पहुँचा: छह भाषाओं में रिव्यू के साथ पूर्ण Meeting Mode, कठोर नेटवर्क सीमा खींचने वाली प्राइवेसी सेटिंग, और मीटिंग के भीतर स्क्रीनशॉट जो डिवाइस से बाहर कभी नहीं जाते। StackKits ने [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) से [v0.24.27](https://github.com/kombifyio/stackKits/releases/tag/v0.24.27) तक शिप किया: Smart Home और Media उपयोग केस, stackkit.cc/planner पर ब्राउज़र-आधारित प्लानर, और मॉड्यूल-लोकल कंप्यूट प्रोफ़ाइल।
+
+### नई सुविधाएँ
+
+- **Meeting Mode प्रथम-श्रेणी का मोड है।** [SpeechKit v0.67.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.67.0) Meeting Mode को Dictation, Assist और Voice Agent के बगल में रखता है, जिसकी कैप्चर, रिव्यू जनरेशन, भाषाओं और रिटेंशन की अपनी सेटिंग हैं। कॉल के दौरान कॉम्पैक्ट पारदर्शी ओवरले कैप्चर की सेहत और नियंत्रण दिखाता है, रोलिंग सारांश कैप्चर को रोके बिना चलते हैं, और मीटिंग खत्म करने पर स्थायी Meeting Review, पाँच वाक्यों का Executive Brief और अंग्रेज़ी, जर्मन, स्पेनिश, चीनी, हिंदी और अरबी में एक्शन आइटम बनते हैं। GitHub Copilot अलग, रद्द करने योग्य ट्रांसक्रिप्ट-प्रोसेसिंग अनुमति के पीछे वैकल्पिक रिव्यू-जनरेशन प्रोवाइडर है; लोकल पथ को क्लाउड क्रेडेंशियल नहीं चाहिए। देखें [SpeechKit मोड](/hi/speechkit/modes)।
+- **नेटवर्क सीमा चुनें और SpeechKit उसे लागू करता है।** [v0.67.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.67.0) Network Scope सेटिंग जोड़ता है: सभी नेटवर्क, केवल स्थानीय नेटवर्क, या केवल यह डिवाइस। बैकएंड स्पीच प्रोवाइडर, मॉडल डाउनलोड, अपडेट, टेलीमेट्री, सर्वर कनेक्शन और इंटीग्रेशन के लिए सीमा लागू करता है। अधिक सख़्त स्कोप पर जाने से असंगत सेटिंग हटाई नहीं जातीं, निलंबित हो जाती हैं, और Settings समझाता है कि क्या अक्षम है और क्यों। देखें [SpeechKit अवलोकन](/hi/speechkit/overview)।
+- **मीटिंग के भीतर स्क्रीनशॉट, आपकी मशीन पर ही।** [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) चुनी हुई विंडो या कर्सर के नीचे के मॉनिटर को कॉन्फ़िगर करने योग्य `Ctrl+Alt+S` शॉर्टकट से कैप्चर करता है। स्नैपशॉट ट्रांसक्रिप्ट टाइमलाइन में मार्कर के रूप में दिखते हैं, जनरेट किए Meeting Review में उद्धृत होते हैं, और कॉम्पैक्ट मीटिंग पिल संक्षेप में प्रीव्यू खोलती है ताकि आप जानें कि सही विंडो कैप्चर हुई। कोई तस्वीर डिवाइस से बाहर नहीं जाती।
+- **किसी भी मीटिंग को खोजें और एक्सपोर्ट करें।** [v0.68 पैच रिलीज़](https://github.com/kombifyio/SpeechKit/releases) मीटिंग सूची को मीटिंग के समय के अनुसार समूहित करती हैं, शीर्षक, ट्रांसक्रिप्ट, नोट्स और राइट-अप में खोज जोड़ती हैं, नोट्स को फ़ॉर्मैट किए Markdown के रूप में रेंडर करती हैं, और पूरे राइट-अप के लिए Copy Markdown और Save .md जोड़ती हैं।
+- **StackKits में Smart Home उपयोग केस।** [StackKits v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) Basement, Cloud और Modern Kit पर Home Assistant वर्कलोड जोड़ता है। Generate रिवर्स-प्रॉक्सी बेसलाइन और नेटिव MCP क्लाइंट फ़्रैगमेंट लिखता है, और सेटअप Homelab ओनर खाता बनाता है। देखें [उपयोग केस कैटलॉग](/hi/stackkits/reference/use-case-catalog)।
+- **Jellyfin के साथ Media उपयोग केस।** [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) `standard` और `high` कंप्यूट टियर पर Jellyfin वर्कलोड जोड़ता है। मीडिया लाइब्रेरी ओनर-कस्टडी में रहती है और जानबूझकर StackKits बैकअप स्रोत नहीं है। देखें [Jellyfin](/hi/stackkits/apps/jellyfin)।
+- **ब्राउज़र में होमलैब की योजना बनाएँ।** [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) stackkit.cc/planner पर StackKits प्लानर लॉन्च करता है: सार्वजनिक कैटलॉग पर केवल-पढ़ने वाले, स्कीमा-प्रथम टूल जो `init → validate → resolve → generate → plan` अनुक्रम CLI को सौंपते हैं। Apply आपकी मशीन पर स्पष्ट चरण रहता है। देखें [MCP कनेक्टर](/hi/stackkits/reference/mcp-connector)।
+
+### अपडेट
+
+- **मीटिंग अपने-आप खत्म होती हैं।** [SpeechKit v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) कॉलिंग ऐप द्वारा माइक्रोफ़ोन छोड़ने के थोड़ी देर बाद रिकॉर्डिंग रोक देता है, और एक नोटिफ़िकेशन बताता है कि Meeting Review कब तैयार है या क्यों विफल हुआ। हाथ से शुरू की गई रिकॉर्डिंग कभी अपने-आप नहीं रुकती।
+- **StackKits में मॉड्यूल-लोकल कंप्यूट प्रोफ़ाइल।** [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) से [v0.24.27](https://github.com/kombifyio/stackKits/releases/tag/v0.24.27) तक कंप्यूट, स्टोरेज और एक्सेलरेटर प्रोफ़ाइल को हर वर्कलोड के विकल्पों के साथ हर मॉड्यूल पर ले जाया गया। आवश्यक होस्ट तथ्य Apply से पहले इन्वेंटरी में देखे जाने चाहिए, घोषित हार्डवेयर से अनुमानित नहीं। देखें [Kit चुनना](/hi/guides/stackkits/choosing-a-kit)।
+- **लो टियर को असली लाइट वेरिएंट मिले।** [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) Basement `low` generate को स्टैंडअलोन Compose वेरिएंट देने वाला बनाता है: Coolify के बिना कोर और मशीन लर्निंग के बिना Immich। लाइट विकल्प आने तक `low` पर Media छोड़ा जाता है, और कम आकार की कोई चीज़ डिप्लॉय करने के बजाय init पर बंद विफल होता है।
+- **इंटीग्रेशन अपनी परिपक्वता दिखाते हैं।** [SpeechKit v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) Settings में हर इंटीग्रेशन को Ready, Partial, Planned या Unavailable चिह्नित करता है, मोड के अनुसार टैग के साथ। जो यह बिल्ड नहीं चला सकता वह चालू करने पर विफल होने के बजाय धूसर दिखता है।
+- **हल्का SpeechKit SDK।** [v0.65.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.65.0) v0.64.0 में अप्रचलित किए प्रोवाइडर नाम हटाता है, जिससे केवल-Deepgram ऐप 286 के बजाय 49 बाहरी पैकेज कंपाइल करता है। [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) रूट पैकेज को अनुबंधों और कार्यान्वयनों में बाँटता है, यांत्रिक import पुनर्लेखन के साथ। [v0.66.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.66.0) सभी पाँच Android मॉड्यूल JitPack पर Apache-2.0 आर्टिफ़ैक्ट के रूप में प्रकाशित करता है, जो गुमनाम रूप से हल हो सकते हैं। देखें [SpeechKit फ़्रेमवर्क](/hi/speechkit/framework)।
+- **ओवरले सेटिंग अब डिज़ाइनर है।** [v0.68 पैच रिलीज़](https://github.com/kombifyio/SpeechKit/releases) General सेटिंग को कॉम्पैक्ट कार्ड के रूप में दोबारा बनाती हैं और ओवरले का लाइव प्रीव्यू दिखाती हैं: स्टाइल, स्थिति और होवर स्ट्रिप के त्वरित बटन प्रीव्यू में तुरंत बदलते हैं।
+
+### बग फ़िक्स
+
+- **अब कुछ भी चुपचाप विफल नहीं होता।** [SpeechKit v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) छूटी Voice Agent स्पीच, ओवरले प्लेसमेंट विफलताएँ, चुप स्क्रीनशॉट त्रुटियाँ और अटके मीटिंग सारांश को अंदाज़ा लगवाने के बजाय कारण के साथ एक्टिविटी लॉग में दर्ज करता है।
+- **मीटिंग ऑडियो Dictation से बाहर रहता है।** [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) मीटिंग ट्रांसक्रिप्शन को अपनी पाइपलाइन पर चलाता है। कॉल ऑडियो अब Dictation ओवरले को नहीं चमकाता, Dictation इतिहास नहीं भरता, और न ही वह "आख़िरी ट्रांसक्रिप्शन" बनता है जिसे कॉपी और इन्सर्ट शॉर्टकट दोबारा उपयोग करते हैं।
+- **लंबी मीटिंग के राइट-अप बनते हैं।** [v0.68 पैच रिलीज़](https://github.com/kombifyio/SpeechKit/releases) बंडल किए लोकल मॉडल के हिसाब से सारांश बैच का आकार तय करती हैं, बहुत लंबे ट्रांसक्रिप्ट टुकड़ों को वाक्य सीमा पर बाँटती हैं, रीस्टार्ट से बाधित राइट-अप फिर शुरू करती हैं, और अस्थायी रूप से अनुपलब्ध लोकल मॉडल को रिव्यू हमेशा के लिए विफल करने के बजाय दोबारा आज़माती हैं।
+- **गैर-ASCII इंस्टॉल पथ पर लोकल Dictation शुरू होता है।** [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) मॉडल पथ में umlaut होने पर ताज़ा इंस्टॉल पर बंडल किए whisper-server के विफल होने को ठीक करता है। यदि लोकल स्पीच-टू-टेक्स्ट फिर भी शुरू न हो, तो एक्टिविटी लॉग कारण बताता है और यह भी कि Dictation ऑफ़लाइन है या किसी नामित क्लाउड प्रोवाइडर पर लौट रहा है।
+- **बहु-भाषा रिव्यू एक के बाद एक चलते हैं।** [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) समानांतर रिव्यू रन को लोकल मॉडल को भूखा रखने और साथ-साथ अपनी समय-सीमा चूकने से रोकता है, और प्रगति 0% पर अटकी कतारबद्ध जॉब के बजाय वास्तव में चल रही भाषा का अनुसरण करती है।
+- **डैशबोर्ड ठीक बैठने वाले आकार में खुलता है।** [v0.68 पैच रिलीज़](https://github.com/kombifyio/SpeechKit/releases) विंडो को स्केल की हुई लैपटॉप स्क्रीन से लंबा खुलने से रोकती हैं, न्यूनतम आकार को 13-इंच डिस्प्ले के भीतर रखती हैं, और आपका चुना आकार सुरक्षित रखती हैं।
+- **Connect बटन सच बताता है।** [v0.67.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.67.0) होस्टेड कनेक्शन के बिना क्रेडेंशियल पाए तैयार होने का दावा करने को ठीक करता है, और Android ऐप अब बताता है कि Companion पेयरिंग तब विफल हुई जब दोनों इंस्टॉल किए ऐप मेल नहीं खाते, सामान्य विफलता दिखाने के बजाय।
+- **StackKits रिलीज़ आर्काइव अपने दस्तावेज़ साथ रखते हैं।** [v0.24.2](https://github.com/kombifyio/stackKits/releases/tag/v0.24.2) सार्वजनिक बैकअप और एप्लिकेशन-तत्परता दस्तावेज़ रिलीज़ आर्काइव में शामिल करता है और संगतता एडैप्टर के ज़रिए निर्देशित Basement और Cloud रेसिपी को स्पष्ट रखता है।
+
+</Update>
+
+<Update label="2026-08-28" description="22 अगस्त – 28 अगस्त का सप्ताह">
+
+## SpeechKit मीटिंग नोट्स और LAN डिस्कवरी, StackKits सार्वजनिक पते और कंप्यूट टियर
+
+SpeechKit [v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) से [v0.64.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.64.0) तक पहुँचा: मीटिंग नोट्स जो आपके लिखे से शुरू होते हैं, LAN डिस्कवरी ताकि डिवाइस बिना पता टाइप किए आपका होमलैब सर्वर ढूँढ लें, और हर क्लाइंट पर टैप-टू-इंटरप्ट। StackKits ने [v0.21.10](https://github.com/kombifyio/stackKits/releases/tag/v0.21.10) से [v0.22.0](https://github.com/kombifyio/stackKits/releases/tag/v0.22.0) तक शिप किया: Cloud Kit पर स्वचालित TLS के साथ मैनेज्ड सार्वजनिक सेवा पते, और कंप्यूट टियर जो Kit को आपके वास्तविक हार्डवेयर से मिलाते हैं।
+
+### नई सुविधाएँ
+
+- **मीटिंग नोट्स जो आपके अपने नोट्स से शुरू होते हैं।** [SpeechKit v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) मीटिंग नोटपैड जोड़ता है: आपके नोट्स आगे रहते हैं, ट्रांसक्रिप्ट बाकी भरता है, और राइट-अप उन शब्दों को उद्धृत करता है जहाँ से वह आया। माइक्रोफ़ोन और सिस्टम ऑडियो अलग ट्रैक पर रहते हैं, इसलिए स्पीकर लेबल मुफ़्त मिलते हैं और ऑडियो कभी रखा नहीं जाता। जब कोई कॉलिंग ऐप माइक्रोफ़ोन लेता है तो SpeechKit इसे भाँपकर नोट्स लेने की पेशकश करता है; आपके स्वीकार करने तक कुछ रिकॉर्ड नहीं होता। मीटिंग खत्म होते ही राइट-अप डैशबोर्ड में आ जाता है। देखें [SpeechKit मोड](/hi/speechkit/modes)।
+- **होम नेटवर्क पर अपना SpeechKit सर्वर खोजें।** [v0.60.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.60.0) होमलैब सर्वर को mDNS/DNS-SD पर खुद को घोषित करने देता है, ताकि डेस्कटॉप ऐप, Android ऐप और `speechkitctl discover` उसे बिना पता टाइप किए ढूँढ लें। डिस्कवरी वैकल्पिक और डिफ़ॉल्ट रूप से बंद है, इसलिए होस्टेड इंस्टेंस चुप रहता है, और घोषणा केवल बताती है कि कहाँ दस्तक देनी है: कनेक्ट होने के बाद भी डिवाइस साइन इन करते हैं। देखें [SpeechKit अवलोकन](/hi/speechkit/overview)।
+- **Cloud Kit पर स्वचालित TLS के साथ मैनेज्ड सार्वजनिक पते।** [StackKits v0.21.20](https://github.com/kombifyio/stackKits/releases/tag/v0.21.20) से [v0.21.24](https://github.com/kombifyio/stackKits/releases/tag/v0.21.24) तक Cloud Kit सेवाओं को मैनेज्ड सार्वजनिक kombify.me पते देते हैं: सीक्रेट-रहित पता प्लान, आपके सत्यापित सबडोमेन प्रीफ़िक्स से रेंडर किए रूट, और ACME HTTP-01 से जारी प्रमाणपत्र ताकि Cloudflare गेटवे ओरिजिन TLS को सत्यापित कर सके जबकि सेवा ट्रैफ़िक HTTPS रहे। देखें [Cloud Kit](/hi/stackkits/kits/cloud-kit)।
+- **कंप्यूट टियर Kit को आपके हार्डवेयर से मिलाते हैं।** [StackKits v0.22.0](https://github.com/kombifyio/stackKits/releases/tag/v0.22.0) हर Kit के लिए `low`, `standard` और `high` कंप्यूट टियर जोड़ता है। Apply हल करने से पहले स्थानीय CPU, RAM और डिस्क को प्रमाणित करता है, और कम आकार वाले होस्ट पर डिप्लॉय करने के बजाय स्पष्ट कारण के साथ रुक जाता है। देखें [Kit चुनना](/hi/guides/stackkits/choosing-a-kit) और [समीक्षा करें, लागू करें और सत्यापित करें](/hi/guides/stackkits/review-plan-and-apply)।
+- **किसी भी क्लाइंट से असिस्टेंट को बीच में रोकें।** [SpeechKit v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) बोले हुए जवाब के लिए टैप-टू-स्टॉप को सिर्फ़ डेस्कटॉप ऐप में नहीं, वेब और Android क्लाइंट में भी लाता है। स्पीकर पहचान चालू होने पर वेब और Android के ट्रांसक्रिप्ट पर स्पीकर लेबल होते हैं, और हर क्लाइंट दिखाता है कि सेशन कौन-सा स्पीच बैकएंड चला रहा है। देखें [SpeechKit मोड](/hi/speechkit/modes)।
+- **Android पर वॉइस-नोट ट्रांसक्रिप्शन और सारांश।** [v0.60.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.60.0) SpeechKit ऐप से वॉइस नोट ट्रांसक्राइब करता है और WhatsApp तथा Telegram वॉइस संदेशों का सारांश बनाता है।
+- **मौजूदा होमलैब में सीक्रेट कस्टडी जोड़ें।** [StackKits v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) स्पष्ट, आइडेम्पोटेंट `stackkit secrets materialize` कमांड जोड़ता है ताकि स्टैंडअलोन होमलैब नया वर्कलोड चुनने के बाद, अपना शुरुआती StackSpec दोबारा चलाए बिना, ओनर-बद्ध कस्टडी स्थापित कर सके। देखें [Day 2 ऑपरेशन](/hi/stackkits/reference/day-2-operations)।
+
+### अपडेट
+
+- **Words और Replacements प्रबंधित किए जा सकते हैं।** [SpeechKit v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) कस्टम Words और Replacements को Settings में खोजने योग्य, पेज किए हुए और हटाने योग्य बनाता है। कई बोले रूप एक शब्द में बदले जा सकते हैं, और उपनाम Dictation, Assist और Voice Agent में लागू होते हैं।
+- **अपना Dictation इंजन एक नियंत्रण से चुनें।** [v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) एक Dictation सेटिंग में Deepgram Nova-3 और AssemblyAI Universal 3.5 के बीच बदलता है, और AssemblyAI का LLM Gateway उसी API कुंजी के साथ नेटिव बैकएंड है जो स्पीच-टू-टेक्स्ट उपयोग करता है।
+- **ओवरले ही कंट्रोल स्ट्रिप है।** [v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) आपको चुनने देता है कि Windows ओवरले पर कौन-सी क्रियाएँ रहें, स्पीच भाषा घुमाएँ, और उससे मीटिंग शुरू करें। देखें [SpeechKit फ़्रेमवर्क](/hi/speechkit/framework)।
+- **हर स्पीच प्रोवाइडर के लिए एक Go पैकेज।** [v0.64.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.64.0) हर स्पीच और रियलटाइम वॉइस प्रोवाइडर को उसके अपने SDK पैकेज में बाँटता है, ताकि एक बैकएंड से बात करने वाला ऐप बाकी को कंपाइल करना बंद कर दे। पुराने नाम v0.64 तक माइग्रेशन तालिका के साथ चलते हैं और v0.65.0 में हटाए जाते हैं। मॉडल कैटलॉग अब एकल-स्रोत है, और एंट्री में `modality` फ़ील्ड है।
+- **ओनर-अनुमोदित रिमूवल एक नोड को लक्ष्य करता है।** [StackKits v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) से [v0.21.13](https://github.com/kombifyio/stackKits/releases/tag/v0.21.13) तक ओनर-अनुमोदित वर्कलोड रिमूवल को सत्यापित बहु-नोड Apply नतीजे से एक सटीक नोड प्लेसमेंट चुनने देते हैं, और अनुपस्थिति का प्रमाण उसी Apply से जुड़ा रहता है।
+- **समृद्ध एक्सेस मैनिफ़ेस्ट।** [v0.21.16](https://github.com/kombifyio/stackKits/releases/tag/v0.21.16) नेटिव एक्सेस मैनिफ़ेस्ट को v3 तक बढ़ाता है, जिसमें एप्लिकेशन ग्रुपिंग, डिस्प्ले नाम, लाइफ़साइकल प्रभाव और चलती सेवाओं के सीक्रेट-रहित आंतरिक पते हैं।
+
+### बग फ़िक्स
+
+- **Cloud हार्डनिंग अब आपको बाहर नहीं कर सकती।** [StackKits v0.21.10](https://github.com/kombifyio/stackKits/releases/tag/v0.21.10) Cloud होस्ट-सिक्योरिटी द्वारा root लॉगिन बंद करने से पहले गैर-root कुंजी-प्रमाणित खाता सुरक्षित रखता है, और [v0.21.17](https://github.com/kombifyio/stackKits/releases/tag/v0.21.17) हार्डन की गई sshd नीति को प्रोवाइडर और cloud-init डिफ़ॉल्ट पर प्राथमिकता देता है, इसलिए root कुंजी लॉगिन बंद रहता है।
+- **पोर्ट 80 और 443 पर Apply दोबारा चलाना सुरक्षित है।** [v0.21.18](https://github.com/kombifyio/stackKits/releases/tag/v0.21.18) आइडेम्पोटेंट Apply को पोर्ट 80 और 443 तभी दोबारा उपयोग करने देता है जब Docker सिद्ध करे कि वे वर्तमान वर्कस्पेस के Cloud कोर के हैं। बाहरी या पुराने लिसनर अब भी रोकते हैं।
+- **बिना प्लेसमेंट ब्लॉक वाले वर्कलोड बस काम करते हैं।** [v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) तब शासित प्लेसमेंट डिफ़ॉल्ट लागू करता है जब StackSpec लेखक `placement` ब्लॉक के बिना वर्कलोड चुनता है। देखें [StackSpec कॉन्फ़िगर करें](/hi/guides/stackkits/configure-stack-spec)।
+- **विफल Apply बताता है कि आगे क्या करें।** [v0.22.0](https://github.com/kombifyio/stackKits/releases/tag/v0.22.0) विफल Product Apply को retry, `status` और `logs` मार्गदर्शन तथा Run-ID के साथ समाप्त करता है, और इंस्टॉलर मरने के बजाय मौजूदा वर्कस्पेस फिर शुरू करते हैं।
+- **अस्वीकृत वॉइस सेशन खुद को समझाता है।** [SpeechKit v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) अस्वीकृत Voice Agent सेशन को वह एक चीज़ बताने वाला बनाता है जिसे बदलना है, और हर त्रुटि में वह id होती है जो सपोर्ट को अनुरोध खोजने के लिए चाहिए।
+- **बोली गई संख्याएँ अंकों में आती हैं।** [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) बोली गई संख्याएँ अंकों में लिखता है और जर्मन फ़िलर शब्द जैसे äh और ähm हटाता है, तब भी जब भाषा सभी भाषाओं पर सेट हो।
+- **असिस्टेंट अब खुद को नहीं टोकता।** [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) एजेंट की अपनी आवाज़ को बार्ज-इन के रूप में अस्वीकार करता है, अटके प्रोवाइडर क्लोज़ को सेशन को समाप्त होते-होते अटकाने से रोकता है, और जवाब सही 24 kHz दर पर चलाता है।
+- **अपडेट के बाद Windows असली संस्करण दिखाता है।** [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) Install and restart को पिछले संस्करण के बजाय प्रकाशित संस्करण दिखाने वाला बनाता है।
+- **फ़ुल-कैप्चर Dictation आपके इंजन के चुनाव का सम्मान करता है।** [v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) हमेशा पहले Deepgram आज़माने के बजाय चुना हुआ स्पीच इंजन उपयोग करता है।
+- **Android पर कीबोर्ड ठीक बर्ताव करता है।** [v0.60.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.60.0) SpeechKit को Gboard सुझाव पट्टी पर रखता है और कीबोर्ड पर प्रोवाइडर बटन बहाल करता है, और [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) टेस्टर कनेक्शन को तब तक चालू रखता है जब तक आप स्पष्ट रूप से होस्टेड कनेक्शन पर न बदलें।
+
+</Update>
+
+<Update label="2026-08-21" description="15 अगस्त – 21 अगस्त का सप्ताह">
+
+## Techstack ओपन-सोर्स Alpha, Android कीबोर्ड पर SpeechKit, StackKits Cloud कोर
+
+Techstack अब सार्वजनिक है: बिना साइन किया Windows Alpha और ओपन-सोर्स क्लाइंट जिसे आप अपनी मशीन पर इंस्टॉल करके बिना होस्टेड kombify खाते के स्थानीय सर्वर चला सकते हैं। SpeechKit अपना Android कीबोर्ड शिप करता है ताकि Dictation और Voice Agent कुंजियों से बस एक टैप ऊपर हों, ऑन-डिवाइस, SpeechKit सर्वर, Deepgram, AssemblyAI या GPT के चुनाव के साथ। StackKits [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) दस प्रथम-श्रेणी उपयोग केस पूरे करता है और प्रोवाइडर-निरपेक्ष Cloud कोर रनटाइम लाता है, जिसके बाद [v0.21.9](https://github.com/kombifyio/stackKits/releases/tag/v0.21.9) तक Cloud Apply और Verify फ़िक्स की श्रृंखला आती है।
+
+### नई सुविधाएँ
+
+- **Techstack Windows Alpha, ओपन सोर्स।** Techstack ओपन-कोर क्लाइंट अब [kombifyio/TechStack](https://github.com/kombifyio/TechStack) पर AGPL-3.0 के तहत प्रकाशित है, और बिना साइन किया Windows Alpha स्थानीय-सर्वर फ़ीडबैक के लिए उपलब्ध है। Techstack StackKits के ऊपर वैकल्पिक ऑर्केस्ट्रेशन और ऑपरेटर अनुभव है, और यह Alpha बिना खाते वाले स्थानीय पथ को समर्थन देता है। देखें [Techstack अवलोकन](/hi/techstack/overview), [उपलब्धता](/hi/techstack/availability) और [Windows पर Techstack Alpha इंस्टॉल करें](/hi/techstack/install-windows)।
+- **Dictation और Voice Agent, कुंजियों से एक टैप ऊपर।** [SpeechKit v0.58.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.58.0) Android कीबोर्ड के ऊपर एक पंक्ति जोड़ता है, जिससे ऑन-डिवाइस या आपके SpeechKit सर्वर के ज़रिए dictate करें, या Deepgram, AssemblyAI या GPT से बात करें। जिन क्रियाओं को सर्वर चाहिए, वे दबाने पर विफल होने के बजाय ख़ुद बताती हैं। देखें [SpeechKit मोड](/hi/speechkit/modes)।
+- **SpeechKit अपना Android कीबोर्ड शिप करता है।** [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) उधार लिए IME को SpeechKit-ब्रांडेड कीबोर्ड (HeliBoard फ़ोर्क) से बदलता है। वॉइस की टैप करें और Dictation पैनल कीबोर्ड के भीतर, जहाँ आप टाइप कर रहे थे वहीं, खुलता है, बिना ऐप बदले या कर्सर खोए। पूरा संबंधित सोर्स रिलीज़ के साथ प्रकाशित है।
+- **StackKits में दस प्रथम-श्रेणी उपयोग केस।** [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) सभी दस उपयोग केस के लिए CUE अधिकार पूरे करता है, जिनमें Vault, Media और ड्राफ़्ट AI/Dev/Remote, साथ ही 1.0-के-बाद के ड्राफ़्ट Mail और Game शामिल हैं। मौजूदा Basement और Cloud Kit भूमिकाएँ उनसे बंधी हैं। देखें [Kit चुनना](/hi/guides/stackkits/choosing-a-kit)।
+- **प्रोवाइडर-निरपेक्ष Cloud कोर रनटाइम।** [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) प्रोवाइडर-निरपेक्ष Cloud कोर रनटाइम लागू करता है, जिसमें सुरक्षित स्थानीय Product Apply, लाइव Verify निरीक्षण, और `base`, `auth`, `id` तथा `coolify` के लिए सटीक access-manifest v2 प्रोजेक्शन है। प्रोवाइडर और क्रेडेंशियल कस्टडी Techstack में रहती है। देखें [Cloud Kit](/hi/stackkits/kits/cloud-kit)।
+- **मोड चालू करने से पहले SpeechKit मोड कॉन्फ़िगर करें।** [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) Transcribe, Assist और Voice Agent सेटिंग को मोड बंद होने पर भी खुला और संपादन योग्य रखता है, और मोड टॉगल बंद करने पर अब आपको पेज से बाहर नहीं फेंकता। देखें [SpeechKit फ़्रेमवर्क](/hi/speechkit/framework)।
+
+### अपडेट
+
+- **डेस्कटॉप शेल "SpeechKit UI" के रूप में ब्रांडेड।** [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) डेस्कटॉप विंडो को SpeechKit चिह्न और शीर्षक देता है ताकि वह खुद को सामान्य शेल के रूप में न पहचाने।
+- **`foundation`, `base` स्कीमा पैकेज की जगह लेता है।** [StackKits v0.18.22](https://github.com/kombifyio/stackKits/releases/tag/v0.18.22) साझा CUE स्कीमा पैकेज का नाम `base` से बदलकर `foundation` करता है और प्रकाशित आर्काइव में `foundation/stackkit.cue` की माँग करता है। प्रोडक्ट Kit अपरिवर्तित हैं और अब भी `#FoundationStackKit` को एक्सटेंड करते हैं।
+- **`base-kit` इंस्टॉलर आर्गुमेंट रिटायर किया गया।** [v0.18.22](https://github.com/kombifyio/stackKits/releases/tag/v0.18.22) रिटायर किए `base-kit` स्लग को चुपचाप `basement-kit` में बदलने के बजाय अस्वीकार करता है। `basement-kit` उपयोग करें। देखें [Kit चुनें](/hi/guides/stackkits/choosing-a-kit)।
+
+### बग फ़िक्स
+
+- **Cloud Apply स्टॉक Ubuntu होस्ट पर अपने घोषित स्तर तक पहुँचता है।** [StackKits v0.21.9](https://github.com/kombifyio/stackKits/releases/tag/v0.21.9) `nft` और `fail2ban` अनुपस्थित होने पर विफल होने के बजाय Cloud होस्ट-सिक्योरिटी यूनिट और उसके रूलसेट के पैकेज इंस्टॉल करता है, और सॉकेट-एक्टिवेटेड होस्ट पर privilege-separation डायरेक्टरी सुनिश्चित करते हुए केवल चलते `sshd` को रीलोड करता है।
+- **Cloud होस्ट-सिक्योरिटी विफलताएँ अब विफल यूनिट का नाम बताती हैं।** [v0.21.8](https://github.com/kombifyio/stackKits/releases/tag/v0.21.8) Cloud होस्ट-सिक्योरिटी सुलह विफल होने पर सीमित कमांड और प्रोसेस आउटपुट सुरक्षित रखता है, ताकि लाइव लक्ष्य सटीक विफल यूनिट रिपोर्ट करे।
+- **सटीक Cloud कोर Verify सॉकेट प्रॉक्सी और हेल्थ-चेक वाली सेवाओं को संभालता है।** [v0.21.6](https://github.com/kombifyio/stackKits/releases/tag/v0.21.6) जानबूझकर हेल्थचेक-रहित सॉकेट प्रॉक्सी के लिए `not-configured` निरीक्षण स्वीकार करता है, और [v0.21.7](https://github.com/kombifyio/stackKits/releases/tag/v0.21.7) Cloud कोर मॉड्यूल प्रोब के विरुद्ध सत्यापन के बाद रनटाइम-स्वामित्व वाले सार्वजनिक-रूट हेल्थ नतीजे सटीक रूप में रखता है।
+- **Cloud Kit Apply डिस्पैचर मेटाडेटा पर बंद विफल होना छोड़ता है।** [v0.21.4](https://github.com/kombifyio/stackKits/releases/tag/v0.21.4) Cloud Kit ओनर और host-admission पर डिस्पैचर plan-class मेटाडेटा स्वीकार करता है ताकि Product Apply अब `health:stackkits-host-admission=executor-failed` के साथ विफल न हो। [v0.21.5](https://github.com/kombifyio/stackKits/releases/tag/v0.21.5) पूरी तरह-स्थानीय Cloud Kit ओनर को उनके सटीक स्थानीय राउटर से चलाता है। देखें [समीक्षा करें, लागू करें और सत्यापित करें](/hi/guides/stackkits/review-plan-and-apply)।
+- **Verify और Status पुराने Cloud सेवा प्रोजेक्शन अस्वीकार करते हैं।** [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) Verify और Status रीडबैक के दौरान पुराने, बाहरी या बदले गए Cloud सेवा प्रोजेक्शन अस्वीकार करता है।
+- **Android पर अब SpeechKit लॉन्चर आइकन दोहराए नहीं जाते।** [v0.58.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.58.0) कीबोर्ड फ़ोर्क को दूसरा लॉन्चर जोड़ने से रोकता है जो ऐप के बजाय कीबोर्ड की सेटिंग खोलता था।
+- **SpeechKit इंस्टॉल करते ही वॉइस की मौजूद है।** [v0.58.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.58.0) दूसरा इनपुट मेथड चालू किए बिना वॉइस की को दिखाता है, और Dictation पैनल अब स्क्रीन के ऊपर के बजाय कुंजियों के ऊपर खुलता है।
+- **Android पर Voice Agent की स्थिति सच्ची है।** [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) Voice Agent को अप्रकाशित बताना बंद करता है और SpeechKit कीबोर्ड को वास्तव में दिखने देता है, Dictation पैनल उसके इनपुट व्यू में माउंट के साथ।
+
+</Update>
+
+<Update label="2026-08-14" description="10 अगस्त – 14 अगस्त का सप्ताह">
+
+## StackKits v0.15.0 – v0.18.1: निर्देशित इंस्टॉलर, सेवा-नियंत्रित रोलआउट और प्रोवाइडर-निरपेक्ष Cloud कोर
+
+StackKits इस सप्ताह v0.14.28 से [v0.18.1](https://github.com/kombifyio/stackKits/releases/tag/v0.18.1) तक पहुँचा। नया निर्देशित इंस्टॉलर तीन मोड में बिना तैयार मशीन को चलते होमलैब तक ले जाता है। Cloud Kit को प्रोवाइडर-निरपेक्ष Cloud कोर, सार्वजनिक TLS रूट स्वामित्व और वैकल्पिक ऑफ़साइट बैकअप मिले। `apply`, `status`, `verify` और `logs` हर नतीजे पर पूरी तरह मशीन-पठनीय हैं, और नया `stackkit service` कमांड पूर्ण apply के बीच अलग-अलग सेवाओं को नियंत्रित करता है।
+
+## SpeechKit v0.53.0 – v0.57.0: हर जगह एक वॉइस असिस्टेंट, Android Voice Agent, होस्टेड वेब असिस्टेंट
+
+SpeechKit ने [v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0) शिप किया। Android ऐप अब वास्तविक बोली हुई बातचीत रखता है और SpeechKit कीबोर्ड से सीधे असिस्टेंट तक पहुँचता है। हर SpeechKit सर्वर उपयोग के लिए तैयार `/assistant` वेब पेज देता है। वही एनिमेटेड असिस्टेंट Android, Windows ओवरले और वेब पर एक साझा लाइब्रेरी से चलकर एक जैसा रेंडर होता है। Deepgram Flux v2 अब रियलटाइम, स्पीच-टू-टेक्स्ट और टेक्स्ट-टू-स्पीच में चुना जा सकता है।
+
+### नई सुविधाएँ
+
+- **निर्देशित इंस्टॉलर से चलते होमलैब तक।** [StackKits v0.17.0](https://github.com/kombifyio/stackKits/releases/tag/v0.17.0) तीन मोड और `--use-case`, `--platform` तथा `--enable` स्वीकार करने वाले `v2 init` प्रवाह के साथ पूर्ण निर्देशित इंस्टॉलेशन शिप करता है। इंस्टॉलर Docker और स्टोरेज रूट सीधे बूटस्ट्रैप करता है, `sudo` में सुरक्षित रूप से काम करता है, और सच्चे नेटिव क्रेडेंशियल प्रिंट करता है। देखें [क्विकस्टार्ट](/hi/stackkits/quickstart) और [Kit चुनना](/hi/guides/stackkits/choosing-a-kit)।
+- **सार्वजनिक TLS रूट के साथ प्रोवाइडर-निरपेक्ष Cloud कोर।** [StackKits v0.15.0](https://github.com/kombifyio/stackKits/releases/tag/v0.15.0) `base`, `auth`, `id` और `coolify` के लिए आवश्यक `cloud-core` वर्कलोड हल करता है, एक digest-pinned Compose प्रोजेक्ट रेंडर करता है, और बाहर से दिए होस्ट पर बंद स्थानीय रनटाइम ओनर से चलाता है। [v0.18.0](https://github.com/kombifyio/stackKits/releases/tag/v0.18.0) Cloud Kit को सार्वजनिक TLS रूट का स्वामी बनाकर शुरू से अंत तक मटीरियलाइज़ करवाता है। Cloud रनटाइम कस्टडी केवल सेवा-स्कोप वाला PocketID, TinyAuth और Coolify मटीरियल रखती है। प्रोवाइडर क्रेडेंशियल, सर्वर क्रेडेंशियल, लीज़ और इन्वेंटरी StackKits के बाहर रहते हैं। देखें [Cloud Kit](/hi/stackkits/kits/cloud-kit)।
+- **रोलआउट के बाद नियंत्रण के लिए `stackkit service` कमांड।** [v0.16.0](https://github.com/kombifyio/stackKits/releases/tag/v0.16.0) StackKits-प्रबंधित Cloud कोर सेवाओं के लिए `stackkit service start|stop|restart <service-key>` और `stackkit service logs <service-key>` जोड़ता है। बदलावों के लिए `--owner-approve` चाहिए, और `--json` संस्करणित एक्शन नतीजा लौटाता है। पूर्ण apply के बीच किसी एक सेवा को बाउंस या निरीक्षित करने के लिए इसका उपयोग करें। देखें [Day 2 ऑपरेशन](/hi/stackkits/reference/day-2-operations)।
+
+```bash
+stackkit service restart coolify --owner-approve --json
+stackkit service logs auth --tail 100
+```
+
+- **apply, status, verify और logs पर पूर्ण मशीन-पठनीय आउटपुट।** [v0.15.8](https://github.com/kombifyio/stackKits/releases/tag/v0.15.8) `stackkit apply --json`, `stackkit status --json` और `stackkit verify --json` को सफलता, अस्वीकृति और विफलता पर पार्स करने योग्य रखता है। `stackkit logs` digest-बद्ध कर्सर और स्पष्ट ट्रंकेशन मेटाडेटा के साथ रिडैक्ट किए, सीमित पेज लौटाता है। MCP कनेक्टर वही संरचित प्रमाण उपलब्ध कराता है। देखें [MCP कनेक्टर](/hi/stackkits/reference/mcp-connector) और [StackKit संचालित करें](/hi/stackkits/reference/day-2-operations)।
+- **प्रोडक्ट-स्वामित्व वाली एप्लिकेशन डिलीवरी के लिए Architecture v2 रनटाइम लिसनर।** [v0.15.3](https://github.com/kombifyio/stackKits/releases/tag/v0.15.3) Architecture v2 कैटलॉग प्रोजेक्शन पर रनटाइम लिसनर उपलब्ध कराता है ताकि एप्लिकेशन लाइफ़साइकल अधिकार को StackKits से बाहर ले जाए बिना अपनी डिलीवरी चला सकें। देखें [एप्लिकेशन डिलीवरी](/hi/guides/stackkits/application-delivery)।
+- **Android Voice Agent क्लाइंट।** [SpeechKit v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0) Android ऐप में रियल-टाइम Voice Agent जोड़ता है। बोलने के लिए दबाएँ, जवाब सुनें, और बोलते हुए ट्रांसक्रिप्ट बनते देखें। SpeechKit कीबोर्ड असिस्टेंट को उसी जगह खोलता है, इसलिए बातचीत टेक्स्ट फ़ील्ड से बाहर रहती है जबकि Dictation अब भी उसमें लिखता है। देखें [SpeechKit मोड](/hi/speechkit/modes)।
+- **हर SpeechKit सर्वर पर होस्टेड `/assistant` वेब पेज।** [v0.55.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.55.0) उपयोग के लिए तैयार Voice Assistant पेज परोसता है। इसे किसी भी ब्राउज़र में खोलें, कनेक्ट करें और बात करना शुरू करें। देखें [SpeechKit अवलोकन](/hi/speechkit/overview)।
+- **Voice Assistant की दिखावट सेटिंग और हर जगह एक दृश्य भाषा।** [v0.55.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.55.0) एनिमेशन (Aura orb या Waveform), केंद्र का लोगो और लाइव ट्रांसक्रिप्ट डिफ़ॉल्ट रूप से दिखे या नहीं, चुनने की Settings जोड़ता है, लाइव प्रीव्यू के साथ। [v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0) साझा orb प्रकाशित करता है ताकि Android ऐप, Windows ओवरले और होस्टेड वेब पेज एक ही स्रोत से वही असिस्टेंट बनाएँ। देखें [SpeechKit फ़्रेमवर्क](/hi/speechkit/framework)।
+- **सभी वॉइस पथों में Deepgram Flux v2।** [v0.54.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.10) रियलटाइम Voice Agent, स्पीच-टू-टेक्स्ट और टेक्स्ट-टू-स्पीच के लिए Deepgram Flux v2 उपलब्ध कराता है।
+- **Local Box मीडिया लाइफ़साइकल।** [v0.54.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.0) पेयर किए Kombify Box पर लोकल डिवाइस एजेंट से मीडिया चलाता है, इसलिए ऑडियो पथ आपके अपने नेटवर्क पर रहता है।
+
+### अपडेट
+
+- **Cloud Kit का ऑफ़साइट बैकअप अब वैकल्पिक है।** [v0.16.1](https://github.com/kombifyio/stackKits/releases/tag/v0.16.1) ऑफ़साइट बैकअप को Cloud Kit पर स्पष्ट चुनाव बनाता है। देखें [बैकअप और रीस्टोर](/hi/guides/stackkits/back-up-and-restore)।
+- **Cloud Kit पर Traefik एडमिन API केवल-localhost रहता है।** [v0.18.1](https://github.com/kombifyio/stackKits/releases/tag/v0.18.1) Traefik एडमिन API को प्रोडक्ट और सार्वजनिक रिलीज़ अनुबंध, दोनों में localhost से बाँधे रखता है।
+- **दोबारा बना Windows Voice Agent ओवरले।** [SpeechKit v0.56.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.56.0) ओवरले को एनिमेशन और बातचीत पर केंद्रित एक गहरे, पठनीय पैनल में बदलता है। नियंत्रण तभी दिखते हैं जब आप उन तक पहुँचें। Quick Note ओवरले पर चला गया, और हर ओवरले आइकन का टूलटिप है।
+- **साइलेंट अपडेटर, अलग सत्यापन चरण के साथ।** [v0.52.11](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.11) अपडेट चुपचाप इंस्टॉल करता है, [v0.52.12](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.12) इंस्टॉल के बाद SpeechKit को खुद रीलॉन्च कराता है, और [v0.54.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.10) 100% पर अटका दिखने के बजाय अलग सत्यापन चरण दिखाता है।
+- **संख्यात्मक pre-1.0 रिलीज़ सार्वजनिक सतहों पर लौटीं।** [v0.52.9](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.9) संख्यात्मक `v0.x` रिलीज़ को सामान्य GitHub रिलीज़ के रूप में प्रकाशित करता है और कैनोनिकल `latest` उपनाम आगे बढ़ाता है ताकि वेबसाइट, इंस्टॉलर मिरर और इन-ऐप अपडेटर नवीनतम बिल्ड पर सहमत हों। [v0.52.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.10) v0.51.37 से v0.52.9 तक के छूटे सार्वजनिक रिलीज़ नोट्स बहाल करता है।
+
+### बग फ़िक्स
+
+- **Apply बदलाव को अपेक्षित प्लान हैश से बाँधता है।** [StackKits v0.17.0](https://github.com/kombifyio/stackKits/releases/tag/v0.17.0) apply को ऐसे प्लान पर चलने से रोकता है जो उसके नीचे बदल गया हो। देखें [समीक्षा करें, लागू करें और सत्यापित करें](/hi/guides/stackkits/review-plan-and-apply)।
+- **प्रमाणित सार्वजनिक रनटाइम इमेज पुल।** [v0.16.8](https://github.com/kombifyio/stackKits/releases/tag/v0.16.8) ताज़ा इंस्टॉल द्वारा किए जाने वाले सार्वजनिक रनटाइम इमेज पुल को प्रमाणित करता है।
+- **होल्ड-टू-टॉक छोड़ने पर बातचीत खत्म होती है।** [SpeechKit v0.56.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.56.0) होल्ड-टू-टॉक छोड़ने पर डायलॉग बंद करता है। छोटी खिड़की फिर भी तुरंत दूसरे दबाव को वहीं से उठाने देती है जहाँ आपने छोड़ा था।
+- **SpeechKit लॉन्च करने पर SpeechKit खुलता है।** [v0.56.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.56.0) टास्कबार या Start मेनू से विंडो लाता है और दोबारा क्लिक पर चलते ऐप पर लौटता है।
+- **Android कीबोर्ड सेटअप हमारा अपना कीबोर्ड पहचानता है।** [v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0) सेटअप प्रवाह को किसी चरण के पूरा होने से पहले उसे पूरा बताने से रोकता है।
+- **ट्रांसक्रिप्ट अपनी भाषा रखते हैं।** [v0.54.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.0) बोली गई भाषा जो भी हो, ट्रांसक्रिप्ट को जर्मन लेबल करना बंद करता है, इसलिए कस्टम शब्दावली और रिप्लेसमेंट उस भाषा पर लागू होते हैं जो आपने वाकई उपयोग की। चुप-रिकॉर्डिंग ड्रॉप भी रुकते हैं: जब बोली गई भाषा कॉन्फ़िगर की भाषा से मेल न खाने से रिकॉर्डिंग में टेक्स्ट नहीं बनता, तो SpeechKit उसे छोड़ने के बजाय बताता है।
+- **क्षणिक प्रोब विफलता के बीच सर्वर चलता रहता है।** [v0.54.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.1) एक विफल प्रोब को SpeechKit सर्वर को मारने से रोकता है, और लोकल Whisper ready फ़्लैग ठीक होने पर उसे हटाता है।
+- **मॉडल सेटअप क्षणिक Whisper डाउनलोड दोबारा आज़माता है।** [v0.54.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.10) क्षणिक नेटवर्क त्रुटि पर इंस्टॉल विफल करने के बजाय दोबारा आज़माता है।
+
+</Update>
