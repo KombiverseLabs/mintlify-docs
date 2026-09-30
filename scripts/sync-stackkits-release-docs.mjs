@@ -62,21 +62,24 @@ export function validateCatalog(document, tag) {
   if (!Array.isArray(document.catalog.useCases)) throw new Error('catalog.useCases must be an array')
   sortedUnique(document.catalog.useCases.map(item => item.id), 'catalog use-case IDs')
   for (const useCase of document.catalog.useCases) {
-    keys(useCase, ['id', 'title', 'description', 'components', 'computeTiers', 'settings', 'docs', 'defaultAlternative', 'alternatives', 'mainUseCase'], `useCase ${useCase.id ?? '?'}`)
+    keys(useCase, ['id', 'title', 'description', 'components', 'computeTiers', 'settings', 'capabilities', 'docs', 'defaultAlternative', 'alternatives', 'addOns', 'mainUseCase'], `useCase ${useCase.id ?? '?'}`)
     string(useCase.id, 'useCase.id', /^[a-z][a-z0-9-]+$/)
     string(useCase.title, `${useCase.id}.title`)
     string(useCase.description, `${useCase.id}.description`)
     if (!Array.isArray(useCase.components) || useCase.components.length === 0) throw new Error(`${useCase.id}.components must be non-empty`)
     sortedUnique(useCase.components.map(component => component.id), `${useCase.id} component IDs`)
     for (const component of useCase.components) {
-      keys(component, ['id', 'name', 'role', 'kind'], `${useCase.id} component`)
+      keys(component, ['id', 'name', 'role', 'kind', 'realization'], `${useCase.id} component`)
       string(component.id, 'component.id', /^[a-z][a-z0-9-]+$/)
       string(component.name, 'component.name')
       if (!['primary', 'alternative', 'supporting', 'connector', 'bridge'].includes(component.role)) throw new Error(`invalid component role ${component.role}`)
       if (!['application', 'module', 'service', 'connector', 'bridge'].includes(component.kind)) throw new Error(`invalid component kind ${component.kind}`)
+      if (component.realization !== undefined && !REALIZATIONS.includes(component.realization)) throw new Error(`invalid component realization ${component.realization}`)
     }
     validateComputeTiers(useCase)
     validateSettings(useCase)
+    validateCapabilities(useCase)
+    if (useCase.addOns !== undefined) validateAddOns(useCase)
     if (useCase.docs !== undefined) string(useCase.docs, `${useCase.id}.docs`, /^\/[a-z0-9/-]+$/)
     if (useCase.defaultAlternative !== undefined || useCase.alternatives !== undefined) validateAlternatives(useCase, `useCase ${useCase.id}`)
     if (useCase.mainUseCase !== undefined) validateMainUseCase(useCase.mainUseCase, `${useCase.id}.mainUseCase`)
@@ -86,6 +89,8 @@ export function validateCatalog(document, tag) {
 }
 
 const CONTRACT_ID = /^[a-z][a-z0-9-]+$/
+// `install` is admitted by the Architecture v2 workload; `recorded` is kept as the owner's target preference for a later release.
+const REALIZATIONS = ['install', 'recorded']
 
 /**
  * StackKits v0.31.0 (internal/usecasecatalog AuthoringWorkload) projects the
@@ -110,11 +115,12 @@ function validateAlternatives(owner, label) {
     string(alternative.name, `${label}.alternatives.name`)
     if (!Array.isArray(alternative.modules) || alternative.modules.length === 0) throw new Error(`${label}.alternatives.modules must be non-empty`)
     for (const module of alternative.modules) {
-      keys(module, ['id', 'computeProfiles'], `${label}.alternatives.modules`)
+      keys(module, ['id', 'computeProfiles', 'computeProfileFacts', 'acceleratorProfileFacts'], `${label}.alternatives.modules`)
       string(module.id, `${label}.alternatives.modules.id`, CONTRACT_ID)
       if (!Array.isArray(module.computeProfiles) || module.computeProfiles.length === 0) throw new Error(`${label}.alternatives.modules.computeProfiles must be non-empty`)
       for (const profile of module.computeProfiles) string(profile, `${label}.alternatives.modules.computeProfiles entry`, CONTRACT_ID)
       sortedUnique(module.computeProfiles, `${label}.alternatives.modules.computeProfiles`)
+      validateProfileFacts(module, `${label}.alternatives.modules`)
     }
   }
   if (!owner.alternatives.some(alternative => alternative.id === owner.defaultAlternative)) throw new Error(`${label}.defaultAlternative is not a declared alternative`)
@@ -128,14 +134,121 @@ function validateMainUseCase(value, label) {
   string(value.title, `${label}.title`)
 }
 
+/**
+ * StackKits `AuthoringModule.computeProfileFacts` and `acceleratorProfileFacts`
+ * (internal/usecasecatalog) carry the declared numeric footprint Techstack
+ * sizes a selection with. They are validated against their real shape but stay
+ * unrendered install internals, like every other module-local field.
+ */
+function validateBudget(value, label, allowed) {
+  keys(value, allowed, label)
+  for (const [axis, amount] of Object.entries(value)) {
+    if (typeof amount !== 'number' || !Number.isFinite(amount) || amount < 0) throw new Error(`${label}.${axis} must be a non-negative number`)
+  }
+}
+
+function validateProfileFacts(module, label) {
+  const facts = module.computeProfileFacts
+  if (facts !== undefined) {
+    keys(facts, module.computeProfiles, `${label}.computeProfileFacts`)
+    for (const [profile, fact] of Object.entries(facts)) {
+      const factLabel = `${label}.computeProfileFacts.${profile}`
+      keys(fact, ['maturity', 'executable', 'realization', 'hostFloor', 'reservation', 'recommended', 'headroom', 'architectures', 'provenance', 'measuredRef'], factLabel)
+      string(fact.maturity, `${factLabel}.maturity`, CONTRACT_ID)
+      if (typeof fact.executable !== 'boolean') throw new Error(`${factLabel}.executable must be a boolean`)
+      if (fact.realization !== undefined) string(fact.realization, `${factLabel}.realization`, CONTRACT_ID)
+      if (fact.hostFloor !== undefined) validateBudget(fact.hostFloor, `${factLabel}.hostFloor`, ['minCpuCores', 'minRamGB', 'minStorageGB', 'minAMD64MicroarchitectureLevel'])
+      for (const field of ['reservation', 'recommended', 'headroom']) {
+        if (fact[field] !== undefined) validateBudget(fact[field], `${factLabel}.${field}`, ['cpuCores', 'ramGB', 'storageGB'])
+      }
+      if (fact.architectures !== undefined) {
+        if (!Array.isArray(fact.architectures)) throw new Error(`${factLabel}.architectures must be an array`)
+        for (const arch of fact.architectures) string(arch, `${factLabel}.architectures entry`, /^(amd64|arm64)$/)
+      }
+      if (fact.provenance !== undefined && (!fact.provenance || typeof fact.provenance !== 'object' || Array.isArray(fact.provenance))) throw new Error(`${factLabel}.provenance must be an object`)
+      if (fact.measuredRef !== undefined) string(fact.measuredRef, `${factLabel}.measuredRef`)
+    }
+  }
+  const accelerators = module.acceleratorProfileFacts
+  if (accelerators !== undefined) {
+    if (!accelerators || typeof accelerators !== 'object' || Array.isArray(accelerators)) throw new Error(`${label}.acceleratorProfileFacts must be an object`)
+    for (const [profile, fact] of Object.entries(accelerators)) {
+      const factLabel = `${label}.acceleratorProfileFacts.${profile}`
+      string(profile, `${factLabel} profile ID`, CONTRACT_ID)
+      keys(fact, ['vendor', 'access', 'minVramGiB', 'minDriverMajor', 'maturity', 'reservation'], factLabel)
+      for (const field of ['vendor', 'access', 'maturity']) string(fact[field], `${factLabel}.${field}`, CONTRACT_ID)
+      for (const field of ['minVramGiB', 'minDriverMajor']) {
+        if (fact[field] !== undefined && (typeof fact[field] !== 'number' || !Number.isFinite(fact[field]) || fact[field] < 0)) throw new Error(`${factLabel}.${field} must be a non-negative number`)
+      }
+      if (fact.reservation !== undefined) validateBudget(fact.reservation, `${factLabel}.reservation`, ['cpuCores', 'ramGB', 'storageGB'])
+    }
+  }
+}
+
+function validateWorkload(workload, label) {
+  keys(workload, ['id', 'defaultAlternative', 'alternatives'], label)
+  string(workload.id, `${label}.id`, CONTRACT_ID)
+  validateAlternatives(workload, label)
+}
+
+/**
+ * `addOns` are the application workloads of a use case the owner selects in
+ * addition to the primary workload (StackKits UseCase.AddOns): the same
+ * authoring workload shape as `kitCores`, unrendered.
+ */
+function validateAddOns(useCase) {
+  const label = `${useCase.id}.addOns`
+  if (!Array.isArray(useCase.addOns)) throw new Error(`${label} must be an array`)
+  sortedUnique(useCase.addOns.map(addOn => addOn.id), `${label} IDs`)
+  for (const addOn of useCase.addOns) validateWorkload(addOn, `${label} ${addOn.id ?? '?'}`)
+}
+
+function validateCapabilityOption(option, label) {
+  keys(option, ['id', 'name', 'note', 'realization', 'pending', 'workloadRef', 'alternativeRef', 'alternativeRefs'], label)
+  string(option.id, `${label}.id`, CONTRACT_ID)
+  string(option.name, `${label}.name`)
+  if (!REALIZATIONS.includes(option.realization)) throw new Error(`${label}.realization is invalid`)
+  for (const field of ['note', 'pending']) if (option[field] !== undefined) string(option[field], `${label}.${field}`)
+  for (const field of ['workloadRef', 'alternativeRef']) if (option[field] !== undefined) string(option[field], `${label}.${field}`, CONTRACT_ID)
+  if (option.alternativeRefs !== undefined) {
+    if (!Array.isArray(option.alternativeRefs)) throw new Error(`${label}.alternativeRefs must be an array`)
+    for (const ref of option.alternativeRefs) string(ref, `${label}.alternativeRefs entry`, CONTRACT_ID)
+  }
+}
+
+/**
+ * `capabilities` are the independently selectable capability modules of a use
+ * case (`stackkit init --use-case-capability`, StackKits UseCase.Capabilities).
+ * Validated, not rendered: the use-case page shows no capability wiring.
+ */
+function validateCapabilities(useCase) {
+  if (useCase.capabilities === undefined) return
+  const label = `${useCase.id}.capabilities`
+  if (!Array.isArray(useCase.capabilities)) throw new Error(`${label} must be an array`)
+  // Declaration order is the authoring order, so only uniqueness is a contract.
+  if (new Set(useCase.capabilities.map(capability => capability.id)).size !== useCase.capabilities.length) throw new Error(`${label} contains duplicate IDs`)
+  for (const capability of useCase.capabilities) {
+    const capabilityLabel = `${label} ${capability.id ?? '?'}`
+    keys(capability, ['id', 'name', 'help', 'required', 'enabledByDefault', 'requires', 'requiresAccelerator', 'default', 'alternative'], capabilityLabel)
+    string(capability.id, `${capabilityLabel}.id`, CONTRACT_ID)
+    string(capability.name, `${capabilityLabel}.name`)
+    if (capability.help !== undefined) string(capability.help, `${capabilityLabel}.help`)
+    for (const field of ['required', 'enabledByDefault', 'requiresAccelerator']) {
+      if (typeof capability[field] !== 'boolean') throw new Error(`${capabilityLabel}.${field} must be a boolean`)
+    }
+    if (!Array.isArray(capability.requires)) throw new Error(`${capabilityLabel}.requires must be an array`)
+    for (const ref of capability.requires) string(ref, `${capabilityLabel}.requires entry`, CONTRACT_ID)
+    validateCapabilityOption(capability.default, `${capabilityLabel}.default`)
+    if (capability.alternative !== undefined) validateCapabilityOption(capability.alternative, `${capabilityLabel}.alternative`)
+  }
+}
+
 function validateKitCores(kitCores) {
   if (kitCores === undefined) return
   if (!Array.isArray(kitCores)) throw new Error('catalog.kitCores must be an array')
   sortedUnique(kitCores.map(core => core.id), 'catalog kit-core IDs')
   for (const core of kitCores) {
-    keys(core, ['id', 'defaultAlternative', 'alternatives'], `kitCore ${core.id ?? '?'}`)
-    string(core.id, 'kitCore.id', CONTRACT_ID)
-    validateAlternatives(core, `kitCore ${core.id}`)
+    validateWorkload(core, `kitCore ${core.id ?? '?'}`)
   }
 }
 
@@ -150,7 +263,7 @@ function validateSettings(useCase) {
   const label = `${useCase.id}.settings`
   if (!Array.isArray(useCase.settings)) throw new Error(`${label} must be an array`)
   for (const setting of useCase.settings) {
-    keys(setting, ['id', 'name', 'kind', 'group', 'depth', 'help', 'options', 'default', 'placeholder', 'realization'], label)
+    keys(setting, ['id', 'name', 'kind', 'group', 'depth', 'help', 'options', 'default', 'placeholder', 'realization', 'workloadRef', 'acceleratorProfileOf'], label)
     string(setting.id, `${label}.id`, /^[a-z][a-z0-9-]+$/)
     string(setting.name, `${label}.name`)
     for (const [field, allowed] of [
@@ -162,6 +275,7 @@ function validateSettings(useCase) {
       if (!allowed.includes(setting[field])) throw new Error(`${label}.${field} is invalid`)
     }
     if (setting.help !== undefined) string(setting.help, `${label}.help`)
+    for (const field of ['workloadRef', 'acceleratorProfileOf']) if (setting[field] !== undefined) string(setting[field], `${label}.${field}`, CONTRACT_ID)
     const defaultType = setting.kind === 'toggle' ? 'boolean' : 'string'
     if (typeof setting.default !== defaultType) throw new Error(`${label}.default must be ${defaultType}`)
     if (setting.kind === 'choice') {
@@ -237,8 +351,16 @@ export function validateCompatibility(document, tag, useCaseIDs) {
     if (['supported', 'preview'].includes(row.status) && !/^https:\/\//.test(row.evidenceRef ?? '')) throw new Error(`positive OS row ${row.id} requires release evidence`)
     if (row.status === 'unsupported' && !row.reason) throw new Error(`unsupported OS row ${row.id} requires a policy reason`)
   }
+  // StackKits orders rows by (useCaseRef, adapterRef) field by field, so a
+  // use-case ID that prefixes another (mail, mail-server) sorts first. Comparing
+  // the joined "a/b/c" string would order them the other way ("-" < "/").
   const deliveryKeys = delivery.map(row => `${row.useCaseRef}/${row.workloadRef}/${row.adapterRef}`)
-  sortedUnique(deliveryKeys, 'application-delivery rows')
+  if (new Set(deliveryKeys).size !== deliveryKeys.length) throw new Error('application-delivery rows contain duplicates')
+  for (let index = 1; index < delivery.length; index++) {
+    const [previous, row] = [delivery[index - 1], delivery[index]]
+    const order = previous.useCaseRef === row.useCaseRef ? (previous.adapterRef > row.adapterRef ? 1 : 0) : (previous.useCaseRef > row.useCaseRef ? 1 : 0)
+    if (order) throw new Error('application-delivery rows must be sorted')
+  }
   for (const row of delivery) {
     keys(row, ['useCaseRef', 'workloadRef', 'adapterRef', 'adapterName', 'status', 'capabilities', 'defaultAlternativeRef', 'defaultModuleRef'], 'application-delivery row')
     if (!useCaseIDs.has(row.useCaseRef)) throw new Error(`unknown useCaseRef ${row.useCaseRef}`)
