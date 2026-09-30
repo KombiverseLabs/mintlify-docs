@@ -131,6 +131,60 @@ test('accepts the published compute-tier fit and still rejects a malformed one',
   }
 })
 
+test('accepts the published capabilities, add-ons and profile facts and still rejects malformed ones', () => {
+  // StackKits v0.4x publishes `capabilities`, `addOns`, component and setting
+  // realization refs and per-profile facts (internal/usecasecatalog UseCase,
+  // Setting, AuthoringModule). The consumer rejected them as unknown fields, so
+  // every release sync failed ("useCase ai has unknown fields: capabilities,
+  // addOns") and the public docs stayed pinned to an older tag.
+  const { catalog } = fixture()
+  const useCase = catalog.catalog.useCases[0]
+  const facts = { maturity: 'beta', executable: true, realization: 'apply-ready', hostFloor: { minCpuCores: 2, minRamGB: 4, minStorageGB: 20 }, reservation: { ramGB: 0.5 }, provenance: { reservation: { ref: 'policy', source: 'policy' } } }
+  useCase.alternatives[0].modules[0].computeProfileFacts = { high: facts, standard: facts }
+  useCase.alternatives[0].modules[0].acceleratorProfileFacts = { nvidia: { vendor: 'nvidia', access: 'cdi', minVramGiB: 8, maturity: 'experimental', reservation: { ramGB: 1 } } }
+  useCase.components[0].realization = 'install'
+  useCase.settings = [{ id: 'kiosk', name: 'Kiosk', kind: 'toggle', group: 'features', depth: 'advanced', default: false, realization: 'install', workloadRef: 'files-kiosk' }]
+  useCase.capabilities = [
+    { id: 'inference', name: 'Inference', required: true, enabledByDefault: true, requires: [], requiresAccelerator: false, default: { id: 'ollama', name: 'Ollama', realization: 'install', workloadRef: 'files', alternativeRef: 'cloudreve', alternativeRefs: ['cloudreve'] }, alternative: { id: 'llama-cpp', name: 'llama.cpp', realization: 'recorded', pending: 'Waits for a release.' } },
+    { id: 'chat', name: 'Chat', help: 'Talk to your files.', required: false, enabledByDefault: false, requires: ['inference'], requiresAccelerator: false, default: { id: 'openwebui', name: 'Open WebUI', realization: 'recorded' } },
+  ]
+  useCase.addOns = [{ id: 'office', defaultAlternative: 'euro-office', alternatives: [{ id: 'euro-office', name: 'euro-office', modules: [{ id: 'stackkits-euro-office-runtime', computeProfiles: ['standard'] }] }] }]
+  catalog.contentDigest = canonicalDigest(catalog)
+  assert.equal(validateCatalog(catalog, 'v9.9.9'), catalog)
+
+  for (const mutate of [
+    doc => { doc.catalog.useCases[0].capabilities[0].gates = [] },
+    doc => { doc.catalog.useCases[0].capabilities[0].default.realization = 'supported' },
+    doc => { doc.catalog.useCases[0].capabilities[1].id = 'inference' },
+    doc => { doc.catalog.useCases[0].capabilities[0].required = 'yes' },
+    doc => { doc.catalog.useCases[0].addOns[0].defaultAlternative = 'not-declared' },
+    doc => { doc.catalog.useCases[0].addOns[0].alternatives[0].modules[0].computeProfiles = [] },
+    doc => { doc.catalog.useCases[0].components[0].realization = 'supported' },
+    doc => { doc.catalog.useCases[0].alternatives[0].modules[0].computeProfileFacts.gigantic = facts },
+    doc => { doc.catalog.useCases[0].alternatives[0].modules[0].computeProfileFacts.high.reservation = { ramGB: -1 } },
+    doc => { doc.catalog.useCases[0].alternatives[0].modules[0].computeProfileFacts.high.gates = [] },
+    doc => { doc.catalog.useCases[0].alternatives[0].modules[0].acceleratorProfileFacts.nvidia.vendor = '' },
+  ]) {
+    const broken = structuredClone(catalog)
+    mutate(broken)
+    broken.contentDigest = canonicalDigest(broken)
+    assert.throws(() => validateCatalog(broken, 'v9.9.9'), Error)
+  }
+})
+
+test('orders application-delivery rows the way StackKits does when one use-case ID prefixes another', () => {
+  const { compatibility } = fixture()
+  const [row] = compatibility.compatibility.applicationDelivery
+  compatibility.compatibility.applicationDelivery = [{ ...row, useCaseRef: 'mail', workloadRef: 'mail' }, { ...row, useCaseRef: 'mail-server', workloadRef: 'mail-server' }]
+  compatibility.contentDigest = canonicalDigest(compatibility)
+  const ids = new Set(['mail', 'mail-server'])
+  assert.equal(validateCompatibility(compatibility, 'v9.9.9', ids), compatibility)
+
+  compatibility.compatibility.applicationDelivery.reverse()
+  compatibility.contentDigest = canonicalDigest(compatibility)
+  assert.throws(() => validateCompatibility(compatibility, 'v9.9.9', ids), Error)
+})
+
 test('is idempotent and never downgrades latest', () => {
   const temp = mkdtempSync(path.join(tmpdir(), 'stackkits-docs-'))
   const input = path.join(temp, 'input'), oldInput = path.join(temp, 'old'), repo = path.join(temp, 'repo')
