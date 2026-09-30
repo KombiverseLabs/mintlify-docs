@@ -22,6 +22,7 @@ Binding; `kombify-fast-development` holds the detail.
 8. The running app is the feedback loop: a one-command hot-reload dev loop; affected tests under 2 minutes.
 9. Delete skipped, dead and superseded tests and code in the slice that obsoletes them.
 10. Claims follow evidence: implemented, merged, deployed and live differ; missing evidence is pending.
+11. Feature completion accepts passing automated user journeys on browsers, Windows hosts/VMs, Android emulators and iOS simulators. Physical-device and real-user validation belongs to owner-controlled Public Beta, never a generic completion blocker. Apply `DEVELOPMENT-THROUGHPUT-STANDARD.md` section "Automated feature acceptance and Public Beta"; record hardware limitations without claiming untested hardware support.
 <!-- END GENERATED: elastic-development-throughput kombify-throughput-policy-sync -->
 
 <!-- BEGIN GENERATED: planning-policy kombify-agent-policy-sync -->
