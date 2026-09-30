@@ -5,6 +5,7 @@ import { appendFileSync } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const OPERATIONS = new Set(["build", "validate", "publish", "promote", "smoke", "async"]);
 const PLAN_POINTER_PATTERNS = {
@@ -110,6 +111,7 @@ function verifyStableCandidateReceipt(variables, operation) {
   ) {
     fail("stable Candidate receipt must be a clean Candidate E2E v1 PASS");
   }
+  assertCandidateFeatureAcceptance(receipt);
   if (
     String(receipt.repo ?? "").toLowerCase() !== variables.SOURCE_REPOSITORY.toLowerCase() ||
     receipt.sha !== variables.SOURCE_SHA
@@ -123,6 +125,54 @@ function verifyStableCandidateReceipt(variables, operation) {
   if (!Number.isFinite(finishedAt) || ageMs < -5 * 60 * 1000 || ageMs > 24 * 60 * 60 * 1000) {
     fail("stable Candidate receipt must be fresh within 24 hours");
   }
+}
+
+// Kept in the standalone runtime so the existing fleet copy/sync path carries
+// the same admission check without another runtime dependency.
+export function assertCandidateFeatureAcceptance(receipt) {
+  const nonempty = (value) => typeof value === "string" && value.trim().length > 0;
+  const hash = (value) => typeof value === "string" && /^[0-9a-f]{64}$/.test(value);
+  const portable = (value) => nonempty(value) && !/^[\\/]|^[A-Za-z]:/.test(value) && !value.includes("\\") && !value.split("/").some((part) => ["", ".", ".."].includes(part));
+  const deny = (message) => { throw new Error(`Candidate feature acceptance: ${message}`); };
+  const check = (acceptance) => {
+    if (!acceptance || acceptance.status !== "passed") deny("declared acceptance is not closed");
+    if (acceptance.source_sha !== receipt.sha || !nonempty(acceptance.scope)) deny("source/scope mismatch");
+    if (!portable(acceptance.producer?.path) || !hash(acceptance.producer?.sha256)) deny("producer binding missing");
+    if (!Array.isArray(acceptance.artifacts) || acceptance.artifacts.length === 0 ||
+        acceptance.artifacts.some((item) => !portable(item.path) || !hash(item.sha256))) deny("artifact bindings missing");
+    const proofPaths = new Set([acceptance.producer.path, ...acceptance.artifacts.map((item) => item.path)]);
+    for (const name of ["functional", "cleanup"]) {
+      const section = acceptance[name];
+      if (section?.status === "not_required" && name === "cleanup" && nonempty(section.reason)) continue;
+      if (section?.status !== "passed" || !Array.isArray(section.effects) || section.effects.length === 0 ||
+          section.effects.some((effect) => !nonempty(effect.assertion) || !nonempty(effect.observation) ||
+            !Array.isArray(effect.evidence) || effect.evidence.length === 0 || effect.evidence.some((ref) => !nonempty(ref) || !proofPaths.has(ref.split("#")[0])))) {
+        deny(`${name} effects are not verified`);
+      }
+    }
+    const visual = acceptance.visual;
+    if (visual?.status === "not_required") {
+      if (!nonempty(visual.reason)) deny("visual omission needs a risk-based reason");
+    } else {
+      if (visual?.status !== "passed" || !nonempty(visual.evaluator) ||
+          !Number.isFinite(Date.parse(visual.evaluated_at)) ||
+          Date.parse(visual.evaluated_at) > Date.now() + 300_000 ||
+          !Array.isArray(visual.images) || visual.images.length === 0 ||
+          visual.images.some((image) => image.verdict !== "passed" || !portable(image.path) ||
+            !hash(image.sha256) || !nonempty(image.expected_outcome) || !nonempty(image.evaluator) ||
+            !acceptance.artifacts.some((artifact) => artifact.path === image.path && artifact.sha256 === image.sha256) ||
+            !Array.isArray(image.findings) || image.findings.length === 0 || image.findings.some((finding) => !nonempty(finding)))) {
+        deny("selected images have no passing evaluated verdict");
+      }
+    }
+  };
+  const visit = (entry) => {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) deny("malformed phase record");
+    if (Object.hasOwn(entry, "phases") && !Array.isArray(entry.phases)) deny("malformed phase list");
+    if (Object.hasOwn(entry, "feature_acceptance")) check(entry.feature_acceptance);
+    for (const phase of entry.phases ?? []) visit(phase);
+  };
+  visit(receipt);
 }
 
 async function runProcess(command, args, cwd) {
@@ -169,7 +219,7 @@ async function githubRequest(token, url, options = {}) {
   return response.json();
 }
 
-async function dispatchWorkflow(step, variables) {
+export async function dispatchWorkflow(step, variables) {
   const token = requireString(process.env.GH_TOKEN, "GH_TOKEN");
   const repository = substitute(step.repository ?? variables.SOURCE_REPOSITORY, variables);
   const owner = substitute(step.owner ?? "KombiverseLabs", variables);
@@ -181,6 +231,44 @@ async function dispatchWorkflow(step, variables) {
       String(substitute(value, variables)),
     ]),
   );
+  // Configuration reactivation is an explicit opt-in of the committed adapter.
+  // Caller input may affect only this boolean, never source or plan identity.
+  if (step.dispatch_boolean_inputs !== undefined) {
+    const optIn = step.dispatch_boolean_inputs;
+    if (
+      !optIn ||
+      Array.isArray(optIn) ||
+      Object.keys(optIn).length !== 1 ||
+      optIn.force_deploy !== true ||
+      Object.hasOwn(inputs, "force_deploy")
+    ) {
+      fail(
+        "dispatch_boolean_inputs permits only force_deploy: true without a static override",
+      );
+    }
+    inputs.force_deploy = "false";
+    if (
+      process.env.GITHUB_EVENT_NAME === "workflow_dispatch" &&
+      process.env.GITHUB_EVENT_PATH
+    ) {
+      const event = JSON.parse(
+        await readFile(process.env.GITHUB_EVENT_PATH, "utf8"),
+      );
+      const executing =
+        event.inputs?.execute === true || event.inputs?.execute === "true";
+      const force = event.inputs?.force_deploy;
+      if (executing) {
+        if (
+          force !== undefined &&
+          ![true, false, "true", "false"].includes(force)
+        ) {
+          fail("force_deploy must be a boolean dispatch input");
+        }
+        inputs.force_deploy =
+          force === true || force === "true" ? "true" : "false";
+      }
+    }
+  }
   const waitsForCompletion = step.wait_for_completion !== false;
   const timeoutSeconds = Number(
     waitsForCompletion ? (step.timeout_seconds ?? 2700) : (step.ignition_timeout_seconds ?? 90),
@@ -284,6 +372,13 @@ async function dispatchWorkflow(step, variables) {
 
   const runEvidence = (run) =>
     `run_id=${run.id} source_sha=${variables.SOURCE_SHA} workflow_head_sha=${run.head_sha} url=${run.html_url}`;
+  const acknowledgedRun = (run) => ({
+    id: run.id,
+    head_sha: run.head_sha,
+    status: run.status,
+    conclusion: run.conclusion ?? null,
+    html_url: run.html_url,
+  });
 
   try {
     /*
@@ -310,7 +405,7 @@ async function dispatchWorkflow(step, variables) {
             process.stdout.write(
               `Workflow ${workflow} ignited (${run.status}); pre-1.0 activation continues asynchronously: ${runEvidence(run)}\n`,
             );
-            return;
+            return acknowledgedRun(run);
           }
           process.stdout.write(
             `Workflow ${workflow} completed as ${run.conclusion}: ${runEvidence(run)}\n`,
@@ -320,7 +415,7 @@ async function dispatchWorkflow(step, variables) {
               `workflow ${owner}/${repository}/${workflow} concluded ${run.conclusion} before it could run asynchronously`,
             );
           }
-          return;
+          return acknowledgedRun(run);
         }
         await new Promise((resolve) => setTimeout(resolve, 5_000));
       }
@@ -344,13 +439,19 @@ async function dispatchWorkflow(step, variables) {
             `workflow ${owner}/${repository}/${workflow} concluded ${run.conclusion}`,
           );
         }
-        return;
+        return acknowledgedRun(run);
       }
       await new Promise((resolve) => setTimeout(resolve, 5_000));
     }
     throw new Error(
       `workflow ${owner}/${repository}/${workflow} did not complete within ${timeoutSeconds}s${run ? ` (${run.html_url})` : ""}`,
     );
+  } catch (error) {
+    // Preserve the failure and the last verified observation of the ACK-owned
+    // run. A timeout or failed GET never becomes synthetic terminal evidence.
+    error.workflowRun = { id: runId, ...observed, observed_at_ms: observedAt,
+      html_url: `https://github.com/${owner}/${repository}/actions/runs/${runId}` };
+    throw error;
   } finally {
     clearInterval(progress);
   }
@@ -463,7 +564,7 @@ async function executeStep(step, variables, cwd) {
   process.stdout.write(`Satisfied by ${by}: ${reason}\n`);
 }
 
-async function main() {
+export async function runDeliveryOperation() {
   const operation = process.argv[2] ?? process.env.DELIVERY_OPERATION ?? "";
   if (!OPERATIONS.has(operation)) {
     fail(`operation must be one of ${[...OPERATIONS].join(", ")}`);
@@ -534,7 +635,20 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  process.stderr.write(`${error.stack ?? error.message}\n`);
-  process.exitCode = 1;
-});
+// Cutover copies this file to .kombify/delivery.mjs; its existing mise task
+// wrappers set DELIVERY_OPERATION and import that copy. Importing the workspace
+// source for dispatchWorkflow must not start a second delivery operation.
+const modulePath = fileURLToPath(import.meta.url);
+const generatedTaskWrapper =
+  process.env.DELIVERY_OPERATION &&
+  path.basename(modulePath) === "delivery.mjs" &&
+  path.basename(path.dirname(modulePath)) === ".kombify";
+if (
+  (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) ||
+  generatedTaskWrapper
+) {
+  runDeliveryOperation().catch((error) => {
+    process.stderr.write(`${error.stack ?? error.message}\n`);
+    process.exitCode = 1;
+  });
+}
