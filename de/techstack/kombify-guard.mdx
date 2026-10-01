@@ -1,0 +1,218 @@
+---
+title: "kombify Guard"
+description: "Wie kombify Guard jeden kombify-Server an dich gebunden, geprüft, erreichbar und wiederherstellbar hält"
+sidebarTitle: "kombify Guard"
+icon: "shield-halved"
+---
+
+kombify Guard ist das Vertrauenszeichen jedes kombify-Servers. Er läuft auf
+jedem Server deines Homelabs und ist darauf ausgelegt, dessen Betrieb
+zuverlässig, sicher und überprüfbar zu machen. Er hält den Server an dein
+Techstack gebunden, führt nur Arbeit aus, die du autorisiert hast, prüft, dass
+Schutzmaßnahmen wirklich greifen, und hält fest, was passiert ist, auch über
+Verbindungsabbrüche, Neustarts und Updates hinweg.
+
+kombify Guard gehört zu [Techstack](/de/techstack/overview). Er ist kein
+eigenes Produkt, kein eigener Tarif und hat keinen eigenen Preis. Im Rest dieser
+Seite heißt er Guard.
+
+<Note>
+**Public Beta.** Diese Seite beschreibt, wie Guard gebaut ist, um zu arbeiten.
+Eine Fähigkeit gilt nur für eine Konfiguration als verfügbar, für die
+Auslieferungsnachweise vorliegen; unter
+[Techstack-Verfügbarkeit](/de/techstack/availability) steht, was heute
+öffentlich ist. Guard verspricht keine Verfügbarkeitsgarantie, keinen Server
+ohne Ausfälle oder Kompromittierung und keine Endpoint Detection and Response
+(EDR).
+</Note>
+
+## Warum das wichtig ist
+
+Ein Homelab ist nur so vertrauenswürdig wie die Server, auf denen es läuft.
+Guard ist darauf ausgelegt, aus „Ich hoffe, mein Server ist in Ordnung" einen
+Nachweis zu machen, den du sehen kannst:
+
+- **An dich gebunden.** Jeder Server wird einmal gepaart und weist seine
+  Identität bei jeder Verbindung mit seinem eigenen Schlüssel nach. Wer einen
+  Server trennt, widerruft ihn überall.
+- **Gesicherte Konfiguration.** Firewall, SSH-Zugang, Brute-Force-Schutz und
+  Sicherheitsupdates werden gegen die StackKits-Baseline geprüft, zu Hause und
+  in der Cloud. Abweichungen werden gemeldet, Reparaturen laufen nur, wenn sie
+  autorisiert sind.
+- **Gesicherte Telemetrie.** Zustands- und Sicherheitsdaten laufen nur über den
+  authentifizierten Guard-Kanal und nur so, wie es
+  [Was kombify Guard sendet](/de/techstack/guard-telemetry) auflistet.
+- **Von überall erreichbar.** Jede Installation ist über deine eigene Domain
+  oder eine `*.kombify.me`-Adresse erreichbar, für lokale Hardware und gemietete
+  Server gleichermaßen. Zugangsdaten werden pro Server ausgestellt und mit ihm
+  widerrufen.
+- **Ein Homelab, alle Geräte.** Server mit Guard, Entwicklergeräte, die über
+  Workbench arbeiten, und Client-Geräte sind Mitglieder desselben Homelabs in
+  kombify Connect.
+- **Wiederherstellung von Grund auf.** Ergebnisse überstehen Verbindungsabbrüche
+  und Neustarts, und unsichere Ausgänge werden gemeldet statt geraten.
+  Guard-Updates sind signiert und fallen automatisch zurück.
+
+## Was Guard dir zeigt
+
+Das Guard-Panel eines Servers zeigt sieben Fakten. Ein Fakt zählt nur, wenn
+aktuelle Nachweise ihn stützen. Fehlende oder zu alte Nachweise erscheinen als
+**Not evidenced**, nie als in Ordnung, und ein bekanntes Problem erscheint als
+**Needs attention**. Ein Server ist nur dann **Guard-ready**, wenn alle sieben
+Fakten belegt sind.
+
+| Fakt | Bedeutung |
+| --- | --- |
+| Bound | Der Server weist seine Identität bei jeder Verbindung mit seinem eigenen Schlüssel nach. Eine Konfiguration, die nur noch Zugangsdaten nutzt, wird als reduzierter Schutz angezeigt. Ein widerrufener Server ist nicht mehr gebunden. |
+| Connected | Guard meldet sich über seine authentifizierte Verbindung. Ein Server, der sich nicht kürzlich genug gemeldet hat, zählt nicht als verbunden. |
+| Operations durable | Guard führt ein dauerhaftes Journal der Operationen, und nichts bleibt ungeklärt. Ergebnisse, die auf Bestätigung warten, und Operationen mit unbekanntem Ausgang werden aufgelistet. |
+| Configuration secured | Der Host entspricht der StackKits-Sicherheits-Baseline, abgesehen von Ausnahmen, die du genehmigt hast. Das Panel zeigt die Baseline-Version und jede abweichende Kontrolle. |
+| Up to date | Guard ist signiert und aktuell, und das Betriebssystem hat keine ausstehenden Sicherheitsupdates und braucht keinen Neustart. |
+| Recoverable | Ein aktuelles Backup existiert und eine Wiederherstellung wurde verifiziert. Nur eine getestete Wiederherstellung belegt Recovery. |
+| Reachable & governed | Der Server ist unter seiner kombify.me-Adresse registriert und in kombify Connect gelistet. |
+
+Jeder Fakt zeigt, wann sein Nachweis beobachtet wurde, und, wenn etwas nicht
+stimmt, was du als Nächstes tun kannst. Beim Pairing eines Servers zeigt die
+Fortschrittsseite die Schritte **Bound**, **Connected**, **Configuration
+verified** und **Reachable**, jeweils geprüft gegen das, was Techstack erfasst
+hat. Du kannst einen Guard-Bericht herunterladen oder drucken. Er listet nur auf,
+was Techstack erfasst hat, mit dem Zeitpunkt jeder Beobachtung, und enthält
+keine Zugangsdaten.
+
+## Pairing und Identität
+
+Der [Pairing-Befehl](/de/techstack/pairing-command) bindet einen Server einmalig
+an dein Techstack. Beim Pairing erzeugt Guard auf dem Server seinen eigenen
+Schlüssel und weist von da an mit kurzlebigen Zugriffstokens nach, dass er
+diesen Schlüssel besitzt. Zugangsdaten allein beweisen nicht, welche Maschine
+spricht.
+
+Jeder Guard ist an genau einen Server gebunden, und ein Homelab hat meist
+mehrere. Ein Server-Image kann einen aktiven, aber ungebundenen Guard
+mitbringen, der aufs Pairing wartet. Es enthält nie deine Zugangsdaten.
+
+Guard besteht aus zwei Teilen. Der Guard selbst läuft als unprivilegierter
+Systembenutzer mit einem gehärteten Dienst. Änderungen am Server, die
+Administratorrechte brauchen, laufen über einen separaten Helfer, der nur
+startet, wenn eine Anfrage eintrifft, und nur typisierte, autorisierte
+Operationen akzeptiert. Ein Server, der noch das frühere Layout mit
+durchgehenden Administratorrechten nutzt, wird als **Reduced protection**
+angezeigt. Diese Trennung schützt die Zugangsdaten von Guard und den Server vor
+anderen Benutzern und Prozessen auf der Maschine. Sie behauptet nicht, dass ein
+kompromittierter Guard harmlos wäre.
+
+Um eine Bindung zu beenden, trenne den Server in seinem Guard-Panel. Das
+Trennen widerruft die Zugangsdaten von Guard und beendet die Reichweite des
+Servers: seine kombify.me-Adresse und seinen Eintrag in kombify Connect. Die
+Maschine selbst und was darauf läuft, bleiben unberührt. Um den Server wieder zu
+verwalten, paare ihn erneut. Guard löscht danach seine Zugangsdaten und sein
+lokales Journal. Du kannst auch die Zugangsdaten eines Servers rotieren: Ein
+Ersatz wird ausgestellt und einmal angezeigt, und die alten werden nicht mehr
+akzeptiert.
+
+## Gesicherte Konfiguration
+
+StackKits definiert die Sicherheits-Baseline des Hosts. Guard prüft den Server
+dagegen und meldet jede Kontrolle als konform, abweichend, unbekannt oder
+genehmigte Ausnahme. Die Prüfungen decken Firewall, SSH-Zugang,
+Brute-Force-Schutz, automatische und ausstehende Sicherheitsupdates,
+Neustart-Status, Kernel-Parameter, offene Listener und Zertifikatsablauf ab. Für
+Heim-Standorte erwartet die Baseline eine expositionsbewusste Firewall, SSH nur
+mit Schlüssel und Brute-Force-Schutz.
+
+- **Unbekannt ist nie sicher.** Nachweise laufen ab. Eine Kontrolle, die nicht
+  beobachtet wurde oder deren Nachweis zu alt ist, gilt als unbekannt, nicht als
+  konform.
+- **Befunde erklären sich selbst.** Jeder Befund zeigt die Kontrolle, ihren
+  Schweregrad, den erwarteten und den beobachteten Wert und die Abhilfe.
+- **Ausnahmen bleiben sichtbar.** Eine Ausnahme braucht einen Owner und ein
+  Ablaufdatum und bleibt aufgelistet.
+- **Abweichungen werden gemeldet, nicht stillschweigend behoben.** Einen Befund
+  zu beobachten autorisiert keine Reparatur. Eine Reparatur läuft nur für
+  Kontrollen, die aktuelle Nachweise als abweichend melden, nur mit deiner
+  Genehmigung und innerhalb von Grenzen: eine Reparatur zur selben Zeit, eine
+  Abkühlzeit pro Kontrolle, ein tägliches Versuchsbudget und ein Circuit Breaker
+  auf dem Server. StackKits lehnt jede Änderung ab, die den Weg von Techstack zum
+  Server kappen oder dich aussperren würde. Du kannst die automatische Reparatur
+  für eine kleine, sichere Gruppe von Kontrollen genehmigen
+  (Brute-Force-Schutz, Firewall, Kernel-Parameter und automatische Updates). Sie
+  ist standardmäßig aus, läuft ab und erneuert sich nicht selbst. SSH-Kontrollen
+  bleiben bei einem Menschen.
+
+Wähle **Verify now** im Guard-Panel, um den Server erneut zu prüfen.
+
+## Von überall erreichbar
+
+Jeder mit Guard gepaarte Server ist darauf ausgelegt, ohne manuelle Schlüssel
+über seine eigene `*.kombify.me`-Adresse oder deine eigene Domain erreichbar zu
+sein, und das hängt nicht davon ab, ob die Hardware zu Hause steht oder gemietet
+ist. Die Zugangsdaten für diesen Weg werden beim Pairing pro Server ausgestellt,
+mit Guard rotiert und widerrufen, wenn du den Server trennst. Siehe
+[kombify.me](/de/kombify-me/overview).
+
+## Ein Homelab in kombify Connect
+
+kombify Connect gibt deinem Homelab ein einheitliches Gerätemodell.
+Entwicklergeräte, die über Workbench arbeiten, Client-Geräte wie Desktop, Mobile
+und Companion sowie die Server deines Homelabs, jeder mit seinem Guard, sind
+Mitglieder desselben Homelabs. In der Public Beta erscheinen Guard-Server in der
+Geräteansicht von Connect, und du kannst dort einen widerrufen. Gelistet zu sein
+gibt keinen Zugriff: Für einen Server in Connect gibt es keine Route, die Arbeit
+auf ihm ausführt. Die Befugnis, Arbeit auf einem Server auszuführen, bleibt bei
+deinem Techstack.
+
+## Operationen, die Ausfälle überstehen
+
+Bevor Guard etwas ändert, hält er die Absicht in einem dauerhaften Journal auf
+dem Server fest und behält jedes Ergebnis, bis Techstack den Empfang bestätigt.
+Nach einem Verbindungsabbruch oder Neustart liefert Guard Ergebnisse erneut aus,
+ohne die Änderung zu wiederholen. Bleibt nach einem Fehler unklar, ob eine
+Änderung gewirkt hat, meldet Guard einen **unbekannten Ausgang**, statt zu
+raten, und blockiert weitere Änderungen auf diesem Server, bis der Ausgang
+geklärt ist. Guard versucht zuerst, ihn selbst zu klären. Andernfalls prüfst du
+den Server und hältst fest, was du gefunden hast. Die Blockade aufzuheben
+erfordert eine frische Anmeldung mit einem zweiten Faktor aus den letzten fünf
+Minuten.
+
+Solange die Verbindung zu Techstack unterbrochen ist, laufen Anwendungen auf dem
+Server weiter und Guard behält seine Beobachtungen. Neue privilegierte Arbeit
+braucht eine gültige Autorisierung und startet nicht ohne sie.
+
+## Updates
+
+Guard-Updates werden vor der Installation geprüft. Der Server verifiziert die
+Signatur des Updates und dass es neuer ist als die installierte Version, und er
+lehnt ein widerrufenes Release ab. Der neue Guard muss dann innerhalb einer
+Testphase einen authentifizierten Check-in bei Techstack abschließen. Gelingt
+das nicht, wird die vorherige Version automatisch wiederhergestellt. Pairing,
+Schlüssel und Journal bleiben über ein Update hinweg erhalten. Die
+Erstinstallation kommt über HTTPS von deinem eigenen Techstack; Signaturprüfungen
+gelten für Updates.
+
+## Was du tun kannst
+
+- **Den Dienst auf dem Server prüfen.** `sudo systemctl status techstack-agent`
+  zeigt, ob Guard läuft, und `sudo journalctl -u techstack-agent -f` verfolgt
+  sein Log.
+- **Das Guard-Panel öffnen** eines Servers in Techstack, um die Fakten zu sehen,
+  die Konfiguration zu verifizieren, unbekannte Ausgänge zu prüfen, die
+  Zugangsdaten zu rotieren oder den Bericht herunterzuladen.
+- **Einen Server trennen**, den du nicht mehr verwalten willst.
+- **Nachlesen, was Guard sendet**, unter
+  [Was kombify Guard sendet](/de/techstack/guard-telemetry).
+
+<CardGroup cols={2}>
+  <Card title="Pairing-Befehl" icon="terminal" href="/de/techstack/pairing-command">
+    Paare einen Server und binde ihn mit einem Befehl an dein Techstack.
+  </Card>
+  <Card title="Was kombify Guard sendet" icon="list-check" href="/de/techstack/guard-telemetry">
+    Die Daten, die Guard senden darf, was er nie sendet und wie lange sie
+    aufbewahrt werden.
+  </Card>
+  <Card title="kombify.me-Adressen" icon="globe" href="/de/kombify-me/overview">
+    Erreiche einen Server von überall über seine eigene Adresse.
+  </Card>
+  <Card title="Techstack-Verfügbarkeit" icon="circle-info" href="/de/techstack/availability">
+    Sieh, was heute öffentlich ist und was Vorschau bleibt.
+  </Card>
+</CardGroup>

@@ -11,13 +11,13 @@ icon: "terminal"
 
 该命令会从你的 Techstack 下载 Techstack 安装程序，并使用一个个人专属的、短期有效的配对令牌来运行它。在服务器上，安装程序会：
 
-1. 检测平台并安装 Techstack **Guard**，这是一个上报服务器健康状况的小型代理；
+1. 检测平台并安装 **kombify Guard**，这个代理让服务器始终绑定于你的 Techstack，只执行你授权的工作，并上报它发现的情况；
 2. 安装部署所需的固定版本 StackKits 运行时；
-3. 兑换配对令牌，将这台服务器链接到你的家庭实验室；
+3. 兑换配对令牌，将这台服务器链接到你的家庭实验室。Guard 在服务器上生成自己的密钥，此后用它来证明身份；
 4. 在没有可用的容器运行时时，通过 `apt-get` 安装 Docker；
-5. 安装并启动 `techstack-agent` 系统服务，使 Guard 在重启后继续运行。
+5. 安装并启动 `techstack-agent` 系统服务，使 Guard 在重启后继续运行。Guard 的设计是以无特权的系统用户身份运行，另有一个单独的辅助进程，只为需要管理员权限的工作而启动。
 
-Guard 仅通过**出站** HTTPS 连接与 Techstack 通信。它大约每 30 秒发送一次心跳和实测的清单。你不需要为此在服务器上开放任何入站端口。
+Guard 仅通过**出站** HTTPS 连接与 Techstack 通信。它大约每 30 秒发送一次心跳和实测的清单。你不需要为此在服务器上开放任何入站端口。Guard 可以发送的全部内容列在 [kombify Guard 会发送什么](/zh-Hans/techstack/guard-telemetry)中。
 
 令牌只能使用一次。Techstack 只存储服务器所收到凭据的哈希值，并且该命令不会保留在任务报告中。
 
@@ -46,6 +46,8 @@ Guard 仅通过**出站** HTTPS 连接与 Techstack 通信。它大约每 30 秒
 ## 节点连接之后
 
 当 Guard 发送第一次心跳时，Techstack 会将节点从 **Not connected yet** 更改为已连接。随后进度页面会继续进行该节点的 StackKit 部署。你可以关闭终端。
+
+进度页面还会显示 Guard 的配对就绪状态：**Bound**、**Connected**、**Configuration verified** 和 **Reachable**。每一步都对照 Techstack 已记录的内容进行检查，而不是想当然。以后若要停止管理该服务器，请分离它。这会在所有地方撤销其 Guard 凭据。请参阅 [kombify Guard](/zh-Hans/techstack/kombify-guard)。
 
 之后如需在服务器上检查 Guard：
 

@@ -15,19 +15,25 @@ eingeben.
 Der Befehl lädt den Techstack-Installer von deinem Techstack herunter und führt
 ihn mit einem persönlichen, kurzlebigen Pairing-Token aus. Auf dem Server
 
-1. erkennt der Installer die Plattform und installiert den Techstack-**Guard**,
-   einen kleinen Agent, der den Zustand des Servers meldet;
+1. erkennt der Installer die Plattform und installiert **kombify Guard**, den
+   Agent, der diesen Server an dein Techstack gebunden hält, nur die Arbeit
+   ausführt, die du autorisierst, und meldet, was er findet;
 2. installiert er die gepinnte StackKits-Laufzeit, die der Rollout braucht;
 3. löst er das Pairing-Token ein, das diesen Server mit deinem Homelab
-   verknüpft;
+   verknüpft. Guard erzeugt auf dem Server seinen eigenen Schlüssel und weist
+   damit von da an seine Identität nach;
 4. installiert er Docker mit `apt-get`, wenn keine funktionierende
    Container-Laufzeit vorhanden ist;
 5. installiert und startet er den Systemdienst `techstack-agent`, damit der
-   Guard nach einem Neustart weiterläuft.
+   Guard nach einem Neustart weiterläuft. Guard ist darauf ausgelegt, als
+   unprivilegierter Systembenutzer zu laufen, mit einem separaten Helfer, der nur
+   für Arbeit startet, die Administratorrechte braucht.
 
 Der Guard spricht mit Techstack nur über eine **ausgehende** HTTPS-Verbindung.
 Er sendet etwa alle 30 Sekunden einen Heartbeat und ein gemessenes Inventar.
-Du öffnest dafür keinen eingehenden Port auf dem Server.
+Du öffnest dafür keinen eingehenden Port auf dem Server. Alles, was Guard
+senden darf, steht unter
+[Was kombify Guard sendet](/de/techstack/guard-telemetry).
 
 Das Token funktioniert einmal. Techstack speichert nur einen Hash der
 Zugangsdaten, die der Server erhält, und der Befehl wird nicht in
@@ -77,6 +83,13 @@ abläuft, kann einen Server mit deinem Homelab verbinden.
 Sobald der Guard seinen ersten Heartbeat sendet, ändert Techstack den Node von
 **Not connected yet** auf verbunden. Die Fortschrittsseite setzt dann mit dem
 StackKit-Rollout für diesen Node fort. Du kannst das Terminal schließen.
+
+Die Fortschrittsseite zeigt außerdem die Pairing-Bereitschaft von Guard:
+**Bound**, **Connected**, **Configuration verified** und **Reachable**. Jeder
+Schritt wird gegen das geprüft, was Techstack erfasst hat, und nicht
+angenommen. Um den Server später nicht mehr zu verwalten, trenne ihn. Das
+widerruft seine Guard-Zugangsdaten überall. Siehe
+[kombify Guard](/de/techstack/kombify-guard).
 
 So prüfst du den Guard später auf dem Server:
 
