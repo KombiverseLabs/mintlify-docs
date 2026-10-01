@@ -1,0 +1,70 @@
+---
+title: "Qué envía kombify Guard"
+description: "Los datos que kombify Guard puede enviar desde tu servidor, lo que nunca envía, adónde van y cuánto tiempo se conservan"
+sidebarTitle: "Qué envía Guard"
+icon: "list-check"
+---
+
+[kombify Guard](/es/techstack/kombify-guard) envía solo las clases de datos
+enumeradas en esta página. Un campo que no figura en la lista no se envía, y
+añadir un campo exige cambiar primero esta lista.
+
+<Note>
+**Public Beta.** La lista es el límite superior de lo que Guard puede enviar. No
+todas las versiones de Guard envían ya todas las clases. Los periodos de
+conservación de abajo describen el plano de control de Techstack que opera
+kombify.
+</Note>
+
+## Lo que Guard nunca envía
+
+- Contenido de aplicaciones ni contenido de archivos.
+- Variables de entorno, secretos ni credenciales.
+- Datos personales de las personas de tu hogar.
+- El correo del Owner. Es configuración de StackKits, nunca telemetría de Guard.
+- El ID de máquina en bruto. Guard solo envía un digest de él.
+
+## Adónde van los datos
+
+- **Un Techstack que operas tú mismo.** Guard envía sus datos solo a tu propio
+  Techstack. kombify no recibe nada a menos que conectes la instalación.
+- **Instalaciones conectadas y gestionadas.** Guard envía sus datos al plano de
+  control de Techstack que opera kombify, por el canal autenticado de Guard
+  vinculado a la propia clave del servidor.
+- **Limitado a ti.** La telemetría está diseñada para limitarse a tu cuenta, tanto
+  al almacenarse como en cada interfaz que la lee. No deberías ver los nombres de
+  host, direcciones, identificadores ni métricas de otra cuenta.
+
+## Qué puede enviar Guard
+
+| Datos | Qué contienen | Para qué | Cuánto tiempo se conservan |
+| --- | --- | --- | --- |
+| Vinculación | Identificadores del worker, servidor, stack, cuenta y propietario; una huella de la clave del servidor; la generación de la credencial; la versión de Guard y del contrato | Autenticar el servidor y vincularlo a ti | Mientras dure la vinculación. Los registros de revocación se conservan 90 días. |
+| Liveness | Hora de observación, números de secuencia, ID de arranque, un digest del ID de máquina, estado del diario, número de resultados sin resolver | Mostrar la frescura de la conexión y detectar reinicios y servidores clonados | Estado actual y la línea temporal de cambios durante 90 días |
+| Recursos del host | CPU, memoria, swap, carga, uso de disco por punto de montaje, uptime, uso de recursos de los contenedores | Mostrar capacidad y estado | 15 días |
+| Inventario del host | Nombre de host, sistema operativo y versión, arquitectura, tamaño de CPU, memoria y disco, versión del runtime, direcciones IP públicas, privadas y locales, claves públicas de host SSH, puertos en escucha | Comprobar la accesibilidad, fijar la identidad del host SSH y comprobar qué está expuesto | Estado actual. Los valores reemplazados se conservan 30 días. |
+| Inventario de servicios | Identidad, versión y modo del StackKit, nombres de servicios y contenedores, referencias de imagen, nombres de unidades systemd, estado comprobado, endpoints | Operar y verificar servicios | Estado actual y la línea temporal de cambios durante 90 días |
+| Postura de seguridad | La evidencia de seguridad del host de StackKits: el estado de cada control, valores esperados y observados, excepciones, versión de la línea base, frescura | Mostrar la configuración asegurada y alertar sobre ella | Estado actual y hallazgos durante 90 días |
+| Postura de recuperación | La antigüedad y el estado de las copias de seguridad, y el resultado del último simulacro de restauración verificado | Mostrar si puedes recuperarte | Estado actual e historial durante 90 días |
+| Recibos de operaciones | ID de comando, vinculación, acción, estado y digest del resultado, un breve resumen del resultado, líneas de log del ejecutor con datos ocultados | Llevar un registro duradero y auditable de lo que hizo Guard | Recibos 90 días. Líneas de log 30 días. |
+
+## Durante una interrupción y al desconectar
+
+Durante una interrupción, Guard guarda sus datos localmente dentro de un
+presupuesto acotado. Tras la interrupción, o bien rellena los datos pendientes o
+notifica un hueco explícito.
+
+Cuando desconectas o retiras un servidor, Guard elimina sus credenciales y su
+diario local después de que Techstack confirme la entrega. El plano de control de
+Techstack que opera kombify elimina el inventario, las métricas y la postura de
+esa vinculación en un plazo de 30 días. Los recibos de auditoría son la
+excepción y siguen los periodos indicados arriba.
+
+<CardGroup cols={2}>
+  <Card title="kombify Guard" icon="shield-halved" href="/es/techstack/kombify-guard">
+    Qué hace Guard en tu servidor y qué muestra su panel.
+  </Card>
+  <Card title="Comando de emparejamiento" icon="terminal" href="/es/techstack/pairing-command">
+    Empareja un servidor e inicia su Guard.
+  </Card>
+</CardGroup>
