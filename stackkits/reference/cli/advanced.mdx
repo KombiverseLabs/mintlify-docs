@@ -4,8 +4,8 @@ description: "Manage offline-authorized Advanced lifecycle operations"
 sidebarTitle: "advanced"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:43d24b787db672a850b71186884b6d9a28ec8ac227ab92afffb4b0115a7f7496"
-source_hash: "bd352b5c02fa98d4ad39638350361e74e9ae685d"
+content_hash: "sha256:ca7b73f69fef6247491730ed31876872b28f84a5d1d98a9ab0f868760db6e6f1"
+source_hash: "2679a8f9f41bc6f4035900107517eda5eaf6b7ee"
 ---
 Manage offline-authorized Advanced lifecycle operations.
 
@@ -107,7 +107,7 @@ Roll every local Terramate stack back to one verified checkpoint.
 
 Roll the local host back to one verified executor-state checkpoint as the Advanced operation rollback.coordinated.
 
-The rollback is admitted only with an offline-verified capability that allows rollback.coordinated, the local Owner-approved issuer trust, and explicit `--owner-approve`. `--to` names the checkpoint directly or the change set whose pre-apply checkpoint is the target. Stacks run in reverse run order: stacks added after the checkpoint are destroyed through OpenTofu (docker compose down without volumes) and removed, changed stacks get the checkpoint's state, configuration and payload back and are forced to converge, and stacks removed after the checkpoint are recreated. The checkpoint's StackSpec and Inventory are restored, regenerated and verified. An interrupted rollback resumes on the next run with the same `--to` and skips stacks that already converged.
+The rollback is admitted only with an offline-verified capability that allows rollback.coordinated, the local Owner-approved issuer trust, and explicit `--owner-approve`. `--to` names the checkpoint directly or the change set whose pre-apply checkpoint is the target. Stacks run in reverse run order: stacks added after the checkpoint are destroyed through OpenTofu (docker compose down without volumes) and removed, changed stacks get the checkpoint's state, configuration and payload back and are forced to converge, and stacks removed after the checkpoint are recreated. The checkpoint's StackSpec and Inventory are restored and regenerated before the stacks run; afterwards joined apply and verify children record and verify the checkpoint's Apply evidence. An interrupted rollback resumes on the next run with the same `--to` and skips stacks that already converged.
 
 ```bash
 stackkit advanced rollback run [flags]

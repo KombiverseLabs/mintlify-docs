@@ -1,0 +1,104 @@
+---
+title: "stackkit fleet"
+description: "Admit and join member hosts of one StackInstance"
+sidebarTitle: "fleet"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:ca7b73f69fef6247491730ed31876872b28f84a5d1d98a9ab0f868760db6e6f1"
+source_hash: "2679a8f9f41bc6f4035900107517eda5eaf6b7ee"
+---
+Admit and join member hosts of one StackInstance.
+
+Bind a physical host to an existing member node of this StackInstance.
+
+The Home owner on the Foundation Node signs a member admission for one enabled non-controller node at a Cloud Site. The member host verifies it against the pinned Home key, recompiles the same plan from the admitted StackSpec and Inventory, and keeps verify-only member custody: no enrollment, signing, credential issuance, or ControlAuthority. Both hosts must run the same StackKits version.
+
+Join also generates a member evidence key and writes one request file. The Home owner certifies it with certify-member-key; after import-member-key the member applies and verifies only its own Site/node/channel tuple and signs that evidence with the certified key.
+
+```bash
+stackkit fleet [flags]
+```
+
+Subcommands: [`stackkit fleet admit-member`](#stackkit-fleet-admit-member), [`stackkit fleet certify-member-key`](#stackkit-fleet-certify-member-key), [`stackkit fleet import-member-key`](#stackkit-fleet-import-member-key), [`stackkit fleet join`](#stackkit-fleet-join)
+
+## stackkit fleet admit-member
+
+Owner-sign a member admission for one Cloud edge node.
+
+```bash
+stackkit fleet admit-member [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--inventory` | string | — | Inventory declaring both execution channels (otherwise one conventional inventory file is selected) |
+| `--node` | string | — | Member node ID from the StackSpec (an enabled worker or edge at a Cloud Site) |
+| `--output` | string | — | Workspace-confined admission output (default .stackkit/fleet/member-admissions/&lt;node&gt;.json) |
+| `--valid-for` | duration | `24h0m0s` | Join window of the admission (at most 24h) |
+
+**Examples**
+
+```bash
+# On the Foundation Node, admit the Cloud edge declared in the plan
+stackkit fleet admit-member --node cloud-edge
+```
+
+## stackkit fleet certify-member-key
+
+Owner-certify a joined member's evidence key for its own tuple.
+
+Certify the member evidence key a joined member generated at join.
+
+The certificate lets the member sign Apply and Verify evidence for its own Site/node/execution-channel tuple and nothing else: no enrollment, identity signing, credential issuance, ControlAuthority, or Owner authority. The Foundation Node records every certificate it issues and from then on leaves that member's local runtime targets to the member.
+
+```bash
+stackkit fleet certify-member-key <request-file> [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--inventory` | string | — | Inventory declaring both execution channels (otherwise one conventional inventory file is selected) |
+| `--output` | string | — | Additional workspace-confined certificate output to relay to the member |
+| `--valid-for` | duration | `720h0m0s` | Certificate validity (at most 2160h) |
+
+**Examples**
+
+```bash
+# On the Foundation Node, with the request file the member relayed
+stackkit fleet certify-member-key member-evidence-key-request.json --output member-evidence-key.json
+```
+
+## stackkit fleet import-member-key
+
+Import the Home owner certificate for this member's evidence key.
+
+```bash
+stackkit fleet import-member-key <certificate-file> [flags]
+```
+
+**Examples**
+
+```bash
+# On the Cloud host, with the certificate the Foundation Node returned
+stackkit fleet import-member-key member-evidence-key.json
+```
+
+## stackkit fleet join
+
+Join this host as the verify-only member named by an admission.
+
+```bash
+stackkit fleet join <admission-file> [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--home-key-id` | string | — | Home owner key ID from admit-member, compared out of band |
+
+**Examples**
+
+```bash
+# On the Cloud host, in an empty deployment directory
+stackkit fleet join member-admission.json --home-key-id <homeKeyId>
+```
+
