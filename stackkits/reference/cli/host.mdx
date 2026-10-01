@@ -4,8 +4,8 @@ description: "Provider-neutral host contract operations"
 sidebarTitle: "host"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:43d24b787db672a850b71186884b6d9a28ec8ac227ab92afffb4b0115a7f7496"
-source_hash: "bd352b5c02fa98d4ad39638350361e74e9ae685d"
+content_hash: "sha256:ca7b73f69fef6247491730ed31876872b28f84a5d1d98a9ab0f868760db6e6f1"
+source_hash: "2679a8f9f41bc6f4035900107517eda5eaf6b7ee"
 ---
 Provider-neutral host contract operations.
 
@@ -13,7 +13,7 @@ Provider-neutral host contract operations.
 stackkit host [flags]
 ```
 
-Subcommands: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host updates`](#stackkit-host-updates)
+Subcommands: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host security`](#stackkit-host-security), [`stackkit host updates`](#stackkit-host-updates)
 
 ## stackkit host attach-conformance
 
@@ -183,6 +183,129 @@ stackkit host remediate --apply <resolution-id> --yes
 
 # Carry out every undoable fix that may run unattended
 stackkit host remediate --auto-reversible --yes
+```
+
+## stackkit host security
+
+Verify and repair the host security baseline with versioned evidence.
+
+Observe this node against the StackKits host security baseline, and restore what drifted without cutting the management path.
+
+'verify' never changes the host. It produces stackkit.host-security-evidence/v1 for the firewall, sshd, brute-force protection, automatic and pending security updates, reboot state, kernel parameters, exposed listeners and certificate expiry. Every control is compliant, drifted, unknown or an owner-approved exception, and the evidence expires: a stale observation is unknown, and an unknown control never counts as compliant.
+
+It works on its own (Standard Mode, no account) and through the pinned CLI when Techstack manages the deployment (`--mode` advanced).
+
+```bash
+stackkit host security [flags]
+```
+
+Subcommands: [`stackkit host security repair`](#stackkit-host-security-repair), [`stackkit host security status`](#stackkit-host-security-status), [`stackkit host security verify`](#stackkit-host-security-verify)
+
+### stackkit host security repair
+
+Restore drifted baseline controls without cutting the management path.
+
+Plan, or with `--apply` carry out, the restoration of drifted controls.
+
+Without `--apply` nothing is changed: the command measures the host and prints what each repair would do. With `--apply` only the named (`--control`) or drifted controls are touched, and every change is checked first:
+
+```text
+  - the firewall always keeps admitting the ssh sessions in use and every
+    --management-source on every sshd port, and a policy that would not is
+    refused before it is loaded;
+  - password logins are disabled only when an account holds an authorized key;
+    without one they stay on, the step is refused with reason no_authorized_key
+    and the rest of the baseline is still repaired. The previous sshd and
+    firewall configuration is restored if the new one does not validate or does
+    not take effect;
+  - fail2ban never bans the management path.
+```
+
+A control that cannot be observed, or that the owner approved an exception for, is not touched. A Cloud site's firewall and root login are restored by 'stackkit apply'. Each step records the control before and after, and a repeated repair of a compliant control changes nothing.
+
+```bash
+stackkit host security repair [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--apply` | bool | — | Carry out the repair; without it the command only plans |
+| `--control` | stringArray | — | Restrict the repair to this control ID (repeatable) |
+| `--declared-port` | stringArray | — | Declared service port as tcp/443 or udp/5353 (repeatable) |
+| `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | Owner-controlled exceptions file (each exception needs an owner and an expiry) |
+| `--freshness` | duration | `15m0s` | How long the evidence may be relied on before it expires (1m to 24h) |
+| `--json` | bool | — | Emit the result as machine-readable JSON |
+| `--kit` | string | — | Kit slug to record (default: the kit of the workspace StackSpec) |
+| `--local-node` | string | — | Exact local Node in the supplied ResolvedPlan |
+| `--management-source` | stringArray | — | Network that must always reach ssh, as a CIDR (repeatable) |
+| `--mode` | string | `standard` | Lifecycle mode to record: standard, or advanced when Techstack manages this deployment |
+| `--no-record` | bool | — | Do not write the post-repair evidence under .stackkit/ |
+| `--resolved-plan` | string | — | Verified canonical ResolvedPlan whose declared listeners to judge exposure against |
+| `--site-kind` | string | — | Site kind of this host: home or cloud (default: inferred from the kit; modern-homelab needs it) |
+
+**Examples**
+
+```bash
+# See what would be repaired
+sudo stackkit host security repair --site-kind home
+
+# Restore only the firewall, keeping a jump host reachable
+sudo stackkit host security repair --apply --control firewall.default_inbound --management-source 198.51.100.0/24
+```
+
+### stackkit host security status
+
+Read the stored evidence as it stands now, without observing the host.
+
+Read the evidence 'verify' last recorded in this workspace and judge it at the current time. Evidence past its freshness budget is unknown: an old observation proves nothing about the host now.
+
+```bash
+stackkit host security status [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--fail-on-drift` | bool | — | Exit 5 when the host is drifted and 6 when its state is unknown |
+| `--json` | bool | — | Emit the evidence as machine-readable JSON |
+
+### stackkit host security verify
+
+Observe the host security baseline and write versioned evidence.
+
+Observe every baseline control on this node and produce stackkit.host-security-evidence/v1. Nothing on the host is changed.
+
+Most controls need root to be observed; one that cannot be observed is reported unknown with the reason, not as a failure. The evidence is written to .stackkit/host-security-evidence.json in the workspace unless `--no-record` is given, and it expires after `--freshness`.
+
+```bash
+stackkit host security verify [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--declared-port` | stringArray | — | Declared service port as tcp/443 or udp/5353 (repeatable) |
+| `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | Owner-controlled exceptions file (each exception needs an owner and an expiry) |
+| `--fail-on-drift` | bool | — | Exit 5 when the host is drifted and 6 when its state is unknown |
+| `--freshness` | duration | `15m0s` | How long the evidence may be relied on before it expires (1m to 24h) |
+| `--json` | bool | — | Emit the result as machine-readable JSON |
+| `--kit` | string | — | Kit slug to record (default: the kit of the workspace StackSpec) |
+| `--local-node` | string | — | Exact local Node in the supplied ResolvedPlan |
+| `--management-source` | stringArray | — | Network that must always reach ssh, as a CIDR (repeatable) |
+| `--mode` | string | `standard` | Lifecycle mode to record: standard, or advanced when Techstack manages this deployment |
+| `--no-record` | bool | — | Do not write the evidence under .stackkit/ |
+| `--resolved-plan` | string | — | Verified canonical ResolvedPlan whose declared listeners to judge exposure against |
+| `--site-kind` | string | — | Site kind of this host: home or cloud (default: inferred from the kit; modern-homelab needs it) |
+
+**Examples**
+
+```bash
+# Verify this host and record the evidence
+sudo stackkit host security verify
+
+# What Techstack runs: machine-readable, advanced mode, exit non-zero on drift
+sudo stackkit host security verify --mode advanced --json --fail-on-drift
+
+# Judge exposure against the ports the verified plan declares
+sudo stackkit host security verify --resolved-plan plan.json --local-node node-1
 ```
 
 ## stackkit host updates

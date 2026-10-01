@@ -4,8 +4,8 @@ description: "Set up the owner account of an applied application"
 sidebarTitle: "setup"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:43d24b787db672a850b71186884b6d9a28ec8ac227ab92afffb4b0115a7f7496"
-source_hash: "bd352b5c02fa98d4ad39638350361e74e9ae685d"
+content_hash: "sha256:ca7b73f69fef6247491730ed31876872b28f84a5d1d98a9ab0f868760db6e6f1"
+source_hash: "2679a8f9f41bc6f4035900107517eda5eaf6b7ee"
 ---
 Set up the owner account of an applied application.
 
@@ -34,5 +34,38 @@ stackkit setup photos --owner-approve --complete-onboarding
 
 # Create the Files owner from a workspace-relative credentials file of your choice
 stackkit setup files --owner-approve --credentials-file private/files-owner.json
+```
+
+Subcommands: [`stackkit setup ai-connect`](#stackkit-setup-ai-connect)
+
+## stackkit setup ai-connect
+
+Connect the Private AI Ollama to your kombify AI as an own model endpoint.
+
+Turn on the optional kombify AI connector of the Private AI use case. Create a model endpoint in Companion Studio (Settings, AI access, Model endpoints) with the origin http://ollama:11434 and copy its connector token. This command reads the token from standard input or from `--token-file`, never from an argument, checks its shape, keeps it in local owner custody and turns the connector on. The next generate and apply start the outbound connector next to Ollama. Nothing inbound is opened and Ollama stays unpublished.
+
+`--disable` turns the connector off and removes the token from local custody. Revoke the endpoint in Companion Studio to make the token useless everywhere.
+
+```bash
+stackkit setup ai-connect [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--disable` | bool | — | Turn the connector off and remove its token from local custody |
+| `--json` | bool | — | Emit the secret-free result |
+| `--token-file` | string | — | File with the connector token; "-" or no flag reads standard input |
+
+**Examples**
+
+```bash
+# Paste the connector token, then press Enter and Ctrl-D (or read it hidden on a terminal)
+stackkit setup ai-connect --token-file -
+
+# Read the token from a private file
+stackkit setup ai-connect --token-file ~/kombify-connector-token
+
+# Turn the connector off and remove its token
+stackkit setup ai-connect --disable
 ```
 
