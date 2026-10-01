@@ -1,0 +1,58 @@
+---
+title: "stackkit image"
+description: "Prepare and admit an owner-neutral golden image cache"
+sidebarTitle: "image"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:665cc71cb93d93df0efdb4e3a345b801b4f2e262d8e9d8b3347fa2a514d2bd4a"
+source_hash: "33ee04d1dcd34c1e8b64fd711d875a11e22a9fed"
+---
+Prepare and admit an owner-neutral golden image cache.
+
+Prepare immutable core container caches from the embedded CUE catalog. This never initializes an Owner, starts services, creates volumes or prepares a provider VM. Ubuntu 26.04 is the default target; Ubuntu 24.04 remains compatible. The manifest is unsigned cache metadata, never host conformance or Apply authority. The existing packaged OpenTofu provider closure is verified and reused. Network access remains necessary for first-boot service integrations and optional workloads. Techstack owns machine sysprep, VM images and enrollment.
+
+```bash
+stackkit image [flags]
+```
+
+Subcommands: [`stackkit image plan`](#stackkit-image-plan), [`stackkit image prepare`](#stackkit-image-prepare), [`stackkit image verify`](#stackkit-image-verify)
+
+## stackkit image plan
+
+Print the authoritative neutral core cache profile.
+
+```bash
+stackkit image plan [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--profile` | string | `cloud-core-compose` | CUE neutral profile (cloud-core-compose, basement-core-compose, basement-core-lite-compose) |
+
+## stackkit image prepare
+
+Cache the exact running attested release and pull core images only.
+
+```bash
+stackkit image prepare [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--cache-root` | string | — | **Required.** Separate neutral release/cache metadata directory |
+| `--profile` | string | `cloud-core-compose` | CUE neutral core cache profile |
+| `--target` | string | — | **Required.** Empty future deployment directory; never an initialized stack |
+
+## stackkit image verify
+
+Re-observe release bytes, empty target, host and exact core image cache.
+
+```bash
+stackkit image verify [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--cache-root` | string | — | **Required.** Separate neutral release/cache metadata directory |
+| `--target` | string | — | **Required.** Empty future deployment directory; never an initialized stack |
+
