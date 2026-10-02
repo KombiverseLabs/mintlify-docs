@@ -16,18 +16,24 @@ El comando descarga el instalador de Techstack desde tu Techstack y lo ejecuta
 con un token de emparejamiento personal y de corta duración. En el servidor, el
 instalador:
 
-1. detecta la plataforma e instala el **Guard** de Techstack, un pequeño agente
-   que informa de la salud del servidor;
+1. detecta la plataforma e instala **kombify Guard**, el agente que mantiene
+   este servidor vinculado a tu Techstack, ejecuta solo el trabajo que autorizas
+   e informa de lo que encuentra;
 2. instala el runtime de StackKits fijado que necesita el despliegue;
-3. canjea el token de emparejamiento, que vincula este servidor a tu homelab;
+3. canjea el token de emparejamiento, que vincula este servidor a tu homelab.
+   Guard genera su propia clave en el servidor y la usa a partir de entonces para
+   demostrar su identidad;
 4. instala Docker con `apt-get` cuando no hay un runtime de contenedores
    operativo;
 5. instala e inicia el servicio del sistema `techstack-agent`, para que el Guard
-   siga ejecutándose tras un reinicio.
+   siga ejecutándose tras un reinicio. Guard está diseñado para ejecutarse como
+   un usuario de sistema sin privilegios, con un ayudante aparte que solo arranca
+   para el trabajo que necesita derechos de administrador.
 
 El Guard habla con Techstack solo mediante una conexión HTTPS **saliente**.
 Envía un heartbeat y un inventario medido aproximadamente cada 30 segundos. No
-abres ningún puerto entrante en el servidor para él.
+abres ningún puerto entrante en el servidor para él. Todo lo que Guard puede
+enviar figura en [Qué envía kombify Guard](/es/techstack/guard-telemetry).
 
 El token funciona una sola vez. Techstack solo almacena un hash de la
 credencial que recibe el servidor, y el comando no se conserva en los informes
@@ -74,6 +80,13 @@ antes de que caduque puede conectar un servidor a tu homelab.
 Cuando el Guard envía su primer heartbeat, Techstack cambia el Node de **Not
 connected yet** a conectado. La página de progreso continúa entonces con el
 despliegue del StackKit para este Node. Puedes cerrar el terminal.
+
+La página de progreso también muestra la preparación del emparejamiento de
+Guard: **Bound**, **Connected**, **Configuration verified** y **Reachable**.
+Cada paso se comprueba frente a lo que Techstack ha registrado, no se da por
+supuesto. Para dejar de gestionar el servidor más adelante, desconéctalo. Esto
+revoca su credencial de Guard en todas partes. Consulta
+[kombify Guard](/es/techstack/kombify-guard).
 
 Para comprobar el Guard en el servidor más adelante:
 
