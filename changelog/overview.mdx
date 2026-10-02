@@ -7,6 +7,52 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits](https://github.com/kombifyio/stackKits/releases), [SpeechKit](https://github.com/kombifyio/SpeechKit/releases), and [Techstack](https://github.com/kombifyio/TechStack/releases) release notes on GitHub.
 
+<Update label="2026-10-02" description="Sep 17 – Oct 2">
+
+## StackKits Private AI lab, game servers, and an MCP on every install; SpeechKit meets Microsoft 365
+
+StackKits shipped [v0.33.0](https://github.com/kombifyio/stackKits/releases/tag/v0.33.0) through [v0.50.3](https://github.com/kombifyio/stackKits/releases/tag/v0.50.3): a full local AI lab, a Game use case, more apps per use case, Advanced mode, and a StackKits MCP on every installation. SpeechKit rolled from [v0.71.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.71.0) to [v0.73.4](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.4): Microsoft 365 meeting imports, bring-your-own-key Google voice, OpenAI-compatible audio endpoints, and an app in six languages.
+
+### New features
+
+- **Private AI becomes a local AI lab.** [StackKits v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) lets you pick Open WebUI or AnythingLLM as the chat and add web search, document parsing, a Hermes assistant, an OpenHands agent under gVisor, and ComfyUI for images and video. It runs on the CPU or on NVIDIA and AMD GPUs. An optional connector links your homelab model to kombify AI over an outbound connection, so no inbound port opens. See [Personal AI](/guides/stackkits/use-cases/personal-ai).
+- **Game servers.** [v0.41.0](https://github.com/kombifyio/stackKits/releases/tag/v0.41.0) adds an optional Game use case with the Pterodactyl Panel. `stackkit setup game` creates Minecraft Java and Bedrock servers with secure defaults, and [v0.43.0](https://github.com/kombifyio/stackKits/releases/tag/v0.43.0) adds Paper, Terraria, and Valheim. Setup checks readiness with a real client join and refuses a server the host memory cannot hold. See [Game](/guides/stackkits/use-cases/game).
+- **More apps per use case.** [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) installs Nextcloud, Forgejo, Emby, and Passbolt as alternatives to the defaults. Add-ons install next to a use case: Paperless-ngx, Euro-Office, Navidrome, Audiobookshelf, and ESPHome. See the [use-case catalog](/stackkits/reference/use-case-catalog).
+- **Mail, your way.** [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) adds Roundcube webmail for a mailbox you already have, plus an optional Stalwart mail server on a dedicated node. See [Mail](/guides/stackkits/use-cases/mail).
+- **Advanced mode for managed homes.** [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) runs change sets, per-stack drift detection and reconcile, coordinated rollback, and restore drills through Terramate over OpenTofu. Basement installs now default to OpenTofu, and [v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) encrypts its state and plans. See [`stackkit advanced`](/stackkits/reference/cli/advanced).
+- **A StackKits MCP on every installation.** [v0.46.0](https://github.com/kombifyio/stackKits/releases/tag/v0.46.0) publishes a token-protected `/mcp` endpoint on each Core, so an AI agent can connect straight to your server. Every public CLI command is now an MCP tool or a listed exception, and commands that would expose a secret stay CLI-only. See [MCP connector](/stackkits/reference/mcp-connector).
+- **OS updates from the CLI.** [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) plans and applies OS updates and schedules reboots on a node. See [`stackkit host`](/stackkits/reference/cli/host).
+- **Prepared images.** [v0.50.0](https://github.com/kombifyio/stackKits/releases/tag/v0.50.0) adds `stackkit image plan`, `prepare`, and `verify` to cache the toolchain and core images ahead of time. Each installation still gets its own owner keys and secrets on first boot. See [`stackkit image`](/stackkits/reference/cli/image).
+- **Meetings meet Microsoft 365.** [SpeechKit v0.72.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.0) imports the Teams transcript or the Microsoft 365 Copilot recap after a Teams meeting, and lets you choose Microsoft Foundry for write-ups with transcript consent. A multi-tenant sign-in lets you switch companies without a new install. See [Meeting](/speechkit/meeting).
+- **Bring your own Google voice.** [v0.73.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.0) restores Google Cloud speech-to-text, text-to-speech, and Gemini Live as optional providers on your own key. See [Modes and data paths](/speechkit/modes).
+- **OpenAI-compatible audio on the SpeechKit server.** [v0.73.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.1) serves `POST /v1/audio/transcriptions` and `POST /v1/audio/speech`, so clients such as Open WebUI can use it directly. A local-only profile runs without cloud providers.
+- **SpeechKit in six languages.** [v0.73.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.1) and [v0.73.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.2) localize the Android app, the website, the desktop app, and the tray in English, German, Spanish, Simplified Chinese, Hindi, and Arabic.
+
+### Updates
+
+- **Sign-in for more apps.** [StackKits v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) signs Paperless-ngx, Media, and Smart Home in through PocketID and provisions household accounts in Files. [v0.38.0](https://github.com/kombifyio/stackKits/releases/tag/v0.38.0) adds `stackkit user owner status` and `activate` for the owner passkey. See [PocketID](/stackkits/apps/pocketid).
+- **Smart Home grows.** [v0.47.1](https://github.com/kombifyio/stackKits/releases/tag/v0.47.1) installs Mosquitto and Zigbee2MQTT with owner-chosen LAN listeners and device passthrough, and [v0.50.0](https://github.com/kombifyio/stackKits/releases/tag/v0.50.0) adopts an existing Home Assistant without replacing its state. See [Smart Home](/guides/stackkits/use-cases/smart-home).
+- **Every application gets a route.** [v0.39.0](https://github.com/kombifyio/stackKits/releases/tag/v0.39.0) gives Media, Smart Home, AI, Dev, and Documents the same HTTPS route and data binding as Photos, Files, and Vault.
+- **Backups by coverage group.** [v0.37.0](https://github.com/kombifyio/stackKits/releases/tag/v0.37.0) selects data by `config`, `content`, or `media`. Unset coverage resolves to `content`, so media is always an explicit choice. See [Back up and restore](/guides/stackkits/back-up-and-restore).
+- **Ubuntu 26.04 by default.** [v0.50.0](https://github.com/kombifyio/stackKits/releases/tag/v0.50.0) targets Ubuntu 26.04 LTS for new installs and keeps 24.04 compatible. [v0.35.0](https://github.com/kombifyio/stackKits/releases/tag/v0.35.0) adds backups on Debian 13. See [OS compatibility](/stackkits/reference/os-compatibility).
+- **Compatibility from real runs.** [v0.33.0](https://github.com/kombifyio/stackKits/releases/tag/v0.33.0) and [v0.34.0](https://github.com/kombifyio/stackKits/releases/tag/v0.34.0) grade each kit per environment from automated install-to-restore runs, and [v0.41.0](https://github.com/kombifyio/stackKits/releases/tag/v0.41.0) grades Cloud Kit on a public VPS as supported.
+- **Every command documented.** [v0.33.0](https://github.com/kombifyio/stackKits/releases/tag/v0.33.0) adds examples to `stackkit <command> --help` and publishes the full [CLI reference](/stackkits/reference/cli/overview). The installer also verifies the downloaded archive against the release checksums.
+- **Basement defaults to `lab.home`.** [v0.47.5](https://github.com/kombifyio/stackKits/releases/tag/v0.47.5) uses `lab.home` as the default domain, and existing Basement domains migrate with signed recovery.
+- **Meeting notes as timestamped bullets.** [SpeechKit v0.71.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.71.0) writes notes as timestamped bullets and adds a quick note from the meeting pill.
+- **Techstack Open Core v0.33.5.** The [Techstack](https://github.com/kombifyio/TechStack) source and installer are published for v0.26.0 and v0.33.5, and the app adds Spanish, Simplified Chinese, Hindi, and Arabic. See [Techstack overview](/techstack/overview).
+
+### Bug fixes
+
+- **4 GB servers meet the 4 GB minimum.** [StackKits v0.45.0](https://github.com/kombifyio/stackKits/releases/tag/v0.45.0) rounds installed memory to the nearest GiB, so a 4 GB VPS is no longer refused by Cloud Kit.
+- **Upgrades from earlier releases work.** [v0.39.0](https://github.com/kombifyio/stackKits/releases/tag/v0.39.0) fixes `stackkit upgrade` and `stackkit kit list` failing with `unexpected EOF`. Install a current CLI before you upgrade.
+- **Config changes reach running services.** [v0.45.0](https://github.com/kombifyio/stackKits/releases/tag/v0.45.0) recreates a service when its generated config file changes, and the game Panel login no longer loads Google reCAPTCHA.
+- **Safer recovery.** [v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) lets a retried Apply recover an interrupted run and resumes an interrupted Cloud install from any directory. [v0.49.0](https://github.com/kombifyio/stackKits/releases/tag/v0.49.0) refuses update planning while an update runs and requires explicit approval for `stackkit remove` with JSON output.
+- **Cloud Kit fixes.** [v0.38.0](https://github.com/kombifyio/stackKits/releases/tag/v0.38.0) makes backups and owner sign-in work on Cloud Kit and names a Let's Encrypt rate limit with its retry time. [v0.48.3](https://github.com/kombifyio/stackKits/releases/tag/v0.48.3) rejects local-only Cloud Kit domains at init.
+- **Updates relaunch on the first try.** [SpeechKit v0.72.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.1) makes the first Install and restart relaunch the app.
+- **Cleaner German dictation.** [v0.72.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.0) stops leftover commas after German filler words, says why a meeting screenshot was not saved, and lets write-ups fall through every model with its own budget.
+
+</Update>
+
 <Update label="2026-09-16" description="Sep 5 – Sep 16">
 
 ## SpeechKit on macOS, Google AI retired, and a StackKits installer that picks the kit
