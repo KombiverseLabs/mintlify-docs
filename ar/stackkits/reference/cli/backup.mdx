@@ -7,7 +7,7 @@ sidebarTitle: "backup"
 
 إدارة النسخ الاحتياطية لعملية نشر StackKit هذه.
 
-تعمل النسخ الاحتياطية بواسطة Kopia (راجع ADR-0016) وتُنفَّذ في خدمة kopia-agent المحلية التي يولّدها Basement core. تعيد عمليات configure وstatus وrun الأصلية التحقق من الخطة المحلية الدقيقة والمخرجات المولَّدة وحيازة المالك وأدلة Apply قبل لمس Kopia. المستودع والمصدر والاستثناءات وهوية الخدمة وبيانات الاعتماد تملكها CUE أو حيازة المالك.
+تعمل النسخ الاحتياطية بواسطة Kopia (راجع ADR-0016) وتُنفَّذ في خدمة kopia-agent المحلية التي يولّدها core الـ Kit (Basement أو Cloud المستقل). تعيد عمليات configure وstatus وrun الأصلية التحقق من الخطة المحلية الدقيقة والمخرجات المولَّدة وحيازة المالك وأدلة Apply قبل لمس Kopia. المستودع والمصدر والاستثناءات وهوية الخدمة وبيانات الاعتماد تملكها CUE أو حيازة المالك.
 
 ```bash
 stackkit backup [flags]
@@ -171,7 +171,7 @@ stackkit backup restore abandon <restore-operation-id> --owner-approve
 
 ### stackkit backup restore activate
 
-تفعيل استعادة مجهّزة مُتحقَّق منها ضمن وحدات تخزين Basement الحية.
+تفعيل استعادة مجهّزة مُتحقَّق منها ضمن وحدات تخزين core الـ Kit الحية.
 
 ```bash
 stackkit backup restore activate <restore-result-id> [flags]

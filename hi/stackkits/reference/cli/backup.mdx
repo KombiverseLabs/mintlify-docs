@@ -7,7 +7,7 @@ sidebarTitle: "backup"
 
 इस StackKit डिप्लॉयमेंट के बैकअप प्रबंधित करें।
 
-बैकअप Kopia पर आधारित हैं (ADR-0016 देखें) और Basement कोर द्वारा रेंडर की गई स्थानीय kopia-agent सेवा में चलते हैं। नेटिव configure, status और run, Kopia को छूने से पहले सटीक स्थानीय Plan, जनरेट किए गए आर्टिफ़ैक्ट, ओनर कस्टडी और Apply प्रमाण को दोबारा सत्यापित करते हैं। रिपॉज़िटरी, स्रोत, बहिष्करण, सेवा पहचान और क्रेडेंशियल CUE या ओनर कस्टडी के स्वामित्व में हैं।
+बैकअप Kopia (ADR-0016 देखें) द्वारा संचालित होते हैं और Kit core (Basement या Cloud standalone) द्वारा रेंडर की गई स्थानीय kopia-agent सेवा में चलते हैं। नेटिव configure, status और run, Kopia को छूने से पहले सटीक स्थानीय Plan, जनरेट किए गए आर्टिफ़ैक्ट, ओनर कस्टडी और Apply साक्ष्य को फिर सत्यापित करते हैं। रिपॉज़िटरी, स्रोत, exclusions, सेवा पहचान और क्रेडेंशियल का स्वामित्व CUE या ओनर कस्टडी के पास है।
 
 ```bash
 stackkit backup [flags]
@@ -171,7 +171,7 @@ stackkit backup restore abandon <restore-operation-id> --owner-approve
 
 ### stackkit backup restore activate
 
-एक सत्यापित स्टेज्ड रिस्टोर को लाइव Basement वॉल्यूम में सक्रिय करें।
+एक सत्यापित स्टेज्ड रिस्टोर को लाइव Kit core वॉल्यूम में सक्रिय करें।
 
 ```bash
 stackkit backup restore activate <restore-result-id> [flags]

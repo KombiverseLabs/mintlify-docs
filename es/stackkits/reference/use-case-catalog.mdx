@@ -1,11 +1,11 @@
 ---
 title: "Catálogo de casos de uso"
-description: "Casos de uso y componentes que declara StackKits v0.46.6"
+description: "Casos de uso y componentes que declara StackKits v0.50.3"
 sidebarTitle: "Catálogo de casos de uso"
 icon: diagram-project
 ---
 
-Esta página se genera a partir del [release v0.46.6](https://github.com/kombifyio/StackKits/releases/tag/v0.46.6) publicado. Lista cada caso de uso que declara ese release, agrupado por caso de uso principal, con su propósito, sus componentes y su app predeterminada. Un componente declarado no es evidencia de una instalación ni de una ejecución verificada en un host; la [compatibilidad de SO](/es/stackkits/reference/os-compatibility) contiene las calificaciones verificadas del ciclo de vida. [Casos de uso](/es/guides/stackkits/use-cases/overview) ofrece la vista general de las guías de configuración.
+Esta página se genera a partir del [release v0.50.3](https://github.com/kombifyio/StackKits/releases/tag/v0.50.3) publicado. Lista cada caso de uso que declara ese release, agrupado por caso de uso principal, con su propósito, sus componentes y su app predeterminada. Un componente declarado no es evidencia de una instalación ni de una ejecución verificada en un host; la [compatibilidad de SO](/es/stackkits/reference/os-compatibility) contiene las calificaciones verificadas del ciclo de vida. [Casos de uso](/es/guides/stackkits/use-cases/overview) ofrece la vista general de las guías de configuración.
 
 ## Fotos
 
@@ -15,7 +15,12 @@ Guía: [Abrir la guía](/es/guides/stackkits/use-cases/photos)
 
 | Componente | Función | Tipo | Predeterminado |
 | --- | --- | --- | --- |
+| Ente Photos (`ente-photos`) | alternativa | aplicación |  |
 | Immich (`immich`) | principal | aplicación | ✓ |
+| Immich Kiosk (`immich-kiosk`) | de apoyo | aplicación |  |
+| Immich Lite (no smart search) (`immich-lite`) | alternativa | aplicación |  |
+| Immich Power Tools (`immich-power-tools`) | de apoyo | aplicación |  |
+| Immich Public Proxy (`immich-public-proxy`) | de apoyo | aplicación |  |
 
 Alternativas: `immich`, `immich-lite`
 
@@ -33,13 +38,19 @@ Guía: [Abrir la guía](/es/guides/stackkits/use-cases/documents-and-files)
 
 ### Almacenamiento de archivos y documentos
 
-Almacenamiento y uso compartido privados de archivos mediante el workload nativo de Cloudreve.
+Almacenamiento y uso compartido privados de archivos: Cloudreve de forma predeterminada, Nextcloud o kombify Paperwork como alternativas, con edición ofimática opcional y un archivo de documentos.
 
 Guía: [Abrir la guía](/es/guides/stackkits/use-cases/documents-and-files)
 
 | Componente | Función | Tipo | Predeterminado |
 | --- | --- | --- | --- |
 | Cloudreve (`cloudreve`) | principal | aplicación | ✓ |
+| Euro-Office (`euro-office`) | de apoyo | aplicación |  |
+| Nextcloud (`nextcloud`) | alternativa | aplicación |  |
+| Paperless-ngx (`paperless-ngx`) | de apoyo | aplicación |  |
+| kombify Paperwork (`paperwork`) | alternativa | conector |  |
+
+Alternativas: `cloudreve`, `nextcloud`
 
 ## Bóveda
 
@@ -49,7 +60,10 @@ Guía: [Abrir la guía](/es/guides/stackkits/use-cases/vault)
 
 | Componente | Función | Tipo | Predeterminado |
 | --- | --- | --- | --- |
+| Passbolt CE (`passbolt`) | alternativa | aplicación |  |
 | Vaultwarden (`vaultwarden`) | principal | aplicación | ✓ |
+
+Alternativas: `passbolt`, `vaultwarden`
 
 ## Multimedia
 
@@ -59,7 +73,12 @@ Guía: [Abrir la guía](/es/guides/stackkits/use-cases/media)
 
 | Componente | Función | Tipo | Predeterminado |
 | --- | --- | --- | --- |
+| Audiobookshelf (`audiobookshelf`) | de apoyo | aplicación |  |
+| Emby (`emby`) | alternativa | aplicación |  |
 | Jellyfin (`jellyfin`) | principal | aplicación | ✓ |
+| Navidrome (`navidrome`) | de apoyo | aplicación |  |
+
+Alternativas: `emby`, `jellyfin`
 
 ## Hogar inteligente
 
@@ -69,7 +88,10 @@ Guía: [Abrir la guía](/es/guides/stackkits/use-cases/smart-home)
 
 | Componente | Función | Tipo | Predeterminado |
 | --- | --- | --- | --- |
+| ESPHome (`esphome`) | de apoyo | aplicación |  |
 | Home Assistant (`home-assistant`) | principal | aplicación | ✓ |
+| Eclipse Mosquitto (`mosquitto`) | de apoyo | servicio |  |
+| Zigbee2MQTT (`zigbee2mqtt`) | de apoyo | aplicación |  |
 
 Alternativas: `home-assistant`, `home-assistant-existing`, `home-assistant-haos`, `home-assistant-imported`
 
@@ -83,7 +105,10 @@ Guía: [Abrir la guía](/es/guides/stackkits/use-cases/development)
 
 | Componente | Función | Tipo | Predeterminado |
 | --- | --- | --- | --- |
+| Forgejo (`forgejo`) | alternativa | aplicación |  |
 | Gitea (`gitea`) | principal | aplicación | ✓ |
+
+Alternativas: `forgejo`, `gitea`
 
 ### Escritorio remoto
 
@@ -97,13 +122,27 @@ Guía: [Abrir la guía](/es/guides/stackkits/use-cases/development)
 
 ## Correo
 
+### Correo privado
+
 Webmail privado mediante Roundcube para un buzón que ya tienes en un proveedor externo. No se crea ningún servidor de correo, DNS ni registro MX.
 
 Guía: [Abrir la guía](/es/guides/stackkits/use-cases/mail)
 
 | Componente | Función | Tipo | Predeterminado |
 | --- | --- | --- | --- |
+| kombify Paperwork (`paperwork`) | alternativa | conector |  |
 | Roundcube Webmail (`roundcube`) | principal | aplicación | ✓ |
+
+### Servidor de correo propio
+
+Tu propio servidor de correo en un nodo Cloud dedicado mediante Stalwart: buzones para tu dominio con SMTP, IMAP y submission. StackKits muestra los registros DNS que debes publicar; nunca modifica el DNS.
+
+Guía: [Abrir la guía](/es/guides/stackkits/use-cases/mail)
+
+| Componente | Función | Tipo | Predeterminado |
+| --- | --- | --- | --- |
+| mailcow (`mailcow`) | alternativa | aplicación |  |
+| Stalwart Mail Server (`stalwart`) | principal | aplicación | ✓ |
 
 ## Juegos
 
@@ -113,7 +152,18 @@ Guía: [Abrir la guía](/es/guides/stackkits/use-cases/game)
 
 | Componente | Función | Tipo | Predeterminado |
 | --- | --- | --- | --- |
+| Pelican Panel (`pelican`) | alternativa | aplicación |  |
 | Pterodactyl (`pterodactyl`) | principal | aplicación | ✓ |
+
+## Automatización
+
+Automatizaciones programadas y basadas en eventos en tu propio nodo mediante kombify Workpaths, un motor headless con una API privada protegida por un token del propietario. Funciona sin un plan de kombify.
+
+Guía: [Abrir la guía](/es/guides/stackkits/use-cases/automation)
+
+| Componente | Función | Tipo | Predeterminado |
+| --- | --- | --- | --- |
+| kombify Workpaths (`workpaths`) | principal | aplicación | ✓ |
 
 ## IA
 
@@ -123,5 +173,14 @@ Guía: [Abrir la guía](/es/guides/stackkits/use-cases/personal-ai)
 
 | Componente | Función | Tipo | Predeterminado |
 | --- | --- | --- | --- |
+| AnythingLLM (`anythingllm`) | alternativa | aplicación |  |
+| ComfyUI (`comfyui`) | de apoyo | aplicación |  |
+| Docling (`docling`) | de apoyo | aplicación |  |
+| Hermes Agent (`hermes`) | de apoyo | aplicación |  |
 | Ollama (`ollama`) | principal | aplicación | ✓ |
 | Open WebUI (`open-webui`) | de apoyo | aplicación |  |
+| SearXNG (`searxng`) | de apoyo | aplicación |  |
+| kombify SpeechKit (`speechkit`) | de apoyo | aplicación |  |
+| Apache Tika (`tika`) | de apoyo | aplicación |  |
+
+Alternativas: `anythingllm`, `private-ai`

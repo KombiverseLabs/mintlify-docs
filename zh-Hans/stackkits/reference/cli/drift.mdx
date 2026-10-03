@@ -39,7 +39,7 @@ stackkit drift detect --json
 
 通过受治理的本地生命周期协调漂移。
 
-Standard 模式需要显式的本地 Owner 批准，会验证当前的本地授权，创建强制性的 Kopia 与执行器状态回滚检查点，然后通过独占的生命周期日志依次运行 generate、apply 和 verify。目标阶段失败时，会自动恢复、重新应用并验证所捕获的先前执行器状态。Advanced 模式在提供离线验证能力之前保持默认拒绝；Advanced 变更之后，它会再次观察漂移报告（包括每个 Terramate 栈的 plan），并在协调后的报告不干净时失败。
+Standard 模式需要显式的本地 Owner 批准，会验证当前的本地授权，创建强制性的 Kopia 与执行器状态回滚检查点，然后通过独占的生命周期日志依次运行 generate、apply 和 verify。目标阶段失败时，会自动恢复、重新应用并验证所捕获的先前执行器状态。Advanced 模式在提供离线验证能力之前保持默认拒绝。它通过一个由 Owner 精确签名的变更集运行；对于运行时漂移，该变更集为空：它观察每个栈的漂移，通过替换各个发生漂移的 Terramate 栈的包装器 up 触发器来强制其重新收敛，经由受治理的事务执行 apply，然后再次观察漂移报告（包括每个 Terramate 栈的 plan），并在协调后的报告不干净时失败。
 
 ```bash
 stackkit drift reconcile [flags]
