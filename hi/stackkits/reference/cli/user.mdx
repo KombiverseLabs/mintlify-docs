@@ -30,7 +30,25 @@ stackkit user list
 stackkit user remove alex --owner-approve
 ```
 
-उप-कमांड: [`stackkit user add`](#stackkit-user-add), [`stackkit user list`](#stackkit-user-list), [`stackkit user owner`](#stackkit-user-owner), [`stackkit user remove`](#stackkit-user-remove)
+उप-कमांड: [`stackkit user activate`](#stackkit-user-activate), [`stackkit user add`](#stackkit-user-add), [`stackkit user files`](#stackkit-user-files), [`stackkit user list`](#stackkit-user-list), [`stackkit user owner`](#stackkit-user-owner), [`stackkit user remove`](#stackkit-user-remove)
+
+## stackkit user activate
+
+मौजूदा घरेलू सदस्य के लिए passkey एनरोलमेंट फिर जारी करें।
+
+```bash
+stackkit user activate <username> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | घरेलू passkey एनरोलमेंट फिर जारी करने की स्पष्ट स्वीकृति दें |
+
+`stackkit user` से मिला:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
 
 ## stackkit user add
 
@@ -61,6 +79,62 @@ stackkit user add alex --email alex@example.com --owner-approve
 # Set a display name and return the invitation as JSON
 stackkit user add sam --email sam@example.com --display-name "Sam Doe" --owner-approve --json
 ```
+
+## stackkit user files
+
+एप्लिकेशन-स्थानीय Files घरेलू अकाउंट फिर शुरू करें और सौंपें।
+
+Cloudreve CE, TinyAuth के पीछे एक एप्लिकेशन-स्थानीय अकाउंट रखता है। ये कमांड स्वीकृत PocketID घरेलू पहचान से उस अकाउंट को अभिसरित करते हैं और केवल स्पष्ट अनुरोध पर ओनर की कस्टडी वाला पासवर्ड दिखाते हैं।
+
+```bash
+stackkit user files [flags]
+```
+
+`stackkit user` से मिला:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+उप-कमांड: [`stackkit user files credential`](#stackkit-user-files-credential), [`stackkit user files ensure`](#stackkit-user-files-ensure)
+
+### stackkit user files credential
+
+ओनर की कस्टडी वाला एक Files घरेलू पासवर्ड प्रिंट करें।
+
+स्वीकृत PocketID घरेलू पहचान और उसके गैर-एडमिन Cloudreve अकाउंट को सत्यापित करें, फिर हस्ताक्षरित स्थानीय-ओनर कस्टडी से मौजूदा पासवर्ड प्रिंट करें। आउटपुट में सीक्रेट सामग्री होती है; इसे केवल निजी टर्मिनल या जानबूझकर बनाई गई पाइप में उपयोग करें।
+
+```bash
+stackkit user files credential <username> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | यह Files पासवर्ड दिखाने की स्पष्ट स्वीकृति दें |
+
+`stackkit user` से मिला:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+### stackkit user files ensure
+
+एक गैर-एडमिन Files अकाउंट बनाएँ या सत्यापित करें।
+
+```bash
+stackkit user files ensure <username> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Files अकाउंट प्रोविज़निंग की स्पष्ट स्वीकृति दें |
+
+`stackkit user` से मिला:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
 
 ## stackkit user list
 
@@ -100,11 +174,11 @@ stackkit user owner [flags]
 | --- | --- | --- | --- |
 | `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
 
-उप-कमांड: [`stackkit user owner activate`](#stackkit-user-owner-activate), [`stackkit user owner status`](#stackkit-user-owner-status)
+उप-कमांड: [`stackkit user owner activate`](#stackkit-user-owner-activate), [`stackkit user owner migrate-domain`](#stackkit-user-owner-migrate-domain), [`stackkit user owner status`](#stackkit-user-owner-status)
 
 ### stackkit user owner activate
 
-ओनर-बद्ध एक-बार वाला पासकी सक्रियण लौटाएँ या दोबारा जारी करें।
+ओनर से बँधा एक बार उपयोग होने वाला passkey एक्टिवेशन लिंक फिर जारी करें और पिछले लिंक को निष्क्रिय करें।
 
 ```bash
 stackkit user owner activate [flags]
@@ -112,9 +186,31 @@ stackkit user owner activate [flags]
 
 | Flag | प्रकार | डिफ़ॉल्ट | विवरण |
 | --- | --- | --- | --- |
-| `--owner-approve` | bool | — | ओनर सक्रियण दिखाने या दोबारा जारी करने को स्पष्ट रूप से स्वीकृत करें |
+| `--owner-approve` | bool | — | ओनर एक्टिवेशन लिंक फिर जारी करने की स्पष्ट स्वीकृति दें |
 
 `stackkit user` से विरासत में मिले:
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1 JSON जारी करें |
+
+### stackkit user owner migrate-domain
+
+ओनर द्वारा स्वीकृत home से lab.home पहचान माइग्रेशन तैयार करें।
+
+Basement के आशय और रनटाइम कस्टडी को home से lab.home पर माइग्रेट करते हुए मौजूदा ओनर, CA, सेवा सीक्रेट और उपयोगकर्ता सुरक्षित रखें। इस कमांड के लिए अलग लक्ष्य CLI उपयोग करने से पहले पिछली रिलीज़ की CLI, पैकेज किए गए टूल और provider mirror सुरक्षित रखें। `--quiesce-runtime` कमांड को सटीक स्रोत Core कंटेनर पहचान कैप्चर करने, PocketID उपलब्ध रहते हुए पहचान callback को अभिसरित करने, फिर केवल उन्हीं कंटेनर को शालीनता से रोकने और हटाने की अनुमति देता है, और कोई वॉल्यूम, नेटवर्क या इमेज नहीं हटाता। generate, apply और verify के लिए पिछली CLI उपयोग करें, फिर upgrade `--to` &lt;exact-release&gt; के लिए लक्ष्य CLI उपयोग करें। अपग्रेड चेकपॉइंट lab.home पर माइग्रेट हुई पिछली रिलीज़ को कवर करता है; यह कमांड मूल डोमेन का rollback चेकपॉइंट नहीं बनाता। v0.47.4 ब्रिज वास्तविक होस्ट योग्यता की प्रतीक्षा में है। रोलआउट के बाद id.lab.home पर क्लाइंट DNS और नई passkey एनरोल करें।
+
+```bash
+stackkit user owner migrate-domain [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | डोमेन माइग्रेशन और नई passkey एनरोलमेंट की स्पष्ट स्वीकृति दें |
+| `--quiesce-runtime` | bool | — | प्रमाणित स्रोत Core कंटेनर को शालीनता से रोकें और हटाएँ, स्थायी संसाधन हटाए बिना |
+| `--spec` | string | `stack-spec.yaml` | माइग्रेट किया जाने वाला वर्कस्पेस-सापेक्ष StackSpec |
+
+`stackkit user` से मिला:
 
 | Flag | प्रकार | डिफ़ॉल्ट | विवरण |
 | --- | --- | --- | --- |

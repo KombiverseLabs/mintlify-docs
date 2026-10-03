@@ -11,7 +11,7 @@ StackKit से नया डिप्लॉयमेंट आरंभ कर�
 
 जनरेट या लागू करने से पहले सहेजे गए कॉन्फ़िगरेशन की समीक्षा करें। डिफ़ॉल्ट स्पष्ट आशय के रूप में दर्ज होते हैं और Kit के CUE कॉन्ट्रैक्ट से सत्यापित होते हैं। ज़रूरी जानकारी, जैसे डोमेन, तब माँगी जाती है जब Kit को उसकी ज़रूरत हो। स्क्रिप्ट में पूछने के बजाय विफल होने के लिए `--non-interactive` उपयोग करें।
 
-सटीक नियंत्रण के लिए `--catalog-defaults` के बजाय `--use-case-alternative` और `--module-compute-profile` उपयोग करें। ये चयन चुने गए Kit से आते हैं। नेटिव ऑथरिंग stackkit/v2alpha2 उपयोग करती है; `--api-version` stackkit/v2alpha1 स्पष्ट लेगेसी ग्राफ़ एडाप्टर चुनता है। v0.6 compatibility चिह्नित फ़्लैग केवल स्पष्ट रूप से वर्ज़न वाली v0.6 बाइनरी स्वीकार करती है।
+सटीक नियंत्रण के लिए `--use-case-alternative` और `--module-compute-profile` को `--catalog-defaults` के बजाय उपयोग करें। ये चयन चुने गए Kit से आते हैं। क्षमता मॉड्यूल से बना यूज़ केस (Private AI) `--use-case-capability` &lt;use-case&gt;.&lt;capability&gt;=&lt;option|off&gt; लेता है; छोड़े गए मॉड्यूल अपने डिफ़ॉल्ट रखते हैं और नियोजित मॉड्यूल इंस्टॉल होने तक अस्वीकार किए जाते हैं। नेटिव ऑथरिंग stackkit/v2alpha2 उपयोग करती है; `--api-version` stackkit/v2alpha1 स्पष्ट लेगेसी ग्राफ़ एडाप्टर चुनता है। v0.6 compatibility चिह्नित फ़्लैग केवल स्पष्ट रूप से वर्ज़न वाली v0.6 बाइनरी स्वीकार करती है।
 
 ```bash
 stackkit init [stackkit] [flags]
@@ -49,11 +49,13 @@ stackkit init [stackkit] [flags]
 | `--owner-source` | string | — | ओनर कस्टडी स्रोत (नेटिव स्टैंडअलोन: local; v0.6 संगतता: local\|cloud) |
 | `--owner-username` | string | — | `--owner-source=local` के लिए वांछित PocketID ओनर यूज़रनेम |
 | `--platform` | string | — | केवल नेटिव v2: चुने गए प्रदाता का प्लेटफ़ॉर्म एडाप्टर (install.platform.providerRef, जैसे coolify या komodo) |
+| `--preinstalled-manifest` | string | — | हर नई क्लोन इनिशियलाइज़ेशन से पहले न्यूट्रल इमेज कैश को फिर सत्यापित करें |
 | `--recovery-material-ref` | string | — | केवल v0.6 संगतता: ऑर्केस्ट्रेटर के स्वामित्व वाली रिकवरी सामग्री का संदर्भ; स्टैक स्पेक में सादे-टेक्स्ट रिकवरी पासफ़्रेज़ कभी स्वीकार नहीं किए जाते |
 | `--recovery-passphrase-hash` | string | — | केवल v0.6 संगतता: रिकवरी पासफ़्रेज़ हैश (argon2id PHC); न होने पर पूछता है |
 | `--service-profile` | string | — | केवल v0.6 संगतता: BaseKit सेवा प्रोफ़ाइल |
 | `--use-case` | strings | — | सक्षम करने योग्य वैकल्पिक kit वर्कलोड (जैसे photos,files,vault); v2alpha2 में स्पष्ट विकल्प आवश्यक हैं |
 | `--use-case-alternative` | stringArray | — | नेटिव v2alpha2: use-case-id=alternative; आवश्यक कोर वर्कलोड शामिल करें |
+| `--use-case-capability` | stringArray | — | नेटिव v2alpha2: use-case.capability=option या off (जैसे ai.chat=open-webui); `--use-case` आवश्यक है |
 
 **उदाहरण**
 
@@ -72,7 +74,9 @@ stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email yo
 # Cloud Kit on your own domain, without prompts (for scripts)
 stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email you@example.com --domain example.com --non-interactive
 
+# Private AI with its default modules (inference with Ollama, chat with Open WebUI) named explicitly
+stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com --use-case ai --use-case-capability ai.inference=ollama --use-case-capability ai.chat=open-webui
+
 # Pick the core alternative and module profile explicitly instead of catalog defaults
 stackkit init basement-kit --owner-source=local --owner-email you@example.com --use-case-alternative basement-core=standalone --module-compute-profile stackkits-basement-core-runtime=standard
 ```
-

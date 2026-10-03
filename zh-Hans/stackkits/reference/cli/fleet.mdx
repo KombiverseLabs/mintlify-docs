@@ -1,0 +1,99 @@
+---
+title: "stackkit fleet"
+description: "准入并加入一个 StackInstance 的成员主机"
+sidebarTitle: "fleet"
+---
+准入并加入一个 StackInstance 的成员主机。
+
+将物理主机绑定到此 StackInstance 的现有成员节点。
+
+Foundation Node 上的 Home Owner 为 Cloud Site 上一个已启用的非控制器节点签署成员准入。成员主机依据固定的 Home 密钥进行验证，从获准的 StackSpec 和 Inventory 重新编译同一计划，并仅保留验证成员的托管权限：不具有注册、签名、凭据签发或 ControlAuthority。两台主机必须运行相同版本的 StackKits。
+
+Join 还会生成成员证据密钥并写入一个请求文件。Home Owner 使用 certify-member-key 对其进行认证；执行 import-member-key 后，成员仅应用并验证自身的 Site/node/channel 元组，并使用经认证的密钥签署该证据。
+
+```bash
+stackkit fleet [flags]
+```
+
+子命令：[`stackkit fleet admit-member`](#stackkit-fleet-admit-member)、[`stackkit fleet certify-member-key`](#stackkit-fleet-certify-member-key)、[`stackkit fleet import-member-key`](#stackkit-fleet-import-member-key)、[`stackkit fleet join`](#stackkit-fleet-join)
+
+## stackkit fleet admit-member
+
+由 Owner 为一个 Cloud 边缘节点签署成员准入。
+
+```bash
+stackkit fleet admit-member [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--inventory` | string | — | 声明两个执行通道的 Inventory（否则选择一个惯例 Inventory 文件） |
+| `--node` | string | — | StackSpec 中的成员节点 ID（Cloud Site 上已启用的 worker 或 edge） |
+| `--output` | string | — | 限于工作区的准入输出（默认 .stackkit/fleet/member-admissions/&lt;node&gt;.json） |
+| `--valid-for` | duration | `24h0m0s` | 准入的 Join 有效窗口（最长 24 小时） |
+
+**示例**
+
+```bash
+# On the Foundation Node, admit the Cloud edge declared in the plan
+stackkit fleet admit-member --node cloud-edge
+```
+
+## stackkit fleet certify-member-key
+
+由 Owner 认证已加入成员的证据密钥，使其仅适用于自己的元组。
+
+认证已加入成员在 Join 时生成的成员证据密钥。
+
+该证书允许成员为自身的 Site/node/execution-channel 元组签署 Apply 和 Verify 证据，除此之外不授予任何权限：不具有注册、身份签名、凭据签发、ControlAuthority 或 Owner 权限。Foundation Node 会记录其签发的每份证书，此后将该成员的本地运行时目标交由该成员管理。
+
+```bash
+stackkit fleet certify-member-key <request-file> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--inventory` | string | — | 声明两个执行通道的 Inventory（否则选择一个惯例 Inventory 文件） |
+| `--output` | string | — | 要转交给成员、限于工作区的额外证书输出 |
+| `--valid-for` | duration | `720h0m0s` | 证书有效期（最长 2160 小时） |
+
+**示例**
+
+```bash
+# On the Foundation Node, with the request file the member relayed
+stackkit fleet certify-member-key member-evidence-key-request.json --output member-evidence-key.json
+```
+
+## stackkit fleet import-member-key
+
+为此成员的证据密钥导入 Home Owner 证书。
+
+```bash
+stackkit fleet import-member-key <certificate-file> [flags]
+```
+
+**示例**
+
+```bash
+# On the Cloud host, with the certificate the Foundation Node returned
+stackkit fleet import-member-key member-evidence-key.json
+```
+
+## stackkit fleet join
+
+按照准入文件中指定的身份，将此主机作为仅验证成员加入。
+
+```bash
+stackkit fleet join <admission-file> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--home-key-id` | string | — | admit-member 中的 Home Owner 密钥 ID，通过带外方式比较 |
+
+**示例**
+
+```bash
+# On the Cloud host, in an empty deployment directory
+stackkit fleet join member-admission.json --home-key-id <homeKeyId>
+```

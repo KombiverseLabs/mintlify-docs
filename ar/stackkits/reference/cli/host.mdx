@@ -9,7 +9,7 @@ sidebarTitle: "host"
 stackkit host [flags]
 ```
 
-الأوامر الفرعية: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host updates`](#stackkit-host-updates)
+الأوامر الفرعية: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host security`](#stackkit-host-security), [`stackkit host updates`](#stackkit-host-updates)
 
 ## stackkit host attach-conformance
 
@@ -181,6 +181,129 @@ stackkit host remediate --apply <resolution-id> --yes
 stackkit host remediate --auto-reversible --yes
 ```
 
+## stackkit host security
+
+التحقق من خط أساس أمان المضيف وإصلاحه بأدلة ذات إصدار.
+
+رصد هذه العقدة وفق خط أساس أمان مضيف StackKits واستعادة ما انحرف دون قطع مسار الإدارة.
+
+لا يغيّر 'verify' المضيف أبدًا. فهو ينتج stackkit.host-security-evidence/v1 لجدار الحماية وsshd والحماية من القوة الغاشمة وتحديثات الأمان التلقائية والمعلّقة وحالة إعادة التشغيل ومعلمات النواة والمنافذ المستمعة المكشوفة وانتهاء صلاحية الشهادات. تكون كل أداة تحكم compliant أو drifted أو unknown أو استثناءً معتمدًا من المالك، وتنتهي صلاحية الدليل: يصبح الرصد القديم unknown، ولا تُعد أداة تحكم unknown متوافقة أبدًا.
+
+يعمل مستقلًا (Standard Mode، دون حساب) ومن خلال CLI المقيّد بالإصدار المحدد عندما يدير Techstack النشر (`--mode` advanced).
+
+```bash
+stackkit host security [flags]
+```
+
+الأوامر الفرعية: [`stackkit host security repair`](#stackkit-host-security-repair)، [`stackkit host security status`](#stackkit-host-security-status)، [`stackkit host security verify`](#stackkit-host-security-verify)
+
+### stackkit host security repair
+
+استعادة أدوات تحكم خط الأساس المنحرفة دون قطع مسار الإدارة.
+
+تخطيط استعادة أدوات التحكم المنحرفة، أو تنفيذها باستخدام `--apply`.
+
+لا يتغير شيء دون `--apply`: يقيس الأمر المضيف ويطبع ما سيفعله كل إصلاح. ومع `--apply` لا تُمس إلا أدوات التحكم المسماة (`--control`) أو المنحرفة، ويُفحص كل تغيير أولًا:
+
+```text
+  - the firewall always keeps admitting the ssh sessions in use and every
+    --management-source on every sshd port, and a policy that would not is
+    refused before it is loaded;
+  - password logins are disabled only when an account holds an authorized key;
+    without one they stay on, the step is refused with reason no_authorized_key
+    and the rest of the baseline is still repaired. The previous sshd and
+    firewall configuration is restored if the new one does not validate or does
+    not take effect;
+  - fail2ban never bans the management path.
+```
+
+لا تُمس أداة تحكم يتعذر رصدها، أو اعتمد المالك استثناءً لها. يعيد 'stackkit apply' جدار الحماية وتسجيل دخول root في Cloud Site. تسجّل كل خطوة أداة التحكم قبل التنفيذ وبعده، ولا يغيّر تكرار repair لأداة تحكم compliant شيئًا.
+
+```bash
+stackkit host security repair [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--apply` | bool | — | تنفيذ الإصلاح؛ ومن دونه يخطط الأمر فقط |
+| `--control` | stringArray | — | حصر الإصلاح في معرّف أداة التحكم هذه (قابل للتكرار) |
+| `--declared-port` | stringArray | — | منفذ خدمة معلن بالصيغة tcp/443 أو udp/5353 (قابل للتكرار) |
+| `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | ملف استثناءات يتحكم فيه المالك (يحتاج كل استثناء إلى مالك وتاريخ انتهاء) |
+| `--freshness` | duration | `15m0s` | مدة إمكان الاعتماد على الدليل قبل انتهاء صلاحيته (من 1m إلى 24h) |
+| `--json` | bool | — | إصدار النتيجة بصيغة JSON قابلة للقراءة آليًا |
+| `--kit` | string | — | slug الـ Kit المطلوب تسجيله (الافتراضي: Kit في StackSpec لمساحة العمل) |
+| `--local-node` | string | — | الـ Node المحلية المحددة بدقة في ResolvedPlan المقدمة |
+| `--management-source` | stringArray | — | الشبكة التي يجب أن تصل دائمًا إلى ssh، بصيغة CIDR (قابلة للتكرار) |
+| `--mode` | string | `standard` | وضع دورة الحياة المطلوب تسجيله: standard، أو advanced عندما يدير Techstack هذا النشر |
+| `--no-record` | bool | — | عدم كتابة دليل ما بعد الإصلاح ضمن .stackkit/ |
+| `--resolved-plan` | string | — | ResolvedPlan قياسية متحقق منها للحكم على الانكشاف وفق المنافذ المستمعة المعلنة فيها |
+| `--site-kind` | string | — | نوع Site لهذا المضيف: home أو cloud (الافتراضي: يُستنتج من الـ Kit؛ يحتاجه modern-homelab) |
+
+**أمثلة**
+
+```bash
+# See what would be repaired
+sudo stackkit host security repair --site-kind home
+
+# Restore only the firewall, keeping a jump host reachable
+sudo stackkit host security repair --apply --control firewall.default_inbound --management-source 198.51.100.0/24
+```
+
+### stackkit host security status
+
+قراءة الدليل المخزّن كما هو الآن، دون رصد المضيف.
+
+قراءة الدليل الذي سجّله 'verify' آخر مرة في مساحة العمل هذه والحكم عليه في الوقت الحالي. يكون الدليل الذي تجاوز مدة حداثته unknown: لا يثبت الرصد القديم شيئًا عن المضيف الآن.
+
+```bash
+stackkit host security status [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--fail-on-drift` | bool | — | الخروج بالرمز 5 عندما يكون المضيف drifted وبالرمز 6 عندما تكون حالته unknown |
+| `--json` | bool | — | إصدار الدليل بصيغة JSON قابلة للقراءة آليًا |
+
+### stackkit host security verify
+
+رصد خط أساس أمان المضيف وكتابة دليل ذي إصدار.
+
+رصد كل أداة تحكم في خط الأساس على هذه العقدة وإنتاج stackkit.host-security-evidence/v1. لا يتغير شيء على المضيف.
+
+تحتاج معظم أدوات التحكم إلى root لرصدها؛ ويُبلّغ عن الأداة التي يتعذر رصدها بأنها unknown مع السبب، لا بوصفها فشلًا. يُكتب الدليل في .stackkit/host-security-evidence.json داخل مساحة العمل ما لم يُمرَّر `--no-record`، وتنتهي صلاحيته بعد `--freshness`.
+
+```bash
+stackkit host security verify [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--declared-port` | stringArray | — | منفذ خدمة معلن بالصيغة tcp/443 أو udp/5353 (قابل للتكرار) |
+| `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | ملف استثناءات يتحكم فيه المالك (يحتاج كل استثناء إلى مالك وتاريخ انتهاء) |
+| `--fail-on-drift` | bool | — | الخروج بالرمز 5 عندما يكون المضيف drifted وبالرمز 6 عندما تكون حالته unknown |
+| `--freshness` | duration | `15m0s` | مدة إمكان الاعتماد على الدليل قبل انتهاء صلاحيته (من 1m إلى 24h) |
+| `--json` | bool | — | إصدار النتيجة بصيغة JSON قابلة للقراءة آليًا |
+| `--kit` | string | — | slug الـ Kit المطلوب تسجيله (الافتراضي: Kit في StackSpec لمساحة العمل) |
+| `--local-node` | string | — | الـ Node المحلية المحددة بدقة في ResolvedPlan المقدمة |
+| `--management-source` | stringArray | — | الشبكة التي يجب أن تصل دائمًا إلى ssh، بصيغة CIDR (قابلة للتكرار) |
+| `--mode` | string | `standard` | وضع دورة الحياة المطلوب تسجيله: standard، أو advanced عندما يدير Techstack هذا النشر |
+| `--no-record` | bool | — | عدم كتابة الدليل ضمن .stackkit/ |
+| `--resolved-plan` | string | — | ResolvedPlan قياسية متحقق منها للحكم على الانكشاف وفق المنافذ المستمعة المعلنة فيها |
+| `--site-kind` | string | — | نوع Site لهذا المضيف: home أو cloud (الافتراضي: يُستنتج من الـ Kit؛ يحتاجه modern-homelab) |
+
+**أمثلة**
+
+```bash
+# Verify this host and record the evidence
+sudo stackkit host security verify
+
+# What Techstack runs: machine-readable, advanced mode, exit non-zero on drift
+sudo stackkit host security verify --mode advanced --json --fail-on-drift
+
+# Judge exposure against the ports the verified plan declares
+sudo stackkit host security verify --resolved-plan plan.json --local-node node-1
+```
+
 ## stackkit host updates
 
 خطّط لتحديثات حزم نظام التشغيل على هذه العقدة ونفّذها.
@@ -245,4 +368,3 @@ sudo stackkit host updates plan
 # Machine-readable plan with its plan_digest
 sudo stackkit host updates plan --json
 ```
-

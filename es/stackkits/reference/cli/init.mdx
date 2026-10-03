@@ -11,7 +11,7 @@ Empieza con los valores predeterminados del catálogo del Kit seleccionado. `--o
 
 Revisa la configuración guardada antes de generarla o aplicarla. Los valores predeterminados se registran como intención explícita y los valida el contrato CUE del Kit. La información necesaria, como un dominio, se solicita cuando el Kit la necesita. Usa `--non-interactive` en scripts para que falle en lugar de preguntar.
 
-Para un control preciso, usa `--use-case-alternative` y `--module-compute-profile` en lugar de `--catalog-defaults`. Estas selecciones provienen del Kit elegido. La creación nativa usa stackkit/v2alpha2; `--api-version` stackkit/v2alpha1 selecciona el adaptador de grafo heredado explícito. Los flags marcados como compatibilidad v0.6 solo los acepta un binario v0.6 con versión explícita.
+Para un control preciso, usa `--use-case-alternative` y `--module-compute-profile` en lugar de `--catalog-defaults`. Estas selecciones provienen del Kit elegido. Un caso de uso compuesto por módulos de capacidades (Private AI) acepta `--use-case-capability` &lt;use-case&gt;.&lt;capability&gt;=&lt;option|off&gt;; los módulos omitidos conservan sus valores predeterminados y los módulos planificados se rechazan hasta que puedan instalarse. La creación nativa usa stackkit/v2alpha2; `--api-version` stackkit/v2alpha1 selecciona el adaptador de grafo heredado explícito. Los flags marcados como compatibilidad v0.6 solo los acepta un binario v0.6 con versión explícita.
 
 ```bash
 stackkit init [stackkit] [flags]
@@ -49,11 +49,13 @@ stackkit init [stackkit] [flags]
 | `--owner-source` | string | — | Origen de la custodia del propietario (independiente nativo: local; compatibilidad v0.6: local\|cloud) |
 | `--owner-username` | string | — | Nombre de usuario deseado del propietario de PocketID para `--owner-source=local` |
 | `--platform` | string | — | Solo v2 nativo: adaptador de plataforma del proveedor seleccionado (install.platform.providerRef, p. ej. coolify o komodo) |
+| `--preinstalled-manifest` | string | — | Vuelve a verificar una caché de imagen neutral antes de una inicialización nueva por clon |
 | `--recovery-material-ref` | string | — | Solo compatibilidad v0.6: referencia al material de recuperación propiedad del orquestador; las frases de contraseña de recuperación en texto plano nunca se aceptan en las stack specs |
 | `--recovery-passphrase-hash` | string | — | Solo compatibilidad v0.6: hash de la frase de contraseña de recuperación (argon2id PHC); la solicita si falta |
 | `--service-profile` | string | — | Solo compatibilidad v0.6: perfil de servicio de BaseKit |
 | `--use-case` | strings | — | Workloads opcionales del kit que se habilitan (p. ej. photos,files,vault); v2alpha2 requiere alternativas explícitas |
 | `--use-case-alternative` | stringArray | — | v2alpha2 nativo: use-case-id=alternative; incluye los workloads centrales requeridos |
+| `--use-case-capability` | stringArray | — | v2alpha2 nativo: use-case.capability=option u off (p. ej. ai.chat=open-webui); requiere `--use-case` |
 
 **Ejemplos**
 
@@ -71,6 +73,9 @@ stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email yo
 
 # Cloud Kit on your own domain, without prompts (for scripts)
 stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email you@example.com --domain example.com --non-interactive
+
+# Private AI with its default modules (inference with Ollama, chat with Open WebUI) named explicitly
+stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com --use-case ai --use-case-capability ai.inference=ollama --use-case-capability ai.chat=open-webui
 
 # Pick the core alternative and module profile explicitly instead of catalog defaults
 stackkit init basement-kit --owner-source=local --owner-email you@example.com --use-case-alternative basement-core=standalone --module-compute-profile stackkits-basement-core-runtime=standard

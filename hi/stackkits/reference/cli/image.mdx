@@ -1,0 +1,53 @@
+---
+title: "stackkit image"
+description: "ओनर-न्यूट्रल गोल्डन इमेज कैश तैयार करें और उसे प्रवेश दें"
+sidebarTitle: "image"
+---
+ओनर-न्यूट्रल गोल्डन इमेज कैश तैयार करें और उसे प्रवेश दें।
+
+एम्बेड किए गए CUE कैटलॉग से अपरिवर्तनीय कोर कंटेनर कैश तैयार करें। यह कभी किसी Owner को इनिशियलाइज़ नहीं करता, सेवाएँ शुरू नहीं करता, वॉल्यूम नहीं बनाता या provider VM तैयार नहीं करता। Ubuntu 26.04 डिफ़ॉल्ट लक्ष्य है; Ubuntu 24.04 संगत रहता है। मैनिफ़ेस्ट अहस्ताक्षरित कैश मेटाडेटा है, यह कभी होस्ट अनुरूपता या Apply अधिकार नहीं है। मौजूदा पैकेज किया गया OpenTofu provider closure सत्यापित करके दोबारा उपयोग किया जाता है। पहली बूट पर सेवा इंटीग्रेशन और वैकल्पिक वर्कलोड के लिए नेटवर्क एक्सेस फिर भी ज़रूरी है। मशीन sysprep, VM इमेज और एनरोलमेंट का स्वामित्व Techstack के पास है।
+
+```bash
+stackkit image [flags]
+```
+
+उप-कमांड: [`stackkit image plan`](#stackkit-image-plan), [`stackkit image prepare`](#stackkit-image-prepare), [`stackkit image verify`](#stackkit-image-verify)
+
+## stackkit image plan
+
+प्रामाणिक न्यूट्रल कोर कैश प्रोफ़ाइल प्रिंट करें।
+
+```bash
+stackkit image plan [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--profile` | string | `cloud-core-compose` | CUE न्यूट्रल प्रोफ़ाइल (cloud-core-compose, basement-core-compose, basement-core-lite-compose) |
+
+## stackkit image prepare
+
+चल रही सटीक प्रमाणित रिलीज़ को कैश करें और केवल कोर इमेज पुल करें।
+
+```bash
+stackkit image prepare [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--cache-root` | string | — | **आवश्यक।** अलग न्यूट्रल रिलीज़/कैश मेटाडेटा डायरेक्टरी |
+| `--profile` | string | `cloud-core-compose` | CUE न्यूट्रल कोर कैश प्रोफ़ाइल |
+| `--target` | string | — | **आवश्यक।** भविष्य की डिप्लॉयमेंट की खाली डायरेक्टरी; कभी भी इनिशियलाइज़ किया हुआ stack नहीं |
+
+## stackkit image verify
+
+रिलीज़ बाइट्स, खाली लक्ष्य, होस्ट और सटीक कोर इमेज कैश को फिर से देखें।
+
+```bash
+stackkit image verify [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--cache-root` | string | — | **आवश्यक।** अलग न्यूट्रल रिलीज़/कैश मेटाडेटा डायरेक्टरी |
+| `--target` | string | — | **आवश्यक।** भविष्य की डिप्लॉयमेंट की खाली डायरेक्टरी; कभी भी इनिशियलाइज़ किया हुआ stack नहीं |

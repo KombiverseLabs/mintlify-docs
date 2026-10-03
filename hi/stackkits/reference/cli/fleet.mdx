@@ -1,0 +1,99 @@
+---
+title: "stackkit fleet"
+description: "एक StackInstance के सदस्य होस्ट को प्रवेश दें और जोड़ें"
+sidebarTitle: "fleet"
+---
+एक StackInstance के सदस्य होस्ट को प्रवेश दें और जोड़ें।
+
+किसी भौतिक होस्ट को इस StackInstance के मौजूदा सदस्य नोड से बाँधें।
+
+Foundation Node पर Home ओनर, Cloud Site के एक सक्षम गैर-कंट्रोलर नोड के लिए सदस्य प्रवेश पर हस्ताक्षर करता है। सदस्य होस्ट इसे पिन की गई Home कुंजी से सत्यापित करता है, स्वीकृत StackSpec और Inventory से उसी प्लान को दोबारा कंपाइल करता है और केवल-सत्यापन सदस्य अभिरक्षा रखता है: कोई एनरोलमेंट, हस्ताक्षर, क्रेडेंशियल जारी करना या ControlAuthority नहीं। दोनों होस्ट पर StackKits का एक ही संस्करण चलना चाहिए।
+
+Join एक सदस्य साक्ष्य कुंजी भी बनाता है और एक अनुरोध फ़ाइल लिखता है। Home ओनर certify-member-key से इसे प्रमाणित करता है; import-member-key के बाद सदस्य केवल अपने Site/node/channel ट्यूपल को लागू और सत्यापित करता है और प्रमाणित कुंजी से उस साक्ष्य पर हस्ताक्षर करता है।
+
+```bash
+stackkit fleet [flags]
+```
+
+उप-कमांड: [`stackkit fleet admit-member`](#stackkit-fleet-admit-member), [`stackkit fleet certify-member-key`](#stackkit-fleet-certify-member-key), [`stackkit fleet import-member-key`](#stackkit-fleet-import-member-key), [`stackkit fleet join`](#stackkit-fleet-join)
+
+## stackkit fleet admit-member
+
+एक Cloud edge नोड के लिए सदस्य प्रवेश पर ओनर के रूप में हस्ताक्षर करें।
+
+```bash
+stackkit fleet admit-member [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--inventory` | string | — | दोनों execution channel घोषित करने वाला Inventory (अन्यथा एक प्रचलित Inventory फ़ाइल चुनी जाती है) |
+| `--node` | string | — | StackSpec का सदस्य नोड ID (Cloud Site पर सक्षम worker या edge) |
+| `--output` | string | — | वर्कस्पेस तक सीमित प्रवेश आउटपुट (डिफ़ॉल्ट .stackkit/fleet/member-admissions/&lt;node&gt;.json) |
+| `--valid-for` | duration | `24h0m0s` | प्रवेश की Join अवधि (अधिकतम 24 घंटे) |
+
+**उदाहरण**
+
+```bash
+# On the Foundation Node, admit the Cloud edge declared in the plan
+stackkit fleet admit-member --node cloud-edge
+```
+
+## stackkit fleet certify-member-key
+
+जुड़े हुए सदस्य की साक्ष्य कुंजी को उसके अपने ट्यूपल के लिए ओनर के रूप में प्रमाणित करें।
+
+Join के समय जुड़े सदस्य द्वारा बनाई गई सदस्य साक्ष्य कुंजी को प्रमाणित करें।
+
+प्रमाणपत्र सदस्य को केवल अपने Site/node/execution-channel ट्यूपल के लिए Apply और Verify साक्ष्य पर हस्ताक्षर करने देता है, और कुछ नहीं: कोई एनरोलमेंट, पहचान हस्ताक्षर, क्रेडेंशियल जारी करना, ControlAuthority या Owner अधिकार नहीं। Foundation Node अपने जारी किए गए हर प्रमाणपत्र को दर्ज करता है और उसके बाद उस सदस्य के स्थानीय रनटाइम लक्ष्यों को सदस्य के पास छोड़ देता है।
+
+```bash
+stackkit fleet certify-member-key <request-file> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--inventory` | string | — | दोनों execution channel घोषित करने वाला Inventory (अन्यथा एक प्रचलित Inventory फ़ाइल चुनी जाती है) |
+| `--output` | string | — | सदस्य तक पहुँचाने के लिए वर्कस्पेस तक सीमित अतिरिक्त प्रमाणपत्र आउटपुट |
+| `--valid-for` | duration | `720h0m0s` | प्रमाणपत्र की वैधता (अधिकतम 2160 घंटे) |
+
+**उदाहरण**
+
+```bash
+# On the Foundation Node, with the request file the member relayed
+stackkit fleet certify-member-key member-evidence-key-request.json --output member-evidence-key.json
+```
+
+## stackkit fleet import-member-key
+
+इस सदस्य की साक्ष्य कुंजी के लिए Home ओनर प्रमाणपत्र इंपोर्ट करें।
+
+```bash
+stackkit fleet import-member-key <certificate-file> [flags]
+```
+
+**उदाहरण**
+
+```bash
+# On the Cloud host, with the certificate the Foundation Node returned
+stackkit fleet import-member-key member-evidence-key.json
+```
+
+## stackkit fleet join
+
+इस होस्ट को प्रवेश में नामित केवल-सत्यापन सदस्य के रूप में जोड़ें।
+
+```bash
+stackkit fleet join <admission-file> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--home-key-id` | string | — | admit-member से मिला Home ओनर कुंजी ID, जिसकी तुलना आउट-ऑफ़-बैंड की जाती है |
+
+**उदाहरण**
+
+```bash
+# On the Cloud host, in an empty deployment directory
+stackkit fleet join member-admission.json --home-key-id <homeKeyId>
+```

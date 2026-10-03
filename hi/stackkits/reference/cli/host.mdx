@@ -9,7 +9,7 @@ sidebarTitle: "host"
 stackkit host [flags]
 ```
 
-उप-कमांड: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host updates`](#stackkit-host-updates)
+उप-कमांड: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host security`](#stackkit-host-security), [`stackkit host updates`](#stackkit-host-updates)
 
 ## stackkit host attach-conformance
 
@@ -179,6 +179,129 @@ stackkit host remediate --apply <resolution-id> --yes
 
 # Carry out every undoable fix that may run unattended
 stackkit host remediate --auto-reversible --yes
+```
+
+## stackkit host security
+
+वर्ज़नयुक्त साक्ष्य के साथ होस्ट सुरक्षा आधाररेखा सत्यापित और ठीक करें।
+
+इस नोड को StackKits होस्ट सुरक्षा आधाररेखा के अनुसार जाँचें और प्रबंधन पथ काटे बिना भटके हुए नियंत्रण बहाल करें।
+
+'verify' होस्ट को कभी नहीं बदलता। यह फ़ायरवॉल, sshd, ब्रूट-फ़ोर्स सुरक्षा, स्वचालित और लंबित सुरक्षा अपडेट, रीबूट स्थिति, कर्नेल पैरामीटर, खुले listeners और प्रमाणपत्र की समाप्ति के लिए stackkit.host-security-evidence/v1 बनाता है। हर नियंत्रण compliant, drifted, unknown या ओनर द्वारा स्वीकृत अपवाद होता है, और साक्ष्य की समय-सीमा समाप्त होती है: पुराना अवलोकन unknown होता है और unknown नियंत्रण कभी compliant नहीं माना जाता।
+
+यह अपने आप (Standard Mode, बिना अकाउंट) और Techstack द्वारा डिप्लॉयमेंट प्रबंधित किए जाने पर पिन की गई CLI के माध्यम से (`--mode` advanced) काम करता है।
+
+```bash
+stackkit host security [flags]
+```
+
+उप-कमांड: [`stackkit host security repair`](#stackkit-host-security-repair), [`stackkit host security status`](#stackkit-host-security-status), [`stackkit host security verify`](#stackkit-host-security-verify)
+
+### stackkit host security repair
+
+प्रबंधन पथ काटे बिना भटके हुए आधाररेखा नियंत्रण बहाल करें।
+
+भटके हुए नियंत्रण की बहाली की योजना बनाएँ, या `--apply` के साथ उसे पूरा करें।
+
+`--apply` के बिना कुछ नहीं बदलता: कमांड होस्ट को मापता है और बताता है कि हर सुधार क्या करेगा। `--apply` के साथ केवल नामित (`--control`) या drifted नियंत्रण छुए जाते हैं, और हर बदलाव को पहले जाँचा जाता है:
+
+```text
+  - the firewall always keeps admitting the ssh sessions in use and every
+    --management-source on every sshd port, and a policy that would not is
+    refused before it is loaded;
+  - password logins are disabled only when an account holds an authorized key;
+    without one they stay on, the step is refused with reason no_authorized_key
+    and the rest of the baseline is still repaired. The previous sshd and
+    firewall configuration is restored if the new one does not validate or does
+    not take effect;
+  - fail2ban never bans the management path.
+```
+
+जिस नियंत्रण को देखा नहीं जा सकता या जिसके लिए ओनर ने अपवाद स्वीकृत किया है, उसे छुआ नहीं जाता। Cloud Site का फ़ायरवॉल और root लॉगिन 'stackkit apply' द्वारा बहाल किए जाते हैं। हर चरण नियंत्रण की पहले और बाद की स्थिति दर्ज करता है, और compliant नियंत्रण पर दोबारा repair करने से कुछ नहीं बदलता।
+
+```bash
+stackkit host security repair [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--apply` | bool | — | repair पूरा करें; इसके बिना कमांड केवल योजना बनाता है |
+| `--control` | stringArray | — | repair को इस नियंत्रण ID तक सीमित करें (दोहराया जा सकता है) |
+| `--declared-port` | stringArray | — | tcp/443 या udp/5353 के रूप में घोषित सेवा पोर्ट (दोहराया जा सकता है) |
+| `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | ओनर-नियंत्रित अपवाद फ़ाइल (हर अपवाद के लिए ओनर और समाप्ति आवश्यक है) |
+| `--freshness` | duration | `15m0s` | साक्ष्य की समय-सीमा समाप्त होने से पहले उस पर भरोसे की अवधि (1m से 24h) |
+| `--json` | bool | — | परिणाम मशीन-पठनीय JSON में जारी करें |
+| `--kit` | string | — | दर्ज किया जाने वाला Kit slug (डिफ़ॉल्ट: वर्कस्पेस StackSpec का Kit) |
+| `--local-node` | string | — | दिए गए ResolvedPlan का सटीक स्थानीय Node |
+| `--management-source` | stringArray | — | वह नेटवर्क जिसे हमेशा ssh तक पहुँचना चाहिए, CIDR के रूप में (दोहराया जा सकता है) |
+| `--mode` | string | `standard` | दर्ज किया जाने वाला लाइफ़साइकिल मोड: standard, या Techstack द्वारा यह डिप्लॉयमेंट प्रबंधित होने पर advanced |
+| `--no-record` | bool | — | repair के बाद का साक्ष्य .stackkit/ के अंतर्गत न लिखें |
+| `--resolved-plan` | string | — | सत्यापित कैनोनिकल ResolvedPlan, जिसके घोषित listeners के अनुसार एक्सपोज़र का आकलन किया जाए |
+| `--site-kind` | string | — | इस होस्ट का Site प्रकार: home या cloud (डिफ़ॉल्ट: Kit से अनुमानित; modern-homelab के लिए आवश्यक) |
+
+**उदाहरण**
+
+```bash
+# See what would be repaired
+sudo stackkit host security repair --site-kind home
+
+# Restore only the firewall, keeping a jump host reachable
+sudo stackkit host security repair --apply --control firewall.default_inbound --management-source 198.51.100.0/24
+```
+
+### stackkit host security status
+
+होस्ट को देखे बिना संग्रहीत साक्ष्य को उसकी वर्तमान स्थिति में पढ़ें।
+
+इस वर्कस्पेस में 'verify' द्वारा आख़िरी बार दर्ज साक्ष्य पढ़ें और वर्तमान समय पर उसका आकलन करें। freshness अवधि पार कर चुका साक्ष्य unknown है: पुराना अवलोकन होस्ट की वर्तमान स्थिति के बारे में कुछ सिद्ध नहीं करता।
+
+```bash
+stackkit host security status [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--fail-on-drift` | bool | — | होस्ट drifted होने पर 5 और उसकी स्थिति unknown होने पर 6 के साथ बाहर निकलें |
+| `--json` | bool | — | साक्ष्य मशीन-पठनीय JSON में जारी करें |
+
+### stackkit host security verify
+
+होस्ट सुरक्षा आधाररेखा देखें और वर्ज़नयुक्त साक्ष्य लिखें।
+
+इस नोड के हर आधाररेखा नियंत्रण को देखें और stackkit.host-security-evidence/v1 बनाएँ। होस्ट पर कुछ नहीं बदला जाता।
+
+अधिकतर नियंत्रण देखने के लिए root आवश्यक है; जिसे देखा नहीं जा सकता उसे कारण सहित unknown बताया जाता है, विफलता नहीं। `--no-record` न दिए जाने पर साक्ष्य वर्कस्पेस में .stackkit/host-security-evidence.json पर लिखा जाता है और `--freshness` के बाद उसकी समय-सीमा समाप्त हो जाती है।
+
+```bash
+stackkit host security verify [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--declared-port` | stringArray | — | tcp/443 या udp/5353 के रूप में घोषित सेवा पोर्ट (दोहराया जा सकता है) |
+| `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | ओनर-नियंत्रित अपवाद फ़ाइल (हर अपवाद के लिए ओनर और समाप्ति आवश्यक है) |
+| `--fail-on-drift` | bool | — | होस्ट drifted होने पर 5 और उसकी स्थिति unknown होने पर 6 के साथ बाहर निकलें |
+| `--freshness` | duration | `15m0s` | साक्ष्य की समय-सीमा समाप्त होने से पहले उस पर भरोसे की अवधि (1m से 24h) |
+| `--json` | bool | — | परिणाम मशीन-पठनीय JSON में जारी करें |
+| `--kit` | string | — | दर्ज किया जाने वाला Kit slug (डिफ़ॉल्ट: वर्कस्पेस StackSpec का Kit) |
+| `--local-node` | string | — | दिए गए ResolvedPlan का सटीक स्थानीय Node |
+| `--management-source` | stringArray | — | वह नेटवर्क जिसे हमेशा ssh तक पहुँचना चाहिए, CIDR के रूप में (दोहराया जा सकता है) |
+| `--mode` | string | `standard` | दर्ज किया जाने वाला लाइफ़साइकिल मोड: standard, या Techstack द्वारा यह डिप्लॉयमेंट प्रबंधित होने पर advanced |
+| `--no-record` | bool | — | साक्ष्य .stackkit/ के अंतर्गत न लिखें |
+| `--resolved-plan` | string | — | सत्यापित कैनोनिकल ResolvedPlan, जिसके घोषित listeners के अनुसार एक्सपोज़र का आकलन किया जाए |
+| `--site-kind` | string | — | इस होस्ट का Site प्रकार: home या cloud (डिफ़ॉल्ट: Kit से अनुमानित; modern-homelab के लिए आवश्यक) |
+
+**उदाहरण**
+
+```bash
+# Verify this host and record the evidence
+sudo stackkit host security verify
+
+# What Techstack runs: machine-readable, advanced mode, exit non-zero on drift
+sudo stackkit host security verify --mode advanced --json --fail-on-drift
+
+# Judge exposure against the ports the verified plan declares
+sudo stackkit host security verify --resolved-plan plan.json --local-node node-1
 ```
 
 ## stackkit host updates

@@ -1,0 +1,53 @@
+---
+title: "stackkit image"
+description: "Prepara y admite una caché de imagen maestra neutral respecto al propietario"
+sidebarTitle: "image"
+---
+Prepara y admite una caché de imagen maestra neutral respecto al propietario.
+
+Prepara cachés inmutables de contenedores Core a partir del catálogo CUE integrado. Esto nunca inicializa un Owner, inicia servicios, crea volúmenes ni prepara una VM del proveedor. Ubuntu 26.04 es el destino predeterminado; Ubuntu 24.04 sigue siendo compatible. El manifiesto contiene metadatos de caché sin firmar, nunca conformidad del host ni autoridad para Apply. El conjunto existente de proveedores de OpenTofu incluido en el paquete se verifica y reutiliza. El acceso a la red sigue siendo necesario para las integraciones de servicios en el primer arranque y las cargas de trabajo opcionales. Techstack es responsable de la preparación de máquinas, las imágenes de VM y la inscripción.
+
+```bash
+stackkit image [flags]
+```
+
+Subcomandos: [`stackkit image plan`](#stackkit-image-plan), [`stackkit image prepare`](#stackkit-image-prepare), [`stackkit image verify`](#stackkit-image-verify)
+
+## stackkit image plan
+
+Muestra el perfil canónico y neutral de la caché Core.
+
+```bash
+stackkit image plan [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--profile` | string | `cloud-core-compose` | Perfil CUE neutral (cloud-core-compose, basement-core-compose, basement-core-lite-compose) |
+
+## stackkit image prepare
+
+Almacena en caché la versión atestiguada exacta en ejecución y descarga solo las imágenes Core.
+
+```bash
+stackkit image prepare [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--cache-root` | string | — | **Obligatorio.** Directorio neutral e independiente para metadatos de versión y caché |
+| `--profile` | string | `cloud-core-compose` | Perfil CUE neutral para la caché Core |
+| `--target` | string | — | **Obligatorio.** Directorio vacío para un despliegue futuro; nunca un stack inicializado |
+
+## stackkit image verify
+
+Vuelve a observar los bytes de la versión, el destino vacío, el host y la caché exacta de imágenes Core.
+
+```bash
+stackkit image verify [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--cache-root` | string | — | **Obligatorio.** Directorio neutral e independiente para metadatos de versión y caché |
+| `--target` | string | — | **Obligatorio.** Directorio vacío para un despliegue futuro; nunca un stack inicializado |

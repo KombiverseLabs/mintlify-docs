@@ -11,7 +11,7 @@ sidebarTitle: "init"
 
 在生成或应用之前，请先审阅已保存的配置。默认值会被记录为显式意图，并由 Kit 的 CUE 契约校验。Kit 需要的必填信息（例如域名）会在需要时询问。在脚本中使用 `--non-interactive`，可在缺少输入时直接失败而不是提示。
 
-如需精确控制，请使用 `--use-case-alternative` 和 `--module-compute-profile`，而不是 `--catalog-defaults`。这些选择来自所选 Kit。原生创作使用 stackkit/v2alpha2；`--api-version` stackkit/v2alpha1 会选用显式的旧版图适配器。标注为 v0.6 兼容的标志只有显式指定版本的 v0.6 二进制文件才接受。
+如需精确控制，请使用 `--use-case-alternative` 和 `--module-compute-profile`，而不是 `--catalog-defaults`。这些选择来自所选 Kit。由能力模块构成的用例（Private AI）使用 `--use-case-capability` &lt;use-case&gt;.&lt;capability&gt;=&lt;option|off&gt;；省略的模块保留默认值，而计划中的模块在可安装前会被拒绝。原生创作使用 stackkit/v2alpha2；`--api-version` stackkit/v2alpha1 会选用显式的旧版图适配器。标注为 v0.6 兼容的标志只有显式指定版本的 v0.6 二进制文件才接受。
 
 ```bash
 stackkit init [stackkit] [flags]
@@ -49,11 +49,13 @@ stackkit init [stackkit] [flags]
 | `--owner-source` | string | — | Owner 托管来源（原生独立模式：local；v0.6 兼容：local\|cloud） |
 | `--owner-username` | string | — | 用于 `--owner-source=local` 的期望 PocketID Owner 用户名 |
 | `--platform` | string | — | 仅限原生 v2：所选提供商的平台适配器（install.platform.providerRef，例如 coolify 或 komodo） |
+| `--preinstalled-manifest` | string | — | 在每个全新副本初始化前重新验证中立镜像缓存 |
 | `--recovery-material-ref` | string | — | 仅限 v0.6 兼容：对编排器所拥有恢复材料的引用；栈规格永远不接受明文恢复口令 |
 | `--recovery-passphrase-hash` | string | — | 仅限 v0.6 兼容：恢复口令哈希（argon2id PHC）；缺失时会提示输入 |
 | `--service-profile` | string | — | 仅限 v0.6 兼容：BaseKit 服务配置 |
 | `--use-case` | strings | — | 要启用的可选 Kit 工作负载（例如 photos,files,vault）；v2alpha2 需要显式的备选项 |
 | `--use-case-alternative` | stringArray | — | 原生 v2alpha2：use-case-id=alternative；包含必需的核心工作负载 |
+| `--use-case-capability` | stringArray | — | 原生 v2alpha2：use-case.capability=option 或 off（例如 ai.chat=open-webui）；需要 `--use-case` |
 
 **示例**
 
@@ -71,6 +73,9 @@ stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email yo
 
 # Cloud Kit on your own domain, without prompts (for scripts)
 stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email you@example.com --domain example.com --non-interactive
+
+# Private AI with its default modules (inference with Ollama, chat with Open WebUI) named explicitly
+stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com --use-case ai --use-case-capability ai.inference=ollama --use-case-capability ai.chat=open-webui
 
 # Pick the core alternative and module profile explicitly instead of catalog defaults
 stackkit init basement-kit --owner-source=local --owner-email you@example.com --use-case-alternative basement-core=standalone --module-compute-profile stackkits-basement-core-runtime=standard

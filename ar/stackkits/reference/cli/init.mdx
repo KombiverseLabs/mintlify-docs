@@ -11,7 +11,7 @@ sidebarTitle: "init"
 
 راجع الإعداد المحفوظ قبل إنشائه أو تطبيقه. تُسجَّل القيم الافتراضية بوصفها نية صريحة ويتحقق منها عقد CUE الخاص بالـ Kit. تُطلب المعلومات المطلوبة، مثل النطاق، عندما يحتاج إليها الـ Kit. استخدم `--non-interactive` في السكربتات ليفشل الأمر بدل أن يسأل.
 
-للتحكم الدقيق، استخدم `--use-case-alternative` و`--module-compute-profile` بدل `--catalog-defaults`. تأتي هذه الاختيارات من الـ Kit المختار. يستخدم التأليف الأصلي stackkit/v2alpha2؛ ويختار `--api-version` stackkit/v2alpha1 محوّل الرسم البياني القديم الصريح. الخيارات الموسومة بتوافق v0.6 لا يقبلها إلا ملف تنفيذي v0.6 محدد الإصدار صراحةً.
+للتحكم الدقيق، استخدم `--use-case-alternative` و`--module-compute-profile` بدل `--catalog-defaults`. تأتي هذه الاختيارات من الـ Kit المختار. تأخذ حالة الاستخدام المبنية من وحدات القدرات (Private AI) الخيار `--use-case-capability` &lt;use-case&gt;.&lt;capability&gt;=&lt;option|off&gt;؛ وتحتفظ الوحدات المحذوفة بقيمها الافتراضية، بينما تُرفض الوحدات المخطط لها حتى تصبح قابلة للتثبيت. يستخدم التأليف الأصلي stackkit/v2alpha2؛ ويختار `--api-version` stackkit/v2alpha1 محوّل الرسم البياني القديم الصريح. الخيارات الموسومة بتوافق v0.6 لا يقبلها إلا ملف تنفيذي v0.6 محدد الإصدار صراحةً.
 
 ```bash
 stackkit init [stackkit] [flags]
@@ -49,11 +49,13 @@ stackkit init [stackkit] [flags]
 | `--owner-source` | string | — | مصدر حيازة المالك (الأصلي المستقل: local؛ توافق v0.6: local\|cloud) |
 | `--owner-username` | string | — | اسم المستخدم المطلوب لمالك PocketID لـ `--owner-source=local` |
 | `--platform` | string | — | v2 الأصلي فقط: محوّل منصة المزوّد المحدد (install.platform.providerRef، مثل coolify أو komodo) |
+| `--preinstalled-manifest` | string | — | إعادة التحقق من ذاكرة تخزين مؤقت محايدة للصور قبل كل تهيئة جديدة للنسخة |
 | `--recovery-material-ref` | string | — | لتوافق v0.6 فقط: مرجع لمادة الاسترداد التي يملكها المنسّق؛ ولا تُقبل عبارات مرور الاسترداد كنص عادي في stack specs أبدًا |
 | `--recovery-passphrase-hash` | string | — | لتوافق v0.6 فقط: تجزئة عبارة مرور الاسترداد (argon2id PHC)؛ ويسأل الأمر عنها عند غيابها |
 | `--service-profile` | string | — | لتوافق v0.6 فقط: ملف خدمة BaseKit |
 | `--use-case` | strings | — | أحمال عمل الـ Kit الاختيارية المطلوب تفعيلها (مثل photos,files,vault)؛ ويتطلب v2alpha2 بدائل صريحة |
 | `--use-case-alternative` | stringArray | — | v2alpha2 الأصلي: use-case-id=alternative؛ وأدرج أحمال العمل الأساسية المطلوبة |
+| `--use-case-capability` | stringArray | — | v2alpha2 الأصلي: use-case.capability=option أو off (مثل ai.chat=open-webui)؛ ويتطلب `--use-case` |
 
 **أمثلة**
 
@@ -71,6 +73,9 @@ stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email yo
 
 # Cloud Kit on your own domain, without prompts (for scripts)
 stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email you@example.com --domain example.com --non-interactive
+
+# Private AI with its default modules (inference with Ollama, chat with Open WebUI) named explicitly
+stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com --use-case ai --use-case-capability ai.inference=ollama --use-case-capability ai.chat=open-webui
 
 # Pick the core alternative and module profile explicitly instead of catalog defaults
 stackkit init basement-kit --owner-source=local --owner-email you@example.com --use-case-alternative basement-core=standalone --module-compute-profile stackkits-basement-core-runtime=standard
