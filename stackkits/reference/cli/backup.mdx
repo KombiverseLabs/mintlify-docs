@@ -4,8 +4,8 @@ description: "Manage backups (Kopia engine)"
 sidebarTitle: "backup"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:63fce23f4e4a34c49f6bbb6416af41313b7372d6da90d1dff01435daf4766981"
-source_hash: "adff23d72b54bddf07df8c214722f2611e90bc41"
+content_hash: "sha256:a831a4f39f879ed92f689b5162eee1248ec16423664d9c3023bf26a29535fed0"
+source_hash: "f33893551fbf9a4426a93a2b210fc305bd197e25"
 ---
 Manage backups (Kopia engine).
 
@@ -362,7 +362,7 @@ Bind an owner-supplied S3 target to the generated backup policy.
 stackkit backup target [flags]
 ```
 
-Subcommands: [`stackkit backup target import`](#stackkit-backup-target-import), [`stackkit backup target status`](#stackkit-backup-target-status)
+Subcommands: [`stackkit backup target import`](#stackkit-backup-target-import), [`stackkit backup target recipient`](#stackkit-backup-target-recipient), [`stackkit backup target status`](#stackkit-backup-target-status)
 
 ### stackkit backup target import
 
@@ -379,12 +379,35 @@ stackkit backup target import [flags]
 | `--candidate-digest` | string | — | Exact sha256 digest of the installed StackKits release candidate |
 | `--owner-approve` | bool | — | Authorize this exact local backup target |
 | `--rebind` | bool | — | Renew Plan/source authority while preserving the existing target and credentials |
+| `--sealed` | bool | — | Read a sealed host delivery envelope on stdin instead of plain JSON |
+| `--tenant-ref` | string | — | Tenant the sealed delivery must be addressed to (required with `--sealed`) |
 
 **Examples**
 
 ```bash
 # Import the S3 target from a private JSON file with the fields listed above
 stackkit backup target import --owner-approve < s3-target.json
+```
+
+### stackkit backup target recipient
+
+Prove this node's sealed-delivery recipient key.
+
+Creates this node's separate encryption recipient key once and prints a statement, signed by the local Owner key, that binds the public key to this Site and node and answers the caller's challenge. The private key never leaves local custody. A delivering authority seals backup target material to this key; import it with `backup target import --sealed`.
+
+```bash
+stackkit backup target recipient [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--challenge` | string | — | Fresh value from the delivering authority that the statement must echo |
+| `--owner-approve` | bool | — | Authorize this node's recipient key |
+
+**Examples**
+
+```bash
+stackkit backup target recipient --challenge "$CHALLENGE" --owner-approve
 ```
 
 ### stackkit backup target status
