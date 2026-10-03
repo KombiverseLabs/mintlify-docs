@@ -7,6 +7,52 @@ mode: "center"
 
 تحديثات المنتج مرتبة من الأحدث إلى الأقدم. للاطلاع على تفاصيل أوفى عن كل إصدار، راجع ملاحظات إصدارات [StackKits](https://github.com/kombifyio/stackKits/releases) و[SpeechKit](https://github.com/kombifyio/SpeechKit/releases) و[Techstack](https://github.com/kombifyio/TechStack/releases) على GitHub.
 
+<Update label="2026-10-02" description="17 سبتمبر – 2 أكتوبر">
+
+## مختبر Private AI وخوادم ألعاب وMCP في كل تثبيت من StackKits؛ وSpeechKit يلتقي Microsoft 365
+
+أصدر StackKits الإصدارات من [v0.33.0](https://github.com/kombifyio/stackKits/releases/tag/v0.33.0) إلى [v0.50.3](https://github.com/kombifyio/stackKits/releases/tag/v0.50.3): مختبر AI محلي متكامل، وحالة استخدام Game، ومزيدًا من التطبيقات لكل حالة استخدام، ووضع Advanced، وStackKits MCP في كل تثبيت. وانتقل SpeechKit من [v0.71.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.71.0) إلى [v0.73.4](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.4): استيراد اجتماعات Microsoft 365، وصوت Google بمفتاحك الخاص، ونقاط نهاية صوتية متوافقة مع OpenAI، وتطبيق بست لغات.
+
+### ميزات جديدة
+
+- **يتحول Private AI إلى مختبر AI محلي.** يتيح [StackKits v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) اختيار Open WebUI أو AnythingLLM للدردشة، وإضافة بحث الويب وتحليل المستندات ومساعد Hermes ووكيل OpenHands داخل gVisor وComfyUI للصور والفيديو. ويعمل على CPU أو وحدات GPU من NVIDIA وAMD. يصل موصّل اختياري نموذج homelab لديك بـ kombify AI عبر اتصال صادر، فلا يُفتح أي منفذ وارد. راجع [Personal AI](/ar/guides/stackkits/use-cases/personal-ai).
+- **خوادم ألعاب.** يضيف [v0.41.0](https://github.com/kombifyio/stackKits/releases/tag/v0.41.0) حالة استخدام Game اختيارية مع Pterodactyl Panel. ينشئ `stackkit setup game` خوادم Minecraft Java وBedrock بإعدادات افتراضية آمنة، ويضيف [v0.43.0](https://github.com/kombifyio/stackKits/releases/tag/v0.43.0) Paper وTerraria وValheim. يتحقق الإعداد من الجاهزية بانضمام عميل حقيقي ويرفض خادمًا لا تتسع له ذاكرة المضيف. راجع [Game](/ar/guides/stackkits/use-cases/game).
+- **مزيد من التطبيقات لكل حالة استخدام.** يثبّت [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) Nextcloud وForgejo وEmby وPassbolt بدائلَ للإعدادات الافتراضية. وتُثبّت إضافات بجانب حالة الاستخدام: Paperless-ngx وEuro-Office وNavidrome وAudiobookshelf وESPHome. راجع [فهرس حالات الاستخدام](/ar/stackkits/reference/use-case-catalog).
+- **البريد كما تريده.** يضيف [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) بريد Roundcube على الويب لصندوق بريد تملكه بالفعل، إلى جانب خادم بريد Stalwart اختياري على عقدة مخصصة. راجع [Mail](/ar/guides/stackkits/use-cases/mail).
+- **وضع Advanced للمنازل المُدارة.** يشغّل [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) مجموعات التغييرات واكتشاف الانحراف وتسويته لكل stack والتراجع المنسق وتدريبات الاستعادة عبر Terramate فوق OpenTofu. تستخدم تثبيتات Basement الآن OpenTofu افتراضيًا، ويشفّر [v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) حالته وخططه. راجع [`stackkit advanced`](/ar/stackkits/reference/cli/advanced).
+- **StackKits MCP في كل تثبيت.** ينشر [v0.46.0](https://github.com/kombifyio/stackKits/releases/tag/v0.46.0) نقطة نهاية `/mcp` محمية برمز مميز على كل Core، حتى يتمكن وكيل AI من الاتصال بخادمك مباشرة. صار كل أمر CLI عام أداة MCP أو استثناءً مدرجًا، وتبقى الأوامر التي قد تكشف سرًا متاحة عبر CLI فقط. راجع [موصّل MCP](/ar/stackkits/reference/mcp-connector).
+- **تحديثات نظام التشغيل من CLI.** يخطط [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) لتحديثات نظام التشغيل ويطبقها ويجدول إعادة تشغيل العقدة. راجع [`stackkit host`](/ar/stackkits/reference/cli/host).
+- **صور مُحضَّرة مسبقًا.** يضيف [v0.50.0](https://github.com/kombifyio/stackKits/releases/tag/v0.50.0) الأوامر `stackkit image plan` و`prepare` و`verify` لتخزين سلسلة الأدوات وصور النواة مؤقتًا قبل الحاجة إليها. ولا يزال كل تثبيت يحصل على مفاتيح المالك وأسراره الخاصة عند الإقلاع الأول. راجع [`stackkit image`](/ar/stackkits/reference/cli/image).
+- **الاجتماعات تلتقي Microsoft 365.** يستورد [SpeechKit v0.72.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.0) نص اجتماع Teams أو ملخص Microsoft 365 Copilot بعد اجتماع Teams، ويتيح اختيار Microsoft Foundry لكتابة المراجعات بعد الموافقة على معالجة النص. ويتيح تسجيل الدخول متعدد المستأجرين تبديل الشركات دون تثبيت جديد. راجع [Meeting](/ar/speechkit/meeting).
+- **استخدم مفتاح Google الصوتي الخاص بك.** يعيد [v0.73.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.0) خدمات Google Cloud لتحويل الكلام إلى نص والنص إلى كلام وGemini Live كمزوّدين اختياريين يعملون بمفتاحك. راجع [الأوضاع ومسارات البيانات](/ar/speechkit/modes).
+- **صوت متوافق مع OpenAI على خادم SpeechKit.** يوفّر [v0.73.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.1) النقطتين `POST /v1/audio/transcriptions` و`POST /v1/audio/speech`، حتى تستخدمه عملاء مثل Open WebUI مباشرة. ويعمل ملف تعريف محلي فقط دون مزوّدي سحابة.
+- **SpeechKit بست لغات.** يترجم [v0.73.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.1) و[v0.73.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.2) تطبيق Android والموقع وتطبيق سطح المكتب وصينية النظام إلى الإنجليزية والألمانية والإسبانية والصينية المبسطة والهندية والعربية.
+
+### تحديثات
+
+- **تسجيل الدخول لمزيد من التطبيقات.** يسجّل [StackKits v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) دخول Paperless-ngx وMedia وSmart Home عبر PocketID، ويوفّر حسابات المنزل في Files. ويضيف [v0.38.0](https://github.com/kombifyio/stackKits/releases/tag/v0.38.0) الأمرين `stackkit user owner status` و`activate` لمفتاح مرور المالك. راجع [PocketID](/ar/stackkits/apps/pocketid).
+- **يتوسع Smart Home.** يثبّت [v0.47.1](https://github.com/kombifyio/stackKits/releases/tag/v0.47.1) Mosquitto وZigbee2MQTT مع مستمعي LAN يختارهم المالك وتمرير الأجهزة، ويتبنى [v0.50.0](https://github.com/kombifyio/stackKits/releases/tag/v0.50.0) تثبيت Home Assistant قائمًا دون استبدال حالته. راجع [Smart Home](/ar/guides/stackkits/use-cases/smart-home).
+- **كل تطبيق يحصل على مسار.** يمنح [v0.39.0](https://github.com/kombifyio/stackKits/releases/tag/v0.39.0) Media وSmart Home وAI وDev وDocuments مسار HTTPS وربط البيانات نفسيهما اللذين تستخدمهما Photos وFiles وVault.
+- **نسخ احتياطية بحسب مجموعة التغطية.** يختار [v0.37.0](https://github.com/kombifyio/stackKits/releases/tag/v0.37.0) البيانات بحسب `config` أو `content` أو `media`. تتحول التغطية غير المحددة إلى `content`، لذلك تبقى الوسائط خيارًا صريحًا دائمًا. راجع [النسخ الاحتياطي والاستعادة](/ar/guides/stackkits/back-up-and-restore).
+- **Ubuntu 26.04 افتراضيًا.** يستهدف [v0.50.0](https://github.com/kombifyio/stackKits/releases/tag/v0.50.0) Ubuntu 26.04 LTS للتثبيتات الجديدة ويحافظ على التوافق مع 24.04. ويضيف [v0.35.0](https://github.com/kombifyio/stackKits/releases/tag/v0.35.0) النسخ الاحتياطي على Debian 13. راجع [توافق أنظمة التشغيل](/ar/stackkits/reference/os-compatibility).
+- **التوافق من عمليات تشغيل حقيقية.** يقيّم [v0.33.0](https://github.com/kombifyio/stackKits/releases/tag/v0.33.0) و[v0.34.0](https://github.com/kombifyio/stackKits/releases/tag/v0.34.0) كل Kit في كل بيئة من عمليات مؤتمتة تبدأ بالتثبيت وتنتهي بالاستعادة، ويقيّم [v0.41.0](https://github.com/kombifyio/stackKits/releases/tag/v0.41.0) Cloud Kit على VPS عام بأنه مدعوم.
+- **توثيق كل أمر.** يضيف [v0.33.0](https://github.com/kombifyio/stackKits/releases/tag/v0.33.0) أمثلة إلى `stackkit <command> --help` وينشر [مرجع CLI](/ar/stackkits/reference/cli/overview) كاملًا. ويتحقق المثبّت أيضًا من الأرشيف المنزّل بمجاميع تحقق الإصدار.
+- **يستخدم Basement النطاق `lab.home` افتراضيًا.** يستخدم [v0.47.5](https://github.com/kombifyio/stackKits/releases/tag/v0.47.5) `lab.home` نطاقًا افتراضيًا، وتنتقل نطاقات Basement القائمة باستعادة موقّعة.
+- **ملاحظات الاجتماع كبنود ذات طوابع زمنية.** يكتب [SpeechKit v0.71.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.71.0) الملاحظات كبنود ذات طوابع زمنية ويضيف ملاحظة سريعة من حبة الاجتماع.
+- **Techstack Open Core v0.33.5.** نُشر مصدر [Techstack](https://github.com/kombifyio/TechStack) ومثبّته للإصدارين v0.26.0 وv0.33.5، ويضيف التطبيق الإسبانية والصينية المبسطة والهندية والعربية. راجع [نظرة عامة على Techstack](/ar/techstack/overview).
+
+### إصلاح الأخطاء
+
+- **خوادم 4 GB تستوفي الحد الأدنى 4 GB.** يقرّب [StackKits v0.45.0](https://github.com/kombifyio/stackKits/releases/tag/v0.45.0) الذاكرة المثبّتة إلى أقرب GiB، فلا يرفض Cloud Kit خادم VPS بسعة 4 GB بعد الآن.
+- **تعمل الترقية من الإصدارات السابقة.** يصلح [v0.39.0](https://github.com/kombifyio/stackKits/releases/tag/v0.39.0) فشل `stackkit upgrade` و`stackkit kit list` بسبب `unexpected EOF`. ثبّت إصدارًا حاليًا من CLI قبل الترقية.
+- **تصل تغييرات الإعداد إلى الخدمات العاملة.** يعيد [v0.45.0](https://github.com/kombifyio/stackKits/releases/tag/v0.45.0) إنشاء الخدمة عندما يتغير ملف إعدادها المولّد، ولم يعد تسجيل الدخول إلى Game Panel يحمّل Google reCAPTCHA.
+- **استعادة أكثر أمانًا.** يتيح [v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) لمحاولة Apply معادة استعادة تشغيل متوقف، ويستأنف تثبيت Cloud متوقفًا من أي مجلد. ويرفض [v0.49.0](https://github.com/kombifyio/stackKits/releases/tag/v0.49.0) تخطيط تحديث أثناء عمل تحديث آخر، ويتطلب موافقة صريحة على `stackkit remove` مع مخرجات JSON.
+- **إصلاحات Cloud Kit.** يجعل [v0.38.0](https://github.com/kombifyio/stackKits/releases/tag/v0.38.0) النسخ الاحتياطي وتسجيل دخول المالك يعملان على Cloud Kit، ويسمّي حد المعدل في Let's Encrypt مع وقت إعادة المحاولة. ويرفض [v0.48.3](https://github.com/kombifyio/stackKits/releases/tag/v0.48.3) نطاقات Cloud Kit المحلية فقط عند التهيئة.
+- **تعيد التحديثات تشغيل التطبيق من المحاولة الأولى.** يجعل [SpeechKit v0.72.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.1) أول عملية «تثبيت وإعادة تشغيل» تعيد تشغيل التطبيق.
+- **Dictation ألماني أنظف.** يزيل [v0.72.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.0) الفواصل المتبقية بعد كلمات الحشو الألمانية، ويوضح سبب عدم حفظ لقطة شاشة لاجتماع، ويتيح للمراجعات المرور عبر كل نموذج بميزانيته الخاصة.
+
+</Update>
+
 <Update label="2026-09-16" description="5 سبتمبر – 16 سبتمبر">
 
 ## SpeechKit على macOS، وإيقاف Google AI، ومثبّت StackKits يختار الـ Kit بنفسه

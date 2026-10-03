@@ -30,7 +30,25 @@ stackkit user list
 stackkit user remove alex --owner-approve
 ```
 
-Subcommands: [`stackkit user add`](#stackkit-user-add), [`stackkit user list`](#stackkit-user-list), [`stackkit user owner`](#stackkit-user-owner), [`stackkit user remove`](#stackkit-user-remove)
+Subcommands: [`stackkit user activate`](#stackkit-user-activate), [`stackkit user add`](#stackkit-user-add), [`stackkit user files`](#stackkit-user-files), [`stackkit user list`](#stackkit-user-list), [`stackkit user owner`](#stackkit-user-owner), [`stackkit user remove`](#stackkit-user-remove)
+
+## stackkit user activate
+
+Die Passkey-Registrierung für ein vorhandenes Haushaltsmitglied neu ausstellen.
+
+```bash
+stackkit user activate <username> [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Die Neuausstellung der Haushalts-Passkey-Registrierung explizit genehmigen |
+
+Geerbt von `stackkit user`:
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
 
 ## stackkit user add
 
@@ -61,6 +79,62 @@ stackkit user add alex --email alex@example.com --owner-approve
 # Set a display name and return the invitation as JSON
 stackkit user add sam --email sam@example.com --display-name "Sam Doe" --owner-approve --json
 ```
+
+## stackkit user files
+
+Lokale Files-Haushaltskonten fortsetzen und übergeben.
+
+Cloudreve CE führt hinter TinyAuth ein lokales Anwendungskonto. Diese Befehle gleichen dieses Konto mit einer genehmigten PocketID-Haushaltsidentität ab und legen dessen in Besitzerverwahrung befindliches Passwort nur auf ausdrückliche Anforderung offen.
+
+```bash
+stackkit user files [flags]
+```
+
+Geerbt von `stackkit user`:
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+
+Unterbefehle: [`stackkit user files credential`](#stackkit-user-files-credential), [`stackkit user files ensure`](#stackkit-user-files-ensure)
+
+### stackkit user files credential
+
+Ein in Besitzerverwahrung befindliches Files-Haushaltspasswort ausgeben.
+
+Die genehmigte PocketID-Haushaltsidentität und ihr Cloudreve-Konto ohne Administratorrechte verifizieren und anschließend das vorhandene Passwort aus der signierten lokalen Besitzerverwahrung ausgeben. Die Ausgabe enthält geheimes Material; verwende sie nur in einem privaten Terminal oder einer bewusst gewählten Pipe.
+
+```bash
+stackkit user files credential <username> [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Das Offenlegen dieses Files-Passworts explizit genehmigen |
+
+Geerbt von `stackkit user`:
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+
+### stackkit user files ensure
+
+Ein Files-Konto ohne Administratorrechte erstellen oder verifizieren.
+
+```bash
+stackkit user files ensure <username> [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Die Bereitstellung des Files-Kontos explizit genehmigen |
+
+Geerbt von `stackkit user`:
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
 
 ## stackkit user list
 
@@ -100,11 +174,11 @@ Geerbt von `stackkit user`:
 | --- | --- | --- | --- |
 | `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
 
-Subcommands: [`stackkit user owner activate`](#stackkit-user-owner-activate), [`stackkit user owner status`](#stackkit-user-owner-status)
+Subcommands: [`stackkit user owner activate`](#stackkit-user-owner-activate), [`stackkit user owner migrate-domain`](#stackkit-user-owner-migrate-domain), [`stackkit user owner status`](#stackkit-user-owner-status)
 
 ### stackkit user owner activate
 
-Die an den Owner gebundene einmalige Passkey-Aktivierung zurückgeben oder neu ausstellen.
+Den an den Owner gebundenen einmaligen Passkey-Aktivierungslink neu ausstellen und den vorherigen zurückziehen.
 
 ```bash
 stackkit user owner activate [flags]
@@ -112,7 +186,29 @@ stackkit user owner activate [flags]
 
 | Flag | Typ | Standard | Beschreibung |
 | --- | --- | --- | --- |
-| `--owner-approve` | bool | — | Das Offenlegen oder Neuausstellen der Owner-Aktivierung explizit freigeben |
+| `--owner-approve` | bool | — | Die Neuausstellung des Owner-Aktivierungslinks explizit genehmigen |
+
+Geerbt von `stackkit user`:
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+
+### stackkit user owner migrate-domain
+
+Die vom Besitzer genehmigte Identitätsmigration von home zu lab.home vorbereiten.
+
+Den vorhandenen Owner, die CA, Dienst-Secrets und Benutzer erhalten, während Basement-Intent und Laufzeitverwahrung von home zu lab.home migriert werden. Bewahre die CLI des vorherigen Releases, die paketierten Tools und den Provider-Mirror auf, bevor du für diesen Befehl eine isolierte Ziel-CLI verwendest. `--quiesce-runtime` berechtigt den Befehl, die exakten Identitäten der Core-Quellcontainer zu erfassen, den Identity-Callback abzugleichen, solange PocketID verfügbar ist, und anschließend nur diese Container kontrolliert zu stoppen und zu entfernen, ohne Volumes, Netzwerke oder Images zu löschen. Verwende die vorherige CLI für generate, apply und verify und danach die Ziel-CLI für upgrade `--to` &lt;exact-release&gt;. Der Upgrade-Checkpoint deckt das migrierte vorherige Release auf lab.home ab; dieser Befehl erstellt keinen Rollback-Checkpoint für die ursprüngliche Domain. Die v0.47.4-Bridge wartet auf die Qualifizierung auf einem echten Host. Registriere nach dem Rollout das Client-DNS und neue Passkeys unter id.lab.home.
+
+```bash
+stackkit user owner migrate-domain [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Die Domain-Migration und Registrierung neuer Passkeys explizit genehmigen |
+| `--quiesce-runtime` | bool | — | Die authentifizierten Core-Quellcontainer kontrolliert stoppen und entfernen, ohne persistente Ressourcen zu löschen |
+| `--spec` | string | `stack-spec.yaml` | Zu migrierende Workspace-relative StackSpec |
 
 Geerbt von `stackkit user`:
 

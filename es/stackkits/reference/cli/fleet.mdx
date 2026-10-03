@@ -1,0 +1,99 @@
+---
+title: "stackkit fleet"
+description: "Admite y une hosts miembros de una StackInstance"
+sidebarTitle: "fleet"
+---
+Admite y une hosts miembros de una StackInstance.
+
+Vincula un host físico a un nodo miembro existente de esta StackInstance.
+
+El propietario de Home en el Foundation Node firma la admisión de un miembro para un nodo habilitado que no sea controlador en un Cloud Site. El host miembro la verifica con la clave de Home fijada, vuelve a compilar el mismo plan a partir de la StackSpec y el Inventory admitidos y conserva una custodia de miembro limitada a la verificación: sin inscripción, firma, emisión de credenciales ni ControlAuthority. Ambos hosts deben ejecutar la misma versión de StackKits.
+
+Join también genera una clave de evidencia del miembro y escribe un archivo de solicitud. El propietario de Home la certifica con certify-member-key; después de import-member-key, el miembro aplica y verifica únicamente su propia tupla Site/node/channel, y firma esa evidencia con la clave certificada.
+
+```bash
+stackkit fleet [flags]
+```
+
+Subcomandos: [`stackkit fleet admit-member`](#stackkit-fleet-admit-member), [`stackkit fleet certify-member-key`](#stackkit-fleet-certify-member-key), [`stackkit fleet import-member-key`](#stackkit-fleet-import-member-key), [`stackkit fleet join`](#stackkit-fleet-join)
+
+## stackkit fleet admit-member
+
+Firma como propietario la admisión de un miembro para un nodo de perímetro Cloud.
+
+```bash
+stackkit fleet admit-member [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--inventory` | string | — | Inventory que declara ambos canales de ejecución (de lo contrario se selecciona un archivo de Inventory convencional) |
+| `--node` | string | — | ID del nodo miembro de la StackSpec (un worker o nodo de perímetro habilitado en un Cloud Site) |
+| `--output` | string | — | Salida de admisión limitada al workspace (predeterminado: .stackkit/fleet/member-admissions/&lt;node&gt;.json) |
+| `--valid-for` | duration | `24h0m0s` | Ventana de Join de la admisión (24h como máximo) |
+
+**Ejemplos**
+
+```bash
+# On the Foundation Node, admit the Cloud edge declared in the plan
+stackkit fleet admit-member --node cloud-edge
+```
+
+## stackkit fleet certify-member-key
+
+Certifica como propietario la clave de evidencia de un miembro unido para su propia tupla.
+
+Certifica la clave de evidencia que un miembro unido generó durante Join.
+
+El certificado permite al miembro firmar evidencia de Apply y Verify para su propia tupla Site/node/execution-channel y nada más: sin inscripción, firma de identidades, emisión de credenciales, ControlAuthority ni autoridad de Owner. El Foundation Node registra cada certificado que emite y, desde entonces, deja al miembro sus destinos locales del entorno de ejecución.
+
+```bash
+stackkit fleet certify-member-key <request-file> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--inventory` | string | — | Inventory que declara ambos canales de ejecución (de lo contrario se selecciona un archivo de Inventory convencional) |
+| `--output` | string | — | Salida adicional del certificado, limitada al workspace, para transmitirla al miembro |
+| `--valid-for` | duration | `720h0m0s` | Validez del certificado (2160h como máximo) |
+
+**Ejemplos**
+
+```bash
+# On the Foundation Node, with the request file the member relayed
+stackkit fleet certify-member-key member-evidence-key-request.json --output member-evidence-key.json
+```
+
+## stackkit fleet import-member-key
+
+Importa el certificado del propietario de Home para la clave de evidencia de este miembro.
+
+```bash
+stackkit fleet import-member-key <certificate-file> [flags]
+```
+
+**Ejemplos**
+
+```bash
+# On the Cloud host, with the certificate the Foundation Node returned
+stackkit fleet import-member-key member-evidence-key.json
+```
+
+## stackkit fleet join
+
+Une este host como el miembro limitado a la verificación nombrado en una admisión.
+
+```bash
+stackkit fleet join <admission-file> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--home-key-id` | string | — | ID de la clave del propietario de Home procedente de admit-member, comparado fuera de banda |
+
+**Ejemplos**
+
+```bash
+# On the Cloud host, in an empty deployment directory
+stackkit fleet join member-admission.json --home-key-id <homeKeyId>
+```

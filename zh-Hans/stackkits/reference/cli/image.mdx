@@ -1,0 +1,53 @@
+---
+title: "stackkit image"
+description: "准备并准入不绑定 Owner 的黄金镜像缓存"
+sidebarTitle: "image"
+---
+准备并准入不绑定 Owner 的黄金镜像缓存。
+
+从嵌入的 CUE 目录准备不可变的核心容器缓存。此操作绝不会初始化 Owner、启动服务、创建卷或准备提供商 VM。默认目标是 Ubuntu 26.04，同时保持与 Ubuntu 24.04 兼容。清单是未签名的缓存元数据，绝不代表主机合规性或 Apply 权限。系统会验证并复用现有的已打包 OpenTofu 提供商闭包。首次启动时的服务集成和可选工作负载仍然需要网络访问。Techstack 负责机器 sysprep、VM 镜像和注册。
+
+```bash
+stackkit image [flags]
+```
+
+子命令：[`stackkit image plan`](#stackkit-image-plan)、[`stackkit image prepare`](#stackkit-image-prepare)、[`stackkit image verify`](#stackkit-image-verify)
+
+## stackkit image plan
+
+打印权威的中立核心缓存配置。
+
+```bash
+stackkit image plan [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--profile` | string | `cloud-core-compose` | CUE 中立配置（cloud-core-compose、basement-core-compose、basement-core-lite-compose） |
+
+## stackkit image prepare
+
+仅缓存正在运行且经过证明的精确版本，并拉取核心镜像。
+
+```bash
+stackkit image prepare [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--cache-root` | string | — | **必填。** 独立的中立版本/缓存元数据目录 |
+| `--profile` | string | `cloud-core-compose` | CUE 中立核心缓存配置 |
+| `--target` | string | — | **必填。** 未来部署所用的空目录；绝不能是已初始化的 stack |
+
+## stackkit image verify
+
+重新观察版本字节、空目标目录、主机和精确的核心镜像缓存。
+
+```bash
+stackkit image verify [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--cache-root` | string | — | **必填。** 独立的中立版本/缓存元数据目录 |
+| `--target` | string | — | **必填。** 未来部署所用的空目录；绝不能是已初始化的 stack |

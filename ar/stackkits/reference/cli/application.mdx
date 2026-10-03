@@ -1,0 +1,94 @@
+---
+title: "stackkit application"
+description: "اعتماد التطبيقات القائمة المدعومة دون استبدال حساباتها أو بياناتها"
+sidebarTitle: "application"
+---
+اعتماد التطبيقات القائمة المدعومة دون استبدال حساباتها أو بياناتها.
+
+```bash
+stackkit application [flags]
+```
+
+الأوامر الفرعية: [`stackkit application adopt`](#stackkit-application-adopt)، [`stackkit application control`](#stackkit-application-control)، [`stackkit application inspect`](#stackkit-application-inspect)، [`stackkit application release`](#stackkit-application-release)، [`stackkit application verify`](#stackkit-application-verify)
+
+## stackkit application adopt
+
+ربط التطبيق القائم الذي خضع للمراجعة بدورة الحياة المعلنة له.
+
+```bash
+stackkit application adopt [workload] [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--container-id` | string | — | معرّف حاوية Docker الدقيق والثابت المكوّن من 64 حرفًا |
+| `--json` | bool | — | إصدار دليل تطبيق ذي إصدار وخالٍ من الأسرار |
+| `--operation-id` | string | — | معرّف عملية ثابت للاستئناف الآمن عند التكرار |
+| `--owner-approve` | bool | — | الموافقة على عملية التطبيق هذه المرتبطة بهذا المالك تحديدًا |
+| `--owner-file` | string | `.stackkit/setup/home-assistant-owner.json` | المسار النسبي إلى مساحة العمل لملف منح المالك الخاص القائم الذي يحتوي على accessToken |
+| `--plan-digest` | string | — | البصمة الدقيقة لخطة الاعتماد التي خضعت للمراجعة والمرتبطة بالمصدر |
+| `--workload` | string | — | حمل عمل التطبيق المحدد بدقة (بديل عن workload الممرَّر حسب الموضع) |
+
+## stackkit application control
+
+بدء الحاوية المعتمدة المحددة أو إيقافها أو إعادة تشغيلها.
+
+```bash
+stackkit application control [workload] [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--action` | string | — | إجراء الطاقة المقبول: start أو stop أو restart |
+| `--container-id` | string | — | معرّف حاوية Docker الدقيق والثابت المكوّن من 64 حرفًا |
+| `--json` | bool | — | إصدار دليل تطبيق ذي إصدار وخالٍ من الأسرار |
+| `--operation-id` | string | — | معرّف عملية ثابت للاستئناف الآمن عند التكرار |
+| `--owner-approve` | bool | — | الموافقة على عملية التطبيق هذه المرتبطة بهذا المالك تحديدًا |
+| `--workload` | string | — | حمل عمل التطبيق المحدد بدقة (بديل عن workload الممرَّر حسب الموضع) |
+
+## stackkit application inspect
+
+تقييم التطبيق القائم المحدد وإعداده الحالي.
+
+```bash
+stackkit application inspect [workload] [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--container-id` | string | — | معرّف حاوية Docker الدقيق والثابت المكوّن من 64 حرفًا |
+| `--json` | bool | — | إصدار دليل تطبيق ذي إصدار وخالٍ من الأسرار |
+| `--owner-file` | string | `.stackkit/setup/home-assistant-owner.json` | المسار النسبي إلى مساحة العمل لملف منح المالك الخاص القائم الذي يحتوي على accessToken |
+| `--workload` | string | — | حمل عمل التطبيق المحدد بدقة (بديل عن workload الممرَّر حسب الموضع) |
+
+## stackkit application release
+
+التخلي عن حيازة دورة الحياة مع الاحتفاظ بالتطبيق.
+
+```bash
+stackkit application release [workload] [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--container-id` | string | — | معرّف حاوية Docker الدقيق والثابت المكوّن من 64 حرفًا |
+| `--json` | bool | — | إصدار دليل تطبيق ذي إصدار وخالٍ من الأسرار |
+| `--operation-id` | string | — | معرّف عملية ثابت للاستئناف الآمن عند التكرار |
+| `--owner-approve` | bool | — | الموافقة على عملية التطبيق هذه المرتبطة بهذا المالك تحديدًا |
+| `--workload` | string | — | حمل عمل التطبيق المحدد بدقة (بديل عن workload الممرَّر حسب الموضع) |
+
+## stackkit application verify
+
+التحقق من ربط الاعتماد الموقّع والمصدر الحالي.
+
+```bash
+stackkit application verify [workload] [flags]
+```
+
+| Flag | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--container-id` | string | — | معرّف حاوية Docker الدقيق والثابت المكوّن من 64 حرفًا |
+| `--json` | bool | — | إصدار دليل تطبيق ذي إصدار وخالٍ من الأسرار |
+| `--operation-id` | string | — | معرّف ارتباط القراءة |
+| `--owner-file` | string | `.stackkit/setup/home-assistant-owner.json` | المسار النسبي إلى مساحة العمل لملف منح المالك الخاص القائم الذي يحتوي على accessToken |
+| `--workload` | string | — | حمل عمل التطبيق المحدد بدقة (بديل عن workload الممرَّر حسب الموضع) |

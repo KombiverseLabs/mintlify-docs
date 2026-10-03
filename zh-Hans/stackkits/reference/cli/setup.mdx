@@ -31,4 +31,35 @@ stackkit setup photos --owner-approve --complete-onboarding
 # Create the Files owner from a workspace-relative credentials file of your choice
 stackkit setup files --owner-approve --credentials-file private/files-owner.json
 ```
+子命令：[`stackkit setup ai-connect`](#stackkit-setup-ai-connect)
 
+## stackkit setup ai-connect
+
+将 Private AI 的 Ollama 作为自有模型端点连接到你的 kombify AI。
+
+开启 Private AI 用例的可选 kombify AI 连接器。在 Companion Studio（Settings、AI access、Model endpoints）中创建一个源为 http://ollama:11434 的模型端点，并复制其连接器令牌。此命令从标准输入或 `--token-file` 读取令牌，绝不从参数读取；它会检查令牌格式，将令牌保存在本地 Owner 托管中，然后开启连接器。下一次 generate 和 apply 会在 Ollama 旁启动出站连接器。不会开放任何入站连接，Ollama 仍不会被公开。
+
+`--disable` 会关闭连接器，并从本地托管中移除令牌。在 Companion Studio 中撤销该端点，可使令牌在任何地方都无法使用。
+
+```bash
+stackkit setup ai-connect [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--disable` | bool | — | 关闭连接器，并从本地托管中移除其令牌 |
+| `--json` | bool | — | 输出不含秘密的结果 |
+| `--token-file` | string | — | 包含连接器令牌的文件；"-" 或不指定此标志时从标准输入读取 |
+
+**示例**
+
+```bash
+# Paste the connector token, then press Enter and Ctrl-D (or read it hidden on a terminal)
+stackkit setup ai-connect --token-file -
+
+# Read the token from a private file
+stackkit setup ai-connect --token-file ~/kombify-connector-token
+
+# Turn the connector off and remove its token
+stackkit setup ai-connect --disable
+```

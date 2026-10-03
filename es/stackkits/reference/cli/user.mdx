@@ -30,7 +30,25 @@ stackkit user list
 stackkit user remove alex --owner-approve
 ```
 
-Subcomandos: [`stackkit user add`](#stackkit-user-add), [`stackkit user list`](#stackkit-user-list), [`stackkit user owner`](#stackkit-user-owner), [`stackkit user remove`](#stackkit-user-remove)
+Subcomandos: [`stackkit user activate`](#stackkit-user-activate), [`stackkit user add`](#stackkit-user-add), [`stackkit user files`](#stackkit-user-files), [`stackkit user list`](#stackkit-user-list), [`stackkit user owner`](#stackkit-user-owner), [`stackkit user remove`](#stackkit-user-remove)
+
+## stackkit user activate
+
+Vuelve a emitir la inscripción de passkey para un miembro existente del hogar.
+
+```bash
+stackkit user activate <username> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Aprueba explícitamente volver a emitir la inscripción de passkey del hogar |
+
+Heredado de `stackkit user`:
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
 
 ## stackkit user add
 
@@ -61,6 +79,62 @@ stackkit user add alex --email alex@example.com --owner-approve
 # Set a display name and return the invitation as JSON
 stackkit user add sam --email sam@example.com --display-name "Sam Doe" --owner-approve --json
 ```
+
+## stackkit user files
+
+Reanuda y entrega las cuentas locales de Files para el hogar.
+
+Cloudreve CE mantiene una cuenta local de la aplicación detrás de TinyAuth. Estos comandos hacen converger esa cuenta desde una identidad aprobada del hogar de PocketID y solo revelan su contraseña bajo custodia del propietario cuando se solicita explícitamente.
+
+```bash
+stackkit user files [flags]
+```
+
+Heredado de `stackkit user`:
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+Subcomandos: [`stackkit user files credential`](#stackkit-user-files-credential), [`stackkit user files ensure`](#stackkit-user-files-ensure)
+
+### stackkit user files credential
+
+Muestra una contraseña de Files del hogar bajo custodia del propietario.
+
+Verifica la identidad aprobada del hogar de PocketID y su cuenta de Cloudreve sin privilegios administrativos, y después muestra la contraseña existente desde la custodia firmada del propietario local. La salida contiene material secreto; úsala solo en un terminal privado o en una canalización intencionada.
+
+```bash
+stackkit user files credential <username> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Aprueba explícitamente revelar esta contraseña de Files |
+
+Heredado de `stackkit user`:
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+### stackkit user files ensure
+
+Crea o verifica una cuenta de Files sin privilegios administrativos.
+
+```bash
+stackkit user files ensure <username> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Aprueba explícitamente el aprovisionamiento de la cuenta de Files |
+
+Heredado de `stackkit user`:
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
 
 ## stackkit user list
 
@@ -100,11 +174,11 @@ Heredado de `stackkit user`:
 | --- | --- | --- | --- |
 | `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
 
-Subcomandos: [`stackkit user owner activate`](#stackkit-user-owner-activate), [`stackkit user owner status`](#stackkit-user-owner-status)
+Subcomandos: [`stackkit user owner activate`](#stackkit-user-owner-activate), [`stackkit user owner migrate-domain`](#stackkit-user-owner-migrate-domain), [`stackkit user owner status`](#stackkit-user-owner-status)
 
 ### stackkit user owner activate
 
-Devuelve o vuelve a emitir la activación de passkey de un solo uso ligada al propietario.
+Vuelve a emitir el enlace de activación de passkey de un solo uso ligado al propietario y retira el anterior.
 
 ```bash
 stackkit user owner activate [flags]
@@ -112,7 +186,29 @@ stackkit user owner activate [flags]
 
 | Flag | Tipo | Predeterminado | Descripción |
 | --- | --- | --- | --- |
-| `--owner-approve` | bool | — | Aprueba explícitamente revelar o volver a emitir la activación del propietario |
+| `--owner-approve` | bool | — | Aprueba explícitamente volver a emitir el enlace de activación del propietario |
+
+Heredado de `stackkit user`:
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+### stackkit user owner migrate-domain
+
+Prepara la migración de identidad de home a lab.home aprobada por el propietario.
+
+Conserva el propietario, la CA, los secretos de servicio y los usuarios existentes mientras migra la intención de Basement y la custodia del entorno de ejecución de home a lab.home. Conserva la CLI de la versión anterior, las herramientas empaquetadas y el mirror de proveedores antes de usar una CLI de destino aislada para este comando. `--quiesce-runtime` autoriza al comando a capturar las identidades exactas de los contenedores Core de origen, hacer converger el callback de identidad mientras PocketID está disponible y después detener de forma ordenada y eliminar únicamente esos contenedores, sin borrar volúmenes, redes ni imágenes. Usa la CLI anterior para generate, apply y verify; después usa la CLI de destino para upgrade `--to` &lt;exact-release&gt;. El punto de control de la actualización cubre la versión anterior migrada en lab.home; este comando no crea un punto de control de reversión al dominio original. El puente v0.47.4 está pendiente de validación en un host real. Después del despliegue, inscribe el DNS de cliente y nuevas passkeys en id.lab.home.
+
+```bash
+stackkit user owner migrate-domain [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Aprueba explícitamente la migración del dominio y la inscripción de nuevas passkeys |
+| `--quiesce-runtime` | bool | — | Detiene de forma ordenada y elimina los contenedores Core de origen autenticados sin borrar recursos persistentes |
+| `--spec` | string | `stack-spec.yaml` | StackSpec relativa al workspace que se migrará |
 
 Heredado de `stackkit user`:
 

@@ -7,6 +7,52 @@ mode: "center"
 
 产品更新，按时间倒序排列。每个版本的更多细节，请参阅 GitHub 上 [StackKits](https://github.com/kombifyio/stackKits/releases)、[SpeechKit](https://github.com/kombifyio/SpeechKit/releases) 和 [Techstack](https://github.com/kombifyio/TechStack/releases) 的发布说明。
 
+<Update label="2026-10-02" description="9 月 17 日 – 10 月 2 日">
+
+## StackKits 带来私有 AI 实验室、游戏服务器和每次安装自带的 MCP；SpeechKit 接入 Microsoft 365
+
+StackKits 发布了从 [v0.33.0](https://github.com/kombifyio/stackKits/releases/tag/v0.33.0) 到 [v0.50.3](https://github.com/kombifyio/stackKits/releases/tag/v0.50.3) 的版本：完整的本地 AI 实验室、Game 用例、每个用例更多可选应用、Advanced 模式，以及每次安装自带的 StackKits MCP。SpeechKit 从 [v0.71.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.71.0) 升级到 [v0.73.4](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.4)：支持导入 Microsoft 365 会议、使用自有密钥的 Google 语音、兼容 OpenAI 的音频端点，以及提供六种语言的应用。
+
+### 新功能
+
+- **私有 AI 变成本地 AI 实验室。** [StackKits v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) 让你选择 Open WebUI 或 AnythingLLM 作为聊天界面，并可添加网页搜索、文档解析、Hermes 助手、在 gVisor 下运行的 OpenHands 智能体，以及用于图像和视频的 ComfyUI。它可在 CPU 或 NVIDIA、AMD GPU 上运行。可选连接器通过出站连接把你的 homelab 模型连接到 kombify AI，因此无需开放入站端口。参见[个人 AI](/zh-Hans/guides/stackkits/use-cases/personal-ai)。
+- **游戏服务器。** [v0.41.0](https://github.com/kombifyio/stackKits/releases/tag/v0.41.0) 新增带 Pterodactyl Panel 的可选 Game 用例。`stackkit setup game` 会以安全默认配置创建 Minecraft Java 和 Bedrock 服务器，[v0.43.0](https://github.com/kombifyio/stackKits/releases/tag/v0.43.0) 还加入了 Paper、Terraria 和 Valheim。设置过程会通过真实客户端加入来检查就绪状态，并拒绝创建主机内存无法承载的服务器。参见 [Game](/zh-Hans/guides/stackkits/use-cases/game)。
+- **每个用例有更多应用。** [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) 可安装 Nextcloud、Forgejo、Emby 和 Passbolt，作为默认应用的替代选择。附加组件会安装在用例旁边：Paperless-ngx、Euro-Office、Navidrome、Audiobookshelf 和 ESPHome。参见[用例目录](/zh-Hans/stackkits/reference/use-case-catalog)。
+- **按你的方式使用邮件。** [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) 为你已有的邮箱新增 Roundcube 网页邮件，并提供可选的 Stalwart 邮件服务器，可安装在专用节点上。参见[邮件](/zh-Hans/guides/stackkits/use-cases/mail)。
+- **面向托管家庭环境的 Advanced 模式。** [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) 通过 Terramate 和 OpenTofu 运行变更集、按栈检测并协调偏移、协同回滚和恢复演练。Basement 安装现在默认使用 OpenTofu，[v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) 还会加密其状态和计划。参见 [`stackkit advanced`](/zh-Hans/stackkits/reference/cli/advanced)。
+- **每次安装都自带 StackKits MCP。** [v0.46.0](https://github.com/kombifyio/stackKits/releases/tag/v0.46.0) 在每个 Core 上发布受令牌保护的 `/mcp` 端点，让 AI 智能体可以直接连接你的服务器。现在每个公共 CLI 命令要么对应一个 MCP 工具，要么列为明确的例外；可能暴露秘密的命令仍仅限 CLI。参见 [MCP 连接器](/zh-Hans/stackkits/reference/mcp-connector)。
+- **通过 CLI 更新操作系统。** [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) 可以规划并应用操作系统更新，还能安排节点重启。参见 [`stackkit host`](/zh-Hans/stackkits/reference/cli/host)。
+- **预制镜像。** [v0.50.0](https://github.com/kombifyio/stackKits/releases/tag/v0.50.0) 新增 `stackkit image plan`、`prepare` 和 `verify`，可提前缓存工具链和核心镜像。每次安装仍会在首次启动时获得自己的所有者密钥和秘密。参见 [`stackkit image`](/zh-Hans/stackkits/reference/cli/image)。
+- **会议接入 Microsoft 365。** [SpeechKit v0.72.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.0) 可在 Teams 会议结束后导入 Teams 文字记录或 Microsoft 365 Copilot 回顾，并允许你在同意处理文字记录后选择 Microsoft Foundry 来生成会议纪要。多租户登录让你无需重新安装即可切换公司。参见[会议](/zh-Hans/speechkit/meeting)。
+- **使用你自己的 Google 语音密钥。** [v0.73.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.0) 恢复 Google Cloud 语音转文字、文字转语音和 Gemini Live，并将它们作为使用你自己密钥的可选提供商。参见[模式与数据路径](/zh-Hans/speechkit/modes)。
+- **SpeechKit 服务器上的 OpenAI 兼容音频。** [v0.73.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.1) 提供 `POST /v1/audio/transcriptions` 和 `POST /v1/audio/speech`，Open WebUI 等客户端可以直接使用。本地专用配置无需云提供商即可运行。
+- **SpeechKit 支持六种语言。** [v0.73.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.1) 和 [v0.73.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.2) 将 Android 应用、网站、桌面应用和托盘本地化为英语、德语、西班牙语、简体中文、印地语和阿拉伯语。
+
+### 更新
+
+- **更多应用支持登录。** [StackKits v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) 通过 PocketID 为 Paperless-ngx、Media 和 Smart Home 提供登录，并在 Files 中配置家庭账户。[v0.38.0](https://github.com/kombifyio/stackKits/releases/tag/v0.38.0) 新增 `stackkit user owner status` 和 `activate`，用于所有者通行密钥。参见 [PocketID](/zh-Hans/stackkits/apps/pocketid)。
+- **Smart Home 功能扩展。** [v0.47.1](https://github.com/kombifyio/stackKits/releases/tag/v0.47.1) 安装 Mosquitto 和 Zigbee2MQTT，并使用所有者选择的 LAN 监听地址和设备直通；[v0.50.0](https://github.com/kombifyio/stackKits/releases/tag/v0.50.0) 可以采用现有 Home Assistant，而不会替换其状态。参见 [Smart Home](/zh-Hans/guides/stackkits/use-cases/smart-home)。
+- **每个应用都有路由。** [v0.39.0](https://github.com/kombifyio/stackKits/releases/tag/v0.39.0) 为 Media、Smart Home、AI、Dev 和 Documents 提供与 Photos、Files 和 Vault 相同的 HTTPS 路由和数据绑定。
+- **按覆盖组备份。** [v0.37.0](https://github.com/kombifyio/stackKits/releases/tag/v0.37.0) 按 `config`、`content` 或 `media` 选择数据。未设置的覆盖范围会解析为 `content`，因此媒体始终需要明确选择。参见[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。
+- **默认使用 Ubuntu 26.04。** [v0.50.0](https://github.com/kombifyio/stackKits/releases/tag/v0.50.0) 将 Ubuntu 26.04 LTS 作为新安装的目标，并保持与 24.04 兼容。[v0.35.0](https://github.com/kombifyio/stackKits/releases/tag/v0.35.0) 新增 Debian 13 上的备份支持。参见[操作系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)。
+- **以真实运行结果判定兼容性。** [v0.33.0](https://github.com/kombifyio/stackKits/releases/tag/v0.33.0) 和 [v0.34.0](https://github.com/kombifyio/stackKits/releases/tag/v0.34.0) 根据自动化的安装到恢复运行，为每个环境中的 Kit 评定等级；[v0.41.0](https://github.com/kombifyio/stackKits/releases/tag/v0.41.0) 将公共 VPS 上的 Cloud Kit 评为受支持。
+- **记录每个命令。** [v0.33.0](https://github.com/kombifyio/stackKits/releases/tag/v0.33.0) 为 `stackkit <command> --help` 添加示例，并发布完整的 [CLI 参考](/zh-Hans/stackkits/reference/cli/overview)。安装器还会根据发行版校验和验证下载的归档文件。
+- **Basement 默认使用 `lab.home`。** [v0.47.5](https://github.com/kombifyio/stackKits/releases/tag/v0.47.5) 将 `lab.home` 用作默认域名，现有 Basement 域名会通过签名恢复完成迁移。
+- **带时间戳项目符号的会议笔记。** [SpeechKit v0.71.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.71.0) 将笔记写成带时间戳的项目符号，并允许从会议浮窗快速添加笔记。
+- **Techstack Open Core v0.33.5。** [Techstack](https://github.com/kombifyio/TechStack) 源代码和安装器已发布 v0.26.0 和 v0.33.5，应用还新增了西班牙语、简体中文、印地语和阿拉伯语。参见 [Techstack 概览](/zh-Hans/techstack/overview)。
+
+### 错误修复
+
+- **4 GB 服务器满足 4 GB 最低要求。** [StackKits v0.45.0](https://github.com/kombifyio/stackKits/releases/tag/v0.45.0) 会把已安装内存四舍五入到最接近的 GiB，因此 Cloud Kit 不再拒绝 4 GB VPS。
+- **可以从早期版本升级。** [v0.39.0](https://github.com/kombifyio/stackKits/releases/tag/v0.39.0) 修复 `stackkit upgrade` 和 `stackkit kit list` 因 `unexpected EOF` 而失败的问题。升级前请先安装当前版本的 CLI。
+- **配置更改会应用到运行中的服务。** [v0.45.0](https://github.com/kombifyio/stackKits/releases/tag/v0.45.0) 会在生成的配置文件发生变化时重新创建服务，Game Panel 登录也不再加载 Google reCAPTCHA。
+- **恢复更安全。** [v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) 允许重试的 Apply 恢复中断的运行，并能从任意目录继续中断的 Cloud 安装。[v0.49.0](https://github.com/kombifyio/stackKits/releases/tag/v0.49.0) 会在更新运行期间拒绝更新规划，并要求明确批准带 JSON 输出的 `stackkit remove`。
+- **Cloud Kit 修复。** [v0.38.0](https://github.com/kombifyio/stackKits/releases/tag/v0.38.0) 让备份和所有者登录可在 Cloud Kit 上工作，并明确指出 Let's Encrypt 速率限制及其重试时间。[v0.48.3](https://github.com/kombifyio/stackKits/releases/tag/v0.48.3) 会在初始化时拒绝仅限本地使用的 Cloud Kit 域名。
+- **更新首次尝试即可重新启动应用。** [SpeechKit v0.72.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.1) 让首次“安装并重启”操作就能重新启动应用。
+- **德语听写更干净。** [v0.72.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.0) 会清除德语填充词后残留的逗号，说明会议截图为何未保存，并允许会议纪要按各自预算依次尝试所有模型。
+
+</Update>
+
 <Update label="2026-09-16" description="9 月 5 日 – 9 月 16 日">
 
 ## SpeechKit 登陆 macOS、Google AI 停用，以及能自动选择 Kit 的 StackKits 安装器

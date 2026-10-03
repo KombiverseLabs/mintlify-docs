@@ -9,7 +9,7 @@ sidebarTitle: "host"
 stackkit host [flags]
 ```
 
-子命令：[`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host updates`](#stackkit-host-updates)
+子命令：[`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host security`](#stackkit-host-security), [`stackkit host updates`](#stackkit-host-updates)
 
 ## stackkit host attach-conformance
 
@@ -179,6 +179,129 @@ stackkit host remediate --apply <resolution-id> --yes
 
 # Carry out every undoable fix that may run unattended
 stackkit host remediate --auto-reversible --yes
+```
+
+## stackkit host security
+
+使用带版本的证据验证并修复主机安全基线。
+
+依据 StackKits 主机安全基线观察此节点，并在不中断管理路径的情况下恢复发生偏移的项目。
+
+'verify' 绝不会更改主机。它会为防火墙、sshd、暴力破解防护、自动和待处理的安全更新、重启状态、内核参数、公开的监听器和证书到期情况生成 stackkit.host-security-evidence/v1。每项控制的状态为 compliant、drifted、unknown 或经 Owner 批准的例外，且证据会到期：过期的观察结果为 unknown，而 unknown 控制绝不能算作 compliant。
+
+它既可独立运行（Standard Mode，无需账号），也可在 Techstack 管理部署时通过固定版本的 CLI 运行（`--mode` advanced）。
+
+```bash
+stackkit host security [flags]
+```
+
+子命令：[`stackkit host security repair`](#stackkit-host-security-repair)、[`stackkit host security status`](#stackkit-host-security-status)、[`stackkit host security verify`](#stackkit-host-security-verify)
+
+### stackkit host security repair
+
+在不中断管理路径的情况下恢复发生偏移的基线控制。
+
+规划如何恢复发生偏移的控制，或使用 `--apply` 执行恢复。
+
+不使用 `--apply` 时不会更改任何内容：命令会测量主机，并输出每项修复将执行的操作。使用 `--apply` 时，只会处理指定的（`--control`）或发生偏移的控制，而且每项更改都会先检查：
+
+```text
+  - the firewall always keeps admitting the ssh sessions in use and every
+    --management-source on every sshd port, and a policy that would not is
+    refused before it is loaded;
+  - password logins are disabled only when an account holds an authorized key;
+    without one they stay on, the step is refused with reason no_authorized_key
+    and the rest of the baseline is still repaired. The previous sshd and
+    firewall configuration is restored if the new one does not validate or does
+    not take effect;
+  - fail2ban never bans the management path.
+```
+
+无法观察的控制或由 Owner 批准例外的控制不会被处理。Cloud Site 的防火墙和 root 登录由 'stackkit apply' 恢复。每个步骤都会记录控制更改前后的状态；对已经 compliant 的控制重复执行修复不会更改任何内容。
+
+```bash
+stackkit host security repair [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--apply` | bool | — | 执行修复；不使用此标志时，命令只进行规划 |
+| `--control` | stringArray | — | 将修复限制为此控制 ID（可重复指定） |
+| `--declared-port` | stringArray | — | 声明的服务端口，格式为 tcp/443 或 udp/5353（可重复指定） |
+| `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | 由 Owner 控制的例外文件（每个例外都需要 Owner 和到期时间） |
+| `--freshness` | duration | `15m0s` | 证据在到期前可被信赖的时长（1 分钟至 24 小时） |
+| `--json` | bool | — | 以机器可读的 JSON 输出结果 |
+| `--kit` | string | — | 要记录的 Kit slug（默认为工作区 StackSpec 的 Kit） |
+| `--local-node` | string | — | 所提供 ResolvedPlan 中的确切本地 Node |
+| `--management-source` | stringArray | — | 必须始终能够访问 ssh 的网络，以 CIDR 表示（可重复指定） |
+| `--mode` | string | `standard` | 要记录的生命周期模式：standard；Techstack 管理此部署时为 advanced |
+| `--no-record` | bool | — | 不在 .stackkit/ 下写入修复后的证据 |
+| `--resolved-plan` | string | — | 经过验证的规范 ResolvedPlan，用于依据其声明的监听器判断暴露情况 |
+| `--site-kind` | string | — | 此主机的 Site 类型：home 或 cloud（默认根据 Kit 推断；modern-homelab 需要此项） |
+
+**示例**
+
+```bash
+# See what would be repaired
+sudo stackkit host security repair --site-kind home
+
+# Restore only the firewall, keeping a jump host reachable
+sudo stackkit host security repair --apply --control firewall.default_inbound --management-source 198.51.100.0/24
+```
+
+### stackkit host security status
+
+读取当前保存的证据，而不观察主机。
+
+读取 'verify' 最后记录在此工作区的证据，并按当前时间进行判断。超过新鲜度期限的证据为 unknown：旧的观察结果无法证明主机当前的状态。
+
+```bash
+stackkit host security status [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--fail-on-drift` | bool | — | 主机为 drifted 时以 5 退出，状态为 unknown 时以 6 退出 |
+| `--json` | bool | — | 以机器可读的 JSON 输出证据 |
+
+### stackkit host security verify
+
+观察主机安全基线并写入带版本的证据。
+
+观察此节点上的每项基线控制并生成 stackkit.host-security-evidence/v1。不会更改主机上的任何内容。
+
+大多数控制需要 root 才能观察；无法观察的控制会报告为 unknown 并附带原因，而不是报告为失败。除非指定 `--no-record`，否则证据会写入工作区的 .stackkit/host-security-evidence.json，并在 `--freshness` 后到期。
+
+```bash
+stackkit host security verify [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--declared-port` | stringArray | — | 声明的服务端口，格式为 tcp/443 或 udp/5353（可重复指定） |
+| `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | 由 Owner 控制的例外文件（每个例外都需要 Owner 和到期时间） |
+| `--fail-on-drift` | bool | — | 主机为 drifted 时以 5 退出，状态为 unknown 时以 6 退出 |
+| `--freshness` | duration | `15m0s` | 证据在到期前可被信赖的时长（1 分钟至 24 小时） |
+| `--json` | bool | — | 以机器可读的 JSON 输出结果 |
+| `--kit` | string | — | 要记录的 Kit slug（默认为工作区 StackSpec 的 Kit） |
+| `--local-node` | string | — | 所提供 ResolvedPlan 中的确切本地 Node |
+| `--management-source` | stringArray | — | 必须始终能够访问 ssh 的网络，以 CIDR 表示（可重复指定） |
+| `--mode` | string | `standard` | 要记录的生命周期模式：standard；Techstack 管理此部署时为 advanced |
+| `--no-record` | bool | — | 不在 .stackkit/ 下写入证据 |
+| `--resolved-plan` | string | — | 经过验证的规范 ResolvedPlan，用于依据其声明的监听器判断暴露情况 |
+| `--site-kind` | string | — | 此主机的 Site 类型：home 或 cloud（默认根据 Kit 推断；modern-homelab 需要此项） |
+
+**示例**
+
+```bash
+# Verify this host and record the evidence
+sudo stackkit host security verify
+
+# What Techstack runs: machine-readable, advanced mode, exit non-zero on drift
+sudo stackkit host security verify --mode advanced --json --fail-on-drift
+
+# Judge exposure against the ports the verified plan declares
+sudo stackkit host security verify --resolved-plan plan.json --local-node node-1
 ```
 
 ## stackkit host updates

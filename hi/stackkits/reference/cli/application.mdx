@@ -1,0 +1,94 @@
+---
+title: "stackkit application"
+description: "समर्थित मौजूदा एप्लिकेशन के अकाउंट या डेटा बदले बिना उन्हें अपनाएँ"
+sidebarTitle: "application"
+---
+समर्थित मौजूदा एप्लिकेशन के अकाउंट या डेटा बदले बिना उन्हें अपनाएँ।
+
+```bash
+stackkit application [flags]
+```
+
+उप-कमांड: [`stackkit application adopt`](#stackkit-application-adopt), [`stackkit application control`](#stackkit-application-control), [`stackkit application inspect`](#stackkit-application-inspect), [`stackkit application release`](#stackkit-application-release), [`stackkit application verify`](#stackkit-application-verify)
+
+## stackkit application adopt
+
+समीक्षा किए गए मौजूदा एप्लिकेशन को उसके घोषित लाइफ़साइकिल से बाँधें।
+
+```bash
+stackkit application adopt [workload] [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--container-id` | string | — | Docker कंटेनर का सटीक और अपरिवर्तनीय 64-वर्ण ID |
+| `--json` | bool | — | संस्करणयुक्त और सीक्रेट-रहित एप्लिकेशन साक्ष्य जारी करें |
+| `--operation-id` | string | — | इडेम्पोटेंट बहाली के लिए स्थिर ऑपरेशन पहचानकर्ता |
+| `--owner-approve` | bool | — | ओनर से सटीक रूप से बँधे इस एप्लिकेशन ऑपरेशन को स्वीकृत करें |
+| `--owner-file` | string | `.stackkit/setup/home-assistant-owner.json` | accessToken वाली मौजूदा निजी ओनर अनुमति फ़ाइल का वर्कस्पेस-सापेक्ष पथ |
+| `--plan-digest` | string | — | समीक्षा किए गए और स्रोत से बँधे adoption प्लान का सटीक डाइजेस्ट |
+| `--workload` | string | — | सटीक चुना गया एप्लिकेशन वर्कलोड (स्थितीय workload का विकल्प) |
+
+## stackkit application control
+
+सटीक अपनाए गए कंटेनर को शुरू, बंद या रीस्टार्ट करें।
+
+```bash
+stackkit application control [workload] [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--action` | string | — | अनुमत पावर कार्रवाई: start, stop या restart |
+| `--container-id` | string | — | Docker कंटेनर का सटीक और अपरिवर्तनीय 64-वर्ण ID |
+| `--json` | bool | — | संस्करणयुक्त और सीक्रेट-रहित एप्लिकेशन साक्ष्य जारी करें |
+| `--operation-id` | string | — | इडेम्पोटेंट बहाली के लिए स्थिर ऑपरेशन पहचानकर्ता |
+| `--owner-approve` | bool | — | ओनर से सटीक रूप से बँधे इस एप्लिकेशन ऑपरेशन को स्वीकृत करें |
+| `--workload` | string | — | सटीक चुना गया एप्लिकेशन वर्कलोड (स्थितीय workload का विकल्प) |
+
+## stackkit application inspect
+
+सटीक मौजूदा एप्लिकेशन और वर्तमान कॉन्फ़िगरेशन का आकलन करें।
+
+```bash
+stackkit application inspect [workload] [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--container-id` | string | — | Docker कंटेनर का सटीक और अपरिवर्तनीय 64-वर्ण ID |
+| `--json` | bool | — | संस्करणयुक्त और सीक्रेट-रहित एप्लिकेशन साक्ष्य जारी करें |
+| `--owner-file` | string | `.stackkit/setup/home-assistant-owner.json` | accessToken वाली मौजूदा निजी ओनर अनुमति फ़ाइल का वर्कस्पेस-सापेक्ष पथ |
+| `--workload` | string | — | सटीक चुना गया एप्लिकेशन वर्कलोड (स्थितीय workload का विकल्प) |
+
+## stackkit application release
+
+एप्लिकेशन बनाए रखते हुए लाइफ़साइकिल की अभिरक्षा छोड़ें।
+
+```bash
+stackkit application release [workload] [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--container-id` | string | — | Docker कंटेनर का सटीक और अपरिवर्तनीय 64-वर्ण ID |
+| `--json` | bool | — | संस्करणयुक्त और सीक्रेट-रहित एप्लिकेशन साक्ष्य जारी करें |
+| `--operation-id` | string | — | इडेम्पोटेंट बहाली के लिए स्थिर ऑपरेशन पहचानकर्ता |
+| `--owner-approve` | bool | — | ओनर से सटीक रूप से बँधे इस एप्लिकेशन ऑपरेशन को स्वीकृत करें |
+| `--workload` | string | — | सटीक चुना गया एप्लिकेशन वर्कलोड (स्थितीय workload का विकल्प) |
+
+## stackkit application verify
+
+हस्ताक्षरित adoption बाइंडिंग और वर्तमान स्रोत को सत्यापित करें।
+
+```bash
+stackkit application verify [workload] [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--container-id` | string | — | Docker कंटेनर का सटीक और अपरिवर्तनीय 64-वर्ण ID |
+| `--json` | bool | — | संस्करणयुक्त और सीक्रेट-रहित एप्लिकेशन साक्ष्य जारी करें |
+| `--operation-id` | string | — | रीड सहसंबंध पहचानकर्ता |
+| `--owner-file` | string | `.stackkit/setup/home-assistant-owner.json` | accessToken वाली मौजूदा निजी ओनर अनुमति फ़ाइल का वर्कस्पेस-सापेक्ष पथ |
+| `--workload` | string | — | सटीक चुना गया एप्लिकेशन वर्कलोड (स्थितीय workload का विकल्प) |

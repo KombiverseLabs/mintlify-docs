@@ -30,7 +30,25 @@ stackkit user list
 stackkit user remove alex --owner-approve
 ```
 
-الأوامر الفرعية: [`stackkit user add`](#stackkit-user-add), [`stackkit user list`](#stackkit-user-list), [`stackkit user owner`](#stackkit-user-owner), [`stackkit user remove`](#stackkit-user-remove)
+الأوامر الفرعية: [`stackkit user activate`](#stackkit-user-activate)، [`stackkit user add`](#stackkit-user-add)، [`stackkit user files`](#stackkit-user-files)، [`stackkit user list`](#stackkit-user-list)، [`stackkit user owner`](#stackkit-user-owner)، [`stackkit user remove`](#stackkit-user-remove)
+
+## stackkit user activate
+
+إعادة إصدار تسجيل مفتاح المرور لعضو موجود في المنزل.
+
+```bash
+stackkit user activate <username> [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | الموافقة الصريحة على إعادة إصدار تسجيل مفتاح مرور المنزل |
+
+موروث من `stackkit user`:
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | إصدار JSON بصيغة stackkit.command-result/v1 |
 
 ## stackkit user add
 
@@ -61,6 +79,62 @@ stackkit user add alex --email alex@example.com --owner-approve
 # Set a display name and return the invitation as JSON
 stackkit user add sam --email sam@example.com --display-name "Sam Doe" --owner-approve --json
 ```
+
+## stackkit user files
+
+استئناف حسابات المنزل المحلية لتطبيق Files وتسليمها.
+
+يحتفظ Cloudreve CE بحساب محلي للتطبيق خلف TinyAuth. تجعل هذه الأوامر ذلك الحساب متوافقًا مع هوية منزل معتمدة في PocketID، ولا تكشف كلمة المرور الموجودة في حيازة المالك إلا عند طلب صريح.
+
+```bash
+stackkit user files [flags]
+```
+
+موروث من `stackkit user`:
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | إصدار JSON بصيغة stackkit.command-result/v1 |
+
+الأوامر الفرعية: [`stackkit user files credential`](#stackkit-user-files-credential)، [`stackkit user files ensure`](#stackkit-user-files-ensure)
+
+### stackkit user files credential
+
+طباعة كلمة مرور منزل واحدة لـ Files في حيازة المالك.
+
+التحقق من هوية المنزل المعتمدة في PocketID وحساب Cloudreve غير الإداري المرتبط بها، ثم طباعة كلمة المرور القائمة من الحيازة المحلية الموقّعة للمالك. يحتوي الناتج على مادة سرية؛ فلا تستخدمه إلا في طرفية خاصة أو أنبوب مقصود.
+
+```bash
+stackkit user files credential <username> [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | الموافقة الصريحة على كشف كلمة مرور Files هذه |
+
+موروث من `stackkit user`:
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | إصدار JSON بصيغة stackkit.command-result/v1 |
+
+### stackkit user files ensure
+
+إنشاء حساب Files واحد غير إداري أو التحقق منه.
+
+```bash
+stackkit user files ensure <username> [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | الموافقة الصريحة على توفير حساب Files |
+
+موروث من `stackkit user`:
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | إصدار JSON بصيغة stackkit.command-result/v1 |
 
 ## stackkit user list
 
@@ -100,11 +174,11 @@ stackkit user owner [flags]
 | --- | --- | --- | --- |
 | `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
 
-الأوامر الفرعية: [`stackkit user owner activate`](#stackkit-user-owner-activate), [`stackkit user owner status`](#stackkit-user-owner-status)
+الأوامر الفرعية: [`stackkit user owner activate`](#stackkit-user-owner-activate)، [`stackkit user owner migrate-domain`](#stackkit-user-owner-migrate-domain)، [`stackkit user owner status`](#stackkit-user-owner-status)
 
 ### stackkit user owner activate
 
-أعد تفعيل passkey لمرة واحدة المرتبط بالمالك أو أصدره من جديد.
+إعادة إصدار رابط تفعيل مفتاح المرور لمرة واحدة والمرتبط بالمالك، وإبطال الرابط السابق.
 
 ```bash
 stackkit user owner activate [flags]
@@ -112,13 +186,35 @@ stackkit user owner activate [flags]
 
 | الخيار | النوع | الافتراضي | الوصف |
 | --- | --- | --- | --- |
-| `--owner-approve` | bool | — | وافق صراحةً على كشف تفعيل المالك أو إعادة إصداره |
+| `--owner-approve` | bool | — | الموافقة الصريحة على إعادة إصدار رابط تفعيل المالك |
 
 موروثة من `stackkit user`:
 
 | الخيار | النوع | الافتراضي | الوصف |
 | --- | --- | --- | --- |
 | `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
+
+### stackkit user owner migrate-domain
+
+تجهيز ترحيل الهوية من home إلى lab.home بموافقة المالك.
+
+الحفاظ على المالك وCA وأسرار الخدمات والمستخدمين الحاليين أثناء ترحيل نية Basement وحيازة وقت التشغيل من home إلى lab.home. احتفظ بملف CLI للإصدار السابق والأدوات المعبأة ومرآة المزوّد قبل استخدام CLI هدف معزول لهذا الأمر. يفوّض `--quiesce-runtime` الأمر لالتقاط هويات حاويات Core المصدر الدقيقة، وجعل رد نداء الهوية متوافقًا بينما يتوفر PocketID، ثم إيقاف تلك الحاويات وحدها وإزالتها بسلاسة دون حذف وحدات التخزين أو الشبكات أو الصور. استخدم CLI السابق لـ generate وapply وverify، ثم استخدم CLI الهدف لـ upgrade `--to` &lt;exact-release&gt;. تغطي نقطة تحقق الترقية الإصدار السابق المرحّل على lab.home؛ ولا ينشئ هذا الأمر نقطة تحقق للتراجع إلى النطاق الأصلي. ينتظر جسر v0.47.4 التأهيل على مضيف حقيقي. بعد الطرح، سجّل DNS للعملاء ومفاتيح مرور جديدة على id.lab.home.
+
+```bash
+stackkit user owner migrate-domain [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | الموافقة الصريحة على ترحيل النطاق وتسجيل مفاتيح مرور جديدة |
+| `--quiesce-runtime` | bool | — | إيقاف حاويات Core المصدر الموثّقة وإزالتها بسلاسة دون حذف الموارد الدائمة |
+| `--spec` | string | `stack-spec.yaml` | StackSpec نسبةً إلى مساحة العمل المطلوب ترحيلها |
+
+موروث من `stackkit user`:
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | إصدار JSON بصيغة stackkit.command-result/v1 |
 
 ### stackkit user owner status
 

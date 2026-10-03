@@ -1,0 +1,94 @@
+---
+title: "stackkit application"
+description: "Unterstützte vorhandene Anwendungen übernehmen, ohne ihre Konten oder Daten zu ersetzen"
+sidebarTitle: "application"
+---
+Unterstützte vorhandene Anwendungen übernehmen, ohne ihre Konten oder Daten zu ersetzen.
+
+```bash
+stackkit application [flags]
+```
+
+Unterbefehle: [`stackkit application adopt`](#stackkit-application-adopt), [`stackkit application control`](#stackkit-application-control), [`stackkit application inspect`](#stackkit-application-inspect), [`stackkit application release`](#stackkit-application-release), [`stackkit application verify`](#stackkit-application-verify)
+
+## stackkit application adopt
+
+Die geprüfte vorhandene Anwendung an ihren deklarierten Lebenszyklus binden.
+
+```bash
+stackkit application adopt [workload] [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--container-id` | string | — | Exakte unveränderliche Docker-Container-ID mit 64 Zeichen |
+| `--json` | bool | — | Den versionierten, geheimnisfreien Anwendungsnachweis ausgeben |
+| `--operation-id` | string | — | Stabile Vorgangskennung für eine idempotente Fortsetzung |
+| `--owner-approve` | bool | — | Diesen exakten, an den Besitzer gebundenen Anwendungsvorgang genehmigen |
+| `--owner-file` | string | `.stackkit/setup/home-assistant-owner.json` | Workspace-relative vorhandene private Besitzer-Berechtigungsdatei, die accessToken enthält |
+| `--plan-digest` | string | — | Exakter geprüfter und quellgebundener Digest des Übernahmeplans |
+| `--workload` | string | — | Exakter ausgewählter Anwendungs-Workload (Alternative zum positionsabhängigen Workload) |
+
+## stackkit application control
+
+Den exakt übernommenen Container starten, stoppen oder neu starten.
+
+```bash
+stackkit application control [workload] [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--action` | string | — | Zugelassene Betriebsaktion: start, stop oder restart |
+| `--container-id` | string | — | Exakte unveränderliche Docker-Container-ID mit 64 Zeichen |
+| `--json` | bool | — | Den versionierten, geheimnisfreien Anwendungsnachweis ausgeben |
+| `--operation-id` | string | — | Stabile Vorgangskennung für eine idempotente Fortsetzung |
+| `--owner-approve` | bool | — | Diesen exakten, an den Besitzer gebundenen Anwendungsvorgang genehmigen |
+| `--workload` | string | — | Exakter ausgewählter Anwendungs-Workload (Alternative zum positionsabhängigen Workload) |
+
+## stackkit application inspect
+
+Die exakte vorhandene Anwendung und die aktuelle Konfiguration bewerten.
+
+```bash
+stackkit application inspect [workload] [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--container-id` | string | — | Exakte unveränderliche Docker-Container-ID mit 64 Zeichen |
+| `--json` | bool | — | Den versionierten, geheimnisfreien Anwendungsnachweis ausgeben |
+| `--owner-file` | string | `.stackkit/setup/home-assistant-owner.json` | Workspace-relative vorhandene private Besitzer-Berechtigungsdatei, die accessToken enthält |
+| `--workload` | string | — | Exakter ausgewählter Anwendungs-Workload (Alternative zum positionsabhängigen Workload) |
+
+## stackkit application release
+
+Die Verwahrung des Lebenszyklus freigeben und die Anwendung beibehalten.
+
+```bash
+stackkit application release [workload] [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--container-id` | string | — | Exakte unveränderliche Docker-Container-ID mit 64 Zeichen |
+| `--json` | bool | — | Den versionierten, geheimnisfreien Anwendungsnachweis ausgeben |
+| `--operation-id` | string | — | Stabile Vorgangskennung für eine idempotente Fortsetzung |
+| `--owner-approve` | bool | — | Diesen exakten, an den Besitzer gebundenen Anwendungsvorgang genehmigen |
+| `--workload` | string | — | Exakter ausgewählter Anwendungs-Workload (Alternative zum positionsabhängigen Workload) |
+
+## stackkit application verify
+
+Die signierte Übernahmebindung und die aktuelle Quelle verifizieren.
+
+```bash
+stackkit application verify [workload] [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--container-id` | string | — | Exakte unveränderliche Docker-Container-ID mit 64 Zeichen |
+| `--json` | bool | — | Den versionierten, geheimnisfreien Anwendungsnachweis ausgeben |
+| `--operation-id` | string | — | Korrelationskennung für Lesevorgänge |
+| `--owner-file` | string | `.stackkit/setup/home-assistant-owner.json` | Workspace-relative vorhandene private Besitzer-Berechtigungsdatei, die accessToken enthält |
+| `--workload` | string | — | Exakter ausgewählter Anwendungs-Workload (Alternative zum positionsabhängigen Workload) |

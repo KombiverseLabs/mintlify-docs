@@ -30,7 +30,25 @@ stackkit user list
 stackkit user remove alex --owner-approve
 ```
 
-子命令：[`stackkit user add`](#stackkit-user-add), [`stackkit user list`](#stackkit-user-list), [`stackkit user owner`](#stackkit-user-owner), [`stackkit user remove`](#stackkit-user-remove)
+子命令：[`stackkit user activate`](#stackkit-user-activate)、[`stackkit user add`](#stackkit-user-add)、[`stackkit user files`](#stackkit-user-files)、[`stackkit user list`](#stackkit-user-list)、[`stackkit user owner`](#stackkit-user-owner)、[`stackkit user remove`](#stackkit-user-remove)
+
+## stackkit user activate
+
+为现有家庭成员重新签发通行密钥注册。
+
+```bash
+stackkit user activate <username> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | 显式批准重新签发家庭通行密钥注册 |
+
+继承自 `stackkit user`：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
 
 ## stackkit user add
 
@@ -61,6 +79,62 @@ stackkit user add alex --email alex@example.com --owner-approve
 # Set a display name and return the invitation as JSON
 stackkit user add sam --email sam@example.com --display-name "Sam Doe" --owner-approve --json
 ```
+
+## stackkit user files
+
+恢复并交接 Files 的应用本地家庭账户。
+
+Cloudreve CE 在 TinyAuth 后方保留应用本地账户。这些命令根据获准的 PocketID 家庭身份使该账户收敛，并且仅在明确请求时才会显示由 Owner 托管的密码。
+
+```bash
+stackkit user files [flags]
+```
+
+继承自 `stackkit user`：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+子命令：[`stackkit user files credential`](#stackkit-user-files-credential)、[`stackkit user files ensure`](#stackkit-user-files-ensure)
+
+### stackkit user files credential
+
+输出一个由 Owner 托管的 Files 家庭密码。
+
+验证获准的 PocketID 家庭身份及其非管理员 Cloudreve 账户，然后从已签名的本地 Owner 托管中输出现有密码。输出包含秘密材料；只能在私有终端或有意设置的管道中使用。
+
+```bash
+stackkit user files credential <username> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | 显式批准显示此 Files 密码 |
+
+继承自 `stackkit user`：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+### stackkit user files ensure
+
+创建或验证一个非管理员 Files 账户。
+
+```bash
+stackkit user files ensure <username> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | 显式批准配置 Files 账户 |
+
+继承自 `stackkit user`：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
 
 ## stackkit user list
 
@@ -100,11 +174,11 @@ stackkit user owner [flags]
 | --- | --- | --- | --- |
 | `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
 
-子命令：[`stackkit user owner activate`](#stackkit-user-owner-activate), [`stackkit user owner status`](#stackkit-user-owner-status)
+子命令：[`stackkit user owner activate`](#stackkit-user-owner-activate)、[`stackkit user owner migrate-domain`](#stackkit-user-owner-migrate-domain)、[`stackkit user owner status`](#stackkit-user-owner-status)
 
 ### stackkit user owner activate
 
-返回或重新签发与 Owner 绑定的一次性通行密钥激活。
+重新签发与 Owner 绑定的一次性通行密钥激活链接，并停用上一个链接。
 
 ```bash
 stackkit user owner activate [flags]
@@ -112,7 +186,29 @@ stackkit user owner activate [flags]
 
 | 标志 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `--owner-approve` | bool | — | 显式批准显示或重新签发 Owner 激活 |
+| `--owner-approve` | bool | — | 显式批准重新签发 Owner 激活链接 |
+
+继承自 `stackkit user`：
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+### stackkit user owner migrate-domain
+
+准备将经 Owner 批准的身份从 home 迁移到 lab.home。
+
+在将 Basement 意图和运行时托管从 home 迁移到 lab.home 时，保留现有 Owner、CA、服务秘密和用户。在使用隔离的目标 CLI 运行此命令之前，保留上一版本的 CLI、打包工具和提供商镜像。`--quiesce-runtime` 授权此命令捕获源 Core 容器的确切身份，在 PocketID 可用时使身份回调收敛，然后仅以正常方式停止并移除这些容器，而不删除卷、网络或镜像。使用上一版本 CLI 执行 generate、apply 和 verify，然后使用目标 CLI 执行 upgrade `--to` &lt;exact-release&gt;。升级检查点覆盖 lab.home 上已迁移的上一版本；此命令不会创建原始域名的回滚检查点。v0.47.4 桥接仍待真实主机验证。上线后，请在 id.lab.home 注册客户端 DNS 和新的通行密钥。
+
+```bash
+stackkit user owner migrate-domain [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | 显式批准域名迁移和新的通行密钥注册 |
+| `--quiesce-runtime` | bool | — | 正常停止并移除经过身份验证的源 Core 容器，而不删除持久资源 |
+| `--spec` | string | `stack-spec.yaml` | 要迁移的工作区相对路径 StackSpec |
 
 继承自 `stackkit user`：
 

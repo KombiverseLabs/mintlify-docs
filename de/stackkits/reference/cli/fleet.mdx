@@ -1,0 +1,99 @@
+---
+title: "stackkit fleet"
+description: "Mitgliedshosts einer StackInstance zulassen und verbinden"
+sidebarTitle: "fleet"
+---
+Mitgliedshosts einer StackInstance zulassen und verbinden.
+
+Einen physischen Host an einen vorhandenen Mitgliedsknoten dieser StackInstance binden.
+
+Der Home-Besitzer auf dem Foundation Node signiert die Zulassung eines Mitglieds für einen aktivierten Nicht-Controller-Knoten an einer Cloud Site. Der Mitgliedshost prüft sie anhand des festgelegten Home-Schlüssels, kompiliert denselben Plan aus der zugelassenen StackSpec und dem Inventory neu und behält eine reine Verifizierungsverwahrung: keine Registrierung, Signierung, Ausgabe von Zugangsdaten oder ControlAuthority. Auf beiden Hosts muss dieselbe StackKits-Version ausgeführt werden.
+
+Join erzeugt außerdem einen Nachweisschlüssel für das Mitglied und schreibt eine Anfragedatei. Der Home-Besitzer zertifiziert ihn mit certify-member-key; nach import-member-key wendet das Mitglied nur sein eigenes Site/node/channel-Tupel an, verifiziert nur dieses und signiert den Nachweis mit dem zertifizierten Schlüssel.
+
+```bash
+stackkit fleet [flags]
+```
+
+Unterbefehle: [`stackkit fleet admit-member`](#stackkit-fleet-admit-member), [`stackkit fleet certify-member-key`](#stackkit-fleet-certify-member-key), [`stackkit fleet import-member-key`](#stackkit-fleet-import-member-key), [`stackkit fleet join`](#stackkit-fleet-join)
+
+## stackkit fleet admit-member
+
+Als Besitzer die Zulassung eines Mitglieds für einen Cloud-Edge-Knoten signieren.
+
+```bash
+stackkit fleet admit-member [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--inventory` | string | — | Inventory, das beide Ausführungskanäle deklariert (andernfalls wird eine konventionelle Inventory-Datei ausgewählt) |
+| `--node` | string | — | ID des Mitgliedsknotens aus der StackSpec (ein aktivierter Worker- oder Edge-Knoten an einer Cloud Site) |
+| `--output` | string | — | Auf den Workspace beschränkte Zulassungsausgabe (Standard: .stackkit/fleet/member-admissions/&lt;node&gt;.json) |
+| `--valid-for` | duration | `24h0m0s` | Join-Zeitfenster der Zulassung (höchstens 24h) |
+
+**Beispiele**
+
+```bash
+# On the Foundation Node, admit the Cloud edge declared in the plan
+stackkit fleet admit-member --node cloud-edge
+```
+
+## stackkit fleet certify-member-key
+
+Als Besitzer den Nachweisschlüssel eines verbundenen Mitglieds für dessen eigenes Tupel zertifizieren.
+
+Den Nachweisschlüssel zertifizieren, den ein verbundenes Mitglied bei Join erzeugt hat.
+
+Das Zertifikat erlaubt dem Mitglied, Apply- und Verify-Nachweise für sein eigenes Site/node/execution-channel-Tupel zu signieren, und nichts darüber hinaus: keine Registrierung, Identitätssignierung, Ausgabe von Zugangsdaten, ControlAuthority oder Owner authority. Der Foundation Node zeichnet jedes von ihm ausgestellte Zertifikat auf und überlässt ab dann die lokalen Laufzeitziele dieses Mitglieds dem Mitglied.
+
+```bash
+stackkit fleet certify-member-key <request-file> [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--inventory` | string | — | Inventory, das beide Ausführungskanäle deklariert (andernfalls wird eine konventionelle Inventory-Datei ausgewählt) |
+| `--output` | string | — | Zusätzliche, auf den Workspace beschränkte Zertifikatsausgabe zur Weitergabe an das Mitglied |
+| `--valid-for` | duration | `720h0m0s` | Gültigkeitsdauer des Zertifikats (höchstens 2160h) |
+
+**Beispiele**
+
+```bash
+# On the Foundation Node, with the request file the member relayed
+stackkit fleet certify-member-key member-evidence-key-request.json --output member-evidence-key.json
+```
+
+## stackkit fleet import-member-key
+
+Das Zertifikat des Home-Besitzers für den Nachweisschlüssel dieses Mitglieds importieren.
+
+```bash
+stackkit fleet import-member-key <certificate-file> [flags]
+```
+
+**Beispiele**
+
+```bash
+# On the Cloud host, with the certificate the Foundation Node returned
+stackkit fleet import-member-key member-evidence-key.json
+```
+
+## stackkit fleet join
+
+Diesen Host als das in einer Zulassung benannte Mitglied mit reiner Verifizierungsfunktion verbinden.
+
+```bash
+stackkit fleet join <admission-file> [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--home-key-id` | string | — | ID des Home-Besitzerschlüssels aus admit-member, außerhalb des Übertragungskanals verglichen |
+
+**Beispiele**
+
+```bash
+# On the Cloud host, in an empty deployment directory
+stackkit fleet join member-admission.json --home-key-id <homeKeyId>
+```

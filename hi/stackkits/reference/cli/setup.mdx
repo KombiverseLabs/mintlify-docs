@@ -31,4 +31,35 @@ stackkit setup photos --owner-approve --complete-onboarding
 # Create the Files owner from a workspace-relative credentials file of your choice
 stackkit setup files --owner-approve --credentials-file private/files-owner.json
 ```
+उप-कमांड: [`stackkit setup ai-connect`](#stackkit-setup-ai-connect)
 
+## stackkit setup ai-connect
+
+Private AI के Ollama को अपने मॉडल एंडपॉइंट के रूप में अपने kombify AI से कनेक्ट करें।
+
+Private AI यूज़ केस का वैकल्पिक kombify AI कनेक्टर चालू करें। Companion Studio (Settings, AI access, Model endpoints) में origin http://ollama:11434 वाला मॉडल एंडपॉइंट बनाएँ और उसका कनेक्टर टोकन कॉपी करें। यह कमांड टोकन को स्टैंडर्ड इनपुट या `--token-file` से पढ़ता है, किसी आर्ग्युमेंट से कभी नहीं; उसका स्वरूप जाँचता है, उसे स्थानीय ओनर कस्टडी में रखता है और कनेक्टर चालू करता है। अगला generate और apply, Ollama के साथ आउटबाउंड कनेक्टर शुरू करता है। कोई इनबाउंड कनेक्शन नहीं खोला जाता और Ollama अप्रकाशित रहता है।
+
+`--disable` कनेक्टर बंद करता है और उसके टोकन को स्थानीय कस्टडी से हटाता है। टोकन को हर जगह अनुपयोगी बनाने के लिए Companion Studio में एंडपॉइंट रद्द करें।
+
+```bash
+stackkit setup ai-connect [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--disable` | bool | — | कनेक्टर बंद करें और उसका टोकन स्थानीय कस्टडी से हटाएँ |
+| `--json` | bool | — | सीक्रेट-रहित परिणाम जारी करें |
+| `--token-file` | string | — | कनेक्टर टोकन वाली फ़ाइल; "-" या कोई फ़्लैग न देने पर स्टैंडर्ड इनपुट पढ़ा जाता है |
+
+**उदाहरण**
+
+```bash
+# Paste the connector token, then press Enter and Ctrl-D (or read it hidden on a terminal)
+stackkit setup ai-connect --token-file -
+
+# Read the token from a private file
+stackkit setup ai-connect --token-file ~/kombify-connector-token
+
+# Turn the connector off and remove its token
+stackkit setup ai-connect --disable
+```

@@ -31,3 +31,36 @@ stackkit setup photos --owner-approve --complete-onboarding
 # Create the Files owner from a workspace-relative credentials file of your choice
 stackkit setup files --owner-approve --credentials-file private/files-owner.json
 ```
+
+Unterbefehle: [`stackkit setup ai-connect`](#stackkit-setup-ai-connect)
+
+## stackkit setup ai-connect
+
+Private AI Ollama als eigenen Modell-Endpunkt mit deiner kombify AI verbinden.
+
+Den optionalen kombify-AI-Connector des Private-AI-Anwendungsfalls aktivieren. Erstelle in Companion Studio (Settings, AI access, Model endpoints) einen Modell-Endpunkt mit dem Ursprung http://ollama:11434 und kopiere dessen Connector-Token. Dieser Befehl liest das Token von der Standardeingabe oder aus `--token-file`, niemals aus einem Argument, prüft sein Format, bewahrt es in lokaler Besitzerverwahrung auf und aktiviert den Connector. Das nächste generate und apply starten den ausgehenden Connector neben Ollama. Eingehend wird nichts geöffnet, und Ollama bleibt unveröffentlicht.
+
+`--disable` schaltet den Connector aus und entfernt das Token aus der lokalen Verwahrung. Widerrufe den Endpunkt in Companion Studio, damit das Token überall unbrauchbar wird.
+
+```bash
+stackkit setup ai-connect [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--disable` | bool | — | Den Connector ausschalten und sein Token aus der lokalen Verwahrung entfernen |
+| `--json` | bool | — | Das geheimnisfreie Ergebnis ausgeben |
+| `--token-file` | string | — | Datei mit dem Connector-Token; "-" oder kein Flag liest die Standardeingabe |
+
+**Beispiele**
+
+```bash
+# Paste the connector token, then press Enter and Ctrl-D (or read it hidden on a terminal)
+stackkit setup ai-connect --token-file -
+
+# Read the token from a private file
+stackkit setup ai-connect --token-file ~/kombify-connector-token
+
+# Turn the connector off and remove its token
+stackkit setup ai-connect --disable
+```

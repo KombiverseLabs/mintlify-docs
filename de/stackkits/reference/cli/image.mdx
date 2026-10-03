@@ -1,0 +1,53 @@
+---
+title: "stackkit image"
+description: "Einen besitzerneutralen Golden-Image-Cache vorbereiten und zulassen"
+sidebarTitle: "image"
+---
+Einen besitzerneutralen Golden-Image-Cache vorbereiten und zulassen.
+
+Unveränderliche Core-Container-Caches aus dem eingebetteten CUE-Katalog vorbereiten. Dadurch werden niemals ein Owner initialisiert, Dienste gestartet, Volumes erstellt oder eine Provider-VM vorbereitet. Ubuntu 26.04 ist das Standardziel; Ubuntu 24.04 bleibt kompatibel. Das Manifest besteht aus unsignierten Cache-Metadaten und ist niemals ein Nachweis der Host-Konformität oder eine Apply-Berechtigung. Die vorhandene paketierte OpenTofu-Provider-Closure wird geprüft und wiederverwendet. Für Dienstintegrationen beim ersten Start und optionale Workloads bleibt Netzwerkzugriff erforderlich. Techstack ist für die Maschinenvorbereitung, VM-Images und Registrierung zuständig.
+
+```bash
+stackkit image [flags]
+```
+
+Unterbefehle: [`stackkit image plan`](#stackkit-image-plan), [`stackkit image prepare`](#stackkit-image-prepare), [`stackkit image verify`](#stackkit-image-verify)
+
+## stackkit image plan
+
+Das maßgebliche neutrale Core-Cache-Profil ausgeben.
+
+```bash
+stackkit image plan [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--profile` | string | `cloud-core-compose` | Neutrales CUE-Profil (cloud-core-compose, basement-core-compose, basement-core-lite-compose) |
+
+## stackkit image prepare
+
+Das exakt ausgeführte attestierte Release zwischenspeichern und nur Core-Images abrufen.
+
+```bash
+stackkit image prepare [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--cache-root` | string | — | **Erforderlich.** Separates neutrales Verzeichnis für Release- und Cache-Metadaten |
+| `--profile` | string | `cloud-core-compose` | Neutrales CUE-Core-Cache-Profil |
+| `--target` | string | — | **Erforderlich.** Leeres künftiges Bereitstellungsverzeichnis; niemals ein initialisierter Stack |
+
+## stackkit image verify
+
+Release-Bytes, leeres Ziel, Host und exakten Core-Image-Cache erneut beobachten.
+
+```bash
+stackkit image verify [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--cache-root` | string | — | **Erforderlich.** Separates neutrales Verzeichnis für Release- und Cache-Metadaten |
+| `--target` | string | — | **Erforderlich.** Leeres künftiges Bereitstellungsverzeichnis; niemals ein initialisierter Stack |
