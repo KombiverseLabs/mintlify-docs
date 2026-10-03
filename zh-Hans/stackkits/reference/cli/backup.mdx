@@ -7,7 +7,7 @@ sidebarTitle: "backup"
 
 管理此 StackKit 部署的备份。
 
-备份由 Kopia 提供支持（见 ADR-0016），并运行在由 Basement 核心渲染的本地 kopia-agent 服务中。原生的 configure、status 和 run 会在接触 Kopia 之前，重新校验确切的本地 Plan、生成的产物、Owner 托管和 Apply 证据。仓库、源、排除项、服务身份和凭据均由 CUE 或 Owner 托管所拥有。
+备份由 Kopia 提供支持（见 ADR-0016），并运行在由 Kit 核心（Basement 或独立 Cloud）渲染的本地 kopia-agent 服务中。原生的 configure、status 和 run 会在接触 Kopia 之前，重新校验确切的本地 Plan、生成的产物、Owner 托管和 Apply 证据。仓库、源、排除项、服务身份和凭据均由 CUE 或 Owner 托管所拥有。
 
 ```bash
 stackkit backup [flags]
@@ -171,7 +171,7 @@ stackkit backup restore abandon <restore-operation-id> --owner-approve
 
 ### stackkit backup restore activate
 
-将一个已验证的暂存恢复激活到线上 Basement 卷中。
+将一个已验证的暂存恢复激活到线上 Kit 核心卷中。
 
 ```bash
 stackkit backup restore activate <restore-result-id> [flags]

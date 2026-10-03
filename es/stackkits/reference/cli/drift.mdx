@@ -39,7 +39,7 @@ stackkit drift detect --json
 
 Reconcilia la deriva mediante el ciclo de vida local gobernado.
 
-El modo estándar requiere la aprobación local explícita del Owner, verifica la autoridad local vigente, crea un punto de control de reversión obligatorio de Kopia y del estado del ejecutor, y después ejecuta generate, apply y verify a través del diario exclusivo del ciclo de vida. Una fase de destino fallida restaura, reaplica y verifica automáticamente el estado previo del ejecutor capturado. El modo avanzado sigue cerrado por defecto hasta que se proporcione una capacidad verificada sin conexión; tras la mutación Advanced observa de nuevo el informe de deriva, incluido el plan de cada stack de Terramate, y falla a menos que el informe posterior a la reconciliación esté limpio.
+El modo estándar requiere la aprobación local explícita del Owner, verifica la autoridad local vigente, crea un punto de control de reversión obligatorio de Kopia y del estado del ejecutor, y después ejecuta generate, apply y verify a través del diario exclusivo del ciclo de vida. Una fase de destino fallida restaura, reaplica y verifica automáticamente el estado previo del ejecutor capturado. El modo avanzado sigue cerrado por defecto hasta que se proporcione una capacidad verificada sin conexión. Se ejecuta mediante un conjunto de cambios exacto firmado por el Owner, que está vacío para la deriva del runtime: observa la deriva por stack, fuerza a cada stack de Terramate con deriva a reconverger sustituyendo su trigger wrapper up, aplica mediante la transacción gobernada, vuelve a observar el informe de deriva, incluido el plan de cada stack de Terramate, y falla a menos que el informe posterior a la reconciliación esté limpio.
 
 ```bash
 stackkit drift reconcile [flags]

@@ -103,7 +103,7 @@ stackkit advanced rollback [flags]
 
 以 Advanced 操作 rollback.coordinated 的方式，将本地主机回滚到一个已验证的执行器状态检查点。
 
-只有同时满足以下条件，回滚才会被受理：持有允许 rollback.coordinated 的离线验证能力、本地 Owner 已批准的签发方信任，以及显式的 `--owner-approve`。`--to` 直接指定检查点，或指定其执行前检查点即为目标的变更集。各栈按相反的运行顺序处理：检查点之后新增的栈会通过 OpenTofu 销毁（docker compose down，不含卷）并移除；发生变化的栈会恢复检查点的状态、配置和负载，并被强制收敛；检查点之后被移除的栈会重新创建。检查点的 StackSpec 和 Inventory 会被还原、重新生成并验证。被中断的回滚会在下次使用相同 `--to` 运行时继续，并跳过已收敛的栈。
+只有同时满足以下条件，回滚才会被受理：持有允许 rollback.coordinated 的离线验证能力、本地 Owner 已批准的签发方信任，以及显式的 `--owner-approve`。`--to` 直接指定检查点，或指定其执行前检查点即为目标的变更集。各栈按相反的运行顺序处理：检查点之后新增的栈会通过 OpenTofu 销毁（docker compose down，不含卷）并移除；发生变化的栈会恢复检查点的状态、配置和负载，并被强制收敛；检查点之后被移除的栈会重新创建。在各栈运行之前，检查点的 StackSpec 和 Inventory 会被还原并重新生成；之后，联结的 apply 与 verify 子操作会记录并验证检查点的 Apply 证据。被中断的回滚会在下次使用相同 `--to` 运行时继续，并跳过已收敛的栈。
 
 ```bash
 stackkit advanced rollback run [flags]

@@ -1,11 +1,11 @@
 ---
 title: "用例目录"
-description: "StackKits v0.46.6 声明的用例和组件"
+description: "StackKits v0.50.3 声明的用例和组件"
 sidebarTitle: "用例目录"
 icon: diagram-project
 ---
 
-本页由已发布的 [v0.46.6 版本](https://github.com/kombifyio/StackKits/releases/tag/v0.46.6)生成。它按主要用例分组，列出该版本声明的每个用例，以及其用途、组件和默认应用。声明的组件不是安装或在主机上验证运行的证据；已验证的生命周期评级请参见[操作系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)。[用例](/zh-Hans/guides/stackkits/use-cases/overview)提供设置指南的总览。
+本页由已发布的 [v0.50.3 版本](https://github.com/kombifyio/StackKits/releases/tag/v0.50.3)生成。它按主要用例分组，列出该版本声明的每个用例，以及其用途、组件和默认应用。声明的组件不是安装或在主机上验证运行的证据；已验证的生命周期评级请参见[操作系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)。[用例](/zh-Hans/guides/stackkits/use-cases/overview)提供设置指南的总览。
 
 ## 照片
 
@@ -15,7 +15,12 @@ icon: diagram-project
 
 | 组件 | 角色 | 类型 | 默认 |
 | --- | --- | --- | --- |
+| Ente Photos (`ente-photos`) | 备选 | 应用 |  |
 | Immich (`immich`) | 主要 | 应用 | ✓ |
+| Immich Kiosk (`immich-kiosk`) | 辅助 | 应用 |  |
+| Immich Lite (no smart search) (`immich-lite`) | 备选 | 应用 |  |
+| Immich Power Tools (`immich-power-tools`) | 辅助 | 应用 |  |
+| Immich Public Proxy (`immich-public-proxy`) | 辅助 | 应用 |  |
 
 备选方案：`immich`、`immich-lite`
 
@@ -33,13 +38,19 @@ icon: diagram-project
 
 ### 文件存储与文档
 
-通过原生 Cloudreve 工作负载实现的私有文件存储和共享。
+私有文件存储与共享：默认使用 Cloudreve，也可选择 Nextcloud 或 kombify Paperwork，并可选配办公编辑和文档归档。
 
 指南：[打开指南](/zh-Hans/guides/stackkits/use-cases/documents-and-files)
 
 | 组件 | 角色 | 类型 | 默认 |
 | --- | --- | --- | --- |
 | Cloudreve (`cloudreve`) | 主要 | 应用 | ✓ |
+| Euro-Office (`euro-office`) | 辅助 | 应用 |  |
+| Nextcloud (`nextcloud`) | 备选 | 应用 |  |
+| Paperless-ngx (`paperless-ngx`) | 辅助 | 应用 |  |
+| kombify Paperwork (`paperwork`) | 备选 | 连接器 |  |
+
+备选方案： `cloudreve`、`nextcloud`
 
 ## 密码库
 
@@ -49,7 +60,10 @@ icon: diagram-project
 
 | 组件 | 角色 | 类型 | 默认 |
 | --- | --- | --- | --- |
+| Passbolt CE (`passbolt`) | 备选 | 应用 |  |
 | Vaultwarden (`vaultwarden`) | 主要 | 应用 | ✓ |
+
+备选方案： `passbolt`、`vaultwarden`
 
 ## 媒体
 
@@ -59,7 +73,12 @@ icon: diagram-project
 
 | 组件 | 角色 | 类型 | 默认 |
 | --- | --- | --- | --- |
+| Audiobookshelf (`audiobookshelf`) | 辅助 | 应用 |  |
+| Emby (`emby`) | 备选 | 应用 |  |
 | Jellyfin (`jellyfin`) | 主要 | 应用 | ✓ |
+| Navidrome (`navidrome`) | 辅助 | 应用 |  |
+
+备选方案： `emby`、`jellyfin`
 
 ## 智能家居
 
@@ -69,7 +88,10 @@ icon: diagram-project
 
 | 组件 | 角色 | 类型 | 默认 |
 | --- | --- | --- | --- |
+| ESPHome (`esphome`) | 辅助 | 应用 |  |
 | Home Assistant (`home-assistant`) | 主要 | 应用 | ✓ |
+| Eclipse Mosquitto (`mosquitto`) | 辅助 | 服务 |  |
+| Zigbee2MQTT (`zigbee2mqtt`) | 辅助 | 应用 |  |
 
 备选方案：`home-assistant`、`home-assistant-existing`、`home-assistant-haos`、`home-assistant-imported`
 
@@ -83,7 +105,10 @@ icon: diagram-project
 
 | 组件 | 角色 | 类型 | 默认 |
 | --- | --- | --- | --- |
+| Forgejo (`forgejo`) | 备选 | 应用 |  |
 | Gitea (`gitea`) | 主要 | 应用 | ✓ |
+
+备选方案： `forgejo`、`gitea`
 
 ### 远程桌面
 
@@ -97,13 +122,27 @@ icon: diagram-project
 
 ## 邮件
 
+### 私有邮件
+
 通过 Roundcube 为你在外部提供商处已有的邮箱提供私有网页邮件。不会创建邮件服务器、DNS 或 MX 记录。
 
 指南：[打开指南](/zh-Hans/guides/stackkits/use-cases/mail)
 
 | 组件 | 角色 | 类型 | 默认 |
 | --- | --- | --- | --- |
+| kombify Paperwork (`paperwork`) | 备选 | 连接器 |  |
 | Roundcube Webmail (`roundcube`) | 主要 | 应用 | ✓ |
+
+### 自有邮件服务器
+
+通过 Stalwart 在专用 Cloud 节点上运行你自己的邮件服务器：为你的域名提供邮箱以及 SMTP、IMAP 和 submission。StackKits 会输出由你发布的 DNS 记录；它绝不会更改 DNS。
+
+指南：[打开指南](/zh-Hans/guides/stackkits/use-cases/mail)
+
+| 组件 | 角色 | 类型 | 默认 |
+| --- | --- | --- | --- |
+| mailcow (`mailcow`) | 备选 | 应用 |  |
+| Stalwart Mail Server (`stalwart`) | 主要 | 应用 | ✓ |
 
 ## 游戏
 
@@ -113,7 +152,18 @@ icon: diagram-project
 
 | 组件 | 角色 | 类型 | 默认 |
 | --- | --- | --- | --- |
+| Pelican Panel (`pelican`) | 备选 | 应用 |  |
 | Pterodactyl (`pterodactyl`) | 主要 | 应用 | ✓ |
+
+## 自动化
+
+通过 kombify Workpaths 在你自己的节点上运行定时和事件驱动的自动化；它是一个带有私有 Owner 令牌 API 的无头引擎。无需 kombify 套餐即可运行。
+
+指南：[打开指南](/zh-Hans/guides/stackkits/use-cases/automation)
+
+| 组件 | 角色 | 类型 | 默认 |
+| --- | --- | --- | --- |
+| kombify Workpaths (`workpaths`) | 主要 | 应用 | ✓ |
 
 ## AI
 
@@ -123,5 +173,14 @@ icon: diagram-project
 
 | 组件 | 角色 | 类型 | 默认 |
 | --- | --- | --- | --- |
+| AnythingLLM (`anythingllm`) | 备选 | 应用 |  |
+| ComfyUI (`comfyui`) | 辅助 | 应用 |  |
+| Docling (`docling`) | 辅助 | 应用 |  |
+| Hermes Agent (`hermes`) | 辅助 | 应用 |  |
 | Ollama (`ollama`) | 主要 | 应用 | ✓ |
 | Open WebUI (`open-webui`) | 辅助 | 应用 |  |
+| SearXNG (`searxng`) | 辅助 | 应用 |  |
+| kombify SpeechKit (`speechkit`) | 辅助 | 应用 |  |
+| Apache Tika (`tika`) | 辅助 | 应用 |  |
+
+备选方案： `anythingllm`、`private-ai`
