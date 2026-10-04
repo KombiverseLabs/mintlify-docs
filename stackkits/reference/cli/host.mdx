@@ -4,8 +4,8 @@ description: "Provider-neutral host contract operations"
 sidebarTitle: "host"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:a831a4f39f879ed92f689b5162eee1248ec16423664d9c3023bf26a29535fed0"
-source_hash: "d1b502a96cf2e78339dd6a314f28ec02b1d7414f"
+content_hash: "sha256:15b1795812dda295fb2fc1f873c6fdfea0881026596b0b1a4793c1a8c66a146b"
+source_hash: "fe133da602e9cab7dcfc40bd1a86f912eb4304c8"
 ---
 Provider-neutral host contract operations.
 
@@ -265,6 +265,7 @@ stackkit host security status [flags]
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
+| `--drift-scope` | string | `all` | Controls that decide `--fail-on-drift`: all, or enforced (only the controls the baseline itself enforces; patch lag, pending reboot, exposure and certificates are still observed and reported) |
 | `--fail-on-drift` | bool | — | Exit 5 when the host is drifted and 6 when its state is unknown |
 | `--json` | bool | — | Emit the evidence as machine-readable JSON |
 
@@ -283,6 +284,7 @@ stackkit host security verify [flags]
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
 | `--declared-port` | stringArray | — | Declared service port as tcp/443 or udp/5353 (repeatable) |
+| `--drift-scope` | string | `all` | Controls that decide `--fail-on-drift`: all, or enforced (only the controls the baseline itself enforces; patch lag, pending reboot, exposure and certificates are still observed and reported) |
 | `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | Owner-controlled exceptions file (each exception needs an owner and an expiry) |
 | `--fail-on-drift` | bool | — | Exit 5 when the host is drifted and 6 when its state is unknown |
 | `--freshness` | duration | `15m0s` | How long the evidence may be relied on before it expires (1m to 24h) |
@@ -301,8 +303,11 @@ stackkit host security verify [flags]
 # Verify this host and record the evidence
 sudo stackkit host security verify
 
-# What Techstack runs: machine-readable, advanced mode, exit non-zero on drift
+# Machine-readable, advanced mode, exit non-zero on any drifted control
 sudo stackkit host security verify --mode advanced --json --fail-on-drift
+
+# What the Techstack host pre-step runs: only the controls the baseline enforces decide the exit code; patch lag, pending reboot, exposure and certificates are still observed and reported
+sudo stackkit host security verify --mode advanced --json --fail-on-drift --drift-scope enforced
 
 # Judge exposure against the ports the verified plan declares
 sudo stackkit host security verify --resolved-plan plan.json --local-node node-1
