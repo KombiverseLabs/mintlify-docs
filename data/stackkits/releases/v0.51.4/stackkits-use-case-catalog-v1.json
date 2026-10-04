@@ -1,0 +1,4803 @@
+{
+  "schemaVersion": "stackkits-use-case-catalog/v1",
+  "release": {
+    "tag": "v0.51.4",
+    "version": "0.51.4",
+    "sourceSha": "1907998dbd65306e9b9df52805be29d897b35ffe",
+    "publicSourceSha": "8b999c878fe0ee2cf05aebcf82e907401484e1b4",
+    "releaseUrl": "https://github.com/kombifyio/StackKits/releases/tag/v0.51.4"
+  },
+  "generatedAt": "2026-10-04T04:08:48Z",
+  "generatorVersion": "0.51.4",
+  "catalog": {
+    "useCases": [
+      {
+        "id": "ai",
+        "title": "Private AI",
+        "description": "Private AI workloads, local model serving, and user-facing AI workbench intent.",
+        "components": [
+          {
+            "id": "anythingllm",
+            "name": "AnythingLLM",
+            "role": "alternative",
+            "kind": "application",
+            "realization": "install"
+          },
+          {
+            "id": "comfyui",
+            "name": "ComfyUI",
+            "role": "supporting",
+            "kind": "application"
+          },
+          {
+            "id": "docling",
+            "name": "Docling",
+            "role": "supporting",
+            "kind": "application"
+          },
+          {
+            "id": "hermes",
+            "name": "Hermes Agent",
+            "role": "supporting",
+            "kind": "application"
+          },
+          {
+            "id": "ollama",
+            "name": "Ollama",
+            "role": "primary",
+            "kind": "application"
+          },
+          {
+            "id": "open-webui",
+            "name": "Open WebUI",
+            "role": "supporting",
+            "kind": "application"
+          },
+          {
+            "id": "searxng",
+            "name": "SearXNG",
+            "role": "supporting",
+            "kind": "application"
+          },
+          {
+            "id": "speechkit",
+            "name": "kombify SpeechKit",
+            "role": "supporting",
+            "kind": "application"
+          },
+          {
+            "id": "tika",
+            "name": "Apache Tika",
+            "role": "supporting",
+            "kind": "application"
+          }
+        ],
+        "mainUseCase": {
+          "id": "ai",
+          "title": "AI"
+        },
+        "computeTiers": {
+          "high": {
+            "included": true,
+            "functions": [
+              "model-serving",
+              "local-inference",
+              "chat-interface"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "ollama",
+            "notes": [
+              "Same CPU runtime as standard. A GPU is a separate accelerator profile, not a compute tier."
+            ]
+          },
+          "low": {
+            "included": false,
+            "reason": "CPU inference needs the explicit standard hardware floor."
+          },
+          "standard": {
+            "included": true,
+            "functions": [
+              "model-serving",
+              "local-inference",
+              "chat-interface"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "ollama",
+            "notes": [
+              "No model is installed automatically. Model weights and context determine additional RAM and disk."
+            ]
+          }
+        },
+        "settings": [
+          {
+            "id": "accelerator",
+            "name": "Accelerator",
+            "kind": "choice",
+            "group": "hardware",
+            "depth": "summary",
+            "help": "Local models run far faster on a GPU.",
+            "options": [
+              {
+                "id": "cpu",
+                "name": "CPU only",
+                "note": "Works everywhere; small models only"
+              },
+              {
+                "id": "nvidia",
+                "name": "NVIDIA GPU",
+                "note": "Needs the NVIDIA driver 550 or newer; StackKits sets up the NVIDIA Container Toolkit"
+              },
+              {
+                "id": "amd",
+                "name": "AMD GPU",
+                "note": "ROCm-capable card with the amdgpu driver; amd64 only"
+              }
+            ],
+            "default": "cpu",
+            "realization": "install",
+            "acceleratorProfileOf": "stackkits-private-ai-runtime"
+          },
+          {
+            "id": "model-size",
+            "name": "Model size",
+            "kind": "choice",
+            "group": "features",
+            "depth": "advanced",
+            "help": "Larger models answer better and need more memory.",
+            "options": [
+              {
+                "id": "small",
+                "name": "Small",
+                "note": "Around 4 GB of memory"
+              },
+              {
+                "id": "medium",
+                "name": "Medium",
+                "note": "Around 8 GB of memory"
+              },
+              {
+                "id": "large",
+                "name": "Large",
+                "note": "16 GB of memory or more"
+              }
+            ],
+            "default": "small",
+            "realization": "recorded"
+          }
+        ],
+        "capabilities": [
+          {
+            "id": "inference",
+            "name": "Inference",
+            "help": "Serves the models you download; every other AI module uses this local endpoint.",
+            "required": true,
+            "enabledByDefault": true,
+            "requires": [],
+            "requiresAccelerator": false,
+            "default": {
+              "id": "ollama",
+              "name": "Ollama",
+              "realization": "install",
+              "workloadRef": "ai",
+              "alternativeRef": "private-ai",
+              "alternativeRefs": [
+                "private-ai",
+                "anythingllm"
+              ]
+            },
+            "alternative": {
+              "id": "llama-cpp",
+              "name": "llama.cpp server",
+              "note": "For small or non-NVIDIA nodes",
+              "realization": "recorded"
+            }
+          },
+          {
+            "id": "chat",
+            "name": "Chat and knowledge",
+            "help": "Chat with your local models and your own documents.",
+            "required": false,
+            "enabledByDefault": true,
+            "requires": [
+              "inference"
+            ],
+            "requiresAccelerator": false,
+            "default": {
+              "id": "open-webui",
+              "name": "Open WebUI",
+              "realization": "install",
+              "workloadRef": "ai",
+              "alternativeRef": "private-ai"
+            },
+            "alternative": {
+              "id": "anythingllm",
+              "name": "AnythingLLM",
+              "note": "Workspaces with built-in RAG and agents, multi-user mode; parses documents itself, so Tika and Docling are not selectable with it",
+              "realization": "install",
+              "workloadRef": "ai",
+              "alternativeRef": "anythingllm"
+            }
+          },
+          {
+            "id": "speech",
+            "name": "Speech",
+            "help": "Speak to your assistant and hear answers; recognition runs on your device where it can.",
+            "required": false,
+            "enabledByDefault": false,
+            "requires": [
+              "inference"
+            ],
+            "requiresAccelerator": false,
+            "default": {
+              "id": "speechkit",
+              "name": "kombify SpeechKit",
+              "note": "Local speech providers only",
+              "realization": "recorded",
+              "pending": "waiting for a SpeechKit release with OpenAI audio endpoints and a public image"
+            }
+          },
+          {
+            "id": "web-search",
+            "name": "Web search",
+            "help": "Private meta search for chat and the assistant.",
+            "required": false,
+            "enabledByDefault": false,
+            "requires": [
+              "inference"
+            ],
+            "requiresAccelerator": false,
+            "default": {
+              "id": "searxng",
+              "name": "SearXNG",
+              "realization": "install",
+              "workloadRef": "ai-search",
+              "alternativeRef": "searxng"
+            }
+          },
+          {
+            "id": "document-parsing",
+            "name": "Document parsing",
+            "help": "Reads PDFs and office files so chat can answer from them.",
+            "required": false,
+            "enabledByDefault": false,
+            "requires": [
+              "inference",
+              "chat"
+            ],
+            "requiresAccelerator": false,
+            "default": {
+              "id": "tika",
+              "name": "Apache Tika",
+              "note": "Text documents; no OCR",
+              "realization": "install",
+              "workloadRef": "ai-documents",
+              "alternativeRef": "tika"
+            },
+            "alternative": {
+              "id": "docling",
+              "name": "Docling",
+              "note": "For scanned and complex layouts; needs more memory",
+              "realization": "install",
+              "workloadRef": "ai-documents",
+              "alternativeRef": "docling"
+            }
+          },
+          {
+            "id": "image-video",
+            "name": "Image and video",
+            "help": "Create and edit images and short videos from reviewed workflow templates.",
+            "required": false,
+            "enabledByDefault": false,
+            "requires": [
+              "inference"
+            ],
+            "requiresAccelerator": false,
+            "default": {
+              "id": "comfyui",
+              "name": "ComfyUI",
+              "note": "Runs on the CPU (slow; upscaling, and text-to-image with 32 GB RAM); an NVIDIA GPU with 8 GB makes images fast, video needs 16 GB of VRAM",
+              "realization": "install",
+              "workloadRef": "ai-image-video",
+              "alternativeRef": "comfyui"
+            },
+            "alternative": {
+              "id": "invokeai",
+              "name": "InvokeAI",
+              "realization": "recorded"
+            }
+          },
+          {
+            "id": "assistant",
+            "name": "Personal assistant",
+            "help": "An assistant with memory that drafts and inspects first; every further permission is a separate grant.",
+            "required": false,
+            "enabledByDefault": false,
+            "requires": [
+              "inference"
+            ],
+            "requiresAccelerator": false,
+            "default": {
+              "id": "hermes",
+              "name": "Hermes Agent",
+              "note": "Experimental; one owner, inspect and draft by default",
+              "realization": "install",
+              "workloadRef": "ai-assistant",
+              "alternativeRef": "hermes"
+            },
+            "alternative": {
+              "id": "openbot",
+              "name": "OpenBot",
+              "note": "Supervised AI coworker with its own workspace; needs a paid CopilotKit Intelligence plan to self-host",
+              "realization": "recorded"
+            }
+          },
+          {
+            "id": "agent-harness",
+            "name": "Agent harness",
+            "help": "Task and coding agents that run only inside isolated workspaces.",
+            "required": false,
+            "enabledByDefault": false,
+            "requires": [
+              "inference"
+            ],
+            "requiresAccelerator": false,
+            "default": {
+              "id": "openhands",
+              "name": "OpenHands",
+              "note": "Runs in a gVisor sandbox; the host needs the runsc runtime",
+              "realization": "install",
+              "workloadRef": "ai-harness",
+              "alternativeRef": "openhands"
+            },
+            "alternative": {
+              "id": "goose",
+              "name": "Goose",
+              "note": "Desktop app and CLI; no self-hostable web surface yet",
+              "realization": "recorded"
+            }
+          },
+          {
+            "id": "agent-control-plane",
+            "name": "Agent control plane",
+            "help": "Organizes agents, their budgets and approvals.",
+            "required": false,
+            "enabledByDefault": false,
+            "requires": [
+              "inference"
+            ],
+            "requiresAccelerator": false,
+            "default": {
+              "id": "paperclip",
+              "name": "Paperclip",
+              "note": "Runs in a gVisor sandbox; the host needs the runsc runtime",
+              "realization": "install",
+              "workloadRef": "ai-control-plane",
+              "alternativeRef": "paperclip"
+            },
+            "alternative": {
+              "id": "langflow",
+              "name": "Langflow",
+              "note": "Visual agent and flow builder; runs flow code in-process",
+              "realization": "recorded"
+            }
+          },
+          {
+            "id": "observability",
+            "name": "Observability and gateway",
+            "help": "Traces and budgets when you mix local and external models.",
+            "required": false,
+            "enabledByDefault": false,
+            "requires": [
+              "inference"
+            ],
+            "requiresAccelerator": false,
+            "default": {
+              "id": "langfuse",
+              "name": "Langfuse",
+              "realization": "recorded"
+            },
+            "alternative": {
+              "id": "litellm",
+              "name": "LiteLLM",
+              "realization": "recorded"
+            }
+          }
+        ],
+        "docs": "/guides/stackkits/use-cases/personal-ai",
+        "defaultAlternative": "private-ai",
+        "alternatives": [
+          {
+            "id": "anythingllm",
+            "name": "anythingllm",
+            "modules": [
+              {
+                "id": "stackkits-anythingllm-runtime",
+                "computeProfiles": [
+                  "high",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 4,
+                      "minRamGB": 12,
+                      "minStorageGB": 40
+                    },
+                    "reservation": {
+                      "ramGB": 1.5
+                    },
+                    "recommended": {
+                      "cpuCores": 8,
+                      "ramGB": 16,
+                      "storageGB": 80
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "Kombify recommended sizing policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 4,
+                      "minRamGB": 12,
+                      "minStorageGB": 40
+                    },
+                    "reservation": {
+                      "ramGB": 1.5
+                    },
+                    "recommended": {
+                      "cpuCores": 8,
+                      "ramGB": 16,
+                      "storageGB": 80
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "Kombify recommended sizing policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  }
+                },
+                "acceleratorProfileFacts": {
+                  "amd": {
+                    "vendor": "amd",
+                    "access": "rocm-device-nodes",
+                    "maturity": "experimental",
+                    "reservation": {
+                      "cpuCores": 1,
+                      "ramGB": 1,
+                      "storageGB": 6
+                    }
+                  },
+                  "nvidia": {
+                    "vendor": "nvidia",
+                    "access": "cdi",
+                    "minDriverMajor": 550,
+                    "maturity": "experimental",
+                    "reservation": {
+                      "cpuCores": 1,
+                      "ramGB": 1,
+                      "storageGB": 1
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "private-ai",
+            "name": "private-ai",
+            "modules": [
+              {
+                "id": "stackkits-private-ai-runtime",
+                "computeProfiles": [
+                  "high",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 4,
+                      "minRamGB": 12,
+                      "minStorageGB": 40
+                    },
+                    "reservation": {
+                      "ramGB": 1.5
+                    },
+                    "recommended": {
+                      "cpuCores": 8,
+                      "ramGB": 16,
+                      "storageGB": 80
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "Kombify recommended sizing policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 4,
+                      "minRamGB": 12,
+                      "minStorageGB": 40
+                    },
+                    "reservation": {
+                      "ramGB": 1.5
+                    },
+                    "recommended": {
+                      "cpuCores": 8,
+                      "ramGB": 16,
+                      "storageGB": 80
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "Kombify recommended sizing policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  }
+                },
+                "acceleratorProfileFacts": {
+                  "amd": {
+                    "vendor": "amd",
+                    "access": "rocm-device-nodes",
+                    "maturity": "experimental",
+                    "reservation": {
+                      "cpuCores": 1,
+                      "ramGB": 1,
+                      "storageGB": 6
+                    }
+                  },
+                  "nvidia": {
+                    "vendor": "nvidia",
+                    "access": "cdi",
+                    "minDriverMajor": 550,
+                    "maturity": "experimental",
+                    "reservation": {
+                      "cpuCores": 1,
+                      "ramGB": 1,
+                      "storageGB": 1
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "addOns": [
+          {
+            "id": "ai-assistant",
+            "defaultAlternative": "hermes",
+            "alternatives": [
+              {
+                "id": "hermes",
+                "name": "hermes",
+                "modules": [
+                  {
+                    "id": "stackkits-hermes-runtime",
+                    "computeProfiles": [
+                      "high",
+                      "standard"
+                    ],
+                    "computeProfileFacts": {
+                      "high": {
+                        "maturity": "experimental",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.5
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      },
+                      "standard": {
+                        "maturity": "experimental",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.5
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "ai-control-plane",
+            "defaultAlternative": "paperclip",
+            "alternatives": [
+              {
+                "id": "paperclip",
+                "name": "paperclip",
+                "modules": [
+                  {
+                    "id": "stackkits-paperclip-runtime",
+                    "computeProfiles": [
+                      "high",
+                      "standard"
+                    ],
+                    "computeProfileFacts": {
+                      "high": {
+                        "maturity": "experimental",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 4,
+                          "minRamGB": 8,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 1
+                        },
+                        "recommended": {
+                          "cpuCores": 8,
+                          "ramGB": 16,
+                          "storageGB": 60
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "recommended": {
+                            "ref": "Kombify recommended sizing policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      },
+                      "standard": {
+                        "maturity": "experimental",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 4,
+                          "minRamGB": 8,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 1
+                        },
+                        "recommended": {
+                          "cpuCores": 8,
+                          "ramGB": 16,
+                          "storageGB": 60
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "recommended": {
+                            "ref": "Kombify recommended sizing policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "ai-documents",
+            "defaultAlternative": "tika",
+            "alternatives": [
+              {
+                "id": "docling",
+                "name": "docling",
+                "modules": [
+                  {
+                    "id": "stackkits-docling-runtime",
+                    "computeProfiles": [
+                      "high",
+                      "standard"
+                    ],
+                    "computeProfileFacts": {
+                      "high": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 4,
+                          "minRamGB": 8,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 1
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      },
+                      "standard": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 4,
+                          "minRamGB": 8,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 1
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "tika",
+                "name": "tika",
+                "modules": [
+                  {
+                    "id": "stackkits-tika-runtime",
+                    "computeProfiles": [
+                      "high",
+                      "standard"
+                    ],
+                    "computeProfileFacts": {
+                      "high": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.5
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      },
+                      "standard": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.5
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "ai-harness",
+            "defaultAlternative": "openhands",
+            "alternatives": [
+              {
+                "id": "openhands",
+                "name": "openhands",
+                "modules": [
+                  {
+                    "id": "stackkits-openhands-runtime",
+                    "computeProfiles": [
+                      "high",
+                      "standard"
+                    ],
+                    "computeProfileFacts": {
+                      "high": {
+                        "maturity": "experimental",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 4,
+                          "minRamGB": 8,
+                          "minStorageGB": 40
+                        },
+                        "reservation": {
+                          "ramGB": 1
+                        },
+                        "recommended": {
+                          "cpuCores": 8,
+                          "ramGB": 16,
+                          "storageGB": 100
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "recommended": {
+                            "ref": "Kombify recommended sizing policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      },
+                      "standard": {
+                        "maturity": "experimental",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 4,
+                          "minRamGB": 8,
+                          "minStorageGB": 40
+                        },
+                        "reservation": {
+                          "ramGB": 1
+                        },
+                        "recommended": {
+                          "cpuCores": 8,
+                          "ramGB": 16,
+                          "storageGB": 100
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "recommended": {
+                            "ref": "Kombify recommended sizing policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "ai-image-video",
+            "defaultAlternative": "comfyui",
+            "alternatives": [
+              {
+                "id": "comfyui",
+                "name": "comfyui",
+                "modules": [
+                  {
+                    "id": "stackkits-comfyui-runtime",
+                    "computeProfiles": [
+                      "high",
+                      "standard"
+                    ],
+                    "computeProfileFacts": {
+                      "high": {
+                        "maturity": "experimental",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 4,
+                          "minRamGB": 8,
+                          "minStorageGB": 40
+                        },
+                        "reservation": {
+                          "ramGB": 2
+                        },
+                        "recommended": {
+                          "cpuCores": 8,
+                          "ramGB": 32,
+                          "storageGB": 150
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "recommended": {
+                            "ref": "Kombify recommended sizing policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      },
+                      "standard": {
+                        "maturity": "experimental",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 4,
+                          "minRamGB": 8,
+                          "minStorageGB": 40
+                        },
+                        "reservation": {
+                          "ramGB": 2
+                        },
+                        "recommended": {
+                          "cpuCores": 8,
+                          "ramGB": 32,
+                          "storageGB": 150
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "recommended": {
+                            "ref": "Kombify recommended sizing policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      }
+                    },
+                    "acceleratorProfileFacts": {
+                      "nvidia": {
+                        "vendor": "nvidia",
+                        "access": "cdi",
+                        "minVramGiB": 8,
+                        "minDriverMajor": 580,
+                        "maturity": "experimental",
+                        "reservation": {
+                          "cpuCores": 1,
+                          "ramGB": 2,
+                          "storageGB": 1
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "ai-search",
+            "defaultAlternative": "searxng",
+            "alternatives": [
+              {
+                "id": "searxng",
+                "name": "searxng",
+                "modules": [
+                  {
+                    "id": "stackkits-searxng-runtime",
+                    "computeProfiles": [
+                      "high",
+                      "standard"
+                    ],
+                    "computeProfileFacts": {
+                      "high": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.125
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      },
+                      "standard": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.125
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "ai-speech",
+            "defaultAlternative": "speechkit",
+            "alternatives": [
+              {
+                "id": "speechkit",
+                "name": "speechkit",
+                "modules": [
+                  {
+                    "id": "stackkits-speechkit-runtime",
+                    "computeProfiles": [
+                      "high",
+                      "standard"
+                    ],
+                    "computeProfileFacts": {
+                      "high": {
+                        "maturity": "experimental",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 2
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Kombify reservation policy; declared, not a sum of component limits",
+                            "source": "policy"
+                          }
+                        }
+                      },
+                      "standard": {
+                        "maturity": "experimental",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 2
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Kombify reservation policy; declared, not a sum of component limits",
+                            "source": "policy"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "automation",
+        "title": "Automation",
+        "description": "Scheduled and event-driven automations on your own node through kombify Workpaths, a headless engine with a private owner-token API. Runs without a kombify plan.",
+        "components": [
+          {
+            "id": "workpaths",
+            "name": "kombify Workpaths",
+            "role": "primary",
+            "kind": "application"
+          }
+        ],
+        "mainUseCase": {
+          "id": "automation",
+          "title": "Automation"
+        },
+        "computeTiers": {
+          "high": {
+            "included": true,
+            "functions": [
+              "automation-engine",
+              "scheduled-automation",
+              "event-automation"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "workpaths",
+            "notes": [
+              "Same application and reservation as standard."
+            ]
+          },
+          "low": {
+            "included": true,
+            "functions": [
+              "automation-engine",
+              "scheduled-automation",
+              "event-automation"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "workpaths",
+            "notes": [
+              "A small Go server and PostgreSQL; the scheduler wakes every few seconds."
+            ]
+          },
+          "standard": {
+            "included": true,
+            "functions": [
+              "automation-engine",
+              "scheduled-automation",
+              "event-automation"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "workpaths",
+            "notes": [
+              "Same application and reservation as low."
+            ]
+          }
+        },
+        "docs": "/guides/stackkits/use-cases/automation",
+        "defaultAlternative": "workpaths",
+        "alternatives": [
+          {
+            "id": "workpaths",
+            "name": "workpaths",
+            "modules": [
+              {
+                "id": "stackkits-workpaths-runtime",
+                "computeProfiles": [
+                  "high",
+                  "low",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 0.25
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Kombify reservation policy; declared, not a sum of component limits",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "low": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 2,
+                      "minStorageGB": 10
+                    },
+                    "reservation": {
+                      "ramGB": 0.25
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Kombify reservation policy; declared, not a sum of component limits",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 0.25
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Kombify reservation policy; declared, not a sum of component limits",
+                        "source": "policy"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dev",
+        "title": "Developer Platform",
+        "description": "Private source control, developer collaboration, and delivery-platform intent.",
+        "components": [
+          {
+            "id": "forgejo",
+            "name": "Forgejo",
+            "role": "alternative",
+            "kind": "application",
+            "realization": "install"
+          },
+          {
+            "id": "gitea",
+            "name": "Gitea",
+            "role": "primary",
+            "kind": "application"
+          }
+        ],
+        "mainUseCase": {
+          "id": "dev",
+          "title": "Dev"
+        },
+        "computeTiers": {
+          "high": {
+            "included": true,
+            "functions": [
+              "source-control",
+              "git-hosting",
+              "developer-collaboration"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "gitea",
+            "notes": [
+              "Same Git hosting runtime as standard."
+            ]
+          },
+          "low": {
+            "included": false,
+            "reason": "The first Git hosting path uses the standard profile."
+          },
+          "standard": {
+            "included": true,
+            "functions": [
+              "source-control",
+              "git-hosting",
+              "developer-collaboration"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "gitea",
+            "notes": [
+              "Repository growth requires a separate disk budget. No CI runner is included."
+            ]
+          }
+        },
+        "settings": [
+          {
+            "id": "ci-runners",
+            "name": "CI runners",
+            "kind": "toggle",
+            "group": "features",
+            "depth": "summary",
+            "help": "Run build and test pipelines on this Node.",
+            "default": false,
+            "realization": "recorded"
+          }
+        ],
+        "docs": "/guides/stackkits/use-cases/development",
+        "defaultAlternative": "gitea",
+        "alternatives": [
+          {
+            "id": "forgejo",
+            "name": "forgejo",
+            "modules": [
+              {
+                "id": "stackkits-forgejo-runtime",
+                "computeProfiles": [
+                  "high",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 0.25
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 0.25
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "gitea",
+            "name": "gitea",
+            "modules": [
+              {
+                "id": "stackkits-gitea-runtime",
+                "computeProfiles": [
+                  "high",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 0.25
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 0.25
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "documents",
+        "title": "Documents",
+        "description": "Private document ingestion, OCR, indexing and search through Paperless-ngx.",
+        "components": [
+          {
+            "id": "paperless-ngx",
+            "name": "Paperless-ngx",
+            "role": "primary",
+            "kind": "application"
+          }
+        ],
+        "mainUseCase": {
+          "id": "documents-files",
+          "title": "Documents \u0026 Files"
+        },
+        "computeTiers": {
+          "high": {
+            "included": true,
+            "functions": [
+              "document-ingestion",
+              "ocr",
+              "document-search",
+              "document-management"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "ingest"
+            },
+            "moduleSlug": "paperless-ngx",
+            "notes": [
+              "Same upstream service graph as standard."
+            ]
+          },
+          "low": {
+            "included": false,
+            "reason": "The first Paperless-ngx path uses the standard profile."
+          },
+          "standard": {
+            "included": true,
+            "functions": [
+              "document-ingestion",
+              "ocr",
+              "document-search",
+              "document-management"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "ingest"
+            },
+            "moduleSlug": "paperless-ngx",
+            "notes": [
+              "Document and database growth require a separate storage budget."
+            ]
+          }
+        },
+        "docs": "/guides/stackkits/use-cases/documents-and-files",
+        "defaultAlternative": "paperless-ngx",
+        "alternatives": [
+          {
+            "id": "paperless-ngx",
+            "name": "paperless-ngx",
+            "modules": [
+              {
+                "id": "stackkits-paperless-runtime",
+                "computeProfiles": [
+                  "high",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 1.25
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 1.25
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "files",
+        "title": "File Storage and Documents",
+        "description": "Private file storage and sharing: Cloudreve by default, Nextcloud or kombify Paperwork as alternatives, with optional office editing and a document archive.",
+        "components": [
+          {
+            "id": "cloudreve",
+            "name": "Cloudreve",
+            "role": "primary",
+            "kind": "application"
+          },
+          {
+            "id": "euro-office",
+            "name": "Euro-Office",
+            "role": "supporting",
+            "kind": "application"
+          },
+          {
+            "id": "nextcloud",
+            "name": "Nextcloud",
+            "role": "alternative",
+            "kind": "application",
+            "realization": "install"
+          },
+          {
+            "id": "paperless-ngx",
+            "name": "Paperless-ngx",
+            "role": "supporting",
+            "kind": "application"
+          },
+          {
+            "id": "paperwork",
+            "name": "kombify Paperwork",
+            "role": "alternative",
+            "kind": "connector",
+            "realization": "recorded"
+          }
+        ],
+        "mainUseCase": {
+          "id": "documents-files",
+          "title": "Documents \u0026 Files"
+        },
+        "computeTiers": {
+          "high": {
+            "included": true,
+            "functions": [
+              "files",
+              "document-storage",
+              "file-sharing"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "cloudreve",
+            "notes": [
+              "A high profile does not add collaboration or DMS. Those need their own admitted workload and lifecycle contracts."
+            ]
+          },
+          "low": {
+            "included": true,
+            "functions": [
+              "files",
+              "document-storage",
+              "file-sharing"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "cloudreve",
+            "notes": [
+              "Lightweight sharing. Nextcloud is a recorded alternative until its native workload lands."
+            ]
+          },
+          "standard": {
+            "included": true,
+            "functions": [
+              "files",
+              "document-storage",
+              "file-sharing"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "cloudreve",
+            "notes": [
+              "Nextcloud, kombify Paperwork, Euro-Office and Paperless-ngx are selectable catalog choices; the release installs Cloudreve."
+            ]
+          }
+        },
+        "settings": [
+          {
+            "id": "paperless",
+            "name": "Document archive",
+            "kind": "toggle",
+            "group": "features",
+            "depth": "summary",
+            "help": "Add Paperless-ngx to scan, read (OCR) and search your paper documents next to your files.",
+            "default": false,
+            "realization": "install",
+            "workloadRef": "documents"
+          },
+          {
+            "id": "office-editing",
+            "name": "Office editing",
+            "kind": "toggle",
+            "group": "features",
+            "depth": "summary",
+            "help": "Add Euro-Office to edit documents, spreadsheets and presentations in the browser. It connects to Nextcloud through the Euro-Office app.",
+            "default": false,
+            "realization": "install",
+            "workloadRef": "files-office"
+          },
+          {
+            "id": "library-volume",
+            "name": "Where files are stored",
+            "kind": "choice",
+            "group": "storage",
+            "depth": "advanced",
+            "help": "A dedicated disk keeps your files off the system disk.",
+            "options": [
+              {
+                "id": "kit-storage",
+                "name": "Kit storage",
+                "note": "Shared data volume of this StackKit"
+              },
+              {
+                "id": "dedicated-disk",
+                "name": "Dedicated disk",
+                "note": "An extra disk on the Node, just for files"
+              }
+            ],
+            "default": "kit-storage",
+            "realization": "recorded"
+          }
+        ],
+        "docs": "/guides/stackkits/use-cases/documents-and-files",
+        "defaultAlternative": "cloudreve",
+        "alternatives": [
+          {
+            "id": "cloudreve",
+            "name": "cloudreve",
+            "modules": [
+              {
+                "id": "stackkits-cloudreve-runtime",
+                "computeProfiles": [
+                  "high",
+                  "low",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "cpuCores": 0.05,
+                      "ramGB": 0.125
+                    },
+                    "recommended": {
+                      "cpuCores": 0.25,
+                      "ramGB": 0.25
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "docs/data/resource-evidence/stackkits-cloudreve-runtime/standard.json",
+                        "source": "measured"
+                      },
+                      "reservation": {
+                        "ref": "docs/data/resource-evidence/stackkits-cloudreve-runtime/standard.json",
+                        "source": "measured"
+                      }
+                    }
+                  },
+                  "low": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 2,
+                      "minStorageGB": 10
+                    },
+                    "reservation": {
+                      "cpuCores": 0.05,
+                      "ramGB": 0.1875
+                    },
+                    "recommended": {
+                      "cpuCores": 0.25,
+                      "ramGB": 0.25
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "docs/data/resource-evidence/stackkits-cloudreve-runtime/low.json",
+                        "source": "measured"
+                      },
+                      "reservation": {
+                        "ref": "docs/data/resource-evidence/stackkits-cloudreve-runtime/low.json",
+                        "source": "measured"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "cpuCores": 0.05,
+                      "ramGB": 0.125
+                    },
+                    "recommended": {
+                      "cpuCores": 0.25,
+                      "ramGB": 0.25
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "docs/data/resource-evidence/stackkits-cloudreve-runtime/standard.json",
+                        "source": "measured"
+                      },
+                      "reservation": {
+                        "ref": "docs/data/resource-evidence/stackkits-cloudreve-runtime/standard.json",
+                        "source": "measured"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "nextcloud",
+            "name": "nextcloud",
+            "modules": [
+              {
+                "id": "stackkits-nextcloud-runtime",
+                "computeProfiles": [
+                  "high",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 0.75
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Kombify reservation policy; declared, not a sum of component limits",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 0.75
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Kombify reservation policy; declared, not a sum of component limits",
+                        "source": "policy"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "addOns": [
+          {
+            "id": "files-office",
+            "defaultAlternative": "euro-office",
+            "alternatives": [
+              {
+                "id": "euro-office",
+                "name": "euro-office",
+                "modules": [
+                  {
+                    "id": "stackkits-euro-office-runtime",
+                    "computeProfiles": [
+                      "high",
+                      "standard"
+                    ],
+                    "computeProfileFacts": {
+                      "high": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 2
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      },
+                      "standard": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 2
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "game",
+        "title": "Game Server",
+        "description": "Self-hosted game servers for friends and family through Pterodactyl, with curated Minecraft Java, Paper and Bedrock, Terraria and Valheim profiles.",
+        "components": [
+          {
+            "id": "pelican",
+            "name": "Pelican Panel",
+            "role": "alternative",
+            "kind": "application",
+            "realization": "recorded"
+          },
+          {
+            "id": "pterodactyl",
+            "name": "Pterodactyl",
+            "role": "primary",
+            "kind": "application"
+          }
+        ],
+        "mainUseCase": {
+          "id": "game",
+          "title": "Game"
+        },
+        "computeTiers": {
+          "high": {
+            "included": true,
+            "functions": [
+              "game-server-hosting",
+              "game-server-management"
+            ],
+            "load": {
+              "residency": "on-demand",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "pterodactyl",
+            "notes": [
+              "Same platform graph as standard; more worlds fit with more host memory."
+            ]
+          },
+          "low": {
+            "included": false,
+            "reason": "Game servers need the standard profile and their own memory budget."
+          },
+          "standard": {
+            "included": true,
+            "functions": [
+              "game-server-hosting",
+              "game-server-management"
+            ],
+            "load": {
+              "residency": "on-demand",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "pterodactyl",
+            "notes": [
+              "Each running world needs its own memory: about 2 GB for Minecraft Java, 3 GB for Paper, 1.5 GB for Bedrock and Terraria, and 4 GB for Valheim."
+            ]
+          }
+        },
+        "settings": [
+          {
+            "id": "edition",
+            "name": "Minecraft edition",
+            "kind": "choice",
+            "group": "profile",
+            "depth": "summary",
+            "help": "Java and Bedrock players cannot join each other's worlds; choose the edition your players use.",
+            "options": [
+              {
+                "id": "java",
+                "name": "Minecraft Java",
+                "note": "PC and Mac players"
+              },
+              {
+                "id": "bedrock",
+                "name": "Minecraft Bedrock",
+                "note": "Console, phone, tablet and Windows players"
+              }
+            ],
+            "default": "java",
+            "realization": "recorded"
+          }
+        ],
+        "docs": "/guides/stackkits/use-cases/game",
+        "defaultAlternative": "pterodactyl",
+        "alternatives": [
+          {
+            "id": "pterodactyl",
+            "name": "pterodactyl",
+            "modules": [
+              {
+                "id": "stackkits-pterodactyl-runtime",
+                "computeProfiles": [
+                  "high",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 1.25
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Kombify reservation policy; declared, not a sum of component limits",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 1.25
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Kombify reservation policy; declared, not a sum of component limits",
+                        "source": "policy"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mail",
+        "title": "Private Mail",
+        "description": "Private webmail through Roundcube for a mailbox you already have at an external provider. No mail server, DNS or MX record is created.",
+        "components": [
+          {
+            "id": "paperwork",
+            "name": "kombify Paperwork",
+            "role": "alternative",
+            "kind": "connector",
+            "realization": "recorded"
+          },
+          {
+            "id": "roundcube",
+            "name": "Roundcube Webmail",
+            "role": "primary",
+            "kind": "application"
+          }
+        ],
+        "mainUseCase": {
+          "id": "mail",
+          "title": "Mail"
+        },
+        "computeTiers": {
+          "high": {
+            "included": true,
+            "functions": [
+              "webmail-client",
+              "mailbox-access",
+              "address-book"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "roundcube",
+            "notes": [
+              "Same application and reservation as standard; high adds no mail server."
+            ]
+          },
+          "low": {
+            "included": true,
+            "functions": [
+              "webmail-client",
+              "mailbox-access",
+              "address-book"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "roundcube",
+            "notes": [
+              "Roundcube with SQLite reserves 128 MiB and is idle between requests; it fits the low graph like Vaultwarden."
+            ]
+          },
+          "standard": {
+            "included": true,
+            "functions": [
+              "webmail-client",
+              "mailbox-access",
+              "address-book"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "roundcube",
+            "notes": [
+              "Same application and reservation as low."
+            ]
+          }
+        },
+        "settings": [
+          {
+            "id": "hosting",
+            "name": "Mail hosting",
+            "kind": "choice",
+            "group": "backend",
+            "depth": "summary",
+            "help": "Keep your mailbox at your current provider, or run your own mail server on a dedicated Cloud node.",
+            "options": [
+              {
+                "id": "existing",
+                "name": "Existing provider",
+                "note": "No mail server, DNS or MX change"
+              },
+              {
+                "id": "stalwart",
+                "name": "Stalwart",
+                "note": "Own mail server: SMTP, IMAP and JMAP in one service"
+              },
+              {
+                "id": "mailcow",
+                "name": "mailcow",
+                "note": "Own mail suite with SOGo webmail, calendar and contacts"
+              }
+            ],
+            "default": "existing",
+            "realization": "recorded"
+          },
+          {
+            "id": "mail-domain",
+            "name": "Mail domain",
+            "kind": "text",
+            "group": "access",
+            "depth": "summary",
+            "help": "The domain your addresses end in, e.g. example.com. You need to own it.",
+            "default": "",
+            "placeholder": "example.com",
+            "realization": "recorded"
+          }
+        ],
+        "docs": "/guides/stackkits/use-cases/mail",
+        "defaultAlternative": "roundcube",
+        "alternatives": [
+          {
+            "id": "roundcube",
+            "name": "roundcube",
+            "modules": [
+              {
+                "id": "stackkits-roundcube-runtime",
+                "computeProfiles": [
+                  "high",
+                  "low",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 0.125
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "low": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 2,
+                      "minStorageGB": 10
+                    },
+                    "reservation": {
+                      "ramGB": 0.125
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 0.125
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mail-server",
+        "title": "Own Mail Server",
+        "description": "Your own mail server on a dedicated Cloud node through Stalwart: mailboxes for your domain with SMTP, IMAP and submission. StackKits prints the DNS records you publish; it never changes DNS.",
+        "components": [
+          {
+            "id": "mailcow",
+            "name": "mailcow",
+            "role": "alternative",
+            "kind": "application",
+            "realization": "recorded"
+          },
+          {
+            "id": "stalwart",
+            "name": "Stalwart Mail Server",
+            "role": "primary",
+            "kind": "application"
+          }
+        ],
+        "mainUseCase": {
+          "id": "mail",
+          "title": "Mail"
+        },
+        "computeTiers": {
+          "high": {
+            "included": true,
+            "functions": [
+              "mail-server",
+              "mailbox-hosting",
+              "smtp-delivery",
+              "imap-access"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "stalwart",
+            "notes": [
+              "Same application and reservation as standard."
+            ]
+          },
+          "low": {
+            "included": true,
+            "functions": [
+              "mail-server",
+              "mailbox-hosting",
+              "smtp-delivery",
+              "imap-access"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "stalwart",
+            "notes": [
+              "Stalwart reserves 512 MiB for RocksDB caches and spam filtering and is idle between deliveries."
+            ]
+          },
+          "standard": {
+            "included": true,
+            "functions": [
+              "mail-server",
+              "mailbox-hosting",
+              "smtp-delivery",
+              "imap-access"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "stalwart",
+            "notes": [
+              "Same application and reservation as low."
+            ]
+          }
+        },
+        "docs": "/guides/stackkits/use-cases/mail",
+        "defaultAlternative": "stalwart",
+        "alternatives": [
+          {
+            "id": "stalwart",
+            "name": "stalwart",
+            "modules": [
+              {
+                "id": "stackkits-stalwart-runtime",
+                "computeProfiles": [
+                  "high",
+                  "low",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "experimental",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 0.5
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "low": {
+                    "maturity": "experimental",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 2,
+                      "minStorageGB": 10
+                    },
+                    "reservation": {
+                      "ramGB": 0.5
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "experimental",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 0.5
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "media",
+        "title": "Media Library",
+        "description": "Private media library and streaming intent for household media collections.",
+        "components": [
+          {
+            "id": "audiobookshelf",
+            "name": "Audiobookshelf",
+            "role": "supporting",
+            "kind": "application"
+          },
+          {
+            "id": "emby",
+            "name": "Emby",
+            "role": "alternative",
+            "kind": "application",
+            "realization": "install"
+          },
+          {
+            "id": "jellyfin",
+            "name": "Jellyfin",
+            "role": "primary",
+            "kind": "application"
+          },
+          {
+            "id": "navidrome",
+            "name": "Navidrome",
+            "role": "supporting",
+            "kind": "application"
+          }
+        ],
+        "mainUseCase": {
+          "id": "media",
+          "title": "Media"
+        },
+        "computeTiers": {
+          "high": {
+            "included": true,
+            "functions": [
+              "media-server",
+              "video-stream"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "jellyfin",
+            "notes": [
+              "Same functions as standard until a high-graph media substitution exists."
+            ]
+          },
+          "low": {
+            "included": false,
+            "reason": "Jellyfin library + transcode is not on the Basement low graph. Needs a lite substitution before it can be included."
+          },
+          "standard": {
+            "included": true,
+            "functions": [
+              "media-server",
+              "video-stream"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "jellyfin",
+            "notes": [
+              "Library waits; playback and transcode are the spike. Catalog alternative jellyfin on standard/high."
+            ]
+          }
+        },
+        "settings": [
+          {
+            "id": "hardware-transcoding",
+            "name": "Hardware transcoding",
+            "kind": "choice",
+            "group": "hardware",
+            "depth": "summary",
+            "help": "Use the Node's GPU to convert video for phones and TVs.",
+            "options": [
+              {
+                "id": "auto",
+                "name": "Automatic",
+                "note": "Use a GPU when the Node has one"
+              },
+              {
+                "id": "off",
+                "name": "Off",
+                "note": "Software only; fine for one stream at a time"
+              },
+              {
+                "id": "on",
+                "name": "Always",
+                "note": "Requires a supported GPU"
+              }
+            ],
+            "default": "auto",
+            "realization": "recorded"
+          },
+          {
+            "id": "library-volume",
+            "name": "Where media is stored",
+            "kind": "choice",
+            "group": "storage",
+            "depth": "advanced",
+            "help": "A dedicated disk keeps a large library off the system disk.",
+            "options": [
+              {
+                "id": "kit-storage",
+                "name": "Kit storage",
+                "note": "Shared data volume of this StackKit"
+              },
+              {
+                "id": "dedicated-disk",
+                "name": "Dedicated disk",
+                "note": "An extra disk on the Node, just for media"
+              }
+            ],
+            "default": "kit-storage",
+            "realization": "recorded"
+          },
+          {
+            "id": "music-server",
+            "name": "Music streaming",
+            "kind": "toggle",
+            "group": "features",
+            "depth": "summary",
+            "help": "Add Navidrome to stream your music library to Subsonic-compatible apps.",
+            "default": false,
+            "realization": "install",
+            "workloadRef": "media-music"
+          },
+          {
+            "id": "audiobooks",
+            "name": "Audiobooks and podcasts",
+            "kind": "toggle",
+            "group": "features",
+            "depth": "advanced",
+            "help": "Add Audiobookshelf for audiobooks and podcasts with progress sync on your phone.",
+            "default": false,
+            "realization": "install",
+            "workloadRef": "media-audiobooks"
+          }
+        ],
+        "docs": "/guides/stackkits/use-cases/media",
+        "defaultAlternative": "jellyfin",
+        "alternatives": [
+          {
+            "id": "emby",
+            "name": "emby",
+            "modules": [
+              {
+                "id": "stackkits-emby-runtime",
+                "computeProfiles": [
+                  "high",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 0.5
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 0.5
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "jellyfin",
+            "name": "jellyfin",
+            "modules": [
+              {
+                "id": "stackkits-jellyfin-runtime",
+                "computeProfiles": [
+                  "high",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "cpuCores": 0.05,
+                      "ramGB": 0.3125
+                    },
+                    "recommended": {
+                      "cpuCores": 0.25,
+                      "ramGB": 0.375
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "docs/data/resource-evidence/stackkits-jellyfin-runtime/standard.json",
+                        "source": "measured"
+                      },
+                      "reservation": {
+                        "ref": "docs/data/resource-evidence/stackkits-jellyfin-runtime/standard.json",
+                        "source": "measured"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "cpuCores": 0.05,
+                      "ramGB": 0.3125
+                    },
+                    "recommended": {
+                      "cpuCores": 0.25,
+                      "ramGB": 0.375
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "docs/data/resource-evidence/stackkits-jellyfin-runtime/standard.json",
+                        "source": "measured"
+                      },
+                      "reservation": {
+                        "ref": "docs/data/resource-evidence/stackkits-jellyfin-runtime/standard.json",
+                        "source": "measured"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "addOns": [
+          {
+            "id": "media-audiobooks",
+            "defaultAlternative": "audiobookshelf",
+            "alternatives": [
+              {
+                "id": "audiobookshelf",
+                "name": "audiobookshelf",
+                "modules": [
+                  {
+                    "id": "stackkits-audiobookshelf-runtime",
+                    "computeProfiles": [
+                      "high",
+                      "standard"
+                    ],
+                    "computeProfileFacts": {
+                      "high": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.125
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      },
+                      "standard": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.125
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "media-music",
+            "defaultAlternative": "navidrome",
+            "alternatives": [
+              {
+                "id": "navidrome",
+                "name": "navidrome",
+                "modules": [
+                  {
+                    "id": "stackkits-navidrome-runtime",
+                    "computeProfiles": [
+                      "high",
+                      "standard"
+                    ],
+                    "computeProfileFacts": {
+                      "high": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.125
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      },
+                      "standard": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.125
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "photos",
+        "title": "Photos and Memories",
+        "description": "Family photo and video vault with mobile backup, search, and shared memories.",
+        "components": [
+          {
+            "id": "ente-photos",
+            "name": "Ente Photos",
+            "role": "alternative",
+            "kind": "application",
+            "realization": "recorded"
+          },
+          {
+            "id": "immich",
+            "name": "Immich",
+            "role": "primary",
+            "kind": "application"
+          },
+          {
+            "id": "immich-kiosk",
+            "name": "Immich Kiosk",
+            "role": "supporting",
+            "kind": "application"
+          },
+          {
+            "id": "immich-lite",
+            "name": "Immich Lite (no smart search)",
+            "role": "alternative",
+            "kind": "application",
+            "realization": "install"
+          },
+          {
+            "id": "immich-power-tools",
+            "name": "Immich Power Tools",
+            "role": "supporting",
+            "kind": "application"
+          },
+          {
+            "id": "immich-public-proxy",
+            "name": "Immich Public Proxy",
+            "role": "supporting",
+            "kind": "application"
+          }
+        ],
+        "mainUseCase": {
+          "id": "photos",
+          "title": "Photos"
+        },
+        "computeTiers": {
+          "high": {
+            "included": true,
+            "functions": [
+              "photos",
+              "photo-management",
+              "media-backup",
+              "ai-search"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "active-resident",
+              "burst": "ingest"
+            },
+            "moduleSlug": "immich",
+            "notes": [
+              "Same photo functions as standard until a high-graph substitution exists. Extra headroom is kit high, not extra Immich features."
+            ]
+          },
+          "low": {
+            "included": true,
+            "functions": [
+              "photos",
+              "photo-management",
+              "media-backup"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "ingest"
+            },
+            "moduleSlug": "immich-lite",
+            "notes": [
+              "No ML search. Catalog alternative immich-lite on standalone-compose. Kit graph also substitutes stackkits-immich-lite-runtime. Mobile backup is the spike; the library otherwise waits."
+            ]
+          },
+          "standard": {
+            "included": true,
+            "functions": [
+              "photos",
+              "photo-management",
+              "media-backup",
+              "ai-search"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "active-resident",
+              "burst": "ingest"
+            },
+            "moduleSlug": "immich",
+            "notes": [
+              "ML worker is resident base load. Ingest and interactive search are bursts on top."
+            ]
+          }
+        },
+        "settings": [
+          {
+            "id": "machine-learning",
+            "name": "Smart search and faces",
+            "kind": "toggle",
+            "group": "features",
+            "depth": "summary",
+            "help": "Recognise faces and search photos by what is in them. Needs more memory on the Node.",
+            "default": true,
+            "realization": "recorded"
+          },
+          {
+            "id": "library-volume",
+            "name": "Where photos are stored",
+            "kind": "choice",
+            "group": "storage",
+            "depth": "advanced",
+            "help": "A dedicated disk keeps a growing library off the system disk.",
+            "options": [
+              {
+                "id": "kit-storage",
+                "name": "Kit storage",
+                "note": "Shared data volume of this StackKit"
+              },
+              {
+                "id": "dedicated-disk",
+                "name": "Dedicated disk",
+                "note": "An extra disk on the Node, just for photos"
+              }
+            ],
+            "default": "kit-storage",
+            "realization": "recorded"
+          },
+          {
+            "id": "public-sharing",
+            "name": "Public share links",
+            "kind": "toggle",
+            "group": "access",
+            "depth": "summary",
+            "help": "Add Immich Public Proxy so people without an account can open the albums you share, while Immich itself stays private.",
+            "default": false,
+            "realization": "install",
+            "workloadRef": "photos-share"
+          },
+          {
+            "id": "kiosk",
+            "name": "Photo frame and TV slideshow",
+            "kind": "toggle",
+            "group": "features",
+            "depth": "advanced",
+            "help": "Add Immich Kiosk to show albums or people as a slideshow on a photo frame, TV or tablet.",
+            "default": false,
+            "realization": "install",
+            "workloadRef": "photos-kiosk"
+          },
+          {
+            "id": "power-tools",
+            "name": "Library power tools",
+            "kind": "toggle",
+            "group": "features",
+            "depth": "advanced",
+            "help": "Add Immich Power Tools for bulk work: merge people, fix missing locations and tidy albums.",
+            "default": false,
+            "realization": "install",
+            "workloadRef": "photos-tools"
+          }
+        ],
+        "docs": "/guides/stackkits/use-cases/photos",
+        "defaultAlternative": "immich",
+        "alternatives": [
+          {
+            "id": "immich",
+            "name": "immich",
+            "modules": [
+              {
+                "id": "stackkits-immich-runtime",
+                "computeProfiles": [
+                  "high",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 6,
+                      "minStorageGB": 20,
+                      "minAMD64MicroarchitectureLevel": 2
+                    },
+                    "reservation": {
+                      "cpuCores": 0.1,
+                      "ramGB": 2.375
+                    },
+                    "recommended": {
+                      "cpuCores": 1,
+                      "ramGB": 3.625
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Immich v2.7.0 docs/install/requirements.md (CPU/RAM); storage is the Kombify platform floor",
+                        "source": "upstream"
+                      },
+                      "recommended": {
+                        "ref": "docs/data/resource-evidence/stackkits-immich-runtime/standard.json",
+                        "source": "measured"
+                      },
+                      "reservation": {
+                        "ref": "docs/data/resource-evidence/stackkits-immich-runtime/standard.json",
+                        "source": "measured"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 6,
+                      "minStorageGB": 20,
+                      "minAMD64MicroarchitectureLevel": 2
+                    },
+                    "reservation": {
+                      "cpuCores": 0.1,
+                      "ramGB": 2.375
+                    },
+                    "recommended": {
+                      "cpuCores": 1,
+                      "ramGB": 3.625
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Immich v2.7.0 docs/install/requirements.md (CPU/RAM); storage is the Kombify platform floor",
+                        "source": "upstream"
+                      },
+                      "recommended": {
+                        "ref": "docs/data/resource-evidence/stackkits-immich-runtime/standard.json",
+                        "source": "measured"
+                      },
+                      "reservation": {
+                        "ref": "docs/data/resource-evidence/stackkits-immich-runtime/standard.json",
+                        "source": "measured"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "immich-lite",
+            "name": "immich-lite",
+            "modules": [
+              {
+                "id": "stackkits-immich-lite-runtime",
+                "computeProfiles": [
+                  "low"
+                ],
+                "computeProfileFacts": {
+                  "low": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 10
+                    },
+                    "reservation": {
+                      "cpuCores": 0.05,
+                      "ramGB": 1.125
+                    },
+                    "recommended": {
+                      "cpuCores": 0.25,
+                      "ramGB": 1.375
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "docs/data/resource-evidence/stackkits-immich-lite-runtime/low.json",
+                        "source": "measured"
+                      },
+                      "reservation": {
+                        "ref": "docs/data/resource-evidence/stackkits-immich-lite-runtime/low.json",
+                        "source": "measured"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "addOns": [
+          {
+            "id": "photos-kiosk",
+            "defaultAlternative": "immich-kiosk",
+            "alternatives": [
+              {
+                "id": "immich-kiosk",
+                "name": "immich-kiosk",
+                "modules": [
+                  {
+                    "id": "stackkits-immich-kiosk-runtime",
+                    "computeProfiles": [
+                      "high",
+                      "standard"
+                    ],
+                    "computeProfileFacts": {
+                      "high": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.0625
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      },
+                      "standard": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.0625
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "photos-share",
+            "defaultAlternative": "immich-public-proxy",
+            "alternatives": [
+              {
+                "id": "immich-public-proxy",
+                "name": "immich-public-proxy",
+                "modules": [
+                  {
+                    "id": "stackkits-immich-public-proxy-runtime",
+                    "computeProfiles": [
+                      "high",
+                      "standard"
+                    ],
+                    "computeProfileFacts": {
+                      "high": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.0625
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      },
+                      "standard": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.0625
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "photos-tools",
+            "defaultAlternative": "immich-power-tools",
+            "alternatives": [
+              {
+                "id": "immich-power-tools",
+                "name": "immich-power-tools",
+                "modules": [
+                  {
+                    "id": "stackkits-immich-power-tools-runtime",
+                    "computeProfiles": [
+                      "high",
+                      "standard"
+                    ],
+                    "computeProfileFacts": {
+                      "high": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.125
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      },
+                      "standard": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.125
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "remote",
+        "title": "Remote Desktop",
+        "description": "Private remote desktop and browser-accessible workspace intent.",
+        "components": [
+          {
+            "id": "guacamole",
+            "name": "Apache Guacamole",
+            "role": "primary",
+            "kind": "application"
+          }
+        ],
+        "mainUseCase": {
+          "id": "dev",
+          "title": "Dev"
+        },
+        "computeTiers": {
+          "high": {
+            "included": false,
+            "reason": "Same as standard until SK-M5."
+          },
+          "low": {
+            "included": false,
+            "reason": "Guacamole is SK-M5 and not on the low graph."
+          },
+          "standard": {
+            "included": false,
+            "reason": "SK-M5: no executable module. Intended load is always-on idle gateway with interactive session bursts."
+          }
+        },
+        "docs": "/guides/stackkits/use-cases/development"
+      },
+      {
+        "id": "smart-home",
+        "title": "Smart Home",
+        "description": "Home automation centered on Home Assistant, native product interfaces, and optional local device adjacency.",
+        "components": [
+          {
+            "id": "esphome",
+            "name": "ESPHome",
+            "role": "supporting",
+            "kind": "application"
+          },
+          {
+            "id": "home-assistant",
+            "name": "Home Assistant",
+            "role": "primary",
+            "kind": "application"
+          },
+          {
+            "id": "mosquitto",
+            "name": "Eclipse Mosquitto",
+            "role": "supporting",
+            "kind": "service"
+          },
+          {
+            "id": "zigbee2mqtt",
+            "name": "Zigbee2MQTT",
+            "role": "supporting",
+            "kind": "application"
+          }
+        ],
+        "mainUseCase": {
+          "id": "smart-home",
+          "title": "Smart Home"
+        },
+        "computeTiers": {
+          "high": {
+            "included": true,
+            "functions": [
+              "smart-home-hub",
+              "native-product-mcp",
+              "assist-api",
+              "automation"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "active-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "home-assistant",
+            "notes": [
+              "Same OSS functions as standard. Managed/hybrid profiles are realization, not a kit graph."
+            ]
+          },
+          "low": {
+            "included": true,
+            "functions": [
+              "smart-home-hub",
+              "automation"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "active-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "home-assistant",
+            "notes": [
+              "24/7 radio/state loop is the base load. Classic constrained-device resident. Native MCP and extra bridges stay optional."
+            ]
+          },
+          "standard": {
+            "included": true,
+            "functions": [
+              "smart-home-hub",
+              "native-product-mcp",
+              "assist-api",
+              "automation"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "active-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "home-assistant"
+          }
+        },
+        "settings": [
+          {
+            "id": "operating-form",
+            "name": "Home Assistant installation",
+            "kind": "choice",
+            "group": "profile",
+            "depth": "summary",
+            "help": "Choose Container or a dedicated Home Assistant OS appliance. OS requires a separately admitted appliance target.",
+            "options": [
+              {
+                "id": "container",
+                "name": "Container",
+                "note": "Home Assistant Core with operator-managed host services; no Supervisor or Apps."
+              },
+              {
+                "id": "haos",
+                "name": "Home Assistant OS",
+                "note": "Dedicated appliance with Supervisor, Apps and native system maintenance."
+              }
+            ],
+            "default": "container",
+            "realization": "install"
+          },
+          {
+            "id": "instance-origin",
+            "name": "Existing installation",
+            "kind": "choice",
+            "group": "profile",
+            "depth": "summary",
+            "help": "An existing instance is observed without changing accounts, integrations or configuration. Migration is a separate backup-protected operation.",
+            "options": [
+              {
+                "id": "new",
+                "name": "Create new"
+              },
+              {
+                "id": "existing",
+                "name": "Connect existing",
+                "note": "Preserve the original configuration; management requires a separate grant."
+              }
+            ],
+            "default": "new",
+            "realization": "install"
+          },
+          {
+            "id": "device-passthrough",
+            "name": "USB devices",
+            "kind": "toggle",
+            "group": "hardware",
+            "depth": "summary",
+            "help": "Let Home Assistant use a Zigbee, Z-Wave or other USB stick plugged into this Node.",
+            "default": false,
+            "realization": "recorded"
+          },
+          {
+            "id": "network-discovery",
+            "name": "Find devices on your network",
+            "kind": "toggle",
+            "group": "access",
+            "depth": "advanced",
+            "help": "Discover lights, speakers and hubs on the home network automatically.",
+            "default": true,
+            "realization": "recorded"
+          },
+          {
+            "id": "mqtt-broker",
+            "name": "MQTT broker",
+            "kind": "toggle",
+            "group": "features",
+            "depth": "advanced",
+            "help": "Add Eclipse Mosquitto so MQTT devices, Zigbee2MQTT and ESPHome can talk to Home Assistant.",
+            "default": false,
+            "realization": "install",
+            "workloadRef": "smart-home-mqtt"
+          },
+          {
+            "id": "zigbee-bridge",
+            "name": "Zigbee devices",
+            "kind": "toggle",
+            "group": "features",
+            "depth": "summary",
+            "help": "Add Zigbee2MQTT to use Zigbee lights and sensors without vendor hubs. You choose the Zigbee USB adapter and the MQTT broker address.",
+            "default": false,
+            "realization": "install",
+            "workloadRef": "smart-home-zigbee"
+          },
+          {
+            "id": "esphome",
+            "name": "ESPHome devices",
+            "kind": "toggle",
+            "group": "features",
+            "depth": "advanced",
+            "help": "Add ESPHome to build and update firmware for your own ESP32 sensors and switches.",
+            "default": false,
+            "realization": "install",
+            "workloadRef": "smart-home-esphome"
+          }
+        ],
+        "docs": "/guides/stackkits/use-cases/smart-home",
+        "defaultAlternative": "home-assistant",
+        "alternatives": [
+          {
+            "id": "home-assistant",
+            "name": "home-assistant",
+            "modules": [
+              {
+                "id": "stackkits-home-assistant-runtime",
+                "computeProfiles": [
+                  "high",
+                  "low",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "cpuCores": 0.05,
+                      "ramGB": 0.4375
+                    },
+                    "recommended": {
+                      "cpuCores": 0.25,
+                      "ramGB": 0.625
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "docs/data/resource-evidence/stackkits-home-assistant-runtime/standard.json",
+                        "source": "measured"
+                      },
+                      "reservation": {
+                        "ref": "docs/data/resource-evidence/stackkits-home-assistant-runtime/standard.json",
+                        "source": "measured"
+                      }
+                    }
+                  },
+                  "low": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 2,
+                      "minStorageGB": 10
+                    },
+                    "reservation": {
+                      "cpuCores": 0.05,
+                      "ramGB": 0.4375
+                    },
+                    "recommended": {
+                      "cpuCores": 0.25,
+                      "ramGB": 0.625
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "docs/data/resource-evidence/stackkits-home-assistant-runtime/low.json",
+                        "source": "measured"
+                      },
+                      "reservation": {
+                        "ref": "docs/data/resource-evidence/stackkits-home-assistant-runtime/low.json",
+                        "source": "measured"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "cpuCores": 0.05,
+                      "ramGB": 0.4375
+                    },
+                    "recommended": {
+                      "cpuCores": 0.25,
+                      "ramGB": 0.625
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "docs/data/resource-evidence/stackkits-home-assistant-runtime/standard.json",
+                        "source": "measured"
+                      },
+                      "reservation": {
+                        "ref": "docs/data/resource-evidence/stackkits-home-assistant-runtime/standard.json",
+                        "source": "measured"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "home-assistant-existing",
+            "name": "home-assistant-existing",
+            "modules": [
+              {
+                "id": "stackkits-home-assistant-existing-runtime",
+                "computeProfiles": [
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "standard": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "home-assistant-haos",
+            "name": "home-assistant-haos",
+            "modules": [
+              {
+                "id": "stackkits-home-assistant-haos-runtime",
+                "computeProfiles": [
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "standard": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready"
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "home-assistant-imported",
+            "name": "home-assistant-imported",
+            "modules": [
+              {
+                "id": "stackkits-home-assistant-imported-runtime",
+                "computeProfiles": [
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "standard": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready"
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "addOns": [
+          {
+            "id": "smart-home-esphome",
+            "defaultAlternative": "esphome",
+            "alternatives": [
+              {
+                "id": "esphome",
+                "name": "esphome",
+                "modules": [
+                  {
+                    "id": "stackkits-esphome-runtime",
+                    "computeProfiles": [
+                      "high",
+                      "standard"
+                    ],
+                    "computeProfileFacts": {
+                      "high": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.25
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      },
+                      "standard": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.25
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "smart-home-mqtt",
+            "defaultAlternative": "mosquitto",
+            "alternatives": [
+              {
+                "id": "mosquitto",
+                "name": "mosquitto",
+                "modules": [
+                  {
+                    "id": "stackkits-mosquitto-runtime",
+                    "computeProfiles": [
+                      "high",
+                      "standard"
+                    ],
+                    "computeProfileFacts": {
+                      "high": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.03125
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      },
+                      "standard": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.03125
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "smart-home-zigbee",
+            "defaultAlternative": "zigbee2mqtt",
+            "alternatives": [
+              {
+                "id": "zigbee2mqtt",
+                "name": "zigbee2mqtt",
+                "modules": [
+                  {
+                    "id": "stackkits-zigbee2mqtt-runtime",
+                    "computeProfiles": [
+                      "high",
+                      "standard"
+                    ],
+                    "computeProfileFacts": {
+                      "high": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.125
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      },
+                      "standard": {
+                        "maturity": "beta",
+                        "executable": true,
+                        "realization": "apply-ready",
+                        "hostFloor": {
+                          "minCpuCores": 2,
+                          "minRamGB": 4,
+                          "minStorageGB": 20
+                        },
+                        "reservation": {
+                          "ramGB": 0.125
+                        },
+                        "provenance": {
+                          "hostFloor": {
+                            "ref": "Kombify host floor support policy",
+                            "source": "policy"
+                          },
+                          "reservation": {
+                            "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                            "source": "policy"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "vault",
+        "title": "Password Vault",
+        "description": "Private password and secure-note vault with owner-controlled lifecycle and recovery.",
+        "components": [
+          {
+            "id": "passbolt",
+            "name": "Passbolt CE",
+            "role": "alternative",
+            "kind": "application",
+            "realization": "install"
+          },
+          {
+            "id": "vaultwarden",
+            "name": "Vaultwarden",
+            "role": "primary",
+            "kind": "application"
+          }
+        ],
+        "mainUseCase": {
+          "id": "vault",
+          "title": "Vault"
+        },
+        "computeTiers": {
+          "high": {
+            "included": true,
+            "functions": [
+              "password-manager",
+              "secure-notes",
+              "totp"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "vaultwarden",
+            "notes": [
+              "No extra vault functions on high until a graph substitution exists."
+            ]
+          },
+          "low": {
+            "included": true,
+            "functions": [
+              "password-manager",
+              "secure-notes",
+              "totp"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "vaultwarden",
+            "notes": [
+              "Always resident for unlock/sync; almost no idle CPU. Fits the low graph."
+            ]
+          },
+          "standard": {
+            "included": true,
+            "functions": [
+              "password-manager",
+              "secure-notes",
+              "totp"
+            ],
+            "load": {
+              "residency": "always-on",
+              "baseline": "idle-resident",
+              "burst": "interactive"
+            },
+            "moduleSlug": "vaultwarden"
+          }
+        },
+        "settings": [
+          {
+            "id": "open-signups",
+            "name": "Open sign-ups",
+            "kind": "toggle",
+            "group": "access",
+            "depth": "advanced",
+            "help": "Let people create their own vault account. Off means the owner invites them.",
+            "default": false,
+            "realization": "recorded"
+          }
+        ],
+        "docs": "/guides/stackkits/use-cases/vault",
+        "defaultAlternative": "vaultwarden",
+        "alternatives": [
+          {
+            "id": "passbolt",
+            "name": "passbolt",
+            "modules": [
+              {
+                "id": "stackkits-passbolt-runtime",
+                "computeProfiles": [
+                  "high",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 0.5
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "beta",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "ramGB": 0.5
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "reservation": {
+                        "ref": "Sum of pinned Compose component memoryReservation limits in foundation/architecture_v2_catalog.cue",
+                        "source": "policy"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "vaultwarden",
+            "name": "vaultwarden",
+            "modules": [
+              {
+                "id": "stackkits-vaultwarden-runtime",
+                "computeProfiles": [
+                  "high",
+                  "low",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "cpuCores": 0.05,
+                      "ramGB": 0.0625
+                    },
+                    "recommended": {
+                      "cpuCores": 0.25,
+                      "ramGB": 0.125
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "docs/data/resource-evidence/stackkits-vaultwarden-runtime/standard.json",
+                        "source": "measured"
+                      },
+                      "reservation": {
+                        "ref": "docs/data/resource-evidence/stackkits-vaultwarden-runtime/standard.json",
+                        "source": "measured"
+                      }
+                    }
+                  },
+                  "low": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 2,
+                      "minStorageGB": 10
+                    },
+                    "reservation": {
+                      "cpuCores": 0.05,
+                      "ramGB": 0.0625
+                    },
+                    "recommended": {
+                      "cpuCores": 0.25,
+                      "ramGB": 0.125
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "docs/data/resource-evidence/stackkits-vaultwarden-runtime/low.json",
+                        "source": "measured"
+                      },
+                      "reservation": {
+                        "ref": "docs/data/resource-evidence/stackkits-vaultwarden-runtime/low.json",
+                        "source": "measured"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "reservation": {
+                      "cpuCores": 0.05,
+                      "ramGB": 0.0625
+                    },
+                    "recommended": {
+                      "cpuCores": 0.25,
+                      "ramGB": 0.125
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "docs/data/resource-evidence/stackkits-vaultwarden-runtime/standard.json",
+                        "source": "measured"
+                      },
+                      "reservation": {
+                        "ref": "docs/data/resource-evidence/stackkits-vaultwarden-runtime/standard.json",
+                        "source": "measured"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "kitCores": [
+      {
+        "id": "basement-core",
+        "defaultAlternative": "standalone-compose",
+        "alternatives": [
+          {
+            "id": "standalone",
+            "name": "standalone",
+            "modules": [
+              {
+                "id": "stackkits-basement-core-runtime",
+                "computeProfiles": [
+                  "high",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "recommended": {
+                      "cpuCores": 4,
+                      "ramGB": 4,
+                      "storageGB": 20
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "Kombify recommended sizing policy",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "recommended": {
+                      "cpuCores": 4,
+                      "ramGB": 4,
+                      "storageGB": 20
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "Kombify recommended sizing policy",
+                        "source": "policy"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "standalone-compose",
+            "name": "standalone-compose",
+            "modules": [
+              {
+                "id": "stackkits-basement-core-lite-runtime",
+                "computeProfiles": [
+                  "high",
+                  "low",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 2,
+                      "minStorageGB": 10
+                    },
+                    "recommended": {
+                      "cpuCores": 2,
+                      "ramGB": 2,
+                      "storageGB": 10
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "Kombify recommended sizing policy",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "low": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 2,
+                      "minStorageGB": 10
+                    },
+                    "recommended": {
+                      "cpuCores": 2,
+                      "ramGB": 2,
+                      "storageGB": 10
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "Kombify recommended sizing policy",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 2,
+                      "minStorageGB": 10
+                    },
+                    "recommended": {
+                      "cpuCores": 2,
+                      "ramGB": 2,
+                      "storageGB": 10
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "Kombify recommended sizing policy",
+                        "source": "policy"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "standalone-lite",
+            "name": "standalone-lite",
+            "modules": [
+              {
+                "id": "stackkits-basement-core-lite-runtime",
+                "computeProfiles": [
+                  "high",
+                  "low",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 2,
+                      "minStorageGB": 10
+                    },
+                    "recommended": {
+                      "cpuCores": 2,
+                      "ramGB": 2,
+                      "storageGB": 10
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "Kombify recommended sizing policy",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "low": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 2,
+                      "minStorageGB": 10
+                    },
+                    "recommended": {
+                      "cpuCores": 2,
+                      "ramGB": 2,
+                      "storageGB": 10
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "Kombify recommended sizing policy",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 2,
+                      "minStorageGB": 10
+                    },
+                    "recommended": {
+                      "cpuCores": 2,
+                      "ramGB": 2,
+                      "storageGB": 10
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "Kombify recommended sizing policy",
+                        "source": "policy"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "cloud-core",
+        "defaultAlternative": "standalone-compose",
+        "alternatives": [
+          {
+            "id": "standalone",
+            "name": "standalone",
+            "modules": [
+              {
+                "id": "stackkits-cloud-core-runtime",
+                "computeProfiles": [
+                  "high",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "recommended": {
+                      "cpuCores": 4,
+                      "ramGB": 4,
+                      "storageGB": 20
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "Kombify recommended sizing policy",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "recommended": {
+                      "cpuCores": 4,
+                      "ramGB": 4,
+                      "storageGB": 20
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "Kombify recommended sizing policy",
+                        "source": "policy"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "id": "standalone-compose",
+            "name": "standalone-compose",
+            "modules": [
+              {
+                "id": "stackkits-cloud-core-standalone-runtime",
+                "computeProfiles": [
+                  "high",
+                  "standard"
+                ],
+                "computeProfileFacts": {
+                  "high": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "recommended": {
+                      "cpuCores": 4,
+                      "ramGB": 4,
+                      "storageGB": 20
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "Kombify recommended sizing policy",
+                        "source": "policy"
+                      }
+                    }
+                  },
+                  "standard": {
+                    "maturity": "supported",
+                    "executable": true,
+                    "realization": "apply-ready",
+                    "hostFloor": {
+                      "minCpuCores": 2,
+                      "minRamGB": 4,
+                      "minStorageGB": 20
+                    },
+                    "recommended": {
+                      "cpuCores": 4,
+                      "ramGB": 4,
+                      "storageGB": 20
+                    },
+                    "provenance": {
+                      "hostFloor": {
+                        "ref": "Kombify host floor support policy",
+                        "source": "policy"
+                      },
+                      "recommended": {
+                        "ref": "Kombify recommended sizing policy",
+                        "source": "policy"
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "contentDigest": "sha256:f52d0f4aecd367aa55588dedc311315dd657143dce72349db52e6733241c1856"
+}
