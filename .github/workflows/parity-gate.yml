@@ -11,6 +11,10 @@ on:
       - "techstack/reference/**"
       - "data/stackkits/**"
 
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('parity-gate-pr-{0}', github.event.pull_request.number) || format('parity-gate-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   check-generated-ownership:
     if: github.event_name != 'pull_request' || !github.event.pull_request.draft

@@ -31,6 +31,10 @@ permissions:
   actions: write
   contents: read
 
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('delivery-pr-{0}', github.event.pull_request.number) || format('delivery-{0}', github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   delivery:
     if: >-
