@@ -197,26 +197,68 @@ async function runProcess(command, args, cwd) {
   });
 }
 
+// A conditional GET that answers 304 is not charged to the REST rate limit, so
+// polling an unchanged run costs nothing against the shared token.
+const conditionalReads = new Map();
+
+// A request that exceeded the primary or secondary rate limit was not
+// executed, so waiting for the reset and repeating it is safe. Anything else
+// (including an unreadable reset) fails as before.
+const RATE_LIMIT_MAX_WAIT_MS = 15 * 60 * 1000;
+
+function rateLimitWaitMs(response, body, attempt) {
+  const header = (name) => response.headers?.get?.(name) ?? null;
+  const retryAfter = header("retry-after");
+  const exhausted = header("x-ratelimit-remaining") === "0";
+  const limited =
+    response.status === 429 ||
+    (response.status === 403 && (exhausted || retryAfter !== null || /rate limit/i.test(body)));
+  if (!limited) return null;
+  if (retryAfter !== null) return Number(retryAfter) * 1000;
+  const reset = Number(header("x-ratelimit-reset"));
+  if (exhausted && reset > 0) return Math.max(0, reset * 1000 - Date.now()) + 1000;
+  return 60_000 * 2 ** (attempt - 1);
+}
+
 async function githubRequest(token, url, options = {}) {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      accept: "application/vnd.github+json",
-      authorization: `Bearer ${token}`,
-      "content-type": "application/json",
-      "user-agent": "kombify-delivery-v2",
-      "x-github-api-version": "2022-11-28",
-      ...options.headers,
-    },
-  });
-  if (!response.ok) {
-    const body = await response.text();
+  const method = options.method ?? "GET";
+  const cached = method === "GET" ? conditionalReads.get(url) : undefined;
+  let waited = 0;
+  for (let attempt = 1; ; attempt += 1) {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        accept: "application/vnd.github+json",
+        authorization: `Bearer ${token}`,
+        "content-type": "application/json",
+        "user-agent": "kombify-delivery-v2",
+        "x-github-api-version": "2022-11-28",
+        ...(cached ? { "if-none-match": cached.etag } : {}),
+        ...options.headers,
+      },
+    });
+    if (response.status === 304 && cached) return cached.body;
+    if (response.ok) {
+      if (response.status === 204) return null;
+      const body = await response.json();
+      const etag = method === "GET" ? response.headers?.get?.("etag") : null;
+      if (etag) conditionalReads.set(url, { etag, body });
+      return body;
+    }
+    const text = await response.text();
+    const waitMs = rateLimitWaitMs(response, text, attempt);
+    if (waitMs !== null && Number.isFinite(waitMs) && waited + waitMs <= RATE_LIMIT_MAX_WAIT_MS) {
+      process.stdout.write(
+        `GitHub API ${method} ${url} is rate limited (${response.status}); waiting ${Math.ceil(waitMs / 1000)}s for the limit to reset instead of failing the delivery.\n`,
+      );
+      waited += waitMs;
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+      continue;
+    }
     throw new Error(
-      `GitHub API ${options.method ?? "GET"} ${url} failed (${response.status}): ${body.slice(0, 500)}`,
+      `GitHub API ${method} ${url} failed (${response.status}${waitMs !== null ? ", rate limited beyond the wait budget" : ""}): ${text.slice(0, 500)}`,
     );
   }
-  if (response.status === 204) return null;
-  return response.json();
 }
 
 export async function dispatchWorkflow(step, variables) {
