@@ -47,16 +47,45 @@ Binding; `kombify-fast-development` holds the detail.
   one designated migrator; other clones run `beads:bootstrap`
   ([standard](https://github.com/KombiverseLabs/kombify-workspace/blob/main/BEADS-REMOTE-WRITE-STANDARD.md)).
 
+## Public Beta Drift Guard
+
+- Scope fence first: before feature work, name the slice and its objective;
+  work outside it waits. A blocked slice is recorded with evidence, then the
+  next slice in scope starts; never substitute other work.
+- No silent fallback: a missing prerequisite fails closed with a clear error.
+- "supported" in a catalog or matrix needs apply evidence at the current pin;
+  a release or repin is not proof.
+- Keep `main` green; regenerate generated files with repository tooling.
+- A late or missing scheduled job is reported as a blocker; never dispatch
+  workflows, add triggers or work around missing permissions.
+- Every bundled binary or provider has a `THIRD-PARTY-NOTICES.md` entry.
+- Keep the tracker and the execution log current with each slice.
+- Consolidate PRs per phase (one commit per slice) and minimise CI runs: run
+  the affected gate locally, push finished work once, no empty commits.
+
 ## Git And Completion
 
 - Track the task in Beads; branch from `origin/main` in your own worktree and
   stage only your paths.
-- Run the affected gate, then commit, push and open a draft PR (CI skips
-  drafts); mark it ready when the slice is complete. Dependent slices form one
-  stack (`gh stack submit`; CI verifies only its top) that merges whole with
-  `gh stack merge`; heavy lanes start by label or dispatch. Squash-merge once
-  mergeable and green; never park a mergeable PR. Commit as the GitHub
-  identity your token acts as.
+- Collect and review parallel changes locally before publishing the finished
+  batch. Use one PR unless dependent slices benefit from separate reviews;
+  then use a native stack (`gh stack submit`) and merge it whole with
+  `gh stack merge` where possible.
+  Commit locally while iterating; push only finished work. Run the affected
+  gate, then publish the package or batch once, ready for review
+  (`gh pr create` without `--draft`, `gh stack submit --auto --open`): an
+  opened ready PR gets its required evidence without a close/reopen. Drafts
+  are only for explicitly requested early review. Every generated
+  `merge_group` still needs its own checks. Heavy lanes start by label or
+  dispatch. Queue the squash-merge yourself (`gh pr merge --squash --auto`)
+  and continue with the next package instead of polling; settle merge, DIRTY
+  and red states at the next checkpoint. Never park a mergeable PR or hand
+  the merge to the owner. If a permission blocks it, name the block and ask
+  for that permission. Commit as the GitHub identity your token acts as.
+- Batch release and activation: merging a release-preparation PR and
+  dispatching Delivery happen at an integration checkpoint for the
+  completed batch, not per package. Start the next package while Delivery
+  runs; read back live state at the checkpoint.
 - A merge is not live: ship only through the `kombify-ship` skill
   (`kombify-workspace/.agents/skills/kombify-ship/SKILL.md`).
 - Close Beads issues after the merge SHA exists; remove only your merged
