@@ -1,0 +1,174 @@
+---
+title: "stackkit network"
+description: "Move this server to another network: status, re-bind, WiFi and watcher"
+sidebarTitle: "network"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:8711ca83672be5ace8615aac1267a84820ffc62fbfcb23d720a560268b901a25"
+source_hash: "8808f0b70fa55b18383455f94ff7eed1b8051f87"
+---
+Move this server to another network: status, re-bind, WiFi and watcher.
+
+Operations for carrying this server from one network to another.
+
+Before the move, stage the destination WiFi (stackkit network wifi add). After the move the server gets a new address from the destination DHCP; the network watcher (stackkit network watch enable, installed by stackkit apply) notices that the recorded site address is stale and re-binds the stack by itself.
+
+```bash
+stackkit network [flags]
+```
+
+Subcommands: [`stackkit network rebind`](#stackkit-network-rebind), [`stackkit network status`](#stackkit-network-status), [`stackkit network watch`](#stackkit-network-watch), [`stackkit network wifi`](#stackkit-network-wifi)
+
+## stackkit network rebind
+
+Re-bind the stack to this server's new network address.
+
+After the server moved to another network, re-issue the signed LAN resolver record for the new address and regenerate and apply the stack so listeners bind to it. Nothing happens when the server did not move.
+
+Owner identity, secrets, certificate authorities and data are not touched; the previous resolver record is kept under .stackkit/custody/backups. LAN clients and the router's DNS must point at the new resolver address afterwards.
+
+```bash
+stackkit network rebind [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--auto` | bool | — | Unattended run for the network watcher: quiet when nothing moved, one run at a time, backs off after a failure |
+| `--json` | bool | — | Emit the result as JSON |
+| `--no-apply` | bool | — | Re-issue the resolver record only; do not regenerate and apply |
+| `--yes` | bool | — | Re-bind without asking for confirmation |
+
+**Examples**
+
+```bash
+stackkit network rebind --yes
+stackkit network rebind --yes --json
+stackkit network rebind --no-apply
+```
+
+## stackkit network status
+
+Show whether this server moved to another network.
+
+Compare the address this server has now with the address recorded in the LAN resolver custody and in .stackkit/inventory.yaml. The verdict is "in-place" when they match, "moved" when a recorded address is stale, and "unknown" when there is nothing to compare. The command always exits 0.
+
+```bash
+stackkit network status [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit the observation as JSON |
+
+**Examples**
+
+```bash
+stackkit network status
+stackkit network status --json
+```
+
+## stackkit network watch
+
+Re-bind automatically after the server moved (systemd timer).
+
+Install a systemd timer that runs "stackkit network rebind `--yes` `--auto`" every minute and shortly after boot. It is silent while the network is unchanged, runs one rebind at a time and waits five minutes after a failed attempt. stackkit apply enables it on systemd hosts; set STACKKIT_NETWORK_WATCH=off or run "stackkit network watch disable" to opt out.
+
+```bash
+stackkit network watch [flags]
+```
+
+Subcommands: [`stackkit network watch disable`](#stackkit-network-watch-disable), [`stackkit network watch enable`](#stackkit-network-watch-enable), [`stackkit network watch status`](#stackkit-network-watch-status)
+
+### stackkit network watch disable
+
+Stop and remove the network watcher timer.
+
+```bash
+stackkit network watch disable [flags]
+```
+
+### stackkit network watch enable
+
+Install and start the network watcher timer.
+
+```bash
+stackkit network watch enable [flags]
+```
+
+### stackkit network watch status
+
+Show whether the network watcher timer is installed and running.
+
+```bash
+stackkit network watch status [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit the status as JSON |
+
+## stackkit network wifi
+
+Pre-stage the destination WiFi before moving the server.
+
+Stage WiFi networks in the host's own network configuration so the server joins the destination WiFi by itself after the move. NetworkManager is used when it is running, otherwise netplan. The wired DHCP connection is not touched and passphrases are written only to the system network configuration (root only, mode 0600); they are never printed or stored by StackKits.
+
+```bash
+stackkit network wifi [flags]
+```
+
+Subcommands: [`stackkit network wifi add`](#stackkit-network-wifi-add), [`stackkit network wifi list`](#stackkit-network-wifi-list), [`stackkit network wifi remove`](#stackkit-network-wifi-remove)
+
+### stackkit network wifi add
+
+Stage a WiFi network that is joined automatically when in range.
+
+```bash
+stackkit network wifi add [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--apply-now` | bool | — | Apply the change immediately (netplan apply) instead of at the next boot |
+| `--force` | bool | — | Stage the network even when this host has no wireless interface |
+| `--open` | bool | — | Stage a network without a passphrase |
+| `--password` | string | — | Passphrase (visible in the process list; prefer `--password-stdin`) |
+| `--password-stdin` | bool | — | Read the passphrase from the first line of stdin |
+| `--priority` | int | — | Connection priority; higher wins (NetworkManager only) |
+| `--ssid` | string | — | Name of the WiFi network |
+
+**Examples**
+
+```bash
+# Read the passphrase from stdin so it never appears in the process list
+printf '%s' "$WIFI_PASSPHRASE" | sudo stackkit network wifi add --ssid OfficeNet --password-stdin
+
+# Prefer this network over others staged on the host
+sudo stackkit network wifi add --ssid OfficeNet --password-stdin --priority 20 < passphrase.txt
+```
+
+### stackkit network wifi list
+
+List the staged WiFi networks (never their passphrases).
+
+```bash
+stackkit network wifi list [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit the list as JSON |
+
+### stackkit network wifi remove
+
+Remove a staged WiFi network.
+
+```bash
+stackkit network wifi remove [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--apply-now` | bool | — | Apply the change immediately (netplan apply) |
+| `--ssid` | string | — | Name of the WiFi network to remove |
+

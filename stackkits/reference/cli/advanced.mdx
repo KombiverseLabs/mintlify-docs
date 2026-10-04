@@ -4,8 +4,8 @@ description: "Manage offline-authorized Advanced lifecycle operations"
 sidebarTitle: "advanced"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:b23b624f33ce7dfbb4202dd60bf7f3721c24fa0d354ce5c22d87d56199b12ba9"
-source_hash: "47950d9b1fad42a87ba4d611f330ceb9e064e5cb"
+content_hash: "sha256:8711ca83672be5ace8615aac1267a84820ffc62fbfcb23d720a560268b901a25"
+source_hash: "8808f0b70fa55b18383455f94ff7eed1b8051f87"
 ---
 Manage offline-authorized Advanced lifecycle operations.
 
@@ -13,7 +13,7 @@ Manage offline-authorized Advanced lifecycle operations.
 stackkit advanced [flags]
 ```
 
-Subcommands: [`stackkit advanced change-set`](#stackkit-advanced-change-set), [`stackkit advanced restore-drill`](#stackkit-advanced-restore-drill), [`stackkit advanced rollback`](#stackkit-advanced-rollback), [`stackkit advanced trust`](#stackkit-advanced-trust)
+Subcommands: [`stackkit advanced change-set`](#stackkit-advanced-change-set), [`stackkit advanced origin-certificate`](#stackkit-advanced-origin-certificate), [`stackkit advanced restore-drill`](#stackkit-advanced-restore-drill), [`stackkit advanced rollback`](#stackkit-advanced-rollback), [`stackkit advanced trust`](#stackkit-advanced-trust)
 
 ## stackkit advanced change-set
 
@@ -53,6 +53,44 @@ stackkit advanced change-set create [flags]
 | --- | --- | --- | --- |
 | `--candidate-spec` | string | — | Path to the candidate StackSpec v2 using generation.target=terramate |
 | `--capability` | string | — | Path to a canonical stackkit.advanced-capability/v1 file |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+
+## stackkit advanced origin-certificate
+
+Manage the Cloudflare Origin CA certificate of managed kombify.me origins.
+
+```bash
+stackkit advanced origin-certificate [flags]
+```
+
+Subcommands: [`stackkit advanced origin-certificate install`](#stackkit-advanced-origin-certificate-install), [`stackkit advanced origin-certificate request`](#stackkit-advanced-origin-certificate-request)
+
+### stackkit advanced origin-certificate install
+
+Verify and install the delivered origin certificate.
+
+```bash
+stackkit advanced origin-certificate install [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--capability` | string | — | Path to a canonical stackkit.advanced-capability/v1 file that allows the origin-certificate operation |
+| `--certificate-file` | string | — | Path to the PEM certificate Cloudflare issued for the pending CSR |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+
+### stackkit advanced origin-certificate request
+
+Generate the node-local origin key pair and print its CSR.
+
+```bash
+stackkit advanced origin-certificate request [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--capability` | string | — | Path to a canonical stackkit.advanced-capability/v1 file that allows the origin-certificate operation |
+| `--hosts` | string | — | Comma-separated managed kombify.me hostnames the certificate covers |
 | `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
 
 ## stackkit advanced restore-drill
