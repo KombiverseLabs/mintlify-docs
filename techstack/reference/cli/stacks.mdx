@@ -4,11 +4,11 @@ description: "Generated reference for the techstack api stacks commands"
 sidebarTitle: "stacks"
 generated: true
 generated_by: "render-api-surface-reference"
-release: "v0.32.8"
-content_hash: "sha256:a1f98a90541e05b5334ee62c2cbcc732dff6b859fef9b203110ec8a4305e5a82"
-source_hash: "4c7d219a5d56d94c5e817e28e0ca5be6dfa98d59"
+release: "v0.39.0"
+content_hash: "sha256:bf842a128153ff0edff706c0f43c62e0ebfa29a7c220fdb34bbb9f5578fcb3a7"
+source_hash: "49677b729cb9818d81aa9e3aa3acabe9a65d84eb"
 ---
-<Note>Generated from the Techstack v0.32.8 release (source `4c7d219a5d56`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+<Note>Generated from the Techstack v0.39.0 release (source `49677b729cb9`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
 
 ## techstack api stacks create
 
@@ -492,7 +492,10 @@ techstack api stacks retry-rollout <stack-id> [flags]
 | Argument | Type | Description |
 | --- | --- | --- |
 | `<stack-id>` | string | **Required.** Stack ID. |
+| `--candidate-spec` | object | Optional canonical StackSpec repairing missing route, access and data dependencies of already admitted modules. The pinned CLI validates it; revision CAS and candidate digest bind retries. Applied installations must use their existing change-set authority. |
+| `--current-spec-hash` | string | Normalized current node intent hash for an exact failed INIT whose immutable retry lineage proves a prior failed APPLY on this runtime. Required only for that partial INIT recovery; rejected on other paths. This is solely the CLI atomic CAS precondition, never authorization. Obtain through the pinned CLI resolve on the same current canonical node document. The durable receipt seals this value and lineage against changed replay. |
 | `--lease-id` | string | **Required.** Exact active managed foundation lease bound to the failed job. |
+| `--owner-approved` | boolean | Required true when supplying a canonical initial-rollout repair candidate. |
 | `--source-job-id` | string | **Required.** Exact failed deploy job used as immutable retry evidence. |
 | `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
 

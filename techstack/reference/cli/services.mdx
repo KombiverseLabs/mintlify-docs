@@ -4,11 +4,37 @@ description: "Generated reference for the techstack api services commands"
 sidebarTitle: "services"
 generated: true
 generated_by: "render-api-surface-reference"
-release: "v0.32.8"
-content_hash: "sha256:a1f98a90541e05b5334ee62c2cbcc732dff6b859fef9b203110ec8a4305e5a82"
-source_hash: "4c7d219a5d56d94c5e817e28e0ca5be6dfa98d59"
+release: "v0.39.0"
+content_hash: "sha256:bf842a128153ff0edff706c0f43c62e0ebfa29a7c220fdb34bbb9f5578fcb3a7"
+source_hash: "49677b729cb9818d81aa9e3aa3acabe9a65d84eb"
 ---
-<Note>Generated from the Techstack v0.32.8 release (source `4c7d219a5d56`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+<Note>Generated from the Techstack v0.39.0 release (source `49677b729cb9`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api services execute-application-adoption
+
+Execute the exact reviewed source plan with explicit Owner approval.
+
+Revalidates the retained digest, source identity, revision and release. Only an authenticated pinned-CLI custody receipt establishes membership. Accounts, configuration and persistent data are preserved; no new runtime is created. Moving to another Node and generic adoption are not supported.
+
+```bash
+techstack api services execute-application-adoption [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/adoption-plans/{planId}/execute` |
+| Changes state | Yes |
+| MCP tool | `execute_application_adoption` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+| `--plan-id` | string | **Required.** |
+| `--expected-inventory-revision` | integer | **Required.** |
+| `--mode` | string | One of `adopt_in_place`. |
+| `--owner-approved` | boolean | Default `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
 
 ## techstack api services get
 
@@ -67,6 +93,113 @@ techstack api services logs <service-id> [flags]
 | `--limit` | integer | Default `100`. |
 | `--cursor` | string | — |
 
+## techstack api services metrics
+
+Read measured resource metrics for an owned service.
+
+Uses the existing Guard telemetry query backend and fixes the tenant, canonical server and container selectors from authorized service inventory. An empty vector means no resource metric was measured.
+
+```bash
+techstack api services metrics [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/metrics` |
+| Changes state | No |
+| MCP tool | `get_service_metrics` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** |
+
+## techstack api services prepare-application-adoption
+
+Assess one exact existing Home Assistant Container for in-place adoption.
+
+Retains the source-bound assessment in the existing durable job store. Requires a connected Guard and the exact capable published CLI release. This read-only operation does not establish Stacked membership.
+
+```bash
+techstack api services prepare-application-adoption [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/adoption-plans` |
+| Changes state | Yes |
+| MCP tool | `prepare_application_adoption` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+| `--expected-inventory-revision` | integer | **Required.** |
+| `--mode` | string | One of `adopt_in_place`. |
+| `--owner-approved` | boolean | Default `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api services read-application-adoption-plan
+
+Read the retained application assessment and durable progress.
+
+```bash
+techstack api services read-application-adoption-plan [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/adoption-plans/{planId}` |
+| Changes state | No |
+| MCP tool | `read_application_adoption_plan` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+| `--plan-id` | string | **Required.** |
+
+## techstack api services read-application-connector
+
+Read node-owned connector status and current published transport admission.
+
+Returns a secret-free projection. An unavailable supporting catalog remains nondispatchable SourcePreview; stale evidence on a supporting pin requires current read-only verification. Dispatchability additionally requires current canonical host-key, node and lease authority.
+
+```bash
+techstack api services read-application-connector [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/connector` |
+| Changes state | No |
+| MCP tool | `read_application_connector` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+
+## techstack api services release-application-lifecycle
+
+Release an adopted lifecycle binding without deleting or stopping its runtime.
+
+```bash
+techstack api services release-application-lifecycle [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/release` |
+| Changes state | Yes |
+| MCP tool | `release_application_lifecycle` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+| `--expected-inventory-revision` | integer | **Required.** |
+| `--mode` | string | One of `adopt_in_place`. |
+| `--owner-approved` | boolean | Default `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
 ## techstack api services run-action
 
 Queue an owner-authorized StackKits service action.
@@ -87,3 +220,30 @@ techstack api services run-action <service-id> [flags]
 | --- | --- | --- |
 | `<service-id>` | string | **Required.** Canonical service runtime ID. |
 | `--body` | json | **Required.** JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api services setup-application-connector
+
+Ensure or revoke one declared owned Home Assistant connector on its node.
+
+Requires fresh backend ownership, positive operate authority, exact current inventory and Owner approval. Transports only closed correlation metadata through Guard to the published pinned CLI, whose local signedApply and Owner setup authority remain mandatory. Stores pre-send durable intent; unknown acknowledgement only reconciles the original operation read-only. Current v0.51.8 lacks the supporting catalog and returns nondispatchable SourcePreview. Credentials stay in node custody.
+
+```bash
+techstack api services setup-application-connector [flags]
+```
+
+<Warning>Requires confirmation: This operation issues or revokes the reviewed node-owned Home Assistant connector credential for this exact service. Pass `--yes` or answer the prompt; a non-interactive run without `--yes` stops before any request with exit code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/connector` |
+| Changes state | Yes |
+| MCP tool | `setup_application_connector` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+| `--action` | string | **Required.** One of `ensure`, `revoke`. |
+| `--expected-inventory-revision` | integer | **Required.** |
+| `--lifespan-days` | integer | **Required.** |
+| `--owner-approved` | boolean | **Required.** One of `true`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
