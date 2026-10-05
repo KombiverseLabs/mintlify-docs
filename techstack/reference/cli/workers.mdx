@@ -4,11 +4,11 @@ description: "Generated reference for the techstack api workers commands"
 sidebarTitle: "workers"
 generated: true
 generated_by: "render-api-surface-reference"
-release: "v0.32.8"
-content_hash: "sha256:a1f98a90541e05b5334ee62c2cbcc732dff6b859fef9b203110ec8a4305e5a82"
-source_hash: "4c7d219a5d56d94c5e817e28e0ca5be6dfa98d59"
+release: "v0.39.0"
+content_hash: "sha256:bf842a128153ff0edff706c0f43c62e0ebfa29a7c220fdb34bbb9f5578fcb3a7"
+source_hash: "49677b729cb9818d81aa9e3aa3acabe9a65d84eb"
 ---
-<Note>Generated from the Techstack v0.32.8 release (source `4c7d219a5d56`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+<Note>Generated from the Techstack v0.39.0 release (source `49677b729cb9`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
 
 ## techstack api workers approve
 
@@ -28,6 +28,86 @@ techstack api workers approve <id> [flags]
 | --- | --- | --- |
 | `<id>` | string | **Required.** Resource ID. |
 
+## techstack api workers identity upgrade approve
+
+Approve the key a legacy server proposed.
+
+Binds the pending key named by `key_thumbprint`, which makes the worker key-bound (bearer-only requests are denied afterwards). Requires the owner and a fresh multi-factor sign-in (at most 300 seconds old). The approving subject and time are recorded with the identity and logged. 409 `identity_upgrade_not_pending` when no unexpired pending key has that fingerprint.
+
+```bash
+techstack api workers identity upgrade approve <id> [flags]
+```
+
+<Warning>Requires confirmation: This operation decides which key may command the server; approve only a key whose fingerprint the Guard logs on the server. Pass `--yes` or answer the prompt; a non-interactive run without `--yes` stops before any request with exit code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/identity/upgrade/approve` |
+| Changes state | Yes |
+| MCP tool | `approve_worker_identity_upgrade` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<id>` | string | **Required.** Resource ID. |
+| `--key-thumbprint` | string | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api workers identity upgrade reject
+
+Discard the key a legacy server proposed.
+
+The owner's reset when the pending key is not the server's own: the proposal is discarded and must be made again. Rotating the server credential ends the holder's access to the bind endpoint.
+
+```bash
+techstack api workers identity upgrade reject <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/identity/upgrade/reject` |
+| Changes state | Yes |
+| MCP tool | None |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<id>` | string | **Required.** Resource ID. |
+
+## techstack api workers identity upgrade-status
+
+Show whether a server still needs its identity key approved.
+
+For the owner of the worker. `identity_binding=legacy_bearer` with `code=guard_identity_upgrade_required` means the server authenticates with its bearer credential alone and is observe-only; `pending` carries the fingerprint of the key the server proposed, which the owner compares with the fingerprint the Guard logs on the server. A worker of another tenant or owner is 404.
+
+```bash
+techstack api workers identity upgrade-status <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/{id}/identity/upgrade` |
+| Changes state | No |
+| MCP tool | `get_worker_identity_upgrade` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<id>` | string | **Required.** Resource ID. |
+
+## techstack api workers identity upgrades
+
+List the owner's servers that wait for an identity key approval.
+
+For the owner. Each entry is a server of theirs that proposed a key and is observe-only until that exact key is approved with `approveWorkerIdentityUpgrade` (fresh multi-factor sign-in required). Entries carry the hostname and the key fingerprint to compare with the one the Guard logs on the server. Listing grants nothing.
+
+```bash
+techstack api workers identity upgrades [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/identity-upgrades` |
+| Changes state | No |
+| MCP tool | `list_worker_identity_upgrades` |
+
 ## techstack api workers list
 
 List registered workers (filtered by owner).
@@ -46,6 +126,53 @@ techstack api workers list [flags]
 | --- | --- | --- |
 | `--page` | integer | Page number (default 1). |
 | `--per-page` | integer | Items per page (default 20, max 100). |
+
+## techstack api workers outcomes list
+
+List the unresolved operation outcomes of one kombify Guard.
+
+Lists the operations of an owned worker whose outcome is unknown: the kombify Guard recorded that the effect may or may not have happened and no observation settled it. Each one fences further changes on the server. `state` is `reconciling` while the Guard still tries to settle it and `needs_operator` once it stayed unresolved past the configured time (`TECHSTACK_GUARD_OUTCOME_NEEDS_OPERATOR_AFTER`, default 30 minutes). The time only changes how the outcome is shown; it never releases the fence. Another tenant's or owner's worker is 404.
+
+```bash
+techstack api workers outcomes list <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/{id}/outcomes` |
+| Changes state | No |
+| MCP tool | `list_guard_unresolved_outcomes` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<id>` | string | **Required.** Resource ID. |
+
+## techstack api workers outcomes resolve
+
+Release an unresolved kombify Guard operation outcome.
+
+Commits an append-only operator resolution revision for an operation whose outcome is unknown and releases the worker's fence. `disposition` is `verified_applied` (the effect is in place), `verified_not_applied` (nothing happened) or `accept_unknown` (release without a verified outcome); `note` records what was verified. The actor is the authenticated subject and is recorded with the revision; a Guard cannot commit these dispositions. A fresh multi-factor sign-in (at most 300 seconds old) is required. `expected_revision` must be the revision the list returned, otherwise 409 `outcome_revision_stale`. The body is decoded strictly: exact keys, no unknown fields.
+
+```bash
+techstack api workers outcomes resolve <id> <command-id> [flags]
+```
+
+<Warning>Requires confirmation: This operation releases the fence of an operation whose outcome was never settled, so conflicting changes may run against the server. Pass `--yes` or answer the prompt; a non-interactive run without `--yes` stops before any request with exit code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/outcomes/{command_id}/resolve` |
+| Changes state | Yes |
+| MCP tool | None |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<id>` | string | **Required.** Resource ID. |
+| `<command-id>` | string | **Required.** |
+| `--disposition` | string | **Required.** One of `verified_applied`, `verified_not_applied`, `accept_unknown`. |
+| `--expected-revision` | integer | **Required.** |
+| `--note` | string | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
 
 ## techstack api workers prechecks list
 
