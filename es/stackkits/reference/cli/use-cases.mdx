@@ -9,7 +9,28 @@ Selecciona los casos de uso opcionales del kit.
 stackkit use-cases [flags]
 ```
 
-Subcomandos: [`stackkit use-cases pick`](#stackkit-use-cases-pick)
+Subcomandos: [`stackkit use-cases add`](#stackkit-use-cases-add), [`stackkit use-cases pick`](#stackkit-use-cases-pick)
+
+## stackkit use-cases add
+
+Añade un caso de uso del catálogo a una instalación independiente existente.
+
+Añade un caso de uso con los valores predeterminados de alternativa y perfil de módulo que CUE define para el kit instalado. Conserva los workloads, rutas, ubicación y almacenamiento existentes. Persiste el candidato mediante el hash de la especificación actual y materializa solo los slots locales de secretos del caso de uso elegido. Reutiliza la custodia existente. No despliega servicios; genera y aplica la intención actualizada mediante el ciclo de vida normal. Requiere stackkit/v2alpha2 nativo y un único nodo/site independiente.
+
+```bash
+stackkit use-cases add <slug> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--expected-spec-hash` | string | — | Exige este hash canónico de la especificación actual; si se omite, usa el hash leído antes de elaborar el cambio |
+
+**Ejemplos**
+
+```bash
+stackkit use-cases add mail
+stackkit use-cases add mail --expected-spec-hash sha256:<current-hash>
+```
 
 ## stackkit use-cases pick
 

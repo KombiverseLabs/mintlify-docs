@@ -1,0 +1,169 @@
+---
+title: "stackkit network"
+description: "Traslada este servidor a otra red: estado, revinculación, WiFi y supervisión"
+sidebarTitle: "network"
+---
+Traslada este servidor a otra red: estado, revinculación, WiFi y supervisión.
+
+Operaciones para trasladar este servidor de una red a otra.
+
+Antes del traslado, prepara el WiFi de destino (stackkit network wifi add). Después, el servidor recibe una dirección nueva del DHCP de destino; el supervisor de red (stackkit network watch enable, instalado por stackkit apply) detecta que la dirección registrada del site está obsoleta y revincula el stack automáticamente.
+
+```bash
+stackkit network [flags]
+```
+
+Subcomandos: [`stackkit network rebind`](#stackkit-network-rebind), [`stackkit network status`](#stackkit-network-status), [`stackkit network watch`](#stackkit-network-watch), [`stackkit network wifi`](#stackkit-network-wifi)
+
+## stackkit network rebind
+
+Revincula el stack a la nueva dirección de red de este servidor.
+
+Después de trasladar el servidor a otra red, vuelve a emitir el registro firmado del resolver LAN para la dirección nueva y regenera y aplica el stack para que sus listeners se vinculen a ella. Si el servidor no se ha trasladado, no hace nada.
+
+No modifica la identidad del propietario, los secretos, las autoridades certificadoras ni los datos; conserva el registro anterior del resolver en .stackkit/custody/backups. Los clientes LAN y el DNS del router deben apuntar después a la nueva dirección del resolver.
+
+```bash
+stackkit network rebind [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--auto` | bool | — | Ejecución desatendida del supervisor de red: silenciosa si no hubo traslado, una ejecución a la vez y espera tras un fallo |
+| `--json` | bool | — | Emite el resultado como JSON |
+| `--no-apply` | bool | — | Solo vuelve a emitir el registro del resolver; no regenera ni aplica |
+| `--yes` | bool | — | Revincula sin pedir confirmación |
+
+**Ejemplos**
+
+```bash
+stackkit network rebind --yes
+stackkit network rebind --yes --json
+stackkit network rebind --no-apply
+```
+
+## stackkit network status
+
+Muestra si este servidor se ha trasladado a otra red.
+
+Compara la dirección actual del servidor con la registrada en la custodia del resolver LAN y en .stackkit/inventory.yaml. El resultado es "in-place" si coinciden, "moved" si una dirección registrada está obsoleta y "unknown" si no hay nada que comparar. El comando siempre termina con código 0.
+
+```bash
+stackkit network status [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite la observación como JSON |
+
+**Ejemplos**
+
+```bash
+stackkit network status
+stackkit network status --json
+```
+
+## stackkit network watch
+
+Revincula automáticamente después del traslado del servidor (temporizador systemd).
+
+Instala un temporizador systemd que ejecuta "stackkit network rebind `--yes` `--auto`" cada minuto y poco después del arranque. Permanece silencioso mientras la red no cambie, ejecuta una revinculación a la vez y espera cinco minutos tras un intento fallido. stackkit apply lo activa en hosts systemd; establece STACKKIT_NETWORK_WATCH=off o ejecuta "stackkit network watch disable" para desactivarlo.
+
+```bash
+stackkit network watch [flags]
+```
+
+Subcomandos: [`stackkit network watch disable`](#stackkit-network-watch-disable), [`stackkit network watch enable`](#stackkit-network-watch-enable), [`stackkit network watch status`](#stackkit-network-watch-status)
+
+### stackkit network watch disable
+
+Detiene y elimina el temporizador del supervisor de red.
+
+```bash
+stackkit network watch disable [flags]
+```
+
+### stackkit network watch enable
+
+Instala e inicia el temporizador del supervisor de red.
+
+```bash
+stackkit network watch enable [flags]
+```
+
+### stackkit network watch status
+
+Muestra si el temporizador del supervisor de red está instalado y en ejecución.
+
+```bash
+stackkit network watch status [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite el estado como JSON |
+
+## stackkit network wifi
+
+Prepara el WiFi de destino antes de trasladar el servidor.
+
+Prepara redes WiFi en la configuración de red del propio host para que el servidor se conecte por sí mismo al WiFi de destino tras el traslado. Usa NetworkManager si está en ejecución y, en caso contrario, netplan. No modifica la conexión DHCP por cable. Escribe las contraseñas solo en la configuración de red del sistema (solo root, modo 0600); StackKits nunca las muestra ni las almacena.
+
+```bash
+stackkit network wifi [flags]
+```
+
+Subcomandos: [`stackkit network wifi add`](#stackkit-network-wifi-add), [`stackkit network wifi list`](#stackkit-network-wifi-list), [`stackkit network wifi remove`](#stackkit-network-wifi-remove)
+
+### stackkit network wifi add
+
+Prepara una red WiFi a la que se conecta automáticamente cuando está al alcance.
+
+```bash
+stackkit network wifi add [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--apply-now` | bool | — | Aplica el cambio inmediatamente (netplan apply) en lugar de hacerlo en el siguiente arranque |
+| `--force` | bool | — | Prepara la red incluso si este host no tiene interfaz inalámbrica |
+| `--open` | bool | — | Prepara una red sin contraseña |
+| `--password` | string | — | Contraseña (visible en la lista de procesos; se recomienda `--password-stdin`) |
+| `--password-stdin` | bool | — | Lee la contraseña de la primera línea de stdin |
+| `--priority` | int | — | Prioridad de conexión; gana la más alta (solo NetworkManager) |
+| `--ssid` | string | — | Nombre de la red WiFi |
+
+**Ejemplos**
+
+```bash
+# Read the passphrase from stdin so it never appears in the process list
+printf '%s' "$WIFI_PASSPHRASE" | sudo stackkit network wifi add --ssid OfficeNet --password-stdin
+
+# Prefer this network over others staged on the host
+sudo stackkit network wifi add --ssid OfficeNet --password-stdin --priority 20 < passphrase.txt
+```
+
+### stackkit network wifi list
+
+Lista las redes WiFi preparadas (nunca sus contraseñas).
+
+```bash
+stackkit network wifi list [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite la lista como JSON |
+
+### stackkit network wifi remove
+
+Elimina una red WiFi preparada.
+
+```bash
+stackkit network wifi remove [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--apply-now` | bool | — | Aplica el cambio inmediatamente (netplan apply) |
+| `--ssid` | string | — | Nombre de la red WiFi que se eliminará |

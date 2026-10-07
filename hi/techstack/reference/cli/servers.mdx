@@ -2,9 +2,9 @@
 title: "techstack api servers"
 description: "techstack api servers कमांड के लिए जनरेट किया गया संदर्भ"
 sidebarTitle: "servers"
-release: "v0.32.8"
+release: "v0.39.0"
 ---
-<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+<Note>Techstack v0.39.0 रिलीज़ (सोर्स `49677b729cb9`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
 
 ## techstack api servers detach
 
@@ -91,15 +91,13 @@ techstack api servers maintenance get <server-id> <job-id> [flags]
 
 ## techstack api servers maintenance run
 
-ओनर द्वारा स्वीकृत OS अपडेट प्लान, OS अपडेट या रीबूट कतार में डालें।
+अपने सर्वर के OS अपडेट प्लान, OS अपडेट या रीबूट को कतार में रखें।
 
-Edge-हस्ताक्षरित `techstack.servers.maintenance` एंटाइटलमेंट, टेनेंट में सर्वर का स्वामित्व, और `reboot` व `os_update` के लिए सत्यापित edge एनवेलप से अधिकतम 300 सेकंड पुराना मल्टी-फ़ैक्टर साइन-इन आवश्यक है। बॉडी को सख़्ती से डिकोड किया जाता है: सटीक लोअरकेस कुंजियाँ, कोई डुप्लिकेट नहीं, कोई अज्ञात फ़ील्ड नहीं। उसी Idempotency-Key के साथ रीप्ले, लक्ष्य सत्यापन से पहले सहेजी गई रसीद लौटाता है। प्रति सर्वर एक रीबूट या OS अपडेट और, अलग से, एक अपडेट प्लान सक्रिय हो सकता है; जो जॉब अपनी समय-सीमा तक पूरा नहीं होता वह `deadline_exceeded` के साथ विफल होता है और अपना स्लॉट खाली कर देता है। यह एक्शन `allowed_actions` में तभी दिया जाता है जब सर्वर एजेंट `stackkit.host-maintenance.v1` घोषित करता है, और `reboot` तभी जब सर्वर `host_boot_id` भी रिपोर्ट करता है। अस्वीकृतियाँ client-error-envelope/v1 दस्तावेज़ होती हैं; 409 `reason_code` इनमें से एक है: control_plane_host, substrate_node, protected_demo_server, service_locked, maintenance_active, node_operation_active, plan_stale, agent_capability_missing, boot_id_unknown, agent_not_connected, heartbeat_stale, inventory_revision_stale या idempotency_key_reused; 403 में entitlement_required या server_maintenance_step_up_required होता है।
+Edge-हस्ताक्षरित `techstack.servers.maintenance` एंटाइटलमेंट, टेनेंट में सर्वर का स्वामित्व और सौंपे गए नेटिव MCP कॉल के लिए वर्तमान सर्वर-बद्ध स्थायी प्राधिकरण आवश्यक हैं। इन तीन सामान्य कार्रवाइयों के लिए नया MFA या अलग owner_approved घोषणा आवश्यक नहीं है। बॉडी सख़्ती से डिकोड होती है: ठीक लोअरकेस कुंजियाँ, कोई डुप्लिकेट या अज्ञात फ़ील्ड नहीं। उसी Idempotency-Key से दोबारा अनुरोध पर लक्ष्य सत्यापन से पहले सहेजी गई रसीद मिलती है। प्रति सर्वर एक रीबूट या OS अपडेट और अलग से एक अपडेट प्लान सक्रिय रह सकता है; समय-सीमा तक अधूरा जॉब `deadline_exceeded` से विफल होता है और स्लॉट छोड़ देता है। कार्रवाई `allowed_actions` में तभी आती है जब सर्वर एजेंट `stackkit.host-maintenance.v1` बताता है, और `reboot` तभी जब सर्वर `host_boot_id` भी बताता है। अस्वीकृतियाँ client-error-envelope/v1 दस्तावेज़ हैं; 409 `reason_code` control_plane_host, substrate_node, protected_demo_server, service_locked, maintenance_active, node_operation_active, plan_stale, agent_capability_missing, boot_id_unknown, agent_not_connected, heartbeat_stale, inventory_revision_stale या idempotency_key_reused है; 403 में entitlement_required या maintenance_origin_authority_denied होता है।
 
 ```bash
 techstack api servers maintenance run <server-id> [flags]
 ```
-
-<Warning>पुष्टि आवश्यक है: यह ऑपरेशन अनुरोध के अनुसार सर्वर के ऑपरेटिंग सिस्टम को रीबूट करता है, अपडेट करता है या अपडेट की योजना बनाता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
 
 | | |
 | --- | --- |
@@ -110,11 +108,53 @@ techstack api servers maintenance run <server-id> [flags]
 | आर्ग्युमेंट | प्रकार | विवरण |
 | --- | --- | --- |
 | `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
-| `--action` | string | **आवश्यक।** इनमें से एक: `os_update_plan`, `os_update`, `reboot`। |
+| `--action` | string | **आवश्यक।** इनमें से एक: `os_update_plan`, `os_update`, `reboot`. |
 | `--expected-inventory-revision` | integer | **आवश्यक।** |
-| `--expected-plan-digest` | string | केवल os_update के लिए: इस सर्वर के पूरे हो चुके os_update_plan का plan_digest, जो अधिकतम 15 मिनट पुराना हो। |
-| `--owner-approved` | boolean | os_update और reboot के लिए true आवश्यक है। |
+| `--expected-plan-digest` | string | केवल os_update: इसी सर्वर के पूर्ण os_update_plan का plan_digest, जो अधिकतम 15 मिनट पुराना हो। |
+| `--owner-approved` | boolean | वैकल्पिक लेगेसी फ़ील्ड; यह रखरखाव प्राधिकरण नहीं देता। |
 | `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api servers network get
+
+सर्वर के नेटवर्क तथ्य और दर्ज घरेलू नेटवर्क बदलाव पढ़ें।
+
+सर्वर के kombify Guard द्वारा अंतिम बार देखा गया नेटवर्क (पता, गेटवे, सबनेट, इंटरफ़ेस, WiFi नेटवर्क), सर्वर के दूसरे नेटवर्क में दिखाई देने पर kombify द्वारा बनाया गया `network_move` रिकॉर्ड और उसके बाद हुई दोबारा बाइंडिंग की स्थिति। स्थान बदला हुआ सर्वर स्वयं दोबारा बाइंड होता है; `can_rebind` बताता है कि Owner अभी दोबारा बाइंडिंग शुरू कर सकता है या नहीं।
+
+```bash
+techstack api servers network get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/network` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_server_network` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+
+## techstack api servers network rebind
+
+स्थान बदले हुए सर्वर को उसके वर्तमान नेटवर्क से दोबारा बाइंड करें।
+
+सर्वर पर उसके kombify Guard के माध्यम से `stackkit network rebind` चलाता है: नोड अपना LAN पता फिर पहचानता है, हस्ताक्षरित LAN DNS कस्टडी रिकॉर्ड दोबारा जारी करता है और वर्कस्पेस दोबारा जनरेट तथा लागू करता है। रिक्वेस्ट में बॉडी नहीं होती। Owner, Inventory operate अनुमति, `techstack.servers.maintenance` एंटाइटलमेंट और कनेक्टेड Guard आवश्यक हैं (अन्यथा 409 `server_network_not_ready`)। दोबारा बाइंडिंग पहले से कतार में या चल रही हो तो दूसरी जोड़ने के बजाय उसी का जॉब लौटाता है।
+
+```bash
+techstack api servers network rebind <server-id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन सर्वर के वर्तमान नेटवर्क पते को फिर पहचानता है, उसका हस्ताक्षरित स्थानीय DNS रिकॉर्ड फिर जारी करता है और उसका वर्कस्पेस फिर लागू करता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/network/rebind` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `rebind_server_network` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
 
 ## techstack api servers ports
 
@@ -131,6 +171,161 @@ techstack api servers ports <server-id> [flags]
 | HTTP | `GET /api/v1/servers/{serverId}/ports` |
 | स्टेट बदलता है | नहीं |
 | MCP टूल | `get_server_runtime_ports` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+
+## techstack api servers reach set
+
+सर्वर को kombify.me पते पर प्रकाशित करें या उसका प्रकाशन रोकें।
+
+डिफ़ॉल्ट रूप से कुछ प्रकाशित नहीं होता: पेयर किए गए सर्वर का सार्वजनिक रूट नहीं होता और रिले कोई ट्रैफ़िक नहीं ले जाता। Owner स्पष्ट `service` नाम और `target_port` देकर इसे प्रत्येक सर्वर के लिए सक्षम करता है (ओरिजिन हमेशा Guard होस्ट का लूपबैक है, कभी दूसरी मशीन नहीं) और कभी भी वापस ले सकता है। रिले Guard को प्रमाणित करता है, विज़िटर को नहीं, इसलिए उस पोर्ट पर उत्तर देने वाली सेवा को अपनी सुरक्षा स्वयं करनी होगी। सक्षम करने के लिए Owner, `techstack.servers.maintenance` एंटाइटलमेंट और नया मल्टी-फ़ैक्टर साइन-इन चाहिए (कारण `server_reach_step_up_required`); वापस लेना कभी इस शर्त से नहीं रोका जाता। सर्वर रीड मॉडल का reach भाग लौटाता है; उसके बाद रिकंसाइलर रूट बनाता या हटाता है।
+
+```bash
+techstack api servers reach set <server-id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन सर्वर की सेवा को सार्वजनिक kombify.me पते पर प्रकाशित करता है जिसे इंटरनेट पर कोई भी खोल सकता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/servers/{serverId}/reach` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+| `--enabled` | boolean | **आवश्यक।** |
+| `--service` | string | सक्षम करते समय आवश्यक। रूट लेबल; kombify.me रूट &lt;base&gt;-&lt;service&gt;-&lt;server suffix&gt; है। |
+| `--target-port` | integer | सक्षम करते समय आवश्यक। Guard होस्ट के लूपबैक पर सेवा का सुनने वाला पोर्ट (होस्ट निश्चित है)। |
+| `--target-scheme` | string | इनमें से एक: `http`, `https`. डिफ़ॉल्ट `"http"`. |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api servers security auto-repair get
+
+स्वचालित सुरक्षा मरम्मत के लिए Owner की मंज़ूरी पढ़ें।
+
+बिना मंज़ूरी या समाप्त मंज़ूरी वाला सर्वर केवल अवलोकन मोड में रहता है।
+
+```bash
+techstack api servers security auto-repair get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/security/auto-repair` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_server_security_auto_repair` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+
+## techstack api servers security auto-repair set
+
+नियंत्रणों के छोटे सुरक्षित समूह की स्वचालित मरम्मत मंज़ूर करें या वापस लें।
+
+डिफ़ॉल्ट रूप से बंद है। मंज़ूरी सुरक्षित समूह के नियंत्रणों को नाम देती है (`allowed_controls`: ब्रूट-फ़ोर्स सुरक्षा, फ़ायरवॉल नीति, कर्नेल पैरामीटर और स्वचालित सुरक्षा अपडेट; SSH नियंत्रण कभी नहीं), अधिकतम 90 दिन में समाप्त होती है और स्वयं नवीनीकृत नहीं होती। प्रभावी रहने तक कंट्रोल प्लेन उसी सीमा में नामित नियंत्रण की मरम्मत करता है जिसमें ताज़ा प्रमाण विचलन दिखाता है, जैसे ऑपरेटर मरम्मत में होता है। Owner, `techstack.servers.maintenance` एंटाइटलमेंट और नया मल्टी-फ़ैक्टर साइन-इन आवश्यक हैं। `enabled: false` मंज़ूरी वापस लेता है।
+
+```bash
+techstack api servers security auto-repair set <server-id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन मंज़ूरी समाप्त होने तक kombify Guard को नामित होस्ट सुरक्षा नियंत्रणों की हर बार पूछे बिना मरम्मत करने देता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/servers/{serverId}/security/auto-repair` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+| `--controls` | string\[\] | — |
+| `--enabled` | boolean | **आवश्यक।** |
+| `--expires-at` | string | — |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api servers security findings
+
+एक सर्वर के खुले निष्कर्ष और हाल का निष्कर्ष इतिहास सूचीबद्ध करें।
+
+सर्वर के `security`, `recovery` और Guard अलर्ट के पीछे निष्कर्ष लेजर। एक निष्कर्ष एक घटना-क्रम है: कोई तथ्य पहली बार गलत देखे जाने पर खुलता है और फिर सही देखे जाने पर हल होता है, अधिकतम एक अलर्ट (`alerted_at`) और एक समाधान के साथ। इतिहास 90 दिन रखा जाता है।
+
+```bash
+techstack api servers security findings <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/security/findings` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_server_security_findings` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+
+## techstack api servers security repairs list
+
+एक सर्वर की हाल की सुरक्षा मरम्मत सूचीबद्ध करें।
+
+```bash
+techstack api servers security repairs list <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/security/repairs` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_server_security_repairs` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+
+## techstack api servers security repairs request
+
+नामित विचलित होस्ट सुरक्षा नियंत्रणों की मरम्मत करें।
+
+उन नियंत्रणों की सीमित मरम्मत माँगता है जिन्हें ताज़ा होस्ट सुरक्षा प्रमाण विचलित और स्वतः मरम्मत योग्य दिखाता है। सर्वर का Owner, Edge-हस्ताक्षरित `techstack.servers.maintenance` एंटाइटलमेंट और नया मल्टी-फ़ैक्टर साइन-इन (अधिकतम 300 सेकंड पुराना) आवश्यक हैं। मरम्मत टाइप किए गए, जर्नल में दर्ज Guard कमांड के रूप में जाती है जो ठीक नामित नियंत्रणों के लिए `stackkit host security repair --apply` चलाता है; StackKits कुछ भी बदलने से पहले ऐसे बदलाव को मना करता है जो प्रबंधन मार्ग काट दे या Owner का एक्सेस रोक दे। सीमाएँ: एक सर्वर पर एक समय में एक मरम्मत (409 `repair_in_progress`), प्रत्येक नियंत्रण के लिए कूलडाउन (429 `repair_cooldown`), प्रत्येक नियंत्रण का दैनिक प्रयास बजट (429 `repair_attempts_exhausted`) और लगातार विफलताओं के बाद सर्किट ब्रेकर (429 `repair_circuit_open`); 429 उत्तरों में `retry_after` आता है। अनुरूप नियंत्रण (409 `control_not_drifted`), मंज़ूर अपवाद वाला (`control_has_exception`), मैनुअल (`control_not_repairable`), अधिकृत SSH कुंजी के बिना अवरुद्ध (`needs_authorized_key`) या बिना अवलोकन वाला नियंत्रण अस्वीकार होता है। बॉडी सख़्ती से डिकोड होती है।
+
+```bash
+techstack api servers security repairs request <server-id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन सर्वर पर उसके kombify Guard से नामित होस्ट सुरक्षा नियंत्रण (फ़ायरवॉल, SSH, ब्रूट-फ़ोर्स सुरक्षा, स्वचालित अपडेट) बहाल करता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/security/repairs` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+| `--controls` | string\[\] | **आवश्यक।** |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api servers security verify
+
+kombify Guard से होस्ट सुरक्षा का ताज़ा अवलोकन माँगें।
+
+दर्ज करता है कि होस्ट बेसलाइन का ताज़ा अवलोकन चाहिए। Guard अगले चेक-इन पर (लगभग एक मिनट में) नई रिपोर्ट देता है; होस्ट पर कुछ नहीं बदलता। सर्वर का `security` रीड मॉडल केवल उस रिपोर्ट से अपडेट होता है, इस रिक्वेस्ट से कभी नहीं। दूसरे टेनेंट या Owner का सर्वर 404 देता है; Guard के बिना सर्वर 409 `guard_not_connected` देता है।
+
+```bash
+techstack api servers security verify <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/security/verify` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
 
 | आर्ग्युमेंट | प्रकार | विवरण |
 | --- | --- | --- |

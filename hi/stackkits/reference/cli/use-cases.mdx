@@ -9,7 +9,28 @@ sidebarTitle: "use-cases"
 stackkit use-cases [flags]
 ```
 
-उप-कमांड: [`stackkit use-cases pick`](#stackkit-use-cases-pick)
+उप-कमांड: [`stackkit use-cases add`](#stackkit-use-cases-add), [`stackkit use-cases pick`](#stackkit-use-cases-pick)
+
+## stackkit use-cases add
+
+मौजूदा स्वतंत्र इंस्टॉलेशन में कैटलॉग का यूज़ केस जोड़ें।
+
+इंस्टॉल किए गए किट के CUE-स्वामित्व वाले विकल्प और मॉड्यूल प्रोफ़ाइल डिफ़ॉल्ट के साथ यूज़ केस जोड़ता है। मौजूदा वर्कलोड, रूट, प्लेसमेंट और स्टोरेज सुरक्षित रखता है। वर्तमान स्पेक हैश के आधार पर उम्मीदवार सहेजता है और केवल चुने गए यूज़ केस के स्थानीय सीक्रेट स्लॉट बनाता है। मौजूदा कस्टडी पुनः उपयोग होती है। कोई सेवा डिप्लॉय नहीं होती; सामान्य लाइफ़साइकिल से अद्यतन इंटेंट जनरेट और लागू करें। नेटिव stackkit/v2alpha2 और एक स्वतंत्र नोड/site आवश्यक हैं।
+
+```bash
+stackkit use-cases add <slug> [flags]
+```
+
+| फ़्लैग | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--expected-spec-hash` | string | — | इस कैनोनिकल वर्तमान स्पेक हैश की माँग करें; न देने पर बदलाव तैयार करने से पहले पढ़ा गया हैश उपयोग होता है |
+
+**उदाहरण**
+
+```bash
+stackkit use-cases add mail
+stackkit use-cases add mail --expected-spec-hash sha256:<current-hash>
+```
 
 ## stackkit use-cases pick
 

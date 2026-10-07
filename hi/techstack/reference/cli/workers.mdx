@@ -2,9 +2,9 @@
 title: "techstack api workers"
 description: "techstack api workers कमांड के लिए जनरेट किया गया संदर्भ"
 sidebarTitle: "workers"
-release: "v0.32.8"
+release: "v0.39.0"
 ---
-<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+<Note>Techstack v0.39.0 रिलीज़ (सोर्स `49677b729cb9`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
 
 ## techstack api workers approve
 
@@ -24,6 +24,86 @@ techstack api workers approve <id> [flags]
 | --- | --- | --- |
 | `<id>` | string | **आवश्यक।** संसाधन ID। |
 
+## techstack api workers identity upgrade approve
+
+लेगेसी सर्वर द्वारा प्रस्तावित कुंजी मंज़ूर करें।
+
+`key_thumbprint` से बताई लंबित कुंजी बाँधता है, जिससे वर्कर कुंजी-बद्ध बनता है (उसके बाद केवल bearer वाली रिक्वेस्ट अस्वीकार होती हैं)। Owner और नया मल्टी-फ़ैक्टर साइन-इन (अधिकतम 300 सेकंड पुराना) चाहिए। मंज़ूर करने वाला सब्जेक्ट और समय पहचान के साथ दर्ज तथा लॉग होते हैं। उस फ़िंगरप्रिंट वाली बिना समाप्त हुई लंबित कुंजी न होने पर 409 `identity_upgrade_not_pending` आता है।
+
+```bash
+techstack api workers identity upgrade approve <id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन तय करता है कि कौन-सी कुंजी सर्वर को कमांड दे सकती है; केवल वही कुंजी मंज़ूर करें जिसका फ़िंगरप्रिंट सर्वर पर Guard लॉग करता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/identity/upgrade/approve` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `approve_worker_identity_upgrade` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<id>` | string | **आवश्यक।** संसाधन ID। |
+| `--key-thumbprint` | string | **आवश्यक।** |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api workers identity upgrade reject
+
+लेगेसी सर्वर द्वारा प्रस्तावित कुंजी हटा दें।
+
+जब लंबित कुंजी सर्वर की अपनी कुंजी नहीं है तब Owner का रीसेट: प्रस्ताव हट जाता है और फिर से देना पड़ता है। सर्वर क्रेडेंशियल रोटेट करने से उसके धारक का बाइंड एंडपॉइंट एक्सेस समाप्त होता है।
+
+```bash
+techstack api workers identity upgrade reject <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/identity/upgrade/reject` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<id>` | string | **आवश्यक।** संसाधन ID। |
+
+## techstack api workers identity upgrade-status
+
+दिखाएँ कि सर्वर की पहचान कुंजी अभी मंज़ूर होना बाकी है या नहीं।
+
+वर्कर के Owner के लिए। `identity_binding=legacy_bearer` और `code=guard_identity_upgrade_required` का मतलब है कि सर्वर केवल bearer क्रेडेंशियल से प्रमाणित होता है और केवल अवलोकन मोड में है; `pending` में प्रस्तावित कुंजी का फ़िंगरप्रिंट होता है, जिसे Owner सर्वर पर Guard द्वारा लॉग किए गए फ़िंगरप्रिंट से मिलाता है। दूसरे टेनेंट या Owner का वर्कर 404 देता है।
+
+```bash
+techstack api workers identity upgrade-status <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/{id}/identity/upgrade` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_worker_identity_upgrade` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<id>` | string | **आवश्यक।** संसाधन ID। |
+
+## techstack api workers identity upgrades
+
+पहचान कुंजी की मंज़ूरी की प्रतीक्षा कर रहे Owner के सर्वर सूचीबद्ध करें।
+
+Owner के लिए। प्रत्येक प्रविष्टि उसका अपना सर्वर है जिसने कुंजी प्रस्तावित की है और केवल अवलोकन मोड में रहता है, जब तक वही कुंजी `approveWorkerIdentityUpgrade` से मंज़ूर न हो (नया मल्टी-फ़ैक्टर साइन-इन आवश्यक)। प्रविष्टियों में होस्टनाम और कुंजी फ़िंगरप्रिंट हैं, ताकि सर्वर पर Guard द्वारा लॉग किए गए फ़िंगरप्रिंट से मिलान किया जा सके। सूची दिखाने से कोई अधिकार नहीं मिलता।
+
+```bash
+techstack api workers identity upgrades [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/identity-upgrades` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_worker_identity_upgrades` |
+
 ## techstack api workers list
 
 पंजीकृत वर्कर सूचीबद्ध करें (ओनर के अनुसार फ़िल्टर किए गए)।
@@ -42,6 +122,53 @@ techstack api workers list [flags]
 | --- | --- | --- |
 | `--page` | integer | पेज नंबर (डिफ़ॉल्ट 1)। |
 | `--per-page` | integer | प्रति पेज आइटम (डिफ़ॉल्ट 20, अधिकतम 100)। |
+
+## techstack api workers outcomes list
+
+एक kombify Guard के अनसुलझे ऑपरेशन परिणाम सूचीबद्ध करें।
+
+अपने वर्कर के वे ऑपरेशन सूचीबद्ध करता है जिनका परिणाम अज्ञात है: kombify Guard ने दर्ज किया कि प्रभाव हुआ भी हो सकता है और नहीं भी, और किसी अवलोकन ने उसे स्पष्ट नहीं किया। हर ऐसा ऑपरेशन सर्वर पर आगे बदलाव रोकता है। Guard समाधान की कोशिश कर रहा हो तो `state` `reconciling` है, और निर्धारित समय से अधिक अनसुलझे रहने पर `needs_operator` (`TECHSTACK_GUARD_OUTCOME_NEEDS_OPERATOR_AFTER`, डिफ़ॉल्ट 30 मिनट)। समय केवल परिणाम का प्रदर्शन बदलता है; वह रोक कभी नहीं हटाता। दूसरे टेनेंट या Owner का वर्कर 404 देता है।
+
+```bash
+techstack api workers outcomes list <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/{id}/outcomes` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_guard_unresolved_outcomes` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<id>` | string | **आवश्यक।** संसाधन ID। |
+
+## techstack api workers outcomes resolve
+
+kombify Guard के अनसुलझे ऑपरेशन परिणाम की रोक हटाएँ।
+
+अज्ञात परिणाम वाले ऑपरेशन के लिए केवल नई जानकारी जोड़ने वाला ऑपरेटर समाधान रिविज़न सहेजता है और वर्कर की रोक हटाता है। `disposition` `verified_applied` (प्रभाव मौजूद), `verified_not_applied` (कुछ नहीं हुआ) या `accept_unknown` (सत्यापित परिणाम के बिना रोक हटाना) है; `note` में सत्यापित तथ्य दर्ज होते हैं। कर्ता प्रमाणित सब्जेक्ट है और रिविज़न के साथ दर्ज होता है; Guard इन निर्णयों को सहेज नहीं सकता। नया मल्टी-फ़ैक्टर साइन-इन (अधिकतम 300 सेकंड पुराना) चाहिए। `expected_revision` सूची से मिले रिविज़न के बराबर होना चाहिए, अन्यथा 409 `outcome_revision_stale` मिलता है। बॉडी सख़्ती से डिकोड होती है: ठीक कुंजियाँ, कोई अज्ञात फ़ील्ड नहीं।
+
+```bash
+techstack api workers outcomes resolve <id> <command-id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन कभी स्पष्ट न हुए परिणाम वाले ऑपरेशन की रोक हटाता है, जिससे सर्वर पर परस्पर-विरोधी बदलाव चल सकते हैं। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/outcomes/{command_id}/resolve` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<id>` | string | **आवश्यक।** संसाधन ID। |
+| `<command-id>` | string | **आवश्यक।** |
+| `--disposition` | string | **आवश्यक।** इनमें से एक: `verified_applied`, `verified_not_applied`, `accept_unknown`. |
+| `--expected-revision` | integer | **आवश्यक।** |
+| `--note` | string | **आवश्यक।** |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
 
 ## techstack api workers prechecks list
 

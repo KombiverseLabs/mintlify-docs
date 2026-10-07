@@ -358,7 +358,7 @@ Vincula un destino S3 aportado por el propietario a la política de copias de se
 stackkit backup target [flags]
 ```
 
-Subcomandos: [`stackkit backup target import`](#stackkit-backup-target-import), [`stackkit backup target status`](#stackkit-backup-target-status)
+Subcomandos: [`stackkit backup target import`](#stackkit-backup-target-import), [`stackkit backup target recipient`](#stackkit-backup-target-recipient), [`stackkit backup target status`](#stackkit-backup-target-status)
 
 ### stackkit backup target import
 
@@ -375,12 +375,36 @@ stackkit backup target import [flags]
 | `--candidate-digest` | string | — | Digest sha256 exacto del release candidate de StackKits instalado |
 | `--owner-approve` | bool | — | Autoriza este destino local de copias de seguridad exacto |
 | `--rebind` | bool | — | Renueva la autoridad de Plan/origen conservando el destino y las credenciales existentes |
+| `--sealed` | bool | — | Lee un sobre de entrega sellado al host desde stdin en lugar de JSON sin cifrar |
+| `--tenant-ref` | string | — | Tenant al que debe dirigirse la entrega sellada (obligatorio con `--sealed`) |
 
 **Ejemplos**
 
 ```bash
 # Import the S3 target from a private JSON file with the fields listed above
 stackkit backup target import --owner-approve < s3-target.json
+```
+
+### stackkit backup target recipient
+
+Demuestra la clave de destinatario de este nodo para entregas selladas.
+
+Crea una sola vez la clave de destinatario de cifrado independiente de este nodo y muestra una declaración firmada por la clave local del propietario. La declaración vincula la clave pública a este Site y nodo y responde al desafío del solicitante. La clave privada nunca abandona la custodia local. Una autoridad de entrega sella el material del destino de backup para esta clave; impórtalo con `backup target import --sealed`.
+
+```bash
+stackkit backup target recipient [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--challenge` | string | — | Valor nuevo de la autoridad de entrega que la declaración debe devolver |
+| `--owner-approve` | bool | — | Autoriza la clave de destinatario de este nodo |
+| `--source-generation` | bool | — | Verifica la generación conservada con su fuente atestada instalada antes de renovar la misma custodia |
+
+**Ejemplos**
+
+```bash
+stackkit backup target recipient --challenge "$CHALLENGE" --owner-approve
 ```
 
 ### stackkit backup target status
