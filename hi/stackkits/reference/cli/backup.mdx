@@ -358,7 +358,7 @@ stackkit backup status --json
 stackkit backup target [flags]
 ```
 
-उप-कमांड: [`stackkit backup target import`](#stackkit-backup-target-import), [`stackkit backup target status`](#stackkit-backup-target-status)
+उप-कमांड: [`stackkit backup target import`](#stackkit-backup-target-import), [`stackkit backup target recipient`](#stackkit-backup-target-recipient), [`stackkit backup target status`](#stackkit-backup-target-status)
 
 ### stackkit backup target import
 
@@ -375,12 +375,36 @@ stackkit backup target import [flags]
 | `--candidate-digest` | string | — | इंस्टॉल किए गए StackKits रिलीज़ कैंडिडेट का सटीक sha256 डाइजेस्ट |
 | `--owner-approve` | bool | — | इस सटीक स्थानीय बैकअप लक्ष्य को अधिकृत करें |
 | `--rebind` | bool | — | मौजूदा लक्ष्य और क्रेडेंशियल बनाए रखते हुए Plan/स्रोत प्राधिकार का नवीनीकरण करें |
+| `--sealed` | bool | — | सादे JSON की जगह stdin से सीलबंद होस्ट डिलीवरी एनवेलप पढ़ें |
+| `--tenant-ref` | string | — | वह टेनेंट जिसे सीलबंद डिलीवरी संबोधित होनी चाहिए (`--sealed` के साथ आवश्यक) |
 
 **उदाहरण**
 
 ```bash
 # Import the S3 target from a private JSON file with the fields listed above
 stackkit backup target import --owner-approve < s3-target.json
+```
+
+### stackkit backup target recipient
+
+सीलबंद डिलीवरी के लिए इस नोड की प्राप्तकर्ता कुंजी का प्रमाण दें।
+
+इस नोड की अलग एन्क्रिप्शन प्राप्तकर्ता कुंजी एक बार बनाता है और स्थानीय Owner कुंजी से हस्ताक्षरित कथन दिखाता है। कथन सार्वजनिक कुंजी को इस Site और नोड से बाँधता है और कॉलर की चुनौती का उत्तर देता है। निजी कुंजी कभी स्थानीय कस्टडी से बाहर नहीं जाती। डिलीवरी प्राधिकरण इस कुंजी के लिए बैकअप लक्ष्य सामग्री को सील करता है; उसे `backup target import --sealed` से आयात करें।
+
+```bash
+stackkit backup target recipient [flags]
+```
+
+| फ़्लैग | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--challenge` | string | — | डिलीवरी प्राधिकरण का नया मान जिसे कथन में वापस दिखाना आवश्यक है |
+| `--owner-approve` | bool | — | इस नोड की प्राप्तकर्ता कुंजी को अधिकृत करें |
+| `--source-generation` | bool | — | उसी कस्टडी के नवीनीकरण से पहले संरक्षित जनरेशन को उसके इंस्टॉल किए गए प्रमाणित सोर्स से सत्यापित करें |
+
+**उदाहरण**
+
+```bash
+stackkit backup target recipient --challenge "$CHALLENGE" --owner-approve
 ```
 
 ### stackkit backup target status

@@ -1,0 +1,169 @@
+---
+title: "stackkit network"
+description: "इस सर्वर को दूसरे नेटवर्क में ले जाएँ: स्थिति, दोबारा बाइंडिंग, WiFi और निगरानी"
+sidebarTitle: "network"
+---
+इस सर्वर को दूसरे नेटवर्क में ले जाएँ: स्थिति, दोबारा बाइंडिंग, WiFi और निगरानी।
+
+इस सर्वर को एक नेटवर्क से दूसरे नेटवर्क में ले जाने के ऑपरेशन।
+
+ले जाने से पहले गंतव्य WiFi तैयार करें (stackkit network wifi add)। स्थान बदलने के बाद सर्वर को गंतव्य DHCP से नया पता मिलता है; नेटवर्क निगरानी सेवा (stackkit network watch enable, जिसे stackkit apply इंस्टॉल करता है) पहचानती है कि दर्ज site पता पुराना हो गया है और स्टैक को स्वयं दोबारा बाइंड करती है।
+
+```bash
+stackkit network [flags]
+```
+
+उप-कमांड: [`stackkit network rebind`](#stackkit-network-rebind), [`stackkit network status`](#stackkit-network-status), [`stackkit network watch`](#stackkit-network-watch), [`stackkit network wifi`](#stackkit-network-wifi)
+
+## stackkit network rebind
+
+स्टैक को इस सर्वर के नए नेटवर्क पते से दोबारा बाइंड करें।
+
+सर्वर को दूसरे नेटवर्क में ले जाने के बाद नए पते के लिए हस्ताक्षरित LAN रिज़ॉल्वर रिकॉर्ड दोबारा जारी करें और स्टैक दोबारा जनरेट तथा लागू करें, ताकि लिसनर उससे बाइंड हों। सर्वर का नेटवर्क नहीं बदला है तो कुछ नहीं होता।
+
+Owner की पहचान, सीक्रेट, प्रमाणपत्र प्राधिकरण और डेटा नहीं बदलते; पिछला रिज़ॉल्वर रिकॉर्ड .stackkit/custody/backups में सुरक्षित रहता है। इसके बाद LAN क्लाइंट और राउटर का DNS नए रिज़ॉल्वर पते की ओर संकेत करना चाहिए।
+
+```bash
+stackkit network rebind [flags]
+```
+
+| फ़्लैग | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--auto` | bool | — | नेटवर्क निगरानी के लिए बिना हस्तक्षेप वाला रन: नेटवर्क न बदलने पर चुप, एक समय में एक रन, विफलता के बाद प्रतीक्षा |
+| `--json` | bool | — | परिणाम JSON के रूप में दिखाएँ |
+| `--no-apply` | bool | — | केवल रिज़ॉल्वर रिकॉर्ड दोबारा जारी करें; दोबारा जनरेट और लागू न करें |
+| `--yes` | bool | — | पुष्टि माँगे बिना दोबारा बाइंड करें |
+
+**उदाहरण**
+
+```bash
+stackkit network rebind --yes
+stackkit network rebind --yes --json
+stackkit network rebind --no-apply
+```
+
+## stackkit network status
+
+दिखाएँ कि क्या यह सर्वर दूसरे नेटवर्क में गया है।
+
+सर्वर के वर्तमान पते की तुलना LAN रिज़ॉल्वर कस्टडी और .stackkit/inventory.yaml में दर्ज पते से करें। मिलान होने पर परिणाम "in-place", दर्ज पता पुराना होने पर "moved" और तुलना के लिए कुछ न होने पर "unknown" है। कमांड हमेशा एग्ज़िट कोड 0 देता है।
+
+```bash
+stackkit network status [flags]
+```
+
+| फ़्लैग | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | अवलोकन JSON के रूप में दिखाएँ |
+
+**उदाहरण**
+
+```bash
+stackkit network status
+stackkit network status --json
+```
+
+## stackkit network watch
+
+सर्वर का नेटवर्क बदलने पर स्वतः दोबारा बाइंड करें (systemd टाइमर)।
+
+एक systemd टाइमर इंस्टॉल करता है जो हर मिनट और बूट के थोड़ी देर बाद "stackkit network rebind `--yes` `--auto`" चलाता है। नेटवर्क अपरिवर्तित होने पर चुप रहता है, एक समय में एक ही दोबारा बाइंडिंग करता है और विफल प्रयास के बाद पाँच मिनट प्रतीक्षा करता है। stackkit apply इसे systemd होस्ट पर सक्षम करता है; बंद करने के लिए STACKKIT_NETWORK_WATCH=off सेट करें या "stackkit network watch disable" चलाएँ।
+
+```bash
+stackkit network watch [flags]
+```
+
+उप-कमांड: [`stackkit network watch disable`](#stackkit-network-watch-disable), [`stackkit network watch enable`](#stackkit-network-watch-enable), [`stackkit network watch status`](#stackkit-network-watch-status)
+
+### stackkit network watch disable
+
+नेटवर्क निगरानी टाइमर रोकें और हटाएँ।
+
+```bash
+stackkit network watch disable [flags]
+```
+
+### stackkit network watch enable
+
+नेटवर्क निगरानी टाइमर इंस्टॉल करें और शुरू करें।
+
+```bash
+stackkit network watch enable [flags]
+```
+
+### stackkit network watch status
+
+दिखाएँ कि नेटवर्क निगरानी टाइमर इंस्टॉल है और चल रहा है या नहीं।
+
+```bash
+stackkit network watch status [flags]
+```
+
+| फ़्लैग | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | स्थिति JSON के रूप में दिखाएँ |
+
+## stackkit network wifi
+
+सर्वर ले जाने से पहले गंतव्य WiFi तैयार करें।
+
+होस्ट की अपनी नेटवर्क कॉन्फ़िगरेशन में WiFi नेटवर्क तैयार करता है, ताकि स्थान बदलने पर सर्वर स्वयं गंतव्य WiFi से जुड़ जाए। NetworkManager चल रहा हो तो उसका उपयोग होता है, अन्यथा netplan का। तारयुक्त DHCP कनेक्शन नहीं बदलता और पासफ़्रेज़ केवल सिस्टम नेटवर्क कॉन्फ़िगरेशन में लिखे जाते हैं (केवल root, मोड 0600); StackKits उन्हें कभी दिखाता या सहेजता नहीं है।
+
+```bash
+stackkit network wifi [flags]
+```
+
+उप-कमांड: [`stackkit network wifi add`](#stackkit-network-wifi-add), [`stackkit network wifi list`](#stackkit-network-wifi-list), [`stackkit network wifi remove`](#stackkit-network-wifi-remove)
+
+### stackkit network wifi add
+
+एक WiFi नेटवर्क तैयार करें जिससे रेंज में आने पर स्वतः जुड़ सकें।
+
+```bash
+stackkit network wifi add [flags]
+```
+
+| फ़्लैग | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--apply-now` | bool | — | अगले बूट के बजाय बदलाव तुरंत लागू करें (netplan apply) |
+| `--force` | bool | — | होस्ट में वायरलेस इंटरफ़ेस न होने पर भी नेटवर्क तैयार करें |
+| `--open` | bool | — | बिना पासफ़्रेज़ वाला नेटवर्क तैयार करें |
+| `--password` | string | — | पासफ़्रेज़ (प्रक्रिया सूची में दिखता है; `--password-stdin` को प्राथमिकता दें) |
+| `--password-stdin` | bool | — | stdin की पहली पंक्ति से पासफ़्रेज़ पढ़ें |
+| `--priority` | int | — | कनेक्शन प्राथमिकता; अधिक मान को प्राथमिकता मिलती है (केवल NetworkManager) |
+| `--ssid` | string | — | WiFi नेटवर्क का नाम |
+
+**उदाहरण**
+
+```bash
+# Read the passphrase from stdin so it never appears in the process list
+printf '%s' "$WIFI_PASSPHRASE" | sudo stackkit network wifi add --ssid OfficeNet --password-stdin
+
+# Prefer this network over others staged on the host
+sudo stackkit network wifi add --ssid OfficeNet --password-stdin --priority 20 < passphrase.txt
+```
+
+### stackkit network wifi list
+
+तैयार WiFi नेटवर्क सूचीबद्ध करें (उनके पासफ़्रेज़ कभी नहीं)।
+
+```bash
+stackkit network wifi list [flags]
+```
+
+| फ़्लैग | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | सूची JSON के रूप में दिखाएँ |
+
+### stackkit network wifi remove
+
+तैयार WiFi नेटवर्क हटाएँ।
+
+```bash
+stackkit network wifi remove [flags]
+```
+
+| फ़्लैग | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--apply-now` | bool | — | बदलाव तुरंत लागू करें (netplan apply) |
+| `--ssid` | string | — | हटाए जाने वाले WiFi नेटवर्क का नाम |

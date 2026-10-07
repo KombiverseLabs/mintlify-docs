@@ -261,6 +261,7 @@ stackkit host security status [flags]
 
 | 标志 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
+| `--drift-scope` | string | `all` | 决定 `--fail-on-drift` 的控制项：all 或 enforced（仅基线本身强制执行的控制项；补丁滞后、待重启、暴露面和证书仍被观测和报告） |
 | `--fail-on-drift` | bool | — | 主机为 drifted 时以 5 退出，状态为 unknown 时以 6 退出 |
 | `--json` | bool | — | 以机器可读的 JSON 输出证据 |
 
@@ -279,6 +280,7 @@ stackkit host security verify [flags]
 | 标志 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `--declared-port` | stringArray | — | 声明的服务端口，格式为 tcp/443 或 udp/5353（可重复指定） |
+| `--drift-scope` | string | `all` | 决定 `--fail-on-drift` 的控制项：all 或 enforced（仅基线本身强制执行的控制项；补丁滞后、待重启、暴露面和证书仍被观测和报告） |
 | `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | 由 Owner 控制的例外文件（每个例外都需要 Owner 和到期时间） |
 | `--fail-on-drift` | bool | — | 主机为 drifted 时以 5 退出，状态为 unknown 时以 6 退出 |
 | `--freshness` | duration | `15m0s` | 证据在到期前可被信赖的时长（1 分钟至 24 小时） |
@@ -297,8 +299,11 @@ stackkit host security verify [flags]
 # Verify this host and record the evidence
 sudo stackkit host security verify
 
-# What Techstack runs: machine-readable, advanced mode, exit non-zero on drift
+# Machine-readable, advanced mode, exit non-zero on any drifted control
 sudo stackkit host security verify --mode advanced --json --fail-on-drift
+
+# What the Techstack host pre-step runs: only the controls the baseline enforces decide the exit code; patch lag, pending reboot, exposure and certificates are still observed and reported
+sudo stackkit host security verify --mode advanced --json --fail-on-drift --drift-scope enforced
 
 # Judge exposure against the ports the verified plan declares
 sudo stackkit host security verify --resolved-plan plan.json --local-node node-1

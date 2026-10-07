@@ -261,6 +261,7 @@ stackkit host security status [flags]
 
 | Flag | Tipo | Predeterminado | Descripción |
 | --- | --- | --- | --- |
+| `--drift-scope` | string | `all` | Controles que determinan `--fail-on-drift`: all o enforced (solo los controles que aplica la propia baseline; el retraso de parches, el reinicio pendiente, la exposición y los certificados siguen observándose y notificándose) |
 | `--fail-on-drift` | bool | — | Sale con 5 cuando el host está desviado y con 6 cuando se desconoce su estado |
 | `--json` | bool | — | Emite la evidencia como JSON legible por máquinas |
 
@@ -280,6 +281,7 @@ stackkit host security verify [flags]
 | --- | --- | --- | --- |
 | `--declared-port` | stringArray | — | Puerto de servicio declarado como tcp/443 o udp/5353 (repetible) |
 | `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | Archivo de excepciones controlado por el propietario (cada excepción necesita propietario y caducidad) |
+| `--drift-scope` | string | `all` | Controles que determinan `--fail-on-drift`: all o enforced (solo los controles que aplica la propia baseline; el retraso de parches, el reinicio pendiente, la exposición y los certificados siguen observándose y notificándose) |
 | `--fail-on-drift` | bool | — | Sale con 5 cuando el host está desviado y con 6 cuando se desconoce su estado |
 | `--freshness` | duration | `15m0s` | Tiempo durante el que se puede confiar en la evidencia antes de que caduque (de 1m a 24h) |
 | `--json` | bool | — | Emite el resultado como JSON legible por máquinas |
@@ -297,8 +299,11 @@ stackkit host security verify [flags]
 # Verify this host and record the evidence
 sudo stackkit host security verify
 
-# What Techstack runs: machine-readable, advanced mode, exit non-zero on drift
+# Machine-readable, advanced mode, exit non-zero on any drifted control
 sudo stackkit host security verify --mode advanced --json --fail-on-drift
+
+# What the Techstack host pre-step runs: only the controls the baseline enforces decide the exit code; patch lag, pending reboot, exposure and certificates are still observed and reported
+sudo stackkit host security verify --mode advanced --json --fail-on-drift --drift-scope enforced
 
 # Judge exposure against the ports the verified plan declares
 sudo stackkit host security verify --resolved-plan plan.json --local-node node-1

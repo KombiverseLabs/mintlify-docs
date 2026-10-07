@@ -2,9 +2,9 @@
 title: "techstack api servers"
 description: "Referencia generada de los comandos techstack api servers"
 sidebarTitle: "servers"
-release: "v0.32.8"
+release: "v0.39.0"
 ---
-<Note>Generado a partir del release v0.32.8 de Techstack (fuente `4c7d219a5d56`). Para una versión instalada, `techstack api <command> --help` es la fuente autorizada.</Note>
+<Note>Generado a partir del release v0.39.0 de Techstack (fuente `49677b729cb9`). Para una versión instalada, `techstack api <command> --help` es la fuente autorizada.</Note>
 
 ## techstack api servers detach
 
@@ -91,15 +91,13 @@ techstack api servers maintenance get <server-id> <job-id> [flags]
 
 ## techstack api servers maintenance run
 
-Pone en cola un plan de actualización del SO, una actualización del SO o un reinicio aprobados por el propietario.
+Pone en cola un plan de actualización del sistema operativo, una actualización o un reinicio de un servidor propio.
 
-Requiere el derecho `techstack.servers.maintenance` firmado por el Edge, la propiedad del servidor en el tenant y, para `reboot` y `os_update`, un inicio de sesión multifactor de como máximo 300 segundos de antigüedad procedente del sobre verificado del edge. El cuerpo se decodifica de forma estricta: claves exactas en minúsculas, sin duplicados y sin campos desconocidos. Una repetición con el mismo Idempotency-Key devuelve el recibo guardado antes de validar el destino. Por servidor puede haber activo un reinicio o una actualización del SO y, por separado, un plan de actualización; un trabajo que no termina antes de su plazo falla con `deadline_exceeded` y libera su ranura. La acción solo se ofrece en `allowed_actions` cuando el agente del servidor anuncia `stackkit.host-maintenance.v1`, y `reboot` solo cuando el servidor además informa `host_boot_id`. Los rechazos son documentos client-error-envelope/v1; el `reason_code` de 409 es uno de control_plane_host, substrate_node, protected_demo_server, service_locked, maintenance_active, node_operation_active, plan_stale, agent_capability_missing, boot_id_unknown, agent_not_connected, heartbeat_stale, inventory_revision_stale o idempotency_key_reused; 403 lleva entitlement_required o server_maintenance_step_up_required.
+Requiere el entitlement `techstack.servers.maintenance` firmado por Edge, la propiedad del servidor en el tenant y autoridad permanente vigente vinculada al servidor para las llamadas MCP nativas delegadas. Estas tres acciones ordinarias no requieren MFA reciente ni una afirmación owner_approved separada. El cuerpo se decodifica de forma estricta: claves exactas en minúsculas, sin duplicados ni campos desconocidos. Una repetición con la misma Idempotency-Key devuelve el recibo almacenado antes de validar el destino. Puede estar activo un reinicio o actualización y, por separado, un plan de actualización por servidor; un job que no termina dentro de su plazo falla con `deadline_exceeded` y libera su slot. La acción solo se ofrece en `allowed_actions` cuando el agente anuncia `stackkit.host-maintenance.v1`, y `reboot` solo cuando el servidor también informa `host_boot_id`. Los rechazos son documentos client-error-envelope/v1; el `reason_code` 409 es control_plane_host, substrate_node, protected_demo_server, service_locked, maintenance_active, node_operation_active, plan_stale, agent_capability_missing, boot_id_unknown, agent_not_connected, heartbeat_stale, inventory_revision_stale o idempotency_key_reused; 403 incluye entitlement_required o maintenance_origin_authority_denied.
 
 ```bash
 techstack api servers maintenance run <server-id> [flags]
 ```
-
-<Warning>Requiere confirmación. Esta operación reinicia, actualiza o planifica una actualización del sistema operativo del servidor, según lo solicitado. Pasa `--yes` o responde a la pregunta; una ejecución no interactiva sin `--yes` se detiene antes de cualquier solicitud con el código de salida 9.</Warning>
 
 | | |
 | --- | --- |
@@ -112,9 +110,51 @@ techstack api servers maintenance run <server-id> [flags]
 | `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
 | `--action` | string | **Obligatorio.** Uno de `os_update_plan`, `os_update`, `reboot`. |
 | `--expected-inventory-revision` | integer | **Obligatorio.** |
-| `--expected-plan-digest` | string | Solo para os_update: el plan_digest de un os_update_plan completado para este servidor con una antigüedad máxima de 15 minutos. |
-| `--owner-approved` | boolean | Debe ser true para os_update y reboot. |
+| `--expected-plan-digest` | string | Solo para os_update: el plan_digest de un os_update_plan completado para este servidor hace como máximo 15 minutos. |
+| `--owner-approved` | boolean | Campo legacy opcional; no concede autoridad de mantenimiento. |
 | `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api servers network get
+
+Consulta los datos de red del servidor y cualquier traslado de red doméstica registrado.
+
+La red que kombify Guard observó por última vez en el servidor (dirección, gateway, subred, interfaz, red WiFi), el registro `network_move` que kombify creó cuando el servidor apareció en otra red y el estado de la revinculación posterior. Un servidor trasladado se revincula automáticamente; `can_rebind` indica si el propietario puede iniciar una revinculación ahora.
+
+```bash
+techstack api servers network get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/network` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_server_network` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
+
+## techstack api servers network rebind
+
+Revincula un servidor trasladado a la red en la que se encuentra ahora.
+
+Ejecuta `stackkit network rebind` en el servidor mediante kombify Guard: el nodo vuelve a detectar su dirección LAN, emite de nuevo el registro firmado de custodia DNS LAN y regenera y aplica el workspace. La solicitud no tiene cuerpo. Requiere al propietario, el permiso operate de Inventory, el entitlement `techstack.servers.maintenance` y un Guard conectado (en caso contrario, 409 `server_network_not_ready`). Si ya hay una revinculación en cola o en ejecución, devuelve su job en lugar de poner otra en cola.
+
+```bash
+techstack api servers network rebind <server-id> [flags]
+```
+
+<Warning>Requiere confirmación. Esta operación vuelve a detectar la dirección del servidor en su red actual, emite de nuevo su registro DNS local firmado y vuelve a aplicar su workspace. Pasa `--yes` o responde a la pregunta; una ejecución no interactiva sin `--yes` se detiene antes de cualquier solicitud con el código de salida 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/network/rebind` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `rebind_server_network` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
 
 ## techstack api servers ports
 
@@ -131,6 +171,161 @@ techstack api servers ports <server-id> [flags]
 | HTTP | `GET /api/v1/servers/{serverId}/ports` |
 | Cambia el estado | No |
 | Herramienta MCP | `get_server_runtime_ports` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
+
+## techstack api servers reach set
+
+Publica el servidor en una dirección kombify.me o deja de publicarlo.
+
+Por defecto no se publica nada: un servidor emparejado no tiene ruta pública y el relay no transporta tráfico. El propietario lo activa por servidor con un nombre `service` y un `target_port` explícitos (el origen siempre es el loopback del host del Guard, nunca otra máquina) y puede retirarlo en cualquier momento. El relay autentica al Guard, no al visitante, por lo que el servicio de ese puerto debe protegerse por sí mismo. La activación requiere al propietario, el entitlement `techstack.servers.maintenance` y un inicio de sesión multifactor reciente (motivo `server_reach_step_up_required`); la retirada nunca queda bloqueada por este requisito. Responde con la sección reach del modelo de lectura del servidor; después el reconciliador crea o retira la ruta.
+
+```bash
+techstack api servers reach set <server-id> [flags]
+```
+
+<Warning>Requiere confirmación. Esta operación publica un servicio del servidor en una dirección kombify.me pública que cualquiera en Internet puede abrir. Pasa `--yes` o responde a la pregunta; una ejecución no interactiva sin `--yes` se detiene antes de cualquier solicitud con el código de salida 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/servers/{serverId}/reach` |
+| Cambia el estado | Sí |
+| Herramienta MCP | Ninguna |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
+| `--enabled` | boolean | **Obligatorio.** |
+| `--service` | string | Obligatorio al activar. Etiqueta de ruta; la ruta kombify.me es &lt;base&gt;-&lt;service&gt;-&lt;server suffix&gt;. |
+| `--target-port` | integer | Obligatorio al activar. Puerto en el que escucha el servicio en el loopback del host del Guard (el host es fijo). |
+| `--target-scheme` | string | Uno de `http`, `https`. Predeterminado `"http"`. |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api servers security auto-repair get
+
+Consulta la aprobación del propietario para la reparación automática de seguridad.
+
+Un servidor sin aprobación, o con una aprobación caducada, solo se observa.
+
+```bash
+techstack api servers security auto-repair get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/security/auto-repair` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_server_security_auto_repair` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
+
+## techstack api servers security auto-repair set
+
+Aprueba o retira la reparación automática de un pequeño conjunto seguro de controles.
+
+Desactivada por defecto. Una aprobación identifica controles del conjunto seguro (`allowed_controls`: protección contra fuerza bruta, política del firewall, parámetros del kernel y actualizaciones automáticas de seguridad; nunca los controles SSH), caduca en un máximo de 90 días y no se renueva sola. Mientras está vigente, el plano de control repara un control identificado cuya evidencia reciente indica deriva, dentro de los mismos límites que una reparación del operador. Requiere al propietario, el entitlement `techstack.servers.maintenance` y un inicio de sesión multifactor reciente. `enabled: false` retira la aprobación.
+
+```bash
+techstack api servers security auto-repair set <server-id> [flags]
+```
+
+<Warning>Requiere confirmación. Esta operación permite que kombify Guard repare los controles de seguridad del host identificados sin preguntar cada vez, hasta que caduque la aprobación. Pasa `--yes` o responde a la pregunta; una ejecución no interactiva sin `--yes` se detiene antes de cualquier solicitud con el código de salida 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/servers/{serverId}/security/auto-repair` |
+| Cambia el estado | Sí |
+| Herramienta MCP | Ninguna |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
+| `--controls` | string\[\] | — |
+| `--enabled` | boolean | **Obligatorio.** |
+| `--expires-at` | string | — |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api servers security findings
+
+Lista los hallazgos abiertos y el historial reciente de hallazgos de un servidor.
+
+El registro de hallazgos que sustenta `security`, `recovery` y las alertas del Guard del servidor. Cada hallazgo representa un episodio: se abre al observar por primera vez un hecho incorrecto y se resuelve cuando vuelve a observarse correcto, con como máximo una alerta (`alerted_at`) y una resolución. El historial se conserva durante 90 días.
+
+```bash
+techstack api servers security findings <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/security/findings` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_server_security_findings` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
+
+## techstack api servers security repairs list
+
+Lista las reparaciones de seguridad recientes de un servidor.
+
+```bash
+techstack api servers security repairs list <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/security/repairs` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_server_security_repairs` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
+
+## techstack api servers security repairs request
+
+Repara los controles de seguridad del host identificados que presentan deriva.
+
+Solicita una reparación limitada de los controles que la evidencia reciente de seguridad del host identifica como desviados y reparables automáticamente. Requiere al propietario del servidor, el entitlement `techstack.servers.maintenance` firmado por Edge y un inicio de sesión multifactor reciente (de como máximo 300 segundos). La reparación viaja como un comando tipado y registrado del Guard que ejecuta `stackkit host security repair --apply` exactamente para los controles identificados; StackKits rechaza, antes de cambiar nada, cualquier cambio que corte la vía de administración o deje al propietario sin acceso. Límites: una reparación por servidor a la vez (409 `repair_in_progress`), una espera por control (429 `repair_cooldown`), un presupuesto diario de intentos por control (429 `repair_attempts_exhausted`) y un cortacircuitos tras fallos consecutivos (429 `repair_circuit_open`); las respuestas 429 incluyen `retry_after`. Se rechaza un control conforme (409 `control_not_drifted`), con una excepción aprobada (`control_has_exception`), manual (`control_not_repairable`), bloqueado por falta de una clave SSH autorizada (`needs_authorized_key`) o no observado. El cuerpo se decodifica de forma estricta.
+
+```bash
+techstack api servers security repairs request <server-id> [flags]
+```
+
+<Warning>Requiere confirmación. Esta operación restaura en el servidor los controles de seguridad del host identificados (firewall, SSH, protección contra fuerza bruta y actualizaciones automáticas) mediante kombify Guard. Pasa `--yes` o responde a la pregunta; una ejecución no interactiva sin `--yes` se detiene antes de cualquier solicitud con el código de salida 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/security/repairs` |
+| Cambia el estado | Sí |
+| Herramienta MCP | Ninguna |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<server-id>` | string | **Obligatorio.** ID canónico del runtime del servidor. |
+| `--controls` | string\[\] | **Obligatorio.** |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## techstack api servers security verify
+
+Pide a kombify Guard una observación reciente de la seguridad del host.
+
+Registra que se desea una observación reciente de la baseline del host. El Guard responde en su siguiente check-in (aproximadamente en un minuto) con un nuevo informe; no cambia nada en el host. El modelo de lectura `security` del servidor solo se actualiza mediante ese informe, nunca mediante esta solicitud. Un servidor de otro tenant o propietario devuelve 404; uno sin Guard devuelve 409 `guard_not_connected`.
+
+```bash
+techstack api servers security verify <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/security/verify` |
+| Cambia el estado | Sí |
+| Herramienta MCP | Ninguna |
 
 | Argumento | Tipo | Descripción |
 | --- | --- | --- |

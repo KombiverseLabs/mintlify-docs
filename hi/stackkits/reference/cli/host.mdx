@@ -261,6 +261,7 @@ stackkit host security status [flags]
 
 | Flag | प्रकार | डिफ़ॉल्ट | विवरण |
 | --- | --- | --- | --- |
+| `--drift-scope` | string | `all` | `--fail-on-drift` तय करने वाले नियंत्रण: all या enforced (केवल वे नियंत्रण जिन्हें बेसलाइन स्वयं लागू करती है; पैच में देरी, लंबित रीबूट, एक्सपोज़र और प्रमाणपत्र फिर भी देखे और रिपोर्ट किए जाते हैं) |
 | `--fail-on-drift` | bool | — | होस्ट drifted होने पर 5 और उसकी स्थिति unknown होने पर 6 के साथ बाहर निकलें |
 | `--json` | bool | — | साक्ष्य मशीन-पठनीय JSON में जारी करें |
 
@@ -280,6 +281,7 @@ stackkit host security verify [flags]
 | --- | --- | --- | --- |
 | `--declared-port` | stringArray | — | tcp/443 या udp/5353 के रूप में घोषित सेवा पोर्ट (दोहराया जा सकता है) |
 | `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | ओनर-नियंत्रित अपवाद फ़ाइल (हर अपवाद के लिए ओनर और समाप्ति आवश्यक है) |
+| `--drift-scope` | string | `all` | `--fail-on-drift` तय करने वाले नियंत्रण: all या enforced (केवल वे नियंत्रण जिन्हें बेसलाइन स्वयं लागू करती है; पैच में देरी, लंबित रीबूट, एक्सपोज़र और प्रमाणपत्र फिर भी देखे और रिपोर्ट किए जाते हैं) |
 | `--fail-on-drift` | bool | — | होस्ट drifted होने पर 5 और उसकी स्थिति unknown होने पर 6 के साथ बाहर निकलें |
 | `--freshness` | duration | `15m0s` | साक्ष्य की समय-सीमा समाप्त होने से पहले उस पर भरोसे की अवधि (1m से 24h) |
 | `--json` | bool | — | परिणाम मशीन-पठनीय JSON में जारी करें |
@@ -297,8 +299,11 @@ stackkit host security verify [flags]
 # Verify this host and record the evidence
 sudo stackkit host security verify
 
-# What Techstack runs: machine-readable, advanced mode, exit non-zero on drift
+# Machine-readable, advanced mode, exit non-zero on any drifted control
 sudo stackkit host security verify --mode advanced --json --fail-on-drift
+
+# What the Techstack host pre-step runs: only the controls the baseline enforces decide the exit code; patch lag, pending reboot, exposure and certificates are still observed and reported
+sudo stackkit host security verify --mode advanced --json --fail-on-drift --drift-scope enforced
 
 # Judge exposure against the ports the verified plan declares
 sudo stackkit host security verify --resolved-plan plan.json --local-node node-1

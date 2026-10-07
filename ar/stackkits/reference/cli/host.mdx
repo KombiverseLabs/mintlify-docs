@@ -261,6 +261,7 @@ stackkit host security status [flags]
 
 | الخيار | النوع | الافتراضي | الوصف |
 | --- | --- | --- | --- |
+| `--drift-scope` | string | `all` | الضوابط التي تحدد `--fail-on-drift`: all أو enforced، أي فقط الضوابط التي يفرضها خط الأساس بنفسه؛ وتظل ملاحظة تأخر التحديثات وإعادة التشغيل المنتظرة والتعرّض والشهادات والإبلاغ عنها قائمة |
 | `--fail-on-drift` | bool | — | الخروج بالرمز 5 عندما يكون المضيف drifted وبالرمز 6 عندما تكون حالته unknown |
 | `--json` | bool | — | إصدار الدليل بصيغة JSON قابلة للقراءة آليًا |
 
@@ -279,6 +280,7 @@ stackkit host security verify [flags]
 | الخيار | النوع | الافتراضي | الوصف |
 | --- | --- | --- | --- |
 | `--declared-port` | stringArray | — | منفذ خدمة معلن بالصيغة tcp/443 أو udp/5353 (قابل للتكرار) |
+| `--drift-scope` | string | `all` | الضوابط التي تحدد `--fail-on-drift`: all أو enforced، أي فقط الضوابط التي يفرضها خط الأساس بنفسه؛ وتظل ملاحظة تأخر التحديثات وإعادة التشغيل المنتظرة والتعرّض والشهادات والإبلاغ عنها قائمة |
 | `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | ملف استثناءات يتحكم فيه المالك (يحتاج كل استثناء إلى مالك وتاريخ انتهاء) |
 | `--fail-on-drift` | bool | — | الخروج بالرمز 5 عندما يكون المضيف drifted وبالرمز 6 عندما تكون حالته unknown |
 | `--freshness` | duration | `15m0s` | مدة إمكان الاعتماد على الدليل قبل انتهاء صلاحيته (من 1m إلى 24h) |
@@ -297,8 +299,11 @@ stackkit host security verify [flags]
 # Verify this host and record the evidence
 sudo stackkit host security verify
 
-# What Techstack runs: machine-readable, advanced mode, exit non-zero on drift
+# Machine-readable, advanced mode, exit non-zero on any drifted control
 sudo stackkit host security verify --mode advanced --json --fail-on-drift
+
+# What the Techstack host pre-step runs: only the controls the baseline enforces decide the exit code; patch lag, pending reboot, exposure and certificates are still observed and reported
+sudo stackkit host security verify --mode advanced --json --fail-on-drift --drift-scope enforced
 
 # Judge exposure against the ports the verified plan declares
 sudo stackkit host security verify --resolved-plan plan.json --local-node node-1

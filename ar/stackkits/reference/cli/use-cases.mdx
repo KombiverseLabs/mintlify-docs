@@ -9,7 +9,28 @@ sidebarTitle: "use-cases"
 stackkit use-cases [flags]
 ```
 
-الأوامر الفرعية: [`stackkit use-cases pick`](#stackkit-use-cases-pick)
+الأوامر الفرعية: [`stackkit use-cases add`](#stackkit-use-cases-add), [`stackkit use-cases pick`](#stackkit-use-cases-pick)
+
+## stackkit use-cases add
+
+أضف حالة استخدام من الكتالوج إلى تثبيت مستقل قائم.
+
+أضف حالة استخدام باستخدام القيم الافتراضية للبديل وملف تعريف الوحدة التي يملكها CUE في الطقم المثبّت. احتفظ بأحمال العمل والمسارات والمواضع والتخزين القائمة. احفظ المرشح وفق تجزئة spec الحالية وأنشئ فقط خانات الأسرار المحلية لحالة الاستخدام المختارة. يُعاد استخدام الحفظ القائم. لا تُنشر خدمات؛ ولّد النية المحدّثة وطبّقها عبر دورة الحياة المعتادة. يلزم stackkit/v2alpha2 أصلي وتثبيت مستقل بعقدة واحدة وموقع واحد.
+
+```bash
+stackkit use-cases add <slug> [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--expected-spec-hash` | string | — | اشترط تجزئة spec الحالية المعتمدة هذه؛ وعند الإغفال تُستخدم التجزئة المقروءة قبل الإنشاء |
+
+**أمثلة**
+
+```bash
+stackkit use-cases add mail
+stackkit use-cases add mail --expected-spec-hash sha256:<current-hash>
+```
 
 ## stackkit use-cases pick
 

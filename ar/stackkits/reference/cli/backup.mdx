@@ -358,7 +358,7 @@ stackkit backup status --json
 stackkit backup target [flags]
 ```
 
-الأوامر الفرعية: [`stackkit backup target import`](#stackkit-backup-target-import)، [`stackkit backup target status`](#stackkit-backup-target-status)
+الأوامر الفرعية: [`stackkit backup target import`](#stackkit-backup-target-import), [`stackkit backup target recipient`](#stackkit-backup-target-recipient), [`stackkit backup target status`](#stackkit-backup-target-status)
 
 ### stackkit backup target import
 
@@ -375,12 +375,36 @@ stackkit backup target import [flags]
 | `--candidate-digest` | string | — | بصمة sha256 الدقيقة للإصدار المرشح المثبَّت من StackKits |
 | `--owner-approve` | bool | — | تفويض هدف النسخ الاحتياطي المحلي هذا بدقة |
 | `--rebind` | bool | — | تجديد سلطة الخطة/المصدر مع الحفاظ على الهدف وبيانات الاعتماد الحاليين |
+| `--sealed` | bool | — | اقرأ غلاف تسليم مختومًا للمضيف من stdin بدلًا من JSON بنص صريح |
+| `--tenant-ref` | string | — | المستأجر الذي يجب أن يُوجَّه إليه التسليم المختوم، وهو مطلوب مع `--sealed` |
 
 **أمثلة**
 
 ```bash
 # Import the S3 target from a private JSON file with the fields listed above
 stackkit backup target import --owner-approve < s3-target.json
+```
+
+### stackkit backup target recipient
+
+أثبت مفتاح المستلِم الخاص بهذه العقدة للتسليم المختوم.
+
+ينشئ مرة واحدة مفتاح تشفير مستقلاً للمستلِم على هذه العقدة، ويطبع بيانًا موقّعًا بمفتاح المالك المحلي يربط المفتاح العام بهذا الموقع وهذه العقدة ويجيب عن تحدّي المستدعي. لا يغادر المفتاح الخاص الحفظ المحلي أبدًا. تختم جهة التسليم مواد وجهة النسخ الاحتياطي لهذا المفتاح؛ استوردها باستخدام `backup target import --sealed`.
+
+```bash
+stackkit backup target recipient [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--challenge` | string | — | قيمة حديثة من جهة التسليم يجب أن يعيد البيان إظهارها |
+| `--owner-approve` | bool | — | صرّح بمفتاح المستلِم لهذه العقدة |
+| `--source-generation` | bool | — | تحقّق من التوليد المحتفَظ به باستخدام مصدره المثبّت المشهود قبل تجديد الحفظ نفسه |
+
+**أمثلة**
+
+```bash
+stackkit backup target recipient --challenge "$CHALLENGE" --owner-approve
 ```
 
 ### stackkit backup target status

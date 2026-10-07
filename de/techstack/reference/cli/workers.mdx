@@ -2,9 +2,9 @@
 title: "techstack api workers"
 description: "Generierte Referenz für die Befehle unter techstack api workers"
 sidebarTitle: "workers"
-release: "v0.32.8"
+release: "v0.39.0"
 ---
-<Note>Generiert aus dem Techstack-Release v0.32.8 (Quelle `4c7d219a5d56`). Für eine installierte Version ist `techstack api <command> --help` maßgeblich.</Note>
+<Note>Generiert aus dem Techstack-Release v0.39.0 (Quelle `49677b729cb9`). Für eine installierte Version ist `techstack api <command> --help` maßgeblich.</Note>
 
 ## techstack api workers approve
 
@@ -24,6 +24,86 @@ techstack api workers approve <id> [flags]
 | --- | --- | --- |
 | `<id>` | string | **Erforderlich.** Ressourcen-ID. |
 
+## techstack api workers identity upgrade approve
+
+Den von einem Legacy-Server vorgeschlagenen Schlüssel freigeben.
+
+Bindet den durch `key_thumbprint` bezeichneten ausstehenden Schlüssel und bindet damit den Worker an den Schlüssel (Anfragen nur mit Bearer-Credential werden danach abgelehnt). Erfordert den Owner und eine frische Multi-Faktor-Anmeldung (höchstens 300 Sekunden alt). Freigebendes Subjekt und Zeitpunkt werden mit der Identität aufgezeichnet und protokolliert. 409 `identity_upgrade_not_pending`, wenn kein noch gültiger ausstehender Schlüssel diesen Fingerabdruck hat.
+
+```bash
+techstack api workers identity upgrade approve <id> [flags]
+```
+
+<Warning>Erfordert Bestätigung: Diese Operation entscheidet, welcher Schlüssel den Server steuern darf; gib nur einen Schlüssel frei, dessen Fingerabdruck Guard auf dem Server protokolliert. Übergib `--yes` oder beantworte die Rückfrage; ein nicht interaktiver Lauf ohne `--yes` stoppt vor jeder Anfrage mit Exit-Code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/identity/upgrade/approve` |
+| Ändert Zustand | Ja |
+| MCP-Tool | `approve_worker_identity_upgrade` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<id>` | string | **Erforderlich.** Ressourcen-ID. |
+| `--key-thumbprint` | string | **Erforderlich.** |
+| `--body` | json | JSON-Request-Body (`application/json`) als Literal, `@path` oder `-` für stdin. |
+
+## techstack api workers identity upgrade reject
+
+Den von einem Legacy-Server vorgeschlagenen Schlüssel verwerfen.
+
+Zurücksetzen durch den Owner, wenn der ausstehende Schlüssel nicht der eigene Schlüssel des Servers ist: Der Vorschlag wird verworfen und muss erneut gestellt werden. Das Rotieren der Server-Zugangsdaten beendet den Zugriff ihres Inhabers auf den Bindungs-Endpoint.
+
+```bash
+techstack api workers identity upgrade reject <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/identity/upgrade/reject` |
+| Ändert Zustand | Ja |
+| MCP-Tool | Keine |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<id>` | string | **Erforderlich.** Ressourcen-ID. |
+
+## techstack api workers identity upgrade-status
+
+Anzeigen, ob der Identitätsschlüssel eines Servers noch freigegeben werden muss.
+
+Für den Owner des Workers. `identity_binding=legacy_bearer` mit `code=guard_identity_upgrade_required` bedeutet, dass der Server sich ausschließlich mit seinem Bearer-Credential authentifiziert und nur beobachtet wird. `pending` enthält den Fingerabdruck des vorgeschlagenen Schlüssels; der Owner vergleicht ihn mit dem von Guard auf dem Server protokollierten Fingerabdruck. Ein Worker eines anderen Tenants oder Owners liefert 404.
+
+```bash
+techstack api workers identity upgrade-status <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/{id}/identity/upgrade` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `get_worker_identity_upgrade` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<id>` | string | **Erforderlich.** Ressourcen-ID. |
+
+## techstack api workers identity upgrades
+
+Die Server des Owners auflisten, die auf die Freigabe ihres Identitätsschlüssels warten.
+
+Für den Owner. Jeder Eintrag ist ein eigener Server, der einen Schlüssel vorgeschlagen hat und nur beobachtet wird, bis genau dieser Schlüssel mit `approveWorkerIdentityUpgrade` freigegeben wurde (frische Multi-Faktor-Anmeldung erforderlich). Die Einträge enthalten Hostnamen und Schlüssel-Fingerabdruck zum Vergleich mit dem von Guard auf dem Server protokollierten Fingerabdruck. Das Auflisten erteilt keine Rechte.
+
+```bash
+techstack api workers identity upgrades [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/identity-upgrades` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `list_worker_identity_upgrades` |
+
 ## techstack api workers list
 
 Registrierte Worker auflisten (nach Owner gefiltert).
@@ -42,6 +122,53 @@ techstack api workers list [flags]
 | --- | --- | --- |
 | `--page` | integer | Seitennummer (Standard 1). |
 | `--per-page` | integer | Einträge pro Seite (Standard 20, max. 100). |
+
+## techstack api workers outcomes list
+
+Die ungeklärten Operationsergebnisse eines kombify Guard auflisten.
+
+Listet die Operationen eines eigenen Workers auf, deren Ergebnis unbekannt ist: kombify Guard hat aufgezeichnet, dass die Wirkung möglicherweise eingetreten ist, möglicherweise aber auch nicht, und keine Beobachtung dies geklärt hat. Jede solche Operation sperrt weitere Änderungen am Server. `state` ist `reconciling`, solange Guard die Klärung versucht, und `needs_operator`, sobald das Ergebnis über die konfigurierte Zeit hinaus ungeklärt blieb (`TECHSTACK_GUARD_OUTCOME_NEEDS_OPERATOR_AFTER`, standardmäßig 30 Minuten). Die Zeit verändert ausschließlich die Darstellung des Ergebnisses; sie hebt die Sperre niemals auf. Ein Worker eines anderen Tenants oder Owners liefert 404.
+
+```bash
+techstack api workers outcomes list <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/{id}/outcomes` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `list_guard_unresolved_outcomes` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<id>` | string | **Erforderlich.** Ressourcen-ID. |
+
+## techstack api workers outcomes resolve
+
+Ein ungeklärtes Operationsergebnis des kombify Guard freigeben.
+
+Speichert für eine Operation mit unbekanntem Ergebnis eine neue Operator-Auflösungsrevision, die die bisherigen Einträge nur ergänzt, und hebt die Sperre des Workers auf. `disposition` ist `verified_applied` (die Wirkung liegt vor), `verified_not_applied` (es ist nichts geschehen) oder `accept_unknown` (Freigabe ohne verifiziertes Ergebnis); `note` hält fest, was verifiziert wurde. Akteur ist das authentifizierte Subjekt; es wird mit der Revision aufgezeichnet. Ein Guard darf diese Festlegungen nicht speichern. Eine frische Multi-Faktor-Anmeldung (höchstens 300 Sekunden alt) ist erforderlich. `expected_revision` muss der von der Liste zurückgegebenen Revision entsprechen, andernfalls 409 `outcome_revision_stale`. Der Body wird strikt dekodiert: exakte Schlüssel, keine unbekannten Felder.
+
+```bash
+techstack api workers outcomes resolve <id> <command-id> [flags]
+```
+
+<Warning>Erfordert Bestätigung: Diese Operation hebt die Sperre einer Operation auf, deren Ergebnis nie geklärt wurde; dadurch können widersprüchliche Änderungen am Server ausgeführt werden. Übergib `--yes` oder beantworte die Rückfrage; ein nicht interaktiver Lauf ohne `--yes` stoppt vor jeder Anfrage mit Exit-Code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/outcomes/{command_id}/resolve` |
+| Ändert Zustand | Ja |
+| MCP-Tool | Keine |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<id>` | string | **Erforderlich.** Ressourcen-ID. |
+| `<command-id>` | string | **Erforderlich.** |
+| `--disposition` | string | **Erforderlich.** Mögliche Werte: `verified_applied`, `verified_not_applied`, `accept_unknown`. |
+| `--expected-revision` | integer | **Erforderlich.** |
+| `--note` | string | **Erforderlich.** |
+| `--body` | json | JSON-Request-Body (`application/json`) als Literal, `@path` oder `-` für stdin. |
 
 ## techstack api workers prechecks list
 

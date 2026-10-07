@@ -2,9 +2,35 @@
 title: "techstack api services"
 description: "Generierte Referenz für die Befehle unter techstack api services"
 sidebarTitle: "services"
-release: "v0.32.8"
+release: "v0.39.0"
 ---
-<Note>Generiert aus dem Techstack-Release v0.32.8 (Quelle `4c7d219a5d56`). Für eine installierte Version ist `techstack api <command> --help` maßgeblich.</Note>
+<Note>Generiert aus dem Techstack-Release v0.39.0 (Quelle `49677b729cb9`). Für eine installierte Version ist `techstack api <command> --help` maßgeblich.</Note>
+
+## techstack api services execute-application-adoption
+
+Den exakt geprüften Quellenplan mit ausdrücklicher Owner-Freigabe ausführen.
+
+Validiert den beibehaltenen Digest, die Quellenidentität, die Revision und das Release erneut. Nur ein authentifizierter Verwahrungsbeleg der gepinnten CLI begründet die Zugehörigkeit. Konten, Konfiguration und persistente Daten bleiben erhalten; es wird keine neue Runtime erstellt. Ein Wechsel auf einen anderen Node und eine generische Übernahme werden nicht unterstützt.
+
+```bash
+techstack api services execute-application-adoption [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/adoption-plans/{planId}/execute` |
+| Ändert Zustand | Ja |
+| MCP-Tool | `execute_application_adoption` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `--service-id` | string | **Erforderlich.** Kanonische Service-Runtime-ID. |
+| `--plan-id` | string | **Erforderlich.** |
+| `--expected-inventory-revision` | integer | **Erforderlich.** |
+| `--mode` | string | Mögliche Werte: `adopt_in_place`. |
+| `--owner-approved` | boolean | Standard `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | JSON-Request-Body (`application/json`) als Literal, `@path` oder `-` für stdin. |
 
 ## techstack api services get
 
@@ -63,6 +89,113 @@ techstack api services logs <service-id> [flags]
 | `--limit` | integer | Standard `100`. |
 | `--cursor` | string | — |
 
+## techstack api services metrics
+
+Gemessene Ressourcenmetriken für einen eigenen Dienst lesen.
+
+Verwendet das bestehende Guard-Telemetrie-Abfragebackend und legt Tenant, kanonischen Server und Container-Selektoren aus dem autorisierten Dienst-Inventory fest. Ein leerer Vektor bedeutet, dass keine Ressourcenmetrik gemessen wurde.
+
+```bash
+techstack api services metrics [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/metrics` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `get_service_metrics` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `--service-id` | string | **Erforderlich.** |
+
+## techstack api services prepare-application-adoption
+
+Einen exakten bestehenden Home-Assistant-Container für die Übernahme am bestehenden Ort bewerten.
+
+Bewahrt die an die Quelle gebundene Bewertung im bestehenden dauerhaften Job-Store auf. Erfordert einen verbundenen Guard und das exakte geeignete veröffentlichte CLI-Release. Diese lesende Operation begründet keine Zugehörigkeit zu Stacked.
+
+```bash
+techstack api services prepare-application-adoption [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/adoption-plans` |
+| Ändert Zustand | Ja |
+| MCP-Tool | `prepare_application_adoption` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `--service-id` | string | **Erforderlich.** Kanonische Service-Runtime-ID. |
+| `--expected-inventory-revision` | integer | **Erforderlich.** |
+| `--mode` | string | Mögliche Werte: `adopt_in_place`. |
+| `--owner-approved` | boolean | Standard `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | JSON-Request-Body (`application/json`) als Literal, `@path` oder `-` für stdin. |
+
+## techstack api services read-application-adoption-plan
+
+Die beibehaltene Anwendungsbewertung und den dauerhaften Fortschritt lesen.
+
+```bash
+techstack api services read-application-adoption-plan [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/adoption-plans/{planId}` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `read_application_adoption_plan` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `--service-id` | string | **Erforderlich.** Kanonische Service-Runtime-ID. |
+| `--plan-id` | string | **Erforderlich.** |
+
+## techstack api services read-application-connector
+
+Den Status des Node-eigenen Connectors und die aktuelle veröffentlichte Transportzulassung lesen.
+
+Gibt eine Projektion ohne Secrets zurück. Ein nicht verfügbarer unterstützender Katalog bleibt nicht ausführbarer SourcePreview; veraltete Nachweise an einem unterstützenden Pin erfordern eine aktuelle lesende Verifikation. Ausführbarkeit setzt außerdem die aktuelle kanonische Host-Schlüssel-, Node- und Lease-Autorität voraus.
+
+```bash
+techstack api services read-application-connector [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/connector` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `read_application_connector` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `--service-id` | string | **Erforderlich.** Kanonische Service-Runtime-ID. |
+
+## techstack api services release-application-lifecycle
+
+Eine übernommene Lebenszyklusbindung lösen, ohne ihre Runtime zu löschen oder anzuhalten.
+
+```bash
+techstack api services release-application-lifecycle [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/release` |
+| Ändert Zustand | Ja |
+| MCP-Tool | `release_application_lifecycle` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `--service-id` | string | **Erforderlich.** Kanonische Service-Runtime-ID. |
+| `--expected-inventory-revision` | integer | **Erforderlich.** |
+| `--mode` | string | Mögliche Werte: `adopt_in_place`. |
+| `--owner-approved` | boolean | Standard `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | JSON-Request-Body (`application/json`) als Literal, `@path` oder `-` für stdin. |
+
 ## techstack api services run-action
 
 Eine vom Owner autorisierte StackKits-Service-Aktion einreihen.
@@ -83,3 +216,30 @@ techstack api services run-action <service-id> [flags]
 | --- | --- | --- |
 | `<service-id>` | string | **Erforderlich.** Kanonische Service-Runtime-ID. |
 | `--body` | json | **Erforderlich.** JSON-Request-Body (`application/json`) als Literal, `@path` oder `-` für stdin. |
+
+## techstack api services setup-application-connector
+
+Einen deklarierten eigenen Home-Assistant-Connector auf seinem Node sicherstellen oder widerrufen.
+
+Erfordert frische Backend-Ownership, eine positive operate-Autorisierung, exaktes aktuelles Inventory und eine Owner-Freigabe. Überträgt ausschließlich festgelegte Korrelationsmetadaten über Guard an die veröffentlichte gepinnte CLI; deren lokale signedApply- und Owner-Setup-Autorität bleiben verpflichtend. Speichert vor dem Versand eine dauerhafte Absicht; bei unbekannter Bestätigung wird ausschließlich der ursprüngliche Vorgang lesend abgeglichen. Der aktuellen v0.51.8 fehlt der unterstützende Katalog; sie gibt nicht ausführbaren SourcePreview zurück. Zugangsdaten verbleiben in der Verwahrung des Nodes.
+
+```bash
+techstack api services setup-application-connector [flags]
+```
+
+<Warning>Erfordert Bestätigung: Diese Operation stellt die geprüften Node-eigenen Home-Assistant-Connector-Zugangsdaten für genau diesen Dienst aus oder widerruft sie. Übergib `--yes` oder beantworte die Rückfrage; ein nicht interaktiver Lauf ohne `--yes` stoppt vor jeder Anfrage mit Exit-Code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/connector` |
+| Ändert Zustand | Ja |
+| MCP-Tool | `setup_application_connector` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `--service-id` | string | **Erforderlich.** Kanonische Service-Runtime-ID. |
+| `--action` | string | **Erforderlich.** Mögliche Werte: `ensure`, `revoke`. |
+| `--expected-inventory-revision` | integer | **Erforderlich.** |
+| `--lifespan-days` | integer | **Erforderlich.** |
+| `--owner-approved` | boolean | **Erforderlich.** Mögliche Werte: `true`. |
+| `--body` | json | JSON-Request-Body (`application/json`) als Literal, `@path` oder `-` für stdin. |

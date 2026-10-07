@@ -9,7 +9,7 @@ sidebarTitle: "advanced"
 stackkit advanced [flags]
 ```
 
-子命令：[`stackkit advanced change-set`](#stackkit-advanced-change-set), [`stackkit advanced restore-drill`](#stackkit-advanced-restore-drill), [`stackkit advanced rollback`](#stackkit-advanced-rollback), [`stackkit advanced trust`](#stackkit-advanced-trust)
+子命令： [`stackkit advanced change-set`](#stackkit-advanced-change-set), [`stackkit advanced origin-certificate`](#stackkit-advanced-origin-certificate), [`stackkit advanced restore-drill`](#stackkit-advanced-restore-drill), [`stackkit advanced rollback`](#stackkit-advanced-rollback), [`stackkit advanced trust`](#stackkit-advanced-trust)
 
 ## stackkit advanced change-set
 
@@ -49,6 +49,44 @@ stackkit advanced change-set create [flags]
 | --- | --- | --- | --- |
 | `--candidate-spec` | string | — | 指向使用 generation.target=terramate 的候选 StackSpec v2 的路径 |
 | `--capability` | string | — | 指向规范 stackkit.advanced-capability/v1 文件的路径 |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+## stackkit advanced origin-certificate
+
+管理受管 kombify.me 源站的 Cloudflare Origin CA 证书。
+
+```bash
+stackkit advanced origin-certificate [flags]
+```
+
+子命令： [`stackkit advanced origin-certificate install`](#stackkit-advanced-origin-certificate-install), [`stackkit advanced origin-certificate request`](#stackkit-advanced-origin-certificate-request)
+
+### stackkit advanced origin-certificate install
+
+验证并安装交付的源站证书。
+
+```bash
+stackkit advanced origin-certificate install [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--capability` | string | — | 允许 origin-certificate 操作的规范 stackkit.advanced-capability/v1 文件路径 |
+| `--certificate-file` | string | — | Cloudflare 为待处理 CSR 签发的 PEM 证书路径 |
+| `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
+
+### stackkit advanced origin-certificate request
+
+生成节点本地的源站密钥对并输出其 CSR。
+
+```bash
+stackkit advanced origin-certificate request [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--capability` | string | — | 允许 origin-certificate 操作的规范 stackkit.advanced-capability/v1 文件路径 |
+| `--hosts` | string | — | 证书覆盖的受管 kombify.me 主机名，以逗号分隔 |
 | `--json` | bool | — | 输出 stackkit.command-result/v1 JSON |
 
 ## stackkit advanced restore-drill

@@ -261,6 +261,7 @@ stackkit host security status [flags]
 
 | Flag | Typ | Standard | Beschreibung |
 | --- | --- | --- | --- |
+| `--drift-scope` | string | `all` | Kontrollelemente, die über `--fail-on-drift` entscheiden: all oder enforced (nur die von der Baseline selbst durchgesetzten Elemente; verzögerte Updates, ausstehende Neustarts, Exposition und Zertifikate werden weiterhin beobachtet und gemeldet) |
 | `--fail-on-drift` | bool | — | Mit 5 beenden, wenn der Host abweicht, und mit 6, wenn sein Zustand unbekannt ist |
 | `--json` | bool | — | Den Nachweis als maschinenlesbares JSON ausgeben |
 
@@ -280,6 +281,7 @@ stackkit host security verify [flags]
 | --- | --- | --- | --- |
 | `--declared-port` | stringArray | — | Deklarierter Dienst-Port als tcp/443 oder udp/5353 (wiederholbar) |
 | `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | Vom Besitzer kontrollierte Ausnahmedatei (jede Ausnahme benötigt einen Besitzer und ein Ablaufdatum) |
+| `--drift-scope` | string | `all` | Kontrollelemente, die über `--fail-on-drift` entscheiden: all oder enforced (nur die von der Baseline selbst durchgesetzten Elemente; verzögerte Updates, ausstehende Neustarts, Exposition und Zertifikate werden weiterhin beobachtet und gemeldet) |
 | `--fail-on-drift` | bool | — | Mit 5 beenden, wenn der Host abweicht, und mit 6, wenn sein Zustand unbekannt ist |
 | `--freshness` | duration | `15m0s` | Wie lange dem Nachweis bis zum Ablauf vertraut werden darf (1m bis 24h) |
 | `--json` | bool | — | Das Ergebnis als maschinenlesbares JSON ausgeben |
@@ -297,8 +299,11 @@ stackkit host security verify [flags]
 # Verify this host and record the evidence
 sudo stackkit host security verify
 
-# What Techstack runs: machine-readable, advanced mode, exit non-zero on drift
+# Machine-readable, advanced mode, exit non-zero on any drifted control
 sudo stackkit host security verify --mode advanced --json --fail-on-drift
+
+# What the Techstack host pre-step runs: only the controls the baseline enforces decide the exit code; patch lag, pending reboot, exposure and certificates are still observed and reported
+sudo stackkit host security verify --mode advanced --json --fail-on-drift --drift-scope enforced
 
 # Judge exposure against the ports the verified plan declares
 sudo stackkit host security verify --resolved-plan plan.json --local-node node-1

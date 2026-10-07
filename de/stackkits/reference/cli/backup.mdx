@@ -358,7 +358,7 @@ Ein vom Owner bereitgestelltes S3-Ziel an die generierte Backup-Richtlinie binde
 stackkit backup target [flags]
 ```
 
-Unterbefehle: [`stackkit backup target import`](#stackkit-backup-target-import), [`stackkit backup target status`](#stackkit-backup-target-status)
+Unterbefehle: [`stackkit backup target import`](#stackkit-backup-target-import), [`stackkit backup target recipient`](#stackkit-backup-target-recipient), [`stackkit backup target status`](#stackkit-backup-target-status)
 
 ### stackkit backup target import
 
@@ -375,12 +375,36 @@ stackkit backup target import [flags]
 | `--candidate-digest` | string | — | Exakter sha256-Digest des installierten StackKits-Release-Kandidaten |
 | `--owner-approve` | bool | — | Dieses exakte lokale Backup-Ziel autorisieren |
 | `--rebind` | bool | — | Plan- und Quellen-Autorität erneuern und dabei das bestehende Ziel samt Zugangsdaten beibehalten |
+| `--sealed` | bool | — | Einen versiegelten Host-Zustellungs-Envelope statt unverschlüsseltem JSON über stdin lesen |
+| `--tenant-ref` | string | — | Tenant, an den die versiegelte Zustellung adressiert sein muss (mit `--sealed` erforderlich) |
 
 **Beispiele**
 
 ```bash
 # Import the S3 target from a private JSON file with the fields listed above
 stackkit backup target import --owner-approve < s3-target.json
+```
+
+### stackkit backup target recipient
+
+Den Empfängerschlüssel dieses Nodes für versiegelte Zustellungen nachweisen.
+
+Erstellt einmalig den separaten Verschlüsselungs-Empfängerschlüssel dieses Nodes und gibt eine mit dem lokalen Owner-Schlüssel signierte Erklärung aus. Diese bindet den öffentlichen Schlüssel an diese Site und diesen Node und beantwortet die Challenge des Aufrufers. Der private Schlüssel verlässt die lokale Verwahrung nie. Eine zustellende Autorität versiegelt das Backup-Zielmaterial für diesen Schlüssel; importiere es mit `backup target import --sealed`.
+
+```bash
+stackkit backup target recipient [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--challenge` | string | — | Frischer Wert der zustellenden Autorität, den die Erklärung zurückgeben muss |
+| `--owner-approve` | bool | — | Den Empfängerschlüssel dieses Nodes autorisieren |
+| `--source-generation` | bool | — | Die beibehaltene Generierung mit ihrer installierten attestierten Quelle verifizieren, bevor dieselbe Verwahrung erneuert wird |
+
+**Beispiele**
+
+```bash
+stackkit backup target recipient --challenge "$CHALLENGE" --owner-approve
 ```
 
 ### stackkit backup target status

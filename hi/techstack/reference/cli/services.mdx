@@ -2,9 +2,35 @@
 title: "techstack api services"
 description: "techstack api services कमांड के लिए जनरेट किया गया संदर्भ"
 sidebarTitle: "services"
-release: "v0.32.8"
+release: "v0.39.0"
 ---
-<Note>Techstack v0.32.8 रिलीज़ (सोर्स `4c7d219a5d56`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+<Note>Techstack v0.39.0 रिलीज़ (सोर्स `49677b729cb9`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+
+## techstack api services execute-application-adoption
+
+स्पष्ट Owner मंज़ूरी के साथ ठीक समीक्षा किया गया सोर्स प्लान चलाएँ।
+
+संरक्षित डाइजेस्ट, सोर्स पहचान, रिविज़न और रिलीज़ फिर सत्यापित करता है। केवल प्रमाणित पिन की गई CLI की कस्टडी रसीद सदस्यता स्थापित करती है। खाते, कॉन्फ़िगरेशन और स्थायी डेटा सुरक्षित रहते हैं; कोई नया रनटाइम नहीं बनता। दूसरे Node पर ले जाना और सामान्यीकृत अपनाना समर्थित नहीं हैं।
+
+```bash
+techstack api services execute-application-adoption [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/adoption-plans/{planId}/execute` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `execute_application_adoption` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--service-id` | string | **आवश्यक।** कैनोनिकल सेवा रनटाइम ID। |
+| `--plan-id` | string | **आवश्यक।** |
+| `--expected-inventory-revision` | integer | **आवश्यक।** |
+| `--mode` | string | इनमें से एक: `adopt_in_place`. |
+| `--owner-approved` | boolean | डिफ़ॉल्ट `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
 
 ## techstack api services get
 
@@ -63,6 +89,113 @@ techstack api services logs <service-id> [flags]
 | `--limit` | integer | डिफ़ॉल्ट `100`। |
 | `--cursor` | string | — |
 
+## techstack api services metrics
+
+अपनी सेवा के मापे गए संसाधन मेट्रिक्स पढ़ें।
+
+मौजूदा Guard टेलीमेट्री क्वेरी बैकएंड उपयोग करता है और अधिकृत सेवा इन्वेंटरी से टेनेंट, कैनोनिकल सर्वर और कंटेनर चयनकर्ता तय करता है। खाली वेक्टर का मतलब है कि कोई संसाधन मेट्रिक मापी नहीं गई।
+
+```bash
+techstack api services metrics [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/metrics` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_service_metrics` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--service-id` | string | **आवश्यक।** |
+
+## techstack api services prepare-application-adoption
+
+एक ठीक निर्दिष्ट मौजूदा Home Assistant Container का उसी स्थान पर अपनाने के लिए मूल्यांकन करें।
+
+सोर्स-बद्ध मूल्यांकन मौजूदा टिकाऊ जॉब स्टोर में रखता है। कनेक्टेड Guard और ठीक आवश्यक क्षमता वाली प्रकाशित CLI रिलीज़ चाहिए। यह केवल-पठन ऑपरेशन Stacked सदस्यता स्थापित नहीं करता।
+
+```bash
+techstack api services prepare-application-adoption [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/adoption-plans` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `prepare_application_adoption` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--service-id` | string | **आवश्यक।** कैनोनिकल सेवा रनटाइम ID। |
+| `--expected-inventory-revision` | integer | **आवश्यक।** |
+| `--mode` | string | इनमें से एक: `adopt_in_place`. |
+| `--owner-approved` | boolean | डिफ़ॉल्ट `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api services read-application-adoption-plan
+
+संरक्षित एप्लिकेशन मूल्यांकन और टिकाऊ प्रगति पढ़ें।
+
+```bash
+techstack api services read-application-adoption-plan [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/adoption-plans/{planId}` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `read_application_adoption_plan` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--service-id` | string | **आवश्यक।** कैनोनिकल सेवा रनटाइम ID। |
+| `--plan-id` | string | **आवश्यक।** |
+
+## techstack api services read-application-connector
+
+नोड-स्वामित्व वाले कनेक्टर की स्थिति और वर्तमान प्रकाशित ट्रांसपोर्ट प्रवेश पढ़ें।
+
+सीक्रेट-रहित प्रक्षेपण लौटाता है। सहायक कैटलॉग उपलब्ध न हो तो स्थिति गैर-निष्पादन योग्य SourcePreview रहती है; सहायक पिन पर पुराने प्रमाण के लिए वर्तमान केवल-पठन सत्यापन चाहिए। निष्पादन योग्य होने के लिए वर्तमान कैनोनिकल होस्ट-कुंजी, नोड और लीज़ प्राधिकरण भी आवश्यक हैं।
+
+```bash
+techstack api services read-application-connector [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/connector` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `read_application_connector` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--service-id` | string | **आवश्यक।** कैनोनिकल सेवा रनटाइम ID। |
+
+## techstack api services release-application-lifecycle
+
+अपनाई गई लाइफ़साइकिल बाइंडिंग छोड़ें, उसका रनटाइम मिटाए या रोके बिना।
+
+```bash
+techstack api services release-application-lifecycle [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/release` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `release_application_lifecycle` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--service-id` | string | **आवश्यक।** कैनोनिकल सेवा रनटाइम ID। |
+| `--expected-inventory-revision` | integer | **आवश्यक।** |
+| `--mode` | string | इनमें से एक: `adopt_in_place`. |
+| `--owner-approved` | boolean | डिफ़ॉल्ट `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
 ## techstack api services run-action
 
 ओनर द्वारा अधिकृत StackKits सेवा एक्शन कतार में डालें।
@@ -83,3 +216,30 @@ techstack api services run-action <service-id> [flags]
 | --- | --- | --- |
 | `<service-id>` | string | **आवश्यक।** कैनोनिकल सेवा रनटाइम ID। |
 | `--body` | json | **आवश्यक।** JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api services setup-application-connector
+
+अपने नोड पर एक घोषित अपने Home Assistant कनेक्टर को सुनिश्चित करें या रद्द करें।
+
+ताज़ा बैकएंड स्वामित्व, सकारात्मक operate प्राधिकरण, ठीक वर्तमान इन्वेंटरी और Owner मंज़ूरी चाहिए। केवल निर्धारित सहसंबंध मेटाडेटा Guard से प्रकाशित पिन की गई CLI तक पहुँचाता है; उसकी स्थानीय signedApply और Owner सेटअप प्राधिकरण आवश्यक रहते हैं। भेजने से पहले टिकाऊ इंटेंट सहेजता है; अज्ञात पुष्टि पर केवल मूल ऑपरेशन का केवल-पठन मिलान होता है। वर्तमान v0.51.8 में सहायक कैटलॉग नहीं है और गैर-निष्पादन योग्य SourcePreview लौटता है। क्रेडेंशियल नोड की कस्टडी में रहते हैं।
+
+```bash
+techstack api services setup-application-connector [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन इसी सेवा के लिए समीक्षा किए गए नोड-स्वामित्व वाले Home Assistant कनेक्टर क्रेडेंशियल जारी या रद्द करता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/connector` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `setup_application_connector` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--service-id` | string | **आवश्यक।** कैनोनिकल सेवा रनटाइम ID। |
+| `--action` | string | **आवश्यक।** इनमें से एक: `ensure`, `revoke`. |
+| `--expected-inventory-revision` | integer | **आवश्यक।** |
+| `--lifespan-days` | integer | **आवश्यक।** |
+| `--owner-approved` | boolean | **आवश्यक।** इनमें से एक: `true`. |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
