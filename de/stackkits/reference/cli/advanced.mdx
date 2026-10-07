@@ -9,7 +9,7 @@ Offline autorisierte Advanced-Lifecycle-Operationen verwalten.
 stackkit advanced [flags]
 ```
 
-Unterbefehle: [`stackkit advanced change-set`](#stackkit-advanced-change-set), [`stackkit advanced restore-drill`](#stackkit-advanced-restore-drill), [`stackkit advanced rollback`](#stackkit-advanced-rollback), [`stackkit advanced trust`](#stackkit-advanced-trust)
+Unterbefehle: [`stackkit advanced change-set`](#stackkit-advanced-change-set), [`stackkit advanced origin-certificate`](#stackkit-advanced-origin-certificate), [`stackkit advanced restore-drill`](#stackkit-advanced-restore-drill), [`stackkit advanced rollback`](#stackkit-advanced-rollback), [`stackkit advanced trust`](#stackkit-advanced-trust)
 
 ## stackkit advanced change-set
 
@@ -49,6 +49,44 @@ stackkit advanced change-set create [flags]
 | --- | --- | --- | --- |
 | `--candidate-spec` | string | — | Pfad zur Kandidaten-StackSpec v2 mit generation.target=terramate |
 | `--capability` | string | — | Pfad zu einer kanonischen stackkit.advanced-capability/v1-Datei |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+
+## stackkit advanced origin-certificate
+
+Das Cloudflare-Origin-CA-Zertifikat verwalteter kombify.me-Origins verwalten.
+
+```bash
+stackkit advanced origin-certificate [flags]
+```
+
+Unterbefehle: [`stackkit advanced origin-certificate install`](#stackkit-advanced-origin-certificate-install), [`stackkit advanced origin-certificate request`](#stackkit-advanced-origin-certificate-request)
+
+### stackkit advanced origin-certificate install
+
+Das zugestellte Origin-Zertifikat verifizieren und installieren.
+
+```bash
+stackkit advanced origin-certificate install [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--capability` | string | — | Pfad zu einer kanonischen stackkit.advanced-capability/v1-Datei, die die origin-certificate-Operation erlaubt |
+| `--certificate-file` | string | — | Pfad zum PEM-Zertifikat, das Cloudflare für die ausstehende CSR ausgestellt hat |
+| `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
+
+### stackkit advanced origin-certificate request
+
+Das lokale Origin-Schlüsselpaar des Nodes generieren und seine CSR ausgeben.
+
+```bash
+stackkit advanced origin-certificate request [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--capability` | string | — | Pfad zu einer kanonischen stackkit.advanced-capability/v1-Datei, die die origin-certificate-Operation erlaubt |
+| `--hosts` | string | — | Kommagetrennte verwaltete kombify.me-Hostnamen, die das Zertifikat abdeckt |
 | `--json` | bool | — | stackkit.command-result/v1-JSON ausgeben |
 
 ## stackkit advanced restore-drill

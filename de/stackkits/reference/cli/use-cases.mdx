@@ -9,7 +9,28 @@ Optionale Anwendungsfälle eines Kits auswählen.
 stackkit use-cases [flags]
 ```
 
-Subcommands: [`stackkit use-cases pick`](#stackkit-use-cases-pick)
+Unterbefehle: [`stackkit use-cases add`](#stackkit-use-cases-add), [`stackkit use-cases pick`](#stackkit-use-cases-pick)
+
+## stackkit use-cases add
+
+Einen Anwendungsfall aus dem Katalog zu einer bestehenden eigenständigen Installation hinzufügen.
+
+Fügt einen Anwendungsfall mit den CUE-eigenen Standardwerten für Alternative und Modulprofil des installierten Kits hinzu. Bestehende Workloads, Routen, Platzierung und Speicher bleiben erhalten. Der Kandidat wird anhand des aktuellen Spec-Hashes gespeichert; nur die lokalen Secret-Slots des gewählten Anwendungsfalls werden angelegt. Bestehende Verwahrung wird wiederverwendet. Es werden keine Dienste bereitgestellt; generiere die aktualisierte Absicht und wende sie über den normalen Lebenszyklus an. Erforderlich sind natives stackkit/v2alpha2 und ein einzelner eigenständiger Node mit einer Site.
+
+```bash
+stackkit use-cases add <slug> [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--expected-spec-hash` | string | — | Diesen kanonischen aktuellen Spec-Hash voraussetzen; ohne Angabe wird der vor dem Erstellen gelesene Hash verwendet |
+
+**Beispiele**
+
+```bash
+stackkit use-cases add mail
+stackkit use-cases add mail --expected-spec-hash sha256:<current-hash>
+```
 
 ## stackkit use-cases pick
 
@@ -29,7 +50,7 @@ stackkit use-cases pick [flags]
 | --- | --- | --- | --- |
 | `--print` | bool | — | Ausgewählte Anwendungsfall-IDs als kommagetrennte Zeile nach stdout schreiben |
 
-**Examples**
+**Beispiele**
 
 ```bash
 # Choose optional use cases in the terminal

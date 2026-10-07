@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
@@ -74,6 +75,59 @@ test('artifacts that expose an internal operation are refused before anything is
     assert.throws(() => sync(root, SURFACE, OPENAPI.replace('    delete: {}', '    delete:\n      x-kombify-internal: true')))
     assert.equal(readFileSync(path.join(root, 'docs.json'), 'utf8').includes('reference'), false)
   } finally {
+    rmSync(root, { recursive: true, force: true })
+  }
+})
+
+test('the public boundary accepts LF and CRLF release stamps while refusing invalid provenance', () => {
+  const root = repo()
+  try {
+    const { files } = sync(root, SURFACE)
+    const originals = new Map(files.map(file => [file, readFileSync(path.join(root, file), 'utf8')]))
+    const boundaryPages = {
+      'overview.mdx': 'Techstack preview',
+      'operating-modes.mdx': 'StackKits execution',
+      'availability.mdx': 'Windows Alpha',
+      'install-windows.mdx': 'https://github.com/kombifyio/TechStack releases/latest/download/kombify-Techstack-Setup.exe unsigned',
+    }
+    for (const [file, content] of Object.entries(boundaryPages)) writeFileSync(path.join(root, 'techstack', file), content)
+    const scriptDirectory = path.join(root, 'scripts')
+    mkdirSync(scriptDirectory)
+    const checker = path.join(scriptDirectory, 'check-techstack-public-boundary.ps1')
+    copyFileSync(new URL('./check-techstack-public-boundary.ps1', import.meta.url), checker)
+    const powershell = process.platform === 'win32'
+      ? 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'
+      : 'pwsh'
+    const run = () => {
+      const result = spawnSync(powershell, ['-NoLogo', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', checker], {
+        cwd: root, encoding: 'utf8', windowsHide: true, timeout: 30_000,
+      })
+      assert.ifError(result.error)
+      assert.equal(result.signal, null)
+      assert.ok(result.status >= 0, `PowerShell initialization failed: ${result.status}`)
+      return result
+    }
+    const restore = newline => {
+      for (const [file, content] of originals) writeFileSync(path.join(root, file), content.replace(/\r?\n/g, newline))
+    }
+    for (const newline of ['\n', '\r\n']) {
+      restore(newline)
+      const result = run()
+      assert.equal(result.status, 0, result.stdout + result.stderr)
+    }
+    const cli = files.find(file => file.endsWith('/servers.mdx'))
+    for (const invalid of [
+      content => content.replace(`source_hash: "${SHA}"`, 'source_hash: "not-a-commit"'),
+      content => content.replace(/^generated_by:.*\r?\n/m, ''),
+      content => content.replace('release: "v1.2.3"', 'release: "v9.8.7"'),
+    ]) {
+      restore('\r\n')
+      writeFileSync(path.join(root, cli), invalid(readFileSync(path.join(root, cli), 'utf8')))
+      assert.notEqual(run().status, 0, 'Invalid release provenance must remain denied')
+    }
+  } finally {
+    assert.equal(path.dirname(path.resolve(root)), path.resolve(tmpdir()))
+    assert.ok(path.basename(root).startsWith('api-surface-reference-'))
     rmSync(root, { recursive: true, force: true })
   }
 })
