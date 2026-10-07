@@ -203,5 +203,5 @@ jobs:
             }
             core.notice('Post-local evidence succeeded. This is not a mandatory risk review or full security attestation.');
 concurrency:
-  group: post-local-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.ref }}
-  cancel-in-progress: true
+  group: post-local-${{ github.event_name == 'pull_request' && format('pr-{0}-{1}', github.event.pull_request.number, (!github.event.pull_request.draft) && 'active' || 'inactive') || github.event_name == 'merge_group' && format('merge-group-{0}', github.event.merge_group.head_sha) || format('{0}-{1}', github.event_name, github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
