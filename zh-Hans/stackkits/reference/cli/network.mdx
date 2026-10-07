@@ -1,0 +1,169 @@
+---
+title: "stackkit network"
+description: "将此服务器移到另一个网络：状态、重新绑定、WiFi 和监视器"
+sidebarTitle: "network"
+---
+将此服务器移到另一个网络：状态、重新绑定、WiFi 和监视器。
+
+用于将此服务器从一个网络迁移到另一个网络的操作。
+
+迁移前，先配置目标 WiFi（stackkit network wifi add）。迁移后，服务器从目标网络的 DHCP 获取新地址；网络监视器（stackkit network watch enable，由 stackkit apply 安装）会发现记录的站点地址已过期，并自动重新绑定栈。
+
+```bash
+stackkit network [flags]
+```
+
+子命令： [`stackkit network rebind`](#stackkit-network-rebind), [`stackkit network status`](#stackkit-network-status), [`stackkit network watch`](#stackkit-network-watch), [`stackkit network wifi`](#stackkit-network-wifi)
+
+## stackkit network rebind
+
+将栈重新绑定到此服务器的新网络地址。
+
+服务器迁移到另一个网络后，为新地址重新签发已签名的 LAN 解析器记录，并重新生成和应用栈，使监听器绑定到该地址。服务器未迁移时不会执行任何操作。
+
+所有者身份、秘密、证书颁发机构和数据均不受影响；旧的解析器记录保留在 .stackkit/custody/backups 下。此后，LAN 客户端和路由器的 DNS 必须指向新的解析器地址。
+
+```bash
+stackkit network rebind [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--auto` | bool | — | 网络监视器的无人值守运行：未迁移时静默，每次一次运行，失败后退避 |
+| `--json` | bool | — | 以 JSON 输出结果 |
+| `--no-apply` | bool | — | 仅重新签发解析器记录；不重新生成或应用 |
+| `--yes` | bool | — | 不询问确认，直接重新绑定 |
+
+**示例**
+
+```bash
+stackkit network rebind --yes
+stackkit network rebind --yes --json
+stackkit network rebind --no-apply
+```
+
+## stackkit network status
+
+显示此服务器是否迁移到了另一个网络。
+
+比较服务器当前地址与 LAN 解析器保管及 .stackkit/inventory.yaml 中记录的地址。一致时判定为 `in-place`；记录的地址已过期时为 `moved`；没有可比较记录时为 `unknown`。此命令始终以 0 退出。
+
+```bash
+stackkit network status [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 以 JSON 输出观测 |
+
+**示例**
+
+```bash
+stackkit network status
+stackkit network status --json
+```
+
+## stackkit network watch
+
+服务器迁移后自动重新绑定（systemd 定时器）。
+
+安装一个 systemd 定时器，每分钟及启动后不久运行 `stackkit network rebind --yes --auto`。网络未变化时保持静默，每次只进行一次重新绑定，失败后等待五分钟。stackkit apply 会在 systemd 主机上启用它；设置 STACKKIT_NETWORK_WATCH=off 或运行 `stackkit network watch disable` 可禁用。
+
+```bash
+stackkit network watch [flags]
+```
+
+子命令： [`stackkit network watch disable`](#stackkit-network-watch-disable), [`stackkit network watch enable`](#stackkit-network-watch-enable), [`stackkit network watch status`](#stackkit-network-watch-status)
+
+### stackkit network watch disable
+
+停止并移除网络监视器定时器。
+
+```bash
+stackkit network watch disable [flags]
+```
+
+### stackkit network watch enable
+
+安装并启动网络监视器定时器。
+
+```bash
+stackkit network watch enable [flags]
+```
+
+### stackkit network watch status
+
+显示网络监视器定时器是否已安装并正在运行。
+
+```bash
+stackkit network watch status [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 以 JSON 输出状态 |
+
+## stackkit network wifi
+
+迁移服务器之前预先配置目标 WiFi。
+
+在主机自身的网络配置中预先配置 WiFi，使服务器迁移后自动加入目标 WiFi。NetworkManager 运行时使用它，否则使用 netplan。有线 DHCP 连接不受影响，口令仅写入系统网络配置（仅 root 可读，权限 0600）；StackKits 不会输出或保存这些口令。
+
+```bash
+stackkit network wifi [flags]
+```
+
+子命令： [`stackkit network wifi add`](#stackkit-network-wifi-add), [`stackkit network wifi list`](#stackkit-network-wifi-list), [`stackkit network wifi remove`](#stackkit-network-wifi-remove)
+
+### stackkit network wifi add
+
+配置进入覆盖范围后会自动连接的 WiFi 网络。
+
+```bash
+stackkit network wifi add [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--apply-now` | bool | — | 立即应用变更（netplan apply），而非等到下次启动 |
+| `--force` | bool | — | 即使此主机没有无线接口也配置网络 |
+| `--open` | bool | — | 配置无需口令的网络 |
+| `--password` | string | — | 口令（可在进程列表中看到；优先使用 `--password-stdin`） |
+| `--password-stdin` | bool | — | 从 stdin 的第一行读取口令 |
+| `--priority` | int | — | 连接优先级；值越高越优先（仅 NetworkManager） |
+| `--ssid` | string | — | WiFi 网络名称 |
+
+**示例**
+
+```bash
+# Read the passphrase from stdin so it never appears in the process list
+printf '%s' "$WIFI_PASSPHRASE" | sudo stackkit network wifi add --ssid OfficeNet --password-stdin
+
+# Prefer this network over others staged on the host
+sudo stackkit network wifi add --ssid OfficeNet --password-stdin --priority 20 < passphrase.txt
+```
+
+### stackkit network wifi list
+
+列出已配置的 WiFi 网络，绝不显示口令。
+
+```bash
+stackkit network wifi list [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 以 JSON 输出列表 |
+
+### stackkit network wifi remove
+
+移除已配置的 WiFi 网络。
+
+```bash
+stackkit network wifi remove [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--apply-now` | bool | — | 立即应用变更（netplan apply） |
+| `--ssid` | string | — | 要移除的 WiFi 网络名称 |

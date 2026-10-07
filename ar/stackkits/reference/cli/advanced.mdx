@@ -9,7 +9,7 @@ sidebarTitle: "advanced"
 stackkit advanced [flags]
 ```
 
-الأوامر الفرعية: [`stackkit advanced change-set`](#stackkit-advanced-change-set)، [`stackkit advanced restore-drill`](#stackkit-advanced-restore-drill)، [`stackkit advanced rollback`](#stackkit-advanced-rollback)، [`stackkit advanced trust`](#stackkit-advanced-trust)
+الأوامر الفرعية: [`stackkit advanced change-set`](#stackkit-advanced-change-set), [`stackkit advanced origin-certificate`](#stackkit-advanced-origin-certificate), [`stackkit advanced restore-drill`](#stackkit-advanced-restore-drill), [`stackkit advanced rollback`](#stackkit-advanced-rollback), [`stackkit advanced trust`](#stackkit-advanced-trust)
 
 ## stackkit advanced change-set
 
@@ -50,6 +50,44 @@ stackkit advanced change-set create [flags]
 | `--candidate-spec` | string | — | مسار StackSpec v2 المرشحة التي تستخدم generation.target=terramate |
 | `--capability` | string | — | مسار ملف stackkit.advanced-capability/v1 القياسي |
 | `--json` | bool | — | إصدار JSON بصيغة stackkit.command-result/v1 |
+
+## stackkit advanced origin-certificate
+
+إدارة شهادة Cloudflare Origin CA لمصادر kombify.me المُدارة.
+
+```bash
+stackkit advanced origin-certificate [flags]
+```
+
+الأوامر الفرعية: [`stackkit advanced origin-certificate install`](#stackkit-advanced-origin-certificate-install), [`stackkit advanced origin-certificate request`](#stackkit-advanced-origin-certificate-request)
+
+### stackkit advanced origin-certificate install
+
+تحقّق من شهادة المصدر المُسلّمة وثبّتها.
+
+```bash
+stackkit advanced origin-certificate install [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--capability` | string | — | مسار ملف stackkit.advanced-capability/v1 المعتمد الذي يسمح بعملية origin-certificate |
+| `--certificate-file` | string | — | مسار شهادة PEM التي أصدرها Cloudflare لطلب CSR المعلّق |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
+
+### stackkit advanced origin-certificate request
+
+أنشئ زوج مفاتيح المصدر محليًا على العقدة واطبع طلب CSR الخاص به.
+
+```bash
+stackkit advanced origin-certificate request [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--capability` | string | — | مسار ملف stackkit.advanced-capability/v1 المعتمد الذي يسمح بعملية origin-certificate |
+| `--hosts` | string | — | أسماء مضيفي kombify.me المُدارة التي تغطيها الشهادة، مفصولة بفواصل |
+| `--json` | bool | — | أخرج JSON بصيغة stackkit.command-result/v1 |
 
 ## stackkit advanced restore-drill
 

@@ -2,9 +2,9 @@
 title: "techstack api workers"
 description: "مرجع مولَّد لأوامر techstack api workers"
 sidebarTitle: "workers"
-release: "v0.32.8"
+release: "v0.39.0"
 ---
-<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+<Note>مولَّد من إصدار Techstack v0.39.0 (المصدر `49677b729cb9`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
 
 ## techstack api workers approve
 
@@ -24,6 +24,86 @@ techstack api workers approve <id> [flags]
 | --- | --- | --- |
 | `<id>` | string | **مطلوب.** معرّف المورد. |
 
+## techstack api workers identity upgrade approve
+
+وافق على المفتاح الذي اقترحه خادم قديم.
+
+يربط المفتاح المعلّق المحدد في `key_thumbprint`، فيصبح العامل مرتبطًا بالمفتاح، وتُرفض بعد ذلك الطلبات المعتمدة على bearer وحده. يلزم المالك وتسجيل دخول حديث متعدد العوامل لا يتجاوز عمره 300 ثانية. تُسجَّل هوية الجهة التي وافقت ووقت الموافقة مع الهوية وفي السجل. تُرجع 409 `identity_upgrade_not_pending` إذا لم يحمل مفتاح معلّق غير منتهٍ تلك البصمة.
+
+```bash
+techstack api workers identity upgrade approve <id> [flags]
+```
+
+<Warning>يتطلب تأكيدًا: تحدد هذه العملية المفتاح الذي يمكنه توجيه أوامر إلى الخادم؛ لا توافق إلا على مفتاح يسجّل Guard بصمته على الخادم. مرّر `--yes` أو أجب عن السؤال؛ يتوقف التشغيل غير التفاعلي دون `--yes` قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/identity/upgrade/approve` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `approve_worker_identity_upgrade` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+| `--key-thumbprint` | string | **مطلوب.** |
+| `--body` | json | جسم طلب JSON بصيغة `application/json`، كقيمة حرفية أو `@path` أو `-` للقراءة من stdin. |
+
+## techstack api workers identity upgrade reject
+
+تجاهل المفتاح الذي اقترحه خادم قديم.
+
+إعادة ضبط يجريها المالك إذا لم يكن المفتاح المعلّق هو مفتاح الخادم نفسه: يُلغى الاقتراح ويجب تقديمه مجددًا. ينهي تدوير بيانات اعتماد الخادم وصول حاملها إلى نقطة نهاية الربط.
+
+```bash
+techstack api workers identity upgrade reject <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/identity/upgrade/reject` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا توجد |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+
+## techstack api workers identity upgrade-status
+
+اعرض ما إذا كان مفتاح هوية الخادم لا يزال بحاجة إلى موافقة.
+
+لمالك العامل. تعني `identity_binding=legacy_bearer` مع `code=guard_identity_upgrade_required` أن الخادم يصادق باستخدام بيانات bearer وحدها وأنه للمراقبة فقط؛ وتحمل `pending` بصمة المفتاح الذي اقترحه الخادم، ويقارنها المالك بالبصمة التي يسجلها Guard على الخادم. يعيد عامل مستأجر أو مالك آخر 404.
+
+```bash
+techstack api workers identity upgrade-status <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/{id}/identity/upgrade` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_worker_identity_upgrade` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+
+## techstack api workers identity upgrades
+
+اعرض خوادم المالك التي تنتظر الموافقة على مفتاح الهوية.
+
+للمالك. كل إدخال هو خادم يملكه اقترح مفتاحًا ويظل للمراقبة فقط حتى يُوافَق على ذلك المفتاح نفسه عبر `approveWorkerIdentityUpgrade`، مع تسجيل دخول حديث متعدد العوامل. تحمل الإدخالات اسم المضيف وبصمة المفتاح لمقارنتها بما يسجله Guard على الخادم. لا يمنح عرض القائمة أي صلاحيات.
+
+```bash
+techstack api workers identity upgrades [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/identity-upgrades` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_worker_identity_upgrades` |
+
 ## techstack api workers list
 
 عرض العمّال المسجلين (مرشَّحين حسب المالك).
@@ -42,6 +122,53 @@ techstack api workers list [flags]
 | --- | --- | --- |
 | `--page` | integer | رقم الصفحة (الافتراضي 1). |
 | `--per-page` | integer | عدد العناصر في الصفحة (الافتراضي 20، والحد الأقصى 100). |
+
+## techstack api workers outcomes list
+
+اعرض نتائج العمليات غير المحسومة لأحد kombify Guard.
+
+يسرد عمليات عامل مملوك ذات نتائج مجهولة: سجّل kombify Guard أن الأثر قد يكون وقع أو لم يقع، ولم تحسمه أي ملاحظة. تمنع كل عملية منها إجراء تغييرات إضافية على الخادم. تكون `state` هي `reconciling` ما دام Guard يحاول حسمها، وتصبح `needs_operator` إذا تجاوز عدم الحسم الوقت المحدد في `TECHSTACK_GUARD_OUTCOME_NEEDS_OPERATOR_AFTER`، وافتراضيًا 30 دقيقة. لا يغيّر الزمن إلا كيفية عرض النتيجة، ولا يرفع الحظر مطلقًا. يعيد عامل مستأجر أو مالك آخر 404.
+
+```bash
+techstack api workers outcomes list <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/{id}/outcomes` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_guard_unresolved_outcomes` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+
+## techstack api workers outcomes resolve
+
+حرّر حظر نتيجة عملية غير محسومة من kombify Guard.
+
+يُثبت مراجعة حلّ من المشغّل، تُضاف دون تعديل السجل السابق، لعملية نتيجتها مجهولة ويرفع حظر العامل. تكون `disposition` هي `verified_applied` إذا كان الأثر موجودًا، أو `verified_not_applied` إذا لم يحدث شيء، أو `accept_unknown` للتحرير دون نتيجة متحقَّق منها؛ وتسجّل `note` ما تم التحقق منه. الفاعل هو الهوية المصادَق عليها ويُسجَّل مع المراجعة؛ ولا يجوز لـ Guard تسجيل هذه القرارات. يلزم تسجيل دخول حديث متعدد العوامل، لا يتجاوز عمره 300 ثانية. يجب أن تطابق `expected_revision` المراجعة التي أعادتها القائمة، وإلا تُرجع 409 `outcome_revision_stale`. يُفك ترميز الجسم بصرامة: مفاتيح مطابقة تمامًا وبلا حقول مجهولة.
+
+```bash
+techstack api workers outcomes resolve <id> <command-id> [flags]
+```
+
+<Warning>يتطلب تأكيدًا: ترفع هذه العملية حظر عملية لم تُحسم نتيجتها قط، ولذلك قد تُنفَّذ تغييرات متعارضة على الخادم. مرّر `--yes` أو أجب عن السؤال؛ يتوقف التشغيل غير التفاعلي دون `--yes` قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/outcomes/{command_id}/resolve` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا توجد |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<id>` | string | **مطلوب.** معرّف المورد. |
+| `<command-id>` | string | **مطلوب.** |
+| `--disposition` | string | **مطلوب.** إحدى القيم: `verified_applied`, `verified_not_applied`, `accept_unknown`. |
+| `--expected-revision` | integer | **مطلوب.** |
+| `--note` | string | **مطلوب.** |
+| `--body` | json | جسم طلب JSON بصيغة `application/json`، كقيمة حرفية أو `@path` أو `-` للقراءة من stdin. |
 
 ## techstack api workers prechecks list
 

@@ -1,0 +1,169 @@
+---
+title: "stackkit network"
+description: "انقل هذا الخادم إلى شبكة أخرى: الحالة وإعادة الربط وWiFi والمراقب"
+sidebarTitle: "network"
+---
+انقل هذا الخادم إلى شبكة أخرى: الحالة وإعادة الربط وWiFi والمراقب.
+
+عمليات نقل هذا الخادم من شبكة إلى أخرى.
+
+قبل النقل، جهّز شبكة WiFi الوجهة باستخدام stackkit network wifi add. بعد النقل يحصل الخادم على عنوان جديد من DHCP في الشبكة الوجهة؛ يكتشف مراقب الشبكة، الذي يُفعَّل عبر stackkit network watch enable ويثبّته stackkit apply، أن عنوان الموقع المسجّل أصبح قديمًا ويعيد ربط المكدس تلقائيًا.
+
+```bash
+stackkit network [flags]
+```
+
+الأوامر الفرعية: [`stackkit network rebind`](#stackkit-network-rebind), [`stackkit network status`](#stackkit-network-status), [`stackkit network watch`](#stackkit-network-watch), [`stackkit network wifi`](#stackkit-network-wifi)
+
+## stackkit network rebind
+
+أعِد ربط المكدس بعنوان الشبكة الجديد لهذا الخادم.
+
+بعد انتقال الخادم إلى شبكة أخرى، أعِد إصدار سجل محلّل LAN الموقّع للعنوان الجديد، ثم أعِد توليد المكدس وتطبيقه ليرتبط المستمعون به. لا يحدث شيء إذا لم ينتقل الخادم.
+
+لا تتغير هوية المالك أو الأسرار أو جهات إصدار الشهادات أو البيانات؛ يُحتفَظ بسجل المحلّل السابق ضمن .stackkit/custody/backups. يجب بعد ذلك أن تشير أجهزة LAN وDNS الموجّه إلى عنوان المحلّل الجديد.
+
+```bash
+stackkit network rebind [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--auto` | bool | — | تشغيل دون تدخل لمراقب الشبكة: صامت عند عدم الانتقال، تشغيل واحد في كل مرة، مع تأخير بعد الفشل |
+| `--json` | bool | — | أخرج النتيجة بصيغة JSON |
+| `--no-apply` | bool | — | أعِد إصدار سجل المحلّل فقط؛ دون إعادة التوليد أو التطبيق |
+| `--yes` | bool | — | أعِد الربط دون طلب تأكيد |
+
+**أمثلة**
+
+```bash
+stackkit network rebind --yes
+stackkit network rebind --yes --json
+stackkit network rebind --no-apply
+```
+
+## stackkit network status
+
+اعرض ما إذا كان هذا الخادم قد انتقل إلى شبكة أخرى.
+
+قارن عنوان الخادم الحالي بالعنوان المسجّل في حفظ محلّل LAN وفي .stackkit/inventory.yaml. تكون النتيجة `in-place` عند تطابقهما، و`moved` عندما يصبح عنوان مسجّل قديمًا، و`unknown` عندما لا يوجد ما يمكن مقارنته. يخرج الأمر دائمًا بالرمز 0.
+
+```bash
+stackkit network status [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج الملاحظة بصيغة JSON |
+
+**أمثلة**
+
+```bash
+stackkit network status
+stackkit network status --json
+```
+
+## stackkit network watch
+
+أعِد الربط تلقائيًا بعد انتقال الخادم، باستخدام مؤقّت systemd.
+
+ثبّت مؤقّت systemd يشغّل `stackkit network rebind --yes --auto` كل دقيقة وبعد الإقلاع بقليل. يظل صامتًا ما دامت الشبكة لم تتغير، وينفّذ إعادة ربط واحدة في كل مرة، وينتظر خمس دقائق بعد محاولة فاشلة. يفعّله stackkit apply على مضيفي systemd؛ عطّله بضبط STACKKIT_NETWORK_WATCH=off أو تشغيل `stackkit network watch disable`.
+
+```bash
+stackkit network watch [flags]
+```
+
+الأوامر الفرعية: [`stackkit network watch disable`](#stackkit-network-watch-disable), [`stackkit network watch enable`](#stackkit-network-watch-enable), [`stackkit network watch status`](#stackkit-network-watch-status)
+
+### stackkit network watch disable
+
+أوقف مؤقّت مراقب الشبكة وأزِله.
+
+```bash
+stackkit network watch disable [flags]
+```
+
+### stackkit network watch enable
+
+ثبّت مؤقّت مراقب الشبكة وشغّله.
+
+```bash
+stackkit network watch enable [flags]
+```
+
+### stackkit network watch status
+
+اعرض ما إذا كان مؤقّت مراقب الشبكة مثبّتًا وقيد التشغيل.
+
+```bash
+stackkit network watch status [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج الحالة بصيغة JSON |
+
+## stackkit network wifi
+
+جهّز شبكة WiFi الوجهة مسبقًا قبل نقل الخادم.
+
+جهّز شبكات WiFi ضمن إعدادات الشبكة الخاصة بالمضيف لينضم الخادم تلقائيًا إلى شبكة WiFi الوجهة بعد نقله. يُستخدم NetworkManager عندما يكون قيد التشغيل، وإلا فيُستخدم netplan. لا يتغير اتصال DHCP السلكي، وتُكتب عبارات المرور فقط في إعدادات شبكة النظام، بصلاحيات root فقط ووضع 0600؛ لا يطبعها StackKits ولا يخزّنها.
+
+```bash
+stackkit network wifi [flags]
+```
+
+الأوامر الفرعية: [`stackkit network wifi add`](#stackkit-network-wifi-add), [`stackkit network wifi list`](#stackkit-network-wifi-list), [`stackkit network wifi remove`](#stackkit-network-wifi-remove)
+
+### stackkit network wifi add
+
+جهّز شبكة WiFi ينضم إليها الجهاز تلقائيًا عند وجودها في النطاق.
+
+```bash
+stackkit network wifi add [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--apply-now` | bool | — | طبّق التغيير فورًا باستخدام netplan apply بدلًا من الإقلاع التالي |
+| `--force` | bool | — | جهّز الشبكة حتى إذا لم يملك هذا المضيف واجهة لاسلكية |
+| `--open` | bool | — | جهّز شبكة دون عبارة مرور |
+| `--password` | string | — | عبارة المرور، الظاهرة في قائمة العمليات؛ يُفضّل `--password-stdin` |
+| `--password-stdin` | bool | — | اقرأ عبارة المرور من السطر الأول في stdin |
+| `--priority` | int | — | أولوية الاتصال؛ القيمة الأعلى تتقدم، مع NetworkManager فقط |
+| `--ssid` | string | — | اسم شبكة WiFi |
+
+**أمثلة**
+
+```bash
+# Read the passphrase from stdin so it never appears in the process list
+printf '%s' "$WIFI_PASSPHRASE" | sudo stackkit network wifi add --ssid OfficeNet --password-stdin
+
+# Prefer this network over others staged on the host
+sudo stackkit network wifi add --ssid OfficeNet --password-stdin --priority 20 < passphrase.txt
+```
+
+### stackkit network wifi list
+
+اعرض شبكات WiFi المُجهّزة، دون عبارات المرور مطلقًا.
+
+```bash
+stackkit network wifi list [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج القائمة بصيغة JSON |
+
+### stackkit network wifi remove
+
+أزِل شبكة WiFi مُجهّزة.
+
+```bash
+stackkit network wifi remove [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--apply-now` | bool | — | طبّق التغيير فورًا باستخدام netplan apply |
+| `--ssid` | string | — | اسم شبكة WiFi المراد إزالتها |

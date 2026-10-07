@@ -2,9 +2,9 @@
 title: "techstack api workers"
 description: "techstack api workers 命令的生成参考"
 sidebarTitle: "workers"
-release: "v0.32.8"
+release: "v0.39.0"
 ---
-<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+<Note>由 Techstack v0.39.0 版本生成（源码 `49677b729cb9`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
 
 ## techstack api workers approve
 
@@ -24,6 +24,86 @@ techstack api workers approve <id> [flags]
 | --- | --- | --- |
 | `<id>` | string | **必填。** 资源 ID。 |
 
+## techstack api workers identity upgrade approve
+
+批准旧服务器提出的密钥。
+
+绑定由 `key_thumbprint` 指定的待批准密钥，使 worker 与该密钥绑定；之后拒绝仅使用 bearer 凭据的请求。需要所有者和新的多因素登录（最多 300 秒前）。批准主体及时间与身份一起记录并写入日志。没有未过期的待批准密钥具有此指纹时，返回 409 `identity_upgrade_not_pending`。
+
+```bash
+techstack api workers identity upgrade approve <id> [flags]
+```
+
+<Warning>需要确认：此操作决定哪个密钥可以控制服务器；仅批准 Guard 在服务器上记录了指纹的密钥。传入 `--yes` 或回答提示；非交互式运行未提供 `--yes` 时，会在发出任何请求前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/identity/upgrade/approve` |
+| 更改状态 | 是 |
+| MCP 工具 | `approve_worker_identity_upgrade` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+| `--key-thumbprint` | string | **必填。** |
+| `--body` | json | JSON 请求体（`application/json`），可以是字面值、`@path`，或使用 `-` 从 stdin 读取。 |
+
+## techstack api workers identity upgrade reject
+
+丢弃旧服务器提出的密钥。
+
+待批准密钥不是服务器自身的密钥时，由所有者重置：丢弃提案，必须重新提出。轮换服务器凭据会终止该凭据持有者对绑定端点的访问。
+
+```bash
+techstack api workers identity upgrade reject <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/identity/upgrade/reject` |
+| 更改状态 | 是 |
+| MCP 工具 | 无 |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+
+## techstack api workers identity upgrade-status
+
+显示服务器的身份密钥是否仍需批准。
+
+供 worker 所有者使用。`identity_binding=legacy_bearer` 且 `code=guard_identity_upgrade_required` 表示服务器仅以 bearer 凭据认证，并且只进行观测；`pending` 携带服务器提出的密钥指纹，所有者将其与 Guard 在服务器上记录的指纹比较。其他租户或所有者的 worker 返回 404。
+
+```bash
+techstack api workers identity upgrade-status <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/{id}/identity/upgrade` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_worker_identity_upgrade` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+
+## techstack api workers identity upgrades
+
+列出等待身份密钥批准的所有者服务器。
+
+供所有者使用。每条记录都是其拥有的服务器，已提出密钥，在通过 `approveWorkerIdentityUpgrade` 批准该精确密钥之前仅进行观测，且批准需要新的多因素登录。记录包含主机名和密钥指纹，以便与 Guard 在服务器上记录的指纹比较。列出记录不会授予任何权限。
+
+```bash
+techstack api workers identity upgrades [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/identity-upgrades` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_worker_identity_upgrades` |
+
 ## techstack api workers list
 
 列出已注册的 Worker（按所有者筛选）。
@@ -42,6 +122,53 @@ techstack api workers list [flags]
 | --- | --- | --- |
 | `--page` | integer | 页码（默认 1）。 |
 | `--per-page` | integer | 每页条目数（默认 20，最多 100）。 |
+
+## techstack api workers outcomes list
+
+列出一个 kombify Guard 的未解决操作结果。
+
+列出拥有的 worker 中结果未知的操作：kombify Guard 已记录效果可能发生，也可能未发生，且没有观测消除不确定性。每个此类操作都会阻止服务器上的进一步变更。Guard 仍尝试确认时，`state` 为 `reconciling`；超过配置期限（`TECHSTACK_GUARD_OUTCOME_NEEDS_OPERATOR_AFTER`，默认 30 分钟）仍未解决时，为 `needs_operator`。时间仅改变结果的显示方式，绝不会解除限制。其他租户或所有者的 worker 返回 404。
+
+```bash
+techstack api workers outcomes list <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/{id}/outcomes` |
+| 更改状态 | 否 |
+| MCP 工具 | `list_guard_unresolved_outcomes` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+
+## techstack api workers outcomes resolve
+
+解除一项未解决的 kombify Guard 操作结果限制。
+
+为结果未知的操作提交仅追加的操作员解决修订，并解除 worker 的限制。`disposition` 可为 `verified_applied`（效果已存在）、`verified_not_applied`（未发生任何效果）或 `accept_unknown`（不验证结果而解除限制）；`note` 记录验证的内容。执行者是经身份验证的主体，与修订一起记录；Guard 不得提交这些决定。需要新的多因素登录（最多 300 秒前）。`expected_revision` 必须等于列表返回的修订，否则返回 409 `outcome_revision_stale`。请求体严格解码：键必须精确，不允许未知字段。
+
+```bash
+techstack api workers outcomes resolve <id> <command-id> [flags]
+```
+
+<Warning>需要确认：此操作解除结果从未被确认的操作限制，因此可能在服务器上执行相互冲突的变更。传入 `--yes` 或回答提示；非交互式运行未提供 `--yes` 时，会在发出任何请求前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/outcomes/{command_id}/resolve` |
+| 更改状态 | 是 |
+| MCP 工具 | 无 |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `<id>` | string | **必填。** 资源 ID。 |
+| `<command-id>` | string | **必填。** |
+| `--disposition` | string | **必填。** 可选值：`verified_applied`, `verified_not_applied`, `accept_unknown`. |
+| `--expected-revision` | integer | **必填。** |
+| `--note` | string | **必填。** |
+| `--body` | json | JSON 请求体（`application/json`），可以是字面值、`@path`，或使用 `-` 从 stdin 读取。 |
 
 ## techstack api workers prechecks list
 

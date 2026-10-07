@@ -2,9 +2,35 @@
 title: "techstack api services"
 description: "techstack api services 命令的生成参考"
 sidebarTitle: "services"
-release: "v0.32.8"
+release: "v0.39.0"
 ---
-<Note>由 Techstack v0.32.8 版本生成（源码 `4c7d219a5d56`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+<Note>由 Techstack v0.39.0 版本生成（源码 `49677b729cb9`）。对于已安装的版本，请以 `techstack api <command> --help` 为准。</Note>
+
+## techstack api services execute-application-adoption
+
+在所有者明确批准后执行经审查的精确源计划。
+
+重新验证保留的摘要、源身份、修订和发布版本。只有经身份验证的固定版本 CLI 保管回执才能确立归属。账户、配置和持久数据均保留；不会创建新的运行时。不支持迁移到另一个节点或通用接管。
+
+```bash
+techstack api services execute-application-adoption [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/adoption-plans/{planId}/execute` |
+| 更改状态 | 是 |
+| MCP 工具 | `execute_application_adoption` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--service-id` | string | **必填。** 规范服务运行时 ID。 |
+| `--plan-id` | string | **必填。** |
+| `--expected-inventory-revision` | integer | **必填。** |
+| `--mode` | string | 可选值：`adopt_in_place`. |
+| `--owner-approved` | boolean | 默认值 `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | JSON 请求体（`application/json`），可以是字面值、`@path`，或使用 `-` 从 stdin 读取。 |
 
 ## techstack api services get
 
@@ -63,6 +89,113 @@ techstack api services logs <service-id> [flags]
 | `--limit` | integer | 默认值：`100`。 |
 | `--cursor` | string | — |
 
+## techstack api services metrics
+
+读取拥有的服务的已测量资源指标。
+
+使用现有 Guard 遥测查询后端，并根据已授权服务库存固定租户、规范服务器和容器选择器。空向量表示没有测得资源指标。
+
+```bash
+techstack api services metrics [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/metrics` |
+| 更改状态 | 否 |
+| MCP 工具 | `get_service_metrics` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--service-id` | string | **必填。** |
+
+## techstack api services prepare-application-adoption
+
+评估一个精确指定的现有 Home Assistant Container，以便原地接管。
+
+将与源绑定的评估保存在现有持久任务存储中。需要已连接的 Guard 和具备相应能力的精确已发布 CLI 版本。此只读评估操作不会确立 Stacked 归属。
+
+```bash
+techstack api services prepare-application-adoption [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/adoption-plans` |
+| 更改状态 | 是 |
+| MCP 工具 | `prepare_application_adoption` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--service-id` | string | **必填。** 规范服务运行时 ID。 |
+| `--expected-inventory-revision` | integer | **必填。** |
+| `--mode` | string | 可选值：`adopt_in_place`. |
+| `--owner-approved` | boolean | 默认值 `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | JSON 请求体（`application/json`），可以是字面值、`@path`，或使用 `-` 从 stdin 读取。 |
+
+## techstack api services read-application-adoption-plan
+
+读取保留的应用评估和持久化进度。
+
+```bash
+techstack api services read-application-adoption-plan [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/adoption-plans/{planId}` |
+| 更改状态 | 否 |
+| MCP 工具 | `read_application_adoption_plan` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--service-id` | string | **必填。** 规范服务运行时 ID。 |
+| `--plan-id` | string | **必填。** |
+
+## techstack api services read-application-connector
+
+读取节点拥有的连接器状态和当前已发布传输的执行准入。
+
+返回不含秘密的投影。支持目录不可用时，仍为不可派发的 SourcePreview；支持版本上的证据过期时，需要当前的只读验证。可派发性还要求当前规范的主机密钥、节点和租约权限。
+
+```bash
+techstack api services read-application-connector [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/connector` |
+| 更改状态 | 否 |
+| MCP 工具 | `read_application_connector` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--service-id` | string | **必填。** 规范服务运行时 ID。 |
+
+## techstack api services release-application-lifecycle
+
+解除已接管的生命周期绑定，不删除或停止其运行时。
+
+```bash
+techstack api services release-application-lifecycle [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/release` |
+| 更改状态 | 是 |
+| MCP 工具 | `release_application_lifecycle` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--service-id` | string | **必填。** 规范服务运行时 ID。 |
+| `--expected-inventory-revision` | integer | **必填。** |
+| `--mode` | string | 可选值：`adopt_in_place`. |
+| `--owner-approved` | boolean | 默认值 `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | JSON 请求体（`application/json`），可以是字面值、`@path`，或使用 `-` 从 stdin 读取。 |
+
 ## techstack api services run-action
 
 将所有者授权的 StackKits 服务操作加入队列。
@@ -83,3 +216,29 @@ techstack api services run-action <service-id> [flags]
 | --- | --- | --- |
 | `<service-id>` | string | **必填。** 规范的服务运行时 ID。 |
 | `--body` | json | **必填。** JSON 请求正文（`application/json`），可以是字面量、`@path`，或用 `-` 表示 stdin。 |
+## techstack api services setup-application-connector
+
+在节点上确保或撤销一个已声明且拥有的 Home Assistant 连接器。
+
+需要新鲜的后端所有权、正向 operate 授权、精确的当前库存和所有者批准。只通过 Guard 将封闭定义的关联元数据传输给已发布的固定版本 CLI；其本地 signedApply 和所有者设置权限始终必需。派发前存储持久意图；确认结果未知时，仅以只读方式协调原操作。当前 v0.51.8 缺少支持目录，返回不可派发的 SourcePreview。凭据保留在节点保管中。
+
+```bash
+techstack api services setup-application-connector [flags]
+```
+
+<Warning>需要确认：此操作为这个精确服务签发或撤销已审查、由节点拥有的 Home Assistant 连接器凭据。传入 `--yes` 或回答提示；非交互式运行未提供 `--yes` 时，会在发出任何请求前以退出码 9 停止。</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/connector` |
+| 更改状态 | 是 |
+| MCP 工具 | `setup_application_connector` |
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `--service-id` | string | **必填。** 规范服务运行时 ID。 |
+| `--action` | string | **必填。** 可选值：`ensure`, `revoke`. |
+| `--expected-inventory-revision` | integer | **必填。** |
+| `--lifespan-days` | integer | **必填。** |
+| `--owner-approved` | boolean | **必填。** 可选值：`true`. |
+| `--body` | json | JSON 请求体（`application/json`），可以是字面值、`@path`，或使用 `-` 从 stdin 读取。 |

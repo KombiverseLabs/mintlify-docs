@@ -2,9 +2,35 @@
 title: "techstack api services"
 description: "مرجع مولَّد لأوامر techstack api services"
 sidebarTitle: "services"
-release: "v0.32.8"
+release: "v0.39.0"
 ---
-<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+<Note>مولَّد من إصدار Techstack v0.39.0 (المصدر `49677b729cb9`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+
+## techstack api services execute-application-adoption
+
+نفّذ خطة المصدر المحددة التي خضعت للمراجعة بموافقة صريحة من المالك.
+
+يعيد التحقق من الملخّص المحتفَظ به وهوية المصدر والمراجعة والإصدار. لا تثبت العضوية إلا بإيصال حفظ مصادَق عليه من CLI المثبّت على إصدار محدد. تُحفَظ الحسابات والإعدادات والبيانات الدائمة؛ ولا تُنشأ بيئة تشغيل جديدة. لا يدعم النقل إلى عقدة أخرى أو التبنّي العام.
+
+```bash
+techstack api services execute-application-adoption [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/adoption-plans/{planId}/execute` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `execute_application_adoption` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--service-id` | string | **مطلوب.** معرّف تشغيل الخدمة المعتمد. |
+| `--plan-id` | string | **مطلوب.** |
+| `--expected-inventory-revision` | integer | **مطلوب.** |
+| `--mode` | string | إحدى القيم: `adopt_in_place`. |
+| `--owner-approved` | boolean | الافتراضي `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | جسم طلب JSON بصيغة `application/json`، كقيمة حرفية أو `@path` أو `-` للقراءة من stdin. |
 
 ## techstack api services get
 
@@ -63,6 +89,113 @@ techstack api services logs <service-id> [flags]
 | `--limit` | integer | الافتراضي `100`. |
 | `--cursor` | string | — |
 
+## techstack api services metrics
+
+اقرأ مقاييس الموارد المقاسة لخدمة مملوكة.
+
+يستخدم خلفية الاستعلام عن قياسات Guard القائمة، ويثبّت المستأجر والخادم المعتمد ومحددات الحاويات من جرد الخدمات المصرّح به. يعني المتجه الفارغ أنه لم تُقَس أي مقاييس موارد.
+
+```bash
+techstack api services metrics [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/metrics` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_service_metrics` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--service-id` | string | **مطلوب.** |
+
+## techstack api services prepare-application-adoption
+
+قيّم حاوية Home Assistant قائمة ومحددة بدقة لتبنّيها في مكانها.
+
+يحفظ التقييم المرتبط بالمصدر في مخزن المهام الدائم القائم. يلزم Guard متصل وإصدار CLI منشور محدد بدقة وقادر على العملية. لا تثبت عملية التقييم للقراءة فقط عضوية Stacked.
+
+```bash
+techstack api services prepare-application-adoption [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/adoption-plans` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `prepare_application_adoption` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--service-id` | string | **مطلوب.** معرّف تشغيل الخدمة المعتمد. |
+| `--expected-inventory-revision` | integer | **مطلوب.** |
+| `--mode` | string | إحدى القيم: `adopt_in_place`. |
+| `--owner-approved` | boolean | الافتراضي `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | جسم طلب JSON بصيغة `application/json`، كقيمة حرفية أو `@path` أو `-` للقراءة من stdin. |
+
+## techstack api services read-application-adoption-plan
+
+اقرأ تقييم التطبيق المحتفَظ به والتقدّم الدائم.
+
+```bash
+techstack api services read-application-adoption-plan [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/adoption-plans/{planId}` |
+| يغيّر الحالة | لا |
+| أداة MCP | `read_application_adoption_plan` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--service-id` | string | **مطلوب.** معرّف تشغيل الخدمة المعتمد. |
+| `--plan-id` | string | **مطلوب.** |
+
+## techstack api services read-application-connector
+
+اقرأ حالة الموصل الذي تملكه العقدة وقبول النقل المنشور الحالي.
+
+يعيد إسقاطًا خاليًا من الأسرار. يظل الكتالوج الداعم غير المتاح في حالة SourcePreview غير قابلة للإرسال للتنفيذ؛ وتتطلب الأدلة القديمة على إصدار داعم مثبت تحققًا حاليًا للقراءة فقط. كما تتطلب قابلية الإرسال صلاحية حالية ومعتمدة لمفتاح المضيف والعقدة وعقد الإيجار.
+
+```bash
+techstack api services read-application-connector [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/connector` |
+| يغيّر الحالة | لا |
+| أداة MCP | `read_application_connector` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--service-id` | string | **مطلوب.** معرّف تشغيل الخدمة المعتمد. |
+
+## techstack api services release-application-lifecycle
+
+حرّر ارتباط دورة حياة متبنّاة دون حذف بيئة تشغيلها أو إيقافها.
+
+```bash
+techstack api services release-application-lifecycle [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/release` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `release_application_lifecycle` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--service-id` | string | **مطلوب.** معرّف تشغيل الخدمة المعتمد. |
+| `--expected-inventory-revision` | integer | **مطلوب.** |
+| `--mode` | string | إحدى القيم: `adopt_in_place`. |
+| `--owner-approved` | boolean | الافتراضي `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | جسم طلب JSON بصيغة `application/json`، كقيمة حرفية أو `@path` أو `-` للقراءة من stdin. |
+
 ## techstack api services run-action
 
 وضع إجراء خدمة StackKits أذن به المالك في الطابور.
@@ -83,3 +216,29 @@ techstack api services run-action <service-id> [flags]
 | --- | --- | --- |
 | `<service-id>` | string | **مطلوب.** معرّف وقت تشغيل الخدمة القياسي. |
 | `--body` | json | **مطلوب.** جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+## techstack api services setup-application-connector
+
+أكّد وجود موصل Home Assistant مُعلَن ومملوك على عقدته، أو ألغِه.
+
+يلزم إثبات حديث لملكية الخلفية وصلاحية operate إيجابية وجرد حالي مطابق تمامًا وموافقة المالك. لا يُنقل عبر Guard إلى CLI المنشور المثبّت على إصدار محدد إلا بيانات الارتباط المحددة حصريًا؛ وتظل صلاحيتا signedApply وإعداد المالك المحليتان إلزاميتين. تُحفَظ النية الدائمة قبل الإرسال؛ وإذا كانت نتيجة التأكيد مجهولة، تُراجَع العملية الأصلية للقراءة فقط. يفتقر الإصدار الحالي v0.51.8 إلى الكتالوج الداعم ويعيد SourcePreview غير قابلة للإرسال للتنفيذ. تبقى بيانات الاعتماد في حفظ العقدة.
+
+```bash
+techstack api services setup-application-connector [flags]
+```
+
+<Warning>يتطلب تأكيدًا: تُصدر هذه العملية بيانات اعتماد موصل Home Assistant الذي تملكه العقدة والخاضع للمراجعة، أو تلغيها، لهذه الخدمة المحددة. مرّر `--yes` أو أجب عن السؤال؛ يتوقف التشغيل غير التفاعلي دون `--yes` قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/connector` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `setup_application_connector` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--service-id` | string | **مطلوب.** معرّف تشغيل الخدمة المعتمد. |
+| `--action` | string | **مطلوب.** إحدى القيم: `ensure`, `revoke`. |
+| `--expected-inventory-revision` | integer | **مطلوب.** |
+| `--lifespan-days` | integer | **مطلوب.** |
+| `--owner-approved` | boolean | **مطلوب.** إحدى القيم: `true`. |
+| `--body` | json | جسم طلب JSON بصيغة `application/json`، كقيمة حرفية أو `@path` أو `-` للقراءة من stdin. |

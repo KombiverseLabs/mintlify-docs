@@ -9,7 +9,28 @@ sidebarTitle: "use-cases"
 stackkit use-cases [flags]
 ```
 
-子命令：[`stackkit use-cases pick`](#stackkit-use-cases-pick)
+子命令： [`stackkit use-cases add`](#stackkit-use-cases-add), [`stackkit use-cases pick`](#stackkit-use-cases-pick)
+
+## stackkit use-cases add
+
+向现有独立安装添加目录中的用例。
+
+使用已安装 kit 的 CUE 定义的备选方案和模块配置默认值添加用例。保留现有工作负载、路由、放置和存储。按当前 spec 哈希保存候选配置，仅创建所选用例的本地秘密槽位。复用现有保管。此操作不会部署服务；通过正常生命周期生成并应用更新后的意图。需要原生 stackkit/v2alpha2，以及单节点、单站点的独立安装。
+
+```bash
+stackkit use-cases add <slug> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--expected-spec-hash` | string | — | 要求此规范的当前 spec 哈希；省略时使用编写前读取的哈希 |
+
+**示例**
+
+```bash
+stackkit use-cases add mail
+stackkit use-cases add mail --expected-spec-hash sha256:<current-hash>
+```
 
 ## stackkit use-cases pick
 
