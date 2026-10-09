@@ -7,6 +7,45 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits](https://github.com/kombifyio/stackKits/releases), [SpeechKit](https://github.com/kombifyio/SpeechKit/releases), and [Techstack](https://github.com/kombifyio/TechStack/releases) release notes on GitHub.
 
+<Update label="2026-10-09" description="Oct 2 – Oct 9">
+
+## StackKits picks your game platform and adds use cases in place; SpeechKit Voice talks to your own model
+
+StackKits shipped [v0.50.4](https://github.com/kombifyio/stackKits/releases/tag/v0.50.4) through [v0.52.6](https://github.com/kombifyio/stackKits/releases/tag/v0.52.6): a choice of game platform, use cases you can add to a running install, and safer restores. SpeechKit rolled from [v0.74.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.74.0) to [v0.76.4](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.4): Voice with your own model, AssemblyAI and Deepgram conversations, and more reliable dictation.
+
+### New features
+
+- **Choose your game platform.** [StackKits v0.52.0](https://github.com/kombifyio/stackKits/releases/tag/v0.52.0) installs Calagopus for new Game installations, with Pelican and Pterodactyl as alternatives. The owner key can only read, power, use the console, and edit files. `stackkit setup game`, `stackkit game list`, `power`, and `allow` work the same on all three, and existing installs keep their platform. See [Game](/guides/stackkits/use-cases/game).
+- **Add a use case to a running install.** [v0.51.0](https://github.com/kombifyio/stackKits/releases/tag/v0.51.0) adds `stackkit use-cases add`, for example `mail`, without touching your existing workloads, routes, or storage. It is also available through the StackKits MCP. See [`stackkit use-cases`](/stackkits/reference/cli/use-cases).
+- **Move your server to another network.** [v0.51.7](https://github.com/kombifyio/stackKits/releases/tag/v0.51.7) re-binds a server after it moves to a new network, so its listeners follow the new address. See [`stackkit network`](/stackkits/reference/cli/network).
+- **Voice with your own model.** [SpeechKit v0.76.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.0) lets voice conversations use your own AI endpoint and model, and keeps the conversation you started in chat, including from the floating panel. See [Modes and data paths](/speechkit/modes).
+- **AssemblyAI and Deepgram conversations.** [v0.75.5](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.5) runs registered-agent Voice sessions on AssemblyAI or Deepgram. Your cloud-processing consent is checked throughout, and AssemblyAI asks separately for recording consent. [v0.76.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.0) adds balanced, lower-latency, and higher-accuracy AssemblyAI profiles.
+- **New live models.** [v0.74.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.74.0) refreshes the model catalog with GPT-Live on Microsoft Foundry and Gemini Transcribe Live dictation, and removes retired models.
+
+### Updates
+
+- **Home Assistant connector stays on your node.** [StackKits v0.52.0](https://github.com/kombifyio/stackKits/releases/tag/v0.52.0) issues, reuses, and revokes the Home Assistant agent connector through `stackkit setup`, and keeps it only in encrypted local storage. See [Smart Home](/guides/stackkits/use-cases/smart-home).
+- **Restore from earlier recovery points.** [v0.52.5](https://github.com/kombifyio/stackKits/releases/tag/v0.52.5) exposes authenticated historical recovery points. See [Back up and restore](/guides/stackkits/back-up-and-restore).
+- **More apps run natively on OpenTofu.** [v0.51.0](https://github.com/kombifyio/stackKits/releases/tag/v0.51.0) lets Paperless, Mosquitto, Stalwart, Zigbee2MQTT, SearXNG, Roundcube, Euro-Office, Navidrome, Audiobookshelf, ESPHome, Emby, and more apply without the Compose wrapper. Native execution is opt-in per app.
+- **Secrets stay out of environments and data volumes.** [v0.51.0](https://github.com/kombifyio/stackKits/releases/tag/v0.51.0) delivers app secrets as files. The Zigbee2MQTT MQTT password and the Pterodactyl app key no longer land in a data volume.
+- **Managed certificates in Advanced mode.** [v0.51.7](https://github.com/kombifyio/stackKits/releases/tag/v0.51.7) issues Origin CA certificates for managed kombify.me origins. See [`stackkit advanced`](/stackkits/reference/cli/advanced).
+- **One dictation, one entry.** [SpeechKit v0.75.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.1) saves a live dictation as a single Library entry. Hold-to-talk inserts the text once when you release the hotkey.
+- **Keep the complete dictation.** [v0.76.4](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.4) starts recording while the provider connects and recovers missing stream audio from the recording. Your dictionary words apply in every dictation mode.
+- **Tabbed settings and a compact voice UI.** [v0.74.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.74.0) organizes settings into tabs. The web voice UI adds a recording indicator, a live transcript, and a microphone check before a session starts.
+- **Longer Voice sessions.** [v0.75.3](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.3) prefers managed speech providers and allows sessions of up to four hours.
+- **SDK migrations.** [v0.74.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.74.0) and [v0.75.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.0) include breaking changes for Go SDK and Android keyboard embedders. Read the release notes before you upgrade. See [Framework](/speechkit/framework).
+
+### Bug fixes
+
+- **Interrupted restores recover.** [StackKits v0.52.6](https://github.com/kombifyio/stackKits/releases/tag/v0.52.6) recovers an interrupted restore through the verified original release, and [v0.52.5](https://github.com/kombifyio/stackKits/releases/tag/v0.52.5) preserves container file ownership during restore.
+- **Offsite backups start on a fresh bucket.** [v0.51.2](https://github.com/kombifyio/stackKits/releases/tag/v0.51.2) initializes the offsite backup repository on an empty bucket.
+- **Paperless sign-in works.** [v0.50.6](https://github.com/kombifyio/stackKits/releases/tag/v0.50.6) fixes Paperless-ngx sign-in through PocketID and fixes the Mosquitto broker restart.
+- **Long Deepgram dictations stay whole.** [SpeechKit v0.75.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.0) keeps transcribing past the first pause and transcribes the rest from the local recording if the connection drops.
+- **Stop means stop.** [v0.75.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.0) cuts queued speech on cancel, and Android and web clients wait for the server before sending microphone audio.
+- **Cleaner voice output.** [v0.74.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.74.1) keeps spaces between streamed words, and [v0.74.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.74.0) removes the white frame behind transparent overlay windows.
+
+</Update>
+
 <Update label="2026-10-02" description="Sep 17 – Oct 2">
 
 ## StackKits Private AI lab, game servers, and an MCP on every install; SpeechKit meets Microsoft 365
