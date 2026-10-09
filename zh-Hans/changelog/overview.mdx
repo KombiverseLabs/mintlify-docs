@@ -7,6 +7,64 @@ mode: "center"
 
 产品更新，按时间倒序排列。每个版本的更多细节，请参阅 GitHub 上 [StackKits](https://github.com/kombifyio/stackKits/releases)、[SpeechKit](https://github.com/kombifyio/SpeechKit/releases) 和 [Techstack](https://github.com/kombifyio/TechStack/releases) 的发布说明。
 
+<Update label="2026-10-09" description="2–9 / 10 / 2026">
+
+## StackKits 支持选择游戏平台并就地添加使用场景；SpeechKit Voice 可连接自有模型
+
+StackKits v0.50.4–v0.52.6 带来游戏平台选择、现有安装中的场景添加和更安全的恢复。SpeechKit v0.74.0–v0.76.4 支持自有模型、AssemblyAI 和 Deepgram 对话，并改进听写可靠性。 [v0.50.4](https://github.com/kombifyio/stackKits/releases/tag/v0.50.4) [v0.52.6](https://github.com/kombifyio/stackKits/releases/tag/v0.52.6) [v0.74.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.74.0) [v0.76.4](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.4)
+
+### 新功能
+
+- 新建游戏安装默认使用 Calagopus，也可选 Pelican 或 Pterodactyl。所有者密钥仅允许读取、电源控制、控制台和文件编辑。stackkit setup game、game list、power 和 allow 在三种平台上保持一致；现有安装保留原平台。 [StackKits v0.52.0](https://github.com/kombifyio/stackKits/releases/tag/v0.52.0) [参考文档](/zh-Hans/guides/stackkits/use-cases/game)
+
+- 通过 stackkit use-cases add（例如 mail）向运行中的安装添加场景，无需改变已有工作负载、路由或存储。StackKits MCP 也支持此操作。 [v0.51.0](https://github.com/kombifyio/stackKits/releases/tag/v0.51.0) [`stackkit use-cases`](/zh-Hans/stackkits/reference/cli/use-cases)
+
+- 服务器迁移到新网络后，stackkit network 重新绑定服务，使监听地址随之更新。 [v0.51.7](https://github.com/kombifyio/stackKits/releases/tag/v0.51.7) [`stackkit network`](/zh-Hans/stackkits/reference/cli/network)
+
+- Voice 对话可使用自己的 AI 端点和模型，并延续已有聊天，包括从浮动面板发起的聊天。 [SpeechKit v0.76.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.0) [参考文档](/zh-Hans/speechkit/modes)
+
+- 已注册的代理可通过 AssemblyAI 或 Deepgram 进行 Voice 对话。整个会话持续检查云处理许可；AssemblyAI 另行征求录音许可。新增均衡、低延迟和高精度配置。 [v0.75.5](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.5) [v0.76.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.0)
+
+- 模型目录新增 Microsoft Foundry 的 GPT-Live 和 Gemini Transcribe Live 听写，并移除停用模型。 [v0.74.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.74.0)
+
+### 更新
+
+- Home Assistant 代理连接器通过 stackkit setup 签发、复用和撤销，仅存于节点本地的加密存储中。 [StackKits v0.52.0](https://github.com/kombifyio/stackKits/releases/tag/v0.52.0) [参考文档](/zh-Hans/guides/stackkits/use-cases/smart-home)
+
+- 支持经身份验证访问历史恢复点。 [v0.52.5](https://github.com/kombifyio/stackKits/releases/tag/v0.52.5) [参考文档](/zh-Hans/guides/stackkits/back-up-and-restore)
+
+- Paperless、Mosquitto、Stalwart、Zigbee2MQTT、SearXNG、Roundcube、Euro-Office、Navidrome、Audiobookshelf、ESPHome、Emby 等应用可直接通过 OpenTofu 执行，无需 Compose 包装；原生执行需逐个应用选择启用。 [v0.51.0](https://github.com/kombifyio/stackKits/releases/tag/v0.51.0)
+
+- 应用密钥以文件交付，不放入环境变量。Zigbee2MQTT 的 MQTT 密码和 Pterodactyl 的应用密钥也不再写入数据卷。 [v0.51.0](https://github.com/kombifyio/stackKits/releases/tag/v0.51.0)
+
+- Advanced 模式为托管的 kombify.me 源站签发 Origin CA 证书。 [v0.51.7](https://github.com/kombifyio/stackKits/releases/tag/v0.51.7) [`stackkit advanced`](/zh-Hans/stackkits/reference/cli/advanced)
+
+- 每次实时听写保存为一个 Library 条目；按住说话在松开快捷键时仅插入一次文本。 [SpeechKit v0.75.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.1)
+
+- 连接提供商期间即开始录音，可从录音恢复流中缺失的音频。词典中的词适用于所有听写模式。 [v0.76.4](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.4)
+
+- 设置改为选项卡。网页语音界面增加录音指示、实时转写和会话开始前的麦克风检查。 [v0.74.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.74.0)
+
+- Voice 优先使用托管语音提供商，并支持最长四小时的会话。 [v0.75.3](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.3)
+
+- v0.74.0 和 v0.75.0 对 Go SDK 与 Android 键盘集成包含不兼容变更。升级前请阅读发布说明。 [v0.74.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.74.0) [v0.75.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.0) [参考文档](/zh-Hans/speechkit/framework)
+
+### 问题修复
+
+- 通过经过验证的原始版本恢复中断的恢复操作，并在恢复时保留容器文件所有权。 [StackKits v0.52.6](https://github.com/kombifyio/stackKits/releases/tag/v0.52.6) [v0.52.5](https://github.com/kombifyio/stackKits/releases/tag/v0.52.5)
+
+- 异地备份会在空存储桶中初始化备份仓库。 [v0.51.2](https://github.com/kombifyio/stackKits/releases/tag/v0.51.2)
+
+- 修复 Paperless-ngx 的 PocketID 登录以及 Mosquitto 消息代理重启。 [v0.50.6](https://github.com/kombifyio/stackKits/releases/tag/v0.50.6)
+
+- Deepgram 听写在首次停顿后继续转写；断线时从本地录音补全剩余部分。 [SpeechKit v0.75.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.0)
+
+- 停止语音会清除排队音频并阻止旧轮次的结果。 [v0.75.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.0)
+
+- 保留流式单词之间的空格，移除透明悬浮窗口后面的白色边框。 [v0.74.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.74.1) [v0.74.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.74.0)
+
+</Update>
+
 <Update label="2026-10-02" description="9 月 17 日 – 10 月 2 日">
 
 ## StackKits 带来私有 AI 实验室、游戏服务器和每次安装自带的 MCP；SpeechKit 接入 Microsoft 365
