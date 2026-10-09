@@ -1,0 +1,194 @@
+---
+title: "kombify Guard"
+description: "How kombify Guard keeps every kombify server bound to you, checked, reachable and recoverable"
+sidebarTitle: "kombify Guard"
+icon: "shield-halved"
+---
+
+kombify Guard is the trust mark of every kombify server. It runs on each server
+of your homelab and is built to make its operation reliable, secure and
+verifiable. It keeps the server bound to your Techstack, carries out only work
+you authorized, checks that protections are really in place, and records what
+happened, even across lost connections, restarts and updates.
+
+kombify Guard is part of [Techstack](/techstack/overview). It is not a separate
+product, plan or price. The rest of this page says Guard.
+
+<Note>
+**Public Beta.** This page describes how Guard is built to work. A capability
+counts as available only for a setup whose delivery evidence exists; see
+[Techstack availability](/techstack/availability) for what is public today.
+Guard does not promise an uptime guarantee, a server without failures or
+compromise, or endpoint detection and response (EDR).
+</Note>
+
+## Why it matters
+
+A homelab is only as trustworthy as the servers it runs on. Guard is built to
+turn "I hope my server is fine" into evidence you can see:
+
+- **Bound to you.** Each server is paired once and proves its identity with its
+  own key on every connection. Detaching a server revokes it everywhere.
+- **Secured configuration.** Firewall, SSH access, brute-force protection and
+  security updates are checked against the StackKits baseline, at home and in
+  the cloud. Drift is reported, and repairs happen only when authorized.
+- **Secured telemetry.** Health and posture data travel only over the
+  authenticated Guard channel and only as listed in
+  [What kombify Guard sends](/techstack/guard-telemetry).
+- **Reachable from anywhere.** Every installation can be reached through your
+  own domain or a `*.kombify.me` address, for local hardware and rented servers
+  alike. Credentials are issued per server and revoked with it.
+- **One homelab, all devices.** Servers with Guard, developer devices working
+  through Workbench, and client devices are members of the same homelab in
+  kombify Connect.
+- **Recovery by design.** Results survive disconnects and restarts, and
+  uncertain outcomes are reported rather than guessed. Guard updates are signed
+  and fall back automatically.
+
+## What Guard shows you
+
+The Guard panel of a server shows seven facts. A fact counts only when fresh
+evidence supports it. Evidence that is missing or too old shows as **Not
+evidenced**, never as fine, and a known problem shows as **Needs attention**. A
+server is **Guard-ready** only when all seven facts are evidenced.
+
+| Fact | What it means |
+| --- | --- |
+| Bound | The server proves its identity with its own key on every connection. A setup that still uses only a credential is shown as reduced protection. A revoked server is no longer bound. |
+| Connected | Guard reports over its authenticated connection. A server that has not reported recently enough does not count as connected. |
+| Operations durable | Guard keeps a durable journal of operations, and nothing is left unresolved. Results waiting for acknowledgement and operations with an unknown outcome are listed. |
+| Configuration secured | The host matches the StackKits security baseline, apart from exceptions you approved. The panel shows the baseline version and every control that deviates. |
+| Up to date | Guard is signed and current, and the operating system has no pending security updates and needs no reboot. |
+| Recoverable | A fresh backup exists and a restore was verified. Only a tested restore proves recovery. |
+| Reachable & governed | The server is registered at its kombify.me address and listed in kombify Connect. |
+
+Each fact shows when its evidence was observed and, if something is wrong, what
+you can do next. While you pair a server, the progress page shows the steps
+**Bound**, **Connected**, **Configuration verified** and **Reachable**, each
+checked against what Techstack has recorded. You can download or print a Guard
+report. It lists only what Techstack has recorded, with the time of each
+observation, and contains no credentials.
+
+## Pairing and identity
+
+The [pairing command](/techstack/pairing-command) binds a server to your
+Techstack once. During pairing, Guard generates its own key on the server and
+from then on proves that it holds that key, using short-lived access tokens. A
+credential alone does not prove which machine is talking.
+
+Each Guard is bound to exactly one server, and a homelab usually has many. A
+server image can ship with an active but unbound Guard that waits to pair. It
+never contains your credentials.
+
+Guard is built as two parts. The Guard itself runs as an unprivileged system
+user with a hardened service. Changes to the server that need administrator
+rights run through a separate helper that starts only when a request arrives and
+accepts only typed, authorized operations. A server that
+still runs the earlier all-administrator layout is shown as **Reduced
+protection**. This split protects Guard's credentials and the server from other
+users and processes on the machine. It is not a claim that a compromised Guard
+would be harmless.
+
+To end a binding, detach the server in its Guard panel. Detaching revokes
+Guard's credential and ends the server's reach: its kombify.me address and its
+kombify Connect listing. The machine itself and what runs on it are not
+touched. To manage the server again, pair it again. Guard then deletes its
+credentials and local journal. You can also rotate a server's credential: a
+replacement is issued and shown once, and the old one stops being accepted.
+
+## Secured configuration
+
+StackKits defines the host security baseline. Guard checks the server against
+it and reports each control as compliant, drifted, unknown or an approved
+exception. The checks cover the firewall, SSH access, brute-force protection,
+automatic and pending security updates, reboot state, kernel parameters, exposed
+listeners and certificate expiry. For home sites, the baseline expects an
+exposure-aware firewall, key-only SSH and brute-force protection.
+
+- **Unknown is never secure.** Evidence expires. A control that was not observed
+  or whose evidence is too old counts as unknown, not as compliant.
+- **Findings explain themselves.** Each finding shows the control, its severity,
+  the expected and the observed value, and the remediation.
+- **Exceptions are visible.** An exception needs an owner and an expiry, and it
+  stays listed.
+- **Drift is reported, not silently fixed.** Observing a finding does not
+  authorize a repair. A repair runs only for controls that fresh evidence
+  reports as drifted, only with your approval and a fresh second-factor
+  sign-in, and within limits: one repair at
+  a time, a cooldown per control, a daily attempt budget and a circuit breaker
+  on the server. StackKits refuses any change that would cut the way Techstack
+  reaches the server or lock you out. You can approve automatic repair for a
+  small safe set of controls (brute-force protection, firewall, kernel
+  parameters and automatic updates). It is off by default, expires and does not
+  renew itself. SSH controls stay with a person.
+
+Select **Verify now** in the Guard panel to check the server again.
+
+## Reachable from anywhere
+
+Every server paired with Guard is built to be reachable through its own
+`*.kombify.me` address or your own domain without manual keys, and this does not
+depend on whether the hardware is at home or rented. The credential for this
+path is issued per server when it is paired, rotated with Guard and revoked when
+you detach the server. See [kombify.me](/kombify-me/overview).
+
+## One homelab in kombify Connect
+
+kombify Connect gives your homelab one device model. Developer devices that
+work through Workbench, client devices such as desktop, mobile and Companion,
+and the servers of your homelab, each carrying its Guard, are members of the
+same homelab. In the Public Beta, Guard servers appear in the Connect device
+view, and you can revoke one there. Being listed gives no access: a server in
+Connect has no route that runs work on it. Authority to run work on a server
+stays with your Techstack.
+
+## Operations that survive failures
+
+Before Guard changes anything, it records the intent in a durable journal on the
+server, and it keeps each result until Techstack confirms it received it. After
+a lost connection or a restart, Guard delivers results again without repeating
+the change. If a failure leaves it unclear whether a change took effect, Guard
+reports an **unknown outcome** instead of guessing, and blocks further changes
+on that server until the outcome is settled. Guard first tries to settle it
+itself. Otherwise you review the server and record what you found. Releasing the
+block needs a fresh sign-in with a second factor from the last five minutes.
+
+While the connection to Techstack is down, applications on the server keep
+running and Guard keeps its observations. New privileged work needs valid
+authorization and does not start without it.
+
+## Updates
+
+Guard updates are checked before they are installed. The server verifies the
+update's signature and that it is newer than the installed version, and it
+refuses a revoked release. The new Guard then has to complete an authenticated
+check-in with Techstack within a trial period. If it cannot, the previous
+version is restored automatically. Pairing, key and journal stay in place across
+an update. The first install comes from your own Techstack over HTTPS; signature
+checks apply to updates.
+
+## What you can do
+
+- **Check the service on the server.** `sudo systemctl status techstack-agent`
+  shows whether Guard runs, and `sudo journalctl -u techstack-agent -f` follows
+  its log.
+- **Open the Guard panel** of a server in Techstack to see the facts, verify the
+  configuration, review unknown outcomes, rotate the credential or download the
+  report.
+- **Detach a server** you no longer want to manage.
+- **Read what Guard sends** in [What kombify Guard sends](/techstack/guard-telemetry).
+
+<CardGroup cols={2}>
+  <Card title="Pairing command" icon="terminal" href="/techstack/pairing-command">
+    Pair a server and bind it to your Techstack with one command.
+  </Card>
+  <Card title="What kombify Guard sends" icon="list-check" href="/techstack/guard-telemetry">
+    The data Guard may send, what it never sends and how long it is kept.
+  </Card>
+  <Card title="kombify.me addresses" icon="globe" href="/kombify-me/overview">
+    Reach a server through its own address from anywhere.
+  </Card>
+  <Card title="Techstack availability" icon="circle-info" href="/techstack/availability">
+    See what is public today and what remains preview.
+  </Card>
+</CardGroup>
