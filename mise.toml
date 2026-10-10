@@ -74,3 +74,7 @@ run_windows = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/wait-
 description = "Verify the live public scope, forbidden routes, and generated projections"
 run = "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/assert-remote-public-safety.ps1 -BaseUrl https://docs.kombify.io"
 run_windows = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/assert-remote-public-safety.ps1 -BaseUrl https://docs.kombify.io"
+
+[tasks.setup]
+description = "Set up this checkout: private Go modules, GitHub Packages and Doppler access, then the frozen install (SECRETS-ACCESS-STANDARD §6c)"
+run = "node scripts/kombify-bootstrap.mjs --install"

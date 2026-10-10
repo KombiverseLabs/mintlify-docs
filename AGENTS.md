@@ -175,3 +175,16 @@ Setup and recovery: the workspace `BEADS-REMOTE-WRITE-STANDARD.md` section
 "Repository-bound Cloudflare access". Regenerate this block and its repository
 files with `scripts/repo-context-sync.mjs --repo mintlify-docs --beads-only`.
 <!-- END GENERATED: beads-cloudflare-access -->
+
+<!-- BEGIN GENERATED: kombify-bootstrap -->
+## Repository bootstrap
+
+`scripts/kombify-bootstrap.mjs` (workspace `SECRETS-ACCESS-STANDARD.md`
+§6c) sets up private Go modules, GitHub Packages and Doppler access in any
+environment. Install with `node scripts/kombify-bootstrap.mjs --install`; run
+a command with this repository's Doppler secrets as
+`node scripts/kombify-bootstrap.mjs run -- <cmd>`. Tokens are fetched on
+demand: a missing `NODE_AUTH_TOKEN` or `DOPPLER_TOKEN` is never a blocker.
+Multi-repository cloud sessions load no repository hooks, so run the
+bootstrap yourself there.
+<!-- END GENERATED: kombify-bootstrap -->
