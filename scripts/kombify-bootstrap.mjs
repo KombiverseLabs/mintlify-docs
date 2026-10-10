@@ -120,7 +120,7 @@ export async function resolveDoppler({ env = process.env, root = ROOT, dispatch 
     return { source: 'cloud-broker', token: record.token };
   }
   if (env.GITHUB_ACTIONS === 'true') {
-    return { gap: 'GitHub Actions uses its repository secrets, not Doppler (SECRETS-ACCESS-STANDARD.md §4); pass DOPPLER_TOKEN explicitly for an operator-only job' };
+    return { source: 'github-actions', skipped: 'GitHub Actions uses its repository secrets, not Doppler (SECRETS-ACCESS-STANDARD.md §4); pass DOPPLER_TOKEN explicitly for an operator-only job' };
   }
   if (interactive && !fromCli.missing) {
     spawnSync('doppler', ['login', '--scope', root], { stdio: 'inherit' });
@@ -163,7 +163,7 @@ async function packagesToken(env, access) {
     const record = await (await loadBroker()).login({ grant: 'github-packages-read' });
     return { source: 'cloud-broker', token: record.token };
   }
-  if (!access.token) throw new Error(access.gap ?? 'no Doppler access for the package token');
+  if (!access.token) throw new Error(access.gap ?? access.skipped ?? 'no Doppler access for the package token');
   const q = new URLSearchParams(PACKAGES_SECRET);
   const { status, body } = await doppler(`/configs/config/secret?${q}`, access.token);
   const token = body?.value?.computed;
@@ -211,7 +211,7 @@ export async function main(argv, env = process.env) {
   if (command === 'run') {
     if (!scope) throw new Error('no Doppler scope: add .kombify/secrets.json (secrets-bootstrap-marker.mjs) or pass --project and --config');
     const access = await resolveDoppler({ env, interactive: process.stdin.isTTY });
-    if (!access.token) throw new Error(access.gap);
+    if (!access.token) throw new Error(access.gap ?? access.skipped);
     const secrets = await secretsOf(access.token, scope);
     return runWith(cmd, { ...secrets, DOPPLER_TOKEN: access.token, DOPPLER_PROJECT: scope.project, DOPPLER_CONFIG: scope.config });
   }
@@ -239,7 +239,7 @@ export async function main(argv, env = process.env) {
     if (status !== 0) gaps.push(`install: exited ${status}`);
   }
   const scopeText = scope ? `${scope.project}/${scope.config}` : 'none';
-  const dopplerText = access.source ? `${access.source}${access.pending ? '(on-demand)' : ''}` : 'missing';
+  const dopplerText = access.source ? `${access.source}${access.pending ? '(on-demand)' : ''}${access.skipped ? '(repository-secrets)' : ''}` : 'missing';
   for (const gap of gaps) console.log(`KOMBIFY_BOOTSTRAP_GAP ${gap}`);
   if (!gaps.length) console.log(`KOMBIFY_BOOTSTRAP_OK doppler=${dopplerText} scope=${scopeText} goprivate=${PRIVATE_GO}`);
   if (hook) {
