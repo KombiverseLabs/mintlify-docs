@@ -1,15 +1,9 @@
 name: Parity Gate
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-    paths:
-      - "stackkits/apps/**"
-      - "stackkits/reference/use-case-catalog.mdx"
-      - "stackkits/reference/*compatibility.mdx"
-      - "stackkits/reference/cli/**"
-      - "techstack/reference/**"
-      - "data/stackkits/**"
+  schedule:
+    - cron: "16 6 * * 1"
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.event_name == 'pull_request' && format('parity-gate-pr-{0}', github.event.pull_request.number) || format('parity-gate-{0}', github.run_id) }}
