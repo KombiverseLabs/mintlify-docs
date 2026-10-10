@@ -1,0 +1,63 @@
+---
+title: "kombify Wallet"
+description: "kombify 集中保管你的机密、登录信息、变量和服务器访问的地方"
+sidebarTitle: "概览"
+icon: "wallet"
+---
+
+<Warning>
+kombify Wallet 尚未发布。这些页面介绍它的工作方式，让你知道会有什么。你目前还无法使用它。
+</Warning>
+
+kombify Wallet 是 kombify 集中保管你交给它的内容的地方：API 密钥、登录信息、变量、配置文件，以及访问你服务器的方式。你、你的代理，以及你选择的 kombify 产品，都以同样的方式使用这些条目，而且每一方只获得你授予的权限。
+
+## 它保管什么
+
+| 条目 | 用途 |
+| --- | --- |
+| **API 密钥、令牌或证书** | 一个机密值，例如服务商的 API 密钥。 |
+| **登录信息** | 另一项服务的用户名和密码，可附带一次性验证码密钥。 |
+| **变量** | 你的工具按名称查找的一个值，例如 `DATABASE_URL`。 |
+| **配置** | 一份文档，例如 `.env` 文件。 |
+| **服务器访问** | 如何连接服务器：主机、用户，以及 SSH 私钥或密码。 |
+| **SSH 证书颁发机构** | 为你、你的代理和你的服务器签发短期 SSH 证书。 |
+
+你与其他服务连接的账户，例如通过 OAuth 连接的账户，已在计划中，将以独立的流程提供。
+
+## Wallet 如何保护你保管的内容
+
+- **离开你的设备之前已加密。** 你的浏览器或 `kombify-wallet` 命令行会在你的设备上加密值。你与 Wallet 之间的服务只转发加密数据，Wallet 也只存储加密后的值。用于解开它们的密钥与存储的数据分开保管，因此仅凭一份存储数据的副本无法读取内容。
+- **每次使用都有记录。** 无论是你查看、代理使用还是产品使用，Wallet 都会在交出或使用某个值之前写入一条审计记录。如果无法写入这条记录，它就不会交出该值。
+- **你的 Auth0 登录守护访问。** 你通过 Auth0 在 `login.kombify.io` 登录 kombify 账户，从而进入你的 Wallet。没有第二个 Wallet 密码。只有你本人登录后才能管理你的 Wallet。代理和委托会话无法管理。
+- **权限由你逐项授予。** 使用某个条目、读取它的值和管理它是各自独立的权限。代理或产品绝不会继承你的权限。
+
+<Note>
+任何能登录你的 kombify 账户的人，都可以以你的身份打开你的 Wallet。请用通行密钥（passkey）或多重验证保护该账户。
+</Note>
+
+## Wallet 做不到的事
+
+别人已经看到的值无法收回。如果某个值可能落到了不该拿到它的人手里，请为该条目添加新版本来替换它。
+
+## 接下来
+
+<CardGroup cols={2}>
+  <Card title="机密、登录信息和变量" icon="key" href="/zh-Hans/wallet/secrets-and-variables">
+    添加、查看、替换、撤销和删除条目，并将它们限定在某个项目或环境。
+  </Card>
+  <Card title="仅可使用的值" icon="eye-slash" href="/zh-Hans/wallet/use-only-values">
+    让密钥可在调用中使用，而无人能看到它。
+  </Card>
+  <Card title="代理" icon="robot" href="/zh-Hans/wallet/agents">
+    只给每个代理它所需的权限。
+  </Card>
+  <Card title="产品" icon="puzzle-piece" href="/zh-Hans/wallet/products">
+    让 kombify 产品在你不在时代你使用某个条目。
+  </Card>
+  <Card title="SSH 证书" icon="certificate" href="/zh-Hans/wallet/ssh-certificates">
+    签发短期证书，而不是分发 SSH 密钥。
+  </Card>
+  <Card title="命令行" icon="terminal" href="/zh-Hans/wallet/cli">
+    在终端中存储、读取和注入条目。
+  </Card>
+</CardGroup>

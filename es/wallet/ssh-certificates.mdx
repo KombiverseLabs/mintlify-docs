@@ -1,0 +1,151 @@
+---
+title: "Certificados SSH"
+description: "Crea una autoridad de certificación SSH en Wallet y firma certificados de corta duración para tus servidores"
+sidebarTitle: "Certificados SSH"
+icon: "certificate"
+---
+
+<Note>
+kombify Wallet todavía no se ha publicado. Esta página describe cómo funciona.
+</Note>
+
+En lugar de copiar claves SSH a cada servidor y a cada persona, guardas una
+autoridad de certificación en tu Wallet. Tus servidores confían en su clave
+pública. Cuando tú, un agente o un producto necesitan iniciar sesión, Wallet
+firma un certificado para esa clave concreta, para los nombres y el tiempo que
+permitas. El acceso termina cuando el certificado caduca, y la clave de la
+autoridad nunca sale de Wallet.
+
+## Crear la autoridad
+
+1. Abre **Ajustes**, elige **Claves y conexiones** y selecciona **Añadir
+   elemento**.
+2. Elige el tipo **Autoridad de certificación SSH** y escribe un **Nombre**.
+3. En **Clave de la autoridad**, elige **Crearla en Wallet (recomendado)**.
+   Wallet genera una clave Ed25519 nueva y la conserva. La clave nunca llega a
+   tu navegador. O elige **Importar una clave existente** para traer una clave
+   OpenSSH Ed25519 sin cifrar y sin frase de contraseña.
+4. Define la política de firma, que se describe a continuación, y selecciona
+   **Guardar en Wallet**.
+
+## Definir la política de firma
+
+En **Lo que esta autoridad puede firmar** fijas los límites de cada certificado:
+
+- **Tipos de certificado**: **Certificados de usuario** para las personas y los
+  agentes que inician sesión en servidores, y **Certificados de host** para los
+  servidores que demuestran quiénes son. Los agentes nunca reciben certificados
+  de host.
+- **Certificado de usuario más largo**: de 1 minuto a 1 día, por ejemplo `30m` o
+  `8h`.
+- **Certificado de host más largo**: de 1 minuto a 366 días, por ejemplo `90d`.
+- **Principals permitidos**: los nombres de usuario o de servidor que puede
+  llevar un certificado, uno por línea o separados por comas. `*.example.com`
+  representa exactamente un nombre delante de `example.com`, como
+  `web1.example.com`.
+- **Extensiones de los certificados de usuario**: solo las extensiones que
+  marques pueden aparecer en un certificado de usuario. `permit-pty` permite un
+  terminal interactivo.
+- **Exigir una dirección de origen**: cada certificado de usuario deberá indicar
+  las direcciones desde las que funciona.
+
+Sin política, la autoridad no firma nada. Puedes cambiar la política en los
+**Ajustes** del elemento, y el cambio se aplica desde el siguiente certificado.
+No se puede quitar una política. Para impedir que una autoridad firme, revócala.
+
+## Confiar en la clave pública en tus servidores
+
+La **Clave pública** de la autoridad aparece en la lista, con un botón
+**Copiar**. `kombify-wallet get my-ca` también la muestra. En los servidores que
+configura kombify StackKits, la clave pública está pensada para instalarse por
+ti; esa integración todavía no se ha publicado. En cualquier otro servidor,
+confía en ella tú mismo:
+
+1. Guarda la clave pública como una sola línea en
+   `/etc/ssh/kombify_user_ca.pub` en el servidor.
+2. Añade esta línea a `/etc/ssh/sshd_config`:
+
+   ```text
+   TrustedUserCAKeys /etc/ssh/kombify_user_ca.pub
+   ```
+
+3. Recarga el servicio SSH:
+
+   ```bash
+   sudo systemctl reload ssh
+   ```
+
+   En algunos sistemas el servicio se llama `sshd`.
+
+De forma predeterminada, el servidor acepta un certificado cuando uno de sus
+principals es el nombre de la cuenta con la que inicias sesión. Un certificado
+con el principal `deploy` permite a su titular iniciar sesión como `deploy`.
+
+## Firmar un certificado para tu clave
+
+En la sección **Wallet**, selecciona **Firmar certificado** en la autoridad.
+
+1. Pega tu clave pública en **Tu clave pública**. Usa el contenido de tu archivo
+   `.pub`, como `~/.ssh/id_ed25519.pub`, nunca una clave privada. Sirven claves
+   Ed25519, ECDSA P-256 y RSA de 2048 bits o más.
+2. Elige el **Tipo de certificado**, **Certificado de usuario** para iniciar
+   sesión en un servidor.
+3. Escribe los **Principals**, por ejemplo `deploy`.
+4. Escribe **Válido durante**, por ejemplo `8h`. No puede superar el máximo de la
+   política.
+5. Escribe una **Dirección de origen** si la política la exige.
+6. Selecciona **Firmar certificado** y luego **Copiar certificado** o
+   **Descargar**.
+
+Guarda el certificado junto a tu clave privada, por ejemplo como
+`~/.ssh/id_ed25519-cert.pub`, e inicia sesión como de costumbre. OpenSSH lo
+encuentra por sí solo.
+
+Puedes hacer lo mismo desde un terminal. El comando escribe el certificado junto
+a tu clave:
+
+```bash
+kombify-wallet ssh-sign my-ca ~/.ssh/id_ed25519.pub --principals deploy --ttl 8h
+```
+
+Para ver qué permite un certificado y cuándo termina:
+
+```bash
+ssh-keygen -L -f ~/.ssh/id_ed25519-cert.pub
+```
+
+## Certificados de host
+
+Un certificado de host permite que un servidor demuestre quién es, así que no
+tienes que comprobar su clave a mano. Copia a tu equipo la clave pública de host
+del servidor y fírmala con `--host`:
+
+```bash
+kombify-wallet ssh-sign my-ca ssh_host_ed25519_key.pub --principals server.example.com --ttl 90d --host
+```
+
+Copia de vuelta al servidor el archivo resultante `ssh_host_ed25519_key-cert.pub`
+y añade esta línea a `/etc/ssh/sshd_config`:
+
+```text
+HostCertificate /etc/ssh/ssh_host_ed25519_key-cert.pub
+```
+
+En tu equipo, confía en los servidores firmados por la autoridad con esta línea
+en `~/.ssh/known_hosts`, donde la clave es la clave pública de la autoridad:
+
+```text
+@cert-authority *.example.com ssh-ed25519 AAAA...
+```
+
+## Cuándo termina el acceso
+
+El acceso termina cuando caduca el certificado. Los certificados duran de
+minutos a horas, dentro de los límites de tu política. Si revocas la autoridad,
+dejan de crearse certificados nuevos al instante, pero un certificado ya firmado
+sigue siendo válido hasta que caduca. Todavía no existe una lista de revocación
+de certificados.
+
+Una autoridad no tiene versiones nuevas, porque los servidores confían en su
+clave. Para sustituirla, crea una autoridad nueva, confía en ambas claves
+públicas mientras haces el cambio y revoca después la antigua.

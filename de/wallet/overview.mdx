@@ -1,0 +1,89 @@
+---
+title: "kombify Wallet"
+description: "Der eine Ort, an dem kombify deine Geheimnisse, Logins, Variablen und Serverzugänge aufbewahrt"
+sidebarTitle: "Übersicht"
+icon: "wallet"
+---
+
+<Warning>
+Die kombify Wallet ist noch nicht veröffentlicht. Diese Seiten beschreiben,
+wie sie funktioniert, damit du weißt, was dich erwartet. Du kannst sie heute
+noch nicht nutzen.
+</Warning>
+
+Die kombify Wallet ist der eine Ort, an dem kombify aufbewahrt, was du ihm
+anvertraust: API-Schlüssel, Logins, Variablen, Konfigurationsdateien und die
+Zugänge zu deinen Servern. Du, deine Agenten und die kombify-Produkte, die du
+auswählst, nutzen diese Einträge auf dieselbe Weise, und jeder von ihnen
+erhält nur die Rechte, die du vergibst.
+
+## Was sie enthält
+
+| Eintrag | Wofür er dient |
+| --- | --- |
+| **API-Schlüssel, Token oder Zertifikat** | Ein einzelner geheimer Wert, etwa der API-Schlüssel eines Anbieters. |
+| **Login** | Benutzername und Passwort für einen anderen Dienst, mit optionalem Geheimnis für Einmalcodes. |
+| **Variable** | Ein Wert, den deine Werkzeuge über seinen Namen abrufen, etwa `DATABASE_URL`. |
+| **Konfiguration** | Ein Dokument, etwa eine `.env`-Datei. |
+| **Serverzugang** | So erreichst du einen Server: Host, Benutzer und ein privater SSH-Schlüssel oder ein Passwort. |
+| **SSH-Zertifizierungsstelle** | Signiert kurzlebige SSH-Zertifikate für dich, deine Agenten und deine Server. |
+
+Konten, die du mit anderen Diensten verbindest, zum Beispiel über OAuth, sind
+geplant und kommen mit einem eigenen Ablauf.
+
+## So schützt die Wallet, was du aufbewahrst
+
+- **Verschlüsselt, bevor es dein Gerät verlässt.** Dein Browser oder die
+  Kommandozeile `kombify-wallet` verschlüsselt einen Wert auf deinem Gerät. Die
+  Dienste zwischen dir und der Wallet leiten nur verschlüsselte Daten weiter,
+  und die Wallet speichert nur verschlüsselte Werte. Die Schlüssel, die sie
+  öffnen, werden getrennt von den gespeicherten Daten aufbewahrt. Eine Kopie
+  der gespeicherten Daten allein lässt sich daher nicht lesen.
+- **Jede Nutzung wird aufgezeichnet.** Die Wallet schreibt einen Audit-Eintrag,
+  bevor sie einen Wert freigibt oder verwendet, egal ob du ihn anzeigst, ein
+  Agent ihn nutzt oder ein Produkt ihn nutzt. Kann sie den Eintrag nicht
+  schreiben, gibt sie den Wert nicht frei.
+- **Deine Auth0-Anmeldung schützt den Zugriff.** Du erreichst deine Wallet, indem
+  du dich über Auth0 unter `login.kombify.io` in dein kombify-Konto einloggst.
+  Es gibt kein zweites Wallet-Passwort. Nur du selbst, persönlich angemeldet,
+  kannst deine Wallet verwalten. Agenten und delegierte Sitzungen können das
+  nicht.
+- **Du vergibst die Rechte einzeln.** Einen Eintrag nutzen, seinen Wert lesen
+  und ihn verwalten sind getrennte Rechte. Ein Agent oder ein Produkt erbt nie
+  deine Rechte.
+
+<Note>
+Wer sich in dein kombify-Konto einloggen kann, kann deine Wallet als du öffnen.
+Schütze das Konto mit einem Passkey oder einer Mehrfaktor-Anmeldung.
+</Note>
+
+## Was die Wallet nicht kann
+
+Einen Wert, den jemand schon gesehen hat, kann niemand zurückholen. Könnte ein
+Wert bei jemandem gelandet sein, bei dem er nicht hingehört, lege eine neue
+Version des Eintrags an, um ihn zu ersetzen.
+
+## Wie es weitergeht
+
+<CardGroup cols={2}>
+  <Card title="Geheimnisse, Logins und Variablen" icon="key" href="/de/wallet/secrets-and-variables">
+    Einträge hinzufügen, anzeigen, ersetzen, widerrufen und löschen und sie
+    einem Projekt oder einer Umgebung zuordnen.
+  </Card>
+  <Card title="Nur nutzbare Werte" icon="eye-slash" href="/de/wallet/use-only-values">
+    Einen Schlüssel in einem Aufruf nutzen lassen, ohne dass ihn jemand sieht.
+  </Card>
+  <Card title="Agenten" icon="robot" href="/de/wallet/agents">
+    Jedem Agenten nur die Rechte geben, die er braucht.
+  </Card>
+  <Card title="Produkte" icon="puzzle-piece" href="/de/wallet/products">
+    Ein kombify-Produkt einen Eintrag für dich nutzen lassen, wenn du nicht da
+    bist.
+  </Card>
+  <Card title="SSH-Zertifikate" icon="certificate" href="/de/wallet/ssh-certificates">
+    Kurzlebige Zertifikate signieren, statt SSH-Schlüssel zu verteilen.
+  </Card>
+  <Card title="Kommandozeile" icon="terminal" href="/de/wallet/cli">
+    Einträge im Terminal speichern, lesen und einspeisen.
+  </Card>
+</CardGroup>

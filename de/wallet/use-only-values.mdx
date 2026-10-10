@@ -1,0 +1,74 @@
+---
+title: "Einen Wert nutzen, ohne ihn zu sehen"
+description: "Agenten und Produkte einen Schlüssel in einem Aufruf nutzen lassen, ohne dass jemand den Wert erhält"
+sidebarTitle: "Nur nutzbare Werte"
+icon: "eye-slash"
+---
+
+<Note>
+Die kombify Wallet ist noch nicht veröffentlicht. Diese Seite beschreibt, wie
+sie funktioniert.
+</Note>
+
+Die meisten Schlüssel werden genutzt, nicht gelesen: Ein API-Schlüssel landet
+in einem Request-Header. Bei der vermittelten Nutzung führt die Wallet den
+Aufruf selbst aus. Der Aufrufer sagt, was er aufrufen möchte, die Wallet fügt
+die Zugangsdaten hinzu und sendet die Anfrage, und der Aufrufer bekommt nur die
+Antwort. Der Wert erreicht den Aufrufer nie.
+
+## Festlegen, wer den Wert sehen darf
+
+In den **Einstellungen** eines Eintrags, oder wenn du den Eintrag hinzufügst,
+bietet **Wer den Wert sehen darf** zwei Möglichkeiten:
+
+- **Agenten und Personen mit Lesezugriff dürfen den Wert sehen.** Das ist die
+  Voreinstellung. Du kannst den Wert jederzeit anzeigen. Ein Agent sieht ihn nur
+  mit Lesezugriff.
+- **Niemand sieht den Wert, er kann nur genutzt werden.** Selbst du kannst ihn
+  nicht anzeigen, du kannst ihn also später nicht aus der Wallet herauskopieren.
+  Agenten und Produkte mit Nutzungszugriff können nur damit handeln, zum
+  Beispiel in einem API-Aufruf. Der Eintrag zeigt das Kennzeichen **Nur
+  nutzbar**.
+
+## Nutzungsziele festlegen
+
+Ein Nutzungsziel legt fest, wohin ein Wert gesendet werden darf. Füge Ziele
+unter **Nutzungsziele** mit **Ziel hinzufügen** hinzu. Jedes Ziel hat:
+
+- **Host**: ein kleingeschriebener Hostname wie `api.example.com`, bei Bedarf
+  mit Port. Füge weder `https://` noch einen Pfad hinzu. IP-Adressen werden
+  nicht akzeptiert.
+- **Methoden**: beliebig viele von GET, HEAD, POST, PUT, PATCH und DELETE.
+- **Pfadpräfix**: Aufrufe dürfen an diesen Pfad oder darunter gehen, zum
+  Beispiel `/v1`.
+- **Wie der Wert gesendet wird**: **Authorization-Header, Bearer**, **Ein Header
+  deiner Wahl** mit einem **Header-Namen** oder **Basic-Authentifizierung mit
+  Benutzername und Passwort** für einen Login.
+
+Ein Eintrag kann bis zu 16 Ziele haben. Ohne Ziel kann der Wert in keinem Aufruf
+genutzt werden. Ziele gibt es für API-Schlüssel, Token und Zertifikate, für
+Logins und für Serverzugänge.
+
+## Was die Wallet mit einem Aufruf macht
+
+1. Ein Agent oder Produkt mit Nutzungszugriff bittet die Wallet, eine URL mit
+   einer Methode aufzurufen.
+2. Die Wallet vergleicht die Anfrage mit deinen Zielen. Host, Methode und Pfad
+   müssen zu einem Ziel passen, sonst lehnt sie ab.
+3. Die Wallet zeichnet den Vorgang auf, fügt den Wert so hinzu, wie es das Ziel
+   vorgibt, und sendet die Anfrage über HTTPS.
+4. Sie gibt die Antwort zurück, wobei jede Kopie des Werts durch `[redacted]`
+   ersetzt ist.
+
+Der Aufrufer kann keine eigenen Autorisierungs-Header hinzufügen, und die Wallet
+folgt keinen Weiterleitungen. Anfragen und Antworten sind auf 1 MiB begrenzt,
+und es wird nur eine feste Auswahl an Antwort-Headern zurückgegeben.
+
+<Note>
+Die Schwärzung entfernt exakte Kopien des Werts. Ein Dienst, der die
+Zugangsdaten verändert, bevor er sie in einer Antwort wiederholt, wird nicht
+erfasst.
+</Note>
+
+Wer einen Eintrag nutzen darf, entscheidest du. Siehe
+[Agenten](/de/wallet/agents) und [Produkte](/de/wallet/products).

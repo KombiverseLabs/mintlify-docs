@@ -1,0 +1,100 @@
+---
+title: "The kombify-wallet command line"
+description: "Sign in, store and read items, inject variables into a process, import from Doppler and sign SSH certificates"
+sidebarTitle: "Command line"
+icon: "terminal"
+---
+
+<Note>
+The kombify Wallet is not released yet, and the command line is not
+distributed yet. This page describes how it works. Install steps will be added
+here when it ships.
+</Note>
+
+`kombify-wallet` gives you the Wallet in a terminal. Like the browser, it
+encrypts a value on your device before it leaves it. It reads values only from
+standard input or a hidden prompt, never from an argument, so they stay out of
+your shell history and process list.
+
+## Sign in
+
+```bash
+kombify-wallet login
+```
+
+The command prints a link and a code. Open the link, sign in to your kombify
+account through Auth0, and confirm the code. The command keeps its own sign-in
+in a file that only you can read.
+
+`kombify-wallet status` shows who is signed in, and `kombify-wallet logout`
+removes the sign-in and revokes it. For automation that already holds a kombify
+access token, set `KOMBIFY_WALLET_TOKEN`. It takes precedence over the stored
+sign-in.
+
+## Store and read items
+
+```bash
+kombify-wallet set DATABASE_URL --type variable
+kombify-wallet list
+kombify-wallet get DATABASE_URL
+kombify-wallet get DATABASE_URL --reveal
+```
+
+`set` asks for the value with a hidden prompt, or reads it from a pipe. If the
+name already exists in the scope, `set` adds a new version. `--type` is
+`variable`, `configuration` or `generic_secret`. `--scope` is `account`
+(default), `project:<project>` or `environment:<project>/<environment>`.
+
+`list` shows your items with their IDs. `get` shows an item's details, and
+only `get --reveal` prints the value. `kombify-wallet revoke <item>` and
+`kombify-wallet delete <item> --yes` work as in
+[Settings](/wallet/secrets-and-variables). Add `--type` or `--scope` when a
+name matches several items.
+
+## Run a command with your variables
+
+```bash
+kombify-wallet run --project shop --environment production -- ./deploy.sh
+```
+
+`run` resolves your variables for that scope and adds them to the environment
+of the command. The environment wins over the project, and the project wins
+over the account. Values are decrypted in memory only, and never printed or
+written.
+
+- `--only NAME,NAME` limits the variables to those names.
+- A variable that is already set in your environment is not replaced unless
+  you add `--override`.
+- The command does not receive `KOMBIFY_WALLET_TOKEN`, so nothing it starts
+  can open your other items.
+- The exit code is the command's own.
+
+## Import from Doppler
+
+```bash
+doppler secrets download --no-file --format json | kombify-wallet import doppler --format json --scope project:shop
+```
+
+Each entry becomes a variable in that scope, or a new version of an existing
+variable with the same name. The import skips Doppler's own metadata entries,
+names that are not valid variable names, empty values and values that are not
+text. It prints names and results, never values.
+
+## Sign an SSH certificate
+
+```bash
+kombify-wallet ssh-sign my-ca ~/.ssh/id_ed25519.pub --principals deploy --ttl 8h
+```
+
+`--host` signs a host certificate. `--source-address` and `--extensions` set
+those fields of a user certificate. See [SSH certificates](/wallet/ssh-certificates).
+
+## Exit codes
+
+| Code | Meaning |
+| --- | --- |
+| 0 | Done |
+| 1 | Wrong command or option |
+| 2 | Not signed in |
+| 3 | The Wallet refused the request |
+| 4 | Network error or the Wallet is unavailable |

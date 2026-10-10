@@ -1,0 +1,64 @@
+---
+title: "Agents and the Wallet"
+description: "Give each agent only the rights it needs for an item: use, read or manage"
+sidebarTitle: "Agents"
+icon: "robot"
+---
+
+<Note>
+The kombify Wallet is not released yet. This page describes how it works.
+</Note>
+
+An agent never inherits your access. It has no rights on an item until you
+give them, and it sees only the items it holds a right for. Only you, signed
+in yourself, can manage your Wallet. An agent cannot.
+
+## Give an agent access to an item
+
+1. Open **Settings** and choose **Keys & connections**.
+2. In the **Wallet** section, select **Agent access** on the item.
+3. Switch on the rights you want for each of your agents.
+
+The list shows the agents you created. Each right is granted on its own, and
+none implies another.
+
+| Right | What the agent can do |
+| --- | --- |
+| **Use** | Act with the value, for example in an API call, without seeing it. It needs [use targets](/wallet/use-only-values). |
+| **Read** | See the value itself. |
+| **Manage** | Manage the item and its settings. |
+
+Today an agent works with an item only through **Use** and **Read**. Adding
+items, adding versions, changing settings, revoking and deleting stay with you,
+whatever rights an agent holds.
+
+Two cases to keep in mind:
+
+- If an item's value is use only, **Read** shows it to no one.
+- If an item has no use targets, **Use** lets an agent make no calls with it.
+
+For an SSH certificate authority, **Use** lets the agent request short-lived
+certificates inside the authority's sign policy. Agents receive user
+certificates only. See [SSH certificates](/wallet/ssh-certificates).
+
+## When a right is missing
+
+The Wallet refuses and says which right is missing: use, read or manage.
+Nothing is released. The agent has to ask for the right, and you can grant it
+as described above.
+
+## Take a right away
+
+Switch the right off. It applies from the agent's next operation, and an
+operation that was already allowed lasts about a minute at most. A right
+otherwise stays until you withdraw it or the agent ends.
+
+## Reveals are counted
+
+Every time an agent reads a value, the Wallet records it and counts it per
+item. The item then shows a hint: **Rotate recommended: the value was released
+N times since its last version. Add a new version to replace it.** A new
+version resets the count.
+
+Prefer **Use** over **Read** where you can. An agent that uses a value never
+holds it, so there is nothing to rotate.

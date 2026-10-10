@@ -18,7 +18,8 @@ $rules = @(
     # The generated CLI reference shows flag defaults verbatim, such as the local
     # stackkit-server URL; a default is not a localhost customer journey.
     @{ Pattern = 'localhost:\d'; Reason = "localhost:PORT URLs are not allowed in Tier-1 docs"; Exclude = '^(?:[a-zA-Z-]+/)?stackkits/reference/cli/' },
-    @{ Pattern = '(?i)doppler'; Reason = "secret-manager references are not allowed in Tier-1 docs" },
+    # The Wallet CLI page documents the `import doppler` command; no other page may name a secret manager.
+    @{ Pattern = '(?i)doppler'; Reason = "secret-manager references are not allowed in Tier-1 docs"; Exclude = '^(?:[a-zA-Z-]+/)?wallet/cli\.mdx$' },
     @{ Pattern = '\bplatform-[a-z0-9]*\d[a-z0-9]*(\.\d+)?\b'; Reason = "internal issue-tracker IDs are not allowed in Tier-1 docs" }
 )
 

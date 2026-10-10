@@ -1,0 +1,142 @@
+---
+title: "SSH certificates"
+description: "Create an SSH certificate authority in the Wallet and sign short-lived certificates for your servers"
+sidebarTitle: "SSH certificates"
+icon: "certificate"
+---
+
+<Note>
+The kombify Wallet is not released yet. This page describes how it works.
+</Note>
+
+Instead of copying SSH keys to every server and person, you keep one
+certificate authority in your Wallet. Your servers trust its public key. When
+you, an agent or a product needs to log in, the Wallet signs a certificate for
+exactly that key, for the names and the time you allow. Access ends when the
+certificate expires, and the authority's own key never leaves the Wallet.
+
+## Create the authority
+
+1. Open **Settings**, choose **Keys & connections** and select **Add item**.
+2. Choose the type **SSH certificate authority** and enter a **Name**.
+3. Under **Authority key**, choose **Create it in the Wallet (recommended)**.
+   The Wallet makes a new Ed25519 key and keeps it. The key never reaches your
+   browser. Or choose **Import an existing key** to bring an unencrypted
+   Ed25519 OpenSSH key without a passphrase.
+4. Set the sign policy, described next, and select **Save to Wallet**.
+
+## Set the sign policy
+
+Under **What this authority may sign**, you set the limits for every
+certificate:
+
+- **Kinds of certificate**: **User certificates** for people and agents who
+  log in to servers, and **Host certificates** for servers that prove who they
+  are. Agents never receive host certificates.
+- **Longest user certificate**: from 1 minute to 1 day, for example `30m` or
+  `8h`.
+- **Longest host certificate**: from 1 minute to 366 days, for example `90d`.
+- **Allowed principals**: the user or server names a certificate may carry,
+  one per line or separated by commas. `*.example.com` stands for exactly one
+  name in front of `example.com`, such as `web1.example.com`.
+- **Extensions of user certificates**: only the extensions you check can appear
+  in a user certificate. `permit-pty` allows an interactive terminal.
+- **Require a source address**: every user certificate must then name the
+  addresses it works from.
+
+Without a policy, the authority signs nothing. You can change the policy in
+the item's **Settings**, and a change applies from the next certificate. You
+cannot remove a policy. To stop an authority from signing, revoke it.
+
+## Trust the public key on your servers
+
+The authority's **Public key** appears in the list, with a **Copy** button.
+`kombify-wallet get my-ca` prints it too. For servers that kombify StackKits sets up,
+the public key is meant to be installed for you; that integration is not
+released yet. On any other server, trust it yourself:
+
+1. Save the public key as one line in `/etc/ssh/kombify_user_ca.pub` on the
+   server.
+2. Add this line to `/etc/ssh/sshd_config`:
+
+   ```text
+   TrustedUserCAKeys /etc/ssh/kombify_user_ca.pub
+   ```
+
+3. Reload the SSH service:
+
+   ```bash
+   sudo systemctl reload ssh
+   ```
+
+   On some systems the service is called `sshd`.
+
+By default the server accepts a certificate when one of its principals is the
+account name you log in as. A certificate with the principal `deploy` lets its
+holder log in as `deploy`.
+
+## Sign a certificate for your key
+
+In the **Wallet** section, select **Sign certificate** on the authority.
+
+1. Paste your public key under **Your public key**. Use the content of your
+   `.pub` file, such as `~/.ssh/id_ed25519.pub`, never a private key.
+   Ed25519, ECDSA P-256 and RSA keys of 2048 bits or more work.
+2. Choose the **Certificate type**, **User certificate** to log in to a server.
+3. Enter the **Principals**, for example `deploy`.
+4. Enter **Valid for**, for example `8h`. It cannot exceed the policy's
+   maximum.
+5. Enter a **Source address** if the policy requires one.
+6. Select **Sign certificate**, then **Copy certificate** or **Download**.
+
+Save the certificate next to your private key, for example as
+`~/.ssh/id_ed25519-cert.pub`, and log in as usual. OpenSSH picks it up on its
+own.
+
+You can do the same from a terminal. The command writes the certificate next
+to your key:
+
+```bash
+kombify-wallet ssh-sign my-ca ~/.ssh/id_ed25519.pub --principals deploy --ttl 8h
+```
+
+To see what a certificate allows and when it ends:
+
+```bash
+ssh-keygen -L -f ~/.ssh/id_ed25519-cert.pub
+```
+
+## Host certificates
+
+A host certificate lets a server prove who it is, so you do not have to check
+its key by hand. Copy the server's host public key to your computer, then sign
+it with `--host`:
+
+```bash
+kombify-wallet ssh-sign my-ca ssh_host_ed25519_key.pub --principals server.example.com --ttl 90d --host
+```
+
+Copy the resulting `ssh_host_ed25519_key-cert.pub` back to the server and add
+this line to `/etc/ssh/sshd_config`:
+
+```text
+HostCertificate /etc/ssh/ssh_host_ed25519_key-cert.pub
+```
+
+On your computer, trust servers signed by the authority with this line in
+`~/.ssh/known_hosts`, where the key is the authority's public key:
+
+```text
+@cert-authority *.example.com ssh-ed25519 AAAA...
+```
+
+## When access ends
+
+Access ends when the certificate expires. Certificates last minutes to hours,
+within the limits of your policy. Revoking the authority stops new
+certificates at once, but a certificate that was already signed stays valid
+until it expires. There is no certificate revocation list yet.
+
+An authority has no new versions, because servers trust its key. To replace
+one, create a new authority, trust both public keys while you move over, then
+revoke the old one.
