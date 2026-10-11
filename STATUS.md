@@ -1,6 +1,6 @@
 ---
 title: mintlify-docs Status
-last_verified: 2026-09-17
+last_verified: 2026-10-11
 maturity: alpha
 ---
 
@@ -22,11 +22,12 @@ maturity: alpha
   Identity & Access, and Changelog.
 - StackKits content is limited to capabilities verified against the current
   public StackKits release.
-- The navigation contains 101 pages: 85 in the StackKits tab (41 of them the
-  generated CLI reference), seven in Techstack, six in SpeechKit, and one each
-  for Start, Identity & Access, and Changelog.
-- Techstack documents the current product and operating boundary but makes no
-  public installer, public source, or general-availability claim.
+- The navigation in `docs.json` is the page inventory; the StackKits tab is the
+  largest (its CLI reference is generated), Techstack and SpeechKit are
+  smaller, and Start, Identity & Access and Changelog are one page each.
+- Techstack documents the current product and operating boundary, including the
+  public, unsigned Windows Alpha (`techstack/install-windows`,
+  `techstack/availability`). It makes no general-availability claim.
 - SpeechKit documentation describes the current public release through a
   generated release block and `releases/latest` download links.
 - The StackKits tab groups Get started, Use cases, Guides, Platform services,
@@ -43,7 +44,7 @@ maturity: alpha
 - Every MDX page must be both in the approved scope and in `docs.json`.
 - Simulate-as-product, Proxmox, excluded products, internal paths, secret
   material, and restricted-content markers fail closed.
-- Local E2E uses pinned Mintlify `4.2.684` and verifies all 47 public pages plus
+- Local E2E uses pinned Mintlify `4.2.684` and verifies every public page in the navigation plus
   every forbidden route through real HTTP.
 - Remote safety checks verify removed direct routes, `llms.txt`, and sitemap
   projections after deployment.
@@ -63,7 +64,7 @@ maturity: alpha
 | Dependency | Verified State |
 | --- | --- |
 | StackKits | Public release `v0.16.0`, commit `22705dd4bbee9caaa7601bffb4769a7c40314490`. |
-| Techstack | Preview product source `9e5c30e699a482d149d89f9a3383db6718a9e360`; public distribution unavailable. |
+| Techstack | Public unsigned Windows Alpha; see `techstack/availability` for the current published release. |
 | SpeechKit | Public release `v0.52.14`, commit `46ed2b0580fb7ff412c7b88db96401973a4c7a2e`. |
 | Mintlify CLI | Pinned `mint@4.2.684` through `mise`. |
 | Node | Version 24 through `mise`. |
@@ -77,8 +78,9 @@ maturity: alpha
 - Photos and Vault workload contracts validate and generate, but v0.16.0 has no
   safe public post-init command for adding their required owner-bound secret
   custody. Their pages remain descriptive rather than installation recipes.
-- Techstack has no supported public installer or anonymous source distribution;
-  its pages remain preview guidance until official artifacts exist.
+- The Techstack Windows installer is an unsigned Alpha (SmartScreen warning;
+  verify the published checksums). Techstack makes no general-availability
+  claim, and its pages describe only what the published release does.
 - Additional product documentation remains excluded until an explicit public
   decision and evidence-backed content audit expands the allowlist.
 
