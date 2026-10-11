@@ -166,7 +166,11 @@ This repository carries its non-secret tracker binding in
 `node scripts/beads-cloudflare-access.mjs` and require
 `BEADS_CLOUDFLARE_ACCESS_OK`. The governed writer resolves this access
 automatically from the host's GitHub identity; do not request or copy a
-Cloudflare key. Trusted CI uses its configured GitHub OIDC identity.
+Cloudflare key. Trusted CI uses its configured GitHub OIDC identity. Where a
+proxy holds the GitHub identity (Claude cloud sessions), the script dispatches
+this repository's `beads-session.yml` workflow and receives an hourly
+credential by itself; `bd` then works directly. When `bd` reports no
+credential, rerun the script; never report Beads access as a blocker first.
 Cloudflare is the operational authority only for an explicitly activated
 binding (`authority: cloudflare`). Bootstrap selects its native backend and
 preserves local Dolt metadata for read-only comparison. Projection preserves
@@ -187,6 +191,11 @@ environment. Install with `node scripts/kombify-bootstrap.mjs --install`; run
 a command with this repository's Doppler secrets as
 `node scripts/kombify-bootstrap.mjs run -- <cmd>`. Tokens are fetched on
 demand: a missing `NODE_AUTH_TOKEN` or `DOPPLER_TOKEN` is never a blocker.
+Private `@kombiverselabs` packages are vendored under `vendor/npm/` (§6d),
+so installs need no token in Claude, Codex, Cursor or anywhere else; after a
+version change run
+`node scripts/kombify-bootstrap.mjs packages -- node scripts/kombify-vendor-packages.mjs`
+and `pnpm install`.
 Multi-repository cloud sessions load no repository hooks, so run the
 bootstrap yourself there.
 <!-- END GENERATED: kombify-bootstrap -->

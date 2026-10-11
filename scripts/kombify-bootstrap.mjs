@@ -24,6 +24,7 @@
 //   node scripts/kombify-bootstrap.mjs            # set up + verify, exit 1 on a gap
 //   node scripts/kombify-bootstrap.mjs --hook     # same, never fails, no broker dispatch
 //   node scripts/kombify-bootstrap.mjs --install  # also pnpm install --frozen-lockfile
+//                                                 # (no token at all where packages are vendored, §6d)
 //   node scripts/kombify-bootstrap.mjs run -- <cmd...>   # cmd with the repo's Doppler secrets
 //   node scripts/kombify-bootstrap.mjs packages -- <cmd...>  # cmd with NODE_AUTH_TOKEN
 //   flags: --project P --config C override the repository scope.
@@ -195,6 +196,10 @@ function runWith(cmd, extraEnv) {
   return result.status ?? 1;
 }
 
+export function vendoredPackages(root = ROOT) {
+  try { return readFileSync(join(root, 'pnpm-workspace.yaml'), 'utf8').includes('# kombify-vendor:start'); } catch { return false; }
+}
+
 function installCommand() {
   const viaMise = existsSync(join(ROOT, 'mise.toml')) && spawnSync('mise', ['--version']).status === 0;
   return viaMise ? ['mise', 'exec', '--', 'pnpm', 'install', '--frozen-lockfile'] : ['pnpm', 'install', '--frozen-lockfile'];
@@ -233,10 +238,17 @@ export async function main(argv, env = process.env) {
     const gap = await verifyScope(access.token, scope).catch((error) => `Doppler not reachable (${error.cause?.code ?? error.message})`);
     if (gap) gaps.push(`doppler: ${gap}`);
   }
-  if (own.includes('--install') && !gaps.length && existsSync(join(ROOT, 'package.json'))) {
-    console.log(`KOMBIFY_BOOTSTRAP_INSTALL ${ROOT}`);
-    const status = await main(['packages', '--', ...installCommand()], env);
-    if (status !== 0) gaps.push(`install: exited ${status}`);
+  if (own.includes('--install') && existsSync(join(ROOT, 'package.json'))) {
+    // Vendored private packages (§6d) install with no token and no Doppler access.
+    if (vendoredPackages()) {
+      console.log(`KOMBIFY_BOOTSTRAP_INSTALL ${ROOT} packages=vendored`);
+      const status = runWith(installCommand(), {});
+      if (status !== 0) gaps.push(`install: exited ${status}`);
+    } else if (!gaps.length) {
+      console.log(`KOMBIFY_BOOTSTRAP_INSTALL ${ROOT}`);
+      const status = await main(['packages', '--', ...installCommand()], env);
+      if (status !== 0) gaps.push(`install: exited ${status}`);
+    }
   }
   const scopeText = scope ? `${scope.project}/${scope.config}` : 'none';
   const dopplerText = access.source ? `${access.source}${access.pending ? '(on-demand)' : ''}${access.skipped ? '(repository-secrets)' : ''}` : 'missing';
