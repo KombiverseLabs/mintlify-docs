@@ -9,6 +9,7 @@ import { pathToFileURL } from 'node:url';
 import { resolveGithubCredential, readGithubCredentials, updateCredentialFile, githubCredentialKey } from './lib/beads-github-auth.mjs';
 import { ensureSessionTools } from './beads-session-tools.mjs';
 import { appReaderCredential } from './lib/beads-app-reader-auth.mjs';
+import { brokerAvailable, brokerCredential } from './lib/beads-session-broker.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 // This adapter is part of the trusted Kombify bootstrap, not an arbitrary URL
@@ -19,7 +20,8 @@ function credentialFile(env = process.env) {
     ? join(homedir(), 'Library', 'Application Support') : env.XDG_CONFIG_HOME || join(homedir(), '.config');
   return home && join(home, 'beads-cloudflare', 'credentials.json');
 }
-export async function access(config, { allowStatic = false, env = process.env, fetchImpl = fetch, cacheFile = credentialFile(env) } = {}) {
+export async function access(config, { allowStatic = false, env = process.env, fetchImpl = fetch, cacheFile = credentialFile(env),
+  broker = { available: brokerAvailable, credential: brokerCredential } } = {}) {
   if (config.base !== trustedOrigin || !/^KombiverseLabs\/[A-Za-z0-9_.-]+$/.test(config.github_repository)
       || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(config.tracker)) throw new Error('Invalid Kombify tracker binding');
   const file = cacheFile;
@@ -27,9 +29,16 @@ export async function access(config, { allowStatic = false, env = process.env, f
   const credentials = !appReader && file && existsSync(file) ? readGithubCredentials(file) : {};
   const machineKey = !appReader && allowStatic && env.BEADS_CLOUDFLARE_TOKEN;
   if (machineKey && !/^[!-~]+$/.test(machineKey)) throw new Error('Machine tracker credential is malformed');
-  const entry = appReader ? await appReaderCredential(config, { env, fetchImpl }) : machineKey ? { token: machineKey, expires_at: null, static: true } : await resolveGithubCredential({ base: config.base, repository: config.github_repository,
+  const github = () => resolveGithubCredential({ base: config.base, repository: config.github_repository,
     tracker: config.tracker, credentials,
     env: { ...env, BEADS_CLOUDFLARE_TRUSTED_ORIGINS: trustedOrigin }, fetchImpl });
+  // A proxy-held GitHub identity (Claude cloud sessions) cannot be exchanged
+  // directly; the repository's OIDC session workflow issues the credential.
+  const viaGithub = async () => {
+    try { return await github(); }
+    catch (error) { if (!broker.available(env)) throw error; return broker.credential(config); }
+  };
+  const entry = appReader ? await appReaderCredential(config, { env, fetchImpl }) : machineKey ? { token: machineKey, expires_at: null, static: true } : await viaGithub();
   const response = await fetchImpl(`${config.base}/t/${config.tracker}/v0/beads/context`, {
     headers: { Authorization: `Bearer ${entry.token}` }, redirect: 'error', signal: AbortSignal.timeout(10_000),
   });
