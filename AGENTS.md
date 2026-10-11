@@ -12,17 +12,19 @@ navigation source of truth; pages are MDX files.
 
 Binding; `kombify-fast-development` holds the detail.
 
-1. Pre-1.0 (`fast-pre-1.0`): the affected deterministic gate is the only synchronous gate.
-2. Test behavior at public boundaries; black-box by default.
+1. Pre-1.0 (`fast-pre-1.0`): change the smallest coherent module, execute its changed function or flow directly in the real development runtime, observe the effect, then run the affected deterministic merge gate once. This is the fast development and deployment path.
+2. Verify behavior through the module's supported interface or affected user/API/CLI path; black-box by default. A build or healthy process alone does not prove the changed behavior.
 3. Add a test only for a regression, core invariant or sensitive boundary (auth, billing, migrations, provider control, signing); lint, type, build, security and schema checks are the baseline, not extra tests.
 4. Assert effects, never structure: no fixed counts, presence or existence checks, exact strings, source or doc greps, or snapshots.
 5. One behavior, max one test.
-6. No coverage or test-count goals pre-1.0.
+6. No coverage, test-count or file-size goals pre-1.0. Split modules around behavior, ownership and dependency seams when it improves direct execution or maintenance.
 7. A test that breaks on a behavior-preserving refactor is fixed or deleted.
-8. The running app is the feedback loop: a one-command hot-reload dev loop; affected tests under 2 minutes.
+8. Direct function/module execution in the running development app is the feedback loop. Reuse a one-command hot-reload loop, diagnose its observed failures, and keep affected automation bounded; do not turn each edit into an automated suite.
 9. Delete skipped, dead and superseded tests and code in the slice that obsoletes them.
 10. Claims follow evidence: implemented, merged, deployed and live differ; missing evidence is pending.
-11. Feature completion accepts passing automated user journeys on browsers, Windows hosts/VMs, Android emulators and iOS simulators. Physical-device and real-user validation belongs to owner-controlled Public Beta, never a generic completion blocker. Apply `DEVELOPMENT-THROUGHPUT-STANDARD.md` section "Automated feature acceptance and Public Beta"; record hardware limitations without claiming untested hardware support.
+11. Scoped fast completion may use recorded actual behavior observed through direct module/function or affected flow execution, with applicable affected checks. No new permanent automated journey is required for every edit. Broad, heavy provider/device and compatibility acceptance remains `pending-window` until the window orchestrator runs it. Physical-device and real-user validation belongs to owner-controlled Public Beta; record hardware limitations honestly.
+12. Narrow development probes on remote hosts, VMs, emulators or devices are admitted by their effects and isolation, not geography: use owned nonproduction runtime state, existing authorization and cleanup, and no heavy acceptance or provider provisioning. A substitute proves only its declared boundary. Databases are the exception (owner rule 2026-10-09): database work always runs against the live databases, signed in as the shared test identities and never as the owner; no local, fictional or emulated database (local Docker Postgres, PGlite, in-memory); development and tests use managed Postgres, and after the beta a managed mirror or snapshot, never a local copy. Schema migrations and destructive or bulk data changes still go only through the governed migration and Delivery path.
+13. Publish the finished batch once after observed behavior and affected checks. Release reuses applicable evidence with its original source/artifact/environment binding and retains compiled Delivery, artifact validity, sensitive-boundary, authorization, entitlement and custody gates. One bounded exact-revision operational smoke verifies activation; production is not the first functional feedback loop.
 <!-- END GENERATED: elastic-development-throughput kombify-throughput-policy-sync -->
 
 <!-- BEGIN GENERATED: planning-policy kombify-agent-policy-sync -->
