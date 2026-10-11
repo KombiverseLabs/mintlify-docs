@@ -5,7 +5,7 @@ sidebarTitle: "Entrega de aplicaciones"
 icon: route
 ---
 
-StackKits mantiene la elección de la aplicación separada de su entrega. Un workload como Files elige su alternativa de aplicación, mientras que `runtimeAdapterRef` elige cómo se entrega ese workload concreto.
+StackKits separa la elección de aplicaciones de la responsabilidad de ejecución. Standalone Compose es la opción nativa predeterminada. Komodo es una plataforma de operaciones sin tienda de aplicaciones. Marketplace está previsto como caso de uso opcional con Coolify; Coolify es su aplicación, no un destino de ejecución nativo.
 
 Consulta la matriz incluida en tu versión instalada:
 
@@ -17,11 +17,11 @@ stackkit app compatibility --json
 
 | Adaptador | Estado actual | Úsalo cuando |
 | --- | --- | --- |
-| `standalone-compose` | Compatible | Necesitas la vía de workload local con capacidad declarada de copia de seguridad y restauración y sin una plataforma de aplicaciones aparte. |
-| [Coolify](/es/stackkits/apps/coolify) | Compatible | Ya operas la plataforma de aplicaciones generada y aceptas que la copia de seguridad y la restauración del workload quedan fuera de este adaptador. |
-| [Komodo](/es/stackkits/apps/komodo) | Beta | Aceptas deliberadamente la madurez beta del adaptador y lo validas en tu propio workspace. |
+| `standalone-compose` | Opción nativa predeterminada | Usa la vía declarada de la versión instalada y comprueba su evidencia del ciclo de vida. |
+| [Coolify](/es/stackkits/apps/coolify) | Aplicación Marketplace prevista | Instalable como Marketplace solo cuando el catálogo publicado incluya el caso de uso y su ciclo de vida esté verificado. |
+| [Komodo](/es/stackkits/apps/komodo) | Plataforma de operaciones en borrador | Selecciona la vía explícitamente y solo para workloads con evidencia en la versión fijada actual. |
 
-La madurez describe el contrato del catálogo, no el estado de salud observado en tu host. La matriz generada de [compatibilidad de la entrega de aplicaciones](/es/stackkits/reference/application-delivery-compatibility) enumera las capacidades de despliegue, ruta, TLS, copia de seguridad y restauración de cada workload y adaptador en la versión publicada. Consulta la fila de la aplicación que has seleccionado; la compatibilidad de despliegue de una plataforma por sí sola no establece su capacidad de recuperación. No deduzcas compatibilidad pública para un componente que la matriz no enumera.
+La matriz publicada de [compatibilidad de la entrega de aplicaciones](/es/stackkits/reference/application-delivery-compatibility) describe contratos declarados de adaptadores. Las filas históricas no demuestran soporte en la versión fijada actual. Comprueba la evidencia del ciclo de vida de tu aplicación y versión; el despliegue por sí solo no demuestra copia de seguridad ni restauración.
 
 Para un Basement Kit independiente, empieza con `standalone-compose`, salvo que operes de forma intencionada una de las plataformas de aplicaciones:
 
@@ -44,7 +44,7 @@ Para un Basement Kit independiente, empieza con `standalone-compose`, salvo que 
 
 - No enrutes el mismo workload a través de Coolify y de Compose independiente al mismo tiempo.
 - No añadas a mano etiquetas de Docker ni rutas generadas.
-- Trata Komodo como una opción beta en esta versión, no como la alternativa por defecto.
+- La vía explícita de Komodo necesita evidencia en la versión fijada actual; no es la opción predeterminada ni una tienda.
 - Valida la intención modificada e inspecciona el plan resuelto antes de aplicar un adaptador distinto.
 
 Consulta [Servicios de plataforma](/es/stackkits/apps/overview) para las integraciones de plataforma y [Configura un StackSpec](/es/guides/stackkits/configure-stack-spec) para el flujo de edición completo.
