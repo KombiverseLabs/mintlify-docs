@@ -4,8 +4,8 @@ description: "Classify a StackSpec v1 and emit its migration report"
 sidebarTitle: "migrate"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:8711ca83672be5ace8615aac1267a84820ffc62fbfcb23d720a560268b901a25"
-source_hash: "8808f0b70fa55b18383455f94ff7eed1b8051f87"
+content_hash: "sha256:94a5c170f22c66891bd1811834f7ad72664057e99e1db0c8b5428bac27e98a8e"
+source_hash: "a7e5f140eb3b7f4ebfcaaddc7d1ceb7da2d3d604"
 ---
 Classify a StackSpec v1 and emit its migration report.
 
@@ -14,6 +14,8 @@ Losslessly classify one StackSpec and run the bounded v1 to v2 migration adapter
 IMPORTANT: without `--complete-with`, the projection is NOT a CUE-valid StackSpec v2, is NOT a ResolvedPlan, and does NOT authorize generation or deployment. Complete the reported manual actions and pass a full StackSpec v2 through CUE resolution first.
 
 `--complete-with` accepts one full explicit StackSpec v2, never a partial overlay. It reconciles deterministic legacy Site, node and hardware bindings, then uses the embedded governed Architecture v2 authority. A completed result contains the explicit canonical candidate and its ResolvedPlan hash. Generator eligibility is reported independently from CUE validity and follows ResolvedPlan readiness.
+
+`--inventory` supplies the observed Inventory the completion resolves against. A Kit whose plan binds node facts (Basement binds the node-site address of its LAN listener) cannot resolve without it, and completion never invents them.
 
 `--spec-output` writes the exact completed canonical StackSpec v2 as deterministic JSON. It is valid only with `--complete-with`, never defaults to an in-place rewrite, and refuses to replace an existing canonical target; canonical replacement requires an explicit CAS-authorized StackSpec authoring flow.
 
@@ -28,6 +30,7 @@ stackkit migrate [v1-spec-file] [flags]
 | `--complete-with` | string | — | Full explicit StackSpec v2 candidate to reconcile and resolve with the embedded authority (never a partial overlay) |
 | `--force` | bool | — | Atomically replace an existing migration result output; canonical StackSpec output requires a new path |
 | `--format` | string | `json` | Machine-readable output format: json or yaml |
+| `--inventory` | string | — | Path to the observed Inventory document the completion resolves against (requires `--complete-with`) |
 | `--output, -o` | string | — | Write the migration result beneath the working directory instead of stdout |
 | `--spec-output` | string | — | Write the completed canonical StackSpec v2 as deterministic JSON beneath the working directory (requires `--complete-with`) |
 | `--target-kit` | string | — | Explicit target KitProfile supported by the authority (never inferred from context) |
@@ -43,6 +46,9 @@ stackkit migrate legacy.yaml --target-kit cloud-kit
 
 # Reconcile with a full StackSpec v2 and write the completed canonical spec
 stackkit migrate legacy.yaml --target-kit basement-kit --complete-with explicit-v2.yaml --spec-output stack-spec.v2.json
+
+# Resolve the completion against an observed Inventory
+stackkit migrate legacy.yaml --target-kit basement-kit --complete-with explicit-v2.yaml --inventory inventory.yaml
 
 # Print the report as YAML
 stackkit migrate legacy.yaml --format yaml

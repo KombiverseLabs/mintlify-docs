@@ -4,8 +4,8 @@ description: "Manage backups (Kopia engine)"
 sidebarTitle: "backup"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:8711ca83672be5ace8615aac1267a84820ffc62fbfcb23d720a560268b901a25"
-source_hash: "8808f0b70fa55b18383455f94ff7eed1b8051f87"
+content_hash: "sha256:94a5c170f22c66891bd1811834f7ad72664057e99e1db0c8b5428bac27e98a8e"
+source_hash: "a7e5f140eb3b7f4ebfcaaddc7d1ceb7da2d3d604"
 ---
 Manage backups (Kopia engine).
 
@@ -183,6 +183,7 @@ stackkit backup restore activate <restore-result-id> [flags]
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
+| `--expected-plan-hash` | string | — | Require this admitted sha256 ResolvedPlan before the safety snapshot or live activation |
 | `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
 | `--operation-id` | string | — | Stable idempotency key for this live restore activation |
 | `--owner-approve` | bool | — | Authorize live activation with the established local Owner custody |
@@ -209,7 +210,12 @@ stackkit backup restore recover <activation-operation-id> [flags]
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
+| `--expected-plan-hash` | string | — | Require the original journal's admitted sha256 ResolvedPlan before recovery or finalization |
 | `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+| `--original-archive-sha256` | string | — | Require the original release archive digest before historical recovery |
+| `--original-index-sha256` | string | — | Require the original signed release-index digest before historical recovery |
+| `--original-release` | string | — | Recover only through this exact originally admitted StackKits tag |
+| `--original-release-cache` | string | — | Absolute retained node release cache, used offline only when the workspace original cache is absent |
 | `--owner-approve` | bool | — | Authorize recovery with the established local Owner custody |
 | `--rollback` | bool | — | Authorize rollback if the interrupted activation has not committed |
 
