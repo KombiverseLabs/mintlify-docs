@@ -1,0 +1,48 @@
+---
+title: "stackkit wallet-item"
+description: "Wallet items delivered to this node's encrypted local custody"
+sidebarTitle: "wallet-item"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:94a5c170f22c66891bd1811834f7ad72664057e99e1db0c8b5428bac27e98a8e"
+source_hash: "a7e5f140eb3b7f4ebfcaaddc7d1ceb7da2d3d604"
+---
+Wallet items delivered to this node's encrypted local custody.
+
+```bash
+stackkit wallet-item [flags]
+```
+
+Subcommands: [`stackkit wallet-item import`](#stackkit-wallet-item-import), [`stackkit wallet-item status`](#stackkit-wallet-item-status)
+
+## stackkit wallet-item import
+
+Open a sealed Wallet item delivery from stdin into encrypted local custody.
+
+Read one sealed wallet-item-import or wallet-item-rotate envelope on stdin, signed by the pinned delivering authority. The node opens it, records it as consumed, and stores the value encrypted under its local custody key, keyed by item reference and version. A rotation removes every older version. The result names the reference and version only.
+
+```bash
+stackkit wallet-item import [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Authorize storing this Wallet item |
+| `--tenant-ref` | string | — | Tenant the sealed delivery must be addressed to |
+
+**Examples**
+
+```bash
+stackkit wallet-item import --tenant-ref "$TENANT" --owner-approve < envelope.json
+```
+
+## stackkit wallet-item status
+
+List Wallet items in local custody by reference and version.
+
+List every Wallet item in local custody by tenant, item reference and versions, and whether it needs rotation after a detach. No value is read.
+
+```bash
+stackkit wallet-item status [flags]
+```
+

@@ -4,8 +4,8 @@ description: "Generate deterministic StackKits documentation projections"
 sidebarTitle: "docs"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:8711ca83672be5ace8615aac1267a84820ffc62fbfcb23d720a560268b901a25"
-source_hash: "8808f0b70fa55b18383455f94ff7eed1b8051f87"
+content_hash: "sha256:94a5c170f22c66891bd1811834f7ad72664057e99e1db0c8b5428bac27e98a8e"
+source_hash: "a7e5f140eb3b7f4ebfcaaddc7d1ceb7da2d3d604"
 ---
 Generate deterministic StackKits documentation projections.
 
@@ -13,7 +13,7 @@ Generate deterministic StackKits documentation projections.
 stackkit docs [flags]
 ```
 
-Subcommands: [`stackkit docs emit-advanced-operations`](#stackkit-docs-emit-advanced-operations), [`stackkit docs emit-cli-reference`](#stackkit-docs-emit-cli-reference), [`stackkit docs emit-release-manifests`](#stackkit-docs-emit-release-manifests), [`stackkit docs emit-use-case-overview`](#stackkit-docs-emit-use-case-overview)
+Subcommands: [`stackkit docs emit-advanced-operations`](#stackkit-docs-emit-advanced-operations), [`stackkit docs emit-cli-reference`](#stackkit-docs-emit-cli-reference), [`stackkit docs emit-release-manifests`](#stackkit-docs-emit-release-manifests), [`stackkit docs emit-troubleshooting`](#stackkit-docs-emit-troubleshooting), [`stackkit docs emit-use-case-overview`](#stackkit-docs-emit-use-case-overview)
 
 ## stackkit docs emit-advanced-operations
 
@@ -85,6 +85,21 @@ stackkit docs emit-release-manifests [flags]
 | `--release-url` | string | — | **Required.** exact public release URL |
 | `--source-sha` | string | — | **Required.** exact private source SHA |
 
+## stackkit docs emit-troubleshooting
+
+Generate the shared standalone troubleshooting authority.
+
+Generate stable error IDs, causes and recovery actions from the same authority used by CLI failures and MCP self-check. With `--check`, refuse missing or stale documentation without writing.
+
+```bash
+stackkit docs emit-troubleshooting [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--check` | bool | — | Write nothing; fail when the generated guide differs |
+| `--out` | string | `docs/TROUBLESHOOTING.md` | Output path, relative to `--chdir` |
+
 ## stackkit docs emit-use-case-overview
 
 Render the internal derived use-case development overview.
@@ -97,7 +112,11 @@ stackkit docs emit-use-case-overview [flags]
 | --- | --- | --- | --- |
 | `--evidence-output` | string | — | evidence manifest output path |
 | `--output` | string | — | Markdown output path |
-| `--source-sha` | string | — | **Required.** exact source SHA |
+| `--source-sha` | string | — | exact source SHA |
+| `--tables-only` | bool | — | render truth tables without overview, evidence output or test claims |
 | `--test-receipt` | string | — | source-SHA-bound passed test receipt |
 | `--tests-passed-for-source` | bool | — | mark tests complete after the caller synchronously passed catalog tests for source-sha |
+| `--truth-table-counts-output` | string | — | CUE-derived intent and catalog count JSON output path (tables-only) |
+| `--truth-table-output` | string | — | shared CUE-derived truth table Markdown output path |
+| `--truth-table-public-output` | string | — | public-filtered truth table Markdown output path |
 

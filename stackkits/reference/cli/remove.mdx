@@ -4,14 +4,14 @@ description: "Uninstall the local StackKits deployment"
 sidebarTitle: "remove"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:8711ca83672be5ace8615aac1267a84820ffc62fbfcb23d720a560268b901a25"
-source_hash: "8808f0b70fa55b18383455f94ff7eed1b8051f87"
+content_hash: "sha256:94a5c170f22c66891bd1811834f7ad72664057e99e1db0c8b5428bac27e98a8e"
+source_hash: "a7e5f140eb3b7f4ebfcaaddc7d1ceb7da2d3d604"
 ---
 Uninstall the local StackKits deployment.
 
 Uninstall the StackKits runtime on this machine.
 
-With no `--workload`, this is the product uninstall: it stops and deletes every Compose project named stackkit-\* (Basement core, Cloud core, and selected use cases), including their networks and volumes. It looks in the current directory, then ~/my-homelab or ~/my-cloud-homelab.
+With no `--workload`, this is the product uninstall: it stops and deletes every Compose project named stackkit-\* (Basement core, Cloud core, and selected use cases), including their networks, while retaining named data volumes. Add `--delete-data` to delete those volumes intentionally. `--purge` also deletes the selected workspace's state, deploy directory and cached images. It looks in the current directory, then ~/my-homelab or ~/my-cloud-homelab.
 
 `--workload` removes one exact Architecture v2 workload through its applied runtime owner. That path keeps application volumes unless `--delete-data` is set.
 
@@ -23,15 +23,15 @@ stackkit remove [flags]
 | --- | --- | --- | --- |
 | `--artifact-manifest` | string | — | Architecture v2 generation manifest |
 | `--auto-approve` | bool | — | Skip interactive approval |
-| `--delete-data` | bool | — | Delete named volumes owned by this exact applied workload (default keeps application data) |
-| `--force` | bool | — | Force remove even with errors |
+| `--delete-data` | bool | — | Delete named volumes in the selected removal scope (default keeps application data) |
+| `--force` | bool | — | Legacy compatibility flag; incomplete removal still fails and retains recovery state |
 | `--generation-receipt` | string | — | Architecture v2 generation receipt |
 | `--inventory` | string | — | Architecture v2 observed Inventory (otherwise one conventional inventory file is selected) |
 | `--json` | bool | — | Emit the canonical Architecture v2 removal result as JSON |
 | `--local-execution-channel` | string | — | Exact applied execution channel owned by this removal process |
 | `--local-node` | string | — | Exact applied node placement owned by this removal process |
 | `--local-site` | string | — | Exact applied Site placement owned by this removal process |
-| `--purge` | bool | — | Remove all StackKit data including images, state, and deploy directory |
+| `--purge` | bool | — | Delete named runtime volumes, selected workspace state and deploy directory, and cached StackKit images |
 | `--resolved-plan` | string | — | Architecture v2 canonical ResolvedPlan |
 | `--terminal-evidence-json` | bool | — | Emit bounded canonical Architecture v2 terminal evidence as JSON |
 | `--workload` | string | — | Exact Architecture v2 ResolvedPlan workload ref to remove |
@@ -44,6 +44,9 @@ stackkit remove
 
 # Uninstall without the confirmation prompt
 stackkit remove --auto-approve
+
+# Uninstall the local deployment and intentionally delete its named volumes
+stackkit remove --delete-data --auto-approve
 
 # Remove only the Files workload and keep its data volumes
 stackkit remove --workload files

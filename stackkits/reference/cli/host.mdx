@@ -4,8 +4,8 @@ description: "Provider-neutral host contract operations"
 sidebarTitle: "host"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:8711ca83672be5ace8615aac1267a84820ffc62fbfcb23d720a560268b901a25"
-source_hash: "8808f0b70fa55b18383455f94ff7eed1b8051f87"
+content_hash: "sha256:94a5c170f22c66891bd1811834f7ad72664057e99e1db0c8b5428bac27e98a8e"
+source_hash: "a7e5f140eb3b7f4ebfcaaddc7d1ceb7da2d3d604"
 ---
 Provider-neutral host contract operations.
 
@@ -13,7 +13,7 @@ Provider-neutral host contract operations.
 stackkit host [flags]
 ```
 
-Subcommands: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host security`](#stackkit-host-security), [`stackkit host updates`](#stackkit-host-updates)
+Subcommands: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host delivery`](#stackkit-host-delivery), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host migrate-browser-ca`](#stackkit-host-migrate-browser-ca), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host security`](#stackkit-host-security), [`stackkit host ssh`](#stackkit-host-ssh), [`stackkit host updates`](#stackkit-host-updates)
 
 ## stackkit host attach-conformance
 
@@ -41,6 +41,75 @@ stackkit host conformance [flags]
 | --- | --- | --- | --- |
 | `--binding` | string | — | **Required.** Local ExternalHostBinding JSON file |
 | `--output, -o` | string | `-` | Receipt destination ('-' for JSON on stdout) |
+
+## stackkit host delivery
+
+Manage this node's sealed host delivery recipient.
+
+Sealed host delivery brings Wallet items, backup targets and SSH access to this node. A delivering authority seals each value to this node's recipient key (HPKE, pkg/hostdelivery); only this node opens it into its own custody. Techstack and Guard carry ciphertext and references only.
+
+```bash
+stackkit host delivery [flags]
+```
+
+Subcommands: [`stackkit host delivery detach`](#stackkit-host-delivery-detach), [`stackkit host delivery recipient`](#stackkit-host-delivery-recipient), [`stackkit host delivery status`](#stackkit-host-delivery-status)
+
+### stackkit host delivery detach
+
+Stop host delivery to this node and list the delivered secrets to rotate.
+
+Detach this node from host delivery: every delivered secret is marked as needing rotation, retired recipient keys are destroyed, and no delivery opens until the node is re-enrolled with 'host delivery recipient `--rotate`'. The result lists the references and versions to rotate where they came from; it never contains a value. Values already in local custody stay usable here.
+
+```bash
+stackkit host delivery detach [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Authorize detaching this node |
+
+**Examples**
+
+```bash
+stackkit host delivery detach --owner-approve
+```
+
+### stackkit host delivery recipient
+
+Prove this node's recipient key, pin the delivering authority, or rotate the key.
+
+Print a statement, signed by the local Owner key, that binds this node's recipient key and its generation to this Site and node and echoes the caller's challenge. The private key never leaves local custody.
+
+`--authority-key` pins the delivering authority's Ed25519 public key for the current generation; Wallet items and SSH access open only when signed by it. A pinned key is never replaced in place. `--rotate` re-enrolls the node under the next generation (and with `--authority-key` pins a new authority): the previous key still opens deliveries issued before the rotation for at most their 15-minute lifetime and is then destroyed. Rotation also ends a detach.
+
+```bash
+stackkit host delivery recipient [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--authority-key` | string | — | Delivering authority Ed25519 public key (base64) to pin for this generation |
+| `--authority-key-id` | string | — | Key ID the delivering authority signs envelopes with |
+| `--challenge` | string | — | Fresh value from the delivering authority that the statement must echo |
+| `--owner-approve` | bool | — | Authorize this node's recipient change |
+| `--rotate` | bool | — | Re-enroll under the next recipient generation |
+
+**Examples**
+
+```bash
+stackkit host delivery recipient --challenge "$CHALLENGE" --authority-key "$WALLET_KEY" --authority-key-id wallet-1 --owner-approve
+stackkit host delivery recipient --challenge "$CHALLENGE" --rotate --owner-approve
+```
+
+### stackkit host delivery status
+
+Show the recipient generation, pinned authority, detach state and delivered references.
+
+Report this node's recipient generation and fingerprint, retired generations still openable, the pinned delivering authority, whether the node is detached, and every delivered secret by reference and version, with its rotation mark. No value is read.
+
+```bash
+stackkit host delivery status [flags]
+```
 
 ## stackkit host environment
 
@@ -70,6 +139,21 @@ stackkit host environment --json
 # Override a wrong detection for the next command, here Basement Kit init on a home host
 STACKKIT_NETWORK_ENV=home stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com
 ```
+
+## stackkit host migrate-browser-ca
+
+Migrate this node's authenticated legacy CA to the browser-capable policy.
+
+Explicitly migrate legacy Basement CA signing keys while preserving the Owner signing key, PocketID identities, runtime secrets, ingress leaf keys, addresses and volumes. Retain an already current root. Apply and verify the current native plan before `--complete`. Clients must approve a changed public root through the existing client-trust handoff.
+
+```bash
+stackkit host migrate-browser-ca [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--complete` | bool | — | Retire the recovery journal after current native Apply and ordinary TLS verification |
+| `--owner-approve` | bool | — | Authorize this node's explicit CA transition |
 
 ## stackkit host preflight
 
@@ -191,7 +275,7 @@ Verify and repair the host security baseline with versioned evidence.
 
 Observe this node against the StackKits host security baseline, and restore what drifted without cutting the management path.
 
-'verify' never changes the host. It produces stackkit.host-security-evidence/v1 for the firewall, sshd, brute-force protection, automatic and pending security updates, reboot state, kernel parameters, exposed listeners and certificate expiry. Every control is compliant, drifted, unknown or an owner-approved exception, and the evidence expires: a stale observation is unknown, and an unknown control never counts as compliant.
+'verify' never changes the host. It produces stackkit.host-security-evidence/v1 for the firewall, sshd, brute-force protection, automatic and pending security updates, reboot state, kernel parameters, exposed listeners and certificate expiry, and for the SSH CA trust and host certificate delivered to this node ('host ssh apply') once they are recorded. Every control is compliant, drifted, unknown or an owner-approved exception, and the evidence expires: a stale observation is unknown, and an unknown control never counts as compliant.
 
 It works on its own (Standard Mode, no account) and through the pinned CLI when Techstack manages the deployment (`--mode` advanced).
 
@@ -234,6 +318,7 @@ stackkit host security repair [flags]
 | `--declared-port` | stringArray | — | Declared service port as tcp/443 or udp/5353 (repeatable) |
 | `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | Owner-controlled exceptions file (each exception needs an owner and an expiry) |
 | `--freshness` | duration | `15m0s` | How long the evidence may be relied on before it expires (1m to 24h) |
+| `--host-name` | stringArray | — | Name the delivered SSH host certificate must carry (repeatable; default: the system hostname) |
 | `--json` | bool | — | Emit the result as machine-readable JSON |
 | `--kit` | string | — | Kit slug to record (default: the kit of the workspace StackSpec) |
 | `--local-node` | string | — | Exact local Node in the supplied ResolvedPlan |
@@ -288,6 +373,7 @@ stackkit host security verify [flags]
 | `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | Owner-controlled exceptions file (each exception needs an owner and an expiry) |
 | `--fail-on-drift` | bool | — | Exit 5 when the host is drifted and 6 when its state is unknown |
 | `--freshness` | duration | `15m0s` | How long the evidence may be relied on before it expires (1m to 24h) |
+| `--host-name` | stringArray | — | Name the delivered SSH host certificate must carry (repeatable; default: the system hostname) |
 | `--json` | bool | — | Emit the result as machine-readable JSON |
 | `--kit` | string | — | Kit slug to record (default: the kit of the workspace StackSpec) |
 | `--local-node` | string | — | Exact local Node in the supplied ResolvedPlan |
@@ -311,6 +397,53 @@ sudo stackkit host security verify --mode advanced --json --fail-on-drift --drif
 
 # Judge exposure against the ports the verified plan declares
 sudo stackkit host security verify --resolved-plan plan.json --local-node node-1
+```
+
+## stackkit host ssh
+
+SSH certificate access delivered to this node.
+
+```bash
+stackkit host ssh [flags]
+```
+
+Subcommands: [`stackkit host ssh apply`](#stackkit-host-ssh-apply)
+
+### stackkit host ssh apply
+
+Apply a sealed SSH CA trust, revocation or host certificate delivery from stdin.
+
+Read one sealed ssh-ca-trust, ssh-ca-revoke or ssh-host-certificate envelope on stdin, signed by the pinned delivering authority, and apply it to this server's sshd:
+
+```text
+  - ssh-ca-trust installs the owner's user CA keys as TrustedUserCAKeys
+    (/etc/ssh/stackkit/trusted_user_ca_keys) and one AuthorizedPrincipalsFile
+    per local user (/etc/ssh/stackkit/principals/<user>). Root is never a
+    target. An empty key list revokes like ssh-ca-revoke.
+  - ssh-ca-revoke removes that trust. Revocations take effect at once and are
+    never rolled back; one sshd cannot reload for is recorded as cleanup
+    pending and finished by 'host security repair'.
+  - ssh-host-certificate installs a host certificate beside the host key it
+    certifies, only if it names every --host-name (default: the system
+    hostname) and is currently valid.
+```
+
+sshd is reloaded only after 'sshd -t' accepts the new configuration; a change that fails is rolled back. The applied state is recorded in owner custody, so 'host security verify' reports drift and 'host security repair' reinstalls it.
+
+```bash
+stackkit host ssh apply [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--host-name` | stringArray | — | Name a host certificate must carry as a principal (repeatable; default: the system hostname) |
+| `--owner-approve` | bool | — | Authorize changing this server's SSH access |
+| `--tenant-ref` | string | — | Tenant the sealed delivery must be addressed to |
+
+**Examples**
+
+```bash
+sudo stackkit host ssh apply --tenant-ref "$TENANT" --owner-approve < envelope.json
 ```
 
 ## stackkit host updates
