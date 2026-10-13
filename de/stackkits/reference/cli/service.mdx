@@ -9,7 +9,7 @@ Vom aktiven StackKits-Plan deklarierte Services steuern.
 stackkit service [flags]
 ```
 
-Subcommands: [`stackkit service logs`](#stackkit-service-logs), [`stackkit service restart`](#stackkit-service-restart), [`stackkit service start`](#stackkit-service-start), [`stackkit service stop`](#stackkit-service-stop)
+Unterbefehle: [`stackkit service logs`](#stackkit-service-logs), [`stackkit service manager`](#stackkit-service-manager), [`stackkit service restart`](#stackkit-service-restart), [`stackkit service start`](#stackkit-service-start), [`stackkit service stop`](#stackkit-service-stop)
 
 ## stackkit service logs
 
@@ -25,7 +25,7 @@ stackkit service logs <service-key> [flags]
 | `--json` | bool | — | Die versionierte Service-Log-Seite als JSON schreiben |
 | `--tail` | int | `100` | Anzahl der zurückzugebenden geschwärzten Log-Einträge (1..200) |
 
-**Examples**
+**Beispiele**
 
 ```bash
 # Read the last 50 redacted log entries of the TinyAuth login gateway
@@ -36,6 +36,30 @@ stackkit service logs id --json
 
 # Read the next page with the cursor the previous JSON result returned
 stackkit service logs id --json --cursor <cursor>
+```
+
+## stackkit service manager
+
+Einen bestehenden, dem Node gehörenden Workload zwischen Compose und Komodo übertragen.
+
+```bash
+stackkit service manager <workload-ref> [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Das versionierte Manager-Ergebnis als JSON schreiben |
+| `--owner-approve` | bool | — | Den an den Owner gebundenen Manager-Wechsel ausdrücklich freigeben |
+| `--resume` | string | — | Die exakte ausstehende Übergabe-Operation fortsetzen |
+| `--status` | bool | — | Den dauerhaften Manager- und Übergabe-Status ohne Änderung lesen |
+| `--to` | string | — | Ziel-Manager: standalone-compose oder komodo |
+
+**Beispiele**
+
+```bash
+stackkit service manager media --to standalone-compose --owner-approve
+stackkit service manager media --to komodo --owner-approve
+stackkit service manager media --to komodo --resume handover-<operation-id> --owner-approve
 ```
 
 ## stackkit service restart
@@ -51,7 +75,7 @@ stackkit service restart <service-key> [flags]
 | `--json` | bool | — | Das versionierte Service-Aktionsergebnis als JSON schreiben |
 | `--owner-approve` | bool | — | Die an den Owner gebundene Service-Änderung explizit freigeben |
 
-**Examples**
+**Beispiele**
 
 ```bash
 # Restart the PocketID identity service
@@ -74,7 +98,7 @@ stackkit service start <service-key> [flags]
 | `--json` | bool | — | Das versionierte Service-Aktionsergebnis als JSON schreiben |
 | `--owner-approve` | bool | — | Die an den Owner gebundene Service-Änderung explizit freigeben |
 
-**Examples**
+**Beispiele**
 
 ```bash
 # Start a stopped service again
@@ -94,7 +118,7 @@ stackkit service stop <service-key> [flags]
 | `--json` | bool | — | Das versionierte Service-Aktionsergebnis als JSON schreiben |
 | `--owner-approve` | bool | — | Die an den Owner gebundene Service-Änderung explizit freigeben |
 
-**Examples**
+**Beispiele**
 
 ```bash
 # Stop a non-critical service; base, id and auth cannot be stopped

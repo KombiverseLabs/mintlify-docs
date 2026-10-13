@@ -9,7 +9,7 @@ Controla los servicios declarados por el plan activo de StackKits.
 stackkit service [flags]
 ```
 
-Subcomandos: [`stackkit service logs`](#stackkit-service-logs), [`stackkit service restart`](#stackkit-service-restart), [`stackkit service start`](#stackkit-service-start), [`stackkit service stop`](#stackkit-service-stop)
+Subcomandos: [`stackkit service logs`](#stackkit-service-logs), [`stackkit service manager`](#stackkit-service-manager), [`stackkit service restart`](#stackkit-service-restart), [`stackkit service start`](#stackkit-service-start), [`stackkit service stop`](#stackkit-service-stop)
 
 ## stackkit service logs
 
@@ -36,6 +36,30 @@ stackkit service logs id --json
 
 # Read the next page with the cursor the previous JSON result returned
 stackkit service logs id --json --cursor <cursor>
+```
+
+## stackkit service manager
+
+Transfiere un workload existente gestionado por el nodo entre Compose y Komodo.
+
+```bash
+stackkit service manager <workload-ref> [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Escribe el resultado versionado del gestor como JSON |
+| `--owner-approve` | bool | — | Aprueba explícitamente la transición del gestor ligada al propietario |
+| `--resume` | string | — | Reanuda la operación de traspaso pendiente exacta |
+| `--status` | bool | — | Lee el resultado duradero del gestor y del traspaso sin mutar nada |
+| `--to` | string | — | Gestor de destino: standalone-compose o komodo |
+
+**Ejemplos**
+
+```bash
+stackkit service manager media --to standalone-compose --owner-approve
+stackkit service manager media --to komodo --owner-approve
+stackkit service manager media --to komodo --resume handover-<operation-id> --owner-approve
 ```
 
 ## stackkit service restart

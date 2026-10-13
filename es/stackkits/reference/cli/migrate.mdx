@@ -11,6 +11,8 @@ IMPORTANTE: sin `--complete-with`, la proyección NO es una StackSpec v2 válida
 
 `--complete-with` acepta una StackSpec v2 completa y explícita, nunca una superposición parcial. Reconcilia los vínculos deterministas heredados de Site, nodo y hardware, y después usa la autoridad gobernada de Architecture v2 integrada. Un resultado completado contiene el candidato canónico explícito y el hash de su ResolvedPlan. La elegibilidad para el generador se informa de forma independiente de la validez de CUE y sigue la disposición del ResolvedPlan.
 
+`--inventory` proporciona el Inventory observado contra el que resuelve la completación. Un Kit cuyo plan vincula hechos del nodo (Basement vincula la dirección del Site del nodo de su listener LAN) no puede resolverse sin él, y la completación nunca inventa esos datos.
+
 `--spec-output` escribe la StackSpec v2 canónica completada exacta como JSON determinista. Solo es válido con `--complete-with`, nunca reescribe en el sitio por defecto y se niega a reemplazar un destino canónico existente; el reemplazo canónico requiere un flujo explícito de creación de StackSpec autorizado por CAS.
 
 Un resultado listo para la resolución sombra termina con éxito. Un resultado bloqueado se emite igualmente como salida legible por máquinas y después el comando termina sin éxito. Context solo mapea la localidad heredada y el hardware Pi; nunca selecciona un Kit.
@@ -24,6 +26,7 @@ stackkit migrate [v1-spec-file] [flags]
 | `--complete-with` | string | — | Candidato completo y explícito de StackSpec v2 que se reconcilia y resuelve con la autoridad integrada (nunca una superposición parcial) |
 | `--force` | bool | — | Reemplaza atómicamente una salida existente del resultado de migración; la salida canónica de StackSpec requiere una ruta nueva |
 | `--format` | string | `json` | Formato de salida legible por máquinas: json o yaml |
+| `--inventory` | string | — | Ruta al documento Inventory observado contra el que se resuelve la completación (requiere `--complete-with`) |
 | `--output, -o` | string | — | Escribe el resultado de la migración bajo el directorio de trabajo en lugar de stdout |
 | `--spec-output` | string | — | Escribe la StackSpec v2 canónica completada como JSON determinista bajo el directorio de trabajo (requiere `--complete-with`) |
 | `--target-kit` | string | — | KitProfile de destino explícito admitido por la autoridad (nunca se infiere del contexto) |
@@ -39,6 +42,9 @@ stackkit migrate legacy.yaml --target-kit cloud-kit
 
 # Reconcile with a full StackSpec v2 and write the completed canonical spec
 stackkit migrate legacy.yaml --target-kit basement-kit --complete-with explicit-v2.yaml --spec-output stack-spec.v2.json
+
+# Resolve the completion against an observed Inventory
+stackkit migrate legacy.yaml --target-kit basement-kit --complete-with explicit-v2.yaml --inventory inventory.yaml
 
 # Print the report as YAML
 stackkit migrate legacy.yaml --format yaml

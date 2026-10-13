@@ -9,7 +9,7 @@ sidebarTitle: "service"
 stackkit service [flags]
 ```
 
-子命令：[`stackkit service logs`](#stackkit-service-logs), [`stackkit service restart`](#stackkit-service-restart), [`stackkit service start`](#stackkit-service-start), [`stackkit service stop`](#stackkit-service-stop)
+子命令：[`stackkit service logs`](#stackkit-service-logs), [`stackkit service manager`](#stackkit-service-manager), [`stackkit service restart`](#stackkit-service-restart), [`stackkit service start`](#stackkit-service-start), [`stackkit service stop`](#stackkit-service-stop)
 
 ## stackkit service logs
 
@@ -36,6 +36,30 @@ stackkit service logs id --json
 
 # Read the next page with the cursor the previous JSON result returned
 stackkit service logs id --json --cursor <cursor>
+```
+
+## stackkit service manager
+
+在 Compose 与 Komodo 之间转移已存在的、由节点拥有的工作负载。
+
+```bash
+stackkit service manager <workload-ref> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 以 JSON 写出带版本的 manager 结果 |
+| `--owner-approve` | bool | — | 显式批准与 Owner 绑定的 manager 转移 |
+| `--resume` | string | — | 继续确切的待处理交接操作 |
+| `--status` | bool | — | 只读取持久化的 manager 和交接结果，不做任何变更 |
+| `--to` | string | — | 目标 manager：standalone-compose 或 komodo |
+
+**示例**
+
+```bash
+stackkit service manager media --to standalone-compose --owner-approve
+stackkit service manager media --to komodo --owner-approve
+stackkit service manager media --to komodo --resume handover-<operation-id> --owner-approve
 ```
 
 ## stackkit service restart

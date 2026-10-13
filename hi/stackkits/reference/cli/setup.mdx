@@ -31,7 +31,7 @@ stackkit setup photos --owner-approve --complete-onboarding
 # Create the Files owner from a workspace-relative credentials file of your choice
 stackkit setup files --owner-approve --credentials-file private/files-owner.json
 ```
-उप-कमांड: [`stackkit setup ai-connect`](#stackkit-setup-ai-connect)
+उप-कमांड: [`stackkit setup ai-connect`](#stackkit-setup-ai-connect), [`stackkit setup ai-provider`](#stackkit-setup-ai-provider), [`stackkit setup connector`](#stackkit-setup-connector)
 
 ## stackkit setup ai-connect
 
@@ -63,3 +63,50 @@ stackkit setup ai-connect --token-file ~/kombify-connector-token
 # Turn the connector off and remove its token
 stackkit setup ai-connect --disable
 ```
+
+## stackkit setup ai-provider
+
+Private AI में अपने kombify Wallet की की के साथ बाहरी OpenAI-संगत प्रदाता उपलब्ध कराएँ।
+
+Private AI यूज़ केस के Open WebUI को नोड के Ollama के साथ बाहरी OpenAI-संगत इन्फ़रेंस प्रदाता (जैसे OpenAI, Mistral, Groq या OpenRouter) उपयोग करने दें। प्रदाता की API की कभी इस कमांड, StackSpec या जनरेट किए गए बंडल से नहीं गुज़रती: उसे अपने kombify Wallet में AI क्रेडेंशियल के रूप में रखें, आइटम पर इस नोड को अनुमति दें, और "stackkit wallet-item import" से उसे इस नोड तक सीलबंद डिलीवर करें। यह कमांड प्रदाता की को उस डिलीवर किए गए आइटम से बाँधता है और प्रदाता का https base URL सेट करता है। फिर हर apply सबसे नया डिलीवर किया गया संस्करण पढ़ता है, इसलिए Wallet में रोटेशन रोटेट किए गए आइटम के "stackkit wallet-item import" और अगले apply के बाद प्रभावी होता है। आइटम इस नोड की कस्टडी में न हो तो apply बंद रहकर विफल होता है।
+
+`--disable` Open WebUI से प्रदाता और स्थानीय कस्टडी से बाइंडिंग हटाता है। डिलीवर किया गया आइटम नोड की Wallet आइटम कस्टडी में रहता है।
+
+```bash
+stackkit setup ai-provider [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--base-url` | string | — | OpenAI-संगत प्रदाता API का https base URL |
+| `--disable` | bool | — | बाहरी प्रदाता और उसकी की बाइंडिंग हटाएँ |
+| `--json` | bool | — | सीक्रेट-रहित stackkit.command-result/v1 परिणाम जारी करें |
+| `--tenant-ref` | string | — | वह tenant जिसके अंतर्गत Wallet आइटम डिलीवर किया गया |
+| `--wallet-item` | string | — | डिलीवर की गई प्रदाता की का Wallet आइटम संदर्भ |
+
+**उदाहरण**
+
+```bash
+# Bind the provider key delivered as Wallet item itm_... and set the provider
+stackkit setup ai-provider --base-url https://api.openai.com/v1 --tenant-ref "$TENANT" --wallet-item itm_abc...
+
+# Remove the provider
+stackkit setup ai-provider --disable
+```
+
+## stackkit setup connector
+
+सटीक स्थानीय Home Assistant कनेक्टर जारी करें, रद्द करें या सत्यापित करें।
+
+```bash
+stackkit setup connector [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | प्रमाणित सटीक हस्ताक्षरित रसीद बाइट्स और वर्तमान स्थानीय तथ्य जारी करें |
+| `--operation-id` | string | — | सटीक स्थिर कनेक्टर सेटअप ऑपरेशन पहचान |
+| `--owner-approve` | bool | — | इस सटीक कनेक्टर ensure या revoke अनुरोध को स्वीकृत करें |
+| `--request-file` | string | — | वर्कस्पेस-सापेक्ष निजी, केवल-मेटाडेटा कनेक्टर अनुरोध JSON; इसमें कभी क्रेडेंशियल नहीं होते |
+| `--verify-only` | bool | — | बिना जारी या रद्द किए, रखी गई रसीद को वर्तमान स्थानीय बाइंडिंग के विरुद्ध पढ़ें और सत्यापित करें |
+| `--workload` | string | — | सटीक स्थानीय वर्कलोड; केवल smart-home स्वीकार्य है |

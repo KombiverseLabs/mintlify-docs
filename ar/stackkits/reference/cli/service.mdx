@@ -9,7 +9,7 @@ sidebarTitle: "service"
 stackkit service [flags]
 ```
 
-الأوامر الفرعية: [`stackkit service logs`](#stackkit-service-logs), [`stackkit service restart`](#stackkit-service-restart), [`stackkit service start`](#stackkit-service-start), [`stackkit service stop`](#stackkit-service-stop)
+الأوامر الفرعية: [`stackkit service logs`](#stackkit-service-logs)، [`stackkit service manager`](#stackkit-service-manager)، [`stackkit service restart`](#stackkit-service-restart)، [`stackkit service start`](#stackkit-service-start)، [`stackkit service stop`](#stackkit-service-stop)
 
 ## stackkit service logs
 
@@ -36,6 +36,30 @@ stackkit service logs id --json
 
 # Read the next page with the cursor the previous JSON result returned
 stackkit service logs id --json --cursor <cursor>
+```
+
+## stackkit service manager
+
+انقل حمل عمل قائمًا تملكه العقدة بين Compose وKomodo.
+
+```bash
+stackkit service manager <workload-ref> [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | اكتب نتيجة المدير ذات الإصدار بصيغة JSON |
+| `--owner-approve` | bool | — | وافق صراحةً على انتقال المدير المرتبط بالمالك |
+| `--resume` | string | — | استأنف عملية التسليم المعلقة بعينها |
+| `--status` | bool | — | اقرأ نتيجة المدير والتسليم الدائمة دون تغيير |
+| `--to` | string | — | المدير الهدف: standalone-compose أو komodo |
+
+**أمثلة**
+
+```bash
+stackkit service manager media --to standalone-compose --owner-approve
+stackkit service manager media --to komodo --owner-approve
+stackkit service manager media --to komodo --resume handover-<operation-id> --owner-approve
 ```
 
 ## stackkit service restart

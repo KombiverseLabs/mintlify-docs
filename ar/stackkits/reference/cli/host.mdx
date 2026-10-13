@@ -9,7 +9,7 @@ sidebarTitle: "host"
 stackkit host [flags]
 ```
 
-الأوامر الفرعية: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host security`](#stackkit-host-security), [`stackkit host updates`](#stackkit-host-updates)
+الأوامر الفرعية: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance)، [`stackkit host conformance`](#stackkit-host-conformance)، [`stackkit host delivery`](#stackkit-host-delivery)، [`stackkit host environment`](#stackkit-host-environment)، [`stackkit host migrate-browser-ca`](#stackkit-host-migrate-browser-ca)، [`stackkit host preflight`](#stackkit-host-preflight)، [`stackkit host prepare`](#stackkit-host-prepare)، [`stackkit host reboot`](#stackkit-host-reboot)، [`stackkit host remediate`](#stackkit-host-remediate)، [`stackkit host security`](#stackkit-host-security)، [`stackkit host ssh`](#stackkit-host-ssh)، [`stackkit host updates`](#stackkit-host-updates)
 
 ## stackkit host attach-conformance
 
@@ -37,6 +37,76 @@ stackkit host conformance [flags]
 | --- | --- | --- | --- |
 | `--binding` | string | — | **مطلوب.** ملف JSON محلي لـ ExternalHostBinding |
 | `--output, -o` | string | `-` | وجهة الإيصال ('-' لإخراج JSON إلى stdout) |
+
+## stackkit host delivery
+
+أدر مستلم التسليم المختوم للمضيف الخاص بهذه العقدة.
+
+يوصل التسليم المختوم للمضيف عناصر Wallet وأهداف النسخ الاحتياطي ووصول SSH إلى هذه العقدة. تختم جهة التسليم كل قيمة بمفتاح المستلم الخاص بهذه العقدة (HPKE، pkg/hostdelivery)؛ ولا تفتحها إلا هذه العقدة في عهدتها. ولا ينقل Techstack وGuard إلا النص المشفّر والمراجع.
+
+```bash
+stackkit host delivery [flags]
+```
+
+الأوامر الفرعية: [`stackkit host delivery detach`](#stackkit-host-delivery-detach)، [`stackkit host delivery recipient`](#stackkit-host-delivery-recipient)، [`stackkit host delivery status`](#stackkit-host-delivery-status)
+
+### stackkit host delivery detach
+
+أوقف التسليم إلى هذه العقدة واذكر الأسرار المسلَّمة التي يجب تدويرها.
+
+افصل هذه العقدة عن التسليم إلى المضيف: يُوسم كل سر مسلَّم بأنه يحتاج إلى تدوير، وتُدمَّر مفاتيح المستلم المتقاعدة، ولا يُفتح أي تسليم حتى يُعاد تسجيل العقدة عبر 'host delivery recipient `--rotate`'. تسرد النتيجة المراجع والإصدارات المطلوب تدويرها من حيث جاءت؛ ولا تحتوي أي قيمة أبدًا. تبقى القيم الموجودة في العهدة المحلية قابلة للاستخدام هنا.
+
+```bash
+stackkit host delivery detach [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | اعتمد فصل هذه العقدة |
+
+**أمثلة**
+
+```bash
+stackkit host delivery detach --owner-approve
+```
+
+### stackkit host delivery recipient
+
+أثبت مفتاح المستلم لهذه العقدة، أو ثبّت جهة التسليم، أو دوّر المفتاح.
+
+اطبع بيانًا موقّعًا بمفتاح Owner المحلي يربط مفتاح المستلم لهذه العقدة وجيله بهذا الـ Site وهذه العقدة ويردد تحدي المستدعي. لا يغادر المفتاح الخاص العهدة المحلية أبدًا.
+
+يثبّت `--authority-key` المفتاح العام Ed25519 لجهة التسليم للجيل الحالي؛ ولا تُفتح عناصر Wallet ووصول SSH إلا إذا وقّعتها. ولا يُستبدل المفتاح المثبّت في مكانه أبدًا. يعيد `--rotate` تسجيل العقدة تحت الجيل التالي (ومع `--authority-key` يثبّت جهة جديدة): يبقى المفتاح السابق يفتح عمليات التسليم الصادرة قبل التدوير طوال عمرها البالغ 15 دقيقة على الأكثر ثم يُدمَّر. ينهي التدوير أيضًا حالة detach.
+
+```bash
+stackkit host delivery recipient [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--authority-key` | string | — | المفتاح العام Ed25519 لجهة التسليم (base64) المراد تثبيته لهذا الجيل |
+| `--authority-key-id` | string | — | معرّف المفتاح الذي توقّع به جهة التسليم المغلفات |
+| `--challenge` | string | — | قيمة جديدة من جهة التسليم يجب أن يرددها البيان |
+| `--owner-approve` | bool | — | اعتمد تغيير المستلم لهذه العقدة |
+| `--rotate` | bool | — | أعد التسجيل تحت جيل المستلم التالي |
+
+**أمثلة**
+
+```bash
+stackkit host delivery recipient --challenge "$CHALLENGE" --authority-key "$WALLET_KEY" --authority-key-id wallet-1 --owner-approve
+stackkit host delivery recipient --challenge "$CHALLENGE" --rotate --owner-approve
+```
+
+### stackkit host delivery status
+
+اعرض جيل المستلم والجهة المثبّتة وحالة detach والمراجع المسلَّمة.
+
+أبلغ عن جيل المستلم لهذه العقدة وبصمته، والأجيال المتقاعدة التي ما زال يمكن فتحها، والجهة المسلِّمة المثبّتة، وما إذا كانت العقدة منفصلة، وكل سر مسلَّم بحسب المرجع والإصدار مع علامة التدوير الخاصة به. لا تُقرأ أي قيمة.
+
+```bash
+stackkit host delivery status [flags]
+```
+
 
 ## stackkit host environment
 
@@ -66,6 +136,21 @@ stackkit host environment --json
 # Override a wrong detection for the next command, here Basement Kit init on a home host
 STACKKIT_NETWORK_ENV=home stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com
 ```
+
+## stackkit host migrate-browser-ca
+
+رحّل المرجع المصدّق القديم (CA) لهذه العقدة إلى سياسة تدعم المتصفحات.
+
+رحّل صراحةً مفاتيح توقيع Basement CA القديمة مع الحفاظ على مفتاح توقيع Owner وهويات PocketID وأسرار وقت التشغيل ومفاتيح أوراق ingress والعناوين ووحدات التخزين. أبقِ الجذر الحالي كما هو. طبّق الخطة الأصلية الحالية وتحقق منها قبل `--complete`. يجب أن يوافق العملاء على الجذر العام المتغيّر عبر تسليم client-trust القائم.
+
+```bash
+stackkit host migrate-browser-ca [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--complete` | bool | — | تقاعد من سجل الاستعادة بعد Apply الأصلي الحالي والتحقق العادي من TLS |
+| `--owner-approve` | bool | — | اعتمد انتقال CA الصريح لهذه العقدة |
 
 ## stackkit host preflight
 
@@ -187,7 +272,7 @@ stackkit host remediate --auto-reversible --yes
 
 رصد هذه العقدة وفق خط أساس أمان مضيف StackKits واستعادة ما انحرف دون قطع مسار الإدارة.
 
-لا يغيّر 'verify' المضيف أبدًا. فهو ينتج stackkit.host-security-evidence/v1 لجدار الحماية وsshd والحماية من القوة الغاشمة وتحديثات الأمان التلقائية والمعلّقة وحالة إعادة التشغيل ومعلمات النواة والمنافذ المستمعة المكشوفة وانتهاء صلاحية الشهادات. تكون كل أداة تحكم compliant أو drifted أو unknown أو استثناءً معتمدًا من المالك، وتنتهي صلاحية الدليل: يصبح الرصد القديم unknown، ولا تُعد أداة تحكم unknown متوافقة أبدًا.
+لا يغيّر 'verify' المضيف أبدًا. فهو ينتج stackkit.host-security-evidence/v1 لجدار الحماية وsshd والحماية من القوة الغاشمة وتحديثات الأمان التلقائية والمعلّقة وحالة إعادة التشغيل ومعلمات النواة والمنافذ المستمعة المكشوفة وانتهاء صلاحية الشهادات، ولثقة SSH CA وشهادة المضيف المسلَّمتين إلى هذه العقدة ('host ssh apply') بمجرد تسجيلهما. تكون كل أداة تحكم compliant أو drifted أو unknown أو استثناءً معتمدًا من المالك، وتنتهي صلاحية الدليل: يصبح الرصد القديم unknown، ولا تُعد أداة تحكم unknown متوافقة أبدًا.
 
 يعمل مستقلًا (Standard Mode، دون حساب) ومن خلال CLI المقيّد بالإصدار المحدد عندما يدير Techstack النشر (`--mode` advanced).
 
@@ -230,6 +315,7 @@ stackkit host security repair [flags]
 | `--declared-port` | stringArray | — | منفذ خدمة معلن بالصيغة tcp/443 أو udp/5353 (قابل للتكرار) |
 | `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | ملف استثناءات يتحكم فيه المالك (يحتاج كل استثناء إلى مالك وتاريخ انتهاء) |
 | `--freshness` | duration | `15m0s` | مدة إمكان الاعتماد على الدليل قبل انتهاء صلاحيته (من 1m إلى 24h) |
+| `--host-name` | stringArray | — | الاسم الذي يجب أن تحمله شهادة مضيف SSH المسلَّمة (قابل للتكرار؛ الافتراضي: اسم مضيف النظام) |
 | `--json` | bool | — | إصدار النتيجة بصيغة JSON قابلة للقراءة آليًا |
 | `--kit` | string | — | slug الـ Kit المطلوب تسجيله (الافتراضي: Kit في StackSpec لمساحة العمل) |
 | `--local-node` | string | — | الـ Node المحلية المحددة بدقة في ResolvedPlan المقدمة |
@@ -284,6 +370,7 @@ stackkit host security verify [flags]
 | `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | ملف استثناءات يتحكم فيه المالك (يحتاج كل استثناء إلى مالك وتاريخ انتهاء) |
 | `--fail-on-drift` | bool | — | الخروج بالرمز 5 عندما يكون المضيف drifted وبالرمز 6 عندما تكون حالته unknown |
 | `--freshness` | duration | `15m0s` | مدة إمكان الاعتماد على الدليل قبل انتهاء صلاحيته (من 1m إلى 24h) |
+| `--host-name` | stringArray | — | الاسم الذي يجب أن تحمله شهادة مضيف SSH المسلَّمة (قابل للتكرار؛ الافتراضي: اسم مضيف النظام) |
 | `--json` | bool | — | إصدار النتيجة بصيغة JSON قابلة للقراءة آليًا |
 | `--kit` | string | — | slug الـ Kit المطلوب تسجيله (الافتراضي: Kit في StackSpec لمساحة العمل) |
 | `--local-node` | string | — | الـ Node المحلية المحددة بدقة في ResolvedPlan المقدمة |
@@ -308,6 +395,54 @@ sudo stackkit host security verify --mode advanced --json --fail-on-drift --drif
 # Judge exposure against the ports the verified plan declares
 sudo stackkit host security verify --resolved-plan plan.json --local-node node-1
 ```
+
+## stackkit host ssh
+
+وصول شهادات SSH المسلَّم إلى هذه العقدة.
+
+```bash
+stackkit host ssh [flags]
+```
+
+الأوامر الفرعية: [`stackkit host ssh apply`](#stackkit-host-ssh-apply)
+
+### stackkit host ssh apply
+
+طبّق تسليم ثقة SSH CA المختوم أو الإبطال أو شهادة المضيف من stdin.
+
+اقرأ من stdin مغلف ssh-ca-trust أو ssh-ca-revoke أو ssh-host-certificate مختومًا وموقّعًا من جهة التسليم المثبّتة، وطبّقه على sshd في هذا الخادم:
+
+```text
+  - ssh-ca-trust installs the owner's user CA keys as TrustedUserCAKeys
+    (/etc/ssh/stackkit/trusted_user_ca_keys) and one AuthorizedPrincipalsFile
+    per local user (/etc/ssh/stackkit/principals/<user>). Root is never a
+    target. An empty key list revokes like ssh-ca-revoke.
+  - ssh-ca-revoke removes that trust. Revocations take effect at once and are
+    never rolled back; one sshd cannot reload for is recorded as cleanup
+    pending and finished by 'host security repair'.
+  - ssh-host-certificate installs a host certificate beside the host key it
+    certifies, only if it names every --host-name (default: the system
+    hostname) and is currently valid.
+```
+
+لا يُعاد تحميل sshd إلا بعد أن يقبل 'sshd -t' الإعداد الجديد؛ ويُتراجع عن أي تغيير يفشل. تُسجَّل الحالة المطبَّقة في عهدة owner، فيبلّغ 'host security verify' عن الانحراف ويعيد 'host security repair' تثبيتها.
+
+```bash
+stackkit host ssh apply [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--host-name` | stringArray | — | الاسم الذي يجب أن تحمله شهادة المضيف بوصفه principal (قابل للتكرار؛ الافتراضي: اسم مضيف النظام) |
+| `--owner-approve` | bool | — | اعتمد تغيير وصول SSH لهذا الخادم |
+| `--tenant-ref` | string | — | المستأجر (tenant) الذي يجب أن يُوجَّه إليه التسليم المختوم |
+
+**أمثلة**
+
+```bash
+sudo stackkit host ssh apply --tenant-ref "$TENANT" --owner-approve < envelope.json
+```
+
 
 ## stackkit host updates
 

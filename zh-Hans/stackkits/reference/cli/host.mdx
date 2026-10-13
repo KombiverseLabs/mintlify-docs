@@ -9,7 +9,7 @@ sidebarTitle: "host"
 stackkit host [flags]
 ```
 
-子命令：[`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host security`](#stackkit-host-security), [`stackkit host updates`](#stackkit-host-updates)
+子命令：[`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host delivery`](#stackkit-host-delivery), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host migrate-browser-ca`](#stackkit-host-migrate-browser-ca), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host security`](#stackkit-host-security), [`stackkit host ssh`](#stackkit-host-ssh), [`stackkit host updates`](#stackkit-host-updates)
 
 ## stackkit host attach-conformance
 
@@ -37,6 +37,75 @@ stackkit host conformance [flags]
 | --- | --- | --- | --- |
 | `--binding` | string | — | **必填。** 本地 ExternalHostBinding JSON 文件 |
 | `--output, -o` | string | `-` | 回执的输出目标（'-' 表示在 stdout 输出 JSON） |
+
+## stackkit host delivery
+
+管理此节点的密封主机交付接收方。
+
+密封主机交付会把 Wallet 项目、备份目标和 SSH 访问权限交付到此节点。交付方会用此节点的接收方密钥（HPKE，pkg/hostdelivery）分别密封每个值；只有此节点能将其打开并存入自身托管。Techstack 和 Guard 只传递密文和引用。
+
+```bash
+stackkit host delivery [flags]
+```
+
+子命令：[`stackkit host delivery detach`](#stackkit-host-delivery-detach), [`stackkit host delivery recipient`](#stackkit-host-delivery-recipient), [`stackkit host delivery status`](#stackkit-host-delivery-status)
+
+### stackkit host delivery detach
+
+停止向此节点交付主机内容，并列出需要轮换的已交付秘密。
+
+将此节点从主机交付中分离：每个已交付的秘密都会被标记为需要轮换，已退役的接收方密钥会被销毁；在使用 'host delivery recipient `--rotate`' 重新注册此节点之前，不会再打开任何交付。结果列出需要在来源处轮换的引用和版本，且绝不包含任何值。本地托管中已有的值在此仍可使用。
+
+```bash
+stackkit host delivery detach [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | 授权分离此节点 |
+
+**示例**
+
+```bash
+stackkit host delivery detach --owner-approve
+```
+
+### stackkit host delivery recipient
+
+证明此节点的接收方密钥、固定交付权威或轮换密钥。
+
+打印一份由本地 Owner 密钥签名的声明，将此节点的接收方密钥及其代次绑定到此 Site 和节点，并回显调用方的挑战值。私钥永远不会离开本地托管。
+
+`--authority-key` 为当前代次固定交付权威的 Ed25519 公钥；只有由该密钥签名时，Wallet 项目和 SSH 访问才会打开。已固定的密钥绝不会原地替换。`--rotate` 会在下一代次下重新注册此节点（若同时使用 `--authority-key`，则固定新的权威）：之前的密钥仍可在最多 15 分钟的有效期内打开轮换前签发的交付，之后即被销毁。轮换也会结束分离状态。
+
+```bash
+stackkit host delivery recipient [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--authority-key` | string | — | 要为此代次固定的交付权威 Ed25519 公钥（base64） |
+| `--authority-key-id` | string | — | 交付权威签署信封所用的密钥 ID |
+| `--challenge` | string | — | 交付权威提供的新值，声明必须回显该值 |
+| `--owner-approve` | bool | — | 授权此节点的接收方变更 |
+| `--rotate` | bool | — | 在下一接收方代次下重新注册 |
+
+**示例**
+
+```bash
+stackkit host delivery recipient --challenge "$CHALLENGE" --authority-key "$WALLET_KEY" --authority-key-id wallet-1 --owner-approve
+stackkit host delivery recipient --challenge "$CHALLENGE" --rotate --owner-approve
+```
+
+### stackkit host delivery status
+
+显示接收方代次、已固定的权威、分离状态和已交付引用。
+
+报告此节点的接收方代次和指纹、仍可打开的已退役代次、已固定的交付权威、此节点是否已分离，以及每个已交付秘密的引用、版本和轮换标记。不会读取任何值。
+
+```bash
+stackkit host delivery status [flags]
+```
 
 ## stackkit host environment
 
@@ -66,6 +135,21 @@ stackkit host environment --json
 # Override a wrong detection for the next command, here Basement Kit init on a home host
 STACKKIT_NETWORK_ENV=home stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com
 ```
+
+## stackkit host migrate-browser-ca
+
+将此节点经过认证的旧版 CA 迁移到支持浏览器的策略。
+
+显式迁移旧版 Basement CA 签名密钥，同时保留 Owner 签名密钥、PocketID 身份、运行时秘密、入口叶证书密钥、地址和卷。已是当前版本的根证书保持不变。先应用并验证当前原生计划，再使用 `--complete`。客户端必须通过现有的客户端信任交接流程，批准已变更的公共根证书。
+
+```bash
+stackkit host migrate-browser-ca [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--complete` | bool | — | 在当前原生 Apply 和常规 TLS 验证之后，退役恢复日志 |
+| `--owner-approve` | bool | — | 授权此节点的显式 CA 迁移 |
 
 ## stackkit host preflight
 
@@ -187,7 +271,7 @@ stackkit host remediate --auto-reversible --yes
 
 依据 StackKits 主机安全基线观察此节点，并在不中断管理路径的情况下恢复发生偏移的项目。
 
-'verify' 绝不会更改主机。它会为防火墙、sshd、暴力破解防护、自动和待处理的安全更新、重启状态、内核参数、公开的监听器和证书到期情况生成 stackkit.host-security-evidence/v1。每项控制的状态为 compliant、drifted、unknown 或经 Owner 批准的例外，且证据会到期：过期的观察结果为 unknown，而 unknown 控制绝不能算作 compliant。
+'verify' 绝不会更改主机。它会为防火墙、sshd、暴力破解防护、自动和待处理的安全更新、重启状态、内核参数、公开的监听器和证书到期情况，以及已记录的、交付到此节点的 SSH CA 信任和主机证书（'host ssh apply'）生成 stackkit.host-security-evidence/v1。每项控制的状态为 compliant、drifted、unknown 或经 Owner 批准的例外，且证据会到期：过期的观察结果为 unknown，而 unknown 控制绝不能算作 compliant。
 
 它既可独立运行（Standard Mode，无需账号），也可在 Techstack 管理部署时通过固定版本的 CLI 运行（`--mode` advanced）。
 
@@ -230,6 +314,7 @@ stackkit host security repair [flags]
 | `--declared-port` | stringArray | — | 声明的服务端口，格式为 tcp/443 或 udp/5353（可重复指定） |
 | `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | 由 Owner 控制的例外文件（每个例外都需要 Owner 和到期时间） |
 | `--freshness` | duration | `15m0s` | 证据在到期前可被信赖的时长（1 分钟至 24 小时） |
+| `--host-name` | stringArray | — | 交付的 SSH 主机证书必须包含的名称（可重复指定；默认：系统主机名） |
 | `--json` | bool | — | 以机器可读的 JSON 输出结果 |
 | `--kit` | string | — | 要记录的 Kit slug（默认为工作区 StackSpec 的 Kit） |
 | `--local-node` | string | — | 所提供 ResolvedPlan 中的确切本地 Node |
@@ -284,6 +369,7 @@ stackkit host security verify [flags]
 | `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | 由 Owner 控制的例外文件（每个例外都需要 Owner 和到期时间） |
 | `--fail-on-drift` | bool | — | 主机为 drifted 时以 5 退出，状态为 unknown 时以 6 退出 |
 | `--freshness` | duration | `15m0s` | 证据在到期前可被信赖的时长（1 分钟至 24 小时） |
+| `--host-name` | stringArray | — | 交付的 SSH 主机证书必须包含的名称（可重复指定；默认：系统主机名） |
 | `--json` | bool | — | 以机器可读的 JSON 输出结果 |
 | `--kit` | string | — | 要记录的 Kit slug（默认为工作区 StackSpec 的 Kit） |
 | `--local-node` | string | — | 所提供 ResolvedPlan 中的确切本地 Node |
@@ -307,6 +393,53 @@ sudo stackkit host security verify --mode advanced --json --fail-on-drift --drif
 
 # Judge exposure against the ports the verified plan declares
 sudo stackkit host security verify --resolved-plan plan.json --local-node node-1
+```
+
+## stackkit host ssh
+
+此节点所交付的 SSH 证书访问。
+
+```bash
+stackkit host ssh [flags]
+```
+
+子命令：[`stackkit host ssh apply`](#stackkit-host-ssh-apply)
+
+### stackkit host ssh apply
+
+从标准输入应用密封的 SSH CA 信任、撤销或主机证书交付。
+
+在标准输入读取一个由已固定的交付权威签名的密封 ssh-ca-trust、ssh-ca-revoke 或 ssh-host-certificate 信封，并将其应用到此服务器的 sshd：
+
+```text
+  - ssh-ca-trust installs the owner's user CA keys as TrustedUserCAKeys
+    (/etc/ssh/stackkit/trusted_user_ca_keys) and one AuthorizedPrincipalsFile
+    per local user (/etc/ssh/stackkit/principals/<user>). Root is never a
+    target. An empty key list revokes like ssh-ca-revoke.
+  - ssh-ca-revoke removes that trust. Revocations take effect at once and are
+    never rolled back; one sshd cannot reload for is recorded as cleanup
+    pending and finished by 'host security repair'.
+  - ssh-host-certificate installs a host certificate beside the host key it
+    certifies, only if it names every --host-name (default: the system
+    hostname) and is currently valid.
+```
+
+只有在 'sshd -t' 接受新配置后才会重新加载 sshd；失败的更改会被回滚。已应用的状态会记录在 Owner 托管中，因此 'host security verify' 会报告偏移，而 'host security repair' 会重新安装它。
+
+```bash
+stackkit host ssh apply [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--host-name` | stringArray | — | 主机证书必须包含的主体名称（可重复指定；默认：系统主机名） |
+| `--owner-approve` | bool | — | 授权更改此服务器的 SSH 访问 |
+| `--tenant-ref` | string | — | 密封交付必须寻址到的租户 |
+
+**示例**
+
+```bash
+sudo stackkit host ssh apply --tenant-ref "$TENANT" --owner-approve < envelope.json
 ```
 
 ## stackkit host updates
