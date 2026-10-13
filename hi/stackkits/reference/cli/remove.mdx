@@ -7,7 +7,7 @@ sidebarTitle: "remove"
 
 इस मशीन पर StackKits रनटाइम अनइंस्टॉल करें।
 
-`--workload` के बिना यह उत्पाद अनइंस्टॉल है: यह stackkit-\* नाम के हर Compose प्रोजेक्ट (Basement कोर, Cloud कोर और चुने गए यूज़ केस) को उनके नेटवर्क और वॉल्यूम सहित रोकता और हटाता है। यह पहले वर्तमान डायरेक्टरी में, फिर ~/my-homelab या ~/my-cloud-homelab में देखता है।
+`--workload` के बिना यह उत्पाद अनइंस्टॉल है: यह stackkit-\* नाम के हर Compose प्रोजेक्ट (Basement कोर, Cloud कोर और चुने गए यूज़ केस) को उनके नेटवर्क सहित रोकता और हटाता है, जबकि नामित डेटा वॉल्यूम रखता है। उन वॉल्यूम को जानबूझकर हटाने के लिए `--delete-data` जोड़ें। `--purge` चुने गए वर्कस्पेस की स्थिति, डिप्लॉय डायरेक्टरी और कैश्ड इमेज भी हटाता है। यह पहले वर्तमान डायरेक्टरी में, फिर ~/my-homelab या ~/my-cloud-homelab में देखता है।
 
 `--workload` एक सटीक Architecture v2 वर्कलोड को उसके लागू रनटाइम ओनर के ज़रिए हटाता है। वह रास्ता एप्लिकेशन वॉल्यूम रखता है, जब तक `--delete-data` सेट न हो।
 
@@ -19,15 +19,15 @@ stackkit remove [flags]
 | --- | --- | --- | --- |
 | `--artifact-manifest` | string | — | Architecture v2 जनरेशन मैनिफ़ेस्ट |
 | `--auto-approve` | bool | — | इंटरैक्टिव स्वीकृति छोड़ें |
-| `--delete-data` | bool | — | इस सटीक लागू वर्कलोड के स्वामित्व वाले नामित वॉल्यूम हटाएँ (डिफ़ॉल्ट रूप से एप्लिकेशन डेटा रखा जाता है) |
-| `--force` | bool | — | त्रुटियों के बावजूद बलपूर्वक हटाएँ |
+| `--delete-data` | bool | — | चुने गए हटाने के दायरे के नामित वॉल्यूम हटाएँ (डिफ़ॉल्ट रूप से एप्लिकेशन डेटा रखा जाता है) |
+| `--force` | bool | — | लेगेसी संगतता फ़्लैग; अधूरा हटाना अब भी विफल होता है और रिकवरी स्थिति रखता है |
 | `--generation-receipt` | string | — | Architecture v2 जनरेशन रसीद |
 | `--inventory` | string | — | Architecture v2 का देखा गया Inventory (अन्यथा एक पारंपरिक इन्वेंटरी फ़ाइल चुनी जाती है) |
 | `--json` | bool | — | कैनोनिकल Architecture v2 हटाने का परिणाम JSON के रूप में जारी करें |
 | `--local-execution-channel` | string | — | इस हटाने की प्रोसेस के स्वामित्व वाला सटीक लागू निष्पादन चैनल |
 | `--local-node` | string | — | इस हटाने की प्रोसेस के स्वामित्व वाला सटीक लागू नोड प्लेसमेंट |
 | `--local-site` | string | — | इस हटाने की प्रोसेस के स्वामित्व वाला सटीक लागू Site प्लेसमेंट |
-| `--purge` | bool | — | इमेज, स्थिति और डिप्लॉय डायरेक्टरी सहित सारा StackKit डेटा हटाएँ |
+| `--purge` | bool | — | नामित रनटाइम वॉल्यूम, चुनी गई वर्कस्पेस स्थिति व डिप्लॉय डायरेक्टरी और कैश्ड StackKit इमेज हटाएँ |
 | `--resolved-plan` | string | — | Architecture v2 कैनोनिकल ResolvedPlan |
 | `--terminal-evidence-json` | bool | — | सीमित कैनोनिकल Architecture v2 टर्मिनल प्रमाण JSON के रूप में जारी करें |
 | `--workload` | string | — | हटाने के लिए सटीक Architecture v2 ResolvedPlan वर्कलोड संदर्भ |
@@ -40,6 +40,9 @@ stackkit remove
 
 # Uninstall without the confirmation prompt
 stackkit remove --auto-approve
+
+# Uninstall the local deployment and intentionally delete its named volumes
+stackkit remove --delete-data --auto-approve
 
 # Remove only the Files workload and keep its data volumes
 stackkit remove --workload files

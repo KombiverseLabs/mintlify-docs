@@ -9,7 +9,7 @@ sidebarTitle: "docs"
 stackkit docs [flags]
 ```
 
-子命令：[`stackkit docs emit-advanced-operations`](#stackkit-docs-emit-advanced-operations), [`stackkit docs emit-cli-reference`](#stackkit-docs-emit-cli-reference), [`stackkit docs emit-release-manifests`](#stackkit-docs-emit-release-manifests), [`stackkit docs emit-use-case-overview`](#stackkit-docs-emit-use-case-overview)
+子命令：[`stackkit docs emit-advanced-operations`](#stackkit-docs-emit-advanced-operations), [`stackkit docs emit-cli-reference`](#stackkit-docs-emit-cli-reference), [`stackkit docs emit-release-manifests`](#stackkit-docs-emit-release-manifests), [`stackkit docs emit-troubleshooting`](#stackkit-docs-emit-troubleshooting), [`stackkit docs emit-use-case-overview`](#stackkit-docs-emit-use-case-overview)
 
 ## stackkit docs emit-advanced-operations
 
@@ -81,6 +81,21 @@ stackkit docs emit-release-manifests [flags]
 | `--release-url` | string | — | **必填。** 确切的公开发布 URL |
 | `--source-sha` | string | — | **必填。** 确切的私有源 SHA |
 
+## stackkit docs emit-troubleshooting
+
+生成共享的独立故障排查权威文档。
+
+根据 CLI 失败和 MCP 自检所用的同一权威，生成稳定的错误 ID、原因和恢复操作。使用 `--check` 时，若指南缺失或已过期则失败，且不写入任何内容。
+
+```bash
+stackkit docs emit-troubleshooting [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--check` | bool | — | 不写入任何内容；生成的指南有差异时失败 |
+| `--out` | string | `docs/TROUBLESHOOTING.md` | 输出路径，相对于 `--chdir` |
+
 ## stackkit docs emit-use-case-overview
 
 渲染内部派生的用例开发概览。
@@ -93,7 +108,11 @@ stackkit docs emit-use-case-overview [flags]
 | --- | --- | --- | --- |
 | `--evidence-output` | string | — | 证据清单输出路径 |
 | `--output` | string | — | Markdown 输出路径 |
-| `--source-sha` | string | — | **必填。** 确切的源 SHA |
+| `--source-sha` | string | — | 确切的源 SHA |
+| `--tables-only` | bool | — | 仅渲染真值表，不包含概览、证据输出或测试声明 |
 | `--test-receipt` | string | — | 与源 SHA 绑定的已通过测试回执 |
 | `--tests-passed-for-source` | bool | — | 在调用方针对 source-sha 同步通过目录测试之后，将测试标记为完成 |
+| `--truth-table-counts-output` | string | — | CUE 派生的 intent 和目录计数 JSON 输出路径（仅 tables-only） |
+| `--truth-table-output` | string | — | 共享的 CUE 派生真值表 Markdown 输出路径 |
+| `--truth-table-public-output` | string | — | 经公开过滤的真值表 Markdown 输出路径 |
 

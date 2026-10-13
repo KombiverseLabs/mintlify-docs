@@ -1,0 +1,43 @@
+---
+title: "stackkit wallet-item"
+description: "عناصر Wallet المسلَّمة إلى العهدة المحلية المشفّرة لهذه العقدة"
+sidebarTitle: "wallet-item"
+---
+عناصر Wallet المسلَّمة إلى العهدة المحلية المشفّرة لهذه العقدة.
+
+```bash
+stackkit wallet-item [flags]
+```
+
+الأوامر الفرعية: [`stackkit wallet-item import`](#stackkit-wallet-item-import)، [`stackkit wallet-item status`](#stackkit-wallet-item-status)
+
+## stackkit wallet-item import
+
+افتح تسليم عنصر Wallet المختوم من stdin إلى العهدة المحلية المشفّرة.
+
+اقرأ من stdin مغلف wallet-item-import أو wallet-item-rotate مختومًا وموقّعًا من جهة التسليم المثبّتة. تفتحه العقدة وتسجله مستهلكًا وتخزن القيمة مشفرة بمفتاح عهدتها المحلية، مفهرسة بمرجع العنصر والإصدار. يزيل التدوير كل إصدار أقدم. تذكر النتيجة المرجع والإصدار فقط.
+
+```bash
+stackkit wallet-item import [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | اعتمد تخزين عنصر Wallet هذا |
+| `--tenant-ref` | string | — | المستأجر (tenant) الذي يجب أن يُوجَّه إليه التسليم المختوم |
+
+**أمثلة**
+
+```bash
+stackkit wallet-item import --tenant-ref "$TENANT" --owner-approve < envelope.json
+```
+
+## stackkit wallet-item status
+
+اذكر عناصر Wallet في العهدة المحلية بحسب المرجع والإصدار.
+
+اذكر كل عنصر Wallet في العهدة المحلية بحسب المستأجر ومرجع العنصر والإصدارات، وما إذا كان يحتاج إلى تدوير بعد detach. لا تُقرأ أي قيمة.
+
+```bash
+stackkit wallet-item status [flags]
+```

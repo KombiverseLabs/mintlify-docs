@@ -32,7 +32,7 @@ stackkit setup photos --owner-approve --complete-onboarding
 stackkit setup files --owner-approve --credentials-file private/files-owner.json
 ```
 
-Subcomandos: [`stackkit setup ai-connect`](#stackkit-setup-ai-connect)
+Subcomandos: [`stackkit setup ai-connect`](#stackkit-setup-ai-connect), [`stackkit setup ai-provider`](#stackkit-setup-ai-provider), [`stackkit setup connector`](#stackkit-setup-connector)
 
 ## stackkit setup ai-connect
 
@@ -64,3 +64,51 @@ stackkit setup ai-connect --token-file ~/kombify-connector-token
 # Turn the connector off and remove its token
 stackkit setup ai-connect --disable
 ```
+
+## stackkit setup ai-provider
+
+Ofrece un proveedor externo compatible con OpenAI en Private AI con una clave de tu kombify Wallet.
+
+Permite que Open WebUI del caso de uso Private AI use un proveedor de inferencia externo compatible con OpenAI (por ejemplo OpenAI, Mistral, Groq u OpenRouter) junto al Ollama del nodo. La clave API del proveedor nunca pasa por este comando, la StackSpec ni el bundle generado: guárdala como credencial de IA en tu kombify Wallet, permite este nodo en el elemento y entrégala cifrada a este nodo con "stackkit wallet-item import". Este comando vincula la clave del proveedor a ese elemento entregado y establece la URL base https del proveedor. Cada apply lee entonces la versión entregada más reciente, de modo que una rotación en la Wallet surte efecto tras "stackkit wallet-item import" del elemento rotado y el siguiente apply. Apply falla de forma cerrada cuando el elemento no está en la custodia de este nodo.
+
+`--disable` elimina el proveedor de Open WebUI y la vinculación de la clave de la custodia local. El elemento entregado permanece en la custodia de elementos Wallet del nodo.
+
+```bash
+stackkit setup ai-provider [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--base-url` | string | — | URL base https de la API del proveedor compatible con OpenAI |
+| `--disable` | bool | — | Elimina el proveedor externo y su vinculación de clave |
+| `--json` | bool | — | Emite el stackkit.command-result/v1 sin secretos |
+| `--tenant-ref` | string | — | Tenant al que se entregó el elemento de Wallet |
+| `--wallet-item` | string | — | Referencia del elemento de Wallet de la clave del proveedor entregada |
+
+**Ejemplos**
+
+```bash
+# Bind the provider key delivered as Wallet item itm_... and set the provider
+stackkit setup ai-provider --base-url https://api.openai.com/v1 --tenant-ref "$TENANT" --wallet-item itm_abc...
+
+# Remove the provider
+stackkit setup ai-provider --disable
+```
+
+## stackkit setup connector
+
+Emite, revoca o verifica el conector exacto de Home Assistant local.
+
+```bash
+stackkit setup connector [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emite los bytes exactos del recibo firmado autenticado y los hechos locales actuales |
+| `--operation-id` | string | — | Identidad exacta y estable de la operación de configuración del conector |
+| `--owner-approve` | bool | — | Aprueba esta solicitud exacta de alta o revocación del conector |
+| `--request-file` | string | — | JSON de solicitud de conector privado, solo metadatos y relativo al workspace; nunca contiene credenciales |
+| `--verify-only` | bool | — | Lee y verifica un recibo conservado frente al vínculo local actual sin emitir ni revocar |
+| `--workload` | string | — | Workload local exacto; solo se admite smart-home |
+

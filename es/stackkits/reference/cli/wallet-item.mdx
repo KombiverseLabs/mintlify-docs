@@ -1,0 +1,43 @@
+---
+title: "stackkit wallet-item"
+description: "Elementos de Wallet entregados a la custodia local cifrada de este nodo"
+sidebarTitle: "wallet-item"
+---
+Elementos de Wallet entregados a la custodia local cifrada de este nodo.
+
+```bash
+stackkit wallet-item [flags]
+```
+
+Subcomandos: [`stackkit wallet-item import`](#stackkit-wallet-item-import), [`stackkit wallet-item status`](#stackkit-wallet-item-status)
+
+## stackkit wallet-item import
+
+Abre desde la entrada estándar una entrega sellada de elemento de Wallet en la custodia local cifrada.
+
+Lee en la entrada estándar un único sobre sellado wallet-item-import o wallet-item-rotate, firmado por la autoridad que entrega fijada. El nodo lo abre, lo registra como consumido y guarda el valor cifrado bajo su clave de custodia local, indexado por referencia del elemento y versión. Una rotación elimina todas las versiones anteriores. El resultado indica solo la referencia y la versión.
+
+```bash
+stackkit wallet-item import [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Autoriza el almacenamiento de este elemento de Wallet |
+| `--tenant-ref` | string | — | Tenant al que debe estar dirigida la entrega sellada |
+
+**Ejemplos**
+
+```bash
+stackkit wallet-item import --tenant-ref "$TENANT" --owner-approve < envelope.json
+```
+
+## stackkit wallet-item status
+
+Lista los elementos de Wallet en la custodia local por referencia y versión.
+
+Lista todos los elementos de Wallet en la custodia local por tenant, referencia del elemento y versiones, e indica si necesitan rotación tras un detach. No se lee ningún valor.
+
+```bash
+stackkit wallet-item status [flags]
+```

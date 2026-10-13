@@ -9,7 +9,7 @@ sidebarTitle: "host"
 stackkit host [flags]
 ```
 
-उप-कमांड: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host security`](#stackkit-host-security), [`stackkit host updates`](#stackkit-host-updates)
+उप-कमांड: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host delivery`](#stackkit-host-delivery), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host migrate-browser-ca`](#stackkit-host-migrate-browser-ca), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host security`](#stackkit-host-security), [`stackkit host ssh`](#stackkit-host-ssh), [`stackkit host updates`](#stackkit-host-updates)
 
 ## stackkit host attach-conformance
 
@@ -37,6 +37,76 @@ stackkit host conformance [flags]
 | --- | --- | --- | --- |
 | `--binding` | string | — | **आवश्यक।** स्थानीय ExternalHostBinding JSON फ़ाइल |
 | `--output, -o` | string | `-` | रसीद का गंतव्य (stdout पर JSON के लिए '-') |
+
+## stackkit host delivery
+
+इस नोड का सीलबंद होस्ट डिलीवरी रिसिपिएंट प्रबंधित करें।
+
+सीलबंद होस्ट डिलीवरी इस नोड तक Wallet आइटम, बैकअप लक्ष्य और SSH एक्सेस पहुँचाती है। डिलीवर करने वाला प्राधिकार हर मान को इस नोड की रिसिपिएंट की (HPKE, pkg/hostdelivery) से सील करता है; केवल यह नोड उसे अपनी कस्टडी में खोलता है। Techstack और Guard केवल सिफ़रटेक्स्ट और संदर्भ वहन करते हैं।
+
+```bash
+stackkit host delivery [flags]
+```
+
+उप-कमांड: [`stackkit host delivery detach`](#stackkit-host-delivery-detach), [`stackkit host delivery recipient`](#stackkit-host-delivery-recipient), [`stackkit host delivery status`](#stackkit-host-delivery-status)
+
+### stackkit host delivery detach
+
+इस नोड पर होस्ट डिलीवरी रोकें और रोटेट किए जाने वाले डिलीवर किए गए सीक्रेट सूचीबद्ध करें।
+
+इस नोड को होस्ट डिलीवरी से अलग करें: हर डिलीवर किया गया सीक्रेट रोटेशन-आवश्यक चिह्नित होता है, रिटायर रिसिपिएंट कीज़ नष्ट होती हैं, और जब तक नोड को 'host delivery recipient `--rotate`' से दोबारा नामांकित नहीं किया जाता, कोई डिलीवरी नहीं खुलती। परिणाम रोटेट किए जाने वाले संदर्भ और संस्करण वहीं सूचीबद्ध करता है जहाँ से वे आए थे; उसमें कभी कोई मान नहीं होता। स्थानीय कस्टडी में पहले से मौजूद मान यहाँ उपयोग योग्य रहते हैं।
+
+```bash
+stackkit host delivery detach [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | इस नोड को अलग करने को अधिकृत करें |
+
+**उदाहरण**
+
+```bash
+stackkit host delivery detach --owner-approve
+```
+
+### stackkit host delivery recipient
+
+इस नोड की रिसिपिएंट की प्रमाणित करें, डिलीवर करने वाला प्राधिकार पिन करें, या की रोटेट करें।
+
+स्थानीय Owner की से हस्ताक्षरित एक कथन प्रिंट करें जो इस नोड की रिसिपिएंट की और उसकी जनरेशन को इस Site और नोड से बाँधता है तथा कॉलर की चुनौती को दोहराता है। प्राइवेट की स्थानीय कस्टडी से बाहर कभी नहीं जाती।
+
+`--authority-key` वर्तमान जनरेशन के लिए डिलीवर करने वाले प्राधिकार की Ed25519 पब्लिक की पिन करता है; Wallet आइटम और SSH एक्सेस केवल उसी से हस्ताक्षरित होने पर खुलते हैं। पिन की गई की कभी जगह पर नहीं बदली जाती। `--rotate` नोड को अगली जनरेशन में दोबारा नामांकित करता है (और `--authority-key` के साथ नया प्राधिकार पिन करता है): पिछली की रोटेशन से पहले जारी डिलीवरी को उनकी अधिकतम 15 मिनट की आयु तक खोलती है और फिर नष्ट कर दी जाती है। रोटेशन detach को भी समाप्त करता है।
+
+```bash
+stackkit host delivery recipient [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--authority-key` | string | — | इस जनरेशन के लिए पिन की जाने वाली डिलीवर करने वाले प्राधिकार की Ed25519 पब्लिक की (base64) |
+| `--authority-key-id` | string | — | वह Key ID जिससे डिलीवर करने वाला प्राधिकार envelopes पर हस्ताक्षर करता है |
+| `--challenge` | string | — | डिलीवर करने वाले प्राधिकार का ताज़ा मान जिसे कथन में दोहराना होगा |
+| `--owner-approve` | bool | — | इस नोड के रिसिपिएंट बदलाव को अधिकृत करें |
+| `--rotate` | bool | — | अगली रिसिपिएंट जनरेशन में दोबारा नामांकित करें |
+
+**उदाहरण**
+
+```bash
+stackkit host delivery recipient --challenge "$CHALLENGE" --authority-key "$WALLET_KEY" --authority-key-id wallet-1 --owner-approve
+stackkit host delivery recipient --challenge "$CHALLENGE" --rotate --owner-approve
+```
+
+### stackkit host delivery status
+
+रिसिपिएंट जनरेशन, पिन किया गया प्राधिकार, detach स्थिति और डिलीवर किए गए संदर्भ दिखाएँ।
+
+इस नोड की रिसिपिएंट जनरेशन और फ़िंगरप्रिंट, अब भी खुलने योग्य रिटायर जनरेशन, पिन किया गया डिलीवर करने वाला प्राधिकार, नोड detached है या नहीं, और हर डिलीवर किया गया सीक्रेट संदर्भ और संस्करण के अनुसार उसके रोटेशन चिह्न सहित रिपोर्ट करें। कोई मान नहीं पढ़ा जाता।
+
+```bash
+stackkit host delivery status [flags]
+```
+
 
 ## stackkit host environment
 
@@ -66,6 +136,21 @@ stackkit host environment --json
 # Override a wrong detection for the next command, here Basement Kit init on a home host
 STACKKIT_NETWORK_ENV=home stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com
 ```
+
+## stackkit host migrate-browser-ca
+
+इस नोड के प्रमाणित लेगेसी CA को ब्राउज़र-सक्षम नीति में माइग्रेट करें।
+
+लेगेसी Basement CA साइनिंग कीज़ को स्पष्ट रूप से माइग्रेट करें, जबकि Owner साइनिंग की, PocketID पहचानें, रनटाइम सीक्रेट, ingress लीफ़ कीज़, पते और वॉल्यूम सुरक्षित रहते हैं। पहले से वर्तमान root को बनाए रखें। `--complete` से पहले वर्तमान नेटिव प्लान लागू और सत्यापित करें। बदली हुई सार्वजनिक root को क्लाइंट मौजूदा client-trust हैंडऑफ़ के ज़रिए स्वीकृत करें।
+
+```bash
+stackkit host migrate-browser-ca [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--complete` | bool | — | वर्तमान नेटिव Apply और सामान्य TLS सत्यापन के बाद रिकवरी जर्नल रिटायर करें |
+| `--owner-approve` | bool | — | इस नोड के स्पष्ट CA संक्रमण को अधिकृत करें |
 
 ## stackkit host preflight
 
@@ -187,7 +272,7 @@ stackkit host remediate --auto-reversible --yes
 
 इस नोड को StackKits होस्ट सुरक्षा आधाररेखा के अनुसार जाँचें और प्रबंधन पथ काटे बिना भटके हुए नियंत्रण बहाल करें।
 
-'verify' होस्ट को कभी नहीं बदलता। यह फ़ायरवॉल, sshd, ब्रूट-फ़ोर्स सुरक्षा, स्वचालित और लंबित सुरक्षा अपडेट, रीबूट स्थिति, कर्नेल पैरामीटर, खुले listeners और प्रमाणपत्र की समाप्ति के लिए stackkit.host-security-evidence/v1 बनाता है। हर नियंत्रण compliant, drifted, unknown या ओनर द्वारा स्वीकृत अपवाद होता है, और साक्ष्य की समय-सीमा समाप्त होती है: पुराना अवलोकन unknown होता है और unknown नियंत्रण कभी compliant नहीं माना जाता।
+'verify' होस्ट को कभी नहीं बदलता। यह फ़ायरवॉल, sshd, ब्रूट-फ़ोर्स सुरक्षा, स्वचालित और लंबित सुरक्षा अपडेट, रीबूट स्थिति, कर्नेल पैरामीटर, खुले listeners और प्रमाणपत्र की समाप्ति के लिए, और (एक बार दर्ज होने पर) इस नोड को डिलीवर किए गए SSH CA ट्रस्ट और होस्ट सर्टिफ़िकेट ('host ssh apply') के लिए stackkit.host-security-evidence/v1 बनाता है। हर नियंत्रण compliant, drifted, unknown या ओनर द्वारा स्वीकृत अपवाद होता है, और साक्ष्य की समय-सीमा समाप्त होती है: पुराना अवलोकन unknown होता है और unknown नियंत्रण कभी compliant नहीं माना जाता।
 
 यह अपने आप (Standard Mode, बिना अकाउंट) और Techstack द्वारा डिप्लॉयमेंट प्रबंधित किए जाने पर पिन की गई CLI के माध्यम से (`--mode` advanced) काम करता है।
 
@@ -230,6 +315,7 @@ stackkit host security repair [flags]
 | `--declared-port` | stringArray | — | tcp/443 या udp/5353 के रूप में घोषित सेवा पोर्ट (दोहराया जा सकता है) |
 | `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | ओनर-नियंत्रित अपवाद फ़ाइल (हर अपवाद के लिए ओनर और समाप्ति आवश्यक है) |
 | `--freshness` | duration | `15m0s` | साक्ष्य की समय-सीमा समाप्त होने से पहले उस पर भरोसे की अवधि (1m से 24h) |
+| `--host-name` | stringArray | — | वह नाम जो डिलीवर किए गए SSH होस्ट सर्टिफ़िकेट में होना चाहिए (दोहराने योग्य; डिफ़ॉल्ट: सिस्टम होस्टनाम) |
 | `--json` | bool | — | परिणाम मशीन-पठनीय JSON में जारी करें |
 | `--kit` | string | — | दर्ज किया जाने वाला Kit slug (डिफ़ॉल्ट: वर्कस्पेस StackSpec का Kit) |
 | `--local-node` | string | — | दिए गए ResolvedPlan का सटीक स्थानीय Node |
@@ -284,6 +370,7 @@ stackkit host security verify [flags]
 | `--drift-scope` | string | `all` | `--fail-on-drift` तय करने वाले नियंत्रण: all या enforced (केवल वे नियंत्रण जिन्हें बेसलाइन स्वयं लागू करती है; पैच में देरी, लंबित रीबूट, एक्सपोज़र और प्रमाणपत्र फिर भी देखे और रिपोर्ट किए जाते हैं) |
 | `--fail-on-drift` | bool | — | होस्ट drifted होने पर 5 और उसकी स्थिति unknown होने पर 6 के साथ बाहर निकलें |
 | `--freshness` | duration | `15m0s` | साक्ष्य की समय-सीमा समाप्त होने से पहले उस पर भरोसे की अवधि (1m से 24h) |
+| `--host-name` | stringArray | — | वह नाम जो डिलीवर किए गए SSH होस्ट सर्टिफ़िकेट में होना चाहिए (दोहराने योग्य; डिफ़ॉल्ट: सिस्टम होस्टनाम) |
 | `--json` | bool | — | परिणाम मशीन-पठनीय JSON में जारी करें |
 | `--kit` | string | — | दर्ज किया जाने वाला Kit slug (डिफ़ॉल्ट: वर्कस्पेस StackSpec का Kit) |
 | `--local-node` | string | — | दिए गए ResolvedPlan का सटीक स्थानीय Node |
@@ -308,6 +395,54 @@ sudo stackkit host security verify --mode advanced --json --fail-on-drift --drif
 # Judge exposure against the ports the verified plan declares
 sudo stackkit host security verify --resolved-plan plan.json --local-node node-1
 ```
+
+## stackkit host ssh
+
+इस नोड तक डिलीवर किया गया SSH सर्टिफ़िकेट एक्सेस।
+
+```bash
+stackkit host ssh [flags]
+```
+
+उप-कमांड: [`stackkit host ssh apply`](#stackkit-host-ssh-apply)
+
+### stackkit host ssh apply
+
+stdin से सीलबंद SSH CA ट्रस्ट, रिवोकेशन या होस्ट सर्टिफ़िकेट डिलीवरी लागू करें।
+
+stdin पर एक सीलबंद ssh-ca-trust, ssh-ca-revoke या ssh-host-certificate envelope पढ़ें, जो पिन किए गए डिलीवर करने वाले प्राधिकार से हस्ताक्षरित हो, और उसे इस सर्वर के sshd पर लागू करें:
+
+```text
+  - ssh-ca-trust installs the owner's user CA keys as TrustedUserCAKeys
+    (/etc/ssh/stackkit/trusted_user_ca_keys) and one AuthorizedPrincipalsFile
+    per local user (/etc/ssh/stackkit/principals/<user>). Root is never a
+    target. An empty key list revokes like ssh-ca-revoke.
+  - ssh-ca-revoke removes that trust. Revocations take effect at once and are
+    never rolled back; one sshd cannot reload for is recorded as cleanup
+    pending and finished by 'host security repair'.
+  - ssh-host-certificate installs a host certificate beside the host key it
+    certifies, only if it names every --host-name (default: the system
+    hostname) and is currently valid.
+```
+
+sshd केवल तब reload होता है जब 'sshd -t' नया कॉन्फ़िगरेशन स्वीकार कर ले; विफल बदलाव रोलबैक हो जाता है। लागू स्थिति owner कस्टडी में दर्ज होती है, इसलिए 'host security verify' drift रिपोर्ट करता है और 'host security repair' उसे दोबारा इंस्टॉल करता है।
+
+```bash
+stackkit host ssh apply [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--host-name` | stringArray | — | वह नाम जो होस्ट सर्टिफ़िकेट में principal के रूप में होना चाहिए (दोहराने योग्य; डिफ़ॉल्ट: सिस्टम होस्टनाम) |
+| `--owner-approve` | bool | — | इस सर्वर का SSH एक्सेस बदलने को अधिकृत करें |
+| `--tenant-ref` | string | — | वह tenant जिसे सीलबंद डिलीवरी संबोधित होनी चाहिए |
+
+**उदाहरण**
+
+```bash
+sudo stackkit host ssh apply --tenant-ref "$TENANT" --owner-approve < envelope.json
+```
+
 
 ## stackkit host updates
 

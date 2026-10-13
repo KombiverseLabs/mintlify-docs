@@ -9,7 +9,7 @@ Genera proyecciones deterministas de la documentación de StackKits.
 stackkit docs [flags]
 ```
 
-Subcomandos: [`stackkit docs emit-advanced-operations`](#stackkit-docs-emit-advanced-operations), [`stackkit docs emit-cli-reference`](#stackkit-docs-emit-cli-reference), [`stackkit docs emit-release-manifests`](#stackkit-docs-emit-release-manifests), [`stackkit docs emit-use-case-overview`](#stackkit-docs-emit-use-case-overview)
+Subcomandos: [`stackkit docs emit-advanced-operations`](#stackkit-docs-emit-advanced-operations), [`stackkit docs emit-cli-reference`](#stackkit-docs-emit-cli-reference), [`stackkit docs emit-release-manifests`](#stackkit-docs-emit-release-manifests), [`stackkit docs emit-troubleshooting`](#stackkit-docs-emit-troubleshooting), [`stackkit docs emit-use-case-overview`](#stackkit-docs-emit-use-case-overview)
 
 ## stackkit docs emit-advanced-operations
 
@@ -81,6 +81,21 @@ stackkit docs emit-release-manifests [flags]
 | `--release-url` | string | — | **Obligatorio.** URL pública exacta del release |
 | `--source-sha` | string | — | **Obligatorio.** SHA exacto del código fuente privado |
 
+## stackkit docs emit-troubleshooting
+
+Genera la autoridad compartida e independiente de solución de problemas.
+
+Genera IDs de error estables, causas y acciones de recuperación desde la misma autoridad que usan los fallos de la CLI y el autocheck del MCP. Con `--check`, rechaza una guía ausente o desactualizada sin escribir nada.
+
+```bash
+stackkit docs emit-troubleshooting [flags]
+```
+
+| Flag | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--check` | bool | — | No escribe nada; falla cuando la guía generada difiere |
+| `--out` | string | `docs/TROUBLESHOOTING.md` | Ruta de salida, relativa a `--chdir` |
+
 ## stackkit docs emit-use-case-overview
 
 Renderiza la vista general interna derivada del desarrollo de casos de uso.
@@ -93,6 +108,10 @@ stackkit docs emit-use-case-overview [flags]
 | --- | --- | --- | --- |
 | `--evidence-output` | string | — | ruta de salida del manifiesto de evidencia |
 | `--output` | string | — | ruta de salida de Markdown |
-| `--source-sha` | string | — | **Obligatorio.** SHA exacto del código fuente |
+| `--source-sha` | string | — | SHA exacto del código fuente |
+| `--tables-only` | bool | — | renderiza solo las tablas de verdad, sin vista general, salida de evidencia ni afirmaciones de pruebas |
 | `--test-receipt` | string | — | recibo de pruebas superadas vinculado al SHA del código fuente |
 | `--tests-passed-for-source` | bool | — | marca las pruebas como completas después de que quien llama haya superado de forma síncrona las pruebas del catálogo para source-sha |
+| `--truth-table-counts-output` | string | — | ruta de salida JSON de recuentos de intención y catálogo derivados de CUE (solo tables-only) |
+| `--truth-table-output` | string | — | ruta de salida Markdown de la tabla de verdad compartida derivada de CUE |
+| `--truth-table-public-output` | string | — | ruta de salida Markdown de la tabla de verdad filtrada para público |

@@ -1,0 +1,43 @@
+---
+title: "stackkit wallet-item"
+description: "Wallet-Einträge, die in die verschlüsselte lokale Verwahrung dieses Nodes geliefert werden"
+sidebarTitle: "wallet-item"
+---
+Wallet-Einträge, die in die verschlüsselte lokale Verwahrung dieses Nodes geliefert werden.
+
+```bash
+stackkit wallet-item [flags]
+```
+
+Unterbefehle: [`stackkit wallet-item import`](#stackkit-wallet-item-import), [`stackkit wallet-item status`](#stackkit-wallet-item-status)
+
+## stackkit wallet-item import
+
+Eine versiegelte Wallet-Eintrags-Lieferung von stdin in die verschlüsselte lokale Verwahrung öffnen.
+
+Genau ein versiegeltes Envelope wallet-item-import oder wallet-item-rotate von stdin lesen, das von der festgelegten liefernden Instanz signiert ist. Der Node öffnet es, zeichnet es als verbraucht auf und speichert den Wert verschlüsselt unter seinem lokalen Verwahrungsschlüssel, geordnet nach Eintrags-Referenz und Version. Eine Rotation entfernt jede ältere Version. Das Ergebnis nennt nur Referenz und Version.
+
+```bash
+stackkit wallet-item import [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Die Speicherung dieses Wallet-Eintrags autorisieren |
+| `--tenant-ref` | string | — | Mandant, an den die versiegelte Delivery adressiert sein muss |
+
+**Beispiele**
+
+```bash
+stackkit wallet-item import --tenant-ref "$TENANT" --owner-approve < envelope.json
+```
+
+## stackkit wallet-item status
+
+Wallet-Einträge in der lokalen Verwahrung nach Referenz und Version auflisten.
+
+Jeden Wallet-Eintrag in der lokalen Verwahrung nach Mandant, Eintrags-Referenz und Versionen auflisten sowie angeben, ob er nach einem Detach rotiert werden muss. Es wird kein Wert gelesen.
+
+```bash
+stackkit wallet-item status [flags]
+```

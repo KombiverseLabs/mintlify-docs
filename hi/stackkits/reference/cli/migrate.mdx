@@ -11,6 +11,8 @@ StackSpec v1 को वर्गीकृत करें और उसकी �
 
 `--complete-with` एक पूरा स्पष्ट StackSpec v2 स्वीकार करता है, कभी आंशिक ओवरले नहीं। यह निर्धारक लेगेसी Site, नोड और हार्डवेयर बाइंडिंग का मिलान करता है, फिर एम्बेडेड शासित Architecture v2 प्राधिकार उपयोग करता है। पूरे हुए परिणाम में स्पष्ट कैनोनिकल उम्मीदवार और उसका ResolvedPlan हैश होता है। जनरेटर की पात्रता CUE वैधता से अलग रिपोर्ट होती है और ResolvedPlan की तैयारी का अनुसरण करती है।
 
+`--inventory` वह देखा गया Inventory देता है जिसके विरुद्ध पूर्णता रिज़ॉल्व होती है। जिस Kit का प्लान नोड तथ्यों से बँधता है (Basement अपने LAN listener का node-site पता बाँधता है) वह इसके बिना रिज़ॉल्व नहीं हो सकता, और पूर्णता उन्हें कभी गढ़ती नहीं।
+
 `--spec-output` पूरे हुए सटीक कैनोनिकल StackSpec v2 को निर्धारक JSON के रूप में लिखता है। यह केवल `--complete-with` के साथ मान्य है, कभी इन-प्लेस पुनर्लेखन पर डिफ़ॉल्ट नहीं होता और मौजूदा कैनोनिकल लक्ष्य को बदलने से मना करता है; कैनोनिकल प्रतिस्थापन के लिए स्पष्ट CAS-अधिकृत StackSpec ऑथरिंग प्रवाह चाहिए।
 
 shadow-resolution के लिए तैयार परिणाम सफलतापूर्वक समाप्त होता है। अवरुद्ध परिणाम भी मशीन-पठनीय आउटपुट के रूप में जारी होता है, फिर कमांड विफलता के साथ समाप्त होती है। Context केवल लेगेसी स्थान और Pi हार्डवेयर को मैप करता है; यह कभी Kit नहीं चुनता।
@@ -24,6 +26,7 @@ stackkit migrate [v1-spec-file] [flags]
 | `--complete-with` | string | — | एम्बेडेड प्राधिकार के साथ मिलान और रिज़ॉल्व करने के लिए पूरा स्पष्ट StackSpec v2 उम्मीदवार (कभी आंशिक ओवरले नहीं) |
 | `--force` | bool | — | मौजूदा माइग्रेशन परिणाम आउटपुट को परमाणु रूप से बदलें; कैनोनिकल StackSpec आउटपुट के लिए नया पथ चाहिए |
 | `--format` | string | `json` | मशीन-पठनीय आउटपुट फ़ॉर्मैट: json या yaml |
+| `--inventory` | string | — | वह देखा गया Inventory दस्तावेज़ जिसके विरुद्ध पूर्णता रिज़ॉल्व होती है (`--complete-with` आवश्यक) |
 | `--output, -o` | string | — | माइग्रेशन परिणाम को stdout के बजाय वर्किंग डायरेक्टरी के नीचे लिखें |
 | `--spec-output` | string | — | पूरे हुए कैनोनिकल StackSpec v2 को निर्धारक JSON के रूप में वर्किंग डायरेक्टरी के नीचे लिखें (`--complete-with` आवश्यक) |
 | `--target-kit` | string | — | प्राधिकार द्वारा समर्थित स्पष्ट लक्ष्य KitProfile (कभी context से अनुमानित नहीं) |
@@ -39,6 +42,9 @@ stackkit migrate legacy.yaml --target-kit cloud-kit
 
 # Reconcile with a full StackSpec v2 and write the completed canonical spec
 stackkit migrate legacy.yaml --target-kit basement-kit --complete-with explicit-v2.yaml --spec-output stack-spec.v2.json
+
+# Resolve the completion against an observed Inventory
+stackkit migrate legacy.yaml --target-kit basement-kit --complete-with explicit-v2.yaml --inventory inventory.yaml
 
 # Print the report as YAML
 stackkit migrate legacy.yaml --format yaml
