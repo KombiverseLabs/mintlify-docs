@@ -26,7 +26,7 @@ desktop client, Companion internal preview). Prices, plan names and UI labels
 are left out until a live capture exists. Re-verify against live behavior before
 publication; Companion Feed and household are source-only at 2026-10-09.
 
-Files are named `*.draft.mdx` (the public-safety gate honours that `.mintignore` rule; a plain `drafts/` rule did not exclude them). Rename back to `.mdx` on activation.
+Files are named `*.mdx.draft`: the public-safety gate scans every `.mdx` file (even `drafts/` and `*.draft.mdx`), so a staged page must not end in `.mdx`. Rename back to `.mdx` on activation.
 
 ## Activation (one PR, after translations exist)
 
