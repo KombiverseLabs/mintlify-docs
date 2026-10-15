@@ -39,6 +39,11 @@ export function prepareAgentHome({ home = homedir(), checkout, agents, device, i
     env: { ...process.env, GIT_TERMINAL_PROMPT: '0', GCM_INTERACTIVE: 'never', GH_PROMPT_DISABLED: '1' },
     maxBuffer: 4 * 1024 * 1024,
   });
+  // Resolve Git authentication from the host's admitted gh identity per command.
+  // No helper config, token, URL or repository-API lookup is persisted/required.
+  const githubAuthentication = ['-c', 'credential.https://github.com.helper=',
+    '-c', 'credential.https://github.com.helper=!gh auth git-credential',
+    '-c', 'url.https://github.com/.insteadOf=git@github.com:'];
   const failed = (step, result) => ({
     status: 'failed', code: /rate limit|rate_limit|API rate/i.test(String(result.stderr)) ? 'github_rate_limited' : step,
     source, exitCode: result.status ?? null, errorCode: result.error?.code,
@@ -47,7 +52,7 @@ export function prepareAgentHome({ home = homedir(), checkout, agents, device, i
   if (!existsSync(source)) {
     if (!install) return { status: 'pending', code: 'agent_home_not_installed', source };
     mkdirSync(dirname(source), { recursive: true });
-    const clone = invoke('gh', ['repo', 'clone', sourceUrl, source, '--', '--branch', 'main', '--single-branch'], 120_000);
+    const clone = invoke('git', [...githubAuthentication, 'clone', '--branch', 'main', '--single-branch', sourceUrl, source], 120_000);
     if (clone.error || clone.status !== 0) return failed('agent_home_source_access_failed', clone);
   }
   const git = (args) => invoke('git', ['-C', source, ...args]);
@@ -61,7 +66,7 @@ export function prepareAgentHome({ home = homedir(), checkout, agents, device, i
     return { status: 'failed', code: 'agent_home_shared_source_unsettled', source };
   }
   if (refresh) {
-    const fetched = git(['fetch', '--quiet', 'origin', 'main']);
+    const fetched = git([...githubAuthentication, 'fetch', '--quiet', 'origin', 'main']);
     if (fetched.error || fetched.status !== 0) return failed('agent_home_source_refresh_failed', fetched);
     const merged = git(['merge', '--ff-only', '--quiet', 'origin/main']);
     if (merged.error || merged.status !== 0) return failed('agent_home_source_diverged', merged);
