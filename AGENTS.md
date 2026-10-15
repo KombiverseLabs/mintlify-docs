@@ -44,14 +44,20 @@ Binding; `kombify-fast-development` holds the detail.
   `standards/rules.md` in the private repository `Soulcreek/agent-home`
   (credentials, harness permissions, cost, databases, working with the
   owner). They hold what no repository holds; engineering rules stay here.
-- Where the host cannot reach that repository, attach it through the
-  session's repository access or ask the project's orchestrator to; until
-  then follow this file and say once that the owner rules were not read.
+- The SessionStart hook prints them (`KOMBIFY_OWNER_RULES`) and
+  fast-forwards this device's Agent Home checkout; any other host runs
+  `node scripts/kombify-bootstrap.mjs rules`, which reads them from the local
+  checkout, from GitHub through `gh`, or from the last cached copy. Only when
+  all three fail, follow this file and say once that the owner rules were
+  not read.
 
 ## Planning System Policy
 
-- GitHub Projects owns cross-repo priorities, `ROADMAP.md` milestones, Beads
-  executable work.
+- Beads epics (with `plan:` and `wave:` labels) own cross-repo priorities,
+  phase gates, ownership and blockers; each product `ROADMAP.md` owns its
+  milestones; Beads owns executable work. GitHub Projects is read-only
+  history: no new items (owner decision 2026-10-15,
+  `GITHUB-PROJECTS-PLANNING-STANDARD.md`).
 
 ## Beads Remote Write Policy
 
