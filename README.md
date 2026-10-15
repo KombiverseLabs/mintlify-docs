@@ -12,7 +12,7 @@ preview contract, and the identity concept needed to use them safely.
 This repository owns the published MDX tree, Mintlify navigation, positive
 publication allowlist, and the local and live gates for `docs.kombify.io`.
 
-The public surface has five tabs:
+The public surface has six tabs:
 
 | Tab | Content |
 | --- | --- |
@@ -21,6 +21,7 @@ The public surface has five tabs:
 | Techstack | Preview product boundary, operating modes, availability, and the release-bound API and `techstack api` CLI reference. |
 | SpeechKit | Released Windows beta, voice modes, and Go framework guidance. |
 | Identity & Access | The small identity boundary relevant to StackKits. |
+| Changelog | Customer-facing product updates. |
 
 Products are documented here as their public artifacts ship. Internal
 infrastructure and operator runbooks stay out of the public docs. Simulate is a
@@ -107,6 +108,9 @@ after each release. A locale is advertised only after a competent-speaker review
 | Delivery | Mintlify hosting at `docs.kombify.io` |
 | Analytics | PostHog via `e.kombify.io`, session recording disabled |
 
+
+## Repository Context
+
 ```mermaid
 flowchart LR
   SK["Released kombify-StackKits"] --> Docs["mintlify-docs"]
@@ -117,13 +121,19 @@ flowchart LR
   Site --> PH["PostHog analytics"]
 ```
 
-## Local Workflow
+Upstream truth comes from the public StackKits and SpeechKit releases and the
+published Techstack release; this repository publishes it and owns no product
+code.
+
+## Quick Start
 
 ```powershell
 mise install
 mise run check
 mise run local:e2e
 ```
+
+## Common Commands
 
 | Command | Purpose |
 | --- | --- |
@@ -139,7 +149,7 @@ mise run local:e2e
 | `scripts/check-code-example-relevance.ps1` | Allow executable and structured examples only on pages with a topic-specific workflow or configuration. |
 | `mise run local:e2e` | Prove allowed and forbidden routes over real local HTTP. |
 | `mise run remote:public-safety` | Prove the deployed route and projection matrix. |
-| `mise run delivery:wait-exact-live` | Wait for a successful `docs.kombify.io` deployment at exact `SOURCE_SHA`. |
+| `mise run postlive:wait-exact-live` | Wait for a successful `docs.kombify.io` deployment at exact `SOURCE_SHA`. |
 
 The local gate runs `mint validate` and the repository-owned route checks. It
 must pass before publication.
@@ -156,8 +166,22 @@ must pass before publication.
 - Workspace standards define documentation and delivery policy; they are not
   copied into public pages.
 
-See [STATUS.md](STATUS.md), [ROADMAP.md](ROADMAP.md), and
-[CONTRIBUTING.md](CONTRIBUTING.md) for current state and contribution rules.
+## Standards
+
+- [DOCUMENTATION-STANDARD.md](../DOCUMENTATION-STANDARD.md)
+- [LANGUAGE-LOCALIZATION-STANDARD.md](../LANGUAGE-LOCALIZATION-STANDARD.md)
+- [REPO-FILE-SCHEMA.md](../kombify-Core/standards/REPO-FILE-SCHEMA.md)
+- [OPENWIKI-STANDARD.md](../kombify-Core/standards/OPENWIKI-STANDARD.md)
+
+## Documentation
+
+| Document | Content |
+| --- | --- |
+| [STATUS.md](STATUS.md) | What is published and verified now |
+| [ROADMAP.md](ROADMAP.md) | Documentation milestones |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution rules |
+| [AGENTS.md](AGENTS.md) | Agent instructions |
+| [openwiki/](openwiki/) | Generated, non-authoritative agent documentation |
 
 ## Issue Tracking
 

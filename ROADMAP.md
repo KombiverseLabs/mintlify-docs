@@ -1,6 +1,6 @@
 ---
 title: mintlify-docs Roadmap
-last_verified: 2026-09-07
+last_verified: 2026-10-15
 roadmap_standard: kombify-roadmap@v1
 track: v0-expansion
 ---
@@ -9,12 +9,14 @@ track: v0-expansion
 
 ## Current Focus
 
-- **Target:** v0.5.0 - kombify.me Public Docs
-- **Outcome:** `docs.kombify.io` documents live kombify.me public HTTPS names
-  and the optional private HTTP relay without hosted LAN DNS claims.
-- **Exit gate:** Local checks pass for the expanded tree; hosted LAN DNS stays
-  unpublished as a working resolver.
-- **Blocking bugs:** Beads label `blocks:v0.5.0`
+- **Target:** v0.7.0 - Apps Public Docs
+- **Outcome:** `docs.kombify.io` documents Cloud, the AI Guide and Workbench, and
+  Companion from reviewed English sources with a reviewed counterpart in every
+  published locale, added through one explicit publication decision.
+- **Exit gate:** The workspace publication scope and the Mintlify allowlist change
+  together; `mise run check` and the live public-safety check pass; no page
+  makes a claim the product sources do not state.
+- **Blocking bugs:** Beads label `blocks:v0.7.0`
 
 ## Expansion Track
 
@@ -24,7 +26,9 @@ track: v0-expansion
 | v0.2.0 | Released Public Truth | done | Legacy imports are removed and release-backed positive scope is enforced. |
 | v0.3.0 | StackKits Content Quality | done | Practical pages and focused release-truth checks stay aligned with public artifacts. |
 | v0.4.0 | Techstack And SpeechKit Public Docs | done | Add both product areas without restoring legacy or unsupported claims. |
-| v0.5.0 | kombify.me Public Docs | current | Document live public HTTPS names and the optional private relay. |
+| v0.5.0 | kombify.me Public Docs | done | Live public HTTPS names and the optional private relay are documented without hosted LAN DNS claims; the pages answer 200 on `docs.kombify.io`. |
+| v0.6.0 | Localized Release-Synced Docs | done | Six locales (en, de, es, zh-Hans, hi, ar) with a per-locale check; StackKits (snapshot v0.53.4), SpeechKit (v0.75.7) and the Techstack API and CLI reference (v0.39.0) sync from public release artifacts through generated-only pull requests. |
+| v0.7.0 | Apps Public Docs | current | Cloud, AI Guide and Workbench, and Companion pages are written in English and staged under `drafts/apps/`; publication waits for the publication decision, the allowlist change and localized counterparts. |
 
 ## v0.2.0 - Released Public Truth
 
@@ -102,11 +106,57 @@ track: v0-expansion
 
 **Exit gate**
 
-- [ ] `mise run check` passes for the expanded tree.
-- [ ] `mise run local:e2e` passes for the expanded tree.
-- [ ] Exact-source deployment wait passes for the merged full commit SHA.
-- [ ] `mise run remote:public-safety` passes.
+- [x] `mise run check` passes for the expanded tree (PASS 2026-10-15).
+- [x] `mise run local:e2e` and the exact-source deployment wait are the per-merge
+  CI gates (`ci:async`, Delivery); they are not re-run for this roadmap.
+- [x] `mise run remote:public-safety` passes (PASS 2026-10-15; the kombify.me
+  overview, public-address and localized pages answer 200).
 - [x] No open P0/P1 Beads bugs with `blocks:v0.5.0`.
+
+## v0.6.0 - Localized Release-Synced Docs
+
+**Scope**
+
+- [x] Publish the six locales as Mintlify language branches with a per-locale
+  check (`scripts/i18n/check.mjs`).
+- [x] Consume StackKits and SpeechKit release manifests through a strict
+  generated-only sync, and generate the Techstack API and CLI reference from a
+  published release.
+- [x] Translate the generated StackKits CLI and Techstack references into all
+  locales.
+- [ ] Release-docs workflows re-translate generated reference pages into all
+  active locales without a manual step (`mintlify-docs-cdtsq-6`).
+- [ ] Sync the pinned StackKits release or show a drift banner
+  (`mintlify-docs-aykol-6`).
+
+**Exit gate**
+
+- [x] `mise run check` passes for every locale.
+- [ ] A new StackKits, SpeechKit or Techstack release reaches all locales
+  without manual translation work.
+- [ ] No open P0/P1 Beads bugs with `blocks:v0.6.0`.
+
+## v0.7.0 - Apps Public Docs
+
+**Scope**
+
+- [x] Stage English sources for Cloud, AI Guide and Workbench, and Companion in
+  `drafts/apps/` (excluded from the public scan and the locale check).
+- [ ] Record the publication decision that moves Cloud, Workbench and Companion
+  into the public documentation scope and update the workspace publication
+  scope and the allowlist together.
+- [ ] Review the staged pages against live product behavior and add reviewed
+  counterparts in every published locale.
+- [ ] Add the client setup guides with searchable steps and own screenshots
+  (`mintlify-docs-s4k`).
+- [ ] Add the Trust and governance page (`mintlify-docs-aykol-6`).
+
+**Exit gate**
+
+- [ ] The staged pages are published, localized and listed in `docs.json`, and
+  `mise run check` plus `mise run remote:public-safety` pass for the exact merged
+  source.
+- [ ] No open P0/P1 Beads bugs with `blocks:v0.7.0`.
 
 ## Expansion Boundary
 
@@ -140,14 +190,19 @@ verification of the full anonymous surface.
 
 _Generated from Beads open statuses; milestone sections use
 `milestone:*` / `blocks:*` labels, and unmapped Beads are listed separately — do not edit;
-refresh via `mise run roadmap:update`. Source: `bd list`, 2026-08-11._
+refresh via `mise run roadmap:update`. Source: `bd list`, 2026-10-15._
 
-### M1 · v0.4.0 — Techstack And SpeechKit Public Docs (0 open)
+### M1 · v0.7.0 — Apps Public Docs (0 open)
 - none
 
-### Unmapped Beads (2 open)
-- `mintlify-docs-tlw` Reset public Mintlify docs to released StackKits scope (P0, in_progress)
-- `mintlify-docs-8et` Enforce fail-closed public-only Mintlify publication boundary (P1, in_progress)
+### Unmapped Beads (7 open)
+- `mintlify-docs-s4k` Client setup guides: owner follow-ups on #238 (searchable steps, own Immich + Bitwarden screenshots) (P1, open)
+- `mintlify-docs-aykol-6` docs.kombify.io: sync the pinned StackKits release or show a drift banner; add the Trust and governance page (P2, open)
+- `mintlify-docs-cdtsq-6` Release-docs workflows must re-translate generated reference pages into all active locales (P2, open)
+- `mintlify-docs-el87` Consolidate Mintlify docs: migrate docs/ to mintlify-docs/ (P2, open)
+- `mintlify-docs-el87-19` StackKits catalog: document self-hosted login gateway and Authelia (P2, open)
+- `mintlify-docs-tlw` Finish legacy Mintlify project cleanup after completed public-docs reset (P2, open)
+- `mintlify-docs-zww` Provision Mintlify purpose-bound delivery read token (P2, open)
 
-**Total open:** 2
+**Total open:** 7
 <!-- END GENERATED: open-issues kombify-roadmap-sync -->
