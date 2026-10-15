@@ -1,21 +1,20 @@
 # Kombify task context
 
-Follow the current checkout's `AGENTS.md`. This compact startup context replaces
-Beads' generic workflow and bulk memory dump; it is not another policy source.
+Follow this checkout's AGENTS.md. Cloudflare is the operational Beads authority
+(owner decision 2026-10-08); Dolt is read-only comparison/performance data.
 
-- Inspect only the task-relevant issue: `bd show <id>`, `bd ready`, or
-  `bd search <term>` (it includes closed issues; add `--status open` for live
-  work). Search historical knowledge with `bd memories <keyword>` when useful;
-  verify old claims against current source and tracker state.
-- GitHub Projects owns portfolio decisions; repository Beads owns executable work.
-- Resolve the workspace root and manifest repository ID before a write. Run all
-  mutations through `mise --cd <workspace-root> run beads:write --repo <id> --
-  <mutation>`. Require `BEADS_REMOTE_WRITE_OK` before claiming persistence.
-- If publication fails, preserve the local mutation and use `beads:publish`;
-  never repeat the mutation. Do not invoke direct Dolt pushes as a separate
-  session-close ritual.
-- Run the affected gate, preserve unrelated work, and follow `AGENTS.md` Git
-  And Completion for the authorized PR/merge workflow.
-- If the remote tracker or required checkout is unavailable, finish independent
-  authorized work and report the exact missing step. Do not initialize a second
-  tracker or claim an offline export is remotely persisted.
+- On a new host or clone run `node scripts/beads-cloudflare-access.mjs` and
+  require `BEADS_CLOUDFLARE_ACCESS_OK`. Access uses the host's GitHub identity or
+  approved CI OIDC; no manual Cloudflare key copying. Install the pinned native
+  Cloudflare-capable bd with `node scripts/beads-session-tools.mjs`.
+- Read focused tasks with `bd show <id>`, `bd ready`, `bd search <term>` or
+  `bd memories <keyword>`. GitHub Projects owns cross-repo priorities.
+- Mutate only through `mise --cd <workspace-root> run beads:write --repo
+  mintlify-docs -- <mutation>`. Require `BEADS_REMOTE_WRITE_OK ...
+  tracker=cloudflare` after independent remote readback.
+- An interrupted write may already have committed. Preserve its acknowledged
+  IDs and inspect remote state; never replay an uncertain mutation.
+- Never fall back to Dolt or `.beads/issues.jsonl`, initialize another tracker,
+  or repair Cloudflare from a stale Dolt comparison snapshot.
+- Follow the [Beads Cloudflare Standard](https://github.com/KombiverseLabs/kombify-workspace/blob/main/BEADS-REMOTE-WRITE-STANDARD.md).
+  Missing access or a failed operation remains an explicit blocker.
