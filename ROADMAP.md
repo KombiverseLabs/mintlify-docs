@@ -20,17 +20,24 @@ track: v0-expansion
 
 ## Expansion Track
 
-| Version | Stage | State | Outcome |
-| --- | --- | --- | --- |
-| v0.1.0 | Mintlify Starter | done | Initial Mintlify site and StackKits navigation. |
-| v0.2.0 | Released Public Truth | done | Legacy imports are removed and release-backed positive scope is enforced. |
-| v0.3.0 | StackKits Content Quality | done | Practical pages and focused release-truth checks stay aligned with public artifacts. |
-| v0.4.0 | Techstack And SpeechKit Public Docs | done | Add both product areas without restoring legacy or unsupported claims. |
-| v0.5.0 | kombify.me Public Docs | done | Live public HTTPS names and the optional private relay are documented without hosted LAN DNS claims; the pages answer 200 on `docs.kombify.io`. |
-| v0.6.0 | Localized Release-Synced Docs | done | Six locales (en, de, es, zh-Hans, hi, ar) with a per-locale check; StackKits (snapshot v0.53.4), SpeechKit (v0.75.7) and the Techstack API and CLI reference (v0.39.0) sync from public release artifacts through generated-only pull requests. |
-| v0.7.0 | Apps Public Docs | current | Cloud, AI Guide and Workbench, and Companion pages are written in English and staged under `drafts/apps/`; publication waits for the publication decision, the allowlist change and localized counterparts. |
+| Version | Stage | State | Central | Epic | Outcome |
+|---|---|---|---|---|---|
+| v0.1.0 | Mintlify Starter | done | C3 | `mintlify-docs-ffd` | Initial Mintlify site and StackKits navigation. |
+| v0.2.0 | Released Public Truth | done | C3 | `mintlify-docs-hky` | Legacy imports are removed and release-backed positive scope is enforced. |
+| v0.3.0 | StackKits Content Quality | done | C3 | `mintlify-docs-pd5` | Practical pages and focused release-truth checks stay aligned with public artifacts. |
+| v0.4.0 | Techstack And SpeechKit Public Docs | done | C3 | `mintlify-docs-f8d` | Add both product areas without restoring legacy or unsupported claims. |
+| v0.5.0 | kombify.me Public Docs | done | C3 | `mintlify-docs-a7u` | Live public HTTPS names and the optional private relay are documented without hosted LAN DNS claims; the pages answer 200 on `docs.kombify.io`. |
+| v0.6.0 | Localized Release-Synced Docs | done | C3 | `mintlify-docs-pa6` | Six locales (en, de, es, zh-Hans, hi, ar) with a per-locale check; StackKits (snapshot v0.53.4), SpeechKit (v0.75.7) and the Techstack API and CLI reference (v0.39.0) sync from public release artifacts through generated-only pull requests. |
+| v0.7.0 | Apps Public Docs | current | C5 | `mintlify-docs-w78` | Cloud, AI Guide and Workbench, and Companion pages are written in English and staged under `drafts/apps/`; publication waits for the publication decision, the allowlist change and localized counterparts. |
+| v0.8.0 | Release-Synced Localization and Delivery Automation | planned | C3 | `mintlify-docs-d3v` | A new StackKits, SpeechKit or Techstack release reaches all six locales through generated-only pull requests with no manual translation, and the Mintlify delivery read token and legacy project cleanup are finished. |
+| v0.9.0 | Docs Consolidation and StackKits Catalog Completeness | planned | C3 | `mintlify-docs-dxk` | All product documentation lives in mintlify-docs with no docs/ remnants in product repositories, and every StackKits catalog application the public release ships is documented. |
+| v0.10.0 | Public API and MCP Reference | planned | C6 | `mintlify-docs-9d3` | The public Gateway API and the customer MCP endpoint have generated, release-backed reference pages in every locale, and the identity and entitlement concepts match the shipped Auth0 and Gateway behavior. |
+| v0.11.0 | Install and Upgrade Paths for Every Published Product | planned | C5 | `mintlify-docs-07w` | Each published product has release-backed install, upgrade and rollback pages and no page claims more than the published release does. |
+| v0.12.0 | Public Beta Docs Gate | planned | C7 | `mintlify-docs-otl` | Privacy and security overviews match the legal pages, public pages are accessible and mobile-ready, and docs analytics follow the privacy policy before the public beta gate. |
 
 ## v0.2.0 - Released Public Truth
+
+**Central:** C3 · **Beads epic:** `mintlify-docs-hky`
 
 **Scope**
 
@@ -52,6 +59,8 @@ track: v0-expansion
 - [x] No open P0/P1 Beads bugs with `blocks:v0.2.0`.
 
 ## v0.3.0 - StackKits Content Quality
+
+**Central:** C3 · **Beads epic:** `mintlify-docs-pd5`
 
 **Scope**
 
@@ -76,6 +85,8 @@ track: v0-expansion
 
 ## v0.4.0 - Techstack And SpeechKit Public Docs
 
+**Central:** C3 · **Beads epic:** `mintlify-docs-f8d`
+
 **Scope**
 
 - [x] Add Techstack overview, operating-mode, and availability pages.
@@ -96,6 +107,8 @@ track: v0-expansion
 
 ## v0.5.0 - kombify.me Public Docs
 
+**Central:** C3 · **Beads epic:** `mintlify-docs-a7u`
+
 **Scope**
 
 - [x] Add kombify.me overview, public-address, and private-target pages.
@@ -115,6 +128,8 @@ track: v0-expansion
 
 ## v0.6.0 - Localized Release-Synced Docs
 
+**Central:** C3 · **Beads epic:** `mintlify-docs-pa6`
+
 **Scope**
 
 - [x] Publish the six locales as Mintlify language branches with a per-locale
@@ -124,19 +139,16 @@ track: v0-expansion
   published release.
 - [x] Translate the generated StackKits CLI and Techstack references into all
   locales.
-- [ ] Release-docs workflows re-translate generated reference pages into all
-  active locales without a manual step (`mintlify-docs-cdtsq-6`).
-- [ ] Sync the pinned StackKits release or show a drift banner
-  (`mintlify-docs-aykol-6`).
+- [x] Carry the remaining automation items (re-translation without a manual step, drift banner) into v0.8.0 and v0.7.0.
 
 **Exit gate**
 
 - [x] `mise run check` passes for every locale.
-- [ ] A new StackKits, SpeechKit or Techstack release reaches all locales
-  without manual translation work.
-- [ ] No open P0/P1 Beads bugs with `blocks:v0.6.0`.
+- [x] No open P0/P1 Beads bugs with `blocks:v0.6.0`.
 
 ## v0.7.0 - Apps Public Docs
+
+**Central:** C5 · **Beads epic:** `mintlify-docs-w78`
 
 **Scope**
 
@@ -158,6 +170,86 @@ track: v0-expansion
   source.
 - [ ] No open P0/P1 Beads bugs with `blocks:v0.7.0`.
 
+## v0.8.0 - Release-Synced Localization and Delivery Automation
+
+**State:** planned · **Central:** C3 · **Beads epic:** `mintlify-docs-d3v`
+
+**Scope**
+
+- [ ] Release-docs workflows re-translate generated reference pages into all active locales without a manual step.
+- [ ] Provision the Mintlify purpose-bound delivery read token for exact-source deployment evidence.
+- [ ] Finish the legacy Mintlify project cleanup after the public-docs reset.
+
+**Exit gate**
+
+- [ ] A new product release reaches every locale without manual translation work.
+- [ ] Exact-source deployment wait uses the purpose-bound read token.
+- [ ] No open P0/P1 Beads bugs labelled `blocks:v0.8.0`.
+
+## v0.9.0 - Docs Consolidation and StackKits Catalog Completeness
+
+**State:** planned · **Central:** C3 · **Beads epic:** `mintlify-docs-dxk`
+
+**Scope**
+
+- [ ] Migrate remaining docs/ content into mintlify-docs and retire the duplicates.
+- [ ] Document the self-hosted login gateway and Authelia, then the rest of the catalog as releases ship.
+- [ ] Re-verify carried known issues against the current StackKits snapshot.
+
+**Exit gate**
+
+- [ ] No product repository keeps a second public documentation tree.
+- [ ] Every catalog entry in the synced release has a page or an explicit exclusion.
+- [ ] No open P0/P1 Beads bugs labelled `blocks:v0.9.0`.
+
+## v0.10.0 - Public API and MCP Reference
+
+**State:** planned · **Central:** C6 · **Beads epic:** `mintlify-docs-9d3`
+
+**Scope**
+
+- [ ] Generated Gateway API reference.
+- [ ] Customer MCP documentation.
+- [ ] Identity, entitlement and billing concepts that match shipped behavior.
+
+**Exit gate**
+
+- [ ] The generated references rebuild from a published contract in CI.
+- [ ] Every page passes the public-safety allowlist and the locale check.
+- [ ] No open P0/P1 Beads bugs labelled `blocks:v0.10.0`.
+
+## v0.11.0 - Install and Upgrade Paths for Every Published Product
+
+**State:** planned · **Central:** C5 · **Beads epic:** `mintlify-docs-07w`
+
+**Scope**
+
+- [ ] Install, upgrade and rollback per product.
+- [ ] Platform pages for SpeechKit macOS and Android.
+- [ ] Recipes for pages that are descriptive today.
+
+**Exit gate**
+
+- [ ] Every command on the pages is bound to the synced release snapshot.
+- [ ] The release-truth gate covers each new page.
+- [ ] No open P0/P1 Beads bugs labelled `blocks:v0.11.0`.
+
+## v0.12.0 - Public Beta Docs Gate
+
+**State:** planned · **Central:** C7 · **Beads epic:** `mintlify-docs-otl`
+
+**Scope**
+
+- [ ] Security and privacy overview.
+- [ ] Accessibility and mobile checks.
+- [ ] Analytics review.
+
+**Exit gate**
+
+- [ ] Legal review finds no inconsistent claim.
+- [ ] The accessibility check passes for every locale.
+- [ ] No open P0/P1 Beads bugs labelled `blocks:v0.12.0`.
+
 ## Expansion Boundary
 
 Additional products, APIs, comparisons, integrations, or architecture material
@@ -167,17 +259,46 @@ change. Repository existence or historical documentation is insufficient.
 
 ## V1 Definition
 
-Version 1 requires a complete customer-oriented information architecture,
-release-backed installation and upgrade paths for every published product,
-generated API references for public contracts, and exact-source local and live
-verification of the full anonymous surface.
+Committed at v1.0.0: a complete customer-oriented information architecture,
+release-backed installation, upgrade and rollback paths for every published
+product, generated API references for the public contracts, all six locales
+(en, de, es, zh-Hans, hi, ar) reviewed, and exact-source local and live
+verification of the full anonymous surface. Additional products enter only
+through the Expansion Boundary.
 
 ## Later
 
-- Localized customer documentation after the English source and review workflow
-  are stable.
-- Additional products and API references as their public artifacts and support
-  boundaries ship.
+Post-0.x milestones. Each is a Beads epic like the table above; nothing is planned outside a milestone.
+
+| Version | Stage | State | Central | Epic | Outcome |
+|---|---|---|---|---|---|
+| **v1.0.0** | Complete Customer Documentation | planned | C8 | `mintlify-docs-6hw` | The full customer information architecture, release-backed install and upgrade paths, generated API references and exact-source local and live verification of the whole anonymous surface hold in all six locales. |
+| **v1.1.0** | Additional Products and References | planned | C8 | `mintlify-docs-0j2` | Each additional product whose public artifact ships (Paperwork, Automations, Me, Sites, Simulate) is documented after an explicit publication decision, source audit and allowlist change. |
+
+### v1.0.0 - Complete Customer Documentation
+
+**State:** planned · **Central:** C8 · **Beads epic:** `mintlify-docs-6hw`
+
+**Scope**
+
+- [ ] Readiness review and exact-source verification of the full anonymous surface.
+
+**Exit gate**
+
+- [ ] Every V1 definition item has exact-source evidence.
+- [ ] All six locales pass the per-locale check.
+
+### v1.1.0 - Additional Products and References
+
+**State:** planned · **Central:** C8 · **Beads epic:** `mintlify-docs-0j2`
+
+**Scope**
+
+- [ ] Decision-gated documentation for additional products.
+
+**Exit gate**
+
+- [ ] Each added product passes the public-safety allowlist and release-truth checks.
 
 ## Not Planned
 
