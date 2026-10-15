@@ -208,8 +208,15 @@ files with `scripts/repo-context-sync.mjs --repo mintlify-docs --beads-only`.
 ## Repository bootstrap
 
 `scripts/kombify-bootstrap.mjs` (workspace `SECRETS-ACCESS-STANDARD.md`
-§6c) sets up private Go modules, GitHub Packages and Doppler access in any
-environment. Install with `node scripts/kombify-bootstrap.mjs --install`; run
+§6c) sets up private Go modules, GitHub Packages, Agent Home and Doppler access.
+`node scripts/kombify-bootstrap.mjs --install` obtains or refreshes the private
+Agent Home source, preserves the selected agents, installs through its own
+installer and runs doctor. For context only use `node scripts/kombify-bootstrap.mjs context`;
+`context --check` reports the installed receipt without changing it. A fresh
+profile may select its target with `--home` and agents with `--agents`.
+Readiness is per capability; pending on-demand access is not verified access.
+Use `--require-go` when the selected task needs Go; other tasks keep working.
+Run
 a command with this repository's Doppler secrets as
 `node scripts/kombify-bootstrap.mjs run -- <cmd>`. Tokens are fetched on
 demand: a missing `NODE_AUTH_TOKEN` or `DOPPLER_TOKEN` is never a blocker.
