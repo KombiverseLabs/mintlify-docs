@@ -29,6 +29,8 @@
 //   node scripts/kombify-bootstrap.mjs run -- <cmd...>   # cmd with the repo's Doppler secrets
 //   node scripts/kombify-bootstrap.mjs packages -- <cmd...>  # cmd with NODE_AUTH_TOKEN
 //   node scripts/kombify-bootstrap.mjs rules     # the owner's rules (also printed by --hook)
+//   node scripts/kombify-bootstrap.mjs context   # obtain/refresh and install Agent Home
+//   node scripts/kombify-bootstrap.mjs context --check  # inspect without installation
 //
 // - Owner rules: `standards/rules.md` of Soulcreek/agent-home, from this
 //   device's Agent Home checkout (fast-forwarded on a clean main), else from
@@ -42,6 +44,7 @@ import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'no
 import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { prepareAgentHome } from './lib/agent-home-bootstrap.mjs';
 
 const SELF = fileURLToPath(import.meta.url);
 export const ROOT = resolve(dirname(SELF), '..');
@@ -239,10 +242,11 @@ async function packagesToken(env, access) {
   return { source: `doppler:${PACKAGES_SECRET.project}/${PACKAGES_SECRET.config}`, token };
 }
 
-function configureGo() {
+function configureGo({ required = false } = {}) {
   const go = spawnSync('go', ['env', '-w', `GOPRIVATE=${PRIVATE_GO}`, `GONOSUMDB=${PRIVATE_GO}`], { encoding: 'utf8' });
-  if (go.error) return null;
-  return go.status === 0 ? null : `go env -w failed: ${go.stderr.trim()}`;
+  console.log(`KOMBIFY_BOOTSTRAP_CAPABILITY ${JSON.stringify({ name: 'go', required, status: go.error ? 'pending' : go.status === 0 ? 'ready' : 'failed', errorCode: go.error?.code })}`);
+  if (go.error) return required ? `Go is required by the selected task (${go.error.code ?? 'unavailable'})` : null;
+  return go.status === 0 || !required ? null : 'go env -w failed for the selected Go task';
 }
 
 function configureNpm(env) {
@@ -279,7 +283,16 @@ export async function main(argv, env = process.env) {
   const cmd = sep >= 0 ? argv.slice(sep + 1) : [];
   const own = sep >= 0 ? argv.slice(0, sep) : argv;
   const scope = resolveScope({ argv: own });
+  const option = (flag) => { const index = own.indexOf(flag); return index >= 0 ? own[index + 1] : undefined; };
+  const personalContext = (install) => prepareAgentHome({
+    home: option('--home'), checkout: option('--agent-home'), agents: option('--agents'), device: option('--device'), install,
+  });
 
+  if (command === 'context') {
+    const context = personalContext(!own.includes('--check'));
+    console.log(`KOMBIFY_BOOTSTRAP_CAPABILITY ${JSON.stringify({ name: 'personal-context', ...context })}`);
+    return context.status === 'ready' ? 0 : 1;
+  }
   if (command === 'run') {
     if (!scope) throw new Error('no Doppler scope: add .kombify/secrets.json (secrets-bootstrap-marker.mjs) or pass --project and --config');
     const access = await resolveDoppler({ env, interactive: process.stdin.isTTY });
@@ -300,7 +313,7 @@ export async function main(argv, env = process.env) {
 
   const hook = own.includes('--hook');
   const gaps = [];
-  const goGap = configureGo();
+  const goGap = configureGo({ required: own.includes('--require-go') });
   if (goGap) gaps.push(`go: ${goGap}`);
   configureNpm(env);
   const access = await resolveDoppler({ env, dispatch: !hook, interactive: !hook && process.stdin.isTTY }).catch((error) => ({ gap: error.message }));
@@ -321,16 +334,20 @@ export async function main(argv, env = process.env) {
       if (status !== 0) gaps.push(`install: exited ${status}`);
     }
   }
+  const context = env.GITHUB_ACTIONS === 'true' ? { status: 'not-required', source: 'github-actions' } : personalContext(own.includes('--install'));
+  console.log(`KOMBIFY_BOOTSTRAP_CAPABILITY ${JSON.stringify({ name: 'personal-context', ...context })}`);
+  if (context.status === 'failed') gaps.push(`personal-context: ${context.code}`);
+  const pending = context.status === 'pending' || access.pending;
   const scopeText = scope ? `${scope.project}/${scope.config}` : 'none';
   const dopplerText = access.source ? `${access.source}${access.pending ? '(on-demand)' : ''}${access.skipped ? '(repository-secrets)' : ''}` : 'missing';
   for (const gap of gaps) console.log(`KOMBIFY_BOOTSTRAP_GAP ${gap}`);
-  if (!gaps.length) console.log(`KOMBIFY_BOOTSTRAP_OK doppler=${dopplerText} scope=${scopeText} goprivate=${PRIVATE_GO}`);
+  if (!gaps.length) console.log(`KOMBIFY_BOOTSTRAP_${pending ? 'PENDING' : 'OK'} doppler=${dopplerText} scope=${scopeText} goprivate=${PRIVATE_GO}`);
   if (hook) {
     const rel = 'scripts/kombify-bootstrap.mjs';
     console.log(`Install: node ${rel} --install. Secrets for a command: node ${rel} run -- <cmd>. Package token for a command: node ${rel} packages -- <cmd>. Tokens are fetched on demand; never report a missing NODE_AUTH_TOKEN or DOPPLER_TOKEN as a blocker.`);
     printOwnerRules();
   }
-  return gaps.length && !hook ? 1 : 0;
+  return (gaps.length || pending) && !hook ? 1 : 0;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
