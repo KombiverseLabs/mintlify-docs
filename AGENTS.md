@@ -25,6 +25,7 @@ Binding; `kombify-fast-development` holds the detail.
 11. Scoped fast completion may use recorded actual behavior observed through direct module/function or affected flow execution, with applicable affected checks. No new permanent automated journey is required for every edit. Broad, heavy provider/device and compatibility acceptance remains `pending-window` until the window orchestrator runs it. Physical-device and real-user validation belongs to owner-controlled Public Beta; record hardware limitations honestly.
 12. Narrow development probes on remote hosts, VMs, emulators or devices are admitted by their effects and isolation, not geography: use owned nonproduction runtime state, existing authorization and cleanup, and no heavy acceptance or provider provisioning. A substitute proves only its declared boundary. Databases are the exception (owner rule 2026-10-09): database work always runs against the live databases, signed in as the shared test identities and never as the owner; no local, fictional or emulated database (local Docker Postgres, PGlite, in-memory); development and tests use managed Postgres, and after the beta a managed mirror or snapshot, never a local copy. Schema migrations and destructive or bulk data changes still go only through the governed migration and Delivery path.
 13. Publish the finished batch once after observed behavior and affected checks. Release reuses applicable evidence with its original source/artifact/environment binding and retains compiled Delivery, artifact validity, sensitive-boundary, authorization, entitlement and custody gates. One bounded exact-revision operational smoke verifies activation; production is not the first functional feedback loop.
+14. Preview-first (owner decision 2026-10-13): gates hang on the release channel, not on each pull request. A change needs locally only build and typecheck of the changed module, then one pull request with auto-merge whose only required check is build plus lint; the session continues without waiting, and the merge deploys to the `preview` channel, where it is tested live with the shared test identities. A broken preview is fixed forward or reverted through the same path. Always on, on every channel: secret scanning and push protection, compilation, the tests of a sensitive boundary (auth, billing, migrations, signing, provider control) when those paths change, fail-closed credential checks at deploys, and preview on the live databases with the shared test identities, never migrating itself (migrations stay backward compatible so stable keeps working). The full gates (complete affected suite, standards and release-preparation checks, signing, receipts) run once per release, when the digest that ran green on `preview` is promoted to `stable`. Detail: `CI-CD-PLATFORM-STANDARD.md` section "Release channels" and skill `kombify-fast-development`.
 <!-- END GENERATED: elastic-development-throughput kombify-throughput-policy-sync -->
 
 <!-- BEGIN GENERATED: planning-policy kombify-agent-policy-sync -->
@@ -35,6 +36,17 @@ Binding; `kombify-fast-development` holds the detail.
 > Run workspace scripts from the workspace root. For a consumer,
 > `session-publish.mjs` takes `--repo <absolute-owning-checkout>` and paths
 > relative to that checkout. References to Start mean the workspace `AGENTS.md`.
+
+## Owner Rules
+
+- Every session, on every host and in every project, reads the owner's
+  cross-project rules before its first action and follows them:
+  `standards/rules.md` in the private repository `Soulcreek/agent-home`
+  (credentials, harness permissions, cost, databases, working with the
+  owner). They hold what no repository holds; engineering rules stay here.
+- Where the host cannot reach that repository, attach it through the
+  session's repository access or ask the project's orchestrator to; until
+  then follow this file and say once that the owner rules were not read.
 
 ## Planning System Policy
 
