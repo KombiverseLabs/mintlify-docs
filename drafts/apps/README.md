@@ -26,6 +26,8 @@ desktop client, Companion internal preview). Prices, plan names and UI labels
 are left out until a live capture exists. Re-verify against live behavior before
 publication; Companion Feed and household are source-only at 2026-10-09.
 
+Files are named `*.draft.mdx` (the public-safety gate honours that `.mintignore` rule; a plain `drafts/` rule did not exclude them). Rename back to `.mdx` on activation.
+
 ## Activation (one PR, after translations exist)
 
 1. Produce `<code>/apps/**` for `de es zh-Hans hi ar` with the localization
