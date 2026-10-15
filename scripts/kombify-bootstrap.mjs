@@ -12,9 +12,10 @@
 //   or doppler.yaml, resolved in this order:
 //     1. DOPPLER_TOKEN already set (dev container from the host, broker);
 //     2. the Doppler CLI signed in on this host (workstation, dev container);
-//     3. Claude cloud session: the GitHub-OIDC broker of kombify-workspace
-//        (cloud-doppler-session.mjs, §6b), fetched with `gh` when absent;
-//     4. GitHub Actions: none; CI uses its repository secrets (§4);
+//     3. GitHub Actions: none; CI uses its repository secrets (§4);
+//     4. any host whose gh acts as an owner identity (Claude cloud session,
+//        a fresh device, Codex, Cursor): the GitHub-OIDC broker of
+//        kombify-workspace (cloud-doppler-session.mjs, §6b), fetched with `gh`;
 //     5. an interactive terminal with the Doppler CLI: `doppler login`.
 // - Package token: NODE_AUTH_TOKEN when set; in a cloud session the broker's
 //   read-only packages grant; elsewhere Doppler kombify-io/prd_gateway
@@ -27,6 +28,11 @@
 //                                                 # (no token at all where packages are vendored, §6d)
 //   node scripts/kombify-bootstrap.mjs run -- <cmd...>   # cmd with the repo's Doppler secrets
 //   node scripts/kombify-bootstrap.mjs packages -- <cmd...>  # cmd with NODE_AUTH_TOKEN
+//   node scripts/kombify-bootstrap.mjs rules     # the owner's rules (also printed by --hook)
+//
+// - Owner rules: `standards/rules.md` of Soulcreek/agent-home, from this
+//   device's Agent Home checkout (fast-forwarded on a clean main), else from
+//   GitHub through gh, else from the last cached copy.
 //   flags: --project P --config C override the repository scope.
 //
 // Prints names, sources and statuses only, never a secret value.
@@ -106,22 +112,83 @@ async function loadBroker() {
   return import(`${pathToFileURL(cached).href}?t=${Date.now()}`);
 }
 
+const AGENT_HOME_REPO = 'Soulcreek/agent-home';
+const OWNER_RULES_PATH = 'standards/rules.md';
+const OWNER_RULES_CACHE = join(homedir(), '.kombify', 'owner-rules.md');
+
+// The owner's cross-project rules (AGENTS.md "Owner Rules") for every session
+// on every host. Keeps this device's Agent Home checkout current (fast-forward
+// only, on a clean main); a checkout off main or with edits is reported, never
+// moved, and the rules then come from GitHub, else from the last cached copy.
+export function ownerRules({ home = homedir(), run = spawnSync } = {}) {
+  const notes = [];
+  let root = '';
+  try { root = JSON.parse(readFileSync(join(home, '.agents', 'agent-home', 'state.json'), 'utf8')).repo_root ?? ''; } catch { /* no local install */ }
+  if (root && existsSync(join(root, '.git'))) {
+    const git = (...args) => run('git', ['-C', root, ...args], { encoding: 'utf8', timeout: 20_000 });
+    const branch = git('rev-parse', '--abbrev-ref', 'HEAD').stdout?.trim();
+    const dirty = git('status', '--porcelain', '--untracked-files=no').stdout?.trim();
+    if (branch === 'main' && !dirty) {
+      const pull = git('pull', '--ff-only', '--quiet');
+      if (pull.status !== 0) notes.push(`agent-home ${root}: fast-forward failed (${String(pull.stderr ?? '').trim().split('\n')[0]})`);
+      const local = join(root, OWNER_RULES_PATH);
+      if (existsSync(local)) return { text: readFileSync(local, 'utf8'), source: `${root}@${git('rev-parse', '--short', 'HEAD').stdout?.trim()}`, notes };
+    } else {
+      notes.push(`agent-home ${root} is ${branch === 'main' ? 'modified' : `on ${branch}`}: save that work to its own branch and return the checkout to main`);
+    }
+  }
+  const fetched = run('gh', ['api', `repos/${AGENT_HOME_REPO}/contents/${OWNER_RULES_PATH}`, '-H', 'Accept: application/vnd.github.raw'], { encoding: 'utf8', timeout: 20_000 });
+  if (fetched.status === 0 && String(fetched.stdout).startsWith('# Owner rules')) {
+    mkdirSync(dirname(OWNER_RULES_CACHE), { recursive: true, mode: 0o700 });
+    writeFileSync(OWNER_RULES_CACHE, fetched.stdout, { mode: 0o600 });
+    return { text: fetched.stdout, source: `github:${AGENT_HOME_REPO}`, notes };
+  }
+  if (existsSync(OWNER_RULES_CACHE)) return { text: readFileSync(OWNER_RULES_CACHE, 'utf8'), source: `cache:${OWNER_RULES_CACHE}`, notes };
+  notes.push(`owner rules unreachable: gh cannot read ${AGENT_HOME_REPO}; follow AGENTS.md and say once that they were not read`);
+  return { text: '', source: 'none', notes };
+}
+
+function printOwnerRules() {
+  const rules = ownerRules();
+  for (const note of rules.notes) console.log(`KOMBIFY_OWNER_RULES_GAP ${note}`);
+  if (rules.text) console.log(`\nKOMBIFY_OWNER_RULES source=${rules.source} (binding for this session):\n\n${rules.text.trim()}\n`);
+}
+
+// GitHub identities the broker workflow accepts (cloud-session-doppler.yml):
+// marcel490 is the Claude cloud proxy, Soulcreek is gh on the owner's devices.
+export const BROKER_ACTORS = ['marcel490', 'Soulcreek'];
+
+function ghLogin() {
+  const result = spawnSync('gh', ['api', 'user', '--jq', '.login'], { encoding: 'utf8' });
+  return result.status === 0 ? result.stdout.trim() : '';
+}
+
 // Finds the Doppler token for this environment. `dispatch: false` (the hook)
 // never starts a broker run; the first command that needs secrets does.
-export async function resolveDoppler({ env = process.env, root = ROOT, dispatch = true, interactive = false, cli = cliToken, broker = loadBroker } = {}) {
+// The GitHub-OIDC broker serves every host whose gh acts as an owner identity,
+// so a fresh device needs only its GitHub sign-in, never a Doppler login.
+export async function resolveDoppler({ env = process.env, root = ROOT, dispatch = true, interactive = false, cli = cliToken, broker = loadBroker, gh = ghLogin } = {}) {
   if (env.DOPPLER_TOKEN) return { source: 'env', token: env.DOPPLER_TOKEN };
   const fromCli = cli(root);
   if (fromCli.token) return { source: 'cli', token: fromCli.token };
-  if (env.CLAUDE_CODE_REMOTE === 'true') {
-    const mod = await broker();
-    const cached = mod.readCache?.();
-    if (cached) return { source: 'cloud-broker', token: cached.token };
-    if (!dispatch) return { source: 'cloud-broker', pending: true };
-    const record = await mod.login();
-    return { source: 'cloud-broker', token: record.token };
-  }
   if (env.GITHUB_ACTIONS === 'true') {
     return { source: 'github-actions', skipped: 'GitHub Actions uses its repository secrets, not Doppler (SECRETS-ACCESS-STANDARD.md §4); pass DOPPLER_TOKEN explicitly for an operator-only job' };
+  }
+  const remote = env.CLAUDE_CODE_REMOTE === 'true';
+  let brokerError = '';
+  if (remote || BROKER_ACTORS.includes(gh())) {
+    const source = remote ? 'cloud-broker' : 'github-broker';
+    try {
+      const mod = await broker();
+      const cached = mod.readCache?.();
+      if (cached) return { source, token: cached.token };
+      if (!dispatch) return { source, pending: true };
+      const record = await mod.login();
+      return { source, token: record.token };
+    } catch (error) {
+      if (remote) throw error;
+      brokerError = `; GitHub broker failed: ${error.message}`;
+    }
   }
   if (interactive && !fromCli.missing) {
     spawnSync('doppler', ['login', '--scope', root], { stdio: 'inherit' });
@@ -129,9 +196,9 @@ export async function resolveDoppler({ env = process.env, root = ROOT, dispatch 
     if (after.token) return { source: 'cli', token: after.token };
   }
   return {
-    gap: fromCli.missing
-      ? 'Doppler CLI not installed: `mise use -g doppler@latest` (or https://docs.doppler.com/docs/install-cli), then `doppler login`'
-      : 'Doppler CLI not signed in: run `doppler login` once on this host (browser approval, nothing to copy)',
+    gap: (fromCli.missing
+      ? 'Doppler CLI not installed and no owner GitHub identity in gh: `gh auth login` as an owner identity, or install the Doppler CLI and `doppler login`'
+      : 'Doppler CLI not signed in and no owner GitHub identity in gh: `gh auth login` as an owner identity, or `doppler login`') + brokerError,
   };
 }
 
@@ -220,6 +287,10 @@ export async function main(argv, env = process.env) {
     const secrets = await secretsOf(access.token, scope);
     return runWith(cmd, { ...secrets, DOPPLER_TOKEN: access.token, DOPPLER_PROJECT: scope.project, DOPPLER_CONFIG: scope.config });
   }
+  if (command === 'rules') {
+    printOwnerRules();
+    return 0;
+  }
   if (command === 'packages') {
     configureNpm(env);
     const access = env.NODE_AUTH_TOKEN || env.CLAUDE_CODE_REMOTE === 'true' ? {} : await resolveDoppler({ env, interactive: process.stdin.isTTY });
@@ -257,6 +328,7 @@ export async function main(argv, env = process.env) {
   if (hook) {
     const rel = 'scripts/kombify-bootstrap.mjs';
     console.log(`Install: node ${rel} --install. Secrets for a command: node ${rel} run -- <cmd>. Package token for a command: node ${rel} packages -- <cmd>. Tokens are fetched on demand; never report a missing NODE_AUTH_TOKEN or DOPPLER_TOKEN as a blocker.`);
+    printOwnerRules();
   }
   return gaps.length && !hook ? 1 : 0;
 }

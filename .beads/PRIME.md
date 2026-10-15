@@ -8,7 +8,8 @@ Follow this checkout's AGENTS.md. Cloudflare is the operational Beads authority
   approved CI OIDC; no manual Cloudflare key copying. Install the pinned native
   Cloudflare-capable bd with `node scripts/beads-session-tools.mjs`.
 - Read focused tasks with `bd show <id>`, `bd ready`, `bd search <term>` or
-  `bd memories <keyword>`. GitHub Projects owns cross-repo priorities.
+  `bd memories <keyword>`. Beads epics own cross-repo priorities; each
+  product `ROADMAP.md` owns its milestones.
 - Mutate only through `mise --cd <workspace-root> run beads:write --repo
   mintlify-docs -- <mutation>`. Require `BEADS_REMOTE_WRITE_OK ...
   tracker=cloudflare` after independent remote readback.
