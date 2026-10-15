@@ -79,8 +79,13 @@ Binding; `kombify-fast-development` holds the detail.
 - "supported" in a catalog or matrix needs apply evidence at the current pin;
   a release or repin is not proof.
 - Keep `main` green; regenerate generated files with repository tooling.
-- A late or missing scheduled job is reported as a blocker; never dispatch
-  workflows, add triggers or work around missing permissions.
+- A late or missing scheduled job is reported as a blocker, never run by hand;
+  never add triggers or work around missing permissions. Sessions dispatch
+  only the workflows their task names: release preparation and Delivery when
+  shipping, `beads-session.yml` and `cloud-session-doppler.yml` for session
+  access, `runner-failover.yml` during a runner outage, and governed
+  privileged workflows (`CI-CD-PLATFORM-STANDARD.md` "Workflows a session may
+  dispatch").
 - Every bundled binary or provider has a `THIRD-PARTY-NOTICES.md` entry.
 - Keep the tracker and the execution log current with each slice.
 - Consolidate PRs per phase (one commit per slice) and minimise CI runs: run
@@ -101,8 +106,7 @@ Binding; `kombify-fast-development` holds the detail.
   gate, then publish the package or batch once, ready for review
   (`gh pr create` without `--draft`, `gh stack submit --auto --open`): an
   opened ready PR gets its required evidence without a close/reopen. Drafts
-  are only for explicitly requested early review. Every generated
-  `merge_group` still needs its own checks. Queue the squash-merge yourself
+  are only for explicitly requested early review. Queue the squash-merge yourself
   (`gh pr merge --squash --auto`)
   and continue with the next package instead of polling; settle merge, DIRTY
   and red states at the next checkpoint. Never park a mergeable PR or hand
@@ -131,7 +135,7 @@ Binding; `kombify-fast-development` holds the detail.
   request to ship a `fast-pre-1.0` product authorizes the acting session to
   execute one scoped release checkpoint outside window close, subject to
   positive absence of a conflicting reservation and the compiled Delivery
-  protections. Use the existing privileged manual workflow; no extra approval
+  protections. Use the existing manual Delivery workflow; no extra approval
   round. Broad acceptance stays `pending-window`/`unverified`.
 - A merge is not live: ship only through the `kombify-ship` skill
   (`kombify-workspace/.agents/skills/kombify-ship/SKILL.md`).
