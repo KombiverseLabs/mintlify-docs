@@ -1,10 +1,14 @@
 ---
 title: mintlify-docs Status
-last_verified: 2026-10-11
+last_verified: 2026-10-15
 maturity: alpha
 ---
 
 # mintlify-docs Status
+
+Verified 2026-10-15: `mise run check` and `mise run remote:public-safety` pass
+on `main`. Cloud, AI Guide and Workbench, and Companion pages exist only as
+staged English sources in `drafts/apps/`; nothing of them is published.
 
 ## Public Surface
 
@@ -49,7 +53,7 @@ maturity: alpha
 - Remote safety checks verify removed direct routes, `llms.txt`, and sitemap
   projections after deployment.
 - A focused release-truth gate pins the singular `stackkit.cc` website,
-  installer endpoints, exact v0.16.0 commands, local-domain wording, and the
+  installer endpoints, commands bound to the synced release snapshot, local-domain wording, and the
   boundary that one-line installers never perform Apply. A bounded external
   link gate checks the website, installer, and immutable release destinations.
 - Every public page is checked for example relevance. Executable and structured
@@ -63,9 +67,9 @@ maturity: alpha
 
 | Dependency | Verified State |
 | --- | --- |
-| StackKits | Public release `v0.16.0`, commit `22705dd4bbee9caaa7601bffb4769a7c40314490`. |
-| Techstack | Public unsigned Windows Alpha; see `techstack/availability` for the current published release. |
-| SpeechKit | Public release `v0.52.14`, commit `46ed2b0580fb7ff412c7b88db96401973a4c7a2e`. |
+| StackKits | Docs snapshot `v0.53.4` (public source `a7e5f140eb3b7f4ebfcaaddc7d1ceb7da2d3d604`, `data/stackkits/latest.json`); newer public releases arrive through the generated-only sync pull request. |
+| Techstack | Public unsigned Windows Alpha; API and CLI reference synced from release `v0.39.0`; see `techstack/availability` for the current published release. |
+| SpeechKit | Docs snapshot `v0.75.7` (`data/speechkit/latest.json`). |
 | Mintlify CLI | Pinned `mint@4.2.684` through `mise`. |
 | Node | Version 24 through `mise`. |
 | Hosting | Mintlify at `docs.kombify.io`. |
@@ -73,7 +77,8 @@ maturity: alpha
 
 ## Known Issues
 
-- Cloud Kit is present in the release, but its public v0.16.0 live-runtime
+- Carried from the v0.16.0 review and not re-verified against the `v0.53.4`
+  snapshot: Cloud Kit is present in the release, but its public live-runtime
   evidence is pending; the docs make no production-readiness claim.
 - Photos and Vault workload contracts validate and generate, but v0.16.0 has no
   safe public post-init command for adding their required owner-bound secret
