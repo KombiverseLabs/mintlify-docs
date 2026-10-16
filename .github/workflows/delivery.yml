@@ -7,8 +7,14 @@ name: Delivery v2
 on:
   push:
     branches: [main]
-  # Pull requests compile only when a delivery definition changes; the push
-  # below executes Delivery and is kept.
+    # Bootstrap/policy maintenance and this trigger correction do not publish docs.
+    # A mixed product change still follows the existing commit Delivery route.
+    paths-ignore:
+      - AGENTS.md
+      - scripts/kombify-bootstrap.mjs
+      - scripts/lib/staff-mcp-bootstrap.mjs
+      - .github/workflows/delivery.yml
+  # Delivery-definition pull requests retain their compile-only qualification.
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
