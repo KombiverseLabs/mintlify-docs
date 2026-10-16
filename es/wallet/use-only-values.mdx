@@ -1,0 +1,70 @@
+---
+title: "Usar un valor sin verlo"
+description: "Deja que agentes y productos usen una clave en una llamada sin que nadie reciba el valor"
+sidebarTitle: "Valores de solo uso"
+icon: "eye-slash"
+---
+
+<Note>
+kombify Wallet todavía no se ha publicado. Esta página describe cómo funciona.
+</Note>
+
+La mayoría de las claves se usan, no se leen: una clave de API va en una
+cabecera de la petición. Con el uso mediado, Wallet hace la llamada por sí
+misma. Quien llama indica qué quiere llamar, Wallet añade la credencial y envía
+la petición, y quien llama solo recibe la respuesta. El valor nunca llega a
+quien llama.
+
+## Elegir quién puede ver el valor
+
+En los **Ajustes** de un elemento, o al añadirlo, **Quién puede ver el valor**
+ofrece dos opciones:
+
+- **Los agentes y las personas con acceso de lectura pueden ver el valor.** Es la
+  opción predeterminada. Puedes mostrar el valor en cualquier momento. Un agente
+  solo lo ve con acceso de lectura.
+- **Nadie ve el valor, solo se puede usar.** Ni siquiera tú puedes mostrarlo, así
+  que más tarde no podrás sacarlo copiado de Wallet. Los agentes y los productos
+  con acceso de uso solo pueden actuar con él, por ejemplo en una llamada a una
+  API. El elemento muestra la insignia **Solo uso**.
+
+## Definir destinos de uso
+
+Un destino de uso indica adónde se puede enviar un valor. Añade destinos en
+**Destinos de uso** con **Añadir destino**. Cada destino tiene:
+
+- **Host**: un nombre de host en minúsculas, como `api.example.com`, con puerto
+  si hace falta. No añadas `https://` ni una ruta. No se aceptan direcciones IP.
+- **Métodos**: cualquiera de GET, HEAD, POST, PUT, PATCH y DELETE.
+- **Prefijo de ruta**: las llamadas pueden ir a esta ruta o por debajo de ella,
+  por ejemplo `/v1`.
+- **Cómo se envía el valor**: **Cabecera Authorization, Bearer**, **Una cabecera
+  que elijas** con un **Nombre de la cabecera**, o **Autenticación básica con
+  usuario y contraseña** para un inicio de sesión.
+
+Un elemento puede tener hasta 16 destinos. Sin destino, el valor no se puede
+usar en llamadas. Hay destinos para claves de API, tokens y certificados, para
+inicios de sesión y para accesos a servidores.
+
+## Qué hace Wallet con una llamada
+
+1. Un agente o un producto con acceso de uso pide a Wallet que llame a una URL
+   con un método.
+2. Wallet compara la petición con tus destinos. El host, el método y la ruta
+   deben coincidir con un destino; si no, la rechaza.
+3. Wallet registra la operación, añade el valor como indica el destino y envía
+   la petición por HTTPS.
+4. Devuelve la respuesta, con cualquier copia del valor sustituida por
+   `[redacted]`.
+
+Quien llama no puede añadir sus propias cabeceras de autorización, y Wallet no
+sigue las redirecciones. Las peticiones y las respuestas están limitadas a
+1 MiB, y solo se devuelve un conjunto fijo de cabeceras de respuesta.
+
+<Note>
+La redacción elimina las copias exactas del valor. No cubre un servicio que
+modifica la credencial antes de repetirla en una respuesta.
+</Note>
+
+Quién puede usar un elemento lo decides tú. Consulta [Agentes](/es/wallet/agents)
+y [Productos](/es/wallet/products).

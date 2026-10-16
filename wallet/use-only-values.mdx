@@ -1,0 +1,68 @@
+---
+title: "Use a value without seeing it"
+description: "Let agents and products use a key in a call without anyone receiving the value"
+sidebarTitle: "Use-only values"
+icon: "eye-slash"
+---
+
+<Note>
+The kombify Wallet is not released yet. This page describes how it works.
+</Note>
+
+Most keys are used, not read: an API key goes into a request header. With
+brokered use, the Wallet makes the call itself. The caller says what it wants
+to call, the Wallet adds the credential and sends the request, and the caller
+only gets the response. The value never reaches the caller.
+
+## Choose who may see the value
+
+In an item's **Settings**, or when you add the item, **Who may see the value**
+offers two choices:
+
+- **Agents and people with read access may see the value.** This is the
+  default. You can reveal the value at any time. An agent sees it only with
+  read access.
+- **Nobody sees the value, it can only be used.** Not even you can reveal it,
+  so you cannot copy it out of the Wallet later. Agents and products with use
+  access can only act with it, for example in an API call. The item shows a
+  **Use only** badge.
+
+## Set use targets
+
+A use target says where a value may be sent. Add targets under **Use targets**
+with **Add target**. Each target has:
+
+- **Host**: a lowercase host name such as `api.example.com`, with a port if
+  needed. Do not add `https://` or a path. IP addresses are not accepted.
+- **Methods**: any of GET, HEAD, POST, PUT, PATCH and DELETE.
+- **Path prefix**: calls may go to this path or below it, for example `/v1`.
+- **How the value is sent**: **Authorization header, Bearer**, **A header of
+  your choice** with a **Header name**, or **Basic authentication with
+  username and password** for a login.
+
+An item can have up to 16 targets. Without a target, the value cannot be used
+in calls. Targets are available for API keys, tokens and certificates, for
+logins and for server access.
+
+## What the Wallet does with a call
+
+1. An agent or product with use access asks the Wallet to call a URL with a
+   method.
+2. The Wallet compares the request with your targets. The host, method and
+   path must all match one target, otherwise it refuses.
+3. The Wallet records the operation, adds the value the way the target says,
+   and sends the request over HTTPS.
+4. It returns the response, with any copy of the value replaced by
+   `[redacted]`.
+
+The caller cannot add its own authorization headers, and the Wallet does not
+follow redirects. Requests and responses are limited to 1 MiB, and only a
+fixed set of response headers is returned.
+
+<Note>
+Redaction removes exact copies of the value. A service that changes the
+credential before it repeats it in a reply is not covered.
+</Note>
+
+Who may use an item is up to you. See [Agents](/wallet/agents) and
+[Products](/wallet/products).

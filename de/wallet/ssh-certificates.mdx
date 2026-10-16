@@ -1,0 +1,157 @@
+---
+title: "SSH-Zertifikate"
+description: "Eine SSH-Zertifizierungsstelle in der Wallet anlegen und kurzlebige Zertifikate für deine Server signieren"
+sidebarTitle: "SSH-Zertifikate"
+icon: "certificate"
+---
+
+<Note>
+Die kombify Wallet ist noch nicht veröffentlicht. Diese Seite beschreibt, wie
+sie funktioniert.
+</Note>
+
+Statt SSH-Schlüssel auf jeden Server und an jede Person zu kopieren, hältst du
+eine Zertifizierungsstelle in deiner Wallet. Deine Server vertrauen ihrem
+öffentlichen Schlüssel. Muss sich jemand anmelden, sei es du, ein Agent oder ein
+Produkt, signiert die Wallet ein Zertifikat für genau diesen Schlüssel, für die
+Namen und die Zeit, die du erlaubst. Der Zugriff endet, wenn das Zertifikat
+abläuft, und der Schlüssel der Zertifizierungsstelle verlässt die Wallet nie.
+
+## Die Zertifizierungsstelle anlegen
+
+1. Öffne die **Einstellungen**, wähle **Schlüssel & Verbindungen** und dann
+   **Eintrag hinzufügen**.
+2. Wähle den Typ **SSH-Zertifizierungsstelle** und gib einen **Namen** ein.
+3. Wähle unter **Schlüssel der Zertifizierungsstelle** die Option **In der Wallet
+   erstellen (empfohlen)**. Die Wallet erzeugt einen neuen Ed25519-Schlüssel und
+   behält ihn. Der Schlüssel erreicht deinen Browser nie. Oder wähle
+   **Vorhandenen Schlüssel importieren**, um einen unverschlüsselten
+   Ed25519-OpenSSH-Schlüssel ohne Passphrase mitzubringen.
+4. Lege die Signierrichtlinie fest, siehe unten, und wähle **In der Wallet
+   speichern**.
+
+## Die Signierrichtlinie festlegen
+
+Unter **Was diese Zertifizierungsstelle signieren darf** legst du die Grenzen
+für jedes Zertifikat fest:
+
+- **Zertifikatarten**: **Benutzerzertifikate** für Personen und Agenten, die sich
+  an Servern anmelden, und **Hostzertifikate** für Server, die nachweisen, wer
+  sie sind. Agenten erhalten nie Hostzertifikate.
+- **Längstes Benutzerzertifikat**: von 1 Minute bis 1 Tag, zum Beispiel `30m`
+  oder `8h`.
+- **Längstes Hostzertifikat**: von 1 Minute bis 366 Tage, zum Beispiel `90d`.
+- **Erlaubte Principals**: die Benutzer- oder Servernamen, die ein Zertifikat
+  tragen darf, einer pro Zeile oder durch Kommas getrennt. `*.example.com`
+  steht für genau einen Namen vor `example.com`, etwa `web1.example.com`.
+- **Erweiterungen von Benutzerzertifikaten**: Nur die Erweiterungen, die du
+  ankreuzt, können in einem Benutzerzertifikat stehen. `permit-pty` erlaubt ein
+  interaktives Terminal.
+- **Quelladresse verlangen**: Jedes Benutzerzertifikat muss dann die Adressen
+  nennen, von denen aus es gilt.
+
+Ohne Richtlinie signiert die Zertifizierungsstelle nichts. Du kannst die
+Richtlinie in den **Einstellungen** des Eintrags ändern, und eine Änderung gilt
+ab dem nächsten Zertifikat. Eine Richtlinie lässt sich nicht entfernen. Um eine
+Zertifizierungsstelle am Signieren zu hindern, widerrufe sie.
+
+## Dem öffentlichen Schlüssel auf deinen Servern vertrauen
+
+Der **Öffentliche Schlüssel** der Zertifizierungsstelle steht in der Liste, mit
+einer Schaltfläche **Kopieren**. `kombify-wallet get my-ca` gibt ihn ebenfalls
+aus. Auf Servern, die kombify StackKits einrichtet, soll der öffentliche
+Schlüssel für dich installiert werden; diese Integration ist noch nicht
+veröffentlicht. Auf jedem anderen Server vertraust du ihm selbst:
+
+1. Speichere den öffentlichen Schlüssel als eine Zeile in
+   `/etc/ssh/kombify_user_ca.pub` auf dem Server.
+2. Füge diese Zeile zu `/etc/ssh/sshd_config` hinzu:
+
+   ```text
+   TrustedUserCAKeys /etc/ssh/kombify_user_ca.pub
+   ```
+
+3. Lade den SSH-Dienst neu:
+
+   ```bash
+   sudo systemctl reload ssh
+   ```
+
+   Auf manchen Systemen heißt der Dienst `sshd`.
+
+Standardmäßig akzeptiert der Server ein Zertifikat, wenn einer seiner Principals
+der Kontoname ist, mit dem du dich anmeldest. Ein Zertifikat mit dem Principal
+`deploy` erlaubt seinem Inhaber, sich als `deploy` anzumelden.
+
+## Ein Zertifikat für deinen Schlüssel signieren
+
+Wähle im Bereich **Wallet** bei der Zertifizierungsstelle **Zertifikat
+signieren**.
+
+1. Füge deinen öffentlichen Schlüssel unter **Dein öffentlicher Schlüssel** ein.
+   Nimm den Inhalt deiner `.pub`-Datei, etwa `~/.ssh/id_ed25519.pub`, niemals
+   einen privaten Schlüssel. Ed25519-, ECDSA-P-256- und RSA-Schlüssel ab 2048
+   Bit funktionieren.
+2. Wähle die **Zertifikatart**, **Benutzerzertifikat** für die Anmeldung an einem
+   Server.
+3. Gib die **Principals** ein, zum Beispiel `deploy`.
+4. Gib **Gültig für** ein, zum Beispiel `8h`. Der Wert darf das Maximum der
+   Richtlinie nicht überschreiten.
+5. Gib eine **Quelladresse** ein, wenn die Richtlinie eine verlangt.
+6. Wähle **Zertifikat signieren** und dann **Zertifikat kopieren** oder
+   **Herunterladen**.
+
+Speichere das Zertifikat neben deinem privaten Schlüssel, zum Beispiel als
+`~/.ssh/id_ed25519-cert.pub`, und melde dich wie gewohnt an. OpenSSH findet es
+von selbst.
+
+Dasselbe geht im Terminal. Der Befehl schreibt das Zertifikat neben deinen
+Schlüssel:
+
+```bash
+kombify-wallet ssh-sign my-ca ~/.ssh/id_ed25519.pub --principals deploy --ttl 8h
+```
+
+So siehst du, was ein Zertifikat erlaubt und wann es endet:
+
+```bash
+ssh-keygen -L -f ~/.ssh/id_ed25519-cert.pub
+```
+
+## Hostzertifikate
+
+Ein Hostzertifikat lässt einen Server nachweisen, wer er ist, sodass du seinen
+Schlüssel nicht von Hand prüfen musst. Kopiere den öffentlichen Host-Schlüssel
+des Servers auf deinen Computer und signiere ihn dann mit `--host`:
+
+```bash
+kombify-wallet ssh-sign my-ca ssh_host_ed25519_key.pub --principals server.example.com --ttl 90d --host
+```
+
+Kopiere die entstandene Datei `ssh_host_ed25519_key-cert.pub` zurück auf den
+Server und füge diese Zeile zu `/etc/ssh/sshd_config` hinzu:
+
+```text
+HostCertificate /etc/ssh/ssh_host_ed25519_key-cert.pub
+```
+
+Auf deinem Computer vertraust du den von der Zertifizierungsstelle signierten
+Servern mit dieser Zeile in `~/.ssh/known_hosts`, wobei der Schlüssel der
+öffentliche Schlüssel der Zertifizierungsstelle ist:
+
+```text
+@cert-authority *.example.com ssh-ed25519 AAAA...
+```
+
+## Wann der Zugriff endet
+
+Der Zugriff endet, wenn das Zertifikat abläuft. Zertifikate gelten Minuten bis
+Stunden, innerhalb der Grenzen deiner Richtlinie. Widerrufst du die
+Zertifizierungsstelle, entstehen sofort keine neuen Zertifikate mehr, aber ein
+bereits signiertes Zertifikat bleibt bis zu seinem Ablauf gültig. Eine
+Zertifikatssperrliste gibt es noch nicht.
+
+Eine Zertifizierungsstelle hat keine neuen Versionen, weil Server ihrem
+Schlüssel vertrauen. Um eine zu ersetzen, lege eine neue Zertifizierungsstelle
+an, vertraue beiden öffentlichen Schlüsseln, während du umziehst, und widerrufe
+dann die alte.

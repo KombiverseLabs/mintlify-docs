@@ -1,0 +1,84 @@
+---
+title: "kombify Wallet"
+description: "The one place where kombify keeps your secrets, logins, variables and server access"
+sidebarTitle: "Overview"
+icon: "wallet"
+---
+
+<Warning>
+The kombify Wallet is not released yet. These pages describe how it works so
+you know what to expect. You cannot use it today.
+</Warning>
+
+The kombify Wallet is the one place where kombify keeps what you hand it: API
+keys, logins, variables, configuration files, and the ways you reach your
+servers. You, your agents and the kombify products you choose use these items
+in the same way, and each of them gets only the rights you give it.
+
+## What it holds
+
+| Item | What it is for |
+| --- | --- |
+| **API key, token or certificate** | One secret value, such as a provider's API key. |
+| **Login** | A username and password for another service, with an optional one-time code secret. |
+| **Variable** | One value your tools look up by name, such as `DATABASE_URL`. |
+| **Configuration** | A document, such as an `.env` file. |
+| **Server access** | How to reach a server: host, user, and an SSH private key or a password. |
+| **SSH certificate authority** | Signs short-lived SSH certificates for you, your agents and your servers. |
+
+Accounts you connect to other services, for example through OAuth, are
+planned and will arrive with their own flow.
+
+## How the Wallet protects what you keep
+
+- **Encrypted before it leaves your device.** Your browser, or the
+  `kombify-wallet` command line, encrypts a value on your device. The services
+  between you and the Wallet only relay encrypted data, and the Wallet stores
+  only encrypted values. The keys that open them are held apart from the
+  stored data, so a copy of the stored data alone cannot be read.
+- **Every use is recorded.** The Wallet writes an audit record before it
+  releases or uses a value, whether you reveal it, an agent uses it or a
+  product uses it. If it cannot write the record, it does not release the
+  value.
+- **Your Auth0 sign-in guards access.** You reach your Wallet by signing in to
+  your kombify account through Auth0 at `login.kombify.io`. There is no second
+  Wallet password. Only you, signed in yourself, can manage your Wallet.
+  Agents and delegated sessions cannot.
+- **You set the rights, one by one.** Using an item, reading its value and
+  managing it are separate rights. An agent or a product never inherits
+  yours.
+
+<Note>
+Anyone who can sign in to your kombify account can open your Wallet as you.
+Protect the account with a passkey or multi-factor sign-in.
+</Note>
+
+## What the Wallet cannot do
+
+A value that someone has already seen cannot be taken back. If a value may
+have reached someone it should not have, add a new version of the item to
+replace it.
+
+## Where to go next
+
+<CardGroup cols={2}>
+  <Card title="Secrets, logins and variables" icon="key" href="/wallet/secrets-and-variables">
+    Add, reveal, replace, revoke and delete items, and scope them to a project
+    or environment.
+  </Card>
+  <Card title="Use-only values" icon="eye-slash" href="/wallet/use-only-values">
+    Let a key be used in a call without anyone seeing it.
+  </Card>
+  <Card title="Agents" icon="robot" href="/wallet/agents">
+    Give each agent only the rights it needs.
+  </Card>
+  <Card title="Products" icon="puzzle-piece" href="/wallet/products">
+    Let a kombify product use an item for you when you are not there.
+  </Card>
+  <Card title="SSH certificates" icon="certificate" href="/wallet/ssh-certificates">
+    Sign short-lived certificates instead of sharing SSH keys.
+  </Card>
+  <Card title="Command line" icon="terminal" href="/wallet/cli">
+    Store, read and inject items from a terminal.
+  </Card>
+</CardGroup>

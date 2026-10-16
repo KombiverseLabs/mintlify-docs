@@ -1,0 +1,104 @@
+---
+title: "Die Kommandozeile kombify-wallet"
+description: "Anmelden, Einträge speichern und lesen, Variablen in einen Prozess einspeisen, aus Doppler importieren und SSH-Zertifikate signieren"
+sidebarTitle: "Kommandozeile"
+icon: "terminal"
+---
+
+<Note>
+Die kombify Wallet ist noch nicht veröffentlicht, und die Kommandozeile wird
+noch nicht verteilt. Diese Seite beschreibt, wie sie funktioniert. Die
+Installationsschritte kommen hierher, sobald sie erscheint.
+</Note>
+
+`kombify-wallet` bringt die Wallet in dein Terminal. Wie der Browser
+verschlüsselt es einen Wert auf deinem Gerät, bevor er es verlässt. Es liest
+Werte nur von der Standardeingabe oder aus einer verdeckten Eingabe, nie aus
+einem Argument, sodass sie nicht in deinem Shell-Verlauf und deiner Prozessliste
+landen.
+
+## Anmelden
+
+```bash
+kombify-wallet login
+```
+
+Der Befehl gibt einen Link und einen Code aus. Öffne den Link, melde dich über
+Auth0 in deinem kombify-Konto an und bestätige den Code. Der Befehl bewahrt
+seine eigene Anmeldung in einer Datei auf, die nur du lesen kannst.
+
+`kombify-wallet status` zeigt, wer angemeldet ist, und `kombify-wallet logout`
+entfernt die Anmeldung und widerruft sie. Für Automatisierung, die bereits ein
+kombify-Zugriffstoken hat, setze `KOMBIFY_WALLET_TOKEN`. Es hat Vorrang vor der
+gespeicherten Anmeldung.
+
+## Einträge speichern und lesen
+
+```bash
+kombify-wallet set DATABASE_URL --type variable
+kombify-wallet list
+kombify-wallet get DATABASE_URL
+kombify-wallet get DATABASE_URL --reveal
+```
+
+`set` fragt den Wert in einer verdeckten Eingabe ab oder liest ihn aus einer
+Pipe. Existiert der Name im Geltungsbereich schon, legt `set` eine neue Version
+an. `--type` ist `variable`, `configuration` oder `generic_secret`. `--scope`
+ist `account` (Standard), `project:<project>` oder
+`environment:<project>/<environment>`.
+
+`list` zeigt deine Einträge mit ihren IDs. `get` zeigt die Details eines
+Eintrags, und nur `get --reveal` gibt den Wert aus. Die Befehle
+`kombify-wallet revoke <item>` und `kombify-wallet delete <item> --yes`
+funktionieren wie in den [Einstellungen](/de/wallet/secrets-and-variables).
+Füge `--type` oder `--scope` hinzu, wenn ein Name auf mehrere Einträge passt.
+
+## Einen Befehl mit deinen Variablen ausführen
+
+```bash
+kombify-wallet run --project shop --environment production -- ./deploy.sh
+```
+
+`run` löst deine Variablen für diesen Geltungsbereich auf und fügt sie der
+Umgebung des Befehls hinzu. Die Umgebung setzt sich gegen das Projekt durch und
+das Projekt gegen das Konto. Werte werden nur im Arbeitsspeicher entschlüsselt
+und nie ausgegeben oder geschrieben.
+
+- `--only NAME,NAME` beschränkt die Variablen auf diese Namen.
+- Eine Variable, die in deiner Umgebung schon gesetzt ist, wird nicht ersetzt,
+  außer du fügst `--override` hinzu.
+- Der Befehl erhält `KOMBIFY_WALLET_TOKEN` nicht, sodass nichts, was er startet,
+  deine anderen Einträge öffnen kann.
+- Der Exit-Code ist der des Befehls selbst.
+
+## Aus Doppler importieren
+
+```bash
+doppler secrets download --no-file --format json | kombify-wallet import doppler --format json --scope project:shop
+```
+
+Jeder Eintrag wird zu einer Variable in diesem Geltungsbereich oder zu einer
+neuen Version einer vorhandenen Variable mit demselben Namen. Der Import
+überspringt Metadaten-Einträge von Doppler, Namen, die keine gültigen
+Variablennamen sind, leere Werte und Werte, die kein Text sind. Er gibt Namen
+und Ergebnisse aus, nie Werte.
+
+## Ein SSH-Zertifikat signieren
+
+```bash
+kombify-wallet ssh-sign my-ca ~/.ssh/id_ed25519.pub --principals deploy --ttl 8h
+```
+
+`--host` signiert ein Hostzertifikat. `--source-address` und `--extensions`
+setzen diese Felder eines Benutzerzertifikats. Siehe
+[SSH-Zertifikate](/de/wallet/ssh-certificates).
+
+## Exit-Codes
+
+| Code | Bedeutung |
+| --- | --- |
+| 0 | Erledigt |
+| 1 | Falscher Befehl oder falsche Option |
+| 2 | Nicht angemeldet |
+| 3 | Die Wallet hat die Anfrage abgelehnt |
+| 4 | Netzwerkfehler oder die Wallet ist nicht erreichbar |
