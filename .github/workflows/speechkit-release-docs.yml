@@ -63,38 +63,36 @@ jobs:
           # carry every download the pages link.
           node scripts/sync-speechkit-release-docs.mjs --release-json .tmp/speechkit-release.json --write
           node scripts/sync-speechkit-release-docs.mjs --check
+      # The pull request is opened by the kombify-ci App so that its pull_request
+      # events start the required Trusted Public Safety workflow; a pull request
+      # opened with the workflow token starts no workflows and auto-merge would
+      # wait for that check forever. The App holds Contents read only, so the
+      # generated branch is pushed and the squash merge is queued with the
+      # workflow token (contents: write on this repository).
+      - name: Mint the CI App pull request token
+        id: pr-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.KOMBIFY_CI_APP_ID }}
+          private-key: ${{ secrets.KOMBIFY_CI_APP_PRIVATE_KEY }}
+          owner: KombiverseLabs
+          repositories: mintlify-docs
+          permission-contents: read
+          permission-pull-requests: write
       - name: Open or update generated-only PR
         env:
-          GH_TOKEN: ${{ secrets.REPO_SYNC_PAT }}
+          GH_TOKEN: ${{ steps.pr-token.outputs.token }}
+          PUSH_TOKEN: ${{ github.token }}
           BRANCH: bot/speechkit-release-docs
           TAG: ${{ steps.release.outputs.tag }}
           GENERATED_PATHS: data/speechkit speechkit
         shell: bash
         run: |
           set -euo pipefail
-          # REPO_SYNC_PAT is a repository-level copy of the canonical PAT
-          # (kombify-Core/standards/DOPPLER-SECRETS-MAP.md). It is not rotated
-          # with the organization GH_PAT, so a rejection here almost always means
-          # this copy missed a rotation.
-          auth_guidance="Re-set this repository's REPO_SYNC_PAT from its documented custody after the last canonical PAT rotation."
-          if [ -z "${GH_TOKEN:-}" ]; then
-            echo "::error::REPO_SYNC_PAT is missing. $auth_guidance"
+          if [ -z "${GH_TOKEN:-}" ] || [ -z "${PUSH_TOKEN:-}" ]; then
+            echo "::error::A credential is missing (CI App pull request token or workflow token)."
             exit 1
           fi
-          if ! writer="$(gh api user 2>/dev/null)"; then
-            echo "::error::REPO_SYNC_PAT authentication was rejected. $auth_guidance"
-            exit 1
-          fi
-          if ! can_push="$(gh api repos/KombiverseLabs/mintlify-docs --jq '.permissions.push' 2>/dev/null)" || [ "$can_push" != true ]; then
-            echo "::error::REPO_SYNC_PAT cannot write KombiverseLabs/mintlify-docs. $auth_guidance"
-            exit 1
-          fi
-          writer_login="$(jq -r '.login // empty' <<<"$writer")"
-          writer_id="$(jq -r '.id // empty' <<<"$writer")"
-          [ -n "$writer_login" ] && [[ "$writer_id" =~ ^[0-9]+$ ]] || {
-            echo "::error::REPO_SYNC_PAT returned an invalid GitHub writer identity. $auth_guidance"
-            exit 1
-          }
           if git diff --quiet -- $GENERATED_PATHS; then
             echo "No public release drift."
             exit 0
@@ -104,14 +102,14 @@ jobs:
           # containing a space survives the porcelain record.
           unexpected="$(git status --porcelain --untracked-files=all | cut -c4- | grep -Ev '^(data/speechkit/|speechkit/[a-z0-9-]+\.mdx$)' || true)"
           [ -z "$unexpected" ] || { echo "::error::unexpected generated paths: $unexpected"; exit 1; }
-          git config user.name "$writer_login"
-          git config user.email "$writer_id+$writer_login@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           gh auth setup-git --hostname github.com
           git fetch origin "refs/heads/$BRANCH:refs/remotes/origin/$BRANCH" || true
           git checkout -B "$BRANCH"
           git add $GENERATED_PATHS
           git commit -m "docs(speechkit): sync $TAG release snapshot"
-          git push --force-with-lease origin "$BRANCH"
+          GH_TOKEN="$PUSH_TOKEN" git push --force-with-lease origin "$BRANCH"
           # `gh pr view <branch>` also matches merged PRs of the reused bot
           # branch, so only an open PR counts as already existing.
           if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq length)" = "0" ]; then
@@ -119,4 +117,4 @@ jobs:
               --title "docs(speechkit): sync $TAG release snapshot" \
               --body "Automated projection from the public SpeechKit release. Download links in these pages are version-free; only the generated release line moves."
           fi
-          gh pr merge "$BRANCH" --auto --squash
+          GH_TOKEN="$PUSH_TOKEN" gh pr merge "$BRANCH" --auto --squash
