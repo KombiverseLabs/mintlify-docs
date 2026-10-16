@@ -87,8 +87,10 @@ Binding; `kombify-fast-development` holds the detail.
 - Keep `main` green; regenerate generated files with repository tooling.
 - A late or missing scheduled job is reported as a blocker, never run by hand;
   never add triggers or work around missing permissions. Sessions dispatch
-  only the workflows their task names: release preparation and Delivery when
-  shipping, `beads-session.yml` and `cloud-session-doppler.yml` for session
+  only the workflows their task names: release preparation and Delivery only
+  for an owner message naming the release (the daily release train ships
+  everything else; a re-dispatched head names its diagnosed cause in
+  `retry-reason`), `beads-session.yml` and `cloud-session-doppler.yml` for session
   access, `runner-failover.yml` during a runner outage, and governed
   privileged workflows (`CI-CD-PLATFORM-STANDARD.md` "Workflows a session may
   dispatch").
@@ -215,6 +217,14 @@ installer and runs doctor. For context only use `node scripts/kombify-bootstrap.
 `context --check` reports the installed receipt without changing it. A fresh
 profile may select its target with `--home` and agents with `--agents`.
 Readiness is per capability; pending on-demand access is not verified access.
+For the selected Codex staff host, run
+`node scripts/kombify-bootstrap.mjs mcp --mcp-host codex --mcp-credential-source github-session --install`.
+This explicit setup uses the admitted GitHub identity and existing session
+issuer before native initialization. It preserves recognized connectors;
+conflicting local or custom entries return a pending capability. Expired
+sessions use the same explicit command for repair. Other hosts retain their
+own installation and readiness requirements. Hooks never dispatch this
+preparation or activate repositories.
 Use `--require-go` when the selected task needs Go; other tasks keep working.
 Run
 a command with this repository's Doppler secrets as
