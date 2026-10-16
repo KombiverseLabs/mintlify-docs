@@ -4,8 +4,8 @@ description: "Wallet items delivered to this node's encrypted local custody"
 sidebarTitle: "wallet-item"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:94a5c170f22c66891bd1811834f7ad72664057e99e1db0c8b5428bac27e98a8e"
-source_hash: "a7e5f140eb3b7f4ebfcaaddc7d1ceb7da2d3d604"
+content_hash: "sha256:7f7b8e700259a205671d51ed22e07f652ac9d47a227ca3c729b14f42a1bfbaf4"
+source_hash: "38ce554603e515c717695c435e588e617f476b95"
 ---
 Wallet items delivered to this node's encrypted local custody.
 
@@ -13,7 +13,7 @@ Wallet items delivered to this node's encrypted local custody.
 stackkit wallet-item [flags]
 ```
 
-Subcommands: [`stackkit wallet-item import`](#stackkit-wallet-item-import), [`stackkit wallet-item status`](#stackkit-wallet-item-status)
+Subcommands: [`stackkit wallet-item import`](#stackkit-wallet-item-import), [`stackkit wallet-item remove`](#stackkit-wallet-item-remove), [`stackkit wallet-item status`](#stackkit-wallet-item-status)
 
 ## stackkit wallet-item import
 
@@ -34,6 +34,27 @@ stackkit wallet-item import [flags]
 
 ```bash
 stackkit wallet-item import --tenant-ref "$TENANT" --owner-approve < envelope.json
+```
+
+## stackkit wallet-item remove
+
+Open a sealed Wallet item removal from stdin and drop the item from local custody.
+
+Read one sealed wallet-item-remove envelope on stdin, signed by the pinned delivering authority. The node opens it, records it as consumed, and deletes every version of the item it names from local custody. A bound consumer such as the Private AI provider key fails closed on its next apply until another item is delivered. Removing an item this node does not hold succeeds and removes nothing. The result names the reference and the removed versions only.
+
+```bash
+stackkit wallet-item remove [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Authorize removing this Wallet item |
+| `--tenant-ref` | string | — | Tenant the sealed removal must be addressed to |
+
+**Examples**
+
+```bash
+stackkit wallet-item remove --tenant-ref "$TENANT" --owner-approve < envelope.json
 ```
 
 ## stackkit wallet-item status
