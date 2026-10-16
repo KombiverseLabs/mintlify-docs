@@ -15,17 +15,23 @@ Techstack.
 The command downloads the Techstack installer from your Techstack and runs it
 with a personal, short-lived pairing token. On the server, the installer:
 
-1. detects the platform and installs the Techstack **Guard**, a small agent
-   that reports the server's health;
+1. detects the platform and installs **kombify Guard**, the agent that keeps
+   this server bound to your Techstack, carries out only the work you authorize
+   and reports what it finds;
 2. installs the pinned StackKits runtime the rollout needs;
-3. redeems the pairing token, which links this server to your homelab;
+3. redeems the pairing token, which links this server to your homelab. Guard
+   generates its own key on the server and uses it from then on to prove its
+   identity;
 4. installs Docker with `apt-get` when no working container runtime is present;
 5. installs and starts the `techstack-agent` system service, so the Guard
-   keeps running after a restart.
+   keeps running after a restart. Guard is built to run as an unprivileged
+   system user, with a separate helper that starts only for work that needs
+   administrator rights.
 
 The Guard talks to Techstack only through an **outbound** HTTPS connection. It
 sends a heartbeat and a measured inventory about every 30 seconds. You do not
-open an inbound port on the server for it.
+open an inbound port on the server for it. Everything Guard may send is listed
+in [What kombify Guard sends](/techstack/guard-telemetry).
 
 The token works once. Techstack stores only a hash of the credential the
 server receives, and the command is not kept in job reports.
@@ -70,6 +76,12 @@ expires can connect a server to your homelab.
 When the Guard sends its first heartbeat, Techstack changes the Node from
 **Not connected yet** to connected. The progress page then continues with the
 StackKit rollout for this Node. You can close the terminal.
+
+The progress page also shows the pairing readiness of Guard: **Bound**,
+**Connected**, **Configuration verified** and **Reachable**. Each step is checked
+against what Techstack has recorded, not assumed. To stop managing the server
+later, detach it. This revokes its Guard credential everywhere. See
+[kombify Guard](/techstack/kombify-guard).
 
 To check the Guard on the server later:
 

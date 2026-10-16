@@ -1,0 +1,71 @@
+---
+title: "Was kombify Guard sendet"
+description: "Die Daten, die kombify Guard von deinem Server senden darf, was er nie sendet, wohin sie gehen und wie lange sie aufbewahrt werden"
+sidebarTitle: "Was Guard sendet"
+icon: "list-check"
+---
+
+[kombify Guard](/de/techstack/kombify-guard) sendet nur die Datenklassen, die auf
+dieser Seite stehen. Ein Feld, das nicht in der Liste steht, wird nicht
+gesendet, und ein neues Feld erfordert zuerst eine Änderung dieser Liste.
+
+<Note>
+**Public Beta.** Die Liste ist die Obergrenze dessen, was Guard senden darf.
+Nicht jede Guard-Version sendet schon jede Klasse. Die Aufbewahrungsfristen
+unten beschreiben die Techstack-Control-Plane, die kombify betreibt.
+</Note>
+
+## Was Guard nie sendet
+
+- Anwendungsinhalte oder Dateiinhalte.
+- Umgebungsvariablen, Secrets oder Zugangsdaten.
+- Personenbezogene Daten der Menschen in deinem Haushalt.
+- Die Owner-E-Mail. Sie ist StackKits-Konfiguration, nie Guard-Telemetrie.
+- Die rohe Machine-ID. Guard sendet nur einen Digest davon.
+
+## Wohin die Daten gehen
+
+- **Ein Techstack, den du selbst betreibst.** Guard sendet seine Daten nur an
+  dein eigenes Techstack. kombify erhält nichts, solange du die Installation
+  nicht verbindest.
+- **Verbundene und verwaltete Installationen.** Guard sendet seine Daten an die
+  Techstack-Control-Plane, die kombify betreibt, über den authentifizierten
+  Guard-Kanal, der an den eigenen Schlüssel des Servers gebunden ist.
+- **Auf dich begrenzt.** Telemetrie ist darauf ausgelegt, auf dein Konto begrenzt
+  zu sein, sowohl beim Speichern als auch in jeder Oberfläche, die sie liest. Du
+  sollst keine Hostnamen, Adressen, Kennungen oder Metriken eines anderen Kontos
+  sehen.
+
+## Was Guard senden darf
+
+| Daten | Was sie enthalten | Wozu | Wie lange sie aufbewahrt werden |
+| --- | --- | --- | --- |
+| Bindung | Kennungen von Worker, Server, Stack, Konto und Owner; ein Fingerabdruck des Server-Schlüssels; die Generation der Zugangsdaten; die Guard- und Vertragsversion | Den Server authentifizieren und an dich binden | Solange die Bindung besteht. Widerrufsnachweise werden 90 Tage aufbewahrt. |
+| Liveness | Beobachtungszeit, Sequenznummern, Boot-ID, ein Digest der Machine-ID, Journal-Zustand, Anzahl ungeklärter Ausgänge | Zeigen, wie aktuell die Verbindung ist, und Neustarts und geklonte Server erkennen | Aktueller Zustand und der Verlauf der Änderungen für 90 Tage |
+| Host-Ressourcen | CPU, Arbeitsspeicher, Swap, Last, Plattennutzung pro Mount, Uptime, Ressourcenverbrauch der Container | Kapazität und Zustand zeigen | 15 Tage |
+| Host-Inventar | Hostname, Betriebssystem und Version, Architektur, Größe von CPU, Arbeitsspeicher und Platte, Laufzeitversion, öffentliche, private und lokale IP-Adressen, öffentliche SSH-Host-Schlüssel, lauschende Ports | Erreichbarkeit prüfen, die SSH-Host-Identität festhalten und prüfen, was exponiert ist | Aktueller Zustand. Ersetzte Werte werden 30 Tage aufbewahrt. |
+| Dienst-Inventar | StackKit-Identität, Version und Modus, Dienst- und Container-Namen, Image-Referenzen, systemd-Unit-Namen, geprüfter Zustand, Endpunkte | Dienste betreiben und verifizieren | Aktueller Zustand und der Verlauf der Änderungen für 90 Tage |
+| Sicherheitslage | Die Host-Security-Nachweise von StackKits: der Zustand jeder Kontrolle, erwartete und beobachtete Werte, Ausnahmen, Baseline-Version, Aktualität | Die gesicherte Konfiguration zeigen und darauf warnen | Aktueller Zustand und Befunde für 90 Tage |
+| Recovery-Lage | Alter und Status der Backup-Snapshots und das Ergebnis der letzten verifizierten Wiederherstellungsübung | Zeigen, ob du wiederherstellen kannst | Aktueller Zustand und Verlauf für 90 Tage |
+| Operationsbelege | Befehls-ID, Bindung, Aktion, Ergebniszustand und Digest, eine kurze Ergebniszusammenfassung, geschwärzte Log-Zeilen des Executors | Ein dauerhaftes, prüfbares Protokoll dessen führen, was Guard getan hat | Belege 90 Tage. Log-Zeilen 30 Tage. |
+
+## Bei einem Ausfall und beim Trennen
+
+Bei einem Ausfall speichert Guard seine Daten lokal innerhalb eines begrenzten
+Budgets. Nach dem Ausfall holt er die Daten entweder nach oder meldet eine
+ausdrückliche Lücke.
+
+Wenn du einen Server trennst oder außer Betrieb nimmst, löscht Guard seine
+Zugangsdaten und sein lokales Journal, nachdem Techstack die Übergabe bestätigt
+hat. Die Techstack-Control-Plane, die kombify betreibt, löscht Inventar, Metriken
+und Sicherheitslage dieser Bindung innerhalb von 30 Tagen. Ausgenommen sind
+Audit-Belege, die den oben genannten Fristen folgen.
+
+<CardGroup cols={2}>
+  <Card title="kombify Guard" icon="shield-halved" href="/de/techstack/kombify-guard">
+    Was Guard auf deinem Server tut und was sein Panel zeigt.
+  </Card>
+  <Card title="Pairing-Befehl" icon="terminal" href="/de/techstack/pairing-command">
+    Paare einen Server und starte seinen Guard.
+  </Card>
+</CardGroup>

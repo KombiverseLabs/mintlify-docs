@@ -1,0 +1,68 @@
+---
+title: "What kombify Guard sends"
+description: "The data kombify Guard may send from your server, what it never sends, where it goes and how long it is kept"
+sidebarTitle: "What Guard sends"
+icon: "list-check"
+---
+
+[kombify Guard](/techstack/kombify-guard) sends only the data classes listed on
+this page. A field that is not on the list is not sent, and adding a field means
+changing this list first.
+
+<Note>
+**Public Beta.** The list is the upper limit of what Guard may send. Not every
+Guard version sends every class yet. The retention periods below describe the
+Techstack control plane that kombify operates.
+</Note>
+
+## What Guard never sends
+
+- Application content or file contents.
+- Environment variables, secrets or credentials.
+- Personal data of the people in your household.
+- The Owner email. It is StackKits configuration, never Guard telemetry.
+- The raw machine ID. Guard sends only a digest of it.
+
+## Where the data goes
+
+- **A Techstack you operate yourself.** Guard sends its data only to your own
+  Techstack. kombify receives nothing unless you connect the installation.
+- **Connected and managed installations.** Guard sends its data to the Techstack
+  control plane that kombify operates, over the authenticated Guard channel that
+  is bound to the server's own key.
+- **Scoped to you.** Telemetry is designed to be scoped to your account, both
+  when it is stored and in every interface that reads it. You are not meant to
+  see another account's hostnames, addresses, identifiers or metrics.
+
+## What Guard may send
+
+| Data | What it contains | Why | How long it is kept |
+| --- | --- | --- | --- |
+| Binding | Identifiers of the worker, server, stack, account and owner; a fingerprint of the server's key; the credential generation; the Guard and contract version | Authenticate the server and bind it to you | For as long as the binding lasts. Revocation records are kept 90 days. |
+| Liveness | Observation time, sequence numbers, boot ID, a digest of the machine ID, journal health, the number of unresolved outcomes | Show how fresh the connection is and detect restarts and cloned servers | Current state, and the timeline of changes for 90 days |
+| Host resources | CPU, memory, swap, load, disk use per mount, uptime, container resource use | Show capacity and health | 15 days |
+| Host inventory | Hostname, operating system and version, architecture, CPU, memory and disk size, runtime version, public, private and local IP addresses, SSH host public keys, listening ports | Check reachability, pin the SSH host identity and check what is exposed | Current state. Replaced values are kept for 30 days. |
+| Service inventory | StackKit identity, version and mode, service and container names, image references, systemd unit names, probed health, endpoints | Operate and verify services | Current state, and the timeline of changes for 90 days |
+| Security posture | The StackKits host-security evidence: the state of each control, expected and observed values, exceptions, baseline version, freshness | Show and alert on the secured configuration | Current state, and findings for 90 days |
+| Recovery posture | The age and status of backup snapshots, and the result of the last verified restore drill | Show whether you can recover | Current state, and history for 90 days |
+| Operation receipts | Command ID, binding, action, result state and digest, a short result summary, redacted log lines of the executor | Keep a durable, auditable record of what Guard did | Receipts 90 days. Log lines 30 days. |
+
+## During an outage and when you detach
+
+During an outage, Guard stores its data locally within a bounded budget. After
+the outage, it either backfills the data or reports an explicit gap.
+
+When you detach or retire a server, Guard deletes its credentials and its local
+journal after Techstack acknowledges the handoff. The Techstack control plane
+that kombify operates deletes the inventory, metrics and posture of that binding
+within 30 days. Audit receipts are the exception, and they follow the periods
+above.
+
+<CardGroup cols={2}>
+  <Card title="kombify Guard" icon="shield-halved" href="/techstack/kombify-guard">
+    What Guard does on your server and what its panel shows.
+  </Card>
+  <Card title="Pairing command" icon="terminal" href="/techstack/pairing-command">
+    Pair a server and start its Guard.
+  </Card>
+</CardGroup>
