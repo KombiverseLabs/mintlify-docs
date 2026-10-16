@@ -54,8 +54,9 @@ Binding; `kombify-fast-development` holds the detail.
 ## Planning System Policy
 
 - Beads epics (with `plan:` and `wave:` labels) own cross-repo priorities,
-  phase gates, ownership and blockers; each product `ROADMAP.md` owns its
-  milestones; Beads owns executable work. GitHub Projects is read-only
+  phase-gate state, ownership and blockers; the central `ROADMAP.md` states
+  the phase order and gate text, each product `ROADMAP.md` its milestones;
+  Beads owns executable work. GitHub Projects is read-only
   history: no new items (owner decision 2026-10-15,
   `GITHUB-PROJECTS-PLANNING-STANDARD.md`).
 
@@ -80,20 +81,22 @@ Binding; `kombify-fast-development` holds the detail.
 
 - Scope fence first: before feature work, name the slice and its objective;
   work outside it waits. A blocked slice is recorded with evidence, then the
-  next slice in scope starts; never substitute other work.
+  next slice in scope starts; never substitute other work. An owner task never
+  waits behind the fence: it starts at once as its own slice.
 - No silent fallback: a missing prerequisite fails closed with a clear error.
 - "supported" in a catalog or matrix needs apply evidence at the current pin;
   a release or repin is not proof.
 - Keep `main` green; regenerate generated files with repository tooling.
-- A late or missing scheduled job is reported as a blocker, never run by hand;
-  never add triggers or work around missing permissions. Sessions dispatch
-  only the workflows their task names: release preparation and Delivery only
-  for an owner message naming the release (the daily release train ships
-  everything else; a re-dispatched head names its diagnosed cause in
-  `retry-reason`), `beads-session.yml` and `cloud-session-doppler.yml` for session
-  access, `runner-failover.yml` during a runner outage, and governed
-  privileged workflows (`CI-CD-PLATFORM-STANDARD.md` "Workflows a session may
-  dispatch").
+- A late or missing scheduled job is a defect, not a state to report: diagnose
+  it, repair its schedule, permission or credential through the governed path,
+  and dispatch it once with the diagnosed cause when its result is needed now
+  (owner rule 2026-10-16). Sessions otherwise dispatch only the workflows their
+  task names: `beads-session.yml` and `cloud-session-doppler.yml` for session
+  access, `runner-failover.yml` during a runner outage, `live-screenshots.yml`
+  and `public-surface-scan.yml` for live checks, and governed privileged
+  workflows (`CI-CD-PLATFORM-STANDARD.md` "Workflows a session may dispatch").
+  Release preparation and Delivery are not among them: only the daily release
+  train ships (Git And Completion).
 - Every bundled binary or provider has a `THIRD-PARTY-NOTICES.md` entry.
 - Keep the tracker and the execution log current with each slice.
 - Consolidate PRs per phase (one commit per slice) and minimise CI runs: run
@@ -120,6 +123,7 @@ Binding; `kombify-fast-development` holds the detail.
   and red states at the next checkpoint. Never park a mergeable PR or hand
   the merge to the owner. If a permission blocks it, name the block and ask
   for that permission. Commit as the GitHub identity your token acts as.
+- Merges never wait for a person: one independent automated review before publishing, then auto-merge on the affected gate (`AUTONOMOUS-MERGE-STANDARD.md`).
 - Build phase and test window
   ([decision](https://github.com/KombiverseLabs/kombify-workspace/blob/main/internal/records/DECISION-RECORD-2026-10-04-build-phase-test-window.md)):
   per PR only the affected gate and the unchanged security checks run.
@@ -128,22 +132,29 @@ Binding; `kombify-fast-development` holds the detail.
     orchestrator starts them; sessions never dispatch them. Narrow module/flow
     development probes on owned isolated nonproduction remote/device state
     are admitted by effects and isolation under the development standard.
-  - A freeze applies only to repositories with a positive native
-    `KOMBIFY_TEST_WINDOW_SCOPE` reservation. There, merge only admitted
-    `window-fix` changes. Independent repositories continue normally. Missing
-    or unreadable scope proof fails closed. No re-runs without a diagnosed cause.
-- Batch release and activation: merging a release-preparation PR and
-  dispatching Delivery happen once per completed batch. Inside a guarded
-  window, registered source gates may admit the canonical generated
-  preparations and publications needed for runtime acceptance before its final
-  report. Retain original code candidate, true product/artifact sources and
-  authenticated publication provenance; preserve all Delivery effect gates.
-  At close, reconcile ACKs and execute only remaining admitted train work. Start the next package while
-  Delivery runs; read back live state at the checkpoint. Stable ships
-  only through the daily train (owner rule 2026-10-16): no session cuts a
-  stable checkpoint, not even on an explicit owner request, and the required
-  release-preparation check and Delivery refuse every merger but the train
-  (`CI-CD-PLATFORM-STANDARD.md` §4.6 "Train-only stable"). Broad acceptance stays `pending-window`/`unverified`.
+  - No merge freeze (owner decision 2026-10-16,
+    [record](https://github.com/KombiverseLabs/kombify-workspace/blob/main/internal/records/DECISION-RECORD-2026-10-16-no-permanent-blockers.md)):
+    a window tests its pinned candidate SHAs while `main` keeps merging; heavy
+    lanes serialize through their org-wide concurrency groups. Open a window
+    only for a new candidate with ready `pending-window` work, one at a time;
+    `pending-window` work older than seven days is reason enough to open one.
+    No re-runs without a diagnosed cause.
+- Stable ships only through the daily train (owner rule 2026-10-16): the
+  train merges the release-preparation PR and that merge executes Delivery
+  once. No session merges it or dispatches Delivery to ship, not even on an
+  owner request; the required release-preparation check and Delivery refuse
+  every merger but the train (`CI-CD-PLATFORM-STANDARD.md` §4.6 "Train-only
+  stable"). An owner message naming a release means: get the change merged and
+  green on `preview`, make sure the release-preparation PR is current for the
+  next train slot, repair whatever keeps the train from admitting it, and read
+  the live version back after the train's Delivery. A failed train Delivery is
+  diagnosed and repaired, then re-dispatched once for the same release commit
+  with the cause in `retry-reason`. Inside a window, registered source gates
+  may admit the canonical generated preparations and publications needed for
+  runtime acceptance before its final report; retain original code candidate,
+  true product/artifact sources and authenticated publication provenance, and
+  preserve all Delivery effect gates. Start the next package while Delivery
+  runs. Broad acceptance stays `pending-window`/`unverified`.
 - A merge is not live: ship only through the `kombify-ship` skill
   (`kombify-workspace/.agents/skills/kombify-ship/SKILL.md`).
 - Close Beads issues after the merge SHA exists; reconcile your merged paths
