@@ -4,11 +4,11 @@ description: "Generated reference for the techstack api stacks commands"
 sidebarTitle: "stacks"
 generated: true
 generated_by: "render-api-surface-reference"
-release: "v0.39.0"
-content_hash: "sha256:bf842a128153ff0edff706c0f43c62e0ebfa29a7c220fdb34bbb9f5578fcb3a7"
-source_hash: "49677b729cb9818d81aa9e3aa3acabe9a65d84eb"
+release: "v0.41.0"
+content_hash: "sha256:8096d8e78d3ab2a213a22b83625e5ed6e66b4072f6f52e7976cfda61e8a7bc86"
+source_hash: "48126edfd3361d6730a83c23c98d5571af70d2f0"
 ---
-<Note>Generated from the Techstack v0.39.0 release (source `49677b729cb9`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+<Note>Generated from the Techstack v0.41.0 release (source `48126edfd336`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
 
 ## techstack api stacks create
 
@@ -410,6 +410,34 @@ techstack api stacks prune-orphans [flags]
 | `--stack-id` | string | Optional exact deployment scope used by E2E cleanup. |
 | `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
 
+## techstack api stacks repair
+
+Repair one degraded component of a completed rollout on its existing server.
+
+A rollout whose stack core applied completes degraded when an
+independent component could not finish; the component is recorded in
+the stack's `degraded_components` and repaired automatically. This
+operation starts that repair now. `public_tls` installs the managed
+kombify.me origin certificate (ADR-0047) on the stack's server; its
+hostnames come from the degraded rollout, never from the request.
+Answers 409 `component_repair_not_needed` when nothing is degraded.
+
+```bash
+techstack api stacks repair <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/repair` |
+| Changes state | Yes |
+| MCP tool | `repair_stack_component` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<stack-id>` | string | **Required.** Stack ID. |
+| `--component` | string | **Required.** One of `public_tls`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
 ## techstack api stacks requirements
 
 Get requirements spec (Phase 1 output).
@@ -521,6 +549,7 @@ techstack api stacks routing ensure <stack-id> [flags]
 | `--if-match` | string | Optional optimistic-concurrency routing revision, for example `"3"`. |
 | `--domain` | string | **Required.** Normalized custom domain; schemes, paths, ports, and wildcards are rejected. |
 | `--ensure-rollout` | boolean | Request reconciliation without implying that it has already been dispatched or applied. Default `false`. |
+| `--expectations` | object | Omission preserves expectations for the same domain/server/lease. An explicit empty object clears optional DNS and TLS pins. |
 | `--lease-id` | string | Exact RuntimeLease for a managed target. Omit for a local/Basement ServerRuntime that genuinely has no lease; invented leases are rejected. |
 | `--mode` | string | **Required.** One of `custom-domain`. |
 | `--provenance` | object | **Required.** |
@@ -566,6 +595,46 @@ techstack api stacks routing targets <stack-id> [flags]
 | Argument | Type | Description |
 | --- | --- | --- |
 | `<stack-id>` | string | **Required.** Stack ID. |
+
+## techstack api stacks stackkit run
+
+Queue an owned node's typed Advanced or backup operation.
+
+Uses the same tenant- and owner-scoped dispatcher as the operator UI. The node executes through its authenticated channel, current release pin, native Advanced catalog and issued operation capability. Techstack never executes Terramate, apply, rollback, backup or restore itself. A mutation requires owner_approved; service locks and active server maintenance are checked before enqueue. Direct backup_run and backup_configure remain Basement-only; managed kits keep their schedule and sealed target-renewal authority. backup_configure derives the node's target and plan from existing custody and accepts no credential fields. advanced_change_set requires candidate_spec; rollback requires an exact rollback_target_ref; restore_drill may reuse a snapshot_anchor_id. ai_provider lets Private AI offer an external OpenAI-compatible provider: the kombify Wallet seals the item wallet_item_id (the provider's API key) to the node, which must be listed as a host target of that item, the node binds it to ai_provider_base_url, and a drift reconcile applies the setting. ai_provider_disable removes it. Restore activation requires exactly one Idempotency-Key header, while other operations have no replay guarantee. Acceptance is not execution success; read the returned job and its scoped result to observe effects.
+
+```bash
+techstack api stacks stackkit run <stack-id> [flags]
+```
+
+<Warning>Requires confirmation: This operation can change the node deployment, replace its services or restore its data; approve the selected operation and exact target before dispatch. Pass `--yes` or answer the prompt; a non-interactive run without `--yes` stops before any request with exit code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/stackkit/operations` |
+| Changes state | Yes |
+| MCP tool | `run_stackkit_operation` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<stack-id>` | string | **Required.** Stack ID. |
+| `--activation-operation-id` | string | — |
+| `--agent-id` | string | **Required.** |
+| `--ai-provider-base-url` | string | https base URL of the OpenAI-compatible provider API for ai_provider. |
+| `--ai-provider-disable` | boolean | Remove the external provider instead of setting it. |
+| `--candidate-spec` | object | Canonical candidate StackSpec validated by the pinned node executor; required for advanced_change_set. |
+| `--operation-dry-run` | boolean | — |
+| `--offline` | boolean | — |
+| `--operation` | string | **Required.** One of `plan`, `apply`, `verify`, `upgrade`, `drift_detect`, `drift_reconcile`, `advanced_change_set`, `rollback`, `restore_drill`, `backup_run`, `backup_configure`, `backup_status`, `backup_restore`, `backup_restore_activate`, `backup_restore_recover`, `ai_provider`. |
+| `--owner-approved` | boolean | — |
+| `--restore-plan-hash` | string | — |
+| `--restore-result-id` | string | — |
+| `--rollback-target-ref` | string | Exact executor-state snapshot or change-set digest. |
+| `--snapshot-anchor-id` | string | — |
+| `--stackkit` | string | Optional execution binding; normally derived from the stack's managed rollout. |
+| `--target-release` | string | — |
+| `--wallet-item-id` | string | kombify Wallet item holding the provider's API key for ai_provider. |
+| `--wallet-item-rotate` | boolean | Deliver a rotated item that replaces the version the node holds. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
 
 ## techstack api stacks unified
 
