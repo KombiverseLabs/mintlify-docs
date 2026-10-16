@@ -10,22 +10,7 @@ navigation source of truth; pages are MDX files.
 
 ## Kombify Development Standard
 
-Binding; `kombify-fast-development` holds the detail.
-
-1. Pre-1.0 (`fast-pre-1.0`): change the smallest coherent module, execute its changed function or flow directly in the real development runtime, observe the effect, then run the affected deterministic merge gate once. This is the fast development and deployment path.
-2. Verify behavior through the module's supported interface or affected user/API/CLI path; black-box by default. A build or healthy process alone does not prove the changed behavior.
-3. Add a test only for a regression, core invariant or sensitive boundary (auth, billing, migrations, provider control, signing); lint, type, build, security and schema checks are the baseline, not extra tests.
-4. Assert effects, never structure: no fixed counts, presence or existence checks, exact strings, source or doc greps, or snapshots.
-5. One behavior, max one test.
-6. No coverage, test-count or file-size goals pre-1.0. Split modules around behavior, ownership and dependency seams when it improves direct execution or maintenance.
-7. A test that breaks on a behavior-preserving refactor is fixed or deleted.
-8. Direct function/module execution in the running development app is the feedback loop. Reuse a one-command hot-reload loop, diagnose its observed failures, and keep affected automation bounded; do not turn each edit into an automated suite.
-9. Delete skipped, dead and superseded tests and code in the slice that obsoletes them.
-10. Claims follow evidence: implemented, merged, deployed and live differ; missing evidence is pending.
-11. Scoped fast completion may use recorded actual behavior observed through direct module/function or affected flow execution, with applicable affected checks. No new permanent automated journey is required for every edit. Broad, heavy provider/device and compatibility acceptance remains `pending-window` until the window orchestrator runs it. Physical-device and real-user validation belongs to owner-controlled Public Beta; record hardware limitations honestly.
-12. Narrow development probes on remote hosts, VMs, emulators or devices are admitted by their effects and isolation, not geography: use owned nonproduction runtime state, existing authorization and cleanup, and no heavy acceptance or provider provisioning. A substitute proves only its declared boundary. Databases are the exception (owner rule 2026-10-09): database work always runs against the live databases, signed in as the shared test identities and never as the owner; no local, fictional or emulated database (local Docker Postgres, PGlite, in-memory); development and tests use managed Postgres, and after the beta a managed mirror or snapshot, never a local copy. Schema migrations and destructive or bulk data changes still go only through the governed migration and Delivery path. Owner exception (2026-10-15): unmodified upstream applications may use their own native internal databases on owned real test servers, including Navidrome/Audiobookshelf SQLite; Kombify-owned databases still use live managed Postgres with shared test identities, and local, emulated or substitute databases remain excluded. Migration, destructive-change and test-window requirements still apply.
-13. Publish the finished batch once after observed behavior and affected checks. Release reuses applicable evidence with its original source/artifact/environment binding and retains compiled Delivery, artifact validity, sensitive-boundary, authorization, entitlement and custody gates. One bounded exact-revision operational smoke verifies activation; production is not the first functional feedback loop.
-14. Preview-first (owner decision 2026-10-13): gates hang on the release channel, not on each pull request. A change needs locally only build and typecheck of the changed module, then one pull request with auto-merge whose only required check is the affected gate (`Affected development gate`, `mise run ci:fast`), held to build plus lint plus the tests of a changed sensitive boundary; the session continues without waiting, and the merge deploys to the `preview` channel, where it is tested live with the shared test identities. A broken preview is fixed forward or reverted through the same path. Always on, on every channel: secret scanning and push protection, compilation, the tests of a sensitive boundary (auth, billing, migrations, signing, provider control) when those paths change, fail-closed credential checks at deploys, and preview on the live databases with the shared test identities, never migrating itself (migrations stay backward compatible so stable keeps working). The full gates (complete affected suite, standards and release-preparation checks, signing, receipts) run once per release, when what ran green on `preview` is promoted to `stable`. A merge to `main` never releases: `stable` starts only when the daily release train merges the release-preparation pull request, which executes Delivery; release-please only keeps that pull request current and never merges or publishes. Detail: `CI-CD-PLATFORM-STANDARD.md` section "Release channels" and skill `kombify-fast-development`.
+- Binding: workspace `CONSTITUTION.md` rules 12 to 16, with the detail in workspace `DEVELOPMENT-THROUGHPUT-STANDARD.md` ("Development feedback loop", "Testing", "Development-probe admission") and skill `kombify-development:kombify-fast-development`.
 <!-- END GENERATED: elastic-development-throughput kombify-throughput-policy-sync -->
 
 <!-- BEGIN GENERATED: planning-policy kombify-agent-policy-sync -->
@@ -39,129 +24,25 @@ Binding; `kombify-fast-development` holds the detail.
 
 ## Owner Rules
 
-- Every session, on every host and in every project, reads the owner's
-  cross-project rules before its first action and follows them:
-  `standards/rules.md` in the private repository `Soulcreek/agent-home`
-  (credentials, harness permissions, cost, databases, working with the
-  owner). They hold what no repository holds; engineering rules stay here.
-- The SessionStart hook prints them (`KOMBIFY_OWNER_RULES`) and
-  fast-forwards this device's Agent Home checkout; any other host runs
-  `node scripts/kombify-bootstrap.mjs rules`, which reads them from the local
-  checkout, from GitHub through `gh`, or from the last cached copy. Only when
-  all three fail, follow this file and say once that the owner rules were
-  not read.
+- Every session, on every host and in every project, reads the owner's cross-project rules (`standards/rules.md` in the private repository `Soulcreek/agent-home`) before its first action. The SessionStart hook prints them (`KOMBIFY_OWNER_RULES`); any other host runs `node scripts/kombify-bootstrap.mjs rules`. Only when that fails, follow this file and say once that the owner rules were not read.
+- The workspace `CONSTITUTION.md` binds in every repository; its rule 1 decides every conflict between documents.
 
 ## Planning System Policy
 
-- Beads epics (with `plan:` and `wave:` labels) own cross-repo priorities,
-  phase-gate state, ownership and blockers; the central `ROADMAP.md` states
-  the phase order and gate text, each product `ROADMAP.md` its milestones;
-  Beads owns executable work. GitHub Projects is read-only
-  history: no new items (owner decision 2026-10-15,
-  `GITHUB-PROJECTS-PLANNING-STANDARD.md`).
+- Beads epics own cross-repo priorities, milestones (labels `milestone` and `central:C<n>`), phase gates and blockers; the central `ROADMAP.md` states the phase order, each product `ROADMAP.md` its milestones, and Beads the executable work. GitHub Projects is read-only history (owner decision 2026-10-15). Detail: workspace `GITHUB-PROJECTS-PLANNING-STANDARD.md` and workspace `ISSUE-FLOW-STANDARD.md`.
 
 ## Beads Remote Write Policy
 
-- Cloudflare is the operational Beads authority (owner decision 2026-10-08).
-  Dolt remains read-only comparison/performance data. Never fall back to Dolt
-  or treat the derived .beads/issues.jsonl export as current tracker state.
-- Each repository carries its non-secret store binding. Run
-  `node scripts/beads-cloudflare-access.mjs` on a new host/clone and require
-  `BEADS_CLOUDFLARE_ACCESS_OK`; the governed writer bootstraps it automatically.
-  Use the checksum-pinned Cloudflare-capable bd from `beads:session-tools`.
-- Mutate only through
-  `mise --cd <workspace-root> run beads:write --repo <manifest-id> -- <bd args>`
-  and require `BEADS_REMOTE_WRITE_OK ... tracker=cloudflare` after independent
-  remote readback. An uncertain write is inspected, never replayed.
-- GitHub user identity or approved CI OIDC grants expiring tracker-scoped access;
-  no Cloudflare token is committed or manually copied between environments.
-- Setup, recovery and migration: [Beads Cloudflare Standard](https://github.com/KombiverseLabs/kombify-workspace/blob/main/BEADS-REMOTE-WRITE-STANDARD.md).
+- Cloudflare is the operational Beads authority (owner decision 2026-10-08). Mutate only through `mise --cd <workspace-root> run beads:write --repo <manifest-id> -- <bd args>` and require `BEADS_REMOTE_WRITE_OK ... tracker=cloudflare`; never fall back to Dolt or replay an uncertain write. Detail: workspace `BEADS-REMOTE-WRITE-STANDARD.md`.
 
 ## Public Beta Drift Guard
 
-- Scope fence first: before feature work, name the slice and its objective;
-  work outside it waits. A blocked slice is recorded with evidence, then the
-  next slice in scope starts; never substitute other work. An owner task never
-  waits behind the fence: it starts at once as its own slice.
-- No silent fallback: a missing prerequisite fails closed with a clear error.
-- "supported" in a catalog or matrix needs apply evidence at the current pin;
-  a release or repin is not proof.
-- Keep `main` green; regenerate generated files with repository tooling.
-- A late or missing scheduled job is a defect, not a state to report: diagnose
-  it, repair its schedule, permission or credential through the governed path,
-  and dispatch it once with the diagnosed cause when its result is needed now
-  (owner rule 2026-10-16). Sessions otherwise dispatch only the workflows their
-  task names: `beads-session.yml` and `cloud-session-doppler.yml` for session
-  access, `runner-failover.yml` during a runner outage, `live-screenshots.yml`
-  and `public-surface-scan.yml` for live checks, and governed privileged
-  workflows (`CI-CD-PLATFORM-STANDARD.md` "Workflows a session may dispatch").
-  Release preparation and Delivery are not among them: only the daily release
-  train ships (Git And Completion).
-- Every bundled binary or provider has a `THIRD-PARTY-NOTICES.md` entry.
-- Keep the tracker and the execution log current with each slice.
-- Consolidate PRs per phase (one commit per slice) and minimise CI runs: run
-  the affected gate locally, push finished work once, no empty commits.
+- Name the slice before feature work, fail closed on a missing prerequisite, prove "supported" at the current pin, keep `main` green, record bundled binaries in `THIRD-PARTY-NOTICES.md` and keep the tracker current: workspace `DEVELOPMENT-THROUGHPUT-STANDARD.md` "Drift guard"; scheduled jobs and the workflows a session may dispatch: workspace `CI-CD-PLATFORM-STANDARD.md`.
 
 ## Git And Completion
 
-- Track the task in Beads; work in the primary checkout on the synced `main`
-  and publish only your own paths or hunks to a PR branch with
-  `node scripts/session-publish.mjs`, never by switching the checkout's
-  branch. A worktree is the last resort under "Main first, shared second,
-  worktree last" in Start (owner rule 2026-10-08).
-- Collect and review parallel changes locally before publishing the finished
-  batch. Use one PR unless dependent slices benefit from separate reviews;
-  then use a native stack (`gh stack submit`) and merge it whole with
-  `gh stack merge` where possible.
-  Commit locally while iterating; push only finished work. Run the affected
-  gate, then publish the package or batch once, ready for review
-  (`gh pr create` without `--draft`, `gh stack submit --auto --open`): an
-  opened ready PR gets its required evidence without a close/reopen. Drafts
-  are only for explicitly requested early review. Queue the squash-merge yourself
-  (`gh pr merge --squash --auto`)
-  and continue with the next package instead of polling; settle merge, DIRTY
-  and red states at the next checkpoint. Never park a mergeable PR or hand
-  the merge to the owner. If a permission blocks it, name the block and ask
-  for that permission. Commit as the GitHub identity your token acts as.
-- Merges never wait for a person: one independent automated review before publishing, then auto-merge on the affected gate (`AUTONOMOUS-MERGE-STANDARD.md`).
-- Build phase and test window
-  ([decision](https://github.com/KombiverseLabs/kombify-workspace/blob/main/internal/records/DECISION-RECORD-2026-10-04-build-phase-test-window.md)):
-  per PR only the affected gate and the unchanged security checks run.
-  - Heavy real-host/device, provider provisioning and compatibility acceptance
-    runs happen **only in a declared test window**. Only the window
-    orchestrator starts them; sessions never dispatch them. Narrow module/flow
-    development probes on owned isolated nonproduction remote/device state
-    are admitted by effects and isolation under the development standard.
-  - No merge freeze (owner decision 2026-10-16,
-    [record](https://github.com/KombiverseLabs/kombify-workspace/blob/main/internal/records/DECISION-RECORD-2026-10-16-no-permanent-blockers.md)):
-    a window tests its pinned candidate SHAs while `main` keeps merging; heavy
-    lanes serialize through their org-wide concurrency groups. Open a window
-    only for a new candidate with ready `pending-window` work, one at a time;
-    `pending-window` work older than seven days is reason enough to open one.
-    No re-runs without a diagnosed cause.
-- Stable ships only through the daily train (owner rule 2026-10-16): the
-  train merges the release-preparation PR and that merge executes Delivery
-  once. No session merges it or dispatches Delivery to ship, not even on an
-  owner request; the required release-preparation check and Delivery refuse
-  every merger but the train (`CI-CD-PLATFORM-STANDARD.md` §4.6 "Train-only
-  stable"). An owner message naming a release means: get the change merged and
-  green on `preview`, make sure the release-preparation PR is current for the
-  next train slot, repair whatever keeps the train from admitting it, and read
-  the live version back after the train's Delivery. A failed train Delivery is
-  diagnosed and repaired, then re-dispatched once for the same release commit
-  with the cause in `retry-reason`. Inside a window, registered source gates
-  may admit the canonical generated preparations and publications needed for
-  runtime acceptance before its final report; retain original code candidate,
-  true product/artifact sources and authenticated publication provenance, and
-  preserve all Delivery effect gates. Start the next package while Delivery
-  runs. Broad acceptance stays `pending-window`/`unverified`.
-- A merge is not live: ship only through the `kombify-ship` skill
-  (`kombify-workspace/.agents/skills/kombify-ship/SKILL.md`).
-- Close Beads issues after the merge SHA exists; reconcile your merged paths
-  (`node scripts/session-publish.mjs --after-merge -- <paths>`) and remove a
-  last-resort worktree with `git worktree remove`.
-- Report committed, merged, deployed and live state with evidence, plus any
-  exact blocker.
+- Work on the synced `main` and publish only your own paths or hunks with `node scripts/session-publish.mjs`; open the batch ready with auto-merge after one automated review; close Beads issues after the merge SHA exists and reconcile with `--after-merge`. Detail: workspace `DEVELOPMENT-THROUGHPUT-STANDARD.md` "Sessions, checkouts and publishing" and workspace `AUTONOMOUS-MERGE-STANDARD.md`.
+- Stable ships only through the daily release train and a merge is not live: workspace skill `.agents/skills/kombify-ship/SKILL.md` and workspace `CI-CD-PLATFORM-STANDARD.md` §4.6. Report committed, merged, deployed and live state separately, with evidence and any exact blocker.
 <!-- END GENERATED: planning-policy kombify-agent-policy-sync -->
 
 ## Sources
