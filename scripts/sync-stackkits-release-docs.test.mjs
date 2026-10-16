@@ -149,6 +149,9 @@ test('accepts the published capabilities, add-ons and profile facts and still re
     { id: 'chat', name: 'Chat', help: 'Talk to your files.', required: false, enabledByDefault: false, requires: ['inference'], requiresAccelerator: false, default: { id: 'openwebui', name: 'Open WebUI', realization: 'recorded' } },
   ]
   useCase.addOns = [{ id: 'office', defaultAlternative: 'euro-office', alternatives: [{ id: 'euro-office', name: 'euro-office', modules: [{ id: 'stackkits-euro-office-runtime', computeProfiles: ['standard'] }] }] }]
+  // v0.53.8 publishes owner-facing `bundles` and per-option memory facts.
+  useCase.bundles = [{ id: 'local-ai', name: 'My local AI', help: 'Run models on your hardware.', examples: ['Compare models'], capabilities: ['inference'], defaults: ['inference'], required: true, enabledByDefault: true, advanced: false, recommendsAccelerator: false, requiresSandbox: false }]
+  useCase.settings.push({ id: 'model-size', name: 'Model size', kind: 'choice', group: 'hardware', depth: 'summary', default: 'small', realization: 'install', options: [{ id: 'small', name: 'Small', note: 'About 4 GB', realization: 'install', minMemoryGb: 8 }, { id: 'large', name: 'Large', minMemoryGb: 32, needsAccelerator: true }] })
   catalog.contentDigest = canonicalDigest(catalog)
   assert.equal(validateCatalog(catalog, 'v9.9.9'), catalog)
 
@@ -164,6 +167,9 @@ test('accepts the published capabilities, add-ons and profile facts and still re
     doc => { doc.catalog.useCases[0].alternatives[0].modules[0].computeProfileFacts.high.reservation = { ramGB: -1 } },
     doc => { doc.catalog.useCases[0].alternatives[0].modules[0].computeProfileFacts.high.gates = [] },
     doc => { doc.catalog.useCases[0].alternatives[0].modules[0].acceleratorProfileFacts.nvidia.vendor = '' },
+    doc => { doc.catalog.useCases[0].bundles[0].gates = [] },
+    doc => { doc.catalog.useCases[0].bundles[0].required = 'yes' },
+    doc => { doc.catalog.useCases[0].settings[1].options[0].minMemoryGb = -1 },
   ]) {
     const broken = structuredClone(catalog)
     mutate(broken)
