@@ -62,7 +62,7 @@ export function validateCatalog(document, tag) {
   if (!Array.isArray(document.catalog.useCases)) throw new Error('catalog.useCases must be an array')
   sortedUnique(document.catalog.useCases.map(item => item.id), 'catalog use-case IDs')
   for (const useCase of document.catalog.useCases) {
-    keys(useCase, ['id', 'title', 'description', 'components', 'computeTiers', 'settings', 'capabilities', 'docs', 'defaultAlternative', 'alternatives', 'addOns', 'mainUseCase'], `useCase ${useCase.id ?? '?'}`)
+    keys(useCase, ['id', 'title', 'description', 'components', 'computeTiers', 'settings', 'capabilities', 'docs', 'defaultAlternative', 'alternatives', 'addOns', 'bundles', 'mainUseCase'], `useCase ${useCase.id ?? '?'}`)
     string(useCase.id, 'useCase.id', /^[a-z][a-z0-9-]+$/)
     string(useCase.title, `${useCase.id}.title`)
     string(useCase.description, `${useCase.id}.description`)
@@ -80,6 +80,7 @@ export function validateCatalog(document, tag) {
     validateSettings(useCase)
     validateCapabilities(useCase)
     if (useCase.addOns !== undefined) validateAddOns(useCase)
+    if (useCase.bundles !== undefined) validateBundles(useCase)
     if (useCase.docs !== undefined) string(useCase.docs, `${useCase.id}.docs`, /^\/[a-z0-9/-]+$/)
     if (useCase.defaultAlternative !== undefined || useCase.alternatives !== undefined) validateAlternatives(useCase, `useCase ${useCase.id}`)
     if (useCase.mainUseCase !== undefined) validateMainUseCase(useCase.mainUseCase, `${useCase.id}.mainUseCase`)
@@ -203,6 +204,33 @@ function validateAddOns(useCase) {
   for (const addOn of useCase.addOns) validateWorkload(addOn, `${label} ${addOn.id ?? '?'}`)
 }
 
+/**
+ * `bundles` are the owner-facing groupings of a use case's capabilities
+ * (StackKits UseCase.Bundles, first published for `ai` in v0.53.8): validated
+ * against their real shape, unrendered like the other module-level facts.
+ */
+function validateBundles(useCase) {
+  const label = `${useCase.id}.bundles`
+  if (!Array.isArray(useCase.bundles) || useCase.bundles.length === 0) throw new Error(`${label} must be a non-empty array`)
+  const ids = useCase.bundles.map(bundle => bundle.id)
+  if (new Set(ids).size !== ids.length) throw new Error(`${label} IDs contain duplicates`)
+  for (const bundle of useCase.bundles) {
+    const bundleLabel = `${label} ${bundle.id ?? '?'}`
+    keys(bundle, ['id', 'name', 'help', 'examples', 'capabilities', 'defaults', 'required', 'enabledByDefault', 'advanced', 'recommendsAccelerator', 'requiresSandbox'], bundleLabel)
+    string(bundle.id, `${bundleLabel}.id`, CONTRACT_ID)
+    string(bundle.name, `${bundleLabel}.name`)
+    string(bundle.help, `${bundleLabel}.help`)
+    for (const field of ['examples', 'capabilities', 'defaults']) {
+      if (!Array.isArray(bundle[field])) throw new Error(`${bundleLabel}.${field} must be an array`)
+    }
+    for (const example of bundle.examples) string(example, `${bundleLabel}.examples entry`)
+    for (const capability of [...bundle.capabilities, ...bundle.defaults]) string(capability, `${bundleLabel} capability entry`, CONTRACT_ID)
+    for (const flag of ['required', 'enabledByDefault', 'advanced', 'recommendsAccelerator', 'requiresSandbox']) {
+      if (typeof bundle[flag] !== 'boolean') throw new Error(`${bundleLabel}.${flag} must be a boolean`)
+    }
+  }
+}
+
 function validateCapabilityOption(option, label) {
   keys(option, ['id', 'name', 'note', 'realization', 'pending', 'workloadRef', 'alternativeRef', 'alternativeRefs'], label)
   string(option.id, `${label}.id`, CONTRACT_ID)
@@ -281,10 +309,13 @@ function validateSettings(useCase) {
     if (setting.kind === 'choice') {
       if (!Array.isArray(setting.options) || setting.options.length < 2) throw new Error(`${label}.options requires choices`)
       for (const option of setting.options) {
-        keys(option, ['id', 'name', 'note'], `${label}.option`)
+        keys(option, ['id', 'name', 'note', 'realization', 'minMemoryGb', 'needsAccelerator'], `${label}.option`)
         string(option.id, `${label}.option.id`, /^[a-z][a-z0-9-]+$/)
         string(option.name, `${label}.option.name`)
         if (option.note !== undefined) string(option.note, `${label}.option.note`)
+        if (option.realization !== undefined && !REALIZATIONS.includes(option.realization)) throw new Error(`${label}.option.realization is invalid`)
+        if (option.minMemoryGb !== undefined && (typeof option.minMemoryGb !== 'number' || !Number.isFinite(option.minMemoryGb) || option.minMemoryGb < 0)) throw new Error(`${label}.option.minMemoryGb must be a non-negative number`)
+        if (option.needsAccelerator !== undefined && typeof option.needsAccelerator !== 'boolean') throw new Error(`${label}.option.needsAccelerator must be a boolean`)
       }
     } else if (setting.options !== undefined) {
       throw new Error(`${label}.options requires choice kind`)
