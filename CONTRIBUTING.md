@@ -1,41 +1,31 @@
 # Contribute to the documentation
 
-Thank you for your interest in contributing to our documentation! This guide will help you get started.
-
-## How to contribute
-
-### Option 1: Edit directly on GitHub
-
-1. Navigate to the page you want to edit
-2. Click the "Edit this file" button (the pencil icon)
-3. Make your changes and submit a pull request
-
-### Option 2: Local development
-
-1. Fork and clone this repository
-2. Install [mise](https://mise.jdx.dev/) and run `mise install`
-3. Create a branch for your changes
-4. Make changes and register each new page in `docs.json`
-5. Run `mise run check`
-6. Run `mise run local:e2e` for the real HTTP preview gate
-7. Commit your changes and submit a pull request
+1. Edit a page on GitHub ("Edit this file"), or fork and clone, run
+   `mise install`, and branch.
+2. Register each new page in `docs.json`.
+3. Run `mise run check`, then `mise run local:e2e` (real HTTP preview gate).
+4. Open a pull request.
 
 ## Public-only rule
 
-Every file in this repository is treated as anonymously publishable. Do not add review-only or internal pages and rely on hidden navigation, `public: false`, group frontmatter, or provider authentication. Direct routes, search, `llms.txt`, MCP projections, and previews can expose the file.
+Every file here is treated as anonymously publishable. Do not rely on hidden
+navigation, `public: false`, group frontmatter or provider authentication:
+direct routes, search, `llms.txt`, MCP projections and previews can expose the
+file. Keep unfinished or internal material in its owning product repository;
+move it here only when sanitized, customer-facing, registered in `docs.json`
+and ready for anonymous publication.
 
-Keep unfinished or internal material in its owning product repository. Move it here only after it is sanitized, customer-facing, registered in `docs.json`, and ready for anonymous publication.
+## Writing
 
-## Writing guidelines
-
-- **Use active voice**: "Run the command" not "The command should be run"
-- **Address the reader directly**: Use "you" instead of "the user"
-- **Keep sentences concise**: Aim for one idea per sentence
-- **Lead with the goal**: Start instructions with what the user wants to accomplish
-- **Use consistent terminology**: Don't alternate between synonyms for the same concept
-- **Include examples**: Show, don't just tell
-- **Keep examples public-safe**: Never include operator secret names, private origins, internal runbooks, customer data, or live credentials
+- Active voice, address the reader as "you", one idea per sentence.
+- Lead with the goal; show examples; use one term per concept.
+- Examples are public-safe: no operator secret names, private origins,
+  internal runbooks, customer data or live credentials.
 
 ## Client setup guides
 
-Pages that walk non-technical readers through setting up apps for a use case, such as phone apps, browser extensions and web vaults, follow [docs-guidelines/client-setup-guides.md](docs-guidelines/client-setup-guides.md). That standard covers tone, page structure, the screenshot and vendor-link policy, image rules and a review checklist. Build them with `snippets/client-setup-guide.jsx`, and capture screenshots with [scripts/guide-screenshots](scripts/guide-screenshots/README.md).
+Pages that walk non-technical readers through apps for a use case follow
+[docs-guidelines/client-setup-guides.md](docs-guidelines/client-setup-guides.md)
+(tone, structure, screenshot and vendor-link policy, review checklist). Build
+them with `snippets/client-setup-guide.jsx`; capture screenshots with
+[scripts/guide-screenshots](scripts/guide-screenshots/README.md).
