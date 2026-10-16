@@ -29,6 +29,7 @@
 //   node scripts/kombify-bootstrap.mjs run -- <cmd...>   # cmd with the repo's Doppler secrets
 //   node scripts/kombify-bootstrap.mjs packages -- <cmd...>  # cmd with NODE_AUTH_TOKEN
 //   node scripts/kombify-bootstrap.mjs rules     # the owner's rules (also printed by --hook)
+//   node scripts/kombify-bootstrap.mjs mcp --mcp-host codex --install # repair + prove selected native staff MCP
 //   node scripts/kombify-bootstrap.mjs context   # obtain/refresh and install Agent Home
 //   node scripts/kombify-bootstrap.mjs context --check  # inspect without installation
 //
@@ -40,11 +41,13 @@
 // Prints names, sources and statuses only, never a secret value.
 // KOMBIFY_BOOTSTRAP_SKIP=1 disables it.
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { prepareAgentHome } from './lib/agent-home-bootstrap.mjs';
+import { prepareStaffMcp } from './lib/staff-mcp-bootstrap.mjs';
 
 const SELF = fileURLToPath(import.meta.url);
 export const ROOT = resolve(dirname(SELF), '..');
@@ -98,7 +101,33 @@ function cliToken(root) {
   return token ? { token } : {};
 }
 
-async function loadBroker() {
+export async function loadBroker({ qualified = false } = {}) {
+  if (qualified) {
+    const git = args => spawnSync('git', ['-C', ROOT, ...args], { encoding: 'utf8', windowsHide: true, timeout: 15_000, stdio: ['ignore', 'pipe', 'pipe'] });
+    const remote = git(['remote', 'get-url', 'origin']);
+    let revision, bytes, blob;
+    if (remote.status === 0 && [`https://github.com/${BROKER_REPO}.git`, `https://github.com/${BROKER_REPO}`, `git@github.com:${BROKER_REPO}.git`].includes(remote.stdout.trim())) {
+      const head = git(['rev-parse', 'HEAD']), upstream = git(['rev-parse', 'origin/main']);
+      if (head.status !== 0 || upstream.status !== 0 || head.stdout !== upstream.stdout || git(['branch', '--show-current']).stdout.trim() !== 'main' || git(['status', '--porcelain', '--', BROKER_FILE]).stdout.trim()) throw new Error('mcp_github_session_source_unsettled');
+      revision = head.stdout.trim(); bytes = git(['show', `${revision}:${BROKER_FILE}`]).stdout;
+      blob = git(['rev-parse', `${revision}:${BROKER_FILE}`]).stdout.trim();
+    } else {
+      const gh = args => { const r = spawnSync('gh', ['api', ...args], { encoding: 'utf8', windowsHide: true, timeout: 30_000, stdio: ['ignore', 'pipe', 'pipe'] }); if (r.status !== 0) throw new Error('mcp_github_session_source_unavailable'); return r.stdout; };
+      revision = gh([`repos/${BROKER_REPO}/git/ref/heads/main`, '--jq', '.object.sha']).trim();
+      if (!/^[0-9a-f]{40}$/.test(revision)) throw new Error('mcp_github_session_source_unverified');
+      const source = JSON.parse(gh([`repos/${BROKER_REPO}/contents/${BROKER_FILE}?ref=${revision}`]));
+      if (source.type !== 'file' || source.encoding !== 'base64') throw new Error('mcp_github_session_source_unverified');
+      bytes = Buffer.from(source.content, 'base64').toString('utf8'); blob = source.sha;
+    }
+    const data = Buffer.from(bytes ?? '');
+    if (!/^[0-9a-f]{40}$/.test(revision ?? '') || createHash('sha1').update(`blob ${data.length}\0`).update(data).digest('hex') !== blob || !bytes.includes('export async function login')) throw new Error('mcp_github_session_source_unverified');
+    const path = join(homedir(), '.kombify', 'cloud-doppler-session.mjs');
+    mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
+    writeFileSync(path, data, { mode: 0o600 });
+    const module = await import(`${pathToFileURL(path).href}?source=${revision}`);
+    if (typeof module.readCache !== 'function' || typeof module.login !== 'function') throw new Error('mcp_github_session_source_unverified');
+    return { ...module, source: { repository: BROKER_REPO, revision, git_blob: blob, sha256: createHash('sha256').update(data).digest('hex'), path } };
+  }
   const local = join(ROOT, BROKER_FILE);
   if (existsSync(local)) return import(pathToFileURL(local).href);
   const cached = join(homedir(), '.kombify', 'cloud-doppler-session.mjs');
@@ -161,7 +190,14 @@ function printOwnerRules() {
 // marcel490 is the Claude cloud proxy, Soulcreek is gh on the owner's devices.
 export const BROKER_ACTORS = ['marcel490', 'Soulcreek'];
 
+// The active gh account, read locally: a throttled or unreachable GitHub API must
+// not turn a signed-in owner identity into a login prompt. The broker workflow
+// verifies the actor itself and reports a spent REST budget as throttling.
 function ghLogin() {
+  const token = spawnSync('gh', ['auth', 'token', '--hostname', 'github.com'], { encoding: 'utf8' });
+  if (token.status !== 0 || !token.stdout.trim()) return '';
+  const user = spawnSync('gh', ['config', 'get', '-h', 'github.com', 'user'], { encoding: 'utf8' });
+  if (user.status === 0 && user.stdout.trim()) return user.stdout.trim();
   const result = spawnSync('gh', ['api', 'user', '--jq', '.login'], { encoding: 'utf8' });
   return result.status === 0 ? result.stdout.trim() : '';
 }
@@ -288,6 +324,12 @@ export async function main(argv, env = process.env) {
     home: option('--home'), checkout: option('--agent-home'), agents: option('--agents'), device: option('--device'), install,
   });
 
+  const staffMcp = install => prepareStaffMcp({ root: ROOT, host: option('--mcp-host'), checkout: option('--plugins-source'), credentialSource: own.includes('--mcp-credential-source') ? option('--mcp-credential-source') ?? '' : undefined, githubSession: () => loadBroker({ qualified: true }), install: install && !own.includes('--hook'), env });
+  if (command === 'mcp') {
+    const capability = await staffMcp(own.includes('--install'));
+    console.log(`KOMBIFY_BOOTSTRAP_CAPABILITY ${JSON.stringify({ name: 'staff-mcp', ...capability })}`);
+    return ['ready', 'not-required'].includes(capability.status) ? 0 : 1;
+  }
   if (command === 'context') {
     const context = personalContext(!own.includes('--check'));
     console.log(`KOMBIFY_BOOTSTRAP_CAPABILITY ${JSON.stringify({ name: 'personal-context', ...context })}`);
@@ -337,7 +379,9 @@ export async function main(argv, env = process.env) {
   const context = env.GITHUB_ACTIONS === 'true' ? { status: 'not-required', source: 'github-actions' } : personalContext(own.includes('--install'));
   console.log(`KOMBIFY_BOOTSTRAP_CAPABILITY ${JSON.stringify({ name: 'personal-context', ...context })}`);
   if (context.status === 'failed') gaps.push(`personal-context: ${context.code}`);
-  const pending = context.status === 'pending' || access.pending;
+  const mcp = own.includes('--install') ? await staffMcp(true) : { status: 'not-requested' };
+  if (own.includes('--install')) console.log(`KOMBIFY_BOOTSTRAP_CAPABILITY ${JSON.stringify({ name: 'staff-mcp', ...mcp })}`);
+  const pending = context.status === 'pending' || access.pending || mcp.status === 'pending';
   const scopeText = scope ? `${scope.project}/${scope.config}` : 'none';
   const dopplerText = access.source ? `${access.source}${access.pending ? '(on-demand)' : ''}${access.skipped ? '(repository-secrets)' : ''}` : 'missing';
   for (const gap of gaps) console.log(`KOMBIFY_BOOTSTRAP_GAP ${gap}`);
