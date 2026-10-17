@@ -1,0 +1,59 @@
+---
+title: "Usa una dirección con un servidor StackKits"
+description: "Cómo obtienen las apps de un kit sus nombres de kombify.me y qué permanece en local"
+sidebarTitle: "Servidor StackKits"
+icon: "server"
+---
+
+Un servidor StackKits funciona por sí solo, sin kombify.me. Una dirección es un
+extra opcional que hace que algunas apps sean accesibles desde fuera.
+
+## Qué ocurre automáticamente
+
+Cuando un flujo conectado de StackKits o Techstack registra tu servidor, puede:
+
+- crear tu nombre base, por ejemplo `mylab-u8f3k2.kombify.me`
+- crear un nombre por cada app del kit, siempre como `{base}-{app}.kombify.me`
+- mantener desactivadas las apps nuevas hasta que las permitas
+
+Las apps de kit como `auth`, `id` y `coolify` siempre obtienen la forma
+`mylab-u8f3k2-auth.kombify.me`. El nombre sin prefijo `auth.kombify.me` nunca se
+usa. Las apps de kit no cuentan para tu límite de 20 apps propias por nombre
+base.
+
+## Pasos
+
+1. Instala e inicia tu servidor StackKits como de costumbre. Comprueba primero
+   que funciona en tu red local.
+2. Conecta el servidor a tu cuenta de kombify mediante el flujo conectado.
+3. Decide para cada app si es accesible desde internet.
+   - Accesible: obtiene una [dirección pública](/es/kombify-me/public-addresses).
+   - Solo en casa: usa una [dirección privada](/es/kombify-me/private-targets).
+4. Activa solo las apps a las que quieres que lleguen los visitantes.
+5. Abre la dirección `kombify.me` de la app en un navegador.
+
+## Qué permanece en local
+
+Los nombres dentro de tu red doméstica los gestiona el resolvedor que instala
+StackKits. Los nombres alojados `*.lan.kombify.me` no están implementados. Quita
+la dirección de internet y la app sigue funcionando en local.
+
+## Eliminar un servidor
+
+Cuando se elimina un servidor conectado, sus direcciones pueden eliminarse con
+él. Las direcciones auxiliares que kombify.me creó para él también se liberan. Si
+la limpieza falla, la solicitud informa de un error y se puede repetir sin
+riesgo.
+
+## Si algo sale mal
+
+| Lo que ves | Qué hacer |
+| --- | --- |
+| La app funciona en casa pero no a través de kombify.me | Comprueba que la dirección está activada y activa. |
+| "binding conflict" (409) | Esa dirección ya pertenece a otro propietario o servidor. No se puede tomar. |
+| Disposiciones de dirección mezcladas (409) | Un nombre base conserva la disposición de su primera app. Sigue usando esa disposición. |
+| Error de límite 429 | Alcanzaste el límite de nombres base o de apps. Elimina uno sin usar. |
+| Falla el inicio de sesión de una app de kit | Asegúrate de que la dirección usa la forma `{base}-auth.kombify.me`. |
+
+Consulta también [Resumen](/es/kombify-me/overview) y
+[Solución de problemas](/es/kombify-me/troubleshooting).

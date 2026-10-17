@@ -1,0 +1,48 @@
+---
+title: "为 StackKits 服务器使用地址"
+description: "套件应用如何获得其 kombify.me 名称，以及哪些内容保持本地"
+sidebarTitle: "StackKits 服务器"
+icon: "server"
+---
+
+StackKits 服务器无需 kombify.me 也能独立工作。地址是一个可选的附加项，使某些应用可以从外部访问。
+
+## 自动发生的事情
+
+当已连接的 StackKits 或 Techstack 流程注册你的服务器时，它可以：
+
+- 创建你的基础名称，例如 `mylab-u8f3k2.kombify.me`
+- 为每个套件应用创建一个名称，始终为 `{base}-{app}.kombify.me`
+- 在你允许之前保持新应用关闭
+
+诸如 `auth`、`id` 和 `coolify` 的套件应用始终采用 `mylab-u8f3k2-auth.kombify.me` 的形式。裸名称 `auth.kombify.me` 从不使用。套件应用不计入每个基础名称 20 个自定义应用的上限。
+
+## 步骤
+
+1. 照常安装并启动你的 StackKits 服务器。先检查它在你的本地网络上能否正常工作。
+2. 通过已连接的流程将服务器连接到你的 kombify 账户。
+3. 逐个应用决定它是否可从互联网访问。
+   - 可访问：它获得一个[公共地址](/zh-Hans/kombify-me/public-addresses)。
+   - 仅限家中：使用[私有地址](/zh-Hans/kombify-me/private-targets)。
+4. 只开启你希望访客能访问的应用。
+5. 在浏览器中打开该应用的 `kombify.me` 地址。
+
+## 哪些内容保持本地
+
+家庭网络内的名称由 StackKits 安装的解析器处理。托管的 `*.lan.kombify.me` 名称尚未实现。移除互联网地址后，该应用在本地仍可继续工作。
+
+## 移除服务器
+
+当一个已连接的服务器被移除时，它的地址可以随之移除。kombify.me 为它创建的辅助地址也会被释放。如果清理失败，该请求会报告错误，并且可以安全地重复。
+
+## 如果出了问题
+
+| 你看到的情况 | 该怎么做 |
+| --- | --- |
+| 应用在家中可用，但通过 kombify.me 不可用 | 检查该地址是否已开启并处于 active 状态。 |
+| “binding conflict” (409) | 该地址已属于另一个所有者或服务器。无法接管。 |
+| 混合的地址布局 (409) | 基础名称沿用其第一个应用的布局。请继续使用该布局。 |
+| 429 限额错误 | 你达到了基础名称或应用的上限。移除一个未使用的。 |
+| 套件应用的登录失败 | 确保地址使用 `{base}-auth.kombify.me` 的形式。 |
+
+另见[概览](/zh-Hans/kombify-me/overview)和[故障排查](/zh-Hans/kombify-me/troubleshooting)。
