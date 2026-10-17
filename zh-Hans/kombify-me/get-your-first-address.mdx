@@ -1,0 +1,63 @@
+---
+title: "获取你的第一个 kombify.me 地址"
+description: "分步指南：选一个名称，把它指向你的服务，然后开启"
+sidebarTitle: "你的第一个地址"
+icon: "rocket"
+---
+
+本指南带你完成第一个 `kombify.me` 地址，从选择名称到在浏览器中打开它。
+
+<Warning>
+kombify.me 是 Alpha 软件。名称和错误消息仍可能变化。
+</Warning>
+
+## 你会得到什么
+
+一个地址分为两级：
+
+- 你的家用服务器的**基础名称**，例如 `mylab-u8f3k2.kombify.me`。
+- 其上每个应用的**服务名称**，例如 `mylab-u8f3k2-grafana.kombify.me`。
+
+这些名称由 kombify.me 为你构建。你选择家用服务器的名称和应用的名称，其余部分由 kombify.me 添加。
+
+| 账户类型 | 基础名称的样子 |
+| --- | --- |
+| kombify 账户 | `{your name}-{short id}.kombify.me` |
+| 自托管 | `sh-{your name}-{device code}.kombify.me` |
+
+需要了解：
+
+- 名称使用小写字母、数字和连字符，最长 63 个字符。
+- 应用名称最长 20 个字符。
+- 你最多可以有 5 个基础名称，每个基础名称下最多 20 个应用。
+- 诸如 `auth`、`api` 或 `www` 的名称不能单独使用。诸如 `auth` 的套件应用仍然可用，并变为 `{base}-auth.kombify.me`。
+
+## 开始之前
+
+- 决定你想分享哪个应用。
+- 弄清楚该应用能否从互联网访问。如果可以，请继续阅读。如果它只在你的家庭网络内工作，请先阅读[公共还是私有](/zh-Hans/kombify-me/public-or-private)。
+- 拥有 kombify.me 的访问权限。托管账户通过已连接的 kombify 流程注册。自托管安装使用电子邮件地址注册并获得一个 API 密钥。目前 kombify.me 没有用于此的界面。
+
+## 步骤
+
+1. **注册你的家用服务器。** 给它起一个简短的名称，例如 `mylab`。kombify.me 会回复完整的基础名称。
+2. **将基础名称指向你的服务器。** 对于可从互联网访问的应用，使用其公共 `http://` 或 `https://` 地址。
+3. **添加应用。** 给它起一个简短的名称，例如 `grafana`，并提供其地址。已连接的 StackKits 和 Techstack 流程可以为你完成第 1 到 3 步。
+4. **开启应用。** 新应用默认是关闭的。当你希望该地址接受访客时，开启该应用（“exposed”）。
+5. **打开地址。** 在浏览器中访问 `https://mylab-u8f3k2-grafana.kombify.me`。HTTPS 由系统为你处理。
+
+对同一账户再次注册相同的名称不会创建第二个，而是返回你已有的那个。
+
+## 如果出了问题
+
+| 你看到的情况 | 该怎么做 |
+| --- | --- |
+| “service subdomain not exposed” (404) | 开启该应用（第 4 步）。 |
+| “subdomain inactive” (503) | 该地址已暂停。将其设回 active。 |
+| “subdomain already taken” (409) | 选择另一个名称。 |
+| 配额错误 (429) | 你已达到 5 个基础名称或 20 个应用的上限。移除一个你不再使用的。 |
+| “reserved” 错误 | 选择另一个名称。 |
+| 502 “Bad Gateway” | 你的服务器没有响应。检查它是否在运行且为公开。 |
+| 注册提示邮件服务不可用 | 请稍后再试。这种情况下不会创建账户。 |
+
+更多检查项见[故障排查页面](/zh-Hans/kombify-me/troubleshooting)。托管的 `*.lan.kombify.me` 名称并不存在。对于家庭网络内的名称，请使用 StackKits 设置的本地名称。

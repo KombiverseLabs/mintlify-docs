@@ -1,0 +1,66 @@
+---
+title: "Pública, privada o redirección: ¿cuál necesito?"
+description: "Los tres tipos de dirección de kombify.me en términos cotidianos"
+sidebarTitle: "Pública o privada"
+icon: "route"
+---
+
+Toda dirección de kombify.me apunta a algún sitio. Hay tres tipos. Elige el que
+corresponda a dónde vive tu app.
+
+## Los tres tipos
+
+| Tipo | En términos cotidianos | Úsalo cuando |
+| --- | --- | --- |
+| Dirección pública (`proxy`) | kombify.me se coloca delante de tu app y deja pasar a los visitantes. El visitante sigue viendo el nombre de kombify.me. | Tu app ya es accesible desde internet. |
+| Redirección | kombify.me envía al visitante a otra dirección web. El navegador muestra entonces esa otra dirección. | Solo quieres un nombre corto y fácil de recordar que reenvíe a otro sitio. |
+| Dirección privada (`tunnel`) | Un pequeño ayudante en tu casa abre una conexión de salida hacia kombify.me y trae las solicitudes. No hace falta abrir nada en tu router. | Tu app solo es accesible dentro de tu red doméstica. |
+
+## Cómo elegir
+
+1. ¿Puede alguien fuera de tu casa abrir hoy la dirección web de la app? Si es
+   así, elige una **dirección pública**.
+2. ¿Solo quieres un nombre más bonito para una página que ya vive en otro sitio?
+   Elige una **redirección**.
+3. ¿La app solo es accesible en direcciones como `192.168.x.x` o `localhost`?
+   Elige una **dirección privada**.
+
+Una dirección pública nunca acepta una dirección privada, de loopback o de enlace
+local. Esto protege tu red doméstica. Si lo intentas, recibes un error y no se
+guarda nada.
+
+## Qué necesita una dirección privada
+
+- Un agente de nodo de Techstack en ejecución en casa que pueda alcanzar la app.
+- El agente debe permanecer conectado. Si está desconectado, los visitantes
+  reciben la respuesta "inténtalo de nuevo en unos segundos" (503).
+- Las páginas y los archivos están limitados a 10 MiB por solicitud o respuesta y
+  a 30 segundos por solicitud. No se admiten las transmisiones en directo ni las
+  conexiones de red arbitrarias.
+
+Consulta [Accede a un servicio privado](/es/kombify-me/private-targets) para ver
+el recorrido completo.
+
+## Pública no significa "todo el mundo debe verla"
+
+Cualquiera que conozca una dirección pública puede abrirla, a menos que tu app
+pida un inicio de sesión. La app mantiene su propio inicio de sesión y sus
+cookies. Mantén las apps con datos sensibles detrás de su propio inicio de
+sesión, o déjalas desactivadas hasta que estés listo.
+
+Además, cada app empieza desactivada. Nadie puede abrirla hasta que la actives.
+
+kombify.me también puede compartir una app durante un tiempo limitado con
+visitantes concretos. Es una función aparte, con sus propios controles de
+propietario en el panel de kombify. No se trata aquí.
+
+## Si algo sale mal
+
+| Lo que ves | Qué significa |
+| --- | --- |
+| Error al guardar una dirección privada en una dirección pública | La ruta pública rechaza las direcciones privadas. Usa en su lugar una dirección privada. |
+| 503 "try again" en una dirección privada | El ayudante doméstico no está conectado. Inícialo y espera un momento. |
+| 502 "Bad Gateway" en una dirección pública | kombify.me no pudo alcanzar tu app. Comprueba que está en marcha y es pública. |
+
+Los nombres alojados `*.lan.kombify.me` no están implementados. StackKits
+proporciona nombres dentro de tu red doméstica.

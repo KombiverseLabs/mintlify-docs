@@ -1,0 +1,71 @@
+---
+title: "Trabaja sin conexión con modelos locales"
+description: "Mantén tu voz en tu ordenador con la ruta solo local"
+sidebarTitle: "Trabajar sin conexión"
+icon: "lock"
+---
+
+SpeechKit puede funcionar sin claves en la nube. En la ruta local, tu voz se
+procesa en tu ordenador. Esta guía muestra cómo configurarlo en Windows.
+
+## Lo que necesitas
+
+- Un ordenador con Windows 10 u 11 con la app instalada. Consulta
+  [Instalar en Windows](/es/speechkit/install-windows).
+- Una conexión a internet para la primera configuración. El instalador incluye el
+  motor de voz local. El modelo de voz en sí se descarga cuando lo eliges.
+
+## Pasos
+
+<Steps>
+  <Step title="Elige Local en la configuración">
+    En la configuración del primer arranque, elige **Local**. Ejecuta Dictation y
+    Assist en este dispositivo, y los modelos residen en tu ordenador.
+  </Step>
+  <Step title="Elige un modelo de voz">
+    Elige un modelo local de Whisper para descargar. Si no eliges ninguno,
+    SpeechKit empieza con el modelo inicial más pequeño. La descarga se ejecuta
+    en segundo plano y puedes continuar mientras termina.
+  </Step>
+  <Step title="Prueba tu micrófono">
+    La configuración puede grabar una breve prueba local. Es opcional y no se
+    guarda nada. El texto se muestra solo en la ventana de configuración.
+  </Step>
+  <Step title="Define el ámbito de privacidad">
+    Abre **Settings > Privacy & Data**. En **Network scope** elige **This device
+    only**. Entonces solo pueden usarse los modelos que SpeechKit ejecuta en el
+    dispositivo. Todo lo que necesita la red queda en pausa, no se elimina.
+  </Step>
+  <Step title="No conserves lo que no necesitas">
+    Elige **Zero retention** si el material bruto de una reunión debe eliminarse
+    tras la reunión. Consulta [Elige tus ajustes de privacidad](/es/speechkit/privacy-settings).
+  </Step>
+</Steps>
+
+## Conviene saber
+
+- Con **This device only**, incluso las descargas de modelos y las
+  comprobaciones de actualizaciones se bloquean por defecto. Si necesitas
+  descargar un modelo más tarde, amplía el ámbito solo por ese momento. Un ajuste
+  llamado `allow_setup_traffic` en `config.toml` puede permitir las descargas de
+  modelos y actualizaciones desde fuentes oficiales, sin audio, transcripciones
+  ni prompts.
+- El texto que dictas permanece en tu historial en el ordenador. Un ordenador sin
+  internet sigue guardando las transcripciones, salvo que elijas Zero retention.
+- Assist y el Voice Agent también pueden funcionar con modelos locales. Un modelo
+  de lenguaje local y la salida de voz local son descargas o servicios aparte.
+  Revisa la pestaña **Model** de cada modo.
+- En macOS, la beta de Dictation funciona con el motor local incluido, y los
+  modelos se descargan bajo demanda.
+
+## Si algo sale mal
+
+- **El modelo no se descarga.** Con un ámbito estricto, las descargas están
+  bloqueadas. Amplía el ámbito para la descarga y luego vuelve a restringirlo.
+  Comprueba también el espacio libre en disco.
+- **La descarga del modelo se queda atascada.** Reintenta la descarga en
+  Settings.
+- **Dictation dice que el motor no está listo.** Puede que el motor local aún se
+  esté iniciando o que falte el modelo. Mira **Needs attention** en **Overview**.
+- **Un ajuste aparece atenuado.** Necesita la red. Settings muestra por qué está
+  deshabilitado.

@@ -1,0 +1,47 @@
+---
+title: "使用本地模型离线工作"
+description: "通过仅本地路径，让你的语音保留在自己的电脑上"
+sidebarTitle: "离线工作"
+icon: "lock"
+---
+
+SpeechKit 可以在没有云端密钥的情况下运行。在本地路径上，你的语音在自己的电脑上处理。本指南介绍如何在 Windows 上进行设置。
+
+## 你需要什么
+
+- 一台装有该应用的 Windows 10 或 11 电脑。参见[在 Windows 上安装](/zh-Hans/speechkit/install-windows)。
+- 首次设置时需要一次联网。安装程序包含本地语音引擎。语音模型本身会在你选择它时下载。
+
+## 步骤
+
+<Steps>
+  <Step title="在设置中选择 Local">
+    在首次运行的设置中，选择 **Local**。它在此设备上运行 Dictation 和 Assist，模型存放在你的电脑上。
+  </Step>
+  <Step title="选择语音模型">
+    选择要下载的本地 Whisper 模型。如果你没有选择，SpeechKit 会从最小的入门模型开始。下载在后台运行，你可以在其完成期间继续操作。
+  </Step>
+  <Step title="测试你的麦克风">
+    设置可以录制一段简短的本地测试。它是可选的，不会保存任何内容。文字只显示在设置窗口中。
+  </Step>
+  <Step title="设置隐私范围">
+    打开 **Settings > Privacy & Data**。在 **Network scope** 下选择 **This device only**。此时只能使用 SpeechKit 在设备上运行的模型。凡是需要网络的内容都会被暂停，而不是删除。
+  </Step>
+  <Step title="不保留你不需要的内容">
+    如果会议结束后应移除原始会议素材，请选择 **Zero retention**。参见[选择你的隐私设置](/zh-Hans/speechkit/privacy-settings)。
+  </Step>
+</Steps>
+
+## 需要了解
+
+- 使用 **This device only** 时，默认连模型下载和更新检查也会被阻止。如果你之后需要下载模型，请暂时放宽范围。`config.toml` 中名为 `allow_setup_traffic` 的设置可以允许从官方来源下载模型和更新，其中不含音频、转录文本或提示词。
+- 你听写的文字保留在电脑上的历史记录中。没有联网的电脑仍会保存转录文本，除非你选择 Zero retention。
+- Assist 和 Voice Agent 也可以在本地模型上运行。本地语言模型和本地语音输出是单独的下载或服务。请查看每个模式的 **Model** 标签页。
+- 在 macOS 上，Dictation 测试版使用随附的本地引擎工作，模型按需下载。
+
+## 如果出了问题
+
+- **模型无法下载。** 在严格的范围下，下载会被阻止。为下载放宽范围，然后再切换回来。同时检查可用磁盘空间。
+- **模型下载一直卡住。** 在 Settings 中重试下载。
+- **Dictation 提示引擎未就绪。** 本地引擎可能仍在启动，或缺少模型。请查看 **Overview** 中的 **Needs attention**。
+- **某项设置呈灰色。** 它需要网络。Settings 会显示其被禁用的原因。

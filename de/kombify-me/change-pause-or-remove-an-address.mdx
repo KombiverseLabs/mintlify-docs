@@ -1,0 +1,77 @@
+---
+title: "Eine Adresse ändern, pausieren oder entfernen"
+description: "Was du bearbeiten kannst, wie du eine Adresse ausschaltest und was sich an Namen nicht ändern lässt"
+sidebarTitle: "Ändern oder entfernen"
+icon: "sliders"
+---
+
+Hier steht, was du mit einer Adresse tun kannst, sobald sie existiert, und was
+Besucher danach sehen.
+
+## Was du ändern kannst
+
+| Änderung | Möglich? |
+| --- | --- |
+| Worauf die Adresse zeigt (Ziel) | Ja |
+| Eine App ein- oder ausschalten ("exposed") | Ja |
+| Die Adresse pausieren oder fortsetzen (Status) | Ja |
+| Beschreibung | Ja |
+| Der Name selbst | Nein |
+
+Ein Name kann nicht umbenannt werden. Um einen anderen Namen zu bekommen, lege
+eine neue Adresse mit dem gewünschten Namen an, ziehe deine Besucher um und
+entferne dann die alte.
+
+Änderungen wirken schnell. kombify.me hält einen Routing-Cache von etwa
+60 Sekunden und leert ihn, wenn du eine Adresse änderst oder löschst.
+
+## Schritte
+
+**Eine App ausschalten:** Schalte "exposed" für diese App aus. Besucher
+bekommen dann eine Seite "not exposed" (404). Du kannst sie jederzeit wieder
+einschalten.
+
+**Eine Adresse pausieren:** Setze ihren Status auf inactive. Besucher bekommen
+die Antwort 503 "inactive". Setze sie auf active, um fortzufahren.
+
+**Sie woandershin ausrichten:** Ändere das Ziel. Das neue Ziel muss denselben
+Regeln folgen wie zuvor. Eine öffentliche Adresse braucht eine öffentliche
+Webadresse.
+
+**Eine Adresse entfernen:** Lösche sie. Nach dem Entfernen funktioniert der Name
+nicht mehr.
+
+## Was Besucher sehen
+
+| Situation | Besucher sieht |
+| --- | --- |
+| App ausgeschaltet | 404 "not exposed" |
+| Adresse pausiert | 503 "inactive" |
+| Zeitraum der vorübergehenden Freigabe abgelaufen | 410 "publication expired" |
+| Dein Server ist nicht erreichbar | 502 "Bad Gateway" |
+| Private Adresse, Helfer offline | 503, bald erneut versuchen |
+
+## Gesperrte Konten
+
+Wenn ein selbst gehostetes Konto gesperrt wird, wird sein API-Schlüssel mit
+einer 403-Meldung "account suspended" abgelehnt. kombify.me hat keine eigene
+öffentliche Seite zu Meldungen oder gesperrten Adressen. Wenn du glaubst, dass
+das versehentlich passiert ist, schreibe mit dem Namen und der Uhrzeit an
+[info@kombify.io](mailto:info@kombify.io).
+
+## Deinen Schlüssel ersetzen
+
+Ein selbst gehostetes Konto kann seinen API-Schlüssel ersetzen. Der alte
+Schlüssel funktioniert sofort nicht mehr, aktualisiere also jede Stelle, die
+ihn verwendet.
+
+## Wenn etwas schiefgeht
+
+| Was du siehst | Was du tun kannst |
+| --- | --- |
+| Änderung abgelehnt, "access denied" (403) | Die Adresse gehört zu einem anderen Konto. |
+| "subdomain not found" (404) | Prüfe den Namen. Er wurde vielleicht schon entfernt. |
+| Ziel abgelehnt | Der öffentliche Pfad akzeptiert nur öffentliche `http`- oder `https`-Adressen. |
+| Altes Ziel wird noch angezeigt | Warte etwa eine Minute und lade neu. |
+
+Mehr dazu unter [Fehlerbehebung](/de/kombify-me/troubleshooting).

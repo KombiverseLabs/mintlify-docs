@@ -1,0 +1,70 @@
+---
+title: "Work offline with local models"
+description: "Keep your voice on your computer with the local-only path"
+sidebarTitle: "Work offline"
+icon: "lock"
+---
+
+SpeechKit can run without cloud keys. On the local path your voice is
+processed on your computer. This guide shows how to set that up on Windows.
+
+## What you need
+
+- A Windows 10 or 11 computer with the installed app. See
+  [Install on Windows](/speechkit/install-windows).
+- One internet connection for the first setup. The installer includes the
+  local speech engine. The speech model itself is downloaded when you choose it.
+
+## Steps
+
+<Steps>
+  <Step title="Choose Local in the setup">
+    In the first-run setup, choose **Local**. It runs Dictation and Assist on
+    this device, and the models live on your computer.
+  </Step>
+  <Step title="Pick a speech model">
+    Pick a local Whisper model to download. If you do not choose one, SpeechKit
+    starts with the smallest starter model. The download runs in the
+    background, and you can continue while it finishes.
+  </Step>
+  <Step title="Test your microphone">
+    The setup can record a short local test. It is optional, and nothing is
+    saved. The text is shown only in the setup window.
+  </Step>
+  <Step title="Set the privacy scope">
+    Open **Settings > Privacy & Data**. Under **Network scope** choose **This
+    device only**. Only models that SpeechKit runs on the device may then be
+    used. Everything that needs the network is paused, not deleted.
+  </Step>
+  <Step title="Keep nothing you do not need">
+    Choose **Zero retention** if raw meeting material should be removed after
+    a meeting. See [Choose your privacy settings](/speechkit/privacy-settings).
+  </Step>
+</Steps>
+
+## Good to know
+
+- With **This device only**, even model downloads and update checks are
+  blocked by default. If you need to download a model later, widen the scope
+  for that moment. A setting called `allow_setup_traffic` in `config.toml`
+  can allow model and update downloads on official sources, without audio,
+  transcripts or prompts.
+- Text you dictate stays in your history on the computer. A computer without
+  internet still saves transcripts unless you choose Zero retention.
+- Assist and the Voice Agent can also run on local models. A local language
+  model and local speech output are separate downloads or services. Check
+  the **Model** tab of each mode.
+- On macOS, the Dictation beta works with the bundled local engine, and models
+  download on demand.
+
+## If something goes wrong
+
+- **The model does not download.** With a strict scope, downloads are blocked.
+  Widen the scope for the download, then switch back. Also check free disk
+  space.
+- **The model download stays stuck.** Retry the download in Settings.
+- **Dictation says the engine is not ready.** The local engine may still be
+  starting or the model is missing. Look under **Needs attention** in
+  **Overview**.
+- **A setting is greyed out.** It needs the network. Settings shows why it is
+  disabled.
