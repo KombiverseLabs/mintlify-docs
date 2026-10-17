@@ -42,9 +42,9 @@ Truth sources, never the retired legacy documentation repository:
 - A StackKits page needs the current public release as evidence; presence in the
   repository, draft metadata or preview status is not evidence.
 - SpeechKit instructions are pinned to its exact public release and assets.
-- Pull requests and merge groups run the centrally projected Post-Local checks
-  without private credentials or a shared writable tool cache; candidate
-  validation, repository checks and dependency review must all succeed.
+- Pull requests run the trusted public safety workflow without private
+  credentials or a shared writable tool cache; the validator and the exact-head
+  check must succeed.
 
 ## Localization
 
