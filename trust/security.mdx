@@ -1,0 +1,106 @@
+---
+title: "Security"
+description: "How kombify protects sign-in, secrets and automated actions, and how to report a vulnerability"
+sidebarTitle: "Security"
+icon: "lock"
+---
+
+This page describes security measures that are in place. Planned work is marked
+as planned.
+
+## Sign-in
+
+- One account for the hosted products, provided through Auth0 with a tenant in
+  the EU. Sign-in happens only on `login.kombify.io`. Methods include e-mail,
+  passkey, Google and GitHub.
+- Passwords are stored only in encrypted form by the sign-in provider.
+- Multi-factor sign-in is supported.
+- On your own homelab, StackKits sets up a separate local owner login built on
+  passkeys. It is independent of any kombify account. See
+  [How sign-in works](/identity/how-sign-in-works).
+
+## Access is denied when in doubt
+
+- Missing or unclear identity means no access.
+- Access tokens are short-lived and made for one purpose.
+- A protected service does not become public when an identity service is
+  unavailable.
+- Public APIs, AI tools and assistants go through a gateway that checks every
+  request. Requests that cost money or make lasting changes need a positive
+  authorization check first, and every denial carries a reason code.
+- Customers are separated from each other.
+
+## Assistants and automated actions
+
+- An assistant that acts for you can never receive more authority than you
+  have, and you can revoke permissions at any time.
+- AI features carry out actions that affect your systems, your data or other
+  people only after your approval, as stated in the
+  [Terms](https://kombify.io/terms). Approvals and executed actions are logged.
+- AI results can be wrong. Check them, especially security settings.
+
+## Secrets and keys
+
+- Keys, tokens and passwords are kept in managed secret stores, not in source
+  code. Repositories are scanned automatically for accidentally published
+  secrets.
+- On your own server, secrets reach the machine only in sealed form, and only
+  StackKits opens them into encrypted local storage. No secret is written into
+  a stored command, log or receipt. This is part of the StackKits baseline.
+- StackKits has no default passwords. Generated secrets do not appear in
+  committed or generated files.
+- AI provider keys that you bring yourself are stored write-only. The public
+  interface returns an identifier and a fingerprint, never the key.
+- Backups are encrypted with a separate key for each customer.
+
+<Note>
+The kombify Wallet, a single place for logins, keys and server access, is in
+early use and is not generally available. It has not had an external review.
+</Note>
+
+## Safe changes on your homelab
+
+- Every StackKits command is non-destructive until you apply.
+- A plan is shown before anything changes, and upgrades show a difference and
+  take a backup first.
+- No service is exposed without an explicit access policy.
+- Releases come with checksums so you can verify downloads. See
+  [Install SpeechKit on Windows](/speechkit/install-windows) for an example.
+
+## Logging and monitoring
+
+- Security-relevant events such as sign-ins, approvals and administrator
+  actions are recorded.
+- The content of AI requests and answers is not written to logs. Only usage
+  data such as time, model and amount is recorded.
+- Error monitoring is configured without cookies, form contents or login data
+  and without session recording.
+
+## How we test
+
+Security testing is internal. It includes a threat model and an adversarial
+review for each sensitive area, automated scans of public hosts and of the code
+and dependencies, and fixing high findings before a release goes on. There is
+**no** external penetration test, and kombify holds **no** security
+certification of its own.
+
+## Report a vulnerability
+
+Write to [info@kombify.io](mailto:info@kombify.io) with the subject starting
+with "Security", or follow the rules on [kombify.io/security](https://kombify.io/security).
+The machine-readable contact is at
+[kombify.io/.well-known/security.txt](https://kombify.io/.well-known/security.txt).
+
+Good-faith research is welcome: test only your own accounts, do not break
+anything, do not access other people's data and give us reasonable time to fix
+the problem before you publish. There is no bug bounty.
+
+Open-source repositories also publish their own security policy. Use the
+contact in that repository for that product.
+
+## Limits you should know
+
+- kombify is in public beta. There is no service-level agreement.
+- If you choose an external AI or voice provider, your content goes to that
+  provider. See [Privacy and data](/trust/privacy).
+- Self-run software is only as secure as the computer it runs on.
