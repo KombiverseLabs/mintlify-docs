@@ -6,49 +6,75 @@ icon: "shield-halved"
 
 # Identidad en StackKits
 
-StackKits mantiene como autoridad al propietario de un homelab local. Instalar
-y operar un stack no requiere una cuenta alojada.
+StackKits mantiene como autoridad al propietario de un homelab local. Instalar y
+operar un stack no requiere una cuenta alojada.
+
+## En palabras sencillas
+
+Hay dos tipos de inicio de sesión. Uno pertenece a tu propio homelab y permanece en
+tu ordenador. El otro es tu cuenta opcional de kombify. No se sustituyen
+entre sí.
+
+## Qué necesitas primero
+
+Nada de kombify. La identidad local viene con el StackKit que instalas.
+Una cuenta de kombify solo hace falta si eliges conectarte a un servicio alojado.
 
 ## Identidad local del propietario
 
 La base de identidad local publicada usa:
 
-- **PocketID** como proveedor de identidad OpenID Connect del propietario del homelab;
+- **PocketID** como proveedor de identidad OpenID Connect para el propietario del homelab;
 - **TinyAuth** como intermediario de autenticación directa (forward-auth) delante de las aplicaciones protegidas;
-- aprobación explícita del propietario para las operaciones del ciclo de vida que modifican el stack.
+- aprobación explícita del propietario para las operaciones de ciclo de vida que cambian el stack.
 
-Los datos de identidad y las credenciales permanecen bajo el control del
-propietario local. Quitar una conexión alojada opcional no debe eliminar el
-acceso local ni impedir el ciclo de vida independiente.
+Los datos de identidad y las credenciales permanecen bajo el control del propietario local.
+Quitar una conexión alojada opcional no debe eliminar el acceso local ni impedir el
+ciclo de vida independiente.
 
 <CardGroup cols={2}>
   <Card title="PocketID" icon="fingerprint" href="/es/stackkits/apps/pocketid">
     Identidad local basada en passkeys para el propietario del homelab.
   </Card>
   <Card title="TinyAuth" icon="key" href="/es/stackkits/apps/tinyauth">
-    Autenticación directa para aplicaciones que no ofrecen un flujo de inicio
-    de sesión compatible propio.
+    Autenticación directa para aplicaciones que no ofrecen su propio flujo
+    de inicio de sesión compatible.
   </Card>
 </CardGroup>
 
 ## Identidad alojada opcional
 
-Cuando un usuario se conecta deliberadamente a un servicio alojado de kombify,
-el inicio de sesión interactivo usa el dominio oficial `login.kombify.io`. Esa
-identidad alojada es una capa de comodidad opcional; no sustituye ni supera al
-propietario local.
+Cuando un usuario se conecta deliberadamente a un servicio alojado de kombify, el
+inicio de sesión interactivo usa el dominio oficial `login.kombify.io`. Esa identidad alojada es
+una capa de comodidad opcional; no sustituye ni supera al propietario local.
+
+## Qué se almacena dónde
+
+Los datos de identidad local y las credenciales permanecen bajo el control del propietario local, en
+tu propio entorno. El inicio de sesión alojado pasa por `login.kombify.io`, y tú
+decides si usarlo.
 
 ## Comportamiento de seguridad
 
 - La información de identidad ausente o ambigua deniega el acceso.
-- Los tokens tienen una vida corta y un alcance limitado a su audiencia prevista.
-- Las rutas protegidas no se vuelven públicas cuando un servicio de identidad
-  no está disponible.
-- Un asistente que actúa en nombre de un usuario no puede recibir más autoridad
-  que ese usuario.
+- Los tokens son de corta duración y están limitados a su audiencia prevista.
+- Las rutas protegidas no se vuelven públicas cuando un servicio de identidad no
+  está disponible.
+- Un asistente que actúa en nombre de un usuario no puede recibir más autoridad que ese usuario.
+
+## Si algo sale mal
+
+- Comprueba la dirección de la página de inicio de sesión. El dominio oficial es
+  `login.kombify.io`.
+- Si falla el inicio de sesión alojado, tu acceso local no se ve afectado. Consulta
+  [Problemas de inicio de sesión y conceptos básicos de la cuenta](/es/apps/cloud/sign-in-and-account).
+- Para configurar o revisar el inicio de sesión local, consulta [PocketID](/es/stackkits/apps/pocketid)
+  y [TinyAuth](/es/stackkits/apps/tinyauth).
+- ¿Sigues atascado? Escribe a [info@kombify.io](mailto:info@kombify.io). No envíes nunca
+  una contraseña.
 
 <Note>
-Esta página describe el concepto público de identidad. La arquitectura interna
-de enrutamiento, tenants, facturación, despliegue y operadores no forma parte,
-de forma deliberada, de la documentación pública de StackKits.
+Esta página describe el concepto público de identidad. El enrutamiento interno, los tenants,
+la facturación, el despliegue y la arquitectura de operador no forman parte
+intencionadamente de la documentación pública de StackKits.
 </Note>
