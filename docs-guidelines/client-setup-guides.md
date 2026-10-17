@@ -6,7 +6,7 @@ desktop apps, web interfaces). First example:
 `guides/stackkits/use-cases/passwords/clients.mdx`. Contributor guidance,
 excluded from the site by `.mintignore`. Public scope, quality gates and one
 Diátaxis mode per page come from `DOCUMENTATION-STANDARD.md`; translations
-follow `LANGUAGE-LOCALIZATION-STANDARD.md`.
+follow `KOMBIFY-DESIGN-SYSTEM-STANDARD.md` §11.
 
 ## 1. Audience and tone
 

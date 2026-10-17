@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // The one development bootstrap of every Kombify repository
-// (SECRETS-ACCESS-STANDARD.md §6c, DEVCONTAINER-STANDARD.md §5). Canonical in
+// (SECRETS-ACCESS-STANDARD.md §6c, DEVELOPMENT-ENVIRONMENT-STANDARD.md §2). Canonical in
 // kombify-workspace; repo-context-sync.mjs projects it unchanged into each
 // repository as scripts/kombify-bootstrap.mjs. It sets up, in any environment,
 // what a session needs to install, build, test and run the repository:
