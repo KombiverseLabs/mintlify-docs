@@ -1,0 +1,79 @@
+---
+title: "Get your first kombify.me address"
+description: "Step by step: pick a name, point it at your service and switch it on"
+sidebarTitle: "Your first address"
+icon: "rocket"
+---
+
+This guide walks you through your first `kombify.me` address, from choosing a
+name to opening it in a browser.
+
+<Warning>
+kombify.me is Alpha software. Names and error messages can still change.
+</Warning>
+
+## What you get
+
+An address has two levels:
+
+- A **base name** for your home server, for example `mylab-u8f3k2.kombify.me`.
+- A **service name** for each app on it, for example
+  `mylab-u8f3k2-grafana.kombify.me`.
+
+kombify.me builds these names for you. You choose the home server name and the
+app name. kombify.me adds the rest.
+
+| Account type | Base name looks like |
+| --- | --- |
+| kombify account | `{your name}-{short id}.kombify.me` |
+| Self-hosted | `sh-{your name}-{device code}.kombify.me` |
+
+Good to know:
+
+- Names use lowercase letters, numbers and hyphens, up to 63 characters.
+- An app name can be up to 20 characters.
+- You can have up to 5 base names and up to 20 apps per base name.
+- Names such as `auth`, `api` or `www` cannot be used on their own. Kit apps
+  such as `auth` still work and become `{base}-auth.kombify.me`.
+
+## Before you start
+
+- Decide which app you want to share.
+- Find out if the app is reachable from the internet. If it is, read on. If it
+  only works inside your home network, read
+  [Public or private](/kombify-me/public-or-private) first.
+- Have access to kombify.me. Hosted accounts register through the connected
+  kombify flows. Self-hosted installs register with an email address and get an
+  API key. kombify.me has no screen for this today.
+
+## Steps
+
+1. **Register your home server.** Give it a short name such as `mylab`.
+   kombify.me answers with the full base name.
+2. **Point the base name at your server.** For an app that is reachable from the
+   internet, use its public `http://` or `https://` address.
+3. **Add an app.** Give it a short name such as `grafana` and its address.
+   Connected StackKits and Techstack flows can do steps 1 to 3 for you.
+4. **Switch the app on.** New apps are off by default. Turn the app on
+   ("exposed") when you want the address to accept visitors.
+5. **Open the address.** Go to `https://mylab-u8f3k2-grafana.kombify.me` in a
+   browser. HTTPS is handled for you.
+
+Registering the same name again for the same account does not create a second
+one. It returns the one you already have.
+
+## If something goes wrong
+
+| What you see | What to do |
+| --- | --- |
+| "service subdomain not exposed" (404) | Switch the app on (step 4). |
+| "subdomain inactive" (503) | The address is paused. Set it back to active. |
+| "subdomain already taken" (409) | Choose another name. |
+| Quota error (429) | You reached 5 base names or 20 apps. Remove one you no longer use. |
+| "reserved" error | Choose another name. |
+| 502 "Bad Gateway" | Your server did not answer. Check that it is running and public. |
+| Registration says the mail service is unavailable | Try again later. No account is created in that case. |
+
+More checks are on the [troubleshooting page](/kombify-me/troubleshooting).
+Hosted `*.lan.kombify.me` names do not exist. For names inside your home
+network, use the local names that StackKits sets up.

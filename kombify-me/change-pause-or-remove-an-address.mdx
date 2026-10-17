@@ -1,0 +1,71 @@
+---
+title: "Change, pause or remove an address"
+description: "What you can edit, how to switch an address off, and what names cannot change"
+sidebarTitle: "Change or remove"
+icon: "sliders"
+---
+
+Here is what you can do with an address once it exists, and what visitors see
+afterwards.
+
+## What you can change
+
+| Change | Possible? |
+| --- | --- |
+| Where the address points (target) | Yes |
+| Switch an app on or off ("exposed") | Yes |
+| Pause or resume the address (status) | Yes |
+| Description | Yes |
+| The name itself | No |
+
+A name cannot be renamed. To get a different name, add a new address with the
+name you want, move your visitors over, then remove the old one.
+
+Changes take effect quickly. kombify.me keeps a routing cache of about
+60 seconds and clears it when you change or delete an address.
+
+## Steps
+
+**Switch an app off:** turn off "exposed" for that app. Visitors then get a
+"not exposed" page (404). Turn it on again at any time.
+
+**Pause an address:** set its status to inactive. Visitors get a 503
+"inactive" answer. Set it to active to resume.
+
+**Point it somewhere else:** change the target. The new target must follow the
+same rules as before. A public address needs a public web address.
+
+**Remove an address:** delete it. After removal the name stops working.
+
+## What visitors see
+
+| Situation | Visitor sees |
+| --- | --- |
+| App switched off | 404 "not exposed" |
+| Address paused | 503 "inactive" |
+| Temporary sharing period ended | 410 "publication expired" |
+| Your server cannot be reached | 502 "Bad Gateway" |
+| Private address, helper offline | 503, try again shortly |
+
+## Accounts that are suspended
+
+If a self-hosted account is suspended, its API key is refused with a 403
+"account suspended" message. kombify.me has no separate public page about
+reports or blocked addresses. If you think this happened by mistake, write to
+[info@kombify.io](mailto:info@kombify.io) with the name and the time.
+
+## Replacing your key
+
+A self-hosted account can replace its API key. The old key stops working
+immediately, so update every place that uses it.
+
+## If something goes wrong
+
+| What you see | What to do |
+| --- | --- |
+| Change refused, "access denied" (403) | The address belongs to another account. |
+| "subdomain not found" (404) | Check the name. It may already be removed. |
+| Target refused | The public path only accepts public `http` or `https` addresses. |
+| Old target still shown | Wait about a minute and reload. |
+
+See [Troubleshooting](/kombify-me/troubleshooting) for more.
