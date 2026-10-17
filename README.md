@@ -130,7 +130,6 @@ mise run local:e2e
 [openwiki/](openwiki/) (generated, non-authoritative agent documentation).
 Standards: [DOCUMENTATION-STANDARD.md](../DOCUMENTATION-STANDARD.md),
 [LANGUAGE-LOCALIZATION-STANDARD.md](../LANGUAGE-LOCALIZATION-STANDARD.md),
-[REPO-FILE-SCHEMA.md](../kombify-Core/standards/REPO-FILE-SCHEMA.md),
 [OPENWIKI-STANDARD.md](../kombify-Core/standards/OPENWIKI-STANDARD.md).
 
 ## Issue tracking
