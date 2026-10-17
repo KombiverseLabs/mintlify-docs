@@ -29,7 +29,7 @@ navigation source of truth; pages are MDX files.
 
 ## Planning System Policy
 
-- Beads epics own cross-repo priorities, milestones (labels `milestone` and `central:C<n>`), phase gates and blockers; the central `ROADMAP.md` states the phase order, each product `ROADMAP.md` its milestones, and Beads the executable work. GitHub Projects is read-only history (owner decision 2026-10-15). Detail: workspace `GITHUB-PROJECTS-PLANNING-STANDARD.md` and workspace `ISSUE-FLOW-STANDARD.md`.
+- Beads epics own cross-repo priorities, milestones (labels `milestone` and `central:C<n>`), phase gates and blockers; the central `ROADMAP.md` states the phase order, each product `ROADMAP.md` its milestones, and Beads the executable work. GitHub Projects is read-only history (owner decision 2026-10-15). Detail: workspace `ISSUE-FLOW-STANDARD.md`.
 
 ## Beads Remote Write Policy
 
