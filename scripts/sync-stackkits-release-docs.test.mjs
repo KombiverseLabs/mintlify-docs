@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtempSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import test from 'node:test'
@@ -200,6 +200,23 @@ test('is idempotent and never downgrades latest', () => {
   writeFixture(oldInput, fixture('v9.9.8'))
   assert.equal(syncRelease({ repoRoot: repo, inputDir: oldInput, tag: 'v9.9.8' }).promoted, false)
   assert.equal(JSON.parse(readFileSync(path.join(repo, 'data/stackkits/latest.json'))).tag, 'v9.9.9')
+})
+
+test('prunes snapshots to the shown release and the one the stored evidence is bound to', () => {
+  const temp = mkdtempSync(path.join(tmpdir(), 'stackkits-docs-prune-'))
+  const repo = path.join(temp, 'repo'), releases = path.join(repo, 'data/stackkits/releases')
+  const dir = tag => path.join(temp, tag)
+  const sync = (tag, document) => {
+    writeFixture(dir(tag), fixture(tag))
+    if (document) writeFileSync(path.join(dir(tag), EVIDENCE_ASSET), `${JSON.stringify(document, null, 2)}\n`)
+    syncRelease({ repoRoot: repo, inputDir: dir(tag), tag })
+  }
+  sync('v9.9.7', evidence('v9.9.7'))
+  sync('v9.9.8')
+  sync('v9.9.9')
+  assert.ok(existsSync(path.join(releases, 'v9.9.9')))
+  assert.ok(existsSync(path.join(releases, 'v9.9.7', EVIDENCE_ASSET)))
+  assert.equal(existsSync(path.join(releases, 'v9.9.8')), false)
 })
 
 // StackKits docs/data/os-compat/latest.json (schemas/os-compat-matrix.schema.json).

@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -705,6 +705,15 @@ function readManifests(dir, tag) {
   return { catalogBytes, compatibilityBytes, catalog, compatibility }
 }
 
+// Snapshots accumulate one directory per synced release. The pages need only
+// the release they show and the release the stored lifecycle evidence is bound
+// to; a later sync for any other tag re-creates its snapshot from the release.
+function pruneSnapshots(releases, keep) {
+  for (const name of readdirSync(releases)) {
+    if (/^v\d+\.\d+\.\d+$/.test(name) && !keep.has(name)) rmSync(path.join(releases, name), { recursive: true, force: true })
+  }
+}
+
 function docsRedirects(repoRoot) {
   const docsPath = path.join(repoRoot, 'docs.json')
   if (!existsSync(docsPath)) return new Map()
@@ -754,6 +763,7 @@ export function syncRelease({ repoRoot, inputDir, tag }) {
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'use-case-catalog.mdx'), pages.useCases)
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'os-compatibility.mdx'), pages.os)
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'application-delivery-compatibility.mdx'), pages.delivery)
+  pruneSnapshots(releases, new Set([shown.catalog.release.tag, evidence?.stackkitsVersion].filter(Boolean)))
   return { promoted, catalog: synced.catalog, compatibility: synced.compatibility, shownTag: shown.catalog.release.tag, evidence }
 }
 
