@@ -1,0 +1,46 @@
+---
+title: "Login gateway"
+description: "How StackKits puts one forward-auth sign-in in front of your self-hosted services, and what is and is not offered"
+sidebarTitle: "Login gateway"
+icon: shield-check
+---
+
+The login gateway is the StackKits platform module that puts one sign-in in front of the services of your own deployment. It is authentication inside a deployment that you operate yourself. It has nothing to do with signing in to kombify.io, kombify Cloud or other hosted kombify surfaces. For those, see [Identity](/identity/overview).
+
+## What it is
+
+The login gateway is a glue module: it runs no container of its own. It declares the `login-gateway` forward-auth middleware on [Traefik](/stackkits/apps/traefik) and ties [TinyAuth](/stackkits/apps/tinyauth) (the forward-auth entrypoint) to [PocketID](/stackkits/apps/pocketid) (the local OIDC identity provider). The module requires Traefik 3.0 or later and TinyAuth 4.0 or later.
+
+When you open a protected service, Traefik asks TinyAuth whether you have a valid session. Without one, you are sent to the `auth.<domain>` login, PocketID authenticates you, and you return to the service with a session.
+
+## Ownership
+
+You own and operate the deployment, the local owner account and its recovery material. The account that protects your services lives in your own PocketID. It is not a kombify account, and kombify does not reset it for you.
+
+## Which kits include it
+
+The Basement Kit and Cloud Kit definitions both list the login gateway as a default platform service next to Traefik, TinyAuth and PocketID, with no alternatives. See [Basement Kit](/stackkits/kits/basement-kit) and [Cloud Kit](/stackkits/kits/cloud-kit).
+
+## Deployment mode and prerequisites
+
+- It protects services deployed by a StackKit that are added with the login gateway option.
+- It needs the shared Docker network that the platform services use.
+- Its defaults are a 24-hour session (`sessionExpiry`, 86400 seconds, at least 300) and a required second factor for admin users (`requireMfaForAdmins`).
+
+## Protecting your own applications
+
+When you add an application with the CLI, `stackkit app add --auth` accepts `login-gateway` (the default) or `public`. Choose `public` only for a service that does its own authentication, such as a public landing page or a webhook receiver. The module definition also expects a service that skips the gateway to be explicitly listed as an allowed public bypass; otherwise validation fails. See [application commands](/stackkits/reference/cli/application).
+
+## Status
+
+The module is marked as a draft in the StackKits source (maturity `draft`, version 0.1.0). Its definition is scaffolded and enforcement across every service depends on the composition engine. Treat the behavior above as the intended contract and confirm it on your own rollout with `stackkit verify --json` rather than assuming that every route is protected.
+
+## Authelia and other alternatives
+
+The released catalog offers PocketID with TinyAuth. Authelia is not a selectable catalog service: it appears only as a configuration type in the StackKits foundation schema, and its earlier add-on definition was removed. Do not plan a deployment around Authelia, and do not expect an alternative to the login gateway in the kit definitions. If this changes, it will appear in the [platform services](/stackkits/apps/overview) list of a released version first.
+
+## If something goes wrong
+
+- A route is not asking for a sign-in: compare the hostname with the generated route and run `stackkit verify --json` from the workspace folder.
+- You cannot sign in: use the owner account created in [PocketID](/stackkits/apps/pocketid), not a kombify Cloud account.
+- More checks: [Troubleshooting](/guides/stackkits/troubleshooting).
