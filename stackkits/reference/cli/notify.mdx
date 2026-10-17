@@ -1,0 +1,102 @@
+---
+title: "stackkit notify"
+description: "Owner notifications declared in the StackSpec"
+sidebarTitle: "notify"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:a04c59c84e6aedf8c596fb4c754eadde666c48817250913a7695580ff29fa971"
+source_hash: "5a33a55a9c82a02b90c42a7ac6c0ac7ca38f9b78"
+---
+Owner notifications declared in the StackSpec.
+
+```bash
+stackkit notify [flags]
+```
+
+Subcommands: [`stackkit notify backup-digest`](#stackkit-notify-backup-digest), [`stackkit notify event`](#stackkit-notify-event), [`stackkit notify test`](#stackkit-notify-test)
+
+## stackkit notify backup-digest
+
+Send the backup digest to the owner notification channels.
+
+Read the local backup state without changing it and send one owner message: backup-failed when configuration, schedule, repository, the latest snapshot or a recovery objective needs attention; backup-restore-verification-overdue when only the staged restore proof is missing or older than the plan's restoreVerification.maxEvidenceAgeDays; otherwise backup-digest.
+
+The message is sent only when its event is in spec.notifications.events (backup-digest is opt-in). It carries states and ages only, never a repository location or credential. Run it from a timer or an automation for a regular digest.
+
+```bash
+stackkit notify backup-digest [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--channel` | string | — | Deliver only to this declared channel name |
+| `--dry-run` | bool | — | Print the composed message without sending it |
+| `--json` | bool | — | Output the message and receipts as JSON |
+| `--resolved-plan` | string | — | Canonical Architecture v2 ResolvedPlan (default: beneath the StackSpec generation.outputRoot) |
+
+**Examples**
+
+```bash
+# Preview the message without sending it
+stackkit notify backup-digest --dry-run
+
+# Send it and print the receipts as JSON
+stackkit notify backup-digest --json
+```
+
+## stackkit notify event
+
+Send one lifecycle event to the owner notification channels.
+
+Send one lifecycle event to the owner notification channels. Use it from a timer or an automation for events StackKit does not observe by itself (upgrade-available, certificate-expiring); apply-failed and drift-detected are sent automatically by 'stackkit apply' and 'stackkit drift detect'.
+
+The event is sent only when it is in spec.notifications.events. Facts are short states or counts; never put a path, repository location or credential in them.
+
+```bash
+stackkit notify event <apply-failed|upgrade-available|drift-detected|certificate-expiring> [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--channel` | string | — | Deliver only to this declared channel name |
+| `--fact` | stringArray | — | A short state or count line (repeatable) |
+| `--json` | bool | — | Output the receipts as JSON |
+| `--remedy` | string | — | The command the owner can run next |
+| `--resolved-plan` | string | — | Canonical Architecture v2 ResolvedPlan (default: beneath the StackSpec generation.outputRoot) |
+| `--subject` | string | — | What the event is about (service, version or certificate name) |
+
+**Examples**
+
+```bash
+stackkit notify event certificate-expiring --subject app.example.test --fact "expires in 9 days"
+stackkit notify event upgrade-available --fact "0.27.0 is available" --remedy "stackkit upgrade"
+```
+
+## stackkit notify test
+
+Send a delivery check to the owner notification channels.
+
+Send a delivery check to every owner notification channel the verified ResolvedPlan declares (spec.notifications), or to one channel with `--channel`.
+
+The plan carries only a secret-free projection of each channel. The check reads the destination from the StackSpec on this server, refuses a channel whose destination no longer matches the verified plan, resolves credentials from local custody and records one receipt per channel under .stackkit/runs/owner-notifications. Receipts never contain the topic, recipients, credentials or message body.
+
+```bash
+stackkit notify test [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--channel` | string | — | Deliver only to this declared channel name |
+| `--json` | bool | — | Output receipts as JSON |
+| `--resolved-plan` | string | — | Canonical Architecture v2 ResolvedPlan (default: beneath the StackSpec generation.outputRoot) |
+
+**Examples**
+
+```bash
+# Prove every declared channel
+stackkit notify test
+
+# Prove one channel and print the receipts as JSON
+stackkit notify test --channel ntfy --json
+```
+
