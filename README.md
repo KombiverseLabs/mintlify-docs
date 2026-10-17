@@ -57,7 +57,7 @@ pages under `<code>/` (`de/stackkits/quickstart` is served at
 Simplified). The pinned CLI's validation accepts these codes; recheck the
 installed `@mintlify/validation` when bumping `mint`. A locale is advertised
 only after competent-speaker review; locale semantics are in
-`LANGUAGE-LOCALIZATION-STANDARD.md`. Unreviewed proposals stay in ignored
+`KOMBIFY-DESIGN-SYSTEM-STANDARD.md` §11. Unreviewed proposals stay in ignored
 `drafts/`, never in navigation or hidden public MDX.
 
 Adding or updating a locale (`<code>`):
@@ -129,8 +129,8 @@ mise run local:e2e
 [AGENTS.md](AGENTS.md) -
 [openwiki/](openwiki/) (generated, non-authoritative agent documentation).
 Standards: [DOCUMENTATION-STANDARD.md](../DOCUMENTATION-STANDARD.md),
-[LANGUAGE-LOCALIZATION-STANDARD.md](../LANGUAGE-LOCALIZATION-STANDARD.md),
-[OPENWIKI-STANDARD.md](../kombify-Core/standards/OPENWIKI-STANDARD.md).
+[KOMBIFY-DESIGN-SYSTEM-STANDARD.md](../KOMBIFY-DESIGN-SYSTEM-STANDARD.md) §11,
+[CODE-INTELLIGENCE-STANDARD.md](../kombify-Core/standards/CODE-INTELLIGENCE-STANDARD.md) §11.
 
 ## Issue tracking
 
