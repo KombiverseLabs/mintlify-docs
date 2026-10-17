@@ -51,11 +51,16 @@ Truth sources, never the retired legacy documentation repository:
 English is the only language that is written and edited by hand. It is the
 source and keeps its URLs (`/stackkits/quickstart`). The other locales (`ar`,
 `de`, `es`, `zh-Hans`, `hi`; Traditional Chinese is `zh-Hant`, never mapped to
-Simplified) are produced by Mintlify's automatic translation: it translates
-changed English pages into `<code>/` folders (`de/stackkits/quickstart` is
-served at `/de/stackkits/quickstart`) and opens a pull request that is reviewed
-and merged like any other change. Nobody translates a page by hand and nobody
-needs to wait for a translation before an English change is merged.
+Simplified) are generated from the English pages into `<code>/` folders
+(`de/stackkits/quickstart` is served at `/de/stackkits/quickstart`) and arrive
+as pull requests that are reviewed and merged like any other change. Nobody
+translates a page by hand and no English change waits for a translation.
+
+Mintlify's own automatic translation is a paid add-on of its Pro plan with
+usage-based AI credits, which is above the documentation budget. The
+generation therefore runs as a repository job on kombify's own AI platform;
+until that job is merged, the existing locale files stay as they are and new
+English pages are reported as pending.
 
 How the pieces fit:
 
@@ -64,22 +69,20 @@ How the pieces fit:
   English tree and leaves out pages that have no translated file yet.
 - Published locales are listed in `allowedNavigationLanguages` of
   `public-safety-policy.json`, with the localized tab names in
-  `allowedNavigationTabs` and `<code>/` in `allowedPagePrefixes`. A translation
-  pull request needs no policy change for an existing locale.
+  `allowedNavigationTabs` and `<code>/` in `allowedPagePrefixes`.
 - `node scripts/i18n/check.mjs <code>` (part of `mise run check`) validates the
   translated files that exist: frontmatter keys, byte-identical code blocks,
   component tags and internal links and anchors. A page without a counterpart
   is reported as `pending_translation`, not as a failure; `--strict` (or
   `I18N_STRICT=1`) fails on it.
-- Mintlify translates only English pages that are valid MDX, so an invalid page
-  blocks the translation pull request. `mise run check` catches this first.
+- A generated translation must keep frontmatter keys, MDX components, fenced
+  code and product names (kombify, StackKits, Techstack, Companion, SpeechKit,
+  Paperwork, kombify Cloud, kombify Sites, Simulate, CUE) unchanged and point
+  internal links to `/<code>/...`; the check enforces this.
 - Generated English pages (`stackkits/reference/cli/*`,
   `techstack/reference/cli/*`, release pages) are rendered from release data;
-  the next translation pull request carries their localized copies.
+  their localized copies arrive with the next translation pull request.
 
-Turning the service on or changing its languages is an account setting in the
-Mintlify dashboard (a paid add-on of the Mintlify plan), not a file in this
-repository. The language list there must match `allowedNavigationLanguages`.
 Locale semantics are in `KOMBIFY-DESIGN-SYSTEM-STANDARD.md` §11. Older
 unreviewed proposals stay in the ignored `drafts/` tree.
 

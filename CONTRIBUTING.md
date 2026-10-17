@@ -3,8 +3,8 @@
 1. Edit a page on GitHub ("Edit this file"), or fork and clone, run
    `mise install`, and branch.
 2. Write and register English pages only: add each new page to the `en` branch
-   of `docs.json`. Do not write or edit translations; Mintlify's automatic
-   translation delivers them by pull request (see README, Localization).
+   of `docs.json`. Do not write or edit translations; they are generated and
+   delivered by pull request (see README, Localization).
 3. Run `mise run check`, then `mise run local:e2e` (real HTTP preview gate).
 4. Open a pull request.
 
