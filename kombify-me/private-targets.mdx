@@ -10,6 +10,12 @@ does not fetch the private address itself. A Techstack node agent on the
 homelab opens an authenticated connection and forwards bounded HTTP(S)
 requests.
 
+In everyday terms: your app only works inside your home network, for example at
+an address like `192.168.x.x`. You do not have to open anything on your router.
+A small helper at home, the Techstack node agent, connects out to kombify.me and
+carries visitors' requests in. Not sure this is the right kind? Read
+[Public, private or redirect](/kombify-me/public-or-private) first.
+
 ## Before you start
 
 - A Techstack node agent must be running on the homelab that can reach the
@@ -29,6 +35,36 @@ requests.
 If the agent is disconnected, the public name stays unavailable and asks the
 client to retry. Reconnecting the same owner restores forwarding. Another
 owner's agent cannot serve the route.
+
+## What to expect after each step
+
+- After registering the name and setting the private target, the name exists
+  but is switched off. Visitors get a "not exposed" answer (404).
+- After the node agent connects, the route can carry traffic. If the agent is
+  not connected yet, visitors get a "try again in a few seconds" answer (503).
+- After you expose the route, `https://{base}-{service}.kombify.me` opens your
+  app.
+
+## Limits to know about
+
+- Pages and files are limited to 10 MiB per request or response, and each
+  request has 30 seconds.
+- Live streams and arbitrary network connections are not supported. The relay
+  carries web (HTTP and HTTPS) requests only.
+
+## If something goes wrong
+
+| What you see | What to do |
+| --- | --- |
+| 503, "try again" | The node agent is not connected. Start it on the homelab and wait a moment. |
+| 404 "not exposed" | Expose the service route. |
+| The target is refused | A private target must be set on a route of the private type, not on a public address. |
+| 502 "Bad Gateway" | The helper is connected but your app did not answer. Check that the app runs and that the helper can reach it. |
+| The agent is connected but the name stays unavailable | Only the agent of the same owner can serve the route. Check that it is connected with the account that owns the name. |
+
+More checks: [kombify.me troubleshooting](/kombify-me/troubleshooting). To use
+this with a StackKits server, see
+[Use an address with a StackKits server](/kombify-me/connect-a-stackkits-server).
 
 ## Keep local names local
 

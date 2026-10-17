@@ -10,6 +10,15 @@ Kit on a server you already operate. Check [OS compatibility](/stackkits/referen
 for the release and host combination with published lifecycle evidence before
 you start. The CLI remains the local execution authority.
 
+## What you need first
+
+- A server or computer you already operate and are allowed to run commands on.
+- A system listed in the OS compatibility page.
+- A terminal on that computer.
+- A private place for the access details that setup creates.
+
+New to servers? [Before you start](/guides/stackkits/before-you-start) explains the ideas in plain words, and it is worth reading once.
+
 ## Bootstrap a Basement Kit
 
 On a supported server, the Basement installer creates `~/my-homelab`,
@@ -30,6 +39,8 @@ cat .stackkit/access.json
   local Owner/Admin, which this bootstrap creates automatically. Keep the
   generated access details private.
 </Warning>
+
+After the command you should see the following: the folder `~/my-homelab` exists, `stackkit version` prints the installed version, the latest log reports the result of the setup, and `.stackkit/access.json` holds your local access details.
 
 Need a different installer? Use [Choose a kit](/guides/stackkits/choosing-a-kit)
 for the toolchain-only path, [Cloud Kit](/stackkits/kits/cloud-kit) for a VPS
@@ -69,6 +80,17 @@ cat .stackkit/access.json
 The Basement one-liner already performs the initial apply. Run these lifecycle
 commands only after you intentionally change `stack-spec.yaml`. Keep the local
 logs and access record with the workspace.
+
+## What is stored where
+
+Your configuration (`stack-spec.yaml`), logs and access record are in the workspace folder `~/my-homelab` on the server. Generated rollout files are outputs of the configuration. No hosted kombify account holds any of this. Keep the folder private.
+
+## If something goes wrong
+
+- The installer stops with an error: read it with `stackkit logs latest --json`, and do not run the one-liner a second time before you understand the error. See [Troubleshooting](/guides/stackkits/troubleshooting).
+- The plan is not `ready`: change the StackSpec rather than the generated files and review it again.
+- A service address does not open: see [Troubleshooting](/guides/stackkits/troubleshooting) and [Day to day](/guides/stackkits/daily-use).
+- Next, finish protection in the [Node Hub guide](/guides/stackkits/node-hub).
 
 ## Continue
 

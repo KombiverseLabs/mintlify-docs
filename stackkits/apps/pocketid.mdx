@@ -7,6 +7,34 @@ icon: fingerprint
 
 PocketID is the default local identity provider in the released StackKits catalog. A Basement Kit rollout uses it for local owner custody and normally exposes it at `id.<domain>`.
 
-After the rollout verifies successfully, open the generated address and create the first local owner passkey. Keep recovery material outside the server and do not use a shared identity for the owner.
+## What it is
 
-TinyAuth uses the generated PocketID integration for protected StackKits routes. See [TinyAuth](/stackkits/apps/tinyauth) for the entrypoint behavior.
+PocketID keeps the list of people who may use your homelab and lets them sign in with a passkey, a login method that uses your device instead of a password. A StackKit includes it so that your server has its own sign-in that works inside your home and does not depend on an outside account.
+
+## Which kits include it
+
+The [Basement Kit](/stackkits/kits/basement-kit) page lists local owner custody with PocketID and TinyAuth, and the kit definition marks PocketID as a default platform service.
+
+## How you open it
+
+The catalog gives the pattern `https://id.<domain>`, for example `https://id.home.test` with the default domain. Copy the generated address from the CLI output.
+
+## First use
+
+1. After the rollout verifies successfully, open the generated address.
+2. Create the first local owner passkey, following the page's prompts.
+3. Keep recovery material outside the server.
+4. Return to the [Node Hub](/guides/stackkits/node-hub) and confirm that protected routes ask you to sign in.
+
+## What to expect and what not to change
+
+- Expect a passkey-first setup. Do not use a shared identity for the owner.
+- TinyAuth uses the generated PocketID integration for protected StackKits routes. See [TinyAuth](/stackkits/apps/tinyauth) for the entrypoint behavior.
+- This account belongs to your own homelab. It is not your kombify Cloud account.
+- Do not paste recovery material into a chat, an issue or an e-mail.
+
+## If something goes wrong
+
+- The address does not open: compare it with the address in the rollout output and check that the name resolves on your device. See [Troubleshooting](/guides/stackkits/troubleshooting).
+- You cannot sign in to a service: use the account that the owner created for you.
+- Run `stackkit verify --json` from the workspace folder and read the findings. Do not reset the owner to get past an error.

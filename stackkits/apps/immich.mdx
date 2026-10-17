@@ -7,6 +7,14 @@ icon: images
 
 Immich provides the [Photos](/guides/stackkits/use-cases/photos) use case. It is the released alternative for the optional native v2 `photos` workload, and the initial Basement and Cloud StackSpecs do not enable it. Plan storage and recovery on the Photos page before you select it.
 
+## What it is
+
+Immich is a photo and video library that runs on your own host. It does what a cloud photo service does: the phone app uploads new pictures, and you browse, search and share them in a web library. A StackKit includes it so your family's photos stay on hardware you control.
+
+## Which kits and use cases include it
+
+Immich is the default application of the Photos use case. The released catalog commits it for the Basement Kit and the Cloud Kit on standalone Compose; the Cloud Kit is a preview with no automated lifecycle run yet. Coolify and Komodo appear in the compatibility table for `photos` too, but without backup and restore.
+
 ## Released contract
 
 | Property | Value |
@@ -21,6 +29,10 @@ The released CLI validates and generates this workload contract, including persi
 
 The `database-password` slot holds an opaque `secret://` reference; local owner custody holds its password. Choose the workload, placement and adapter in the [StackSpec](/guides/stackkits/configure-stack-spec), then follow [Add a workload](/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace) to validate, establish custody, generate, inspect the plan, apply and verify.
 
+## How to open it
+
+Open the generated Photos route printed by the CLI or listed in the [Node Hub](/guides/stackkits/node-hub). The default local domain is `home.test`, and the name must resolve on your device. The same address is what the phone app asks for as its server address.
+
 ## First use
 
 1. Complete StackKits verification after a rollout that already has valid owner-bound custody.
@@ -29,3 +41,18 @@ The `database-password` slot holds an opaque `secret://` reference; local owner 
 4. Connect each phone with [Back up photos from your phone](/guides/stackkits/use-cases/photos/phone-backup).
 
 Verify the StackKits workspace again after any configuration change.
+
+## What is backed up
+
+Recovery needs both the original photos and videos and the Immich database; either part alone is not a complete restore. Photo originals belong to the `media` coverage group, which is chosen, not inherited, so a first snapshot will not quietly include a large library. Run `stackkit backup status --json` to see exactly which volumes the next snapshot contains, and practice a staged restore with [Back up and restore](/guides/stackkits/back-up-and-restore). The application-level readback after restore was last verified on v0.33.3 for the backup cycle; see the evidence notice on that page.
+
+## What to expect
+
+Photo libraries are often the largest data set in a homelab and keep growing, so size primary and backup storage for photo and video growth. The first upload from a phone can take a while on a large album; a small test album with one spare photo is enough for a first check.
+
+## If something goes wrong
+
+- The address does not open: compare it with the rollout output and confirm that the name resolves from the device. See [Troubleshooting](/guides/stackkits/troubleshooting).
+- The phone cannot sign in: use the Immich account you created in the web library; it is not your kombify account.
+- A test photo does not arrive: check the chosen album and the app's photo access, then follow [Back up photos from your phone](/guides/stackkits/use-cases/photos/phone-backup).
+- Storage fills up: stop adding photos and fix capacity before the next snapshot.

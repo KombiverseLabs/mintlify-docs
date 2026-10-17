@@ -7,6 +7,33 @@ icon: route
 
 Traefik is the default reverse-proxy component in the released StackKits catalog. It routes generated service names such as `base.<domain>`, `auth.<domain>`, and application routes selected by your validated configuration.
 
-Use the generated service URLs and CLI verification output to diagnose routing. Do not add labels, routers, or middleware directly to StackKits-managed containers.
+## What it is
+
+A reverse proxy is the front door of your server. Every address you type, such as the Node Hub or a service name, first arrives at Traefik, which passes the request to the right service. A StackKit includes it so that each service gets its own readable name instead of a port number, and so that sign-in ([TinyAuth](/stackkits/apps/tinyauth)) can be applied in one place.
+
+## Which kits include it
+
+The [Basement Kit](/stackkits/kits/basement-kit) page lists routing through Traefik, and the kit definition marks it as a default platform service. The catalog also notes that the selected application platform can ship its own Traefik; your rollout output shows what you actually have.
+
+## How you open it
+
+You normally never open Traefik itself. You open the services it routes, using the generated addresses from the CLI output or the [Node Hub](/guides/stackkits/node-hub). The catalog also defines a Traefik dashboard at `https://traefik.<domain>`; open it only if your rollout lists it.
+
+## First use
+
+1. Open the Node Hub at the `base.<domain>` address.
+2. Click a service and confirm that it opens under its own name.
+3. If a service does not open, run `stackkit verify --json` before looking at routing.
+
+## What to expect and what not to change
+
+- Expect it to work silently in the background.
+- The catalog gives its routes security headers and a request rate limit.
+- Use the generated service URLs and CLI verification output to diagnose routing. Do not add labels, routers, or middleware directly to StackKits-managed containers. Edit the StackSpec and regenerate instead.
 
 The released [Whoami](/stackkits/apps/whoami) contract describes the routing-diagnostic role, but the initial native v2 StackSpec does not select it.
+
+## If something goes wrong
+
+- A service address does not open: check that the name resolves on your device and compare the address with the rollout output. See [Troubleshooting](/guides/stackkits/troubleshooting).
+- A route asks for sign-in repeatedly: see [TinyAuth](/stackkits/apps/tinyauth).

@@ -7,4 +7,33 @@ icon: bug
 
 Whoami ships as a released routing-diagnostic module contract, but the initial native v2 StackSpec does not select it. Do not expect a generated Whoami route in a fresh Basement Kit or copy an address from an older rollout.
 
-Do not change generated router configuration in response to one diagnostic request. Update validated StackKits intent and regenerate the rollout instead.
+## What it is
+
+Whoami is a tiny test service. When you open it, it answers with a short text describing the request it received. A StackKit can include it to prove that the reverse proxy ([Traefik](/stackkits/apps/traefik)) and the name of the service work together, before you rely on a bigger application. It is a check, not something you use every day.
+
+## Which kits include it
+
+The catalog defines Whoami as an optional module that needs Traefik. The initial native v2 StackSpec does not select it, so a fresh Basement Kit does not contain it. Treat the generated output of your own rollout as the only truth for what is installed.
+
+## How you open it
+
+When a release selects it, the catalog gives the pattern `https://whoami.<domain>`, for example `https://whoami.home.test` with the default domain. Copy the address from the CLI output or the [Node Hub](/guides/stackkits/node-hub) instead of typing it.
+
+## First use
+
+1. Confirm that Whoami is listed in your rollout output or in the Node Hub.
+2. Open the generated address in your browser.
+3. Read the short text that appears. Seeing a reply means the name resolved and the route reached the service.
+4. Close the page. There is nothing to set up.
+
+## What to expect and what not to change
+
+- Expect plain text, not an application.
+- If your rollout protects the route, expect a sign-in first.
+- Do not change generated router configuration in response to one diagnostic request. Update validated StackKits intent and regenerate the rollout instead.
+
+## If something goes wrong
+
+- The address does not open: compare it with the address in the rollout output and check that the name resolves on the device you use. See [Troubleshooting](/guides/stackkits/troubleshooting).
+- The service is not listed: your StackSpec does not select it. Do not invent a selection from an older schema.
+- Run `stackkit verify --json` from your workspace folder and read the findings before changing anything.

@@ -16,6 +16,21 @@ Meeting is a Windows desktop capability. System-audio capture is not ported to
 the macOS beta.
 </Info>
 
+In everyday terms: you join a call as usual, SpeechKit listens to both sides in
+the background, and afterwards you get a written summary you can read, search
+and copy. It records what is said, not a recording you can play back, because
+audio itself is never kept.
+
+## Before you start
+
+- Use the Windows desktop client. See [Install on Windows](/speechkit/install-windows).
+- Allow SpeechKit to use your microphone. If you have not set up your microphone
+  yet, see [Set up hotkeys, microphone and language](/speechkit/hotkeys-microphone-language).
+- Make sure no other SpeechKit mode is using the microphone. Only one capture
+  can hold it at a time.
+- If you want everything to stay on your computer, check your privacy scope
+  first. See [Privacy settings](/speechkit/privacy-settings).
+
 ## What a meeting produces
 
 - A transcript with both channels, labelled by capture channel. Channel labels
@@ -41,6 +56,11 @@ and [Retention Scope](/speechkit/modes#retention-scope) decides how long.
 4. SpeechKit stops shortly after the calling application releases the
    microphone, and notifies you when the review is ready or why it failed.
    A recording you started by hand is never stopped automatically.
+
+What to expect after each step: after you start, the overlay shows that capture
+is running. During the call, the transcript grows and rolling summaries appear
+in batches. After the call ends, SpeechKit tells you when the review is ready
+or why it could not be made, and the meeting shows up in the meeting list.
 
 Exactly one capture holds the microphone at a time. Starting Dictation, Assist,
 or Voice Agent while a meeting records is refused rather than silently taking
@@ -69,6 +89,29 @@ Export connectors and cloud review providers are unavailable under the
 **local network only** and **this device only**
 [Network Scopes](/speechkit/modes#network-scope). A fresh install configures no
 connector, so nothing leaves the machine until you choose it.
+
+## If something goes wrong
+
+- **The meeting will not start.** Another SpeechKit mode may be holding the
+  microphone. Finish or stop Dictation, Assist or the Voice Agent, then start
+  the meeting again. See also [Fix common problems](/speechkit/fix-common-problems).
+- **There is no transcript, or only one side of the call.** Check the
+  microphone as described in
+  [Set up hotkeys, microphone and language](/speechkit/hotkeys-microphone-language).
+  Meeting records your microphone and the system sound as two channels; if only
+  the microphone is selected, the other side of the call is not captured.
+- **No review appears.** The notification names the reason. A review needs a
+  review provider: the bundled local model works without an account, and a
+  cloud provider is unavailable under the **local network only** and **this
+  device only** scopes. See [Work offline with local models](/speechkit/work-offline)
+  and [Privacy settings](/speechkit/privacy-settings).
+- **Detection offered nothing.** Call detection is a suggestion, not a promise.
+  Start the meeting from the desktop client instead.
+- **You are on a Mac.** Meeting is not available on the macOS beta. See
+  [Install on macOS](/speechkit/install-macos).
+- **Still stuck.** See [Fix common problems](/speechkit/fix-common-problems) and
+  [Update or uninstall SpeechKit](/speechkit/update-and-uninstall) to make sure
+  you are on the current version.
 
 <CardGroup cols={2}>
   <Card title="Install on Windows" icon="windows" href="/speechkit/install-windows">
