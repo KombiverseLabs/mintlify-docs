@@ -1,0 +1,62 @@
+---
+title: "Troubleshooting"
+description: "Fix the most common problems after a StackKits setup"
+sidebarTitle: "Troubleshooting"
+icon: "life-ring"
+---
+
+Start with the problem you see, then follow the checks in order.
+
+## A service address does not open
+
+1. Compare the address you typed with the address printed by the CLI or shown
+   in the Node Hub. Copy it rather than typing it from memory.
+2. Make sure the device uses the name resolution of your homelab. StackKits
+   does not silently change every router or device. The default local domain is
+   `home.test`; names below it must resolve on the device you are using.
+3. Open the same address from another device in your home network. If it works
+   there, the problem is the first device, not the homelab.
+4. From the workspace folder, run `stackkit verify --json` and look for
+   findings.
+
+## The Node Hub does not open
+
+Check that its expected `base.<domain>` address is the one in the rollout
+output, that the name resolves from your device and that the route belongs to
+the current workspace. Regenerate from the StackSpec instead of editing the
+generated Node Hub or router files. See [Node Hub](/guides/stackkits/node-hub).
+
+## The browser warns about the connection
+
+Do not click through a warning you do not understand. Ask the person who set
+up the homelab and compare the address with the one in the Node Hub. Do not turn off protection on a route to make a
+warning go away.
+
+## I cannot sign in to a service
+
+Services behind TinyAuth ask you to sign in through PocketID. Use the account
+that the owner created for you. It is not your kombify Cloud account. Details
+are in [How sign-in works](/identity/how-sign-in-works).
+
+## The setup stopped with an error
+
+1. Read the last log with `stackkit logs latest --json`.
+2. Do not run the one-line installer a second time without reading the error.
+3. Check that your operating system is listed in [OS compatibility](/stackkits/reference/os-compatibility).
+4. If you cannot find the cause, send the log text, but not the file
+   `.stackkit/access.json`, to [info@kombify.io](mailto:info@kombify.io).
+
+## I applied a change and something broke
+
+Return to the plan you reviewed. If you made a backup first, restore from it as
+described in [Back up and restore](/guides/stackkits/back-up-and-restore).
+This is why a backup before a change is part of the routine.
+
+## A public kombify.me name does not open
+
+See [kombify.me troubleshooting](/kombify-me/troubleshooting).
+
+<Warning>
+Never paste the contents of `.stackkit/access.json`, passwords or passkey
+recovery material into a chat, an issue or an e-mail.
+</Warning>

@@ -1,0 +1,64 @@
+---
+title: "How sign-in works"
+description: "Local sign-in for your homelab and optional hosted sign-in, explained step by step"
+sidebarTitle: "How sign-in works"
+icon: "right-to-bracket"
+---
+
+This page explains, for people who are not technical, who decides who gets in.
+The short version: you decide for your homelab, and a hosted sign-in is an
+optional extra.
+
+## Two doors
+
+<CardGroup cols={2}>
+  <Card title="Your homelab" icon="house">
+    You, the owner, control it. The services answer only to people you let in.
+  </Card>
+  <Card title="Your kombify account" icon="cloud">
+    Used for the hosted tools such as kombify Cloud. Sign-in happens on the
+    official `login.kombify.io` page.
+  </Card>
+</CardGroup>
+
+Having a kombify account never gives anyone access to your homelab, and
+deleting the hosted connection never locks you out of it.
+
+## What happens when you open a service at home
+
+1. You open the address of a service.
+2. A guard in front of the service, called TinyAuth, sees that you are not
+   signed in and sends you to your local identity service, PocketID.
+3. PocketID asks you to confirm who you are. It is built around passkeys,
+   which means a fingerprint, a face scan or a device PIN instead of a
+   password.
+4. After you confirm, TinyAuth lets you through to the service.
+
+Some applications have their own sign-in. In that case they use it. TinyAuth is
+for services that do not bring a compatible one.
+
+## First-time setup of the owner
+
+Right after the rollout you create the first local owner passkey. Keep recovery
+material outside the server and do not share one identity between people. See
+[PocketID](/stackkits/apps/pocketid) and [Node Hub](/guides/stackkits/node-hub).
+
+## Rules that always apply
+
+- If the system cannot tell who you are, it says no.
+- Access tokens are short-lived and made for one purpose.
+- A protected service does not become public when the identity service is
+  unavailable.
+- An assistant that acts for you can never get more authority than you have.
+
+## Questions
+
+- A person cannot sign in to a service: ask the owner to check that the person
+  has a local account. See [Troubleshooting](/guides/stackkits/troubleshooting).
+- You cannot sign in to your kombify account: see [Sign-in help](/apps/cloud/sign-in-and-account).
+- How kombify handles personal data: [Privacy and data](/trust/privacy).
+
+<Note>
+This page describes behaviour that is already in the released products. It does
+not describe future sign-in features.
+</Note>
