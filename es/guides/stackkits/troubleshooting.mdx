@@ -1,0 +1,62 @@
+---
+title: "Solución de problemas"
+description: "Resuelve los problemas más habituales tras una configuración de StackKits"
+sidebarTitle: "Solución de problemas"
+icon: "life-ring"
+---
+
+Empieza por el problema que ves y sigue las comprobaciones en orden.
+
+## La dirección de un servicio no se abre
+
+1. Compara la dirección que has escrito con la que imprime la CLI o la que
+   muestra el Node Hub. Cópiala en lugar de escribirla de memoria.
+2. Asegúrate de que el dispositivo usa la resolución de nombres de tu homelab.
+   StackKits no cambia en silencio todos los routers o dispositivos. El dominio
+   local por defecto es `home.test`; los nombres bajo él deben resolverse en el
+   dispositivo que estás usando.
+3. Abre la misma dirección desde otro dispositivo de tu red doméstica. Si
+   funciona allí, el problema es el primer dispositivo, no el homelab.
+4. Desde la carpeta del espacio de trabajo, ejecuta `stackkit verify --json` y
+   busca hallazgos.
+
+## El Node Hub no se abre
+
+Comprueba que su dirección `base.<domain>` esperada es la que aparece en la
+salida del despliegue, que el nombre se resuelve desde tu dispositivo y que la
+ruta pertenece al espacio de trabajo actual. Regenera a partir de la StackSpec en
+lugar de editar los archivos generados del Node Hub o del router. Consulta [Node Hub](/es/guides/stackkits/node-hub).
+
+## El navegador avisa sobre la conexión
+
+No ignores una advertencia que no entiendes. Pregunta a la persona que configuró
+el homelab y compara la dirección con la del Node Hub. No desactives la
+protección de una ruta para que desaparezca una advertencia.
+
+## No puedo iniciar sesión en un servicio
+
+Los servicios detrás de TinyAuth te piden iniciar sesión mediante PocketID. Usa
+la cuenta que el propietario creó para ti. No es tu cuenta de kombify Cloud.
+
+## La configuración se detuvo con un error
+
+1. Lee el último registro con `stackkit logs latest --json`.
+2. No ejecutes por segunda vez el instalador de una línea sin leer el error.
+3. Comprueba que tu sistema operativo figura en [Compatibilidad de SO](/es/stackkits/reference/os-compatibility).
+4. Si no encuentras la causa, envía el texto del registro, pero no el archivo
+   `.stackkit/access.json`, a [info@kombify.io](mailto:info@kombify.io).
+
+## Apliqué un cambio y algo se rompió
+
+Vuelve al plan que revisaste. Si hiciste antes una copia de seguridad, restaura
+desde ella como se describe en [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).
+Por eso una copia de seguridad antes de un cambio forma parte de la rutina.
+
+## Un nombre público de kombify.me no se abre
+
+Consulta [Solución de problemas de kombify.me](/es/kombify-me/troubleshooting).
+
+<Warning>
+Nunca pegues el contenido de `.stackkit/access.json`, contraseñas ni material de
+recuperación de passkeys en un chat, una incidencia o un correo electrónico.
+</Warning>
