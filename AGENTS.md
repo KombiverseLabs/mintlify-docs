@@ -49,7 +49,7 @@ navigation source of truth; pages are MDX files.
 
 - Workspace `DOCUMENTATION-STANDARD.md` (tier model, Tier-1 rules, Brand bind)
   and `PLATFORM-STRATEGY.md` (product naming, public/internal boundaries);
-  `kombify-Core/standards/REPO-FILE-SCHEMA.md` for root metadata.
+  its "Repository Documentation" section for root metadata.
 - Repository gates: `.github/workflows/public-safety.yml` (public allowlist)
   and `.github/workflows/parity-gate.yml` (generated-MDX frontmatter).
 
