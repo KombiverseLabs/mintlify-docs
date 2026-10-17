@@ -5,24 +5,39 @@ sidebarTitle: "Instalar en macOS"
 icon: "apple"
 ---
 
-SpeechKit para macOS es una beta temprana que solo hace Dictation. Funciona en
+SpeechKit para macOS es una beta temprana que solo ofrece Dictation. Funciona en
 macOS 14 o posterior con Apple Silicon. Los Mac con Intel no son compatibles.
 
 {/* speechkit-release:begin */}
-La versión pública actual es [v0.72.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.1), publicada el 2026-09-20.
+La versión pública actual es [v0.77.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.1), publicada el 2026-10-16.
 {/* speechkit-release:end */}
 
 <Warning>
-El paquete de macOS está firmado ad hoc, sin Apple Developer ID y sin
+El paquete de macOS está firmado ad hoc, sin un Apple Developer ID y sin
 notarización. macOS lo pone en cuarentena y puede afirmar que la app está
 dañada. No lo está. Quitar la etiqueta de cuarentena requiere un solo comando
-documentado, que se describe más abajo.
+documentado, que se describe a continuación.
 </Warning>
+
+En términos cotidianos: esta es una primera versión limitada para Mac con chip
+de Apple. Convierte tu voz en texto y lo escribe en la app que estás usando. Es
+gratuita para probar, pero macOS la trata con desconfianza porque no está
+firmada por una cuenta de desarrollador de Apple, así que la instalación
+necesita un paso extra que haces en Terminal. Nada de lo que sigue requiere una
+contraseña de administrador.
+
+## Antes de empezar
+
+- Un Mac con chip de Apple (serie M) con macOS 14 o posterior. Los Mac con Intel
+  no son compatibles.
+- Unos minutos. Los modelos de voz locales se descargan más tarde, bajo demanda.
+- Saber que Terminal es una app de tu Mac (pulsa Cmd+Espacio y escribe
+  `Terminal`). Solo pegas un comando en ella.
 
 ## Descarga
 
 <Card title="Paquete de macOS (Apple Silicon)" icon="download" href="https://github.com/kombifyio/SpeechKit/releases/latest/download/SpeechKit-macOS-arm64.zip">
-  Descarga `SpeechKit-macOS-arm64.zip` de la última versión publicada.
+  Descarga `SpeechKit-macOS-arm64.zip` de la versión publicada más reciente.
 </Card>
 
 Verifica la descarga con
@@ -37,7 +52,7 @@ grep SpeechKit-macOS-arm64.zip SHA256SUMS.txt | shasum -a 256 -c
 ## Instalación
 
 1. Descomprime la descarga y arrastra `SpeechKit.app` a tu carpeta Aplicaciones.
-   Muévela antes del siguiente paso: macOS ejecuta una app que se queda en
+   Muévela antes del siguiente paso: macOS ejecuta una app que se deja en
    Descargas desde una copia oculta de solo lectura, y SpeechKit no puede
    actualizarse desde ahí.
 2. Quita la etiqueta de cuarentena en Terminal:
@@ -46,10 +61,20 @@ grep SpeechKit-macOS-arm64.zip SHA256SUMS.txt | shasum -a 256 -c
    xattr -dr com.apple.quarantine /Applications/SpeechKit.app
    ```
 
-   No se imprime nada cuando funciona. El comando no necesita contraseña y
-   afecta solo a esta app.
+   No se imprime nada cuando funciona. El comando no necesita contraseña y solo
+   afecta a esta app.
 3. Abre SpeechKit desde Aplicaciones y concede **Micrófono** y
    **Accesibilidad** cuando se te pida.
+
+Qué esperar después de cada paso:
+
+- Después del paso 1, la app está en tu carpeta Aplicaciones, ya no en
+  Descargas.
+- Después del paso 2, Terminal no imprime nada. Eso significa que el comando
+  funcionó.
+- Después del paso 3, SpeechKit se abre sin el mensaje de "dañada", muestra su
+  elemento en la barra de menús en la parte superior de la pantalla y macOS
+  solicita los permisos.
 
 Lee el
 [aviso de versión sin firmar](https://github.com/kombifyio/SpeechKit/releases/latest/download/UNSIGNED-MACOS-RELEASE.txt)
@@ -58,27 +83,60 @@ desactivar Gatekeeper en todo el sistema ni ejecutar nada como root.
 
 ## Qué funciona y qué no
 
-| Función | Beta para macOS |
+| Capacidad | Beta de macOS |
 | --- | --- |
 | Dictation con el modelo local incluido | Disponible |
 | Dictation con proveedores de voz a texto en la nube | Disponible |
-| Captura de micrófono, inyección de texto, elemento en la barra de menús | Disponible |
-| Atajos de teclado globales y mantener pulsado para hablar | No funciona en esta compilación |
+| Captura del micrófono, inyección de texto, elemento de la barra de menús | Disponible |
+| Atajos globales y mantener para hablar | No funcionan en esta compilación |
 | Assist y Voice Agent | No verificados en macOS |
-| Captura de audio del sistema de Meeting, capturas de pantalla, palabra de activación, LLM local | No portados; cada uno se rechaza con un error tipado y sus controles están ocultos |
+| Captura de audio del sistema en reuniones, capturas de pantalla, palabra de activación, LLM local | No portados; cada uno se rechaza con un error tipado y sus controles están ocultos |
 
 El oyente de atajos se instala pero no recibe eventos de teclado, así que el
 elemento de la barra de menús es la forma de iniciar un dictado hasta que se
-corrija. Usa el [cliente para Windows](/es/speechkit/install-windows) cuando
+corrija. Usa el [cliente de Windows](/es/speechkit/install-windows) cuando
 necesites el conjunto completo de funciones.
 
 ## Permisos tras una actualización
 
-macOS recuerda los permisos concedidos según la firma exacta de una app. Cada
-compilación firmada ad hoc tiene una firma distinta, así que macOS vuelve a
-pedir Micrófono y Accesibilidad después de cada actualización y, a veces, el
-acceso al llavero. Es lo esperado en una beta sin firmar.
+macOS recuerda las concesiones de permisos según la firma exacta de una app.
+Cada compilación firmada ad hoc tiene una firma distinta, así que macOS vuelve a
+pedir Micrófono y Accesibilidad tras cada actualización, y a veces acceso al
+llavero. Es lo esperado en una beta sin firmar.
+
+Si aún parece faltar un permiso, SpeechKit también puede pedir Supervisión de
+entrada, que necesitan los atajos. Los atajos no funcionan en esta compilación,
+así que por ahora puedes dejar ese desactivado.
 
 Si una actualización deja el dictado sin respuesta, abre **Ajustes del Sistema →
-Privacidad y seguridad → Accesibilidad** y vuelve a activar SpeechKit. Recoge el
+Privacidad y seguridad → Accesibilidad** y vuelve a activar SpeechKit. Toma el
 permiso mientras se ejecuta; no hace falta reiniciar.
+
+## Si algo sale mal
+
+- **macOS dice que la app está dañada.** No lo está; el paquete está intacto.
+  Ejecuta el comando de cuarentena del paso 2 y ábrela de nuevo.
+- **El comando imprime un error.** Comprueba que la app está en `/Applications`
+  y que la ortografía coincide con el paso 2, incluidas las mayúsculas.
+- **No se escribe nada en la otra app.** Revisa **Ajustes del Sistema →
+  Privacidad y seguridad → Accesibilidad** y activa SpeechKit. Tampoco se puede
+  escribir texto en un campo de contraseña; macOS lo bloquea a propósito.
+- **No hay entrada de micrófono.** Revisa **Ajustes del Sistema → Privacidad y
+  seguridad → Micrófono** para SpeechKit, y la entrada que elegiste en
+  SpeechKit. Consulta
+  [Configura atajos, micrófono e idioma](/es/speechkit/hotkeys-microphone-language).
+- **El atajo no hace nada.** Es lo esperado en esta compilación. Usa el elemento
+  de la barra de menús para iniciar un dictado.
+- **Una actualización volvió a pedirlo todo.** Es lo esperado; consulta "Permisos
+  tras una actualización" más arriba.
+- **Un modelo de voz no se descarga.** Comprueba tu conexión y el alcance de
+  privacidad. Consulta
+  [Trabaja sin conexión con modelos locales](/es/speechkit/work-offline) y
+  [Soluciona problemas comunes](/es/speechkit/fix-common-problems).
+- **Quieres actualizarla o eliminarla.** Consulta
+  [Actualiza o desinstala SpeechKit](/es/speechkit/update-and-uninstall).
+
+## Próximos pasos
+
+- [Configura atajos, micrófono e idioma](/es/speechkit/hotkeys-microphone-language)
+- [Soluciona problemas comunes](/es/speechkit/fix-common-problems)

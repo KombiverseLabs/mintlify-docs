@@ -1,31 +1,60 @@
 ---
 title: "Coolify"
-description: "可选的已发布 StackKits 应用平台和工作负载适配器"
+description: "可选的、已发布的 StackKits 应用平台和工作负载适配器"
 sidebarTitle: "Coolify"
 icon: cloud-upload
 ---
 
-Coolify 是可选的应用平台和工作负载适配器。当你希望由 Coolify 管理你的应用时，请显式选择它。默认的独立工作区直接使用 Compose。
+Coolify 是可选的应用平台和工作负载适配器。当你希望由 Coolify 管理你的应用时，请明确选择它。默认的独立工作区直接使用 Compose。
+
+## 它是什么
+
+Coolify 是用于在你自己的服务器上运行应用的控制面板。它可以通过网页为你启动、更新和路由应用。当你想要这个面板时，StackKit 可以将它作为可选层包含进来；否则 StackKits 直接用 Compose 文件启动工作负载，完全不需要面板。
+
+## 哪些 kit 和使用场景包含它
+
+它在每个 kit 中都是可选的，绝不是默认工作区的一部分。在使用场景目录中，它是 Marketplace 使用场景的主要应用，那里把它描述为你在 homelab 上运行的应用的专属应用商店。Marketplace 计划作为基于 Coolify 的可选使用场景，而 Coolify 是该使用场景的一个应用，而不是原生运行时目标。作为工作负载适配器，它在兼容性表中被列为适用于 `files`、`photos`、`media`、`smart-home` 和 `vault`。
 
 | 角色 | 已发布目录中的行为 |
 | --- | --- |
-| 选择方式 | 可选的显式集成；独立 Compose 不需要应用平台 |
+| 选择 | 可选的显式集成；独立 Compose 不需要应用平台 |
 | 工作负载适配器 | 支持 `files`、`photos` 和 `vault` |
 | 路由和 TLS 证据 | 支持 |
 | 工作负载备份与恢复 | Coolify 适配器不提供 |
 
+## 如何打开
+
+从 Node Hub 或 StackKits 输出中打开生成的 Coolify 地址。默认的本地域名是 `home.test`；请从输出中复制该地址，而不是手动输入，并确保该名称可以在你的设备上解析。
+
 ## 安全使用
 
 1. 在打开应用平台之前，先完成并验证 StackKits 部署。
-2. 从 Node Hub 或 StackKits 的输出中打开生成的 Coolify URL。
-3. 每个工作负载只使用一条应用交付路径；不要手动创建相互竞争的生成路由。
-4. 应用凭据和恢复材料由本地所有者掌管。
-5. 只有当所选适配器声明支持备份与恢复时，才使用 StackKits 的备份路径。
+2. 从 Node Hub 或 StackKits 输出中打开生成的 Coolify URL。
+3. 每个工作负载使用一条应用交付路径；不要手动创建相互竞争的生成路由。
+4. 将应用凭据和恢复材料置于本地所有者的控制之下。
+5. 仅当所选适配器声明支持备份与恢复时，才使用 StackKits 备份路径。
+
+## 首次使用
+
+1. 完成 StackKits 部署并运行验证。
+2. 打开生成的 Coolify 地址。
+3. 按照部署输出的说明创建或确认所有者登录。
+4. 检查你选择的应用是否出现，并能在其生成的路由上打开。
+
+## 备份了什么
+
+Coolify 适配器不提供工作负载备份与恢复。独立 Compose 适配器则对声明了该能力的工作负载提供。请参阅[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)，并在你把无法重建的数据交给任何工作负载之前，先演练一次恢复。
 
 ## 验证
 
-- 生成的 Coolify 路由可以在部署所报告的地址上打开。
-- StackKits 验证报告应用平台及其已配置的路由状态健康。
+- 生成的 Coolify 路由在部署所报告的地址上打开。
+- StackKits 验证报告应用平台及其配置的路由状态良好。
 - StackKits 工作区仍然是配置意图的来源。
 
-关于 beta 备选方案，参见 [Komodo](/zh-Hans/stackkits/apps/komodo)。关于完整的适配器矩阵，参见[应用交付](/zh-Hans/guides/stackkits/application-delivery)。
+## 如果出了问题
+
+- 地址打不开：将其与部署输出进行比较，确认该名称可以从你的设备解析，并参阅[故障排查](/zh-Hans/guides/stackkits/troubleshooting)。
+- 同一个应用出现两次，或路由冲突：同一个工作负载有两条交付路径。保留一条，修改 StackSpec 并重新生成；不要手动添加路由或标签。
+- 某个工作负载缺少备份：在此适配器上这是预期的。如果你需要该工作负载的 StackKits 备份，请使用独立 Compose 路径。
+
+关于测试版备选项，请参阅 [Komodo](/zh-Hans/stackkits/apps/komodo)。关于完整的适配器矩阵，请参阅[应用交付](/zh-Hans/guides/stackkits/application-delivery)。

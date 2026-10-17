@@ -1,7 +1,7 @@
 ---
 title: "Graba y revisa una reunión"
 description: "Captura de reuniones en dos canales, notas, capturas de pantalla y resúmenes con citas"
-sidebarTitle: "Meeting"
+sidebarTitle: "Reunión"
 icon: "users"
 ---
 
@@ -12,73 +12,118 @@ de grabación independiente, no un cuarto modo: solo comparte con Dictation el
 transcriptor de voz a texto.
 
 <Info>
-Meeting es una función de escritorio de Windows. La captura de audio del sistema
-no está portada a la beta de macOS.
+Meeting es una capacidad del escritorio de Windows. La captura de audio del
+sistema no está portada a la beta de macOS.
 </Info>
+
+En términos cotidianos: te unes a una llamada como siempre, SpeechKit escucha
+ambas partes en segundo plano y después obtienes un resumen escrito que puedes
+leer, buscar y copiar. Registra lo que se dice, no una grabación que puedas
+reproducir, porque el audio en sí nunca se conserva.
+
+## Antes de empezar
+
+- Usa el cliente de escritorio de Windows. Consulta [Instalar en Windows](/es/speechkit/install-windows).
+- Permite que SpeechKit use tu micrófono. Si aún no has configurado tu
+  micrófono, consulta [Configura atajos, micrófono e idioma](/es/speechkit/hotkeys-microphone-language).
+- Asegúrate de que ningún otro modo de SpeechKit esté usando el micrófono. Solo
+  una captura puede retenerlo a la vez.
+- Si quieres que todo permanezca en tu ordenador, comprueba primero tu alcance
+  de privacidad. Consulta [Ajustes de privacidad](/es/speechkit/privacy-settings).
 
 ## Qué produce una reunión
 
 - Una transcripción con ambos canales, etiquetada por canal de captura. Las
-  etiquetas de canal indican de qué lado de la llamada procede una línea; no
-  identifican a cada interlocutor remoto.
-- Tus propias notas, reproducidas textualmente en el resumen.
+  etiquetas de canal indican de qué lado de la llamada vino una línea; no son la
+  identificación de cada interlocutor remoto.
+- Tus propias notas, reproducidas literalmente en el resumen.
 - Una **Meeting Review** duradera: un resumen ejecutivo de cinco frases,
   elementos de acción y un cuerpo que cita la transcripción de la que procede.
-- Reviews en inglés, alemán, español, chino, hindi y árabe.
+- Revisiones en inglés, alemán, español, chino, hindi y árabe.
 
 El audio nunca se conserva. Lo que permanece son la transcripción, las notas y
-la review, y el [Retention Scope](/es/speechkit/modes#retention-scope) decide
-durante cuánto tiempo.
+la revisión, y el [alcance de retención](/es/speechkit/modes#retention-scope)
+decide durante cuánto tiempo.
 
 ## Inicia y termina una grabación
 
 1. Inicia una reunión desde el cliente de escritorio, o deja que la detección de
-   llamadas te ofrezca una cuando aceptes una llamada. La detección es una
+   llamadas ofrezca una cuando aceptes una llamada. La detección es una
    sugerencia que aceptas, no una grabación automática.
-2. Una superposición compacta y transparente muestra el estado de la captura y
-   los controles durante la llamada, y se puede desplegar para tomar notas.
-3. Los resúmenes parciales se ejecutan por lotes mientras continúa la captura,
-   de modo que una llamada larga no espera hasta el final para procesarse.
+2. Una superposición transparente compacta muestra el estado de la captura y los
+   controles durante la llamada, y puede desplegarse para tomar notas.
+3. Los resúmenes continuos se ejecutan por lotes mientras continúa la captura,
+   de modo que una llamada larga no espera al final para ser procesada.
 4. SpeechKit se detiene poco después de que la aplicación de llamadas libere el
-   micrófono y te avisa cuando la review está lista o por qué falló. Una
+   micrófono, y te avisa cuando la revisión está lista o por qué falló. Una
    grabación que iniciaste a mano nunca se detiene automáticamente.
 
-Solo una captura mantiene el micrófono a la vez. Iniciar Dictation, Assist o
-Voice Agent mientras se graba una reunión se rechaza en lugar de tomar el
-dispositivo en silencio.
+Qué esperar después de cada paso: tras iniciar, la superposición muestra que la
+captura está en marcha. Durante la llamada, la transcripción crece y los
+resúmenes continuos aparecen por lotes. Cuando termina la llamada, SpeechKit te
+avisa cuando la revisión está lista o por qué no se pudo crear, y la reunión
+aparece en la lista de reuniones.
+
+Exactamente una captura retiene el micrófono a la vez. Iniciar Dictation,
+Assist o Voice Agent mientras se graba una reunión se rechaza en lugar de tomar
+el dispositivo en silencio.
 
 ## Capturas de pantalla
 
 Pulsa `Ctrl+Alt+S` durante una reunión para capturar una ventana elegida o el
-monitor que hay bajo el cursor. Las capturas aparecen como marcadores en la
-línea de tiempo de la transcripción, se citan en la review generada y se
-muestran brevemente en la píldora de la reunión para que confirmes que se
-capturó la ventana correcta. Ninguna imagen sale del dispositivo.
+monitor bajo el cursor. Las capturas aparecen como marcadores en la línea de
+tiempo de la transcripción, se citan en la revisión generada y se previsualizan
+brevemente en la píldora de la reunión para que puedas confirmar que se capturó
+la ventana correcta. Ninguna imagen sale del dispositivo.
 
-## Buscar y exportar
+## Busca y exporta
 
-La lista de reuniones agrupa las sesiones según cuándo ocurrieron. La búsqueda
+La lista de reuniones agrupa las sesiones por cuándo ocurrieron. La búsqueda
 abarca títulos, transcripciones, notas y resúmenes. Las notas se muestran como
 Markdown con formato, y el resumen completo ofrece **Copy Markdown** y **Save .md**.
 
-## Generación de la review
+## Generación de la revisión
 
-La vía local no necesita credenciales de nube: el modelo local incluido genera
-la review en el dispositivo. GitHub Copilot es un proveedor opcional de
-generación de reviews, tras una autorización independiente y revocable para el
-procesamiento de transcripciones.
+La ruta local no necesita credenciales en la nube: el modelo local incluido
+genera la revisión en el dispositivo. GitHub Copilot es un proveedor opcional de
+generación de revisiones, protegido por una concesión de procesamiento de
+transcripciones aparte y revocable.
 
-Los conectores de exportación y los proveedores de review en la nube no están
-disponibles con los
-[Network Scopes](/es/speechkit/modes#network-scope) **local network only** y
-**this device only**. Una instalación nueva no configura ningún conector, así
-que nada sale del equipo hasta que tú lo eliges.
+Los conectores de exportación y los proveedores de revisión en la nube no están
+disponibles bajo los
+[alcances de red](/es/speechkit/modes#network-scope) **solo red local** y
+**solo este dispositivo**. Una instalación nueva no configura ningún conector,
+así que nada sale de la máquina hasta que lo elijas.
+
+## Si algo sale mal
+
+- **La reunión no se inicia.** Puede que otro modo de SpeechKit esté reteniendo
+  el micrófono. Termina o detén Dictation, Assist o Voice Agent y luego inicia
+  la reunión de nuevo. Consulta también [Soluciona problemas comunes](/es/speechkit/fix-common-problems).
+- **No hay transcripción, o solo un lado de la llamada.** Comprueba el micrófono
+  como se describe en
+  [Configura atajos, micrófono e idioma](/es/speechkit/hotkeys-microphone-language).
+  Meeting graba tu micrófono y el sonido del sistema como dos canales; si solo
+  está seleccionado el micrófono, el otro lado de la llamada no se captura.
+- **No aparece ninguna revisión.** La notificación indica el motivo. Una
+  revisión necesita un proveedor de revisiones: el modelo local incluido
+  funciona sin una cuenta, y un proveedor en la nube no está disponible bajo los
+  alcances **solo red local** y **solo este dispositivo**. Consulta
+  [Trabaja sin conexión con modelos locales](/es/speechkit/work-offline) y
+  [Ajustes de privacidad](/es/speechkit/privacy-settings).
+- **La detección no ofreció nada.** La detección de llamadas es una sugerencia,
+  no una promesa. Inicia la reunión desde el cliente de escritorio.
+- **Estás en un Mac.** Meeting no está disponible en la beta de macOS. Consulta
+  [Instalar en macOS](/es/speechkit/install-macos).
+- **Sigues atascado.** Consulta [Soluciona problemas comunes](/es/speechkit/fix-common-problems) y
+  [Actualiza o desinstala SpeechKit](/es/speechkit/update-and-uninstall) para
+  asegurarte de que tienes la versión actual.
 
 <CardGroup cols={2}>
   <Card title="Instalar en Windows" icon="windows" href="/es/speechkit/install-windows">
-    Meeting se incluye con el cliente de escritorio para Windows.
+    Meeting se incluye con el cliente de escritorio de Windows.
   </Card>
   <Card title="Modos y rutas de datos" icon="waveform-lines" href="/es/speechkit/modes">
-    Descubre cómo funcionan la elección del proveedor y los dos ámbitos de privacidad.
+    Descubre cómo funcionan la elección de proveedor y los dos alcances de privacidad.
   </Card>
 </CardGroup>

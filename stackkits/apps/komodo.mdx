@@ -7,6 +7,18 @@ icon: rocket
 
 Komodo is a beta adapter in the released workload compatibility matrix; the generated [application delivery compatibility](/stackkits/reference/application-delivery-compatibility) table owns its declared rows. Choose it only when you accept that maturity; Coolify and standalone Compose are the supported adapter paths.
 
+## What it is
+
+Komodo is a tool for running and managing applications on a server. In everyday words, it is a control panel that sits next to your applications and looks after how they are started and kept running. A StackKit can include it when you want that panel instead of the default way of starting applications, which is plain Compose files. It is an operations platform, not an app store: it does not offer a catalog of apps to click and install.
+
+## Which kits and use cases include it
+
+Komodo is never included by default. It is a platform integration that you select explicitly in the workload intent of your StackSpec, for the workloads the declared rows of the compatibility table list (for example `files`, `media`, `photos`, `smart-home` and `vault`). Most people never need it: standalone Compose is the native default and Coolify is the other supported platform path.
+
+## How to open it
+
+After a rollout, StackKits prints the generated Komodo address and credentials in the rollout output. Open that address in a browser from a device that can resolve your homelab names. The default local domain is `home.test`; copy the address instead of typing it from memory.
+
 ## Use it safely
 
 - Select the beta `komodo` adapter explicitly in the workload intent for your installed release.
@@ -15,5 +27,26 @@ Komodo is a beta adapter in the released workload compatibility matrix; the gene
 - Keep one application delivery path per workload.
 
 Do not copy an old configuration snippet or create a second platform route by hand. The installed release's CUE validation is authoritative.
+
+## First use
+
+1. Complete and verify the StackKits rollout before you open Komodo.
+2. Open the generated Komodo address from the rollout output.
+3. Sign in with the generated credentials from the rollout output. Do not paste them into chat or an issue.
+4. Look at the application that StackKits delivered for your workload. Treat the StackSpec as the place where you change settings, not the Komodo screens.
+
+## What is backed up
+
+The application delivery compatibility table has a Backup/restore column for each workload and adapter; check the row for your workload and release. Deployment capability alone does not establish backup or restore. Practice a staged restore as described in [Back up and restore](/guides/stackkits/back-up-and-restore) before you rely on it.
+
+## What to expect
+
+Komodo is a beta path. Expect fewer verified rows than standalone Compose, and expect that you may need to read the compatibility table before trusting a particular workload on it. The panel shows and runs what StackKits generated; it does not replace validation of your configuration.
+
+## If something goes wrong
+
+- The address does not open: compare it with the address in the rollout output and make sure your device resolves the homelab name. See [Troubleshooting](/guides/stackkits/troubleshooting).
+- A workload is missing or duplicated: you probably have two delivery paths for it. Keep one application delivery path per workload and fix the StackSpec, then regenerate.
+- You are unsure whether the path is supported: run `stackkit app compatibility --json` and read the row for your release.
 
 [Choose application delivery](/guides/stackkits/application-delivery) compares Komodo with Coolify and standalone Compose.

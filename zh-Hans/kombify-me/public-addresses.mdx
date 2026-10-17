@@ -1,31 +1,56 @@
 ---
 title: "在 kombify.me 上发布服务"
-description: "为可公开访问的家庭实验室服务提供稳定的 HTTPS 名称"
-sidebarTitle: "公共地址"
+description: "为可公开访问的 homelab 服务提供稳定的 HTTPS 名称"
+sidebarTitle: "公开地址"
 icon: "lock"
 ---
 
-当服务已经通过公共 HTTP(S) URL 响应时，请使用此路径。kombify.me 会终止 TLS，并将浏览器代理到该源站。在此路径上，私有、回环和链路本地目标会被拒绝。
+当服务已经在公开的 HTTP(S) URL 上响应时，请使用这条路径。kombify.me 会终止 TLS，并将浏览器代理到该源站。这条路径会拒绝私有、回环和链路本地目标。
+
+通俗地说：你的应用已经有一个互联网上任何人都能打开的网址。kombify.me 在 `kombify.me` 上给它第二个更整洁的名称，并为你处理好 HTTPS。访客输入 kombify.me 的名称，kombify.me 会把他们转发到你的应用。不确定这是不是合适的类型？请先阅读[公开、私有还是重定向](/zh-Hans/kombify-me/public-or-private)。
 
 ## 开始之前
 
-- 源站必须能够从互联网通过 HTTP 或 HTTPS 访问。
-- 已登录的 kombify 账号通过 [api.kombify.io](https://api.kombify.io) 注册名称。自托管安装在邮箱验证后使用 API 密钥注册。
-- 已连接的 StackKits 和 Techstack 流程可以为你注册官方套件名称。
+- 源站必须能够通过 HTTP 或 HTTPS 从互联网访问。
+- 已登录的 kombify 账户通过 [api.kombify.io](https://api.kombify.io) 注册名称。自托管安装在邮箱验证之后使用 API 密钥注册。
+- 已连接的 StackKits 和 Techstack 流程可以为你注册第一方 kit 名称。
 
 ## 为服务命名
 
-1. 为家庭实验室注册一个基础名称。托管账号获得 `{homelab}-{you}.kombify.me`。自托管安装获得 `sh-{homelab}-{device}.kombify.me`。
-2. 在该基础名称下注册服务。`auth`、`id` 和 `coolify` 等官方套件标识始终会变成 `{base}-{service}.kombify.me`。
-3. 将服务指向公共源站 URL。
+1. 为 homelab 注册一个基础名称。托管账户得到 `{homelab}-{you}.kombify.me`。自托管安装得到 `sh-{homelab}-{device}.kombify.me`。
+2. 在该基础名称下注册服务。`auth`、`id` 和 `coolify` 等第一方 kit slug 始终会变成 `{base}-{service}.kombify.me`。
+3. 将服务指向公开的源站 URL。
 4. 暴露服务路由。未暴露的服务名称保持未发布状态。
 
 然后在浏览器中打开 `https://{base}-{service}.kombify.me`。
 
-`auth.kombify.me` 这类保留的根域名保持不使用。套件登录仍会落在 `{your-lab}-auth.kombify.me`。
+如需带示例名称的通俗讲解，请参阅[获取你的第一个 kombify.me 地址](/zh-Hans/kombify-me/get-your-first-address)。
+
+## 每一步之后的预期情况
+
+- 注册基础名称之后，kombify.me 会返回完整的基础名称。请把它记下来；每个应用名称都由它构成。
+- 注册服务及其源站之后，该名称已存在，但仍处于关闭状态。在你暴露它之前，访客会得到“未暴露”的响应（404）。
+- 暴露服务之后，该名称开始接受访客。更改最多可能需要大约一分钟才能显示，因为 kombify.me 保留了一个很短的路由缓存。
+- 在自托管安装上，当电子邮箱地址尚未验证时，新名称会以暂停状态启动，访客会得到“inactive”响应（503）。请完成验证，或将该地址设置为 active。
+
+只要知道名称的人都可以打开公开地址，除非应用要求登录。包含敏感数据的应用请放在它们自己的登录之后。
+
+`auth.kombify.me` 这类保留的顶级名称不会被使用。Kit 登录仍然落在 `{your-lab}-auth.kombify.me` 上。
 
 ## 如果源站不是公开的
 
-请在此停止，并按照[访问私有服务](/zh-Hans/kombify-me/private-targets)操作。不要在公共代理上发布 localhost 或仅限局域网的 URL。
+请在此停下，并按照[访问私有服务](/zh-Hans/kombify-me/private-targets)操作。不要在公开代理上发布 localhost 或仅限局域网的 URL。
 
-仅限本地的名称保留在 StackKits 安装的家庭实验室解析器上。它们不是 kombify.me 名称。
+仅限本地的名称保留在 StackKits 安装的 homelab 解析器上。它们不是 kombify.me 的名称。
+
+## 如果出了问题
+
+| 你看到的情况 | 该怎么做 |
+| --- | --- |
+| “service subdomain not exposed”（404） | 暴露服务路由。 |
+| “subdomain inactive”（503） | 该地址已暂停或尚未验证。请将其设置为 active。 |
+| 保存源站被拒绝 | 公开路径只接受公开的 `http` 或 `https` 地址。其他情况请使用[私有地址](/zh-Hans/kombify-me/private-targets)。 |
+| 502 “Bad Gateway” | kombify.me 无法访问你的源站。请检查应用是否在运行，以及能否从互联网响应。 |
+| “already taken”、“reserved”或达到限制的错误 | 请选择另一个名称，或删除你不再使用的地址。 |
+
+更多检查：[kombify.me 故障排查](/zh-Hans/kombify-me/troubleshooting)。如需稍后暂停、更改或删除地址，请参阅[更改、暂停或删除地址](/zh-Hans/kombify-me/change-pause-or-remove-an-address)。

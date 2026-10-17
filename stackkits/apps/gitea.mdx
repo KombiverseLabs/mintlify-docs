@@ -7,6 +7,18 @@ icon: code-branch
 
 Gitea provides the [Development](/guides/stackkits/use-cases/development) use case. The dev workload with Gitea runs a private Git server in a rootless container with SQLite on one selected node. Public registration is disabled and new repositories are forced private. It does not expose SSH, install a CI runner, or enable Actions; workflows for additional users and API tokens stay native Gitea operations. The [use-case catalog](/stackkits/reference/use-case-catalog) lists the components the published release declares.
 
+## What it is
+
+Gitea is a private place to keep your code, similar to a small self-run version of a code hosting website. You push projects to it with ordinary Git tools and keep them private. A StackKit includes it so your repositories do not have to live with an outside provider.
+
+## Which kits and use cases include it
+
+Gitea is the default application of the Developer Platform part of the Dev use case. The example below uses `basement-kit` on standalone Compose. Per the evidence state on the [Development](/guides/stackkits/use-cases/development) page, it is selectable but not yet lifecycle-verified.
+
+## How to open it
+
+Open the route you configure for the workload; the example uses `https://dev.home.test`. The hostname must resolve to your host from every client, as described below.
+
 ## Select the dev workload explicitly
 
 From an empty owner workspace, select Gitea and establish its local owner custody:
@@ -69,6 +81,14 @@ stackkit secrets reveal --workload dev --slot owner-password
 
 The command accepts only slots declared by the current validated StackSpec, writes the value to stdout — never to deployment logs — and neither creates nor resets a password. An existing unmatched administrator or an unowned user database fails delivery without replacing accounts or resetting passwords.
 
+## First use
+
+1. Reveal the owner password with the command above in a private terminal.
+2. Open the Gitea route and sign in as `owner`.
+3. Create a private repository.
+4. Copy its HTTPS clone URL and clone it from a real client, using your native Git credential storage.
+5. Push a small test commit.
+
 Sign in as `owner`, create a private repository, and use its HTTPS clone URL with your native Git credential storage. Git authenticates directly with Gitea: no browser forward-auth gate intercepts Git requests. Readiness that only reports the HTTP process and SQLite as reachable does not prove you have cloned, pushed, or recovered anything — test an actual push from an intended client.
 
 ## Storage and recovery boundary
@@ -79,6 +99,17 @@ Sign in as `owner`, create a private repository, and use its HTTPS clone URL wit
 | `gitea/config` | `/etc/gitea` | `app.ini` and persisted application keys/configuration |
 
 Both named volumes belong to the workload's data and backup contract. Correct recovery quiesces the application's single writer, captures both volumes, and activates them together with writes stopped — a live copy of the SQLite file alone is not that contract. Follow [Back up and restore](/guides/stackkits/back-up-and-restore) for the workspace lifecycle. Rootless and rootful Gitea use different layouts, so swapping the image is not a storage migration.
+
+## What to expect
+
+Gitea is a single small server using SQLite on one selected node. Sign-in and repository pages are fast for a household. If the page loads but cloning fails, the usual cause is name resolution or certificate trust, not Gitea itself.
+
+## If something goes wrong
+
+- Cloning fails before asking for a password: the hostname does not resolve from that client, or the client does not trust the internal CA certificate.
+- You cannot remember the owner password: reveal it again with `stackkit secrets reveal`; the command neither creates nor resets a password.
+- Delivery fails on an existing administrator or user database: it does not replace accounts or reset passwords; resolve the conflict deliberately first.
+- Compare any address with the rollout output and see [Troubleshooting](/guides/stackkits/troubleshooting).
 
 ## Known limits
 

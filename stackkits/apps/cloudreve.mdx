@@ -7,6 +7,18 @@ icon: folder-cloud
 
 Cloudreve provides the Files half of [Documents & Files](/guides/stackkits/use-cases/documents-and-files). It is the default alternative of the optional `files` workload, and the initial StackSpec does not select it. Plan storage and backups on the Documents & Files page before you select it.
 
+## What it is
+
+Cloudreve is a private file storage and sharing site. Think of a personal cloud drive: you upload files in a browser, organize them in folders and share a link with someone. A StackKit includes it so everyday documents and exports live on your own storage instead of a third-party service.
+
+## Which kits and use cases include it
+
+Cloudreve is the default application of the Files half of Documents & Files. The released catalog commits it for the Basement Kit and the Cloud Kit on standalone Compose. It is optional: you select the `files` workload yourself.
+
+## How to open it
+
+After verification, open the generated Files route printed by the CLI or listed in the [Node Hub](/guides/stackkits/node-hub). The default local domain is `home.test`; make sure the name resolves on the device you use.
+
 ## Released role
 
 | Property | Value |
@@ -52,8 +64,31 @@ Confirm that the resolved plan contains the `files` workload, `cloudreve` altern
 
 After verification succeeds, open the generated Files route and create only the application accounts you need.
 
+## First use
+
+1. Run the verification command above and confirm that it succeeds.
+2. Open the generated Files route in a browser.
+3. Create the application accounts you need, and no more.
+4. Upload one test file, download it again and share it with one recipient.
+
+Cloudreve's standalone selection needs no secret reference, which makes Files a good first use case.
+
+## What is backed up
+
+The data that matters is the file bytes and the Cloudreve database with users and share links; the recovery sequence covers the Cloudreve data volume. In the lifecycle run, the restore returned the original bytes. Keep the backup root separate from primary data, and see [Back up and restore](/guides/stackkits/back-up-and-restore).
+
+## What to expect
+
+Storage grows with what you upload, so choose a primary data root with enough free space. There is no official Cloudreve mobile app; use the web page from a phone browser. See [Documents & Files](/guides/stackkits/use-cases/documents-and-files) for desktop sync notes.
+
 ## Operate
 
 - Keep the primary and backup roots on storage you control.
 - Keep StackKits configuration changes in the StackSpec. Do not edit the generated Cloudreve workload bundle or Compose environment.
 - Verify recovery before relying on the service for the only copy of a file. See [Back up and restore](/guides/stackkits/back-up-and-restore).
+
+## If something goes wrong
+
+- The route does not open: compare it with the rollout output and confirm that the name resolves from your device. See [Troubleshooting](/guides/stackkits/troubleshooting).
+- `stackkit verify` reports findings: read them before using the service, fix the StackSpec and regenerate.
+- The plan does not show `files`, `cloudreve` and `standalone-compose`: do not apply; correct the workload object and its site and node IDs first.

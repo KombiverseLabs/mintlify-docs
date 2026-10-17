@@ -7,8 +7,37 @@ icon: lock-keyhole
 
 TinyAuth is the default forward-auth entrypoint in the released StackKits catalog. It normally appears at `auth.<domain>` and uses the local PocketID owner setup for protected routes.
 
-After a successful rollout, open the generated address, complete the local owner setup, and verify that a protected route redirects through the expected login path.
+## What it is
+
+TinyAuth is the guard at the door of your services. When you open a protected address, [Traefik](/stackkits/apps/traefik) asks TinyAuth whether you are signed in; if not, you are sent to a login page and then back to where you wanted to go. A StackKit includes it so that protected services are covered by one sign-in.
+
+## Which kits include it
+
+The [Basement Kit](/stackkits/kits/basement-kit) page lists local owner custody with PocketID and TinyAuth, and the kit definition marks TinyAuth as a default platform service.
+
+## How you open it
+
+The catalog gives the pattern `https://auth.<domain>`, for example `https://auth.home.test` with the default domain. In daily use you reach it by opening a protected service, which redirects you.
+
+## First use
+
+1. After a successful rollout, open the generated address.
+2. Complete the local owner setup with [PocketID](/stackkits/apps/pocketid).
+3. Open a protected route, such as the Node Hub, and verify that it redirects through the expected login path.
+4. Sign in and confirm that you return to the service.
+
+## What to expect and what not to change
+
+- Expect a login page, not an application.
+- TinyAuth itself stays reachable without a sign-in so that the login can work.
+- Do not change an application merely to work around a routing or owner-setup problem.
+- Do not turn off protection on a route to make a warning go away.
+
+## If something goes wrong
 
 If a route loops or bypasses authentication, first compare the requested hostname with the generated route and confirm that the local PocketID owner can authenticate. Do not change an application merely to work around a routing or owner-setup problem.
+
+- You cannot sign in: use the account that the owner created for you. It is not your kombify Cloud account.
+- More checks: [Troubleshooting](/guides/stackkits/troubleshooting).
 
 See [PocketID](/stackkits/apps/pocketid) for the local identity component.

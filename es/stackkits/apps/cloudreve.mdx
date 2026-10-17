@@ -5,21 +5,33 @@ sidebarTitle: "Cloudreve"
 icon: folder-cloud
 ---
 
-Cloudreve aporta la parte de Files de [Documentos y archivos](/es/guides/stackkits/use-cases/documents-and-files). Es la alternativa predeterminada del workload opcional `files`, y la StackSpec inicial no la selecciona. Planifica el almacenamiento y las copias de seguridad en la página Documentos y archivos antes de seleccionarla.
+Cloudreve proporciona la mitad Files de [Documentos y archivos](/es/guides/stackkits/use-cases/documents-and-files). Es la alternativa predeterminada de la carga de trabajo opcional `files`, y la StackSpec inicial no la selecciona. Planifica el almacenamiento y las copias de seguridad en la página de Documentos y archivos antes de seleccionarla.
 
-## Rol publicado
+## Qué es
+
+Cloudreve es un sitio privado de almacenamiento e intercambio de archivos. Piensa en una unidad personal en la nube: subes archivos desde un navegador, los organizas en carpetas y compartes un enlace con alguien. Un StackKit lo incluye para que los documentos y las exportaciones de uso diario vivan en tu propio almacenamiento en lugar de en un servicio de terceros.
+
+## Qué kits y casos de uso lo incluyen
+
+Cloudreve es la aplicación predeterminada de la mitad Files de Documentos y archivos. El catálogo publicado lo compromete para Basement Kit y Cloud Kit sobre Compose independiente. Es opcional: seleccionas tú mismo la carga de trabajo `files`.
+
+## Cómo abrirlo
+
+Tras la verificación, abre la ruta de Files generada que imprime la CLI o que aparece en el [Node Hub](/es/guides/stackkits/node-hub). El dominio local predeterminado es `home.test`; asegúrate de que el nombre se resuelve en el dispositivo que usas.
+
+## Función publicada
 
 | Propiedad | Valor |
 | --- | --- |
-| Workload | `files` |
+| Carga de trabajo | `files` |
 | Alternativa | `cloudreve` |
 | Clase de datos | personal |
-| Ruta | ruta de servicio Files generada |
+| Ruta | ruta del servicio Files generada |
 | Adaptador independiente | `standalone-compose` |
 
-## Selecciona el workload
+## Selecciona la carga de trabajo
 
-Fusiona este objeto en la StackSpec completa creada por `stackkit init`:
+Combina este objeto en la StackSpec completa creada por `stackkit init`:
 
 ```json
 {
@@ -36,7 +48,7 @@ Fusiona este objeto en la StackSpec completa creada por `stackkit init`:
 }
 ```
 
-El ejemplo se validó y generó con el release v0.32.x. Si los ID de site o de nodo generados en tu caso son distintos, usa esos ID exactos.
+El ejemplo se validó y generó con la versión v0.32.x. Si los ID de sitio o de nodo generados son distintos, usa esos ID exactos.
 
 ## Despliega y verifica
 
@@ -48,12 +60,35 @@ stackkit apply
 stackkit verify --http --json
 ```
 
-Antes de aplicar, confirma que el plan resuelto contiene el workload `files`, la alternativa `cloudreve` y el adaptador `standalone-compose`.
+Confirma que el plan resuelto contiene la carga de trabajo `files`, la alternativa `cloudreve` y el adaptador `standalone-compose` antes de aplicar.
 
-Cuando la verificación termine con éxito, abre la ruta de Files generada y crea solo las cuentas de aplicación que necesites.
+Cuando la verificación tenga éxito, abre la ruta de Files generada y crea solo las cuentas de aplicación que necesites.
 
-## Operación
+## Primer uso
 
-- Mantén las raíces principal y de copia de seguridad en almacenamiento que controles.
-- Mantén los cambios de configuración de StackKits en la StackSpec. No edites el paquete de workload de Cloudreve generado ni el entorno de Compose.
+1. Ejecuta el comando de verificación anterior y confirma que tiene éxito.
+2. Abre la ruta de Files generada en un navegador.
+3. Crea las cuentas de aplicación que necesites, y no más.
+4. Sube un archivo de prueba, descárgalo de nuevo y compártelo con un destinatario.
+
+La selección independiente de Cloudreve no necesita ninguna referencia a secretos, lo que hace de Files un buen primer caso de uso.
+
+## Qué se respalda
+
+Los datos que importan son los bytes de los archivos y la base de datos de Cloudreve con usuarios y enlaces compartidos; la secuencia de recuperación cubre el volumen de datos de Cloudreve. En la ejecución del ciclo de vida, la restauración devolvió los bytes originales. Mantén la raíz de copias de seguridad separada de los datos principales y consulta [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).
+
+## Qué esperar
+
+El almacenamiento crece con lo que subes, así que elige una raíz de datos principal con suficiente espacio libre. No hay una app móvil oficial de Cloudreve; usa la página web desde el navegador de un teléfono. Consulta [Documentos y archivos](/es/guides/stackkits/use-cases/documents-and-files) para las notas sobre sincronización de escritorio.
+
+## Opera
+
+- Mantén las raíces principal y de copias de seguridad en almacenamiento que controles.
+- Mantén los cambios de configuración de StackKits en la StackSpec. No edites el paquete de carga de trabajo de Cloudreve generado ni el entorno de Compose.
 - Verifica la recuperación antes de confiar en el servicio para la única copia de un archivo. Consulta [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).
+
+## Si algo sale mal
+
+- La ruta no se abre: compárala con la salida del despliegue y confirma que el nombre se resuelve desde tu dispositivo. Consulta [Solución de problemas](/es/guides/stackkits/troubleshooting).
+- `stackkit verify` informa de hallazgos: léelos antes de usar el servicio, corrige la StackSpec y regenera.
+- El plan no muestra `files`, `cloudreve` y `standalone-compose`: no apliques; corrige primero el objeto de carga de trabajo y sus ID de sitio y de nodo.

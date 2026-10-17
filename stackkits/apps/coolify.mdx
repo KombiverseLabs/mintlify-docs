@@ -7,12 +7,24 @@ icon: cloud-upload
 
 Coolify is an optional application platform and workload adapter. Select it explicitly when you want Coolify to manage your applications. The default standalone workspace uses Compose directly.
 
+## What it is
+
+Coolify is a control panel for running applications on your own server. It can start, update and route applications for you from a web page. A StackKit can include it as an optional layer when you want that panel; otherwise StackKits starts workloads directly with Compose files and needs no panel at all.
+
+## Which kits and use cases include it
+
+It is optional in every kit and is never part of the default workspace. In the use-case catalog it is the primary application of the Marketplace use case, described there as your own app store for applications you run on your homelab. Marketplace is planned as an optional use case on Coolify, and Coolify is an application of that use case, not a native runtime target. As a workload adapter it is listed for `files`, `photos`, `media`, `smart-home` and `vault` in the compatibility table.
+
 | Role | Released catalog behavior |
 | --- | --- |
 | Selection | Optional explicit integration; standalone Compose needs no application platform |
 | Workload adapter | Supported for `files`, `photos`, and `vault` |
 | Route and TLS evidence | Supported |
 | Workload backup and restore | Not supplied by the Coolify adapter |
+
+## How to open it
+
+Open the generated Coolify address from the Node Hub or the StackKits output. The default local domain is `home.test`; copy the address from the output instead of typing it, and make sure the name resolves on your device.
 
 ## Use it safely
 
@@ -22,10 +34,27 @@ Coolify is an optional application platform and workload adapter. Select it expl
 4. Keep application credentials and recovery material under the local owner's control.
 5. Use the StackKits backup path only where the selected adapter declares backup-and-restore support.
 
+## First use
+
+1. Complete the StackKits rollout and run verification.
+2. Open the generated Coolify address.
+3. Create or confirm the owner sign-in as the rollout output describes.
+4. Check that the application you selected appears and opens at its generated route.
+
+## What is backed up
+
+The Coolify adapter does not supply workload backup and restore. The standalone Compose adapter does, for the workloads that declare it. See [Back up and restore](/guides/stackkits/back-up-and-restore) and practice a restore before you trust any workload with data you cannot recreate.
+
 ## Verify
 
 - The generated Coolify route opens at the address reported by the rollout.
 - StackKits verification reports the application platform and its configured routes as healthy.
 - The StackKits workspace remains the source of configuration intent.
+
+## If something goes wrong
+
+- The address does not open: compare it with the rollout output, confirm that the name resolves from your device and see [Troubleshooting](/guides/stackkits/troubleshooting).
+- The same application appears twice or routes conflict: you have two delivery paths for one workload. Keep one, change the StackSpec and regenerate; do not add routes or labels by hand.
+- Backups are missing for a workload: that is expected on this adapter. Use the standalone Compose path if you need StackKits backup for that workload.
 
 For the beta alternative, see [Komodo](/stackkits/apps/komodo). For the complete adapter matrix, see [Application delivery](/guides/stackkits/application-delivery).

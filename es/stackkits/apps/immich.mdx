@@ -1,31 +1,58 @@
 ---
 title: "Immich"
-description: "Selecciona Immich para el caso de uso Photos y completa su primer uso"
+description: "Selecciona Immich para el caso de uso Fotos y completa su primer uso"
 sidebarTitle: "Immich"
 icon: images
 ---
 
-Immich aporta el caso de uso [Fotos](/es/guides/stackkits/use-cases/photos). Es la alternativa publicada para el workload opcional `photos` de v2 nativo, y las StackSpec iniciales de Basement y Cloud no lo habilitan. Planifica el almacenamiento y la recuperación en la página Fotos antes de seleccionarlo.
+Immich proporciona el caso de uso [Fotos](/es/guides/stackkits/use-cases/photos). Es la alternativa publicada para la carga de trabajo nativa v2 opcional `photos`, y las StackSpecs iniciales de Basement y Cloud no la activan. Planifica el almacenamiento y la recuperación en la página de Fotos antes de seleccionarla.
+
+## Qué es
+
+Immich es una biblioteca de fotos y vídeos que se ejecuta en tu propio host. Hace lo que hace un servicio de fotos en la nube: la app del teléfono sube las imágenes nuevas y tú las exploras, buscas y compartes en una biblioteca web. Un StackKit lo incluye para que las fotos de tu familia permanezcan en hardware que controlas.
+
+## Qué kits y casos de uso lo incluyen
+
+Immich es la aplicación por defecto del caso de uso Fotos. El catálogo publicado lo compromete para el Basement Kit y el Cloud Kit en Compose independiente; el Cloud Kit es una vista previa sin una ejecución automatizada del ciclo de vida todavía. Coolify y Komodo también aparecen en la tabla de compatibilidad de `photos`, pero sin copia de seguridad ni restauración.
 
 ## Contrato publicado
 
 | Propiedad | Valor |
 | --- | --- |
-| Workload | `photos` |
+| Carga de trabajo | `photos` |
 | Alternativa | `immich` |
 | Clase de datos | personal |
 | Referencia de secreto requerida | `database-password` |
 | Adaptador independiente compatible | `standalone-compose` |
 
-La CLI publicada valida y genera este contrato de workload, incluidas las asignaciones persistentes de fotos y de base de datos y una ruta de Photos generada. El [catálogo de casos de uso](/es/stackkits/reference/use-case-catalog) muestra los componentes que declara el release.
+La CLI publicada valida y genera este contrato de carga de trabajo, incluidas las asignaciones persistentes de fotos y base de datos y una ruta de Fotos generada. El [catálogo de casos de uso](/es/stackkits/reference/use-case-catalog) muestra los componentes que declara la versión.
 
-El slot `database-password` contiene una referencia opaca `secret://`; la custodia local del propietario guarda su contraseña. Elige el workload, la ubicación y el adaptador en la [StackSpec](/es/guides/stackkits/configure-stack-spec) y después sigue [Añadir un workload](/es/stackkits/reference/day-2-operations#añadir-un-workload-a-un-workspace-existente) para validar, establecer la custodia, generar, inspeccionar el plan, aplicar y verificar.
+La ranura `database-password` contiene una referencia opaca `secret://`; la custodia local del propietario guarda su contraseña. Elige la carga de trabajo, la ubicación y el adaptador en la [StackSpec](/es/guides/stackkits/configure-stack-spec) y luego sigue [Añadir una carga de trabajo](/es/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace) para validar, establecer la custodia, generar, inspeccionar el plan, aplicar y verificar.
+
+## Cómo abrirlo
+
+Abre la ruta de Fotos generada que imprime la CLI o que figura en el [Node Hub](/es/guides/stackkits/node-hub). El dominio local por defecto es `home.test` y el nombre debe resolverse en tu dispositivo. Es la misma dirección que la app del teléfono pide como dirección del servidor.
 
 ## Primer uso
 
-1. Completa la verificación de StackKits tras un despliegue que ya tenga una custodia válida ligada al propietario.
-2. Abre la dirección de Immich generada desde el Node Hub o desde la salida del despliegue.
-3. Crea la cuenta de propietario de la aplicación y conecta clientes solo después de confirmar la capacidad de almacenamiento y las copias de seguridad.
+1. Completa la verificación de StackKits tras un despliegue que ya tenga una custodia válida vinculada al propietario.
+2. Abre la dirección de Immich generada desde el Node Hub o la salida del despliegue.
+3. Crea la cuenta de propietario de la aplicación y conecta los clientes solo después de haber confirmado la capacidad de almacenamiento y las copias de seguridad.
 4. Conecta cada teléfono con [Copia de seguridad de fotos desde el teléfono](/es/guides/stackkits/use-cases/photos/phone-backup).
 
-Vuelve a verificar el workspace de StackKits después de cualquier cambio de configuración.
+Verifica de nuevo el espacio de trabajo de StackKits después de cualquier cambio de configuración.
+
+## Qué se respalda
+
+La recuperación necesita tanto las fotos y vídeos originales como la base de datos de Immich; una sola de las partes no es una restauración completa. Los originales de las fotos pertenecen al grupo de cobertura `media`, que se elige y no se hereda, así que una primera instantánea no incluirá sin avisar una biblioteca grande. Ejecuta `stackkit backup status --json` para ver exactamente qué volúmenes contendrá la próxima instantánea y practica una restauración por etapas con [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore). La lectura a nivel de aplicación tras la restauración se verificó por última vez en v0.33.3 para el ciclo de copia de seguridad; consulta el aviso de evidencia en esa página.
+
+## Qué esperar
+
+Las bibliotecas de fotos suelen ser el conjunto de datos más grande de un homelab y siguen creciendo, así que dimensiona el almacenamiento principal y el de copias de seguridad para el crecimiento de fotos y vídeos. La primera subida desde un teléfono puede tardar en un álbum grande; un álbum de prueba pequeño con una foto de sobra basta para una primera comprobación.
+
+## Si algo sale mal
+
+- La dirección no se abre: compárala con la salida del despliegue y confirma que el nombre se resuelve desde el dispositivo. Consulta [Solución de problemas](/es/guides/stackkits/troubleshooting).
+- El teléfono no puede iniciar sesión: usa la cuenta de Immich que creaste en la biblioteca web; no es tu cuenta de kombify.
+- Una foto de prueba no llega: revisa el álbum elegido y el acceso de la app a las fotos, y luego sigue [Copia de seguridad de fotos desde el teléfono](/es/guides/stackkits/use-cases/photos/phone-backup).
+- El almacenamiento se llena: deja de añadir fotos y corrige la capacidad antes de la próxima instantánea.

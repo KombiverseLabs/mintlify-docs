@@ -1,14 +1,43 @@
 ---
 title: "TinyAuth"
-description: "El punto de entrada de forward-auth predeterminado publicado de StackKits"
+description: "El punto de entrada de forward-auth por defecto publicado de StackKits"
 sidebarTitle: "TinyAuth"
 icon: lock-keyhole
 ---
 
-TinyAuth es el punto de entrada de forward-auth predeterminado del catálogo publicado de StackKits. Normalmente aparece en `auth.<domain>` y usa la configuración local del propietario de PocketID para las rutas protegidas.
+TinyAuth es el punto de entrada de forward-auth por defecto del catálogo publicado de StackKits. Normalmente aparece en `auth.<domain>` y usa la configuración local del propietario de PocketID para las rutas protegidas.
 
-Tras un despliegue correcto, abre la dirección generada, completa la configuración local del propietario y verifica que una ruta protegida redirige por la vía de inicio de sesión esperada.
+## Qué es
 
-Si una ruta entra en bucle o se salta la autenticación, compara primero el nombre de host solicitado con la ruta generada y confirma que el propietario local de PocketID puede autenticarse. No cambies una aplicación solo para esquivar un problema de enrutamiento o de configuración del propietario.
+TinyAuth es el guardián de la puerta de tus servicios. Cuando abres una dirección protegida, [Traefik](/es/stackkits/apps/traefik) pregunta a TinyAuth si has iniciado sesión; si no, te envía a una página de acceso y luego de vuelta a donde querías ir. Un StackKit lo incluye para que los servicios protegidos queden cubiertos por un único inicio de sesión.
+
+## Qué kits lo incluyen
+
+La página del [Basement Kit](/es/stackkits/kits/basement-kit) enumera la custodia local del propietario con PocketID y TinyAuth, y la definición del kit marca TinyAuth como servicio de plataforma por defecto.
+
+## Cómo se abre
+
+El catálogo da el patrón `https://auth.<domain>`, por ejemplo `https://auth.home.test` con el dominio por defecto. En el uso diario llegas a él al abrir un servicio protegido, que te redirige.
+
+## Primer uso
+
+1. Tras un despliegue correcto, abre la dirección generada.
+2. Completa la configuración local del propietario con [PocketID](/es/stackkits/apps/pocketid).
+3. Abre una ruta protegida, como el Node Hub, y verifica que redirige por la ruta de acceso esperada.
+4. Inicia sesión y confirma que vuelves al servicio.
+
+## Qué esperar y qué no cambiar
+
+- Espera una página de acceso, no una aplicación.
+- El propio TinyAuth sigue siendo accesible sin iniciar sesión para que el acceso pueda funcionar.
+- No cambies una aplicación solo para sortear un problema de enrutamiento o de configuración del propietario.
+- No desactives la protección de una ruta para que desaparezca una advertencia.
+
+## Si algo sale mal
+
+Si una ruta entra en bucle o se salta la autenticación, primero compara el nombre de host solicitado con la ruta generada y confirma que el propietario local de PocketID puede autenticarse. No cambies una aplicación solo para sortear un problema de enrutamiento o de configuración del propietario.
+
+- No puedes iniciar sesión: usa la cuenta que el propietario creó para ti. No es tu cuenta de kombify Cloud.
+- Más comprobaciones: [Solución de problemas](/es/guides/stackkits/troubleshooting).
 
 Consulta [PocketID](/es/stackkits/apps/pocketid) para el componente de identidad local.

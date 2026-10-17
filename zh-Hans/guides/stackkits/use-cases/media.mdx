@@ -1,16 +1,27 @@
 ---
 title: "媒体"
-description: "用 Jellyfin 串流你拥有的电影、音乐和视频"
+description: "使用 Jellyfin 串流你拥有的电影、音乐和视频"
 sidebarTitle: "媒体"
 icon: clapperboard
 ---
 
 <Info>
   证据状态（2026-09-24，v0.41.0）：使用 Jellyfin 的媒体为 `available,
-  lifecycle-verified`。媒体已在公开的 v0.39.7 归档上验证：Depot 生产者在 Ubuntu 24.04 amd64（Basement Kit，standalone）上完成的生命周期运行，通过了 install、init、generate、apply、所有者设置、verify、backup、restore 和 restore activation，并通过来宾本地回环验证了应用层回读。
+  lifecycle-verified`。媒体已在公开的 v0.39.7 归档上验证，其中在 Ubuntu 24.04 amd64（Basement Kit，独立模式）上运行的 Depot 生产者生命周期测试通过了安装、init、generate、apply、所有者设置、verify、备份、恢复和恢复激活，并通过客户机本地回环验证了应用回读。
 </Info>
 
-媒体把你拥有的电影、音乐和家庭视频串流到家里的各台设备。发布目录把这个使用场景称为 Media Library，并作为可选的 `media` 工作负载交付。
+媒体会把你拥有的电影、音乐和家庭视频串流到家中的各个设备。发布目录将此使用场景称为 Media Library，并以可选的 `media` 工作负载交付。
+
+## 通俗地说
+
+媒体把你自己收藏的电影、音乐和视频变成类似家里私人流媒体服务的东西。一个名为 Jellyfin 的程序会为你的文件建立目录，并在你的电视、手机或电脑上播放它们。文件保留在你自己的主机上。媒体适用于你拥有的内容；它不提供内容。
+
+## 你首先需要什么
+
+- 已完成的基线，因此请先阅读[开始之前](/zh-Hans/guides/stackkits/before-you-start)并验证你的 [Basement Kit](/zh-Hans/stackkits/kits/basement-kit)。
+- 你的媒体文件放在主机上的同一个目录中，或者决定让计划管理一个媒体库卷。
+- 这些文件的独立副本，因为 StackKits 不会备份它们。
+- 你想用来观看的设备，连接到同一网络。
 
 ## 应用
 
@@ -20,18 +31,38 @@ icon: clapperboard
 
 ## 开始之前
 
-- 决定 Jellyfin 是读取现有的媒体目录（StackKits 以只读方式挂载），还是使用由计划管理的媒体库卷。
-- StackKits 不会备份你的媒体文件。请自行保留一份独立的副本。
-- 列出你想用来观看的设备。容器运行正常，并不能说明在某台电视或手机上能否播放。
+- 决定 Jellyfin 是读取现有的媒体目录（StackKits 将其以只读方式挂载），还是读取由计划管理的媒体库卷。
+- StackKits 不会备份你的媒体文件。请自行保留一份独立副本。
+- 列出你想用来观看的设备。容器运行正常并不能说明在某台特定电视或手机上能否播放。
 
 ## 设置
 
-在你的 kit 基线验证通过之后，再设置媒体。[Jellyfin](/zh-Hans/stackkits/apps/jellyfin) 页面涵盖存储设置、所有者设置和你的第一个媒体库，并以在真实客户端上的播放测试收尾。
+请在你的 kit 基线验证通过之后再设置媒体。[Jellyfin](/zh-Hans/stackkits/apps/jellyfin) 页面涵盖存储设置、所有者设置和你的第一个媒体库，并以在真实客户端上的播放测试结尾。
+
+## 逐步会发生什么
+
+1. 选择文件存放的位置。计划会以只读方式挂载现有目录；如果你没有设置，则会创建一个媒体库卷。
+2. 选择 `media` 工作负载并应用它。你会在 Node Hub 或部署输出中看到一个媒体地址。
+3. 按照 [Jellyfin](/zh-Hans/stackkits/apps/jellyfin) 页面所述创建所有者账户。你会得到一个由你自己选定的 Jellyfin 管理员。
+4. 添加你的媒体库，并在一台真实设备上测试一个文件。预期它能够播放，或者告诉你哪个部分需要处理。
+
+## 什么内容存储在哪里
+
+- 你的媒体文件保留在原处。现有目录对 Jellyfin 是只读的，因此它无法编辑或删除这些文件。
+- Jellyfin 的配置及其转码缓存位于主机上各自独立的卷中。
+- 在依赖应用的备份声明之前，请先检查它。你的媒体文件不属于 StackKits 备份的一部分，因此请保留你自己的副本。
+
+## 如果出了问题
+
+- 媒体地址打不开：请参阅[故障排查](/zh-Hans/guides/stackkits/troubleshooting)，并将其与 Node Hub 中的地址进行比较。
+- 设置因缺少文件夹而失败：媒体目录必须已经存在，因为 StackKits 不会创建它。
+- 某个文件在某台电视或手机上无法播放：容器运行正常并不能证明该设备上可以播放，因此请测试另一个客户端，并参阅 [Jellyfin](/zh-Hans/stackkits/apps/jellyfin)。
+- 请在[日常使用](/zh-Hans/guides/stackkits/daily-use)中学习日常流程，并在[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)中演练恢复。
 
 ## 获取应用
 
-在你想用来观看的设备上安装官方 Jellyfin 客户端，然后把它连接到生成的媒体 URL，并使用你的家庭成员注册的账户登录。
+在你想用来观看的设备上安装官方 Jellyfin 客户端，然后将其连接到你生成的媒体 URL，并使用你的家庭成员注册的账户登录。
 
 <Card title="Jellyfin 客户端" icon="download" href="https://jellyfin.org/downloads/">
-  适用于 Android、iOS/tvOS、Fire TV、Android TV、Roku、桌面端及其他受支持播放器的官方应用。
+  适用于 Android、iOS/tvOS、Fire TV、Android TV、Roku、桌面以及其他受支持播放器的官方应用。
 </Card>

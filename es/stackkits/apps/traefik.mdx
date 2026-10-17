@@ -1,12 +1,39 @@
 ---
 title: "Traefik"
-description: "El componente de proxy inverso predeterminado publicado para las rutas de StackKits"
+description: "El componente de proxy inverso por defecto publicado para las rutas de StackKits"
 sidebarTitle: "Traefik"
 icon: route
 ---
 
-Traefik es el componente de proxy inverso predeterminado del catálogo publicado de StackKits. Enruta nombres de servicio generados como `base.<domain>`, `auth.<domain>` y las rutas de aplicación seleccionadas por tu configuración validada.
+Traefik es el componente de proxy inverso por defecto del catálogo publicado de StackKits. Enruta los nombres de servicio generados, como `base.<domain>`, `auth.<domain>` y las rutas de aplicación seleccionadas por tu configuración validada.
 
-Usa las URL de servicio generadas y la salida de verificación de la CLI para diagnosticar el enrutamiento. No añadas labels, routers ni middleware directamente a los contenedores gestionados por StackKits.
+## Qué es
+
+Un proxy inverso es la puerta de entrada de tu servidor. Cada dirección que escribes, como el Node Hub o el nombre de un servicio, llega primero a Traefik, que pasa la petición al servicio correcto. Un StackKit lo incluye para que cada servicio tenga su propio nombre legible en lugar de un número de puerto, y para que el inicio de sesión ([TinyAuth](/es/stackkits/apps/tinyauth)) pueda aplicarse en un solo lugar.
+
+## Qué kits lo incluyen
+
+La página del [Basement Kit](/es/stackkits/kits/basement-kit) enumera el enrutamiento mediante Traefik, y la definición del kit lo marca como servicio de plataforma por defecto. El catálogo también señala que la plataforma de aplicaciones seleccionada puede traer su propio Traefik; la salida de tu despliegue muestra lo que tienes realmente.
+
+## Cómo se abre
+
+Normalmente nunca abres Traefik en sí. Abres los servicios que enruta, usando las direcciones generadas de la salida de la CLI o del [Node Hub](/es/guides/stackkits/node-hub). El catálogo también define un panel de Traefik en `https://traefik.<domain>`; ábrelo solo si tu despliegue lo enumera.
+
+## Primer uso
+
+1. Abre el Node Hub en la dirección `base.<domain>`.
+2. Haz clic en un servicio y confirma que se abre con su propio nombre.
+3. Si un servicio no se abre, ejecuta `stackkit verify --json` antes de revisar el enrutamiento.
+
+## Qué esperar y qué no cambiar
+
+- Espera que funcione en silencio en segundo plano.
+- El catálogo da a sus rutas cabeceras de seguridad y un límite de tasa de peticiones.
+- Usa las URL de servicio generadas y la salida de verificación de la CLI para diagnosticar el enrutamiento. No añadas etiquetas, routers ni middleware directamente a los contenedores gestionados por StackKits. Edita la StackSpec y vuelve a generar.
 
 El contrato publicado de [Whoami](/es/stackkits/apps/whoami) describe la función de diagnóstico de enrutamiento, pero la StackSpec v2 nativa inicial no lo selecciona.
+
+## Si algo sale mal
+
+- La dirección de un servicio no se abre: comprueba que el nombre se resuelve en tu dispositivo y compara la dirección con la salida del despliegue. Consulta [Solución de problemas](/es/guides/stackkits/troubleshooting).
+- Una ruta pide iniciar sesión repetidamente: consulta [TinyAuth](/es/stackkits/apps/tinyauth).

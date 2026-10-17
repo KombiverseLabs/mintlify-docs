@@ -1,12 +1,40 @@
 ---
 title: "PocketID"
-description: "Der veröffentlichte lokale Standard-Identity-Provider für StackKits"
+description: "Der veröffentlichte lokale Standard-Identitätsanbieter für StackKits"
 sidebarTitle: "PocketID"
 icon: fingerprint
 ---
 
-PocketID ist der lokale Standard-Identity-Provider im veröffentlichten StackKits-Katalog. Ein Basement-Kit-Rollout nutzt ihn für die lokale Owner-Verwahrung und stellt ihn normalerweise unter `id.<domain>` bereit.
+PocketID ist der lokale Standard-Identitätsanbieter im veröffentlichten StackKits-Katalog. Ein Basement-Kit-Rollout verwendet ihn für die lokale Owner-Custody und stellt ihn normalerweise unter `id.<domain>` bereit.
 
-Öffne nach erfolgreicher Verifikation des Rollouts die generierte Adresse und lege den ersten lokalen Owner-Passkey an. Bewahre Wiederherstellungsmaterial außerhalb des Servers auf und nutze für den Owner keine geteilte Identität.
+## Was es ist
 
-TinyAuth nutzt die generierte PocketID-Integration für geschützte StackKits-Routen. Siehe [TinyAuth](/de/stackkits/apps/tinyauth) für das Verhalten des Einstiegspunkts.
+PocketID führt die Liste der Personen, die dein Homelab nutzen dürfen, und lässt sie sich mit einem Passkey anmelden, einer Anmeldemethode, die dein Gerät statt eines Passworts nutzt. Ein StackKit enthält es, damit dein Server eine eigene Anmeldung hat, die im Heimnetz funktioniert und nicht von einem externen Konto abhängt.
+
+## Welche Kits es enthalten
+
+Die Seite zum [Basement Kit](/de/stackkits/kits/basement-kit) führt die lokale Owner-Custody mit PocketID und TinyAuth auf, und die Kit-Definition kennzeichnet PocketID als Standard-Plattformdienst.
+
+## Wie du es öffnest
+
+Der Katalog nennt das Muster `https://id.<domain>`, zum Beispiel `https://id.home.test` mit der Standarddomain. Kopiere die generierte Adresse aus der CLI-Ausgabe.
+
+## Erste Nutzung
+
+1. Öffne nach erfolgreicher Verifikation des Rollouts die generierte Adresse.
+2. Lege den ersten lokalen Owner-Passkey an und folge dabei den Hinweisen der Seite.
+3. Bewahre Wiederherstellungsmaterial außerhalb des Servers auf.
+4. Kehre zum [Node Hub](/de/guides/stackkits/node-hub) zurück und bestätige, dass geschützte Routen zur Anmeldung auffordern.
+
+## Was du erwarten kannst und was du nicht ändern solltest
+
+- Erwarte ein Passkey-orientiertes Setup. Verwende keine gemeinsame Identität für den Owner.
+- TinyAuth nutzt die generierte PocketID-Integration für geschützte StackKits-Routen. Siehe [TinyAuth](/de/stackkits/apps/tinyauth) für das Verhalten des Einstiegspunkts.
+- Dieses Konto gehört zu deinem eigenen Homelab. Es ist nicht dein kombify-Cloud-Konto.
+- Füge Wiederherstellungsmaterial nicht in einen Chat, ein Issue oder eine E-Mail ein.
+
+## Wenn etwas schiefgeht
+
+- Die Adresse öffnet sich nicht: Vergleiche sie mit der Adresse in der Rollout-Ausgabe und prüfe, ob der Name auf deinem Gerät aufgelöst wird. Siehe [Fehlerbehebung](/de/guides/stackkits/troubleshooting).
+- Du kannst dich bei einem Dienst nicht anmelden: Verwende das Konto, das der Owner für dich angelegt hat.
+- Führe `stackkit verify --json` im Workspace-Ordner aus und lies die Befunde. Setze den Owner nicht zurück, um einen Fehler zu umgehen.

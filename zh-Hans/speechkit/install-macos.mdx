@@ -5,23 +5,31 @@ sidebarTitle: "在 macOS 上安装"
 icon: "apple"
 ---
 
-macOS 版 SpeechKit 是早期测试版，仅支持 Dictation（听写）。它运行在 Apple Silicon 上的 macOS 14 或更新版本。不支持 Intel Mac。
+macOS 版 SpeechKit 是一个仅支持听写的早期测试版。它运行于搭载 Apple Silicon 的 macOS 14 或更新版本。不支持 Intel Mac。
 
 {/* speechkit-release:begin */}
-当前公开版本为 [v0.72.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.1)，发布于 2026-09-20。
+当前的公开版本是 [v0.77.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.1)，发布于 2026-10-16。
 {/* speechkit-release:end */}
 
 <Warning>
-macOS 安装包使用临时（ad-hoc）签名，没有 Apple Developer ID，也未经公证。macOS 会将其隔离，并可能提示应用已损坏。其实并没有损坏。移除隔离标记只需一条有文档说明的命令，见下文。
+macOS 应用包使用临时（ad-hoc）签名，没有 Apple Developer ID，也没有经过公证。macOS 会将其隔离，并可能声称该应用已损坏。其实并没有。移除隔离标记只需要一条有文档说明的命令，见下文。
 </Warning>
+
+通俗地说：这是面向搭载 Apple 芯片的 Mac 的首个功能有限的版本。它把你的语音转换成文字，并输入到你正在使用的应用中。可以免费试用，但由于它没有由 Apple 开发者账户签名，macOS 会对它持怀疑态度，因此安装需要你在“终端”中多做一步。下面的任何内容都不需要管理员密码。
+
+## 开始之前
+
+- 一台搭载 Apple 芯片（M 系列）并运行 macOS 14 或更新版本的 Mac。不支持 Intel Mac。
+- 几分钟时间。本地语音模型会在之后按需下载。
+- 了解“终端”是你 Mac 上的一个应用（按 Cmd+空格键并输入 `Terminal`）。你只需要向其中粘贴一条命令。
 
 ## 下载
 
-<Card title="macOS 安装包（Apple Silicon）" icon="download" href="https://github.com/kombifyio/SpeechKit/releases/latest/download/SpeechKit-macOS-arm64.zip">
+<Card title="macOS 应用包（Apple Silicon）" icon="download" href="https://github.com/kombifyio/SpeechKit/releases/latest/download/SpeechKit-macOS-arm64.zip">
   从最新发布的版本下载 `SpeechKit-macOS-arm64.zip`。
 </Card>
 
-打开之前，请对照 [SHA256SUMS.txt](https://github.com/kombifyio/SpeechKit/releases/latest/download/SHA256SUMS.txt) 校验下载文件。该文件同时列出了 Windows 资源，因此只需检查 macOS 压缩包对应的那一行：
+打开之前，请对照 [SHA256SUMS.txt](https://github.com/kombifyio/SpeechKit/releases/latest/download/SHA256SUMS.txt) 验证下载文件。该文件也列出了 Windows 资源，因此只需检查 macOS 压缩包对应的那一行：
 
 ```bash
 grep SpeechKit-macOS-arm64.zip SHA256SUMS.txt | shasum -a 256 -c
@@ -29,33 +37,57 @@ grep SpeechKit-macOS-arm64.zip SHA256SUMS.txt | shasum -a 256 -c
 
 ## 安装
 
-1. 解压下载的文件，并将 `SpeechKit.app` 拖入“应用程序”文件夹。请在执行下一步之前完成移动：macOS 会从一个隐藏的只读副本运行留在“下载”中的应用，而 SpeechKit 无法在那里自行更新。
+1. 解压下载的文件，并将 `SpeechKit.app` 拖入“应用程序”文件夹。请在下一步之前先移动它：macOS 会从一个隐藏的只读副本运行留在“下载”中的应用，而 SpeechKit 无法从那里自行更新。
 2. 在“终端”中移除隔离标记：
 
    ```bash
    xattr -dr com.apple.quarantine /Applications/SpeechKit.app
    ```
 
-   成功时不会输出任何内容。该命令不需要密码，只影响这个应用。
-3. 从“应用程序”打开 SpeechKit，并在提示时授予**麦克风**和**辅助功能**权限。
+   成功时不会打印任何内容。该命令不需要密码，并且只影响这个应用。
+3. 从“应用程序”中打开 SpeechKit，并在被询问时授予**麦克风**和**辅助功能**权限。
 
-请阅读完整的[未签名版本说明](https://github.com/kombifyio/SpeechKit/releases/latest/download/UNSIGNED-MACOS-RELEASE.txt)，了解每一步的理由。整个流程中没有任何一步要求你在系统范围内禁用 Gatekeeper，或以 root 身份运行任何内容。
+每一步之后的预期情况：
+
+- 第 1 步之后，应用位于“应用程序”文件夹中，而不再位于“下载”中。
+- 第 2 步之后，“终端”不打印任何内容。这表示命令已生效。
+- 第 3 步之后，SpeechKit 打开时不再出现“已损坏”的提示，在屏幕顶部的菜单栏中显示它的图标，并且 macOS 会请求相应权限。
+
+要了解每一步背后的理由，请阅读完整的[未签名版本说明](https://github.com/kombifyio/SpeechKit/releases/latest/download/UNSIGNED-MACOS-RELEASE.txt)。该流程中没有任何一步要求你在系统范围内禁用 Gatekeeper，或以 root 身份运行任何内容。
 
 ## 哪些可用，哪些不可用
 
 | 功能 | macOS 测试版 |
 | --- | --- |
-| 使用随附本地模型的听写 | 可用 |
-| 使用云端语音转文字提供方的听写 | 可用 |
-| 麦克风采集、文本注入、菜单栏项目 | 可用 |
-| 全局热键和按住说话 | 此版本中无法工作 |
-| Assist 和 Voice Agent | 尚未在 macOS 上验证 |
-| 会议系统音频采集、屏幕快照、唤醒词、本地 LLM | 尚未移植；每项都会返回类型化错误并隐藏其控件 |
+| 使用内置本地模型听写 | 可用 |
+| 使用云端语音转文字提供商听写 | 可用 |
+| 麦克风采集、文字注入、菜单栏图标 | 可用 |
+| 全局热键和按住说话 | 此版本中不可用 |
+| Assist 和 Voice Agent | 未在 macOS 上验证 |
+| 会议系统音频采集、屏幕快照、唤醒词、本地 LLM | 尚未移植；每项都会以类型化错误拒绝，且其控件被隐藏 |
 
-热键监听器可以安装，但收不到任何按键事件，因此在修复之前，请通过菜单栏项目来开始听写。如果需要完整的功能集，请使用 [Windows 客户端](/zh-Hans/speechkit/install-windows)。
+热键监听器已安装，但收不到任何按键事件，因此在修复之前，菜单栏图标是开始听写的方式。当你需要完整的功能集时，请使用 [Windows 客户端](/zh-Hans/speechkit/install-windows)。
 
 ## 更新后的权限
 
-macOS 会将权限授予记录在应用的确切签名上。每个临时签名的构建都有不同的签名，因此每次更新后 macOS 都会再次请求麦克风和辅助功能权限，有时还会请求钥匙串访问。对于未签名的测试版，这是预期行为。
+macOS 会根据应用的确切签名记住权限授予。每个临时签名的构建都有不同的签名，因此每次更新后，macOS 都会再次请求麦克风和辅助功能权限，有时还会请求钥匙串访问权限。对于未签名的测试版，这是预期的。
 
-如果更新后听写没有响应，请打开**系统设置 → 隐私与安全性 → 辅助功能**，重新打开 SpeechKit 的开关。它会在运行时获取该权限，无需重启。
+如果某项权限似乎仍然缺失，SpeechKit 可能还会请求“输入监控”，热键需要它。此版本中热键不工作，因此你暂时可以不开启这一项。
+
+如果更新之后听写没有响应，请打开**系统设置 → 隐私与安全性 → 辅助功能**，并重新开启 SpeechKit。它在运行时就会获取该权限；无需重新启动。
+
+## 如果出了问题
+
+- **macOS 提示该应用已损坏。** 其实没有；应用包是完整的。请运行第 2 步中的隔离命令，然后再次打开它。
+- **命令打印出错误。** 请检查应用是否位于 `/Applications` 中，并检查拼写是否与第 2 步一致，包括大小写字母。
+- **没有任何文字输入到其他应用。** 请检查**系统设置 → 隐私与安全性 → 辅助功能**，并开启 SpeechKit。文字也无法输入到密码框中；macOS 有意阻止这一点。
+- **没有麦克风输入。** 请在**系统设置 → 隐私与安全性 → 麦克风**中检查 SpeechKit，并检查你在 SpeechKit 中选择的输入设备。请参阅[设置热键、麦克风和语言](/zh-Hans/speechkit/hotkeys-microphone-language)。
+- **热键没有反应。** 此版本中符合预期。请使用菜单栏图标开始听写。
+- **更新后一切权限又被再次请求。** 符合预期；请参阅上文的“更新后的权限”。
+- **语音模型无法下载。** 请检查你的网络连接和隐私范围。请参阅[使用本地模型离线工作](/zh-Hans/speechkit/work-offline)和[解决常见问题](/zh-Hans/speechkit/fix-common-problems)。
+- **你想更新或删除它。** 请参阅[更新或卸载 SpeechKit](/zh-Hans/speechkit/update-and-uninstall)。
+
+## 后续步骤
+
+- [设置热键、麦克风和语言](/zh-Hans/speechkit/hotkeys-microphone-language)
+- [解决常见问题](/zh-Hans/speechkit/fix-common-problems)

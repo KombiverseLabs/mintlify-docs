@@ -1,12 +1,37 @@
 ---
 title: "Uptime Kuma"
-description: "已发布的监控模块，不属于初始的原生 v2 StackSpec"
+description: "一个已发布的监控模块，不属于初始的原生 v2 StackSpec"
 sidebarTitle: "Uptime Kuma"
 icon: chart-line
 ---
 
-Uptime Kuma 作为已发布的模块契约提供，但初始的原生 v2 StackSpec 不会选择它。不要仅凭归档就推断存在一组已启用的监控项。
+Uptime Kuma 作为已发布的模块契约提供，但初始的原生 v2 StackSpec 不会选择它。请不要仅凭归档就推断存在一组已启用的监控。
 
-只为你自己运维的服务添加监控。对于受保护的路由，请使用专门设计的健康端点，或预期得到配置好的认证响应；不要仅仅为了让监控返回 HTTP 200 而削弱路由保护。
+## 它是什么
 
-初始的 StackSpec 没有受支持的 Uptime Kuma 配置示例。即使你另行运维了一个监控，StackKits 生命周期仍然是栈验证的来源；[监控栈](/zh-Hans/stackkits/reference/day-2-operations#监控栈)列出了需要运行的检查。
+Uptime Kuma 会定期检查你的服务是否有响应。目录列出了可用性检查、状态页面和通知。StackKit 可以包含它，让你在家人察觉之前就发现问题。
+
+## 哪些套件包含它
+
+目录将其标记为默认成熟度的模块，依赖 Traefik，套件定义也将其指定为监控工具。初始的原生 v2 StackSpec 不会选择它，因此你拥有什么以部署输出为准。
+
+## 如何打开
+
+如果你的部署包含它，目录给出的地址模式是 `https://kuma.<domain>`，例如使用默认域名时为 `https://kuma.home.test`。请复制生成的地址。
+
+## 首次使用
+
+1. 打开生成的地址。
+2. 为你运维的某个服务添加一个监控项。
+3. 检查该监控项是否将服务报告为在线。
+
+## 预期情况与不应更改的内容
+
+- 只为你自己运维的服务添加监控项。
+- 对于受保护的路由，请使用有意设置的健康端点，或预期得到已配置的认证响应；不要仅仅为了让监控项返回 HTTP 200 而削弱路由保护。
+- 初始 StackSpec 没有受支持的 Uptime Kuma 配置示例。即使你另外运行了监控，栈验证的依据仍是 StackKits 生命周期；[监控栈](/zh-Hans/stackkits/reference/day-2-operations#监控栈)列出了需要执行的检查。
+
+## 出现问题时
+
+- 地址打不开：将其与部署输出对比，并确认该名称能在你的设备上解析。参见[故障排查](/zh-Hans/guides/stackkits/troubleshooting)。
+- 受保护服务的监控项失败：先检查该路由的认证响应，再考虑更改保护设置。

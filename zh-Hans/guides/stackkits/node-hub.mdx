@@ -1,19 +1,30 @@
 ---
 title: "StackKits Node Hub"
-description: "在验证通过的 StackKits 部署之后，使用生成的本地服务总览"
+description: "在经过验证的 StackKits 部署之后使用生成的本地服务概览"
 sidebarTitle: "Node Hub"
 icon: grid-2
 ---
 
-StackKits Node Hub 是生成的本地服务总览。部署成功后，打开 CLI 打印出的或验证输出中显示的 `base.<domain>` 地址。
+StackKits Node Hub 是生成的本地服务概览。部署成功后，请打开 CLI 打印出的或已验证输出中显示的 `base.<domain>` 地址。
 
-## 检查什么
+## 通俗地说
 
-- 页面能识别当前的 StackKits 工作区。
-- 只显示经过验证的配置所选择的服务。
-- 列出的每个服务都使用本次部署生成的地址。
+Node Hub 是你自己 homelab 的起始页。设置完成后，它会列出你选择的服务，每个服务都带有一个可以打开它的链接。可以把它看作 homelab 的前门：你打开它来找到你的服务，并完成对它们的保护。它只列出你的配置所选择的内容，因此你没有选择的服务不会出现。
 
-如果 Node Hub 打不开，请把它预期的 `base.<domain>` 地址与部署输出中的地址对比。确认该主机名能在你使用的客户端上解析，并且该路由属于当前工作区。请修改 StackSpec 并重新生成产物，而不是直接编辑生成的 Node Hub 或路由器配置。
+## 你首先需要什么
+
+- 已完成的设置。如果你还没有完成，请按照[快速入门](/zh-Hans/stackkits/quickstart)操作，并阅读[开始之前](/zh-Hans/guides/stackkits/before-you-start)。
+- 设置时打印出的 `base.<domain>` 地址。使用默认的本地域名时，这是 `base.home.test`。
+- 家庭网络中能够解析该名称的手机或电脑（请参阅[日常使用](/zh-Hans/guides/stackkits/daily-use)）。
+- 工作区文件夹中 `.stackkit/access.json` 里的访问详情。请妥善保密。
+
+## 需要检查什么
+
+- 页面标识出当前的 StackKits 工作区。
+- 只有经过验证的配置所选择的服务才可见。
+- 每个列出的服务都使用该次部署生成的地址。
+
+如果 Node Hub 打不开，请将其预期的 `base.<domain>` 地址与部署输出中的地址进行比较。确认主机名可以在你所使用的客户端上解析，并且该路由属于当前工作区。请修改 StackSpec 并重新生成产物，而不要编辑生成的 Node Hub 或路由器配置。
 
 ## 完成首次运行保护
 
@@ -21,9 +32,28 @@ StackKits Node Hub 是生成的本地服务总览。部署成功后，打开 CLI
 2. 打开生成的 Hub 路由。
 3. 建立本地 PocketID 所有者。
 4. 确认 TinyAuth 保护了预期的路由。
-5. 只有在所有者能够完成身份验证之后，才使用 Hub 的保护操作。
-6. 配置本地备份仓库，并按照[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)演练一次恢复。
+5. 只有在所有者可以完成身份验证之后，才使用 Hub 的保护操作。
+6. 配置本地备份仓库，并通过[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)演练一次恢复。
+
+每一步之后，你应该看到：
+
+- 第 1 步之后，CLI 报告部署已验证，并打印 Hub 地址。
+- 第 2 步之后，Hub 页面在浏览器中打开，并显示你的工作区和你选择的服务。
+- 第 3 步之后，你可以通过 PocketID 以本地所有者身份登录。
+- 第 4 步之后，打开受保护的服务时会先要求你登录。
+- 第 6 步之后，你已有备份，并且知道恢复是可行的。
 
 Hub 用于查看状态和已批准的操作。它不是组件安装器、提供商控制台，也不能替代 StackSpec 验证。
+
+## 什么内容存储在哪里
+
+一切都保留在运行你的 homelab 的计算机上。所有者身份保存在那里的 PocketID 中，你的设置的访问详情位于工作区文件夹的 `.stackkit/access.json` 中。你的配置（StackSpec）也在该文件夹中。Hub 本身是根据该配置生成的，这就是为什么你要修改 StackSpec 而不是 Hub。备份与这些数据是分开的，因此请检查你的备份仓库存放在哪里。请参阅[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。
+
+## 如果出了问题
+
+- Hub 地址打不开：使用上面的检查项，然后参阅[故障排查](/zh-Hans/guides/stackkits/troubleshooting)。
+- 你无法登录：请使用所有者在 PocketID 中创建的账户，而不是 kombify Cloud 账户。
+- 列表中缺少某个服务：它没有在经过验证的配置中被选择。请修改 StackSpec 并重新生成。
+- 切勿将 `.stackkit/access.json` 的内容粘贴到聊天、issue 或电子邮件中。
 
 [平台服务](/zh-Hans/stackkits/apps/overview)说明了 Hub 背后的服务。[使用场景](/zh-Hans/guides/stackkits/use-cases/overview)列出了你可以添加的工作负载。

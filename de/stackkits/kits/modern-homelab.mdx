@@ -1,48 +1,78 @@
 ---
 title: "Modern Homelab"
-description: "Das Alpha-Definitionsarchiv von StackKits für ein Homelab über Home und Cloud"
-sidebarTitle: "Modern Homelab (alpha)"
+description: "Das Alpha-Definitionsarchiv von StackKits für ein Homelab über Zuhause und Cloud hinweg"
+sidebarTitle: "Modern Homelab (Alpha)"
 icon: network-wired
 ---
 
-Modern Homelab beschreibt ein Homelab über eine Home-Umgebung und eine Cloud-Umgebung.
-Seine Definition behält Steuerung und standardmäßige Datenhoheit bei Home
-und verlangt explizit deklarierte Verbindungen und Veröffentlichung zwischen den Standorten.
+Modern Homelab beschreibt ein Homelab, das eine Home-Umgebung und eine
+Cloud-Umgebung umspannt. Seine Definition belässt Kontrolle und
+Standard-Datenhoheit bei Home und verlangt ausdrücklich deklarierte
+Verbindungen und Veröffentlichung zwischen den Standorten.
+
+## In einfachen Worten
+
+Ein normales Homelab lebt an einem Ort. Modern Homelab beschreibt eines, das zwei umspannt: dein Zuhause und einen Cloud-Server. Heute ist dies eine frühe Definition, die du lesen, initialisieren, validieren und generieren kannst. Sie ist noch kein fertiger Weg, ein Homelab an zwei Standorten zu betreiben, und dient daher dem Erkunden, nicht für Familienfotos oder Passwörter.
 
 <Warning>
   Modern Homelab ist ein Alpha-Definitionsarchiv ohne unterstützten
-  Installationsweg. Du kannst es mit dem veröffentlichten CLI initialisieren,
-  validieren und generieren. Das Herunterladen des Archivs stellt weder eine
-  funktionierende Verbindung zwischen Hosts noch geschützten Anwendungszugriff
-  oder Wiederherstellung über Standorte hinweg her. Für eine bestehende
-  Installationsanleitung nutze Basement Kit oder Cloud Kit.
+  Installationspfad. Du kannst es mit der veröffentlichten CLI initialisieren,
+  validieren und generieren. Der Download seines Archivs begründet weder eine
+  funktionierende Verbindung zwischen Hosts noch geschützten
+  Anwendungszugriff oder Wiederherstellung über Standorte hinweg. Nutze für
+  eine bestehende Installationsanleitung das Basement Kit oder das Cloud Kit.
 </Warning>
 
 ## Was das Alpha-Archiv enthält
 
-Das [öffentliche StackKits-Release](https://github.com/kombifyio/StackKits/releases/latest)
-enthält neben dem CLI die Definitionsarchive von Modern Homelab. Sie beschreiben
-die vorgesehenen Sites, die Platzierung von Anwendungen, Verbindungen und Hoheitsgrenzen.
-Prüfe die `release-evidence.json` des Releases auf die Laufzeitnachweise, die tatsächlich
-an diese Version angehängt sind.
+Die [öffentliche StackKits-Version](https://github.com/kombifyio/StackKits/releases/latest)
+enthält Definitionsarchive für Modern Homelab neben der CLI. Sie beschreiben
+die vorgesehenen Sites, die Platzierung von Anwendungen, Verbindungen und
+Autoritätsgrenzen. Prüfe die `release-evidence.json` der Version auf die
+Runtime-Nachweise, die tatsächlich an diese Version angehängt sind.
 
-Die [Installationsanleitung nur für die Toolchain](/de/guides/stackkits/choosing-a-kit#nur-die-toolchain-installieren)
-erklärt, wie du das CLI und die Modern-Definitionen herunterlädst. Ein vollständiges Modern-Deployment
-braucht weiterhin konkretes Verhalten für Verbindung, Identität, Routing, TLS und
-Standortausfall. Eine Konfiguration oder ein generierter Plan allein verifiziert dieses Verhalten nicht.
+Die [Installationsanleitung nur für das Toolchain](/de/guides/stackkits/choosing-a-kit#install-only-the-toolchain)
+erklärt, wie du die CLI und die Modern-Definitionen herunterlädst. Ein
+vollständiges Modern-Deployment braucht weiterhin konkretes Verhalten für
+Verbindung, Identität, Routing, TLS und Standortausfall. Eine Konfiguration
+oder ein generierter Plan allein verifiziert dieses Verhalten nicht.
 
-## Einen Einstiegsweg wählen
+## Was du zuerst brauchst
 
-Wähle [Basement Kit](/de/stackkits/kits/basement-kit) für einen bestehenden Linux-Host
-zu Hause oder [Cloud Kit](/de/stackkits/kits/cloud-kit) für einen bestehenden Cloud-Host
-mit einer Domain, die du kontrollierst. Deren Anleitungen halten den Konfigurations-Bootstrap und
-release-spezifische Laufzeitnachweise getrennt.
+- Erfahrung mit einem der Kits, idealerweise einem funktionierenden [Basement Kit](/de/stackkits/kits/basement-kit). Lies [Bevor du beginnst](/de/guides/stackkits/before-you-start), wenn du neu bist.
+- Einen Host zu Hause und einen Cloud-Host mit einer Domain, die du kontrollierst, wenn du der vorgesehenen Form der Definition folgen willst.
+- Die CLI, installiert wie in der obigen Toolchain-Anleitung beschrieben.
 
-Halte dieselbe Unterscheidung ein, wenn du Modern erkundest: Schütze bestehende Daten und
-bewahre die Konfiguration und die Betriebsausgabe jedes Workspaces auf. Gehe nicht davon aus,
-dass eine Anwendung bei einem Verbindungs- oder Cloud-Ausfall verfügbar bleibt,
-solange das gewählte Release dafür keinen Nachweis hat.
+## Was du heute ausprobieren kannst
 
-Siehe [Ein StackKit wählen](/de/guides/stackkits/choosing-a-kit) für alle Einstiegswege
-und die [Kompatibilität der Anwendungsbereitstellung](/de/stackkits/reference/application-delivery-compatibility)
+1. Installiere die CLI und die Modern-Definitionen. Erwarte, dass das Werkzeug auf deinem Computer verfügbar ist, ohne dass auf einem Server etwas geändert wurde.
+2. Initialisiere und validiere einen Workspace. Erwarte eine Konfigurationsdatei und einen Bericht, ob sie gültig ist.
+3. Generiere den Plan und lies ihn. Erwarte Dateien und einen Plan, die das vorgesehene Layout beschreiben, kein laufendes System.
+
+## Was wo gespeichert wird
+
+Die Definition und die generierten Dateien bleiben in deinem Workspace-Ordner. Die Definition belässt Kontrolle und Standard-Datenhoheit bei Home. Nichts im Alpha-Archiv verschiebt von selbst Daten zwischen Standorten.
+
+## Wenn etwas schiefgeht
+
+- Validierung oder Generierung schlägt fehl: Lies das Log mit `stackkit logs latest --json` und siehe [Fehlerbehebung](/de/guides/stackkits/troubleshooting).
+- Du brauchst jetzt ein funktionierendes Homelab: Nutze das [Basement Kit](/de/stackkits/kits/basement-kit) oder das [Cloud Kit](/de/stackkits/kits/cloud-kit).
+- Du bist unsicher, was ein Ergebnis belegt: Ein generierter Plan allein verifiziert weder Verbindungen noch Zugriff oder Wiederherstellung.
+
+## Einen Einstiegspfad wählen
+
+Wähle das [Basement Kit](/de/stackkits/kits/basement-kit) für einen bestehenden
+Linux-Host zu Hause oder das [Cloud Kit](/de/stackkits/kits/cloud-kit) für einen
+bestehenden Cloud-Host mit einer Domain, die du kontrollierst. Deren Anleitungen
+halten Konfigurations-Bootstrap und versionsspezifische Runtime-Nachweise
+getrennt.
+
+Behalte dieselbe Unterscheidung beim Erkunden von Modern bei: Schütze
+vorhandene Daten und bewahre die Konfiguration und die Betriebsausgabe jedes
+Workspace auf. Gehe nicht davon aus, dass eine Anwendung bei einem
+Verbindungs- oder Cloud-Ausfall verfügbar bleibt, bevor die gewählte Version
+dafür Nachweise hat.
+
+Siehe [Ein StackKit wählen](/de/guides/stackkits/choosing-a-kit) für alle
+Einstiegspfade und [Kompatibilität der Anwendungsbereitstellung](/de/stackkits/reference/application-delivery-compatibility)
 für die Fähigkeiten, die die veröffentlichten Anwendungsadapter deklarieren.

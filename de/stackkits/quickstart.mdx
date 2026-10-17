@@ -1,21 +1,32 @@
 ---
 title: "StackKits-Quickstart"
-description: "Ein veröffentlichtes Basement Kit bootstrappen, prüfen und explizit anwenden"
+description: "Ein veröffentlichtes Basement Kit starten, prüfen und gezielt anwenden"
 sidebarTitle: "Quickstart"
 icon: rocket
 ---
 
-Dieser Quickstart installiert das aktuelle öffentliche StackKits-Release mit einem Basement
-Kit auf einem Server, den du bereits betreibst. Prüfe vorab in der [OS-Kompatibilität](/de/stackkits/reference/os-compatibility),
-welche Kombination aus Release und Host veröffentlichte Lebenszyklus-Nachweise hat.
-Das CLI bleibt die lokale Ausführungsinstanz.
+Dieser Quickstart installiert die aktuelle öffentliche StackKits-Version mit
+einem Basement Kit auf einem Server, den du bereits betreibst. Prüfe vor dem
+Start in der [OS-Kompatibilität](/de/stackkits/reference/os-compatibility) die
+Kombination aus Version und Host mit veröffentlichten Lifecycle-Nachweisen. Die
+CLI bleibt die lokale Ausführungsinstanz.
 
-## Ein Basement Kit bootstrappen
+## Was du zuerst brauchst
+
+- Einen Server oder Computer, den du bereits betreibst und auf dem du Befehle ausführen darfst.
+- Ein System aus der Seite zur OS-Kompatibilität.
+- Ein Terminal auf diesem Computer.
+- Einen privaten Ort für die Zugangsdaten, die das Setup erzeugt.
+
+Neu bei Servern? [Bevor du beginnst](/de/guides/stackkits/before-you-start) erklärt die Konzepte in einfachen Worten und ist einmal lesenswert.
+
+## Ein Basement Kit starten
 
 Auf einem unterstützten Server legt der Basement-Installer `~/my-homelab` an,
-installiert die veröffentlichten Artefakte und die nötige Laufzeit, initialisiert die lokale Owner-Verwahrung,
-bootstrappt den lokalen Admin-/PocketID-Zugang, validiert die generierte
-StackSpec und wendet die standardmäßigen Basement-Dienste an:
+installiert die veröffentlichten Artefakte und die benötigte Runtime,
+initialisiert die lokale Owner-Custody, richtet den lokalen Admin-/PocketID-Zugang
+ein, validiert die generierte StackSpec und wendet die
+Standarddienste des Basement an:
 
 ```bash
 curl -sSL https://base.stackkit.cc | sh
@@ -26,26 +37,30 @@ cat .stackkit/access.json
 ```
 
 <Warning>
-  Ein gehostetes kombify-Konto ist nicht erforderlich. StackKits selbst braucht
-  weiterhin einen lokalen Owner/Admin, den dieser Bootstrap automatisch anlegt.
-  Halte die generierten Zugangsdaten privat.
+  Ein gehostetes kombify-Konto ist nicht erforderlich. StackKits selbst
+  benötigt weiterhin einen lokalen Owner/Admin, den dieser Bootstrap
+  automatisch anlegt. Halte die generierten Zugangsdaten privat.
 </Warning>
 
-Du brauchst einen anderen Installer? Nutze [Ein Kit wählen](/de/guides/stackkits/choosing-a-kit)
-für den Weg nur mit Toolchain, [Cloud Kit](/de/stackkits/kits/cloud-kit) für einen VPS,
-den du bereits betreibst, oder die [CLI-Schritt-für-Schritt-Anleitung](/de/guides/stackkits/cli-walkthrough)
-für die getrennten Schritte Konfigurieren, Prüfen, Anwenden und Verifizieren.
+Nach dem Befehl solltest du Folgendes sehen: Der Ordner `~/my-homelab` existiert, `stackkit version` gibt die installierte Version aus, das neueste Log meldet das Ergebnis des Setups, und `.stackkit/access.json` enthält deine lokalen Zugangsdaten.
+
+Brauchst du einen anderen Installer? Nutze [Ein Kit wählen](/de/guides/stackkits/choosing-a-kit)
+für den Pfad nur mit Toolchain, das [Cloud Kit](/de/stackkits/kits/cloud-kit) für einen VPS,
+den du bereits betreibst, oder die [CLI-Anleitung](/de/guides/stackkits/cli-walkthrough)
+für die getrennten Schritte Konfiguration, Prüfung, Anwenden und Verifikation.
 
 ## Den generierten Intent prüfen oder ändern
 
-Prüfe `stack-spec.yaml`, bevor du Ausgaben generierst. Achte besonders auf die
-absoluten Speicher-Wurzeln, die lokale Domain (der Basement-Installer verwendet `home`,
-daher lösen Dienste nach der Geräte-Registrierung als `*.home` auf), die Site- und Node-Identitäten
-und die leere optionale Workload-Auswahl.
+Prüfe `stack-spec.yaml`, bevor du die Ausgabe generierst. Prüfe insbesondere
+die absoluten Speicher-Wurzelverzeichnisse, die lokale Domain (der
+Basement-Installer verwendet `home`, sodass Dienste nach der Geräte-Einrichtung
+unter `*.home` aufgelöst werden), die Site- und Node-Identitäten und die leere
+optionale Workload-Auswahl.
 
 Die StackSpec ist die Konfigurationseingabe. CUE bleibt die Validierungsinstanz,
-und generierte Rollout-Dateien sind Ausgaben, keine Dateien zum manuellen Bearbeiten. Aktuelle
-Beispiele findest du unter [Eine StackSpec konfigurieren](/de/guides/stackkits/configure-stack-spec).
+und generierte Rollout-Dateien sind Ausgaben, die du nicht von Hand
+bearbeitest. Siehe [Eine StackSpec konfigurieren](/de/guides/stackkits/configure-stack-spec)
+für aktuelle Beispiele.
 
 ## Einen geänderten Plan generieren und prüfen
 
@@ -54,8 +69,8 @@ stackkit generate
 stackkit plan --json
 ```
 
-Vergewissere dich, dass Generierungs- und Apply-Bereitschaft beide `ready` sind, und prüfe dann die
-ausgewählten Workloads und Artefaktpfade.
+Bestätige, dass Generierungs- und Apply-Bereitschaft beide `ready` sind, und
+prüfe dann die ausgewählten Workloads und Artefaktpfade.
 
 ## Eine beabsichtigte Änderung anwenden
 
@@ -65,9 +80,20 @@ stackkit logs latest --json
 cat .stackkit/access.json
 ```
 
-Der Basement-Einzeiler führt das erste Apply bereits aus. Führe diese Lebenszyklus-Befehle
-nur aus, nachdem du `stack-spec.yaml` absichtlich geändert hast. Bewahre die lokalen Logs
-und den Zugangsdatensatz beim Workspace auf.
+Der Basement-Einzeiler führt das erste Apply bereits aus. Führe diese
+Lifecycle-Befehle erst aus, nachdem du `stack-spec.yaml` absichtlich geändert
+hast. Behalte die lokalen Logs und das Zugriffsprotokoll beim Workspace.
+
+## Was wo gespeichert wird
+
+Deine Konfiguration (`stack-spec.yaml`), Logs und das Zugriffsprotokoll liegen im Workspace-Ordner `~/my-homelab` auf dem Server. Generierte Rollout-Dateien sind Ausgaben der Konfiguration. Kein gehostetes kombify-Konto hält etwas davon. Halte den Ordner privat.
+
+## Wenn etwas schiefgeht
+
+- Der Installer bricht mit einem Fehler ab: Lies ihn mit `stackkit logs latest --json` und führe den Einzeiler nicht ein zweites Mal aus, bevor du den Fehler verstehst. Siehe [Fehlerbehebung](/de/guides/stackkits/troubleshooting).
+- Der Plan ist nicht `ready`: Ändere die StackSpec statt der generierten Dateien und prüfe sie erneut.
+- Eine Dienstadresse öffnet sich nicht: Siehe [Fehlerbehebung](/de/guides/stackkits/troubleshooting) und [Im Alltag](/de/guides/stackkits/daily-use).
+- Schließe als Nächstes den Schutz im [Node-Hub-Leitfaden](/de/guides/stackkits/node-hub) ab.
 
 ## Weiter
 
@@ -76,7 +102,7 @@ und den Zugangsdatensatz beim Workspace auf.
     Lerne das lokale Kit für eine einzelne Umgebung kennen.
   </Card>
   <Card title="Cloud Kit" icon="cloud" href="/de/stackkits/kits/cloud-kit">
-    Nutze denselben Standalone-Lebenszyklus auf einem VPS, den du betreibst.
+    Nutze denselben eigenständigen Lifecycle auf einem VPS, den du betreibst.
   </Card>
   <Card title="Sicher anwenden" icon="clipboard-check" href="/de/guides/stackkits/review-plan-and-apply">
     Prüfe Bereitschaft und generierte Artefakte, bevor du den Host änderst.

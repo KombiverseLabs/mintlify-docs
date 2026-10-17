@@ -1,19 +1,52 @@
 ---
 title: "Komodo"
-description: "已发布工作负载矩阵中的 beta 应用交付适配器"
+description: "已发布工作负载矩阵中的测试版应用交付适配器"
 sidebarTitle: "Komodo"
 icon: rocket
 ---
 
-Komodo 是已发布的工作负载兼容性矩阵中的 beta 适配器；生成的[应用交付兼容性](/zh-Hans/stackkits/reference/application-delivery-compatibility)表格记载了它所声明的各行。只有在你接受这种成熟度时才选择它；Coolify 和独立 Compose 是受支持的适配器路径。
+Komodo 是已发布的工作负载兼容性矩阵中的测试版适配器；其声明的行由生成的[应用交付兼容性](/zh-Hans/stackkits/reference/application-delivery-compatibility)表负责。只有在你接受这一成熟度时才选择它；Coolify 和独立 Compose 是受支持的适配器路径。
+
+## 它是什么
+
+Komodo 是一个用于在服务器上运行和管理应用的工具。通俗地说，它是一个与你的应用并排放置的控制面板，负责管理应用如何启动并保持运行。当你想用这个面板来取代默认的应用启动方式（即普通的 Compose 文件）时，StackKit 可以包含它。它是运维平台，而不是应用商店：它不提供可供点击安装的应用目录。
+
+## 哪些套件和用例包含它
+
+Komodo 从不默认包含。它是一种平台集成，由你在 StackSpec 的工作负载意图中显式选择，适用于兼容性表中已声明的行所列出的工作负载（例如 `files`、`media`、`photos`、`smart-home` 和 `vault`）。大多数人从不需要它：独立 Compose 是原生默认方式，Coolify 是另一条受支持的平台路径。
+
+## 如何打开
+
+部署后，StackKits 会在部署输出中打印生成的 Komodo 地址和凭据。请在能够解析你的 homelab 名称的设备上，用浏览器打开该地址。默认本地域名为 `home.test`；请复制地址，而不是凭记忆输入。
 
 ## 安全使用
 
-- 在你所安装版本的工作负载意图中，显式选择 beta 的 `komodo` 适配器。
+- 在你所安装版本的工作负载意图中，显式选择测试版的 `komodo` 适配器。
 - 在生成或应用配置之前，先验证工作负载意图。
 - 使用部署输出中生成的 Komodo URL 和凭据。
 - 每个工作负载只保留一条应用交付路径。
 
-不要复制旧的配置片段，也不要手动创建第二条平台路由。以已安装版本的 CUE 验证为准。
+不要复制旧的配置片段，也不要手动创建第二条平台路由。以所安装版本的 CUE 验证为准。
 
-[选择应用交付](/zh-Hans/guides/stackkits/application-delivery)对比了 Komodo、Coolify 和独立 Compose。
+## 首次使用
+
+1. 在打开 Komodo 之前，先完成并验证 StackKits 部署。
+2. 从部署输出中打开生成的 Komodo 地址。
+3. 使用部署输出中生成的凭据登录。不要把它们粘贴到聊天或问题单中。
+4. 查看 StackKits 为你的工作负载交付的应用。请把 StackSpec 当作修改设置的地方，而不是 Komodo 的界面。
+
+## 备份内容
+
+应用交付兼容性表为每个工作负载和适配器提供了“备份/恢复”列；请查看你的工作负载和版本所对应的行。仅有部署能力并不意味着具备备份或恢复能力。在依赖它之前，请按照[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)所述演练一次分阶段恢复。
+
+## 预期情况
+
+Komodo 是测试版路径。预期其已验证的行比独立 Compose 少，并且在信任它承载某个特定工作负载之前，你可能需要先阅读兼容性表。该面板展示并运行 StackKits 生成的内容，不能替代对你配置的验证。
+
+## 出现问题时
+
+- 地址打不开：将其与部署输出中的地址对比，并确保你的设备能解析 homelab 名称。参见[故障排查](/zh-Hans/guides/stackkits/troubleshooting)。
+- 某个工作负载缺失或重复：你很可能为它设置了两条交付路径。请每个工作负载只保留一条应用交付路径，修正 StackSpec 后重新生成。
+- 不确定该路径是否受支持：运行 `stackkit app compatibility --json` 并阅读你所用版本对应的行。
+
+[选择应用交付方式](/zh-Hans/guides/stackkits/application-delivery)比较了 Komodo、Coolify 和独立 Compose。

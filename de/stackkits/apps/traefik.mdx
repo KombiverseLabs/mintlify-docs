@@ -5,8 +5,35 @@ sidebarTitle: "Traefik"
 icon: route
 ---
 
-Traefik ist die Standard-Reverse-Proxy-Komponente im veröffentlichten StackKits-Katalog. Er routet generierte Dienstnamen wie `base.<domain>`, `auth.<domain>` und Anwendungsrouten, die deine validierte Konfiguration auswählt.
+Traefik ist die Standard-Reverse-Proxy-Komponente im veröffentlichten StackKits-Katalog. Er routet generierte Dienstnamen wie `base.<domain>`, `auth.<domain>` sowie Anwendungsrouten, die deine validierte Konfiguration auswählt.
 
-Nutze die generierten Dienst-URLs und die CLI-Verifikationsausgabe, um Routing zu diagnostizieren. Füge Labels, Router oder Middleware nicht direkt zu von StackKits verwalteten Containern hinzu.
+## Was es ist
+
+Ein Reverse-Proxy ist die Haustür deines Servers. Jede Adresse, die du eintippst, etwa der Node Hub oder ein Dienstname, kommt zuerst bei Traefik an, der die Anfrage an den richtigen Dienst weiterreicht. Ein StackKit enthält ihn, damit jeder Dienst einen eigenen lesbaren Namen statt einer Portnummer bekommt und damit die Anmeldung ([TinyAuth](/de/stackkits/apps/tinyauth)) an einer Stelle angewendet werden kann.
+
+## Welche Kits ihn enthalten
+
+Die Seite zum [Basement Kit](/de/stackkits/kits/basement-kit) führt das Routing über Traefik auf, und die Kit-Definition kennzeichnet ihn als Standard-Plattformdienst. Der Katalog vermerkt außerdem, dass die gewählte Anwendungsplattform einen eigenen Traefik mitbringen kann; die Rollout-Ausgabe zeigt, was du tatsächlich hast.
+
+## Wie du ihn öffnest
+
+Du öffnest Traefik selbst normalerweise nie. Du öffnest die Dienste, die er routet, über die generierten Adressen aus der CLI-Ausgabe oder dem [Node Hub](/de/guides/stackkits/node-hub). Der Katalog definiert außerdem ein Traefik-Dashboard unter `https://traefik.<domain>`; öffne es nur, wenn dein Rollout es aufführt.
+
+## Erste Nutzung
+
+1. Öffne den Node Hub unter der Adresse `base.<domain>`.
+2. Klicke auf einen Dienst und bestätige, dass er unter seinem eigenen Namen öffnet.
+3. Wenn ein Dienst nicht öffnet, führe `stackkit verify --json` aus, bevor du das Routing untersuchst.
+
+## Was du erwarten kannst und was du nicht ändern solltest
+
+- Erwarte, dass er still im Hintergrund arbeitet.
+- Der Katalog versieht seine Routen mit Security-Headern und einem Anfragen-Ratenlimit.
+- Nutze die generierten Dienst-URLs und die CLI-Verifikationsausgabe, um das Routing zu diagnostizieren. Füge nicht direkt Labels, Router oder Middleware zu von StackKits verwalteten Containern hinzu. Bearbeite stattdessen die StackSpec und generiere neu.
 
 Der veröffentlichte Vertrag [Whoami](/de/stackkits/apps/whoami) beschreibt die Rolle der Routing-Diagnose, aber die anfängliche native v2-StackSpec wählt ihn nicht aus.
+
+## Wenn etwas schiefgeht
+
+- Eine Dienstadresse öffnet sich nicht: Prüfe, ob der Name auf deinem Gerät aufgelöst wird, und vergleiche die Adresse mit der Rollout-Ausgabe. Siehe [Fehlerbehebung](/de/guides/stackkits/troubleshooting).
+- Eine Route fordert wiederholt zur Anmeldung auf: Siehe [TinyAuth](/de/stackkits/apps/tinyauth).

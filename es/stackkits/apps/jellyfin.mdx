@@ -1,24 +1,36 @@
 ---
 title: "Jellyfin"
-description: "El workload de biblioteca multimedia con medios de solo lectura, configuración nativa del propietario y vías de recuperación separadas"
+description: "La carga de trabajo de biblioteca multimedia con medios de solo lectura, configuración nativa del propietario y rutas de recuperación separadas"
 sidebarTitle: "Jellyfin"
 icon: film
 ---
 
-Jellyfin aporta el caso de uso [Multimedia](/es/guides/stackkits/use-cases/media) mediante el workload `media` en un host de Compose independiente. Configúralo después de que se verifique la base de tu [Basement Kit](/es/stackkits/kits/basement-kit). Usa `stackkit app compatibility --json` para inspeccionar las capacidades de adaptador del release instalado.
+Jellyfin proporciona el caso de uso [Multimedia](/es/guides/stackkits/use-cases/media) mediante la carga de trabajo `media` en un host con Compose independiente. Configúralo después de que se verifique la base de tu [Basement Kit](/es/stackkits/kits/basement-kit). Usa `stackkit app compatibility --json` para inspeccionar las capacidades del adaptador de la versión instalada.
 
-## Apunta el workload a un directorio de medios existente
+## Qué es
 
-Para usar una biblioteca existente, establece `storage.mediaRoot` en la StackSpec con el directorio absoluto de los medios en el host de runtime, por ejemplo `/srv/household-media`, antes de generar y aplicar el stack:
+Jellyfin es un servidor multimedia para las películas, la música y los vídeos caseros que posees. Analiza tus archivos, los muestra como una biblioteca ordenada con carátulas y descripciones, y los transmite a televisores, teléfonos y ordenadores de tu casa. Un StackKit lo incluye para que tu hogar pueda ver su propia colección sin un servicio de suscripción.
 
-- StackKits monta ese directorio en `/media` como solo lectura. Jellyfin puede escanear y reproducir esos archivos, pero no puede editarlos ni eliminarlos.
+## Qué kits y casos de uso lo incluyen
+
+Jellyfin es la aplicación por defecto del caso de uso Multimedia, entregada como la carga de trabajo opcional `media` en un host con Compose independiente, después de que se verifique la base de tu [Basement Kit](/es/stackkits/kits/basement-kit). Coolify y Komodo aparecen en la tabla de compatibilidad de `media` sin copia de seguridad ni restauración.
+
+## Cómo abrirlo
+
+Abre la ruta privada de Multimedia declarada que imprime la CLI o que figura en el [Node Hub](/es/guides/stackkits/node-hub). El dominio local por defecto es `home.test`; el nombre debe resolverse en cada dispositivo desde el que veas contenido.
+
+## Apuntar la carga de trabajo a un directorio multimedia existente
+
+Para usar una biblioteca existente, establece `storage.mediaRoot` en la StackSpec con el directorio absoluto de los medios en el host de ejecución, por ejemplo `/srv/household-media`, antes de generar y aplicar la pila:
+
+- StackKits monta ese directorio en `/media` en solo lectura. Jellyfin puede analizar y transmitir esos archivos, pero no puede editarlos ni borrarlos.
 - El directorio ya debe existir. StackKits no lo crea ni cambia sus permisos; si falta, la entrega falla, así que prepara y protege tú mismo el almacenamiento del host.
 - Deja `storage.mediaRoot` sin definir para mantener, en su lugar, un volumen de biblioteca con nombre gestionado por el plan.
-- La ruta nombra almacenamiento del host de runtime, no de la máquina donde se ejecuta un visor remoto.
+- La ruta designa almacenamiento en el host de ejecución, no en la máquina desde la que se ve el contenido de forma remota.
 
-## Configura la cuenta de propietario
+## Configurar la cuenta del propietario
 
-Crea un archivo de credenciales privado y relativo al workspace `.stackkit/setup/media-owner.json`:
+Crea un archivo de credenciales privado, relativo al espacio de trabajo, `.stackkit/setup/media-owner.json`:
 
 ```json
 {
@@ -27,36 +39,55 @@ Crea un archivo de credenciales privado y relativo al workspace `.stackkit/setup
 }
 ```
 
-Restringe ese archivo al propietario del workspace y mantén su contenido fuera de los argumentos de comandos y de los mensajes de chat. Después ejecuta:
+Restringe ese archivo al propietario del espacio de trabajo y mantén su contenido fuera de los argumentos de comandos y de los mensajes de chat. Después ejecuta:
 
 ```bash
 stackkit setup media --credentials-file .stackkit/setup/media-owner.json --owner-approve --json
 ```
 
-Antes de actuar, el comando verifica el plan actual, el Apply firmado, el contenedor local exacto y la versión fijada de Jellyfin. En la primera ejecución establece las credenciales de administrador que elegiste; nunca usa una contraseña predeterminada de primer usuario. En una instalación existente realiza un inicio de sesión normal y una lectura de vuelta del administrador. La sesión temporal de configuración se revoca antes de registrar el resultado firmado.
+El comando verifica el plan actual, la aplicación firmada (Apply), el contenedor local exacto y la versión fijada de Jellyfin antes de actuar. En la primera ejecución establece las credenciales de administrador que elegiste; nunca usa una contraseña de primer usuario por defecto. En una instalación existente realiza un inicio de sesión normal y una lectura del administrador. La sesión temporal de configuración se revoca antes de registrar el resultado firmado.
 
-## Termina el asistente y añade bibliotecas
+## Terminar el asistente y añadir bibliotecas
 
-Sin más flags, un asistente de inicio de Jellyfin sin terminar sigue sin terminar: abre Media en su ruta privada declarada y elige tú mismo las rutas de biblioteca, el idioma y los ajustes del hogar. Para completar en cambio el asistente de inicio con los ajustes actuales de la aplicación y configurar tus bibliotecas después, añade `--complete-onboarding`:
+Sin más opciones, un asistente de inicio de Jellyfin sin terminar se queda sin terminar: abre Multimedia en su ruta privada declarada y elige tú mismo las rutas de las bibliotecas, el idioma y los ajustes del hogar. Para completar en cambio el asistente de inicio con los ajustes actuales de la aplicación y configurar tus bibliotecas después, añade `--complete-onboarding`:
 
 ```bash
 stackkit setup media --credentials-file .stackkit/setup/media-owner.json --owner-approve --complete-onboarding --json
 ```
 
-El flag solo termina el asistente de inicio. No añade bibliotecas, no cambia los ajustes de acceso remoto ni configura la transcodificación. Cuando añadas una biblioteca, sigue el mapeo de volumen de medios del plan: el montaje `/media` de solo lectura para un directorio bajo custodia del propietario. Da a los espectadores del hogar cuentas de Jellyfin distintas y sin permisos de administrador, y conecta cada reproductor directamente a la URL de Media declarada.
+La opción solo termina el asistente de inicio. No añade bibliotecas, no cambia los ajustes de acceso remoto ni configura la transcodificación. Al añadir una biblioteca, sigue la asignación de volúmenes multimedia del plan: el montaje `/media` de solo lectura para un directorio bajo custodia del propietario. Da a los espectadores del hogar cuentas de Jellyfin separadas sin permisos de administrador y conecta cada reproductor directamente a la URL de Multimedia declarada.
 
-## Límites de la recuperación
+## Primer uso
+
+1. Prepara tu directorio multimedia en el host y establece `storage.mediaRoot` en la StackSpec.
+2. Aplica la pila y ejecuta el comando de configuración del propietario anterior.
+3. Abre la ruta de Multimedia e inicia sesión con la cuenta de administrador que elegiste.
+4. Añade una biblioteca que siga la asignación de volúmenes del plan.
+5. Crea cuentas separadas sin permisos de administrador para los espectadores del hogar.
+
+## Límites de recuperación
 
 La configuración de la aplicación y los bytes de los medios se custodian por separado:
 
-- La configuración de Jellyfin y su caché de transcodificación residen en volúmenes separados. Comprueba la declaración de copia de seguridad de la aplicación para ver qué datos incluye; que el almacenamiento sea escribible no implica cobertura de copia de seguridad.
-- Tu origen de medios no es una copia de seguridad de StackKits. Sea cual sea el valor que establezcas para `storage.mediaRoot`, mantén una fuente de recuperación independiente para esos bytes y documéntala fuera del stack.
-- La salud del contenedor y una configuración de administrador verificada no demuestran el contenido de la biblioteca ni la recuperación; comprueba ambos de forma explícita.
+- La configuración de Jellyfin y su caché de transcodificación residen en volúmenes distintos. Revisa la declaración de copia de seguridad de la aplicación para saber qué datos se incluyen; que el almacenamiento sea escribible no implica cobertura de copia de seguridad.
+- Tu origen de medios no es una copia de seguridad de StackKits. Sea cual sea el valor de `storage.mediaRoot`, mantén una fuente de recuperación independiente para esos bytes y documéntala fuera de la pila.
+- La salud del contenedor y una configuración verificada del administrador no prueban el contenido de la biblioteca ni la recuperación; comprueba ambos de forma explícita.
 
-## Prueba un cliente real
+## Probar un cliente real
 
-Prueba la reproducción de uno de tus propios archivos desde un cliente previsto. Comprueba primero la reproducción directa y la transcodificación solo si la has configurado explícitamente. La compatibilidad de clientes, el ancho de banda y la calidad de la transcodificación no las demuestra un contenedor sano; verifícalas en los dispositivos en los que realmente planeas ver contenido.
+Prueba la reproducción de uno de tus propios archivos desde un cliente previsto. Comprueba primero la reproducción directa y la transcodificación solo si la has configurado explícitamente. La compatibilidad de los clientes, el ancho de banda y la calidad de la transcodificación no quedan demostrados por un contenedor sano: verifícalos en los dispositivos en los que realmente piensas ver contenido.
 
-## Reanuda una configuración interrumpida
+## Qué esperar
+
+Analizar una biblioteca grande lleva tiempo. Un contenedor sano no dice nada sobre la reproducción en un televisor o teléfono concreto, así que prueba los dispositivos que realmente piensas usar.
+
+## Si algo sale mal
+
+- La entrega falla de inmediato: falta el directorio multimedia. StackKits no lo crea; prepara el almacenamiento del host y aplica de nuevo.
+- Un reproductor no puede conectarse: confirma que usa la URL de Multimedia declarada y que el nombre se resuelve desde ese dispositivo.
+- La reproducción se entrecorta: comprueba primero la reproducción directa y la transcodificación solo si la configuraste.
+- Consulta también [Solución de problemas](/es/guides/stackkits/troubleshooting).
+
+## Reanudar una configuración interrumpida
 
 Si una ejecución de configuración se interrumpe, reinténtala con el `--operation-id` indicado. El comando vuelve a comprobar el estado de la aplicación y nunca reabre un asistente de inicio ya completado.

@@ -6,46 +6,74 @@ icon: house
 ---
 
 <Info>
-  Estado de la evidencia (2026-09-17, v0.35.0): Basement Kit es la vía
-  compatible de un solo comando del release público actual. En el archivo
-  público v0.35.0, Basement Kit superó install, init, generate, apply, verify,
-  backup y restore en máquinas virtuales nuevas de Ubuntu 24.04 y Debian 13, y
-  en una máquina virtual de una red doméstica, donde sus direcciones de
-  servicio locales también respondieron desde otra máquina de esa red. La
-  passkey del teléfono y la confianza en el certificado de cliente están
-  pendientes. Cloud Kit es una vista previa y Modern Homelab un archivo de
-  definición alfa, no un destino de instalación; ninguno tiene aún una
+  Estado de la evidencia (2026-09-17, v0.35.0): Basement Kit es la ruta
+  compatible de un solo comando de la versión pública actual. Con el archivo
+  público v0.35.0, Basement Kit superó la instalación, init, generate, apply,
+  verify, backup y restore en máquinas virtuales nuevas con Ubuntu 24.04 y
+  Debian 13, y en una máquina virtual de una red doméstica, donde sus
+  direcciones de servicio locales también respondieron desde otra máquina de
+  esa red. La passkey del teléfono y la confianza del certificado de cliente
+  están pendientes. Cloud Kit es una vista previa y Modern Homelab un archivo
+  de definición alfa, no un destino de instalación; ninguno tiene todavía una
   ejecución automatizada del ciclo de vida.
 </Info>
 
-Basement Kit es el perfil local compatible del release público actual de StackKits. Úsalo para un homelab en hardware que ya controlas, con un site doméstico y un propietario local.
+Basement Kit es el perfil local compatible de la versión pública actual de StackKits. Úsalo para un homelab en hardware que ya controlas, con un sitio doméstico y un propietario local.
+
+## En palabras sencillas
+
+Un Basement Kit convierte un ordenador de tu casa en un pequeño servidor privado. Instala los programas que protegen y organizan tus servicios, y más adelante puedes añadir cosas como archivos, fotos o contenido multimedia. Nada sale de tu red doméstica a menos que decidas publicarlo. Si eres nuevo en esto, lee primero [Antes de empezar](/es/guides/stackkits/before-you-start).
+
+## Qué necesitas primero
+
+- Un ordenador que controles y que pueda permanecer encendido, con un sistema de los enumerados en [Compatibilidad de sistemas operativos](/es/stackkits/reference/os-compatibility).
+- Acceso a un terminal en él.
+- Tu red doméstica, con teléfonos y portátiles que puedan resolver los nombres locales (consulta [Día a día](/es/guides/stackkits/daily-use)).
+- Un lugar privado para los datos de acceso de `.stackkit/access.json`.
+- Ninguna cuenta de kombify ni servidor alquilado.
 
 ## Qué proporciona
 
-El Basement Kit útil más pequeño es un site doméstico con un nodo local. Aporta:
+El Basement Kit útil más pequeño es un sitio doméstico con un nodo local. Aporta:
 
-- una StackSpec validada por CUE y el ciclo de vida local de `stackkit`
+- una StackSpec validada con CUE y el ciclo de vida local de `stackkit`
 - custodia local del propietario con PocketID y TinyAuth
 - enrutamiento mediante Traefik
 - un Node Hub en la dirección generada `base.<domain>`
-- política local de copias de seguridad con restauración ligada al propietario
+- política de copias de seguridad local con restauración vinculada al propietario
 
-El dominio predeterminado de creación es `home.test`. Asegúrate de que los clientes usen una vía de DNS que controles antes de considerar alcanzable una ruta generada; StackKits no modifica en silencio todos los clientes ni el router.
+El dominio por defecto de autoría es `home.test`. Asegúrate de que los clientes usen una ruta DNS que controlas antes de considerar alcanzable una ruta generada; StackKits no modifica en silencio todos los clientes ni el router.
 
-La base sigue siendo independiente. El sitio web de StackKits te ayuda a elegir y arrancar una vía, pero no opera el host.
+La base sigue siendo independiente. El sitio web de StackKits te ayuda a elegir e iniciar una ruta, pero no opera el host.
 
-## Completa la base
+## Completar la base
 
-1. Arranca el kit con la [Guía de inicio rápido](/es/stackkits/quickstart).
+1. Inicia el kit con el [Inicio rápido](/es/stackkits/quickstart).
 2. Termina la protección del primer arranque en el [Node Hub](/es/guides/stackkits/node-hub): crea el propietario local de PocketID y confirma que TinyAuth protege las rutas esperadas.
-3. Configura el repositorio local de copias de seguridad y practica una restauración. Consulta [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).
+3. Configura el repositorio de copias de seguridad local y practica una restauración. Consulta [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).
 
 Cambia la StackSpec y vuelve a validar en lugar de editar los archivos generados.
 
-## Añade casos de uso
+Después de cada paso deberías ver lo siguiente:
 
-Añade workloads solo después de que la base se verifique. [Documentos y archivos](/es/guides/stackkits/use-cases/documents-and-files) es un buen primer caso de uso, porque la selección independiente de Cloudreve no necesita ninguna referencia de secreto. [Casos de uso](/es/guides/stackkits/use-cases/overview) lista todos los documentados.
+1. El Inicio rápido deja una carpeta de espacio de trabajo con tu configuración y un registro de acceso.
+2. El Node Hub se abre, puedes iniciar sesión como propietario local y las rutas protegidas te piden iniciar sesión.
+3. Tienes una copia de seguridad y sabes que una restauración funciona.
+
+## Qué se guarda dónde
+
+Tu configuración, los registros y los datos de acceso permanecen en la carpeta del espacio de trabajo del ordenador doméstico. La identidad del propietario reside en PocketID en ese ordenador. Las copias de seguridad son una copia aparte que tú configuras. Mantén la carpeta privada y no compartas `.stackkit/access.json`.
+
+## Si algo sale mal
+
+- Una dirección no se abre en un teléfono o portátil: probablemente el dispositivo no puede resolver tus nombres locales. Consulta [Solución de problemas](/es/guides/stackkits/troubleshooting).
+- La configuración se detiene con un error: léelo con `stackkit logs latest --json` antes de volver a ejecutar el instalador.
+- No estás seguro de que la instalación esté sana: consulta las comprobaciones en [Día a día](/es/guides/stackkits/daily-use).
+
+## Añadir casos de uso
+
+Añade cargas de trabajo solo después de que la base se verifique. [Documentos y archivos](/es/guides/stackkits/use-cases/documents-and-files) es un buen primer caso de uso, porque la selección independiente de Cloudreve no necesita ninguna referencia de secreto. [Casos de uso](/es/guides/stackkits/use-cases/overview) enumera todos los documentados.
 
 ## Cuándo usar otro kit
 
-Elige [Cloud Kit](/es/stackkits/kits/cloud-kit) cuando el único entorno sea un VPS o un host en la nube existente con un dominio que operas. StackKits no aprovisiona ese host.
+Elige [Cloud Kit](/es/stackkits/kits/cloud-kit) cuando el entorno único sea un VPS existente o un host en la nube con un dominio que operas. StackKits no aprovisiona ese host.

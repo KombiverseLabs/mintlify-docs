@@ -7,6 +7,31 @@ icon: chart-line
 
 Uptime Kuma ships as a released module contract, but the initial native v2 StackSpec does not select it. Do not infer an active monitor set from the archive alone.
 
-Add monitors only for services you operate. For protected routes, use an intentional health endpoint or expect the configured authentication response; do not weaken route protection merely to make a monitor return HTTP 200.
+## What it is
 
-There is no supported Uptime Kuma configuration example for the initial StackSpec. The StackKits lifecycle remains the source of stack verification even when you operate a separate monitor; [Monitor the stack](/stackkits/reference/day-2-operations#monitor-the-stack) lists the checks to run.
+Uptime Kuma checks regularly whether your services answer. The catalog lists uptime checks, status pages and notifications. A StackKit can include it so that you notice a problem before your household does.
+
+## Which kits include it
+
+The catalog marks it as a default-maturity module that needs Traefik, and the kit definitions name it as the monitoring tool. The initial native v2 StackSpec does not select it, so your rollout output decides what you have.
+
+## How you open it
+
+If your rollout includes it, the catalog gives the pattern `https://kuma.<domain>`, for example `https://kuma.home.test` with the default domain. Copy the generated address.
+
+## First use
+
+1. Open the generated address.
+2. Add a monitor for one service you operate.
+3. Check that the monitor reports the service as up.
+
+## What to expect and what not to change
+
+- Add monitors only for services you operate.
+- For protected routes, use an intentional health endpoint or expect the configured authentication response; do not weaken route protection merely to make a monitor return HTTP 200.
+- There is no supported Uptime Kuma configuration example for the initial StackSpec. The StackKits lifecycle remains the source of stack verification even when you operate a separate monitor; [Monitor the stack](/stackkits/reference/day-2-operations#monitor-the-stack) lists the checks to run.
+
+## If something goes wrong
+
+- The address does not open: compare it with the rollout output and check that the name resolves on your device. See [Troubleshooting](/guides/stackkits/troubleshooting).
+- A monitor for a protected service fails: check the route's authentication response before changing protection.

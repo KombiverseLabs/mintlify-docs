@@ -1,38 +1,51 @@
 ---
 title: "kombify.me"
-description: "为已可访问的家庭实验室服务提供公共 HTTPS 地址，另有可选的私有中继"
+description: "为已可访问的 homelab 服务提供公开 HTTPS 地址，另有可选的私有中继"
 sidebarTitle: "概览"
 icon: "globe"
 ---
 
-kombify.me 为家庭实验室服务提供 `*.kombify.me` 下稳定的 HTTPS 名称。它是可选的联网入口路径：需要公共地址时很有用，技术栈保持在本地网络时则无需使用。
+kombify.me 为 homelab 服务提供 `*.kombify.me` 上稳定的 HTTPS 名称。它是可选的联网入口路径：当你想要一个公开地址时很有用，而当 stack 保持在本地网络中时则不会用到。
 
 <Warning>
-kombify.me 是 Alpha 软件。名称、标头和错误格式仍可能变化。请不要将其视为正式发布版本。
+kombify.me 是 Alpha 软件。名称、标头和错误格式仍可能发生变化。请不要把它当作正式发布（GA）版本。
 </Warning>
+
+通俗地说：你自己服务器上的应用通常有一个只在家里才能使用的地址。kombify.me 可以给它一个在任何地方都能使用的普通网址，并且已经带有挂锁（HTTPS）。你来决定哪些应用获得地址，哪些保持私有。
 
 ## 你可以做什么
 
-- 当源站已可从公共互联网访问时，在 `*.kombify.me` 主机上打开套件服务。
-- 让 `auth` 这类官方套件名称使用 `{your-lab}-auth.kombify.me`，而不是 `auth.kombify.me` 这样的保留根域名。
+- 当源站已经可以从公共互联网访问时，在 `*.kombify.me` 主机上打开 kit 服务。
+- 让 `auth` 这类第一方 kit 名称保持在 `{your-lab}-auth.kombify.me` 上，而不要放在 `auth.kombify.me` 这样的保留顶级域名上。
 - 当源站不是公开的时，通过 Techstack 节点代理中继私有 HTTP(S) 目标。
 
-kombify.me 不会取代 StackKits。即使没有 kombify.me 地址，本地套件依然可以安装、验证和运行。
+kombify.me 并不取代 StackKits。本地 kit 在没有 kombify.me 地址的情况下仍然可以安装、验证和运行。
 
-## 如何协同
+## 它如何配合
 
 | 关注点 | 负责方 |
 | --- | --- |
-| 套件定义、本地生命周期和局域网可达性 | StackKits |
+| Kit 定义、本地生命周期和局域网可达性 | StackKits |
 | 编排以及用于私有目标的节点代理 | Techstack |
-| 公共 HTTPS 名称、代理和私有 HTTP 中继 | kombify.me |
-| 托管 kombify 账号的登录 | `login.kombify.io` |
+| 公开 HTTPS 名称、代理和私有 HTTP 中继 | kombify.me |
+| 托管 kombify 账户的登录 | `login.kombify.io` |
+
+## 从哪里开始
+
+1. 阅读[公开、私有还是重定向：我需要哪一种？](/zh-Hans/kombify-me/public-or-private)，选出与你的应用所在位置相匹配的地址类型。
+2. 按照[获取你的第一个 kombify.me 地址](/zh-Hans/kombify-me/get-your-first-address)选择名称、将其指向你的应用并启用。
+3. 如果你使用 StackKits 服务器，请参阅[在 StackKits 服务器上使用地址](/zh-Hans/kombify-me/connect-a-stackkits-server)。
+4. 之后，需要时可以[更改、暂停或删除地址](/zh-Hans/kombify-me/change-pause-or-remove-an-address)。
+
+## 如果出了问题
+
+请从 [kombify.me 故障排查](/zh-Hans/kombify-me/troubleshooting)开始。它列出了访客在各种情况下看到的内容以及需要检查的事项。
 
 <CardGroup cols={2}>
-  <Card title="发布公共服务" icon="lock" href="/zh-Hans/kombify-me/public-addresses">
+  <Card title="发布公开服务" icon="lock" href="/zh-Hans/kombify-me/public-addresses">
     为已可访问的服务注册 HTTPS 名称。
   </Card>
   <Card title="访问私有服务" icon="network-wired" href="/zh-Hans/kombify-me/private-targets">
-    当源站保留在你的网络内时，使用可选的中继。
+    当源站保持在你的网络内时，使用可选的中继。
   </Card>
 </CardGroup>

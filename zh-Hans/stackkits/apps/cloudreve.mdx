@@ -1,25 +1,37 @@
 ---
 title: "Cloudreve"
-description: "为 Files 用例选择、部署并运维 Cloudreve"
+description: "为文件使用场景选择、部署和运维 Cloudreve"
 sidebarTitle: "Cloudreve"
 icon: folder-cloud
 ---
 
-Cloudreve 提供[文档与文件](/zh-Hans/guides/stackkits/use-cases/documents-and-files)中的 Files 部分。它是可选 `files` 工作负载的默认备选方案，初始 StackSpec 不会选择它。选择它之前，请先在“文档与文件”页面规划存储和备份。
+Cloudreve 提供[文档与文件](/zh-Hans/guides/stackkits/use-cases/documents-and-files)中“文件”的那一半。它是可选的 `files` 工作负载的默认备选项，初始 StackSpec 不会选择它。在选择它之前，请先在“文档与文件”页面规划存储和备份。
+
+## 它是什么
+
+Cloudreve 是一个私有的文件存储和共享网站。可以把它想象成个人网盘：你在浏览器中上传文件，将其整理到文件夹中，并向某人分享一个链接。StackKit 包含它，是为了让日常文档和导出内容存放在你自己的存储上，而不是第三方服务中。
+
+## 哪些 kit 和使用场景包含它
+
+Cloudreve 是“文档与文件”中“文件”那一半的默认应用。已发布的目录承诺将它用于独立 Compose 上的 Basement Kit 和 Cloud Kit。它是可选的：你需要自己选择 `files` 工作负载。
+
+## 如何打开
+
+验证之后，打开 CLI 打印出的或列在 [Node Hub](/zh-Hans/guides/stackkits/node-hub) 中的生成的文件路由。默认的本地域名是 `home.test`；请确保该名称可以在你使用的设备上解析。
 
 ## 已发布的角色
 
 | 属性 | 值 |
 | --- | --- |
 | 工作负载 | `files` |
-| 备选方案 | `cloudreve` |
-| 数据类别 | personal |
-| 路由 | 生成的 Files 服务路由 |
+| 备选项 | `cloudreve` |
+| 数据类别 | 个人 |
+| 路由 | 生成的文件服务路由 |
 | 独立适配器 | `standalone-compose` |
 
 ## 选择工作负载
 
-把下面这个对象合并到由 `stackkit init` 创建的完整 StackSpec 中：
+将此对象合并到由 `stackkit init` 创建的完整 StackSpec 中：
 
 ```json
 {
@@ -36,9 +48,9 @@ Cloudreve 提供[文档与文件](/zh-Hans/guides/stackkits/use-cases/documents-
 }
 ```
 
-该示例已在 v0.32.x 版本上验证并生成。如果你生成的站点或节点 ID 与此不同，请使用你自己的确切 ID。
+该示例已在 v0.32.x 版本中验证并生成。如果你生成的站点或节点 ID 不同，请使用那些确切的 ID。
 
-## 部署并验证
+## 部署与验证
 
 ```bash
 stackkit validate
@@ -48,12 +60,35 @@ stackkit apply
 stackkit verify --http --json
 ```
 
-在应用之前，请确认解析后的计划包含 `files` 工作负载、`cloudreve` 备选方案和 `standalone-compose` 适配器。
+在应用之前，请确认解析后的计划包含 `files` 工作负载、`cloudreve` 备选项和 `standalone-compose` 适配器。
 
-验证成功后，打开生成的 Files 路由，只创建你需要的应用账户。
+验证成功之后，打开生成的文件路由，并且只创建你需要的应用账户。
+
+## 首次使用
+
+1. 运行上面的验证命令，并确认其成功。
+2. 在浏览器中打开生成的文件路由。
+3. 创建你需要的应用账户，不要多创建。
+4. 上传一个测试文件，再把它下载下来，并与一位接收者分享。
+
+Cloudreve 的独立选择不需要任何密钥引用，这使文件成为很好的第一个使用场景。
+
+## 备份了什么
+
+重要的数据是文件字节内容，以及包含用户和分享链接的 Cloudreve 数据库；恢复流程涵盖 Cloudreve 数据卷。在生命周期测试中，恢复返回了原始字节。请将备份根目录与主数据分开，并参阅[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。
+
+## 预期情况
+
+存储会随着你上传的内容而增长，因此请选择有足够可用空间的主数据根目录。Cloudreve 没有官方移动应用；请在手机浏览器中使用网页。桌面同步说明请参阅[文档与文件](/zh-Hans/guides/stackkits/use-cases/documents-and-files)。
 
 ## 运维
 
-- 让主存储根目录和备份根目录位于你自己控制的存储上。
-- StackKits 的配置变更请保留在 StackSpec 中。不要编辑生成的 Cloudreve 工作负载包或 Compose 环境。
-- 在把该服务当作某个文件的唯一副本之前，先验证恢复。参见[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。
+- 将主数据根目录和备份根目录保存在你控制的存储上。
+- StackKits 配置更改请保留在 StackSpec 中。不要编辑生成的 Cloudreve 工作负载包或 Compose 环境。
+- 在依赖该服务保存某个文件的唯一副本之前，先验证恢复。请参阅[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。
+
+## 如果出了问题
+
+- 路由打不开：将其与部署输出进行比较，并确认该名称可以从你的设备解析。请参阅[故障排查](/zh-Hans/guides/stackkits/troubleshooting)。
+- `stackkit verify` 报告了发现项：在使用该服务之前请先阅读它们，修复 StackSpec 并重新生成。
+- 计划中没有显示 `files`、`cloudreve` 和 `standalone-compose`：不要应用；请先更正工作负载对象及其站点和节点 ID。

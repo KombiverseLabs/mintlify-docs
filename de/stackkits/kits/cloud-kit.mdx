@@ -5,36 +5,66 @@ sidebarTitle: "Cloud Kit"
 icon: cloud
 ---
 
-Cloud Kit ist im aktuellen öffentlichen Release (v0.35.x) als Preview enthalten. Kein automatisierter Lebenszyklus-Lauf deckt bisher einen öffentlichen VPS ab, daher führt die [OS-Kompatibilität](/de/stackkits/reference/os-compatibility) es als `unverified`. Es nutzt denselben Standalone-Lebenszyklus zum Erstellen wie Basement Kit, ist aber für einen bestehenden Cloud-Host mit öffentlichem DNS und TLS unter deiner Kontrolle gedacht.
+Das Cloud Kit ist in der aktuellen öffentlichen Version (v0.35.x) als Vorschau enthalten. Noch kein automatisierter Lifecycle-Lauf deckt einen öffentlichen VPS ab, daher führt die [OS-Kompatibilität](/de/stackkits/reference/os-compatibility) es als `unverified`. Es nutzt denselben eigenständigen Authoring-Lifecycle wie das Basement Kit, ist aber für einen bestehenden Cloud-Host mit öffentlichem DNS und TLS unter deiner Kontrolle gedacht.
 
 <Note>
-  Das Release enthält die Cloud-Kit-Definition und den Installer. Behandle den Konfigurations-Bootstrap und release-spezifische Live-Laufzeit-Nachweise als getrennte Aussagen.
+  Die Version enthält die Cloud-Kit-Definition und den Installer. Behandle
+  Konfigurations-Bootstrap und versionsspezifische Live-Runtime-Nachweise als
+  getrennte Aussagen.
 </Note>
 
-## Bevor du startest
+## In einfachen Worten
+
+Das Cloud Kit ist für einen Server, den du mietest und bereits betreibst, etwa einen Virtual Private Server, und den du über einen Namen unter deiner eigenen Domain erreichen willst. Es ist das richtige Kit, wenn dein Homelab auf diesem Server statt auf einem Computer zu Hause leben soll. Wenn du noch nie einen Server eingerichtet hast, lies zuerst [Bevor du beginnst](/de/guides/stackkits/before-you-start); das Basement Kit ist der sanftere Einstieg.
+
+## Bevor du beginnst
 
 Bereite diese Dinge außerhalb von StackKits vor:
 
-- einen bereits verfügbaren Host, den du betreiben darfst
+- einen bereits verfügbaren Host, den zu betreiben du berechtigt bist
 - eine Domain und DNS-Einträge, die du kontrollierst
-- eine für öffentliche Dienste geeignete Host- und Netzwerkabsicherung
+- eine Host- und Netzwerkaufstellung, die für öffentliche Dienste geeignet ist
 
-StackKits validiert und wendet seine eigene Systemdefinition auf diesen Host an. Es stellt keinen Server bereit, wählt keinen Provider aus und hält keine Provider-Zugangsdaten.
+Was du zuerst brauchst, kurz gefasst:
+
+1. Kommandozeilenzugriff auf den Host mit der Berechtigung, den Installer auszuführen.
+2. Den Domainnamen und Zugriff auf dessen DNS-Einstellungen.
+3. Eine Entscheidung, welche Ports und Dienste aus dem Internet erreichbar sein dürfen.
+4. Einen privaten Ort für die Zugangsdaten, die das Setup erzeugt.
+
+StackKits validiert und wendet seine eigene Systemdefinition auf diesen Host an. Es stellt keinen Server bereit, wählt keinen Anbieter und bewahrt keine Anbieter-Zugangsdaten auf.
 
 ## Ein Cloud Kit starten
 
-Bootstrappe den veröffentlichten Workspace unter Linux oder macOS:
+Starte den veröffentlichten Workspace unter Linux oder macOS:
 
 ```bash
 curl -sSL https://cloud.stackkit.cc | DOMAIN=example.com sh
 cd ~/my-cloud-homelab
 ```
 
-Verwende anstelle von `example.com` eine Domain, die dir gehört. Bewahre die StackSpec und die Verifikationsausgabe beim Workspace auf und ändere nur die StackSpec, bevor du Artefakte neu generierst.
+Verwende anstelle von `example.com` eine Domain, die dir gehört. Behalte die StackSpec und die Verifikationsausgabe beim Workspace und ändere nur die StackSpec, bevor du die Artefakte neu generierst.
 
-Wenn du das CLI schon hast, [wähle ein Kit](/de/guides/stackkits/choosing-a-kit) und [konfiguriere die StackSpec](/de/guides/stackkits/configure-stack-spec).
+Nach jedem Teil solltest du Folgendes sehen:
 
-## Mit Basement Kit vergleichen
+1. Der Befehl legt den Workspace-Ordner `~/my-cloud-homelab` an und wechselt in ihn.
+2. Die StackSpec in diesem Ordner nennt deine Domain. Prüfe sie, bevor du den Host änderst.
+3. Die Verifikationsausgabe sagt dir, ob der Rollout dem Plan entspricht. Nutze dieselben Schritte wie in der [CLI-Anleitung](/de/guides/stackkits/cli-walkthrough) und unter [Einen Plan prüfen und anwenden](/de/guides/stackkits/review-plan-and-apply).
+4. Öffne die Node-Hub-Adresse aus der Ausgabe und schließe den Schutz ab, wie im [Node-Hub-Leitfaden](/de/guides/stackkits/node-hub) beschrieben.
+
+Wenn du die CLI bereits hast, [wähle ein Kit](/de/guides/stackkits/choosing-a-kit) und [konfiguriere die StackSpec](/de/guides/stackkits/configure-stack-spec).
+
+## Was wo gespeichert wird
+
+Die Konfiguration (StackSpec), die Verifikationsausgabe und die Zugangsdaten bleiben im Workspace-Ordner auf deinem Host, halte diesen Ordner also privat. Deine Domain und DNS-Einträge bleiben bei dir und deinem Anbieter, und StackKits bewahrt keine Anbieter-Zugangsdaten auf. Plane Backups mit [Sichern und Wiederherstellen](/de/guides/stackkits/back-up-and-restore).
+
+## Wenn etwas schiefgeht
+
+- Ein Name öffnet sich nicht: Prüfe, ob die DNS-Einträge deiner Domain auf den Host zeigen, und vergleiche dann die Adresse mit der im Node Hub. Siehe [Fehlerbehebung](/de/guides/stackkits/troubleshooting).
+- Der Installer bricht mit einem Fehler ab: Lies das Log mit `stackkit logs latest --json` und prüfe die [OS-Kompatibilität](/de/stackkits/reference/os-compatibility) für deinen Host. Denke daran, dass das Cloud Kit eine Vorschau ist.
+- Für den täglichen Gebrauch nach dem Setup siehe [Im Alltag](/de/guides/stackkits/daily-use).
+
+## Mit dem Basement Kit vergleichen
 
 <CardGroup cols={2}>
   <Card title="Basement Kit" icon="house" href="/de/stackkits/kits/basement-kit">

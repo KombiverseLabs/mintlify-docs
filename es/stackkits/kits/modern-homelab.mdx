@@ -6,46 +6,72 @@ icon: network-wired
 ---
 
 Modern Homelab describe un homelab que abarca un entorno Home y un entorno
-Cloud. Su definición mantiene el control y la autoridad de datos
-predeterminada en Home y exige conexiones y publicación declaradas
-explícitamente entre ubicaciones.
+Cloud. Su definición mantiene el control y la autoridad de datos por defecto en
+Home y exige conexiones y publicación declaradas explícitamente entre ubicaciones.
+
+## En palabras sencillas
+
+Un homelab normal vive en un solo lugar. Modern Homelab describe uno que abarca dos: tu casa y un servidor en la nube. Hoy es una definición temprana que puedes leer, inicializar, validar y generar. No es una forma terminada de operar un homelab de dos ubicaciones, así que está pensado para explorar y no para fotos familiares ni contraseñas.
 
 <Warning>
-  Modern Homelab es un archivo de definición alfa sin una vía de instalación
+  Modern Homelab es un archivo de definición alfa sin una ruta de instalación
   compatible. Puedes inicializarlo, validarlo y generarlo con la CLI
   publicada. Descargar su archivo no establece una conexión funcional entre
-  hosts, un acceso protegido a las aplicaciones ni la recuperación entre
-  ubicaciones. Usa Basement Kit o Cloud Kit para una guía de instalación
+  hosts, un acceso protegido a las aplicaciones ni una recuperación entre
+  ubicaciones. Usa Basement Kit o Cloud Kit si quieres una guía de instalación
   existente.
 </Warning>
 
 ## Qué contiene el archivo alfa
 
-El [release público de StackKits](https://github.com/kombifyio/StackKits/releases/latest)
+La [versión pública de StackKits](https://github.com/kombifyio/StackKits/releases/latest)
 incluye archivos de definición de Modern Homelab junto con la CLI. Describen
-los sites previstos, la ubicación de las aplicaciones, las conexiones y los
-límites de autoridad. Revisa el `release-evidence.json` del release para ver la
-evidencia de runtime que realmente está adjunta a esa versión.
+los sitios previstos, la ubicación de las aplicaciones, las conexiones y los
+límites de autoridad. Revisa el `release-evidence.json` de la versión para ver
+la evidencia de runtime que realmente está adjunta a esa versión.
 
-La [guía de instalación solo de la cadena de herramientas](/es/guides/stackkits/choosing-a-kit#instala-solo-la-cadena-de-herramientas)
-explica cómo descargar la CLI y las definiciones de Modern. Un despliegue
-completo de Modern sigue necesitando un comportamiento concreto de conexión,
-identidad, enrutamiento, TLS y fallo de ubicación. Una configuración o un plan
-generado por sí solos no verifican esos comportamientos.
+La [guía de instalación solo de la toolchain](/es/guides/stackkits/choosing-a-kit#install-only-the-toolchain)
+explica cómo descargar la CLI y las definiciones Modern. Un despliegue Modern
+completo sigue necesitando un comportamiento concreto de conexión, identidad,
+enrutamiento, TLS y fallo de ubicación. Una configuración o un plan generado
+por sí solos no verifican esos comportamientos.
 
-## Elige una vía de entrada
+## Qué necesitas primero
+
+- Experiencia con uno de los kits, idealmente un [Basement Kit](/es/stackkits/kits/basement-kit) en funcionamiento. Lee [Antes de empezar](/es/guides/stackkits/before-you-start) si eres nuevo.
+- Un host en casa y un host en la nube con un dominio que controlas, si quieres seguir la forma prevista de la definición.
+- La CLI, instalada como se describe en la guía solo de la toolchain anterior.
+
+## Qué puedes probar hoy
+
+1. Instala la CLI y las definiciones Modern. Espera que la herramienta esté disponible en tu ordenador, sin cambios en ningún servidor.
+2. Inicializa y valida un espacio de trabajo. Espera un archivo de configuración y un informe sobre si es válido.
+3. Genera y lee el plan. Espera archivos y un plan que describen la disposición prevista, no un sistema en funcionamiento.
+
+## Qué se guarda dónde
+
+La definición y los archivos generados permanecen en la carpeta de tu espacio de trabajo. La definición mantiene el control y la autoridad de datos por defecto en Home. Nada del archivo alfa mueve datos entre ubicaciones por sí solo.
+
+## Si algo sale mal
+
+- La validación o la generación fallan: lee el registro con `stackkit logs latest --json` y consulta [Solución de problemas](/es/guides/stackkits/troubleshooting).
+- Necesitas un homelab funcional ahora: usa [Basement Kit](/es/stackkits/kits/basement-kit) o [Cloud Kit](/es/stackkits/kits/cloud-kit).
+- No estás seguro de lo que demuestra un resultado: un plan generado por sí solo no verifica conexiones, acceso ni recuperación.
+
+## Elegir una ruta de entrada
 
 Elige [Basement Kit](/es/stackkits/kits/basement-kit) para un host Linux
 existente en casa, o [Cloud Kit](/es/stackkits/kits/cloud-kit) para un host en
-la nube existente con un dominio que controles. Sus guías mantienen separados el
-arranque de la configuración y la evidencia de runtime específica del release.
+la nube existente con un dominio que controlas. Sus guías mantienen separados
+el arranque de la configuración y la evidencia de runtime específica de cada
+versión.
 
 Mantén la misma distinción al explorar Modern: protege los datos existentes y
-conserva la configuración y la salida de operación de cada workspace. No des
-por sentado que una aplicación sigue disponible durante una caída de la
-conexión o de Cloud hasta que el release seleccionado tenga evidencia de ese
+conserva la configuración y la salida de operación de cada espacio de trabajo.
+No asumas que una aplicación sigue disponible durante una caída de la conexión
+o de la nube hasta que la versión seleccionada tenga evidencia de ese
 comportamiento.
 
-Consulta [Elige un StackKit](/es/guides/stackkits/choosing-a-kit) para ver todas
-las vías de entrada y la [compatibilidad de entrega de aplicaciones](/es/stackkits/reference/application-delivery-compatibility)
-para las capacidades declaradas por los adaptadores de aplicación publicados.
+Consulta [Elegir un StackKit](/es/guides/stackkits/choosing-a-kit) para ver
+todas las rutas de entrada y la [compatibilidad de entrega de aplicaciones](/es/stackkits/reference/application-delivery-compatibility)
+para las capacidades declaradas por los adaptadores de aplicaciones publicados.

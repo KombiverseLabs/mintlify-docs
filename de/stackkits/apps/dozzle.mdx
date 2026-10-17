@@ -1,10 +1,39 @@
 ---
 title: "Dozzle"
-description: "Den optionalen StackKits-Container-Log-Viewer nutzen"
+description: "Den optionalen StackKits-Container-Log-Viewer verwenden"
 sidebarTitle: "Dozzle"
 icon: list
 ---
 
-Dozzle ist ein öffentlich veröffentlichter Modulvertrag zum Ansehen von Container-Logs. Die anfängliche native v2-StackSpec stellt keine aktuelle öffentliche Dozzle-Auswahl bereit, daher ist das Vorhandensein im Archiv keine Installationsanleitung.
+Dozzle ist ein veröffentlichter Modulvertrag zum Anzeigen von Container-Logs. Die anfängliche native v2-StackSpec bietet derzeit keine öffentliche Dozzle-Auswahl, daher ist das Vorhandensein im Archiv keine Installationsanleitung.
 
-Falls eine künftige veröffentlichte StackSpec es auswählt, nutze Dozzle für die schnelle Inspektion eines benannten Containers. Es ersetzt weder die StackKits-Verifikation noch dauerhafte Nachweise, und es darf nicht dazu verwendet werden, von StackKits verwaltete Container zu verändern.
+## Was es ist
+
+Jeder Dienst auf deinem Server läuft in einem Container, und jeder Container schreibt ein fortlaufendes Log darüber, was er gerade tut. Dozzle zeigt diese Logs live auf einer Webseite an. Ein StackKit kann es anbieten, damit du ohne Kommandozeile nachsehen kannst, was ein Dienst gerade gemeldet hat.
+
+## Welche Kits es enthalten
+
+Der Katalog kennzeichnet Dozzle als Opt-in. Kein Kit enthält es standardmäßig, und die anfängliche native v2-StackSpec bietet keine Auswahl dafür.
+
+## Wie du es öffnest
+
+Wenn eine künftige veröffentlichte StackSpec es auswählt, nennt der Katalog das Muster `https://logs.<domain>`, zum Beispiel `https://logs.home.test` mit der Standarddomain. Kopiere die generierte Adresse aus der Rollout-Ausgabe oder dem [Node Hub](/de/guides/stackkits/node-hub).
+
+## Erste Nutzung
+
+1. Öffne die generierte Adresse.
+2. Melde dich an, falls die Route dazu auffordert.
+3. Wähle den Container aus, der dich interessiert.
+4. Lies die neuesten Zeilen und schließe dann die Seite.
+
+## Was du erwarten kannst und was du nicht ändern solltest
+
+- Erwarte eine Ansicht von Log-Text. Laut Katalog greift Dozzle über einen Socket-Proxy auf die Docker-API zu und bindet den Docker-Socket nicht direkt ein.
+- Wenn eine künftige veröffentlichte StackSpec es auswählt, nutze Dozzle zur schnellen Prüfung eines bestimmten Containers. Es ersetzt weder die StackKits-Verifikation noch dauerhafte Nachweise und darf nicht verwendet werden, um von StackKits verwaltete Container zu verändern.
+- Kopiere keinen Log-Text, der Geheimnisse oder personenbezogene Daten enthält, an öffentliche Orte.
+
+## Wenn etwas schiefgeht
+
+- Die Adresse öffnet sich nicht: Vergleiche sie mit der generierten Adresse und prüfe, ob der Name auf deinem Gerät aufgelöst wird. Siehe [Fehlerbehebung](/de/guides/stackkits/troubleshooting).
+- Der Dienst ist nicht aufgeführt: Deine StackSpec wählt ihn nicht aus.
+- Für den Zustand des gesamten Stacks führe `stackkit verify --json` aus und siehe [Den Stack überwachen](/de/stackkits/reference/day-2-operations#monitor-the-stack).
