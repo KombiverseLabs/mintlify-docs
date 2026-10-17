@@ -1,0 +1,27 @@
+---
+title: "kombify.me troubleshooting"
+description: "Why a kombify.me name does not open and what to check"
+sidebarTitle: "Troubleshooting"
+icon: "life-ring"
+---
+
+## The name shows an error or does not open
+
+| Check | What it means |
+| --- | --- |
+| The service route is exposed | An unexposed service name stays unpublished. Exposure defaults to off. |
+| The name has the right shape | First-party kit services use `{base}-{service}.kombify.me`. Reserved apex names such as `auth.kombify.me` stay unused. |
+| The origin is public (public address) | The public path rejects private, loopback and link-local targets. |
+| The node agent is connected (private target) | If the agent is disconnected, the public name stays unavailable and asks the client to retry. |
+| The same owner reconnects | Reconnecting the same owner restores forwarding. Another owner's agent cannot serve the route. |
+
+## I only need the service at home
+
+Use the local name instead. Local names stay on the resolver that StackKits
+installs. kombify.me does not publish `*.lan.kombify.me` names.
+
+## Still stuck
+
+kombify.me is Alpha software, so names and error shapes can still change.
+Write to [info@kombify.io](mailto:info@kombify.io) with the name you used and
+the time of the attempt.

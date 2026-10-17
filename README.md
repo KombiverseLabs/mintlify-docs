@@ -48,45 +48,43 @@ Truth sources, never the retired legacy documentation repository:
 
 ## Localization
 
-English is the source and keeps its URLs (`/stackkits/quickstart`). Every other
-locale is a language branch in `docs.json` (`navigation.languages`) with its
-pages under `<code>/` (`de/stackkits/quickstart` is served at
-`/de/stackkits/quickstart`). Published locales are listed in
-`allowedNavigationLanguages` of `public-safety-policy.json`. Codes: `ar`, `de`,
-`en`, `es`, `zh-Hans`, `hi` (Traditional Chinese is `zh-Hant`, never mapped to
-Simplified). The pinned CLI's validation accepts these codes; recheck the
-installed `@mintlify/validation` when bumping `mint`. A locale is advertised
-only after competent-speaker review; locale semantics are in
-`KOMBIFY-DESIGN-SYSTEM-STANDARD.md` §11. Unreviewed proposals stay in ignored
-`drafts/`, never in navigation or hidden public MDX.
+English is the only language that is written and edited by hand. It is the
+source and keeps its URLs (`/stackkits/quickstart`). The other locales (`ar`,
+`de`, `es`, `zh-Hans`, `hi`; Traditional Chinese is `zh-Hant`, never mapped to
+Simplified) are generated from the English pages into `<code>/` folders
+(`de/stackkits/quickstart` is served at `/de/stackkits/quickstart`) and arrive
+as pull requests that are reviewed and merged like any other change. Nobody
+translates a page by hand and no English change waits for a translation.
 
-Adding or updating a locale (`<code>`):
+Mintlify's own automatic translation is a paid add-on of its Pro plan with
+usage-based AI credits, which is above the documentation budget. The
+generation therefore runs as a repository job on kombify's own AI platform;
+until that job is merged, the existing locale files stay as they are and new
+English pages are reported as pending.
 
-1. Add `scripts/i18n/labels/<code>.json` (tab and group names) and enable the
-   code in `LOCALES` of `scripts/i18n/sync-navigation.mjs`.
-2. Translate each English `P.mdx` to `<code>/P.mdx`: keep frontmatter keys, MDX
-   components, props and images; translate prose, `title`, `description`,
-   `sidebarTitle` and human-readable props; copy fenced code byte for byte;
-   leave product names (kombify, StackKits, Techstack, Companion, SpeechKit,
-   Paperwork, kombify Cloud, kombify Sites, Simulate, CUE) and CLI commands,
-   flags, paths and identifiers; rewrite internal links to `/<code>/...` (anchors
-   follow the translated heading). Guides import translated catalogs
-   (`snippets/client-setup-labels-<code>.jsx`,
-   `snippets/photo-backup-guide-<code>.jsx`); check RTL locales with
-   `dir="rtl"`.
-3. `node scripts/i18n/sync-navigation.mjs <code>` rebuilds the locale branch of
-   `docs.json` from the English tree.
-4. In `public-safety-policy.json` add the code to `allowedNavigationLanguages`,
-   the localized tab names to `allowedNavigationTabs` and `<code>/` to
-   `allowedPagePrefixes`.
-5. `node scripts/i18n/check.mjs <code>` (part of `mise run check`) fails on a
-   missing counterpart, changed frontmatter keys, differing code blocks or
-   component tags, and unresolved internal links or anchors.
+How the pieces fit:
 
-Generated English pages (`stackkits/reference/cli/*`, `techstack/reference/cli/*`,
-release pages) are rendered from release data; regenerate or re-translate their
-localized copies after each release. Locale catalogs for staged pages live in
-`localization/` (exported with `scripts/i18n/export-catalog.mjs`).
+- Each locale is a language branch in `docs.json` (`navigation.languages`).
+  `node scripts/i18n/sync-navigation.mjs <code>` rebuilds a branch from the
+  English tree and leaves out pages that have no translated file yet.
+- Published locales are listed in `allowedNavigationLanguages` of
+  `public-safety-policy.json`, with the localized tab names in
+  `allowedNavigationTabs` and `<code>/` in `allowedPagePrefixes`.
+- `node scripts/i18n/check.mjs <code>` (part of `mise run check`) validates the
+  translated files that exist: frontmatter keys, byte-identical code blocks,
+  component tags and internal links and anchors. A page without a counterpart
+  is reported as `pending_translation`, not as a failure; `--strict` (or
+  `I18N_STRICT=1`) fails on it.
+- A generated translation must keep frontmatter keys, MDX components, fenced
+  code and product names (kombify, StackKits, Techstack, Companion, SpeechKit,
+  Paperwork, kombify Cloud, kombify Sites, Simulate, CUE) unchanged and point
+  internal links to `/<code>/...`; the check enforces this.
+- Generated English pages (`stackkits/reference/cli/*`,
+  `techstack/reference/cli/*`, release pages) are rendered from release data;
+  their localized copies arrive with the next translation pull request.
+
+Locale semantics are in `KOMBIFY-DESIGN-SYSTEM-STANDARD.md` §11. Older
+unreviewed proposals stay in the ignored `drafts/` tree.
 
 ## Runtime
 

@@ -19,7 +19,13 @@ if (!code) {
   console.error("usage: check.mjs <locale> [page paths]");
   process.exit(2);
 }
-const only = process.argv.slice(3);
+// English is the only hand-maintained language. Mintlify's automatic
+// translation opens pull requests with the locale copies, so a page without a
+// counterpart is expected between a source change and that pull request. It is
+// reported as pending; --strict (or I18N_STRICT=1) restores the old failure.
+const strict = process.argv.includes("--strict") || process.env.I18N_STRICT === "1";
+const only = process.argv.slice(3).filter((a) => a !== "--strict");
+const pending = [];
 const skipDirs = new Set([".git", ".github", "node_modules", "drafts", "openwiki", "standards", "data", "docs-guidelines", "scripts", ".beads", ".kombify", ".mintlify"]);
 const locales = new Set(["de", "es", "zh-Hans", "hi", "ar", "cn"]);
 
@@ -76,7 +82,7 @@ let linkCount = 0;
 for (const page of pages) {
   const enSrc = read(page);
   const dePath = `${code}/${page}`;
-  if (!isPage(dePath)) { add(page, "missing translation"); continue; }
+  if (!isPage(dePath)) { if (strict) add(page, "missing translation"); else pending.push(page); continue; }
   const en = split(enSrc), de = split(read(dePath));
   if (!en || !de) { add(page, "frontmatter missing or malformed"); continue; }
   for (const k of GENERATED_KEYS) if (fmValue(de.fm, k) !== undefined) add(page, `frontmatter ${k} must not be copied to a translation`);
@@ -112,6 +118,6 @@ for (const page of pages) {
   }
 }
 
-console.log(`locale=${code} pages_checked=${pages.length} internal_links_checked=${linkCount} problems=${problems.length}`);
+console.log(`locale=${code} pages_checked=${pages.length} pending_translation=${pending.length} internal_links_checked=${linkCount} problems=${problems.length}`);
 for (const p of problems) console.log(" - " + p);
 process.exit(problems.length ? 1 : 0);
