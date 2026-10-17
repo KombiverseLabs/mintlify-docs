@@ -1,21 +1,31 @@
 ---
-title: "Media"
-description: "Reproduce en streaming las películas, la música y los vídeos que posees con Jellyfin"
-sidebarTitle: "Media"
+title: "Medios"
+description: "Transmite las películas, la música y los vídeos que posees con Jellyfin"
+sidebarTitle: "Medios"
 icon: clapperboard
 ---
 
 <Info>
-  Estado de la evidencia (2026-09-24, v0.41.0): Media con Jellyfin es
-  `available, lifecycle-verified`. Media se verificó en el archivo público de la
-  v0.39.7, donde una ejecución del ciclo de vida del productor de Depot en
-  Ubuntu 24.04 amd64 (Basement Kit, independiente) pasó install, init, generate,
-  apply, configuración del propietario, verify, backup, restore y activación de
-  la restauración, con la lectura de vuelta de la aplicación verificada a través
-  del loopback local del invitado.
+  Estado de la evidencia (2026-09-24, v0.41.0): Media con Jellyfin está
+  `available, lifecycle-verified`. Media se verificó en el archivo público
+  v0.39.7, donde una ejecución del ciclo de vida del productor Depot en Ubuntu
+  24.04 amd64 (Basement Kit, independiente) superó install, init, generate,
+  apply, owner setup, verify, backup, restore y restore activation, con la
+  lectura de la aplicación verificada sobre el loopback local del invitado.
 </Info>
 
-Media reproduce en streaming las películas, la música y los vídeos caseros que posees en los dispositivos de tu hogar. El catálogo de la versión llama a este caso de uso Media Library y lo entrega como el workload opcional `media`.
+Media transmite las películas, la música y los vídeos caseros que posees a los dispositivos de tu hogar. El catálogo de versiones llama a este caso de uso Media Library y lo entrega como la carga de trabajo opcional `media`.
+
+## En palabras sencillas
+
+Media convierte tu propia colección de películas, música y vídeos en algo parecido a un servicio de streaming privado en casa. Un programa llamado Jellyfin mantiene un catálogo de tus archivos y los reproduce en tu televisor, teléfono u ordenador. Los archivos permanecen en tu propio host. Media es para contenido que posees; no suministra contenido.
+
+## Qué necesitas primero
+
+- Una base terminada, así que lee primero [Antes de empezar](/es/guides/stackkits/before-you-start) y verifica tu [Basement Kit](/es/stackkits/kits/basement-kit).
+- Tus archivos multimedia en un directorio del host, o la decisión de dejar que el plan gestione un volumen de biblioteca.
+- Una copia independiente de esos archivos, porque StackKits no hace copias de seguridad de ellos.
+- Los dispositivos en los que quieres ver contenido, conectados a la misma red.
 
 ## Aplicaciones
 
@@ -26,16 +36,36 @@ Media reproduce en streaming las películas, la música y los vídeos caseros qu
 ## Antes de empezar
 
 - Decide si Jellyfin lee un directorio multimedia existente, que StackKits monta en solo lectura, o un volumen de biblioteca que gestiona el plan.
-- StackKits no hace copia de seguridad de tus archivos multimedia. Conserva una copia independiente de ellos.
+- StackKits no hace copias de seguridad de tus archivos multimedia. Mantén una copia independiente.
 - Haz una lista de los dispositivos en los que quieres ver contenido. Un contenedor en buen estado no dice nada sobre la reproducción en un televisor o teléfono concreto.
 
 ## Configúralo
 
 Configura Media después de que se verifique la base de tu kit. La página de [Jellyfin](/es/stackkits/apps/jellyfin) cubre el ajuste de almacenamiento, la configuración del propietario y tu primera biblioteca, y termina con una prueba de reproducción en un cliente real.
 
-## Consigue las apps
+## Qué ocurre, paso a paso
 
-Instala un cliente oficial de Jellyfin en los dispositivos en los que quieras ver contenido, conéctalo a tu URL de Media generada e inicia sesión con la cuenta que registró el miembro de tu hogar.
+1. Elige dónde están los archivos. Espera que el plan monte un directorio existente en solo lectura, o que cree un volumen de biblioteca si no defines ninguno.
+2. Selecciona la carga de trabajo `media` y aplícala. Espera una dirección de Media en el Node Hub o en la salida del despliegue.
+3. Crea la cuenta de propietario como se describe en la página de [Jellyfin](/es/stackkits/apps/jellyfin). Espera un administrador de Jellyfin que elegiste tú mismo.
+4. Añade tu biblioteca y prueba un archivo en un dispositivo real. Espera que se reproduzca, o que te muestre qué parte necesita atención.
+
+## Qué se almacena y dónde
+
+- Tus archivos multimedia permanecen donde están. Un directorio existente es de solo lectura para Jellyfin, así que no puede editarlos ni eliminarlos.
+- La configuración de Jellyfin y su caché de transcodificación viven en volúmenes separados en el host.
+- Comprueba la declaración de copia de seguridad de la aplicación antes de confiar en ella. Tus archivos multimedia no forman parte de una copia de seguridad de StackKits, así que conserva tu propia copia.
+
+## Si algo sale mal
+
+- La dirección de Media no se abre: consulta [Solución de problemas](/es/guides/stackkits/troubleshooting) y compárala con la dirección del Node Hub.
+- La configuración falla por una carpeta que falta: el directorio multimedia ya debe existir, porque StackKits no lo crea.
+- Un archivo no se reproduce en un televisor o teléfono: un contenedor en buen estado no demuestra la reproducción en ese dispositivo, así que prueba con otro cliente y consulta [Jellyfin](/es/stackkits/apps/jellyfin).
+- Aprende la rutina diaria en [Día a día](/es/guides/stackkits/daily-use) y practica una restauración en [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).
+
+## Obtén las apps
+
+Instala un cliente oficial de Jellyfin en los dispositivos en los que quieres ver contenido, conéctalo a tu URL de Media generada e inicia sesión con la cuenta que registró el miembro de tu hogar.
 
 <Card title="Clientes de Jellyfin" icon="download" href="https://jellyfin.org/downloads/">
   Apps oficiales para Android, iOS/tvOS, Fire TV, Android TV, Roku, escritorio y otros reproductores compatibles.

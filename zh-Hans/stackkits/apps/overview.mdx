@@ -1,13 +1,25 @@
 ---
 title: "平台服务"
-description: "位于你的用例之下的服务：登录、路由、应用交付和可见性"
+description: "位于用例之下的服务：登录、路由、应用交付与可见性"
 sidebarTitle: "平台服务"
 icon: grid-2
 ---
 
-平台服务运行在你的用例之下，负责登录、路由、应用交付和可见性。提供某个用例的应用，例如 Photos 用例的 Immich，列在[用例](/zh-Hans/guides/stackkits/use-cases/overview)下。
+平台服务运行在你的用例之下，负责登录、路由、应用交付和可见性。提供某个用例的应用（例如用于照片的 Immich）列在[用例](/zh-Hans/guides/stackkits/use-cases/overview)下。
 
 目录中存在、安装成功和恢复完成，是三件不同的事。请查看已安装版本的[应用交付兼容性](/zh-Hans/stackkits/reference/application-delivery-compatibility)。
+
+## 这些服务的作用
+
+可以把用例应用想象成房子的各个房间，把平台服务想象成门、锁和指示牌。它们决定谁可以进入、地址如何找到正确的应用，以及你如何看到正在运行的内容。你通常不需要逐个选择它们：套件会带上核心服务。
+
+## 哪些套件包含它们
+
+核心运行时是生成的原生 v2 工作区的一部分；Basement Kit 页面介绍了其生成的 Node Hub 和本地服务，参见 [Basement Kit](/zh-Hans/stackkits/kits/basement-kit)。下文标为模块契约的条目以及应用平台，只有在你选择时才会出现。
+
+## 如何打开它们
+
+部署后，在 CLI 打印的 `base.<domain>` 地址打开 Node Hub；默认本地域名为 `home.test`。其他每个服务都使用该次部署生成的地址。
 
 ## 访问与路由
 
@@ -17,14 +29,27 @@ icon: grid-2
 - [TinyAuth](/zh-Hans/stackkits/apps/tinyauth)，受保护路由的转发认证入口
 - [Traefik](/zh-Hans/stackkits/apps/traefik)，生成路由的反向代理
 
-[kombify Point DNS](/zh-Hans/stackkits/apps/kombify-point) 和 [Whoami](/zh-Hans/stackkits/apps/whoami) 路由诊断工具作为模块契约提供，初始的原生 v2 StackSpec 不会选择它们。
+[kombify Point DNS](/zh-Hans/stackkits/apps/kombify-point) 和 [Whoami](/zh-Hans/stackkits/apps/whoami) 路由诊断作为模块契约提供，初始的原生 v2 StackSpec 不会选择它们。
 
 ## 应用平台
 
-Standalone Compose 默认交付工作负载，不需要应用平台。[Coolify](/zh-Hans/stackkits/apps/coolify) 和 [Komodo](/zh-Hans/stackkits/apps/komodo) 是需要你显式选择的平台集成。[选择应用交付](/zh-Hans/guides/stackkits/application-delivery)对比了这三者。
+独立 Compose 默认交付工作负载，不需要应用平台。[Coolify](/zh-Hans/stackkits/apps/coolify) 和 [Komodo](/zh-Hans/stackkits/apps/komodo) 是需要你显式选择的平台集成。[选择应用交付方式](/zh-Hans/guides/stackkits/application-delivery)对这三者进行了比较。
 
-## 仪表盘与监控
+## 仪表板与监控
 
 [Node Hub](/zh-Hans/guides/stackkits/node-hub) 是生成的服务总览。[Homepage](/zh-Hans/stackkits/apps/homepage)、[Uptime Kuma](/zh-Hans/stackkits/apps/uptime-kuma) 和 [Dozzle](/zh-Hans/stackkits/apps/dozzle) 作为模块契约提供，初始的原生 v2 StackSpec 不会选择它们。
 
-不要编辑生成的部署文件，也不要因为归档中存在就推断它已启用。
+不要编辑生成的部署文件，也不要根据归档中存在与否来推断是否已启用。
+
+## 第一步
+
+1. 通过 CLI 验证核心部署。
+2. 打开 [Node Hub](/zh-Hans/guides/stackkits/node-hub)。
+3. 在 PocketID 中建立本地所有者，并确认 TinyAuth 保护着你预期的路由。
+4. 配置备份仓库，并通过[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)演练一次恢复。
+
+## 出现问题时
+
+- 地址打不开或名称无法解析：参见[故障排查](/zh-Hans/guides/stackkits/troubleshooting)。
+- 登录失败：TinyAuth 之后的服务使用 PocketID 中的所有者账户，它不是你的 kombify Cloud 账户。
+- 切勿编辑生成的部署文件或路由器文件；请修改 StackSpec 并重新生成。

@@ -1,26 +1,56 @@
 ---
 title: "Vaultwarden"
-description: "Selecciona Vaultwarden para el caso de uso Passwords e inscribe clientes de Bitwarden"
+description: "Selecciona Vaultwarden para el caso de uso Contraseñas e inscribe clientes Bitwarden"
 sidebarTitle: "Vaultwarden"
 icon: vault
 ---
 
-Vaultwarden aporta el caso de uso [Contraseñas](/es/guides/stackkits/use-cases/passwords). Es la alternativa publicada para el workload opcional `vault` de v2 nativo, y las StackSpec iniciales de Basement y Cloud no lo habilitan.
+Vaultwarden proporciona el caso de uso [Contraseñas](/es/guides/stackkits/use-cases/passwords). Es la alternativa publicada para la carga de trabajo nativa v2 opcional `vault`, y las StackSpecs iniciales de Basement y Cloud no la activan.
+
+## Qué es
+
+Vaultwarden es un pequeño servidor que guarda las contraseñas y notas seguras de tu hogar en una máquina que ejecutas tú mismo. Habla el mismo idioma que Bitwarden, así que todos usan las apps y extensiones de navegador normales de Bitwarden y simplemente las apuntan a tu propio servidor. Un StackKit lo incluye para que la familia no tenga que confiar sus contraseñas a un tercero.
+
+## Qué kits y casos de uso lo incluyen
+
+Vaultwarden es la aplicación por defecto de la experiencia de Contraseñas del caso de uso Vault. El catálogo publicado lo compromete para el Basement Kit y el Cloud Kit en Compose independiente. Es opcional, así que lo seleccionas tú mismo.
+
+## Contrato publicado
 
 | Propiedad | Valor |
 | --- | --- |
-| Workload | `vault` |
+| Carga de trabajo | `vault` |
 | Alternativa | `vaultwarden` |
 | Clase de datos | secret |
 | Referencia de secreto requerida | `admin-token` |
 | Adaptador independiente compatible | `standalone-compose` |
 
-El slot `admin-token` contiene una referencia opaca `secret://`; el token real permanece en la custodia local del propietario. Elige el workload, la ubicación y el adaptador en la [StackSpec](/es/guides/stackkits/configure-stack-spec) y después sigue [Añadir un workload](/es/stackkits/reference/day-2-operations#añadir-un-workload-a-un-workspace-existente) para validar, establecer la custodia, generar, inspeccionar el plan, aplicar y verificar.
+La ranura `admin-token` contiene una referencia opaca `secret://`; el token real permanece en la custodia local del propietario. Elige la carga de trabajo, la ubicación y el adaptador en la [StackSpec](/es/guides/stackkits/configure-stack-spec) y luego sigue [Añadir una carga de trabajo](/es/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace) para validar, establecer la custodia, generar, inspeccionar el plan, aplicar y verificar.
+
+## Cómo abrirlo
+
+Tras un despliegue, abre la dirección de Contraseñas generada que imprime la CLI o que figura en el [Node Hub](/es/guides/stackkits/node-hub). El dominio local por defecto es `home.test` y el nombre debe resolverse en el dispositivo que uses. Las apps de Bitwarden necesitan esta misma dirección como URL del servidor.
 
 ## Primer uso
 
 1. Crea la cuenta de propietario de la aplicación y elige la política de registro antes de añadir secretos reales.
-2. Tras aceptar una invitación, completa el registro de la cuenta e inicia sesión desde tu cliente de Bitwarden.
-3. Crea y sincroniza una entrada de la bóveda para confirmar que la cuenta está lista. Una invitación por sí sola no completa esta configuración.
+2. Tras aceptar una invitación, completa el registro de la cuenta e inicia sesión desde tu cliente Bitwarden.
+3. Crea y sincroniza una entrada del almacén para confirmar que la cuenta está lista. Una invitación por sí sola no completa esta configuración.
 
-Para un workload ya admitido, cambia la intención de StackKits mediante la StackSpec y los comandos del ciclo de vida; no edites la configuración generada de la aplicación en el destino.
+La página [Contraseñas](/es/guides/stackkits/use-cases/passwords) explica cómo apuntar un cliente Bitwarden a tu propio servidor, y [Configura tus apps de gestor de contraseñas](/es/guides/stackkits/use-cases/passwords/clients) lo recorre paso a paso para las personas de tu hogar.
+
+## Qué se respalda
+
+La secuencia de recuperación cubre el volumen de datos de Vaultwarden, que contiene la base de datos del almacén y los adjuntos. Guarda tu material de recuperación fuera del servidor. Confirma que tus copias de seguridad cubren ese volumen y practica una restauración por etapas con [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore) antes de que el almacén contenga secretos que no puedas volver a crear. La lectura a nivel de aplicación tras la restauración sigue pendiente en la evidencia publicada.
+
+## Qué esperar
+
+El almacén es pequeño y está siempre en marcha. Está listo para una persona solo después de que se registre en un cliente Bitwarden, inicie sesión y sincronice una entrada. Las contraseñas maestras las conservan las personas que las eligen.
+
+## Si algo sale mal
+
+- La app de Bitwarden no puede alcanzar el servidor: comprueba que la URL del servidor es tu dirección de Contraseñas generada y que el nombre se resuelve desde ese dispositivo. Consulta [Solución de problemas](/es/guides/stackkits/troubleshooting).
+- Una persona tiene una invitación pero no puede iniciar sesión: la cuenta solo está completa cuando un cliente oficial de Bitwarden la registra.
+- El navegador avisa sobre la conexión: no ignores una advertencia que no entiendas. Compara la dirección con la del Node Hub.
+
+Para una carga de trabajo ya admitida, cambia la intención de StackKits mediante la StackSpec y los comandos del ciclo de vida; no edites la configuración generada de la aplicación en el destino.

@@ -1,27 +1,65 @@
 ---
 title: "kombify.me-Fehlerbehebung"
-description: "Warum sich ein kombify.me-Name nicht öffnet und was du prüfen solltest"
+description: "Warum sich ein kombify.me-Name nicht öffnet und was zu prüfen ist"
 sidebarTitle: "Fehlerbehebung"
 icon: "life-ring"
 ---
 
+Öffne den Namen in einem Browser und notiere, was du siehst. Die Antwort sagt dir,
+mit welcher der folgenden Prüfungen du beginnen solltest. Wenn du noch keine
+Adresse angelegt hast, beginne mit
+[Deine erste kombify.me-Adresse erhalten](/de/kombify-me/get-your-first-address).
+
+## Was der Browser zeigt
+
+| Was du siehst | Wahrscheinlichster Grund |
+| --- | --- |
+| 404, „service subdomain not exposed“ | Die App ist ausgeschaltet. Schalte sie ein. |
+| 503, „subdomain inactive“ | Die Adresse ist pausiert. Setze sie wieder auf aktiv. |
+| 503, „try again“ bei einer privaten Adresse | Der Helfer zu Hause ist nicht verbunden. |
+| 502, „Bad Gateway“ | kombify.me konnte deine App nicht erreichen. Prüfe, ob sie läuft und öffentlich ist. |
+| 410, „publication expired“ | Ein befristeter Freigabezeitraum ist abgelaufen. |
+
 ## Der Name zeigt einen Fehler oder öffnet sich nicht
 
-| Prüfung | Was es bedeutet |
+| Prüfung | Was sie bedeutet |
 | --- | --- |
 | Die Dienstroute ist freigegeben | Ein nicht freigegebener Dienstname bleibt unveröffentlicht. Die Freigabe ist standardmäßig aus. |
-| Der Name hat die richtige Form | First-Party-Kit-Dienste nutzen `{base}-{service}.kombify.me`. Reservierte Apex-Namen wie `auth.kombify.me` bleiben ungenutzt. |
+| Der Name hat die richtige Form | Kit-eigene Dienste verwenden `{base}-{service}.kombify.me`. Reservierte Apex-Namen wie `auth.kombify.me` bleiben ungenutzt. |
 | Der Origin ist öffentlich (öffentliche Adresse) | Der öffentliche Pfad lehnt private, Loopback- und Link-Local-Ziele ab. |
 | Der Node-Agent ist verbunden (privates Ziel) | Ist der Agent getrennt, bleibt der öffentliche Name nicht verfügbar und fordert den Client auf, es erneut zu versuchen. |
-| Derselbe Owner verbindet sich erneut | Die erneute Verbindung desselben Owners stellt die Weiterleitung wieder her. Der Agent eines anderen Owners kann die Route nicht bedienen. |
+| Derselbe Eigentümer verbindet sich erneut | Die erneute Verbindung desselben Eigentümers stellt die Weiterleitung wieder her. Der Agent eines anderen Eigentümers kann die Route nicht bedienen. |
+
+## Schritte zum Durcharbeiten
+
+1. Öffne den Namen nach etwa einer Minute erneut. kombify.me führt einen
+   Routing-Cache von etwa 60 Sekunden, eine Änderung wird also möglicherweise
+   nicht sofort sichtbar.
+2. Prüfe die Antwort in der obigen Tabelle und folge ihrer Zeile in den
+   folgenden Prüfungen.
+3. Prüfe, ob die App selbst funktioniert: Öffne bei einer öffentlichen Adresse
+   deren öffentliche Adresse direkt, und bei einer privaten Adresse öffne sie von
+   innerhalb deines Heimnetzwerks.
+4. Schlägt die Registrierung eines neuen Namens mit einem Limit-Fehler fehl,
+   entferne einen, den du nicht mehr nutzt. Die Limits findest du unter
+   [Deine erste kombify.me-Adresse erhalten](/de/kombify-me/get-your-first-address).
+
+Um eine Adresse zu ändern, zu pausieren oder zu entfernen, siehe
+[Eine Adresse ändern, pausieren oder entfernen](/de/kombify-me/change-pause-or-remove-an-address).
+Zum Unterschied zwischen öffentlich und privat siehe
+[Öffentlich, privat oder Weiterleitung](/de/kombify-me/public-or-private). Für
+Kit-Apps siehe
+[Eine Adresse mit einem StackKits-Server nutzen](/de/kombify-me/connect-a-stackkits-server).
 
 ## Ich brauche den Dienst nur zu Hause
 
-Nutze stattdessen den lokalen Namen. Lokale Namen bleiben auf dem Resolver, den
-StackKits installiert. kombify.me veröffentlicht keine `*.lan.kombify.me`-Namen.
+Nutze stattdessen den lokalen Namen. Lokale Namen bleiben beim Resolver, den
+StackKits installiert. kombify.me veröffentlicht keine Namen unter
+`*.lan.kombify.me`.
 
-## Immer noch festgefahren
+## Du kommst nicht weiter
 
 kombify.me ist Alpha-Software, Namen und Fehlerformen können sich also noch
-ändern. Schreibe an [info@kombify.io](mailto:info@kombify.io) mit dem Namen, den
-du benutzt hast, und dem Zeitpunkt des Versuchs.
+ändern. Schreibe an [info@kombify.io](mailto:info@kombify.io) mit dem verwendeten
+Namen und dem Zeitpunkt des Versuchs. Sende niemals ein Passwort oder einen
+API-Schlüssel.

@@ -1,80 +1,129 @@
 ---
-title: "Ein Meeting aufnehmen und prüfen"
-description: "Zweikanal-Meeting-Aufnahme, Notizen, Screenshots und Zusammenfassungen mit Quellenangaben"
+title: "Ein Meeting aufzeichnen und auswerten"
+description: "Zwei-Kanal-Meeting-Aufnahme, Notizen, Screenshots und belegte Zusammenfassungen"
 sidebarTitle: "Meeting"
 icon: "users"
 ---
 
-Meeting nimmt ein Gespräch als zwei unabhängige Kanäle auf — dein Mikrofon und den
-System-Loopback —, transkribiert beide in einer Sitzung und schreibt das Meeting
-aus dem Transkript, deinen eigenen Notizen und einer Vorlage zusammen. Es ist ein separater Aufnahme-
-Dienst und kein vierter Modus: Es teilt nur den Speech-to-Text-Transcriber mit
-Dictation.
+Meeting zeichnet ein Gespräch als zwei unabhängige Kanäle auf, dein Mikrofon und
+den System-Loopback, transkribiert beide in eine Sitzung und schreibt das Meeting
+aus dem Transkript, deinen eigenen Notizen und einer Vorlage auf. Es ist ein
+eigener Aufnahmedienst, kein vierter Modus: Es teilt nur den Speech-to-Text-Transkribierer
+mit Dictation.
 
 <Info>
-Meeting ist eine Windows-Desktop-Funktion. Die Systemaudio-Aufnahme ist nicht in die
-macOS-Beta portiert.
+Meeting ist eine Windows-Desktop-Funktion. Die Systemaudio-Aufnahme ist nicht in
+die macOS-Beta portiert.
 </Info>
+
+Im Alltag gesprochen: Du nimmst wie gewohnt an einem Gespräch teil, SpeechKit hört
+im Hintergrund beide Seiten ab, und danach erhältst du eine schriftliche
+Zusammenfassung, die du lesen, durchsuchen und kopieren kannst. Es hält fest, was
+gesagt wird, keine Aufnahme zum Abspielen, denn Audio selbst wird nie aufbewahrt.
+
+## Bevor du beginnst
+
+- Nutze den Windows-Desktop-Client. Siehe [Unter Windows installieren](/de/speechkit/install-windows).
+- Erlaube SpeechKit die Nutzung deines Mikrofons. Wenn du dein Mikrofon noch nicht
+  eingerichtet hast, siehe [Hotkeys, Mikrofon und Sprache einrichten](/de/speechkit/hotkeys-microphone-language).
+- Stelle sicher, dass kein anderer SpeechKit-Modus das Mikrofon verwendet. Es kann
+  jeweils nur eine Aufnahme es belegen.
+- Wenn alles auf deinem Computer bleiben soll, prüfe zuerst deinen
+  Datenschutzbereich. Siehe [Datenschutzeinstellungen](/de/speechkit/privacy-settings).
 
 ## Was ein Meeting erzeugt
 
-- Ein Transkript mit beiden Kanälen, gekennzeichnet nach Aufnahmekanal. Kanalbezeichnungen
-  zeigen, von welcher Seite des Gesprächs eine Zeile stammt; sie identifizieren nicht
+- Ein Transkript mit beiden Kanälen, nach Aufnahmekanal beschriftet. Kanalbeschriftungen
+  sagen, von welcher Seite des Gesprächs eine Zeile stammt; sie identifizieren nicht
   jeden entfernten Sprecher.
-- Deine eigenen Notizen, wörtlich in der Zusammenfassung wiedergegeben.
-- Ein dauerhaftes **Meeting Review**: eine Kurzfassung in fünf Sätzen, Aktionspunkte
-  und ein Hauptteil, der das Transkript zitiert, aus dem er stammt.
+- Deine eigenen Notizen, wortgetreu in der Zusammenfassung wiedergegeben.
+- Ein dauerhaftes **Meeting Review**: eine Kurzfassung in fünf Sätzen, Aufgaben und
+  ein Textteil, der das Transkript zitiert, aus dem er stammt.
 - Reviews auf Englisch, Deutsch, Spanisch, Chinesisch, Hindi und Arabisch.
 
-Audio wird nie gespeichert. Transkript, Notizen und Review bleiben übrig,
-und der [Retention Scope](/de/speechkit/modes#retention-scope) entscheidet, wie lange.
+Audio wird nie dauerhaft gespeichert. Transkript, Notizen und Review bleiben
+bestehen, und der [Aufbewahrungsbereich](/de/speechkit/modes#retention-scope)
+bestimmt, wie lange.
 
 ## Eine Aufnahme starten und beenden
 
-1. Starte ein Meeting im Desktop-Client oder lass die Anruferkennung eines anbieten,
-   wenn du einen Anruf annimmst. Die Erkennung ist ein Vorschlag, den du annimmst, keine
-   automatische Aufnahme.
-2. Ein kompaktes transparentes Overlay zeigt während des Gesprächs Aufnahmezustand und Steuerung
-   und lässt sich für Notizen aufklappen.
-3. Fortlaufende Zusammenfassungen laufen in Batches, während die Aufnahme weitergeht, sodass ein langes Gespräch
-   nicht bis zum Ende warten muss, bis es ausgewertet wird.
-4. SpeechKit stoppt kurz, nachdem die anrufende Anwendung das
-   Mikrofon freigegeben hat, und benachrichtigt dich, wenn das Review fertig ist oder warum es fehlgeschlagen ist.
-   Eine Aufnahme, die du von Hand gestartet hast, wird nie automatisch gestoppt.
+1. Starte ein Meeting im Desktop-Client oder lass dir von der Anruferkennung eines
+   anbieten, wenn du einen Anruf annimmst. Die Erkennung ist ein Vorschlag, den du
+   annimmst, keine automatische Aufnahme.
+2. Ein kompaktes transparentes Overlay zeigt während des Gesprächs den
+   Aufnahmezustand und Bedienelemente und lässt sich für Notizen aufklappen.
+3. Rollierende Zusammenfassungen laufen in Stapeln, während die Aufnahme
+   weitergeht, sodass ein langes Gespräch nicht bis zum Ende auf seine
+   Auswertung warten muss.
+4. SpeechKit beendet die Aufnahme kurz nachdem die Anruf-Anwendung das Mikrofon
+   freigegeben hat und benachrichtigt dich, wenn das Review fertig ist oder warum es
+   fehlgeschlagen ist. Eine Aufnahme, die du von Hand gestartet hast, wird nie
+   automatisch beendet.
 
-Genau eine Aufnahme belegt das Mikrofon zur selben Zeit. Wenn du Dictation, Assist
-oder Voice Agent startest, während ein Meeting aufgenommen wird, wird das abgelehnt, statt
-das Gerät stillschweigend zu übernehmen.
+Was nach jedem Schritt zu erwarten ist: Nach dem Start zeigt das Overlay, dass die
+Aufnahme läuft. Während des Gesprächs wächst das Transkript, und rollierende
+Zusammenfassungen erscheinen in Stapeln. Nach dem Ende des Gesprächs teilt dir
+SpeechKit mit, wann das Review fertig ist oder warum es nicht erstellt werden
+konnte, und das Meeting erscheint in der Meeting-Liste.
+
+Genau eine Aufnahme belegt das Mikrofon zur selben Zeit. Das Starten von Dictation,
+Assist oder Voice Agent, während ein Meeting aufgezeichnet wird, wird abgelehnt,
+statt das Gerät stillschweigend zu übernehmen.
 
 ## Bildschirm-Snapshots
 
-Drücke während eines Meetings `Ctrl+Alt+S`, um ein gewähltes Fenster oder den Monitor
-unter dem Cursor aufzunehmen. Snapshots erscheinen als Markierungen in der Transkript-Zeitleiste, werden
-im erzeugten Review zitiert und kurz in der Meeting-Pille als Vorschau gezeigt, damit du
-bestätigen kannst, dass das richtige Fenster erfasst wurde. Kein Bild verlässt das Gerät.
+Drücke während eines Meetings `Ctrl+Alt+S`, um ein gewähltes Fenster oder den
+Monitor unter dem Mauszeiger aufzunehmen. Snapshots erscheinen als Markierungen in
+der Transkript-Zeitleiste, werden im erzeugten Review zitiert und kurz in der
+Meeting-Pille eingeblendet, damit du bestätigen kannst, dass das richtige Fenster
+erfasst wurde. Kein Bild verlässt das Gerät.
 
 ## Finden und exportieren
 
-Die Meeting-Liste gruppiert Sitzungen danach, wann sie stattfanden. Die Suche umfasst Titel,
-Transkripte, Notizen und Zusammenfassungen. Notizen werden als formatiertes Markdown dargestellt, und die
-vollständige Zusammenfassung bietet **Copy Markdown** und **Save .md**.
+Die Meeting-Liste gruppiert Sitzungen nach dem Zeitpunkt, an dem sie stattfanden.
+Die Suche umfasst Titel, Transkripte, Notizen und Zusammenfassungen. Notizen werden
+als formatiertes Markdown dargestellt, und die vollständige Zusammenfassung bietet
+**Copy Markdown** und **Save .md**.
 
 ## Review-Erzeugung
 
-Der lokale Pfad braucht keine Cloud-Zugangsdaten: Das mitgelieferte lokale Modell erzeugt
-das Review auf dem Gerät. GitHub Copilot ist ein optionaler Provider für die Review-Erzeugung
-hinter einer separaten, widerrufbaren Berechtigung zur Transkriptverarbeitung.
+Der lokale Pfad braucht keine Cloud-Zugangsdaten: Das mitgelieferte lokale Modell
+erzeugt das Review auf dem Gerät. GitHub Copilot ist ein optionaler Anbieter für die
+Review-Erzeugung hinter einer separaten, widerrufbaren Freigabe zur
+Transkriptverarbeitung.
 
-Export-Connectors und Cloud-Review-Provider sind unter den
-[Network Scopes](/de/speechkit/modes#network-scope) **local network only** und **this device only**
-nicht verfügbar. Eine frische Installation konfiguriert keinen
-Connector, daher verlässt nichts den Rechner, bis du es wählst.
+Export-Konnektoren und Cloud-Review-Anbieter sind unter den
+[Netzwerkbereichen](/de/speechkit/modes#network-scope) **nur lokales Netzwerk** und
+**nur dieses Gerät** nicht verfügbar. Eine frische Installation konfiguriert keinen
+Konnektor, sodass nichts den Rechner verlässt, bis du es wählst.
+
+## Wenn etwas schiefgeht
+
+- **Das Meeting startet nicht.** Möglicherweise belegt ein anderer SpeechKit-Modus
+  das Mikrofon. Beende Dictation, Assist oder den Voice Agent und starte das
+  Meeting erneut. Siehe auch [Häufige Probleme beheben](/de/speechkit/fix-common-problems).
+- **Es gibt kein Transkript oder nur eine Seite des Gesprächs.** Prüfe das Mikrofon
+  wie in [Hotkeys, Mikrofon und Sprache einrichten](/de/speechkit/hotkeys-microphone-language)
+  beschrieben. Meeting zeichnet dein Mikrofon und den Systemton als zwei Kanäle auf;
+  ist nur das Mikrofon gewählt, wird die andere Seite des Gesprächs nicht erfasst.
+- **Es erscheint kein Review.** Die Benachrichtigung nennt den Grund. Ein Review
+  braucht einen Review-Anbieter: Das mitgelieferte lokale Modell funktioniert ohne
+  Konto, und ein Cloud-Anbieter ist unter den Bereichen **nur lokales Netzwerk** und
+  **nur dieses Gerät** nicht verfügbar. Siehe [Offline mit lokalen Modellen arbeiten](/de/speechkit/work-offline)
+  und [Datenschutzeinstellungen](/de/speechkit/privacy-settings).
+- **Die Erkennung hat nichts angeboten.** Die Anruferkennung ist ein Vorschlag, kein
+  Versprechen. Starte das Meeting stattdessen im Desktop-Client.
+- **Du nutzt einen Mac.** Meeting ist in der macOS-Beta nicht verfügbar. Siehe
+  [Unter macOS installieren](/de/speechkit/install-macos).
+- **Du kommst nicht weiter.** Siehe [Häufige Probleme beheben](/de/speechkit/fix-common-problems)
+  und [SpeechKit aktualisieren oder deinstallieren](/de/speechkit/update-and-uninstall),
+  um sicherzustellen, dass du die aktuelle Version nutzt.
 
 <CardGroup cols={2}>
   <Card title="Unter Windows installieren" icon="windows" href="/de/speechkit/install-windows">
     Meeting wird mit dem Windows-Desktop-Client ausgeliefert.
   </Card>
   <Card title="Modi und Datenpfade" icon="waveform-lines" href="/de/speechkit/modes">
-    Sieh, wie die Provider-Wahl und die beiden Datenschutz-Scopes funktionieren.
+    Sieh, wie die Anbieterwahl und die beiden Datenschutzbereiche funktionieren.
   </Card>
 </CardGroup>

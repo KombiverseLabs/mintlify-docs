@@ -5,26 +5,51 @@ sidebarTitle: "Plattformdienste"
 icon: grid-2
 ---
 
-Plattformdienste laufen unter deinen Anwendungsfällen. Sie übernehmen Anmeldung, Routing, Anwendungsbereitstellung und Sichtbarkeit. Die Anwendungen, die einen Anwendungsfall liefern, etwa Immich für Fotos, sind unter [Anwendungsfälle](/de/guides/stackkits/use-cases/overview) aufgeführt.
+Plattformdienste laufen unter deinen Anwendungsfällen. Sie kümmern sich um Anmeldung, Routing, Anwendungsbereitstellung und Sichtbarkeit. Die Anwendungen, die einen Anwendungsfall bereitstellen, etwa Immich für Fotos, sind unter [Anwendungsfälle](/de/guides/stackkits/use-cases/overview) aufgeführt.
 
-Katalogpräsenz, eine erfolgreiche Installation und eine abgeschlossene Wiederherstellung bedeuten Verschiedenes. Prüfe die [Kompatibilität der Anwendungsbereitstellung](/de/stackkits/reference/application-delivery-compatibility) des installierten Releases.
+Katalogpräsenz, eine erfolgreiche Installation und eine abgeschlossene Wiederherstellung bedeuten Verschiedenes. Prüfe die [Kompatibilität der Anwendungsbereitstellung](/de/stackkits/reference/application-delivery-compatibility) der installierten Version.
+
+## Was diese Dienste tun
+
+Stell dir die Anwendungen der Anwendungsfälle als die Zimmer eines Hauses vor und die Plattformdienste als die Türen, Schlösser und Schilder. Sie entscheiden, wer hereinkommen darf, wie eine Adresse die richtige Anwendung findet und wie du siehst, was läuft. Du wählst sie meist nicht einzeln aus: Das Kit bringt die zentralen mit.
+
+## Welche Kits sie enthalten
+
+Die Kern-Runtime ist Teil des generierten nativen v2-Workspace; die Seite zum Basement Kit beschreibt den generierten Node Hub und die lokalen Dienste, siehe [Basement Kit](/de/stackkits/kits/basement-kit). Unten als Modulverträge gekennzeichnete Einträge sowie die Anwendungsplattformen erscheinen nur, wenn du sie auswählst.
+
+## Wie du sie öffnest
+
+Öffne nach einem Rollout den Node Hub unter der Adresse `base.<domain>`, die die CLI ausgibt; die lokale Standarddomain ist `home.test`. Jeder andere Dienst verwendet die für diesen Rollout generierte Adresse.
 
 ## Zugriff und Routing
 
-Die generierte Core-Laufzeit umfasst:
+Die generierte Kern-Runtime umfasst:
 
 - [PocketID](/de/stackkits/apps/pocketid), die lokale Owner-Identität
 - [TinyAuth](/de/stackkits/apps/tinyauth), den Forward-Auth-Einstiegspunkt für geschützte Routen
-- [Traefik](/de/stackkits/apps/traefik), den Reverse Proxy für generierte Routen
+- [Traefik](/de/stackkits/apps/traefik), den Reverse-Proxy für generierte Routen
 
 [kombify Point DNS](/de/stackkits/apps/kombify-point) und die Routing-Diagnose [Whoami](/de/stackkits/apps/whoami) werden als Modulverträge ausgeliefert, die die anfängliche native v2-StackSpec nicht auswählt.
 
 ## Anwendungsplattformen
 
-Standalone-Compose stellt Workloads standardmäßig bereit und braucht keine Anwendungsplattform. [Coolify](/de/stackkits/apps/coolify) und [Komodo](/de/stackkits/apps/komodo) sind Plattform-Integrationen, die du explizit auswählst. [Anwendungsbereitstellung wählen](/de/guides/stackkits/application-delivery) vergleicht die drei.
+Standalone Compose stellt Workloads standardmäßig bereit und braucht keine Anwendungsplattform. [Coolify](/de/stackkits/apps/coolify) und [Komodo](/de/stackkits/apps/komodo) sind Plattform-Integrationen, die du ausdrücklich auswählst. [Anwendungsbereitstellung wählen](/de/guides/stackkits/application-delivery) vergleicht die drei.
 
 ## Dashboards und Monitoring
 
 Der [Node Hub](/de/guides/stackkits/node-hub) ist die generierte Übersicht deiner Dienste. [Homepage](/de/stackkits/apps/homepage), [Uptime Kuma](/de/stackkits/apps/uptime-kuma) und [Dozzle](/de/stackkits/apps/dozzle) werden als Modulverträge ausgeliefert, die die anfängliche native v2-StackSpec nicht auswählt.
 
-Bearbeite keine generierten Deployment-Dateien und leite die Aktivierung nicht aus dem Vorhandensein im Archiv ab.
+Bearbeite keine generierten Deployment-Dateien und schließe aus der Präsenz im Archiv nicht auf eine Aktivierung.
+
+## Erste Schritte
+
+1. Verifiziere den Kern-Rollout über die CLI.
+2. Öffne den [Node Hub](/de/guides/stackkits/node-hub).
+3. Richte den lokalen Owner in PocketID ein und bestätige, dass TinyAuth die erwarteten Routen schützt.
+4. Konfiguriere das Backup-Repository und übe eine Wiederherstellung mit [Sichern und Wiederherstellen](/de/guides/stackkits/back-up-and-restore).
+
+## Wenn etwas schiefgeht
+
+- Eine Adresse öffnet sich nicht oder ein Name wird nicht aufgelöst: Siehe [Fehlerbehebung](/de/guides/stackkits/troubleshooting).
+- Die Anmeldung schlägt fehl: Dienste hinter TinyAuth verwenden das Owner-Konto in PocketID, nicht dein kombify-Cloud-Konto.
+- Bearbeite nie generierte Deployment- oder Router-Dateien; ändere die StackSpec und generiere neu.

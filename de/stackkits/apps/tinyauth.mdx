@@ -5,10 +5,39 @@ sidebarTitle: "TinyAuth"
 icon: lock-keyhole
 ---
 
-TinyAuth ist der Standard-Forward-Auth-Einstiegspunkt im veröffentlichten StackKits-Katalog. Er erscheint normalerweise unter `auth.<domain>` und nutzt für geschützte Routen die lokale PocketID-Owner-Einrichtung.
+TinyAuth ist der Standard-Forward-Auth-Einstiegspunkt im veröffentlichten StackKits-Katalog. Er erscheint normalerweise unter `auth.<domain>` und nutzt für geschützte Routen das lokale PocketID-Owner-Setup.
 
-Öffne nach einem erfolgreichen Rollout die generierte Adresse, schließe die lokale Owner-Einrichtung ab und verifiziere, dass eine geschützte Route über den erwarteten Anmeldepfad umleitet.
+## Was es ist
 
-Wenn eine Route in einer Schleife läuft oder die Authentifizierung umgeht, vergleiche zuerst den angefragten Hostnamen mit der generierten Route und bestätige, dass sich der lokale PocketID-Owner authentifizieren kann. Ändere keine Anwendung, nur um ein Routing- oder Owner-Einrichtungsproblem zu umgehen.
+TinyAuth ist der Türsteher deiner Dienste. Wenn du eine geschützte Adresse öffnest, fragt [Traefik](/de/stackkits/apps/traefik) TinyAuth, ob du angemeldet bist; falls nicht, wirst du auf eine Anmeldeseite und danach zurück zu deinem Ziel geleitet. Ein StackKit enthält es, damit geschützte Dienste durch eine einzige Anmeldung abgedeckt sind.
+
+## Welche Kits es enthalten
+
+Die Seite zum [Basement Kit](/de/stackkits/kits/basement-kit) führt die lokale Owner-Custody mit PocketID und TinyAuth auf, und die Kit-Definition kennzeichnet TinyAuth als Standard-Plattformdienst.
+
+## Wie du es öffnest
+
+Der Katalog nennt das Muster `https://auth.<domain>`, zum Beispiel `https://auth.home.test` mit der Standarddomain. Im Alltag erreichst du es, indem du einen geschützten Dienst öffnest, der dich weiterleitet.
+
+## Erste Nutzung
+
+1. Öffne nach einem erfolgreichen Rollout die generierte Adresse.
+2. Schließe das lokale Owner-Setup mit [PocketID](/de/stackkits/apps/pocketid) ab.
+3. Öffne eine geschützte Route, etwa den Node Hub, und prüfe, dass sie über den erwarteten Anmeldepfad weiterleitet.
+4. Melde dich an und bestätige, dass du zum Dienst zurückkehrst.
+
+## Was du erwarten kannst und was du nicht ändern solltest
+
+- Erwarte eine Anmeldeseite, keine Anwendung.
+- TinyAuth selbst bleibt ohne Anmeldung erreichbar, damit die Anmeldung funktionieren kann.
+- Ändere keine Anwendung, nur um ein Routing- oder Owner-Setup-Problem zu umgehen.
+- Schalte den Schutz einer Route nicht ab, nur damit eine Warnung verschwindet.
+
+## Wenn etwas schiefgeht
+
+Wenn eine Route in einer Schleife läuft oder die Authentifizierung umgeht, vergleiche zuerst den angefragten Hostnamen mit der generierten Route und bestätige, dass sich der lokale PocketID-Owner authentifizieren kann. Ändere keine Anwendung, nur um ein Routing- oder Owner-Setup-Problem zu umgehen.
+
+- Du kannst dich nicht anmelden: Verwende das Konto, das der Owner für dich angelegt hat. Es ist nicht dein kombify-Cloud-Konto.
+- Weitere Prüfungen: [Fehlerbehebung](/de/guides/stackkits/troubleshooting).
 
 Siehe [PocketID](/de/stackkits/apps/pocketid) für die lokale Identitätskomponente.

@@ -6,12 +6,20 @@ icon: "lock"
 ---
 
 Nutze diesen Pfad, wenn der Dienst bereits unter einer öffentlichen HTTP(S)-URL
-antwortet. kombify.me terminiert TLS und leitet den Browser per Proxy an diesen
-Origin. Private, Loopback- und Link-Local-Ziele werden auf diesem Pfad abgelehnt.
+antwortet. kombify.me beendet TLS und leitet den Browser per Proxy an diesen
+Origin weiter. Private, Loopback- und Link-Local-Ziele werden auf diesem Pfad
+abgelehnt.
 
-## Bevor du startest
+Im Alltag gesprochen: Deine App hat bereits eine Webadresse, die jeder im Internet
+öffnen kann. kombify.me gibt ihr einen zweiten, aufgeräumteren Namen unter
+`kombify.me`, wobei HTTPS für dich erledigt wird. Besucher geben den
+kombify.me-Namen ein, und kombify.me reicht sie an deine App durch. Du bist nicht
+sicher, ob das die richtige Art ist? Lies zuerst
+[Öffentlich, privat oder Weiterleitung](/de/kombify-me/public-or-private).
 
-- Der Origin muss aus dem Internet per HTTP oder HTTPS erreichbar sein.
+## Bevor du beginnst
+
+- Der Origin muss aus dem Internet über HTTP oder HTTPS erreichbar sein.
 - Ein angemeldetes kombify-Konto registriert Namen über
   [api.kombify.io](https://api.kombify.io). Selbst gehostete Installationen
   registrieren sich nach der E-Mail-Verifizierung mit einem API-Schlüssel.
@@ -23,21 +31,57 @@ Origin. Private, Loopback- und Link-Local-Ziele werden auf diesem Pfad abgelehnt
 1. Registriere einen Basisnamen für das Homelab. Gehostete Konten erhalten
    `{homelab}-{you}.kombify.me`. Selbst gehostete Installationen erhalten
    `sh-{homelab}-{device}.kombify.me`.
-2. Registriere den Dienst unter dieser Basis. Kit-eigene Slugs wie `auth`,
-   `id` und `coolify` werden immer zu `{base}-{service}.kombify.me`.
-3. Richte den Dienst auf die öffentliche Origin-URL aus.
-4. Veröffentliche die Dienstroute. Nicht veröffentlichte Dienstnamen bleiben
+2. Registriere den Dienst unter dieser Basis. Kit-eigene Slugs wie `auth`, `id`
+   und `coolify` werden immer zu `{base}-{service}.kombify.me`.
+3. Richte den Dienst auf die öffentliche Origin-URL.
+4. Gib die Dienstroute frei. Nicht freigegebene Dienstnamen bleiben
    unveröffentlicht.
 
-Öffne dann `https://{base}-{service}.kombify.me` im Browser.
+Öffne dann `https://{base}-{service}.kombify.me` in einem Browser.
 
-Reservierte Apex-Namen wie `auth.kombify.me` bleiben ungenutzt. Der Kit-Login
+Eine Schritt-für-Schritt-Anleitung in einfacher Sprache mit Beispielnamen findest
+du unter [Deine erste kombify.me-Adresse erhalten](/de/kombify-me/get-your-first-address).
+
+## Was nach jedem Schritt zu erwarten ist
+
+- Nach der Registrierung des Basisnamens antwortet kombify.me mit dem vollständigen
+  Basisnamen. Notiere ihn; jeder App-Name wird daraus gebildet.
+- Nach der Registrierung des Dienstes und seines Origins existiert der Name, ist
+  aber noch ausgeschaltet. Besucher erhalten die Antwort „nicht freigegeben“ (404),
+  bis du ihn freigibst.
+- Nachdem du den Dienst freigegeben hast, nimmt der Name Besucher an. Änderungen
+  können bis zu etwa einer Minute brauchen, bis sie sichtbar werden, da
+  kombify.me einen kurzen Routing-Cache führt.
+- Bei einer selbst gehosteten Installation starten neue Namen pausiert, solange
+  die E-Mail-Adresse noch nicht verifiziert ist, und Besucher erhalten die Antwort
+  „inaktiv“ (503). Schließe die Verifizierung ab oder setze die Adresse auf aktiv.
+
+Jeder, der den Namen kennt, kann eine öffentliche Adresse öffnen, sofern die App
+nicht nach einer Anmeldung fragt. Halte Apps mit sensiblen Daten hinter ihrer
+eigenen Anmeldung.
+
+Reservierte Apex-Namen wie `auth.kombify.me` bleiben ungenutzt. Die Kit-Anmeldung
 landet weiterhin auf `{your-lab}-auth.kombify.me`.
 
 ## Wenn der Origin nicht öffentlich ist
 
-Halte hier an und folge [Einen privaten Dienst erreichen](/de/kombify-me/private-targets).
-Veröffentliche keine localhost- oder nur im LAN gültige URL auf dem öffentlichen Proxy.
+Hör hier auf und folge [Einen privaten Dienst erreichen](/de/kombify-me/private-targets).
+Veröffentliche keine localhost- oder nur im LAN gültige URL auf dem öffentlichen
+Proxy.
 
-Rein lokale Namen bleiben auf dem Homelab-Resolver, den StackKits installiert.
-Sie sind keine kombify.me-Namen.
+Rein lokale Namen bleiben beim Homelab-Resolver, den StackKits installiert. Sie
+sind keine kombify.me-Namen.
+
+## Wenn etwas schiefgeht
+
+| Was du siehst | Was zu tun ist |
+| --- | --- |
+| „service subdomain not exposed“ (404) | Gib die Dienstroute frei. |
+| „subdomain inactive“ (503) | Die Adresse ist pausiert oder noch nicht verifiziert. Setze sie auf aktiv. |
+| Das Speichern des Origins wird abgelehnt | Der öffentliche Pfad akzeptiert nur öffentliche `http`- oder `https`-Adressen. Nutze für alles andere eine [private Adresse](/de/kombify-me/private-targets). |
+| 502 „Bad Gateway“ | kombify.me konnte deinen Origin nicht erreichen. Prüfe, ob die App läuft und aus dem Internet antwortet. |
+| „already taken“, „reserved“ oder ein Limit-Fehler | Wähle einen anderen Namen oder entferne eine Adresse, die du nicht mehr nutzt. |
+
+Weitere Prüfungen: [kombify.me-Fehlerbehebung](/de/kombify-me/troubleshooting). Um
+eine Adresse später zu pausieren, zu ändern oder zu entfernen, siehe
+[Eine Adresse ändern, pausieren oder entfernen](/de/kombify-me/change-pause-or-remove-an-address).

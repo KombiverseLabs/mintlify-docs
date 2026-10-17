@@ -1,15 +1,27 @@
 ---
 title: "Gitea"
-description: "Ejecuta el workload de desarrollo Git privado publicado con Git nativo por HTTPS y custodia del propietario"
+description: "Ejecuta la carga de trabajo de desarrollo Git privada publicada con Git HTTPS nativo y custodia del propietario"
 sidebarTitle: "Gitea"
 icon: code-branch
 ---
 
-Gitea aporta el caso de uso [Desarrollo](/es/guides/stackkits/use-cases/development). El workload dev con Gitea ejecuta un servidor Git privado en un contenedor rootless con SQLite en un nodo seleccionado. El registro público está desactivado y los repositorios nuevos se fuerzan a privados. No expone SSH, no instala un runner de CI ni habilita Actions; los flujos de trabajo para usuarios adicionales y tokens de API siguen siendo operaciones nativas de Gitea. El [catálogo de casos de uso](/es/stackkits/reference/use-case-catalog) lista los componentes que declara el release publicado.
+Gitea proporciona el caso de uso [Desarrollo](/es/guides/stackkits/use-cases/development). La carga de trabajo de desarrollo con Gitea ejecuta un servidor Git privado en un contenedor sin privilegios de root con SQLite en un nodo seleccionado. El registro público está desactivado y los repositorios nuevos se fuerzan a privados. No expone SSH, no instala un runner de CI ni activa Actions; los flujos de trabajo para usuarios adicionales y tokens de API siguen siendo operaciones nativas de Gitea. El [catálogo de casos de uso](/es/stackkits/reference/use-case-catalog) enumera los componentes que declara la versión publicada.
 
-## Selecciona el workload dev de forma explícita
+## Qué es
 
-Desde un workspace de propietario vacío, selecciona Gitea y establece su custodia local del propietario:
+Gitea es un lugar privado para guardar tu código, similar a una pequeña versión autoalojada de un sitio web de alojamiento de código. Subes proyectos con las herramientas Git habituales y los mantienes privados. Un StackKit lo incluye para que tus repositorios no tengan que vivir con un proveedor externo.
+
+## Qué kits y casos de uso lo incluyen
+
+Gitea es la aplicación por defecto de la parte Developer Platform del caso de uso Dev. El ejemplo siguiente usa `basement-kit` en Compose independiente. Según el estado de la evidencia de la página [Desarrollo](/es/guides/stackkits/use-cases/development), es seleccionable pero todavía no está verificado en el ciclo de vida.
+
+## Cómo abrirlo
+
+Abre la ruta que configures para la carga de trabajo; el ejemplo usa `https://dev.home.test`. El nombre de host debe resolverse a tu host desde todos los clientes, como se describe más abajo.
+
+## Seleccionar explícitamente la carga de trabajo de desarrollo
+
+Desde un espacio de trabajo de propietario vacío, selecciona Gitea y establece su custodia local del propietario:
 
 ```bash
 stackkit init basement-kit --platform standalone-compose \
@@ -20,7 +32,7 @@ stackkit init basement-kit --platform standalone-compose \
   --owner-source local --owner-email owner@example.com --non-interactive
 ```
 
-Antes de generar, fusiona los siguientes campos en las secciones existentes `capabilities`, `data` y `routes` de tu [StackSpec](/es/guides/stackkits/configure-stack-spec). Conserva sus demás entradas. Este fragmento usa el site inicial `home` y la política de acceso `home-private`; adapta esas referencias, el dominio doméstico y las raíces de almacenamiento del host a tu host real.
+Antes de generar, combina los siguientes campos con las secciones existentes `capabilities`, `data` y `routes` de tu [StackSpec](/es/guides/stackkits/configure-stack-spec). Conserva sus demás entradas. Este fragmento usa el sitio inicial `home` y la política de acceso `home-private`; adapta esas referencias, el dominio doméstico y las raíces de almacenamiento del host a tu host real.
 
 ```yaml
 capabilities:
@@ -43,23 +55,23 @@ routes:
     accessPolicyRef: home-private
 ```
 
-Gitea requiere esta ruta HTTPS explícita y este vínculo de datos para obtener URL de clonado nativas utilizables. Valida y genera el resultado:
+Gitea necesita esta ruta HTTPS explícita y esta vinculación de datos para obtener URL de clonación nativas utilizables. Valida y genera el resultado:
 
 ```bash
 stackkit validate
 stackkit generate --local-node main --local-site home
 ```
 
-Después sigue el ciclo de entrega normal: valida, inspecciona el plan, y aplica y verifica como se documenta en [Revisar, aplicar y verificar](/es/guides/stackkits/review-plan-and-apply). El inventario de host observado debe cumplir los perfiles de módulo seleccionados; la configuración de ejemplo no es evidencia de hardware.
+Después sigue el ciclo de vida de entrega normal: validar, inspeccionar el plan, y aplicar y verificar como se documenta en [Revisar, aplicar y verificar](/es/guides/stackkits/review-plan-and-apply). El inventario observado del host debe satisfacer los perfiles de módulo seleccionados; la configuración de ejemplo no es evidencia de hardware.
 
-## Aporta el nombre y confía en que la ruta funciona
+## Proporcionar el nombre y confiar en que la ruta funciona
 
-El Git nativo por HTTPS necesita dos cosas que tu host ya debe cumplir:
+El Git HTTPS nativo necesita dos cosas que tu host ya debe cumplir:
 
-- El nombre de host de la ruta (el ejemplo usa `dev.home.test`) debe resolverse a ese host desde todos los clientes con los que quieras clonar.
-- Los clientes de Git deben confiar en el certificado de la CA interna del host. Sin esa confianza en el cliente, el clonado por HTTPS falla antes de la autenticación.
+- El nombre de host de la ruta (el ejemplo usa `dev.home.test`) debe resolverse a ese host desde todos los clientes desde los que quieras clonar.
+- Los clientes Git deben confiar en el certificado de la CA interna del host. Sin confianza del cliente, la clonación HTTPS falla antes de la autenticación.
 
-## Revela la contraseña del propietario e inicia sesión
+## Revelar la contraseña del propietario e iniciar sesión
 
 El primer arranque migra la base de datos SQLite y crea el administrador `owner` antes de atender tráfico; el correo del propietario procede de tu identidad local de propietario, y la referencia `owner-password` se guarda en la custodia local de secretos existente. Lee la contraseña en un terminal privado:
 
@@ -67,21 +79,40 @@ El primer arranque migra la base de datos SQLite y crea el administrador `owner`
 stackkit secrets reveal --workload dev --slot owner-password
 ```
 
-El comando solo acepta slots declarados por la StackSpec validada actual, escribe el valor en stdout (nunca en los logs de despliegue) y no crea ni restablece ninguna contraseña. Un administrador existente que no coincida, o una base de datos de usuarios sin propietario, hace fallar la entrega sin reemplazar cuentas ni restablecer contraseñas.
+El comando solo acepta las ranuras declaradas por la StackSpec validada actual, escribe el valor en stdout (nunca en los registros del despliegue) y no crea ni restablece ninguna contraseña. Un administrador existente que no coincida o una base de datos de usuarios sin propietario hace fallar la entrega sin reemplazar cuentas ni restablecer contraseñas.
 
-Inicia sesión como `owner`, crea un repositorio privado y usa su URL de clonado HTTPS con el almacenamiento de credenciales nativo de Git. Git se autentica directamente con Gitea: ninguna puerta de forward-auth del navegador intercepta las peticiones de Git. Una comprobación de disponibilidad que solo informa de que el proceso HTTP y SQLite son alcanzables no demuestra que hayas clonado, hecho push ni recuperado nada; prueba un push real desde un cliente previsto.
+## Primer uso
+
+1. Revela la contraseña del propietario con el comando anterior en un terminal privado.
+2. Abre la ruta de Gitea e inicia sesión como `owner`.
+3. Crea un repositorio privado.
+4. Copia su URL de clonación HTTPS y clónalo desde un cliente real, usando el almacenamiento de credenciales nativo de Git.
+5. Sube un pequeño commit de prueba.
+
+Inicia sesión como `owner`, crea un repositorio privado y usa su URL de clonación HTTPS con el almacenamiento de credenciales nativo de Git. Git se autentica directamente con Gitea: ninguna puerta de forward-auth del navegador intercepta las peticiones de Git. Una comprobación de disponibilidad que solo informa de que el proceso HTTP y SQLite son alcanzables no demuestra que hayas clonado, subido o recuperado nada: prueba una subida real desde un cliente previsto.
 
 ## Límite de almacenamiento y recuperación
 
-| Asignación | Ruta en el contenedor | Contenido |
+| Asignación | Ruta del contenedor | Contenido |
 | --- | --- | --- |
 | `gitea/data` | `/var/lib/gitea` | Base de datos SQLite, repositorios, objetos LFS, datos de la aplicación |
 | `gitea/config` | `/etc/gitea` | `app.ini` y claves/configuración persistentes de la aplicación |
 
-Ambos volúmenes con nombre pertenecen al contrato de datos y de copia de seguridad del workload. Una recuperación correcta silencia al único escritor de la aplicación, captura ambos volúmenes y los activa juntos con las escrituras detenidas; una copia en vivo del archivo SQLite por sí sola no es ese contrato. Sigue [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore) para el ciclo de vida del workspace. Gitea rootless y rootful usan diseños distintos, así que cambiar la imagen no es una migración de almacenamiento.
+Ambos volúmenes con nombre pertenecen al contrato de datos y de copia de seguridad de la carga de trabajo. Una recuperación correcta detiene el único escritor de la aplicación, captura ambos volúmenes y los activa juntos con las escrituras detenidas: una copia en vivo del solo archivo SQLite no cumple ese contrato. Sigue [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore) para el ciclo de vida del espacio de trabajo. Gitea sin privilegios de root y con ellos usan disposiciones distintas, así que cambiar la imagen no es una migración de almacenamiento.
+
+## Qué esperar
+
+Gitea es un único servidor pequeño que usa SQLite en un nodo seleccionado. El inicio de sesión y las páginas de repositorios son rápidos para un hogar. Si la página carga pero la clonación falla, la causa habitual es la resolución de nombres o la confianza del certificado, no Gitea en sí.
+
+## Si algo sale mal
+
+- La clonación falla antes de pedir una contraseña: el nombre de host no se resuelve desde ese cliente, o el cliente no confía en el certificado de la CA interna.
+- No recuerdas la contraseña del propietario: vuelve a revelarla con `stackkit secrets reveal`; el comando no crea ni restablece ninguna contraseña.
+- La entrega falla por un administrador o una base de datos de usuarios existentes: no reemplaza cuentas ni restablece contraseñas; resuelve primero el conflicto de forma deliberada.
+- Compara cualquier dirección con la salida del despliegue y consulta [Solución de problemas](/es/guides/stackkits/troubleshooting).
 
 ## Límites conocidos
 
-- SSH no está expuesto; el HTTPS nativo es la vía de acceso a Git documentada.
-- Gitea Actions y los runners de CI no están instalados; la integración de runners aún no tiene una vía documentada.
-- La recreación forzada del contenedor conserva el acceso del propietario, los metadatos de los repositorios privados y la configuración de la aplicación, pero el aprovisionamiento completo de hosts Linux, la distribución real de DNS/CA en la LAN y un ciclo completo de copia de seguridad y restauración son niveles de evidencia aparte y aquí no están demostrados.
+- SSH no está expuesto; HTTPS nativo es la ruta de acceso Git documentada.
+- Gitea Actions y los runners de CI no están instalados; la integración de runners todavía no tiene una ruta documentada.
+- La recreación forzada del contenedor conserva el acceso del propietario, los metadatos de los repositorios privados y la configuración de la aplicación, pero el aprovisionamiento completo de un host Linux, la distribución real de DNS/CA en la LAN y un ciclo completo de copia de seguridad y restauración son niveles de evidencia separados y no se demuestran aquí.

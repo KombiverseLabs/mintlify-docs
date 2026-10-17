@@ -6,37 +6,70 @@ icon: house
 ---
 
 <Info>
-  证据状态（2026-09-17，v0.35.0）：Basement Kit 是当前公开版本所支持的一条命令路径。在公开的 v0.35.0 归档上，Basement Kit 在全新的 Ubuntu 24.04 和 Debian 13 虚拟机上，以及在家庭网络中的一台虚拟机上，通过了 install、init、generate、apply、verify、backup 和 restore；在家庭网络中，其本地服务地址也可以从该网络中的另一台机器访问。手机 passkey 和客户端证书信任仍待完成。Cloud Kit 是预览版，Modern Homelab 是 alpha 定义归档，不是安装目标；两者目前都还没有自动化的生命周期运行。
+  证据状态（2026-09-17，v0.35.0）：Basement Kit 是当前公开版本所支持的一条命令路径。
+  在公开的 v0.35.0 归档上，Basement Kit 在全新的 Ubuntu 24.04 和 Debian 13 虚拟机上，
+  以及在家庭网络中的一台虚拟机上，都通过了安装、初始化、生成、应用、验证、备份和恢复，
+  并且其本地服务地址也能从该网络中的另一台机器上应答。手机通行密钥和客户端证书信任仍待验证。
+  Cloud Kit 是预览版，Modern Homelab 是 alpha 定义归档，二者都不是安装目标；
+  两者目前都还没有自动化的生命周期运行。
 </Info>
 
-Basement Kit 是当前公开 StackKits 版本所支持的本地配置。请把它用于你已经掌控的硬件上的 homelab，包含一个家庭站点和一个本地所有者。
+Basement Kit 是当前公开 StackKits 版本所支持的本地配置。请将它用于运行在你已掌控的硬件上、具有一个家庭站点和一个本地所有者的 homelab。
+
+## 通俗地说
+
+Basement Kit 会把你家中的一台电脑变成一台小型私有服务器。它会安装保护和组织你各项服务的程序，之后你可以再添加文件、照片或媒体等内容。除非你决定发布，否则任何内容都不会离开你的家庭网络。如果你刚接触这些，请先阅读[开始之前](/zh-Hans/guides/stackkits/before-you-start)。
+
+## 你需要先准备什么
+
+- 一台你掌控的、可以保持开机的电脑，运行[操作系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)中列出的系统。
+- 该电脑上的终端访问权限。
+- 你的家庭网络，其中的手机和笔记本电脑能够解析本地名称（参见[日常使用](/zh-Hans/guides/stackkits/daily-use)）。
+- 一个用于保存 `.stackkit/access.json` 中访问详情的私密位置。
+- 不需要 kombify 账户，也不需要租用服务器。
 
 ## 它提供什么
 
-最小可用的 Basement Kit 是一个家庭站点加一个本地节点。它带来：
+最小的可用 Basement Kit 是一个带有一个本地节点的家庭站点。它带来：
 
 - 经 CUE 验证的 StackSpec 和本地 `stackkit` 生命周期
-- 由 PocketID 和 TinyAuth 提供的本地所有者托管
-- 通过 Traefik 路由
+- 使用 PocketID 和 TinyAuth 的本地所有者托管
+- 通过 Traefik 进行路由
 - 位于生成的 `base.<domain>` 地址的 Node Hub
-- 带有绑定所有者的恢复的本地备份策略
+- 带有绑定所有者恢复的本地备份策略
 
-创作时的默认域名是 `home.test`。在把生成的路由视为可达之前，请确保客户端使用的是你所控制的 DNS 路径；StackKits 不会悄悄修改每一个客户端或路由器。
+创作时的默认域名是 `home.test`。在认为生成的路由可达之前，请确保客户端使用你所掌控的 DNS 路径；StackKits 不会悄悄修改每一个客户端或路由器。
 
-基线保持独立运行。StackKits 网站帮助你选择并引导一条路径，但不会操作主机。
+该基线保持独立。StackKits 网站可以帮助你选择并引导一条路径，但它不会操作主机。
 
 ## 完成基线
 
-1. 使用[快速开始](/zh-Hans/stackkits/quickstart)引导该 kit。
-2. 在 [Node Hub](/zh-Hans/guides/stackkits/node-hub) 中完成首次运行保护：创建本地 PocketID 所有者，并确认 TinyAuth 保护了预期的路由。
+1. 使用[快速入门](/zh-Hans/stackkits/quickstart)引导该套件。
+2. 在 [Node Hub](/zh-Hans/guides/stackkits/node-hub) 中完成首次运行保护：创建本地 PocketID 所有者，并确认 TinyAuth 保护着预期的路由。
 3. 配置本地备份仓库并演练一次恢复。参见[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。
 
-请更改 StackSpec 并重新验证，而不要编辑生成的文件。
+请修改 StackSpec 并重新验证，而不是编辑生成的文件。
+
+每一步之后，你应当看到以下结果：
+
+1. 快速入门会留下一个包含你的配置和访问记录的工作区文件夹。
+2. Node Hub 可以打开，你能以本地所有者身份登录，受保护的路由会要求你登录。
+3. 你已有一份备份，并且知道恢复可以成功。
+
+## 什么存放在哪里
+
+你的配置、日志和访问详情保存在家用电脑的工作区文件夹中。所有者身份保存在该电脑上的 PocketID 中。备份是你另行配置的独立副本。请保持该文件夹私密，不要分享 `.stackkit/access.json`。
+
+## 出现问题时
+
+- 手机或笔记本电脑上地址打不开：该设备很可能无法解析你的本地名称。参见[故障排查](/zh-Hans/guides/stackkits/troubleshooting)。
+- 设置因错误而停止：在再次运行安装程序之前，先用 `stackkit logs latest --json` 读取错误。
+- 你不确定设置是否健康：参见[日常使用](/zh-Hans/guides/stackkits/daily-use)中的检查。
 
 ## 添加用例
 
-只有在基线通过验证之后再添加工作负载。[文档与文件](/zh-Hans/guides/stackkits/use-cases/documents-and-files)是一个不错的首选用例，因为 Cloudreve 的独立选择不需要密钥引用。[用例](/zh-Hans/guides/stackkits/use-cases/overview)列出了所有已有文档的用例。
+只有在基线验证通过之后才添加工作负载。[文档与文件](/zh-Hans/guides/stackkits/use-cases/documents-and-files)是不错的首个用例，因为 Cloudreve 的独立选择不需要密钥引用。[用例](/zh-Hans/guides/stackkits/use-cases/overview)列出了所有已记录的用例。
 
-## 何时使用其他 kit
+## 何时使用其他套件
 
-当单一环境是你已有的、带有你所运营域名的 VPS 或云主机时，请选择 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。StackKits 不会配置该主机。
+当这个单一环境是一台现有的 VPS 或云主机，并且你运营着一个域名时，请选择 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。StackKits 不会预配该主机。

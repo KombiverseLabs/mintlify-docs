@@ -1,29 +1,59 @@
 ---
-title: "Node Hub de StackKits"
+title: "StackKits Node Hub"
 description: "Usa el resumen local de servicios generado tras un despliegue verificado de StackKits"
 sidebarTitle: "Node Hub"
 icon: grid-2
 ---
 
-El Node Hub de StackKits es el resumen local de servicios generado. Tras un despliegue correcto, abre la dirección `base.<domain>` que imprime la CLI o que aparece en la salida verificada.
+El StackKits Node Hub es el resumen local de servicios generado. Tras un despliegue correcto, abre la dirección `base.<domain>` que imprime la CLI o que aparece en la salida verificada.
+
+## En palabras sencillas
+
+El Node Hub es una página de inicio para tu propio homelab. Después de la configuración, lista los servicios que elegiste, cada uno con un enlace que lo abre. Piensa en él como la puerta de entrada de tu homelab: lo abres para encontrar tus servicios y para terminar de protegerlos. Solo lista lo que seleccionó tu configuración, así que un servicio que no elegiste no aparece.
+
+## Qué necesitas primero
+
+- Una configuración terminada. Si aún no la has hecho, sigue el [Inicio rápido](/es/stackkits/quickstart) y lee [Antes de empezar](/es/guides/stackkits/before-you-start).
+- La dirección `base.<domain>` que imprimió la configuración. Con el dominio local predeterminado es `base.home.test`.
+- Un teléfono u ordenador en tu red doméstica que pueda resolver ese nombre (consulta [Día a día](/es/guides/stackkits/daily-use)).
+- Los datos de acceso en `.stackkit/access.json` en tu carpeta de trabajo. Mantenlos privados.
 
 ## Qué comprobar
 
-- La página identifica el workspace actual de StackKits.
+- La página identifica el espacio de trabajo actual de StackKits.
 - Solo son visibles los servicios seleccionados por la configuración validada.
-- Cada servicio de la lista usa la dirección generada para ese despliegue.
+- Cada servicio listado usa la dirección generada para ese despliegue.
 
-Si el Node Hub no se abre, compara su dirección `base.<domain>` esperada con la dirección de la salida del despliegue. Confirma que el nombre de host se resuelve desde el cliente que estás usando y que la ruta pertenece al workspace actual. Cambia el StackSpec y vuelve a generar los artefactos en lugar de editar el Node Hub generado o la configuración del router.
+Si el Node Hub no se abre, compara su dirección `base.<domain>` esperada con la dirección de la salida del despliegue. Confirma que el nombre de host se resuelve desde el cliente que usas y que la ruta pertenece al espacio de trabajo actual. Cambia la StackSpec y regenera los artefactos en lugar de editar el Node Hub generado o la configuración del router.
 
-## Completa la protección del primer uso
+## Completa la protección del primer arranque
 
 1. Verifica el despliegue principal desde la CLI.
 2. Abre la ruta del Hub generada.
 3. Establece el propietario local de PocketID.
 4. Confirma que TinyAuth protege las rutas esperadas.
 5. Usa la acción de protección del Hub solo después de que el propietario pueda autenticarse.
-6. Configura el repositorio local de copias de seguridad y practica una restauración con [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).
+6. Configura el repositorio de copias de seguridad local y practica una restauración con [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).
 
-El Hub revisa el estado y las operaciones aprobadas. No es un instalador de componentes, ni una consola de proveedores, ni un sustituto de la validación del StackSpec.
+Después de cada paso deberías ver lo siguiente:
 
-[Servicios de plataforma](/es/stackkits/apps/overview) explica los servicios que hay detrás del Hub. [Casos de uso](/es/guides/stackkits/use-cases/overview) enumera los workloads que puedes añadir.
+- Tras el paso 1, la CLI informa de un despliegue verificado e imprime la dirección del Hub.
+- Tras el paso 2, la página del Hub se abre en tu navegador y muestra tu espacio de trabajo y los servicios que seleccionaste.
+- Tras el paso 3, puedes iniciar sesión como propietario local mediante PocketID.
+- Tras el paso 4, abrir un servicio protegido te pide iniciar sesión primero.
+- Tras el paso 6, tienes una copia de seguridad y sabes que una restauración funciona.
+
+El Hub revisa el estado y las operaciones aprobadas. No es un instalador de componentes, una consola de proveedor ni un sustituto de la validación de la StackSpec.
+
+## Qué se almacena y dónde
+
+Todo permanece en el ordenador que ejecuta tu homelab. La identidad del propietario vive allí en PocketID, y los datos de acceso de tu configuración están en `.stackkit/access.json` en tu carpeta de trabajo. Tu configuración (la StackSpec) también está en esa carpeta. El Hub en sí se genera a partir de esa configuración, por eso cambias la StackSpec y no el Hub. Las copias de seguridad son independientes de estos datos, así que comprueba dónde se guarda tu repositorio de copias de seguridad. Consulta [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).
+
+## Si algo sale mal
+
+- La dirección del Hub no se abre: usa las comprobaciones anteriores y consulta [Solución de problemas](/es/guides/stackkits/troubleshooting).
+- No puedes iniciar sesión: usa la cuenta que el propietario creó en PocketID, no una cuenta de kombify Cloud.
+- Falta un servicio en la lista: no se seleccionó en la configuración validada. Cambia la StackSpec y regenera.
+- Nunca pegues el contenido de `.stackkit/access.json` en un chat, una incidencia o un correo electrónico.
+
+[Servicios de la plataforma](/es/stackkits/apps/overview) explica los servicios que hay detrás del Hub. [Casos de uso](/es/guides/stackkits/use-cases/overview) lista las cargas de trabajo que puedes añadir.

@@ -6,45 +6,74 @@ icon: house
 ---
 
 <Info>
-  Nachweisstand (2026-09-17, v0.35.0): Basement Kit ist der unterstützte
-  Ein-Befehl-Weg des aktuellen öffentlichen Releases. Im öffentlichen v0.35.0-Archiv
-  hat Basement Kit auf frischen virtuellen Maschinen mit Ubuntu 24.04 und Debian 13
-  sowie in einer virtuellen Maschine in einem Heimnetz install, init, generate, apply,
-  verify, backup und restore bestanden; dort antworteten seine lokalen Dienstadressen
-  auch von einem anderen Rechner im selben Netz. Phone-Passkey und Vertrauen für
-  Client-Zertifikate stehen noch aus. Cloud Kit ist eine Preview und Modern Homelab ein
-  Alpha-Definitionsarchiv, kein Installationsziel; für keines von beiden gibt es
-  bisher einen automatisierten Lebenszyklus-Lauf.
+  Nachweisstatus (2026-09-17, v0.35.0): Das Basement Kit ist der unterstützte
+  Ein-Befehl-Pfad der aktuellen öffentlichen Version. Im öffentlichen
+  v0.35.0-Archiv hat das Basement Kit Installation, Init, Generate, Apply,
+  Verify, Backup und Restore auf frischen virtuellen Maschinen mit Ubuntu 24.04
+  und Debian 13 sowie in einer virtuellen Maschine in einem Heimnetz bestanden,
+  wobei seine lokalen Dienstadressen auch von einem anderen Rechner in diesem
+  Netz beantwortet wurden. Handy-Passkey und Client-Zertifikatsvertrauen stehen
+  noch aus. Das Cloud Kit ist eine Vorschau und Modern Homelab ein
+  Alpha-Definitionsarchiv, kein Installationsziel; für beide gibt es noch
+  keinen automatisierten Lifecycle-Lauf.
 </Info>
 
-Basement Kit ist das unterstützte lokale Profil des aktuellen öffentlichen StackKits-Releases. Nutze es für ein Homelab auf Hardware, die du bereits kontrollierst, mit einer Home-Site und einem lokalen Owner.
+Das Basement Kit ist das unterstützte lokale Profil der aktuellen öffentlichen StackKits-Version. Verwende es für ein Homelab auf Hardware, die du bereits kontrollierst, mit einem Heim-Site und einem lokalen Owner.
 
-## Was es bietet
+## In einfachen Worten
 
-Das kleinste nützliche Basement Kit ist eine Home-Site mit einem lokalen Node. Es bringt:
+Ein Basement Kit macht aus einem Computer in deinem Zuhause einen kleinen privaten Server. Es installiert die Programme, die deine Dienste schützen und ordnen, und du kannst später Dinge wie Dateien, Fotos oder Medien hinzufügen. Nichts verlässt dein Heimnetz, solange du es nicht veröffentlichst. Wenn dir das neu ist, lies zuerst [Bevor du beginnst](/de/guides/stackkits/before-you-start).
 
-- eine CUE-validierte StackSpec und den lokalen `stackkit`-Lebenszyklus
-- lokale Owner-Verwahrung mit PocketID und TinyAuth
+## Was du zuerst brauchst
+
+- Einen Computer unter deiner Kontrolle, der eingeschaltet bleiben kann und ein System aus der [OS-Kompatibilität](/de/stackkits/reference/os-compatibility) verwendet.
+- Zugriff auf ein Terminal darauf.
+- Dein Heimnetz mit Handys und Laptops, die die lokalen Namen auflösen können (siehe [Im Alltag](/de/guides/stackkits/daily-use)).
+- Einen privaten Ort für die Zugangsdaten in `.stackkit/access.json`.
+- Kein kombify-Konto und keinen gemieteten Server.
+
+## Was es bereitstellt
+
+Das kleinste sinnvolle Basement Kit besteht aus einem Heim-Site mit einem lokalen Node. Es bringt:
+
+- eine CUE-validierte StackSpec und den lokalen `stackkit`-Lifecycle
+- lokale Owner-Custody mit PocketID und TinyAuth
 - Routing über Traefik
 - einen Node Hub unter der generierten Adresse `base.<domain>`
-- eine lokale Backup-Richtlinie mit Owner-gebundener Wiederherstellung
+- lokale Backup-Richtlinie mit an den Owner gebundener Wiederherstellung
 
-Die Standard-Domain zum Erstellen ist `home.test`. Stelle sicher, dass Clients einen DNS-Pfad nutzen, den du kontrollierst, bevor du eine generierte Route als erreichbar betrachtest; StackKits ändert nicht stillschweigend jeden Client oder Router.
+Die Standarddomain beim Authoring ist `home.test`. Stelle sicher, dass Clients einen DNS-Pfad nutzen, den du kontrollierst, bevor du eine generierte Route als erreichbar betrachtest; StackKits ändert nicht stillschweigend jeden Client oder Router.
 
-Die Basis bleibt Standalone. Die StackKits-Website hilft dir, einen Weg zu wählen und zu bootstrappen, betreibt den Host aber nicht.
+Die Basis bleibt eigenständig. Die StackKits-Website hilft dir, einen Pfad zu wählen und zu starten, betreibt den Host aber nicht.
 
 ## Die Basis abschließen
 
-1. Bootstrappe das Kit mit dem [Quickstart](/de/stackkits/quickstart).
-2. Schließe den Schutz beim ersten Start im [Node Hub](/de/guides/stackkits/node-hub) ab: Lege den lokalen PocketID-Owner an und bestätige, dass TinyAuth die erwarteten Routen schützt.
-3. Konfiguriere das lokale Backup-Repository und übe eine Wiederherstellung. Siehe [Sichern und wiederherstellen](/de/guides/stackkits/back-up-and-restore).
+1. Starte das Kit mit dem [Quickstart](/de/stackkits/quickstart).
+2. Schließe den Erststart-Schutz im [Node Hub](/de/guides/stackkits/node-hub) ab: Lege den lokalen PocketID-Owner an und bestätige, dass TinyAuth die erwarteten Routen schützt.
+3. Konfiguriere das lokale Backup-Repository und übe eine Wiederherstellung. Siehe [Sichern und Wiederherstellen](/de/guides/stackkits/back-up-and-restore).
 
 Ändere die StackSpec und validiere erneut, statt generierte Dateien zu bearbeiten.
 
+Nach jedem Schritt solltest du Folgendes sehen:
+
+1. Der Quickstart hinterlässt einen Workspace-Ordner mit deiner Konfiguration und einem Zugriffsprotokoll.
+2. Der Node Hub öffnet sich, du kannst dich als lokaler Owner anmelden, und geschützte Routen fordern zur Anmeldung auf.
+3. Du hast ein Backup und weißt, dass eine Wiederherstellung funktioniert.
+
+## Was wo gespeichert wird
+
+Deine Konfiguration, Logs und Zugangsdaten bleiben im Workspace-Ordner auf dem Heimcomputer. Die Owner-Identität liegt in PocketID auf diesem Computer. Backups sind eine separate Kopie, die du konfigurierst. Halte den Ordner privat und teile `.stackkit/access.json` nicht.
+
+## Wenn etwas schiefgeht
+
+- Eine Adresse öffnet sich auf einem Handy oder Laptop nicht: Das Gerät kann deine lokalen Namen wahrscheinlich nicht auflösen. Siehe [Fehlerbehebung](/de/guides/stackkits/troubleshooting).
+- Das Setup bricht mit einem Fehler ab: Lies ihn mit `stackkit logs latest --json`, bevor du den Installer erneut ausführst.
+- Du bist nicht sicher, ob das Setup gesund ist: Siehe die Prüfungen unter [Im Alltag](/de/guides/stackkits/daily-use).
+
 ## Anwendungsfälle hinzufügen
 
-Füge Workloads erst hinzu, wenn die Basis verifiziert ist. [Dokumente und Dateien](/de/guides/stackkits/use-cases/documents-and-files) ist ein guter erster Anwendungsfall, weil die Standalone-Auswahl von Cloudreve keine Secret-Referenz braucht. Die [Anwendungsfälle](/de/guides/stackkits/use-cases/overview) listen alle dokumentierten auf.
+Füge Workloads erst hinzu, wenn die Basis verifiziert ist. [Dokumente & Dateien](/de/guides/stackkits/use-cases/documents-and-files) ist ein guter erster Anwendungsfall, weil die Standalone-Auswahl von Cloudreve keine Secret-Referenz braucht. [Anwendungsfälle](/de/guides/stackkits/use-cases/overview) listet alle dokumentierten auf.
 
-## Wann du ein anderes Kit wählst
+## Wann ein anderes Kit
 
-Wähle [Cloud Kit](/de/stackkits/kits/cloud-kit), wenn die einzelne Umgebung ein bestehender VPS oder Cloud-Host mit einer Domain ist, die du betreibst. StackKits stellt diesen Host nicht bereit.
+Wähle das [Cloud Kit](/de/stackkits/kits/cloud-kit), wenn die einzelne Umgebung ein bestehender VPS oder Cloud-Host mit einer von dir betriebenen Domain ist. StackKits stellt diesen Host nicht bereit.

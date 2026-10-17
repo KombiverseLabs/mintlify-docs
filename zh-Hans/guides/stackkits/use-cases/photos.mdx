@@ -1,41 +1,66 @@
 ---
 title: "照片"
-description: "用 Immich 把家人的照片和视频保存在你掌控的主机上，并从手机备份"
+description: "借助 Immich 和手机备份，把家人的照片和视频保存在你控制的主机上"
 sidebarTitle: "照片"
 icon: camera-retro
 ---
 
 <Info>
   证据状态（2026-09-24，v0.41.0）：使用 Immich 的照片为 `available,
-  lifecycle-verified`。照片已在公开的 v0.39.7 归档上验证：Depot 生产者在 Ubuntu 24.04 amd64（Basement Kit，standalone）上完成的生命周期运行，通过了 install、init、generate、apply、所有者设置、verify、backup、restore 和 restore activation，并通过来宾本地回环验证了应用层回读。Cloud Kit 为预览版，目前还没有自动化的生命周期运行。
+  lifecycle-verified`。照片已在公开的 v0.39.7 归档上验证，其中在 Ubuntu 24.04 amd64（Basement Kit，独立模式）上运行的 Depot 生产者生命周期测试通过了安装、init、generate、apply、所有者设置、verify、备份、恢复和恢复激活，并通过客户机本地回环验证了应用回读。Cloud Kit 是预览版，目前还没有自动化的生命周期测试。
 </Info>
 
-照片为你的家庭在你运营的主机上提供一个统一的照片和视频库。Immich 运行这个库，它的移动应用会从你的手机上传图片。发布目录把这个使用场景称为 Photos and Memories，并作为可选的 `photos` 工作负载交付。
+照片为你的家庭在你运营的主机上提供一个统一的照片和视频库。Immich 运行这个库，其移动应用会从你的手机上传图片。发布目录将此使用场景称为 Photos and Memories，并以可选的 `photos` 工作负载交付。
+
+## 通俗地说
+
+照片就是你家里自己的家庭照片库。一个名为 Immich 的程序把你的图片和视频存放在你的主机上，每部手机上的应用会自动把新图片发送到那里。它的工作方式类似云端照片服务，只不过照片库位于你控制的计算机上。
+
+## 你首先需要什么
+
+- 已完成的基线：阅读[开始之前](/zh-Hans/guides/stackkits/before-you-start)并验证你的 kit。
+- 足够存放照片库的可用磁盘空间，以及存放备份的位置。
+- 首次上传时，手机需要在同一网络中。
+- 决定由哪个 kit 托管它（见下文）。
 
 ## 应用
 
 <CardGroup cols={2}>
   <Card title="Immich" icon="images" href="/zh-Hans/stackkits/apps/immich">
-    照片背后的照片和视频库：已发布的契约、选择与首次使用。
+    照片背后的照片和视频库：已发布的契约、选择以及首次使用。
   </Card>
   <Card title="从手机备份照片" icon="mobile-screen-button" href="/zh-Hans/guides/stackkits/use-cases/photos/phone-backup">
-    连接 Immich 应用，选择相册，并检查第一次上传。
+    连接 Immich 应用、选择相册并检查你的首次上传。
   </Card>
 </CardGroup>
 
 ## 选择主机
 
-- 本地硬件和以局域网优先的访问，请使用 [Basement Kit](/zh-Hans/stackkits/kits/basement-kit)。
-- 已有的 VPS 或云主机，并且域名由你掌控，请使用 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。
+- 本地硬件和以局域网为先的访问，请使用 [Basement Kit](/zh-Hans/stackkits/kits/basement-kit)。
+- 带有你所控制域名的现有 VPS 或云主机，请使用 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。
 
-## 规划存储与恢复
+## 规划存储和恢复
 
-在家庭实验室里，照片和视频往往会成为最大的数据集。在导入家人的照片库之前，请先规划存储和备份。
+照片和视频往往会成为 homelab 中最大的数据集。在导入家庭照片库之前，请先规划好存储和备份。
 
-- 按照片和视频的增长量来估算主存储和备份存储的容量。
-- 恢复既需要原始的照片和视频，也需要 Immich 数据库。缺少任何一部分都不算完整的恢复。
-- 在这个库成为你照片的唯一副本之前，先演练一次分阶段恢复。参见[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。
+- 按照照片和视频的增长来规划主存储和备份存储的容量。
+- 恢复既需要原始照片和视频，也需要 Immich 数据库。只有其中任何一部分都不是完整的恢复。
+- 在照片库成为你照片的唯一副本之前，先演练一次分阶段恢复。请参阅[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。
+
+## 什么内容存储在哪里
+
+- 原始照片和视频存储在你的主机上，位于计划为 `photos` 工作负载创建的持久化分配中。
+- 保存相册、人物和设置的 Immich 数据库单独存储在主机上。其密码保存在本地所有者托管中，而不是配置里。
+- 备份是单独的一份副本。恢复既需要原始文件，也需要数据库。
 
 ## 设置
 
-在 [Immich](/zh-Hans/stackkits/apps/immich) 页面选择工作负载并完成首次使用。然后按照[从手机备份照片](/zh-Hans/guides/stackkits/use-cases/photos/phone-backup)连接每一部手机，并检查测试照片是否已到达。
+在 [Immich](/zh-Hans/stackkits/apps/immich) 页面选择工作负载并完成首次使用。然后通过[从手机备份照片](/zh-Hans/guides/stackkits/use-cases/photos/phone-backup)连接每部手机，并检查测试照片是否到达。
+
+每一步之后，你应该看到：计划列出了 `photos` 工作负载，Node Hub 或部署输出中出现了照片地址，你可以创建 Immich 所有者账户，并且手机上的测试照片出现在照片库中。
+
+## 如果出了问题
+
+- 照片地址打不开：将其与 Node Hub 中的地址进行比较，并参阅[故障排查](/zh-Hans/guides/stackkits/troubleshooting)。
+- 手机不上传：按照[日常使用](/zh-Hans/guides/stackkits/daily-use)中的说明，检查它能否解析你的 homelab 名称，并遵循[从手机备份照片](/zh-Hans/guides/stackkits/use-cases/photos/phone-backup)。
+- 你不确定照片是否安全：在你通过[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)演练过恢复之前，不要把这个照片库当作唯一的副本。

@@ -1,11 +1,19 @@
 ---
 title: "Immich"
-description: "Immich für den Photos-Anwendungsfall auswählen und die erste Nutzung abschließen"
+description: "Immich für den Fotos-Anwendungsfall auswählen und die erste Nutzung abschließen"
 sidebarTitle: "Immich"
 icon: images
 ---
 
-Immich liefert den Anwendungsfall [Fotos](/de/guides/stackkits/use-cases/photos). Es ist die veröffentlichte Alternative für den optionalen nativen v2-Workload `photos`, und die anfänglichen Basement- und Cloud-StackSpecs aktivieren ihn nicht. Plane Speicher und Wiederherstellung auf der Seite Fotos, bevor du es auswählst.
+Immich stellt den Anwendungsfall [Fotos](/de/guides/stackkits/use-cases/photos) bereit. Es ist die veröffentlichte Alternative für den optionalen nativen v2-Workload `photos`; die anfänglichen StackSpecs für Basement und Cloud aktivieren ihn nicht. Plane Speicher und Wiederherstellung auf der Fotos-Seite, bevor du ihn auswählst.
+
+## Was es ist
+
+Immich ist eine Foto- und Videobibliothek, die auf deinem eigenen Host läuft. Sie leistet, was ein Cloud-Fotodienst leistet: Die Handy-App lädt neue Bilder hoch, und du durchsuchst, findest und teilst sie in einer Webbibliothek. Ein StackKit enthält es, damit die Fotos deiner Familie auf Hardware bleiben, die du kontrollierst.
+
+## Welche Kits und Anwendungsfälle es enthalten
+
+Immich ist die Standardanwendung des Anwendungsfalls Fotos. Der veröffentlichte Katalog sieht es für das Basement Kit und das Cloud Kit auf Standalone Compose vor; das Cloud Kit ist eine Vorschau ohne bisher automatisierten Lifecycle-Lauf. Coolify und Komodo erscheinen ebenfalls in der Kompatibilitätstabelle für `photos`, jedoch ohne Backup und Wiederherstellung.
 
 ## Veröffentlichter Vertrag
 
@@ -17,15 +25,34 @@ Immich liefert den Anwendungsfall [Fotos](/de/guides/stackkits/use-cases/photos)
 | Erforderliche Secret-Referenz | `database-password` |
 | Unterstützter Standalone-Adapter | `standalone-compose` |
 
-Das veröffentlichte CLI validiert und generiert diesen Workload-Vertrag, einschließlich persistenter Foto- und Datenbank-Zuweisungen und einer generierten Fotos-Route. Der [Anwendungsfall-Katalog](/de/stackkits/reference/use-case-catalog) zeigt die Komponenten, die das Release deklariert.
+Die veröffentlichte CLI validiert und generiert diesen Workload-Vertrag, einschließlich persistenter Foto- und Datenbank-Zuweisungen und einer generierten Fotos-Route. Der [Anwendungsfall-Katalog](/de/stackkits/reference/use-case-catalog) zeigt die Komponenten, die die Version deklariert.
 
-Der Slot `database-password` enthält eine opake `secret://`-Referenz; die lokale Owner-Verwahrung hält das Passwort. Wähle Workload, Platzierung und Adapter in der [StackSpec](/de/guides/stackkits/configure-stack-spec) und folge dann [Einen Workload hinzufügen](/de/stackkits/reference/day-2-operations#einen-workload-zu-einem-bestehenden-workspace-hinzufügen), um zu validieren, die Verwahrung herzustellen, zu generieren, den Plan zu prüfen, anzuwenden und zu verifizieren.
+Der Slot `database-password` enthält eine opake `secret://`-Referenz; die lokale Owner-Custody hält das Passwort. Wähle Workload, Platzierung und Adapter in der [StackSpec](/de/guides/stackkits/configure-stack-spec) und folge dann [Einen Workload hinzufügen](/de/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace), um zu validieren, die Custody einzurichten, zu generieren, den Plan zu prüfen, anzuwenden und zu verifizieren.
+
+## Wie du es öffnest
+
+Öffne die generierte Fotos-Route, die die CLI ausgibt oder die im [Node Hub](/de/guides/stackkits/node-hub) aufgeführt ist. Die lokale Standarddomain ist `home.test`, und der Name muss auf deinem Gerät aufgelöst werden. Dieselbe Adresse fragt die Handy-App als Serveradresse ab.
 
 ## Erste Nutzung
 
-1. Schließe die StackKits-Verifikation nach einem Rollout ab, der bereits eine gültige Owner-gebundene Verwahrung hat.
+1. Schließe die StackKits-Verifikation nach einem Rollout ab, der bereits über eine gültige, an den Owner gebundene Custody verfügt.
 2. Öffne die generierte Immich-Adresse aus dem Node Hub oder der Rollout-Ausgabe.
-3. Lege das Anwendungs-Owner-Konto an und verbinde Clients erst, nachdem du Speicherkapazität und Backups bestätigt hast.
-4. Verbinde jedes Smartphone mit [Fotos vom Smartphone sichern](/de/guides/stackkits/use-cases/photos/phone-backup).
+3. Lege das Owner-Konto der Anwendung an und verbinde Clients erst, nachdem du Speicherkapazität und Backups bestätigt hast.
+4. Verbinde jedes Handy mit [Fotos von deinem Handy sichern](/de/guides/stackkits/use-cases/photos/phone-backup).
 
 Verifiziere den StackKits-Workspace nach jeder Konfigurationsänderung erneut.
+
+## Was gesichert wird
+
+Die Wiederherstellung braucht sowohl die originalen Fotos und Videos als auch die Immich-Datenbank; ein Teil allein ist keine vollständige Wiederherstellung. Foto-Originale gehören zur Abdeckungsgruppe `media`, die gewählt und nicht vererbt wird, daher enthält ein erster Snapshot eine große Bibliothek nicht stillschweigend. Führe `stackkit backup status --json` aus, um genau zu sehen, welche Volumes der nächste Snapshot enthält, und übe eine gestufte Wiederherstellung mit [Sichern und Wiederherstellen](/de/guides/stackkits/back-up-and-restore). Das Auslesen auf Anwendungsebene nach der Wiederherstellung wurde zuletzt mit v0.33.3 für den Backup-Zyklus verifiziert; siehe den Nachweishinweis auf dieser Seite.
+
+## Was du erwarten kannst
+
+Fotobibliotheken sind oft der größte Datenbestand in einem Homelab und wachsen weiter; dimensioniere deshalb den primären und den Backup-Speicher für das Wachstum von Fotos und Videos. Der erste Upload von einem Handy kann bei einem großen Album eine Weile dauern; ein kleines Testalbum mit einem übrigen Foto genügt für eine erste Prüfung.
+
+## Wenn etwas schiefgeht
+
+- Die Adresse öffnet sich nicht: Vergleiche sie mit der Rollout-Ausgabe und bestätige, dass der Name vom Gerät aus aufgelöst wird. Siehe [Fehlerbehebung](/de/guides/stackkits/troubleshooting).
+- Das Handy kann sich nicht anmelden: Verwende das Immich-Konto, das du in der Webbibliothek angelegt hast; es ist nicht dein kombify-Konto.
+- Ein Testfoto kommt nicht an: Prüfe das gewählte Album und den Fotozugriff der App und folge dann [Fotos von deinem Handy sichern](/de/guides/stackkits/use-cases/photos/phone-backup).
+- Der Speicher läuft voll: Füge keine Fotos mehr hinzu und behebe die Kapazität vor dem nächsten Snapshot.

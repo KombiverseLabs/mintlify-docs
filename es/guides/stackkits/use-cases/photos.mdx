@@ -1,22 +1,33 @@
 ---
-title: "Photos"
-description: "Guarda las fotos y los vídeos familiares en un host que controlas, con Immich y copia de seguridad desde tu teléfono"
-sidebarTitle: "Photos"
+title: "Fotos"
+description: "Guarda las fotos y vídeos familiares en un host que controlas, con Immich y copia de seguridad desde tu teléfono"
+sidebarTitle: "Fotos"
 icon: camera-retro
 ---
 
 <Info>
-  Estado de la evidencia (2026-09-24, v0.41.0): Photos con Immich es
-  `available, lifecycle-verified`. Photos se verificó en el archivo público de la
-  v0.39.7, donde una ejecución del ciclo de vida del productor de Depot en
-  Ubuntu 24.04 amd64 (Basement Kit, independiente) pasó install, init, generate,
-  apply, configuración del propietario, verify, backup, restore y activación de
-  la restauración, con la lectura de vuelta de la aplicación verificada a través
-  del loopback local del invitado. Cloud Kit es una vista previa sin ejecución
-  automatizada del ciclo de vida todavía.
+  Estado de la evidencia (2026-09-24, v0.41.0): Photos con Immich está
+  `available, lifecycle-verified`. Photos se verificó en el archivo público
+  v0.39.7, donde una ejecución del ciclo de vida del productor Depot en Ubuntu
+  24.04 amd64 (Basement Kit, independiente) superó install, init, generate,
+  apply, owner setup, verify, backup, restore y restore activation, con la
+  lectura de la aplicación verificada sobre el loopback local del invitado.
+  Cloud Kit es una vista previa sin una ejecución automatizada del ciclo de
+  vida todavía.
 </Info>
 
-Photos da a tu hogar una única biblioteca de fotos y vídeos en un host que tú operas. Immich ejecuta la biblioteca, y sus apps móviles suben las imágenes desde tus teléfonos. El catálogo de la versión llama a este caso de uso Photos and Memories y lo entrega como el workload opcional `photos`.
+Photos ofrece a tu hogar una biblioteca única de fotos y vídeos en un host que operas. Immich ejecuta la biblioteca, y sus apps móviles suben las imágenes desde tus teléfonos. El catálogo de versiones llama a este caso de uso Photos and Memories y lo entrega como la carga de trabajo opcional `photos`.
+
+## En palabras sencillas
+
+Photos es tu propia biblioteca de fotos familiar en casa. Un programa llamado Immich guarda tus imágenes y vídeos en tu host, y una app en cada teléfono envía allí las fotos nuevas automáticamente. Funciona como un servicio de fotos en la nube, salvo que la biblioteca está en un ordenador que controlas.
+
+## Qué necesitas primero
+
+- Una base terminada: lee [Antes de empezar](/es/guides/stackkits/before-you-start) y verifica tu kit.
+- Suficiente espacio libre en disco para la biblioteca y un lugar para las copias de seguridad.
+- Teléfonos en la misma red para la primera subida.
+- Una decisión sobre qué kit lo aloja (consulta más abajo).
 
 ## Aplicaciones
 
@@ -31,17 +42,31 @@ Photos da a tu hogar una única biblioteca de fotos y vídeos en un host que tú
 
 ## Elige el host
 
-- Usa [Basement Kit](/es/stackkits/kits/basement-kit) para hardware local y acceso orientado a la LAN.
-- Usa [Cloud Kit](/es/stackkits/kits/cloud-kit) para un VPS o un host en la nube existente con un dominio que controlas.
+- Usa [Basement Kit](/es/stackkits/kits/basement-kit) para hardware local y acceso centrado en la LAN.
+- Usa [Cloud Kit](/es/stackkits/kits/cloud-kit) para un VPS o host en la nube existente con un dominio que controlas.
 
 ## Planifica el almacenamiento y la recuperación
 
-Las fotos y los vídeos suelen convertirse en el mayor conjunto de datos de un homelab. Planifica el almacenamiento y las copias de seguridad antes de importar una biblioteca familiar.
+Las fotos y los vídeos suelen convertirse en el conjunto de datos más grande de un homelab. Planifica el almacenamiento y las copias de seguridad antes de importar una biblioteca familiar.
 
 - Dimensiona el almacenamiento principal y el de copias de seguridad para el crecimiento de fotos y vídeos.
-- La recuperación necesita tanto las fotos y los vídeos originales como la base de datos de Immich. Una de las dos partes por sí sola no es una restauración completa.
-- Practica una restauración preparada antes de que la biblioteca sea la única copia de tus fotos. Consulta [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).
+- La recuperación necesita tanto las fotos y vídeos originales como la base de datos de Immich. Cualquiera de las dos partes por sí sola no es una restauración completa.
+- Practica una restauración por etapas antes de que la biblioteca sea la única copia de tus fotos. Consulta [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).
+
+## Qué se almacena y dónde
+
+- Las fotos y vídeos originales se almacenan en tu host, en la asignación persistente que crea el plan para la carga de trabajo `photos`.
+- La base de datos de Immich, que contiene álbumes, personas y ajustes, se almacena por separado en el host. Su contraseña se guarda en la custodia local del propietario, no en la configuración.
+- Las copias de seguridad son una copia aparte. Una restauración necesita tanto los archivos originales como la base de datos.
 
 ## Configúralo
 
-Selecciona el workload y completa el primer uso en la página de [Immich](/es/stackkits/apps/immich). Después conecta cada teléfono con [Copia de seguridad de fotos desde tu teléfono](/es/guides/stackkits/use-cases/photos/phone-backup) y comprueba que llega una foto de prueba.
+Selecciona la carga de trabajo y completa el primer uso en la página de [Immich](/es/stackkits/apps/immich). Después conecta cada teléfono con [Copia de seguridad de fotos desde tu teléfono](/es/guides/stackkits/use-cases/photos/phone-backup) y comprueba que llega una foto de prueba.
+
+Después de cada paso deberías ver lo siguiente: el plan lista la carga de trabajo `photos`, aparece una dirección de Photos en el Node Hub o en la salida del despliegue, puedes crear la cuenta de propietario de Immich y una foto de prueba de tu teléfono aparece en la biblioteca.
+
+## Si algo sale mal
+
+- La dirección de Photos no se abre: compárala con la dirección del Node Hub y consulta [Solución de problemas](/es/guides/stackkits/troubleshooting).
+- Un teléfono no sube: comprueba que resuelve los nombres de tu homelab, como se describe en [Día a día](/es/guides/stackkits/daily-use), y sigue [Copia de seguridad de fotos desde tu teléfono](/es/guides/stackkits/use-cases/photos/phone-backup).
+- No estás seguro de que tus fotos estén a salvo: no trates la biblioteca como la única copia hasta que hayas practicado una restauración en [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).

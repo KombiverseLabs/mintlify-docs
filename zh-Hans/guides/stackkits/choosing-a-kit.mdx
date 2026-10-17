@@ -1,42 +1,74 @@
 ---
 title: "选择 StackKit"
-description: "对比 Home 与 Cloud 入门路径以及 Modern Homelab 预览版"
+description: "比较 Home 和 Cloud 入门路径与 Modern Homelab 预览版"
 sidebarTitle: "选择 kit"
 ---
 
-公开的 StackKits 版本包含 Basement Kit、Cloud Kit 和 Modern Homelab 预览定义。请根据你已经在运营的主机选择路径。
-Cloud Kit 的实时运行时证据取决于具体版本；Modern 目前还没有受支持的完整安装路径。
+公开的 StackKits 版本包含 Basement Kit、Cloud Kit 以及 Modern Homelab 预览定义。请针对你已在运营的主机选择一条路径。Cloud Kit 的实时运行时证据取决于具体版本；Modern 目前还没有受支持的完整安装路径。
+
+## 通俗地说
+
+kit 是你的 homelab 的现成起点。它决定你的服务在哪里运行，以及你如何访问它们。选哪个 kit 取决于你拥有的计算机，而不是你想要哪些功能：家里的计算机适合 Basement Kit，而你已经租用并自行运营、拥有自己域名的服务器适合 Cloud Kit。如果你从未设置过服务器，请先阅读[开始之前](/zh-Hans/guides/stackkits/before-you-start)，然后从 Basement Kit 开始。
+
+## 你首先需要什么
+
+- 清楚你将使用哪台计算机或服务器，并确认你有权在其上运行命令。
+- 对于 Cloud Kit，需要一个你控制的域名和 DNS 记录。
+- 能够访问该机器上的终端。
+- 遵循独立路径不需要 kombify 账户。
+
+## 比较各条路径
 
 | 如果你运营的是…… | 选择 | 原因 |
 | --- | --- | --- |
-| 家庭或私有网络中的本地硬件 | [Basement Kit](/zh-Hans/stackkits/kits/basement-kit) | 它是已发布的、以局域网优先的本地配置。 |
-| 已有的 VPS 或云主机，并且域名由你掌控 | [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit) | 它是为该主机发布的公共域名配置。 |
-| 你想探索如何连接的 Home 与 Cloud 环境 | [Modern Homelab（alpha）](/zh-Hans/stackkits/kits/modern-homelab) | 已发布的定义描述了这两个位置；完整的运行时支持仍待完成。 |
+| 家庭或私有网络中的本地硬件 | [Basement Kit](/zh-Hans/stackkits/kits/basement-kit) | 这是已发布的、以本地和局域网优先的配置档。 |
+| 带有你所控制域名的现有 VPS 或云主机 | [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit) | 这是适用于该主机、已发布的公共域名配置档。 |
+| 你想探索其连接方式的 Home 和 Cloud 环境 | [Modern Homelab（alpha）](/zh-Hans/stackkits/kits/modern-homelab) | 已发布的定义描述了这两个位置；完整的运行时支持仍待完成。 |
 
-现有的安装指南请从一个环境开始。StackKits 不会配置服务器，也不会托管提供商凭据，因此请在弄清楚你掌控哪台主机和哪个域名之后，再选择 kit。
+对于现有的安装指南，请从一个环境开始。StackKits 不会供应服务器，也不会托管提供商凭据，因此请在确定你控制哪台主机和哪个域名之后再选择 kit。
 
-第一条成功的 Basement 路径是[快速开始](/zh-Hans/stackkits/quickstart)。对于你已经在运营的 VPS，请使用 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。[StackKits 网站](https://stackkit.cc/getting-started)也可以帮你做选择。
+第一条成功的 Basement 路径是[快速入门](/zh-Hans/stackkits/quickstart)。对于你已在运营的 VPS，请使用 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。[StackKits 网站](https://stackkit.cc/getting-started)也可以帮助你选择。
+
+<span id="install-only-the-toolchain"></span>
 
 ## 仅安装工具链
 
-如果想安装 CLI 和完整的公开目录，而不使用 Basement 一行命令：
+要安装 CLI 和完整的公共目录，而不使用 Basement 一行命令安装：
 
 ```bash
 curl -sSL https://install.stackkit.cc | sh
 ```
 
-如果只想在 CLI 之外安装某一个 kit 的定义，请传入它的名称：
+要在安装 CLI 的同时只安装某一个 kit 的定义，请传入它的名称：
 
 ```bash
 curl -sSL https://install.stackkit.cc | sh -s -- basement-kit
 ```
 
-你可以用同样的方式传入 `cloud-kit` 或 `modern-homelab`。
+你也可以用同样的方式传入 `cloud-kit` 或 `modern-homelab`。
 
 <Note>
-  已停用的 `base-kit` 名称会被拒绝。仍然传入该名称的脚本请更新为使用 `basement-kit`。
+  已停用的 `base-kit` 名称会被拒绝。请更新仍在传入它的脚本，改用
+  `basement-kit`。
 </Note>
 
-这些 shell 安装器会解析当前的公开版本，支持 `amd64` 和 `arm64` 上的 Linux 和 macOS。Windows 用户可以从[最新版本](https://github.com/kombifyio/StackKits/releases/latest)下载 `windows_amd64` ZIP。
+shell 安装程序会解析当前的公开版本，并支持 `amd64` 和 `arm64` 上的 Linux 和 macOS。Windows 用户可以从[最新版本](https://github.com/kombifyio/StackKits/releases/latest)下载 `windows_amd64` ZIP。
+
+## 选择之后会发生什么
+
+1. 通过相应的指南安装：Basement Kit 使用[快速入门](/zh-Hans/stackkits/quickstart)，或者使用 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。你会在主机上得到一个工作区文件夹，其中包含你的配置。
+2. 检查配置，然后在它更改主机之前先审阅计划。CLI 会告诉你是否已就绪。
+3. 在 [Node Hub](/zh-Hans/guides/stackkits/node-hub) 中完成首次运行保护。
+
+## 什么内容存储在哪里
+
+你选择的 kit 存储在 StackSpec 中，这是主机上你的工作区文件夹里的一个配置文件。对于独立路径，kombify 账户中不存储任何内容，StackKits 也不保存提供商凭据。请参阅[配置 StackSpec](/zh-Hans/guides/stackkits/configure-stack-spec)。
+
+## 如果出了问题
+
+- 安装程序因错误而停止：用 `stackkit logs latest --json` 读取日志，并参阅[故障排查](/zh-Hans/guides/stackkits/troubleshooting)。在读完错误信息之前，请不要再次运行安装程序。
+- 你选的 kit 与你的主机不匹配：先读取日志，然后用与你所控制主机相匹配的 kit 重新开始。
+- 脚本因 `base-kit` 而失败：该名称已停用，请使用 `basement-kit`。
+- 设置完成后的日常问题，请参阅[日常使用](/zh-Hans/guides/stackkits/daily-use)。
 
 仅安装工具链之后，请在 [Basement Kit](/zh-Hans/stackkits/kits/basement-kit) 或[配置 StackSpec](/zh-Hans/guides/stackkits/configure-stack-spec) 上初始化工作区。

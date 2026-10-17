@@ -1,37 +1,66 @@
 ---
-title: "Publicar un servicio en kombify.me"
-description: "Dale a un servicio de homelab accesible públicamente un nombre HTTPS estable"
+title: "Publica un servicio en kombify.me"
+description: "Da un nombre HTTPS estable a un servicio del homelab accesible públicamente"
 sidebarTitle: "Direcciones públicas"
 icon: "lock"
 ---
 
-Usa esta vía cuando el servicio ya responde en una URL HTTP(S) pública.
-kombify.me termina TLS y hace de proxy entre el navegador y ese origen. En esta
-vía se rechazan los destinos privados, de loopback y de enlace local.
+Usa esta ruta cuando el servicio ya responde en una URL HTTP(S) pública.
+kombify.me termina TLS y hace de proxy del navegador hacia ese origen. En esta
+ruta se rechazan los destinos privados, de loopback y de enlace local.
+
+En términos cotidianos: tu app ya tiene una dirección web que cualquiera en
+internet puede abrir. kombify.me le da un segundo nombre, más ordenado, en
+`kombify.me`, con HTTPS gestionado por ti. Los visitantes escriben el nombre de
+kombify.me y kombify.me los pasa a tu app. ¿No estás seguro de que este sea el
+tipo correcto? Lee primero
+[Pública, privada o redirección](/es/kombify-me/public-or-private).
 
 ## Antes de empezar
 
 - El origen debe ser accesible desde internet por HTTP o HTTPS.
-- Una cuenta de kombify con sesión iniciada registra los nombres a través de
+- Una cuenta de kombify con la sesión iniciada registra nombres a través de
   [api.kombify.io](https://api.kombify.io). Las instalaciones autoalojadas se
   registran con una clave de API tras verificar el correo electrónico.
 - Los flujos conectados de StackKits y Techstack pueden registrar por ti los
-  nombres de los kits propios.
+  nombres de kit propios.
 
-## Dale un nombre al servicio
+## Da un nombre al servicio
 
 1. Registra un nombre base para el homelab. Las cuentas alojadas obtienen
    `{homelab}-{you}.kombify.me`. Las instalaciones autoalojadas obtienen
    `sh-{homelab}-{device}.kombify.me`.
-2. Registra el servicio bajo esa base. Los slugs de kits propios, como `auth`,
-   `id` y `coolify`, siempre se convierten en `{base}-{service}.kombify.me`.
+2. Registra el servicio bajo esa base. Los slugs de kit propios como `auth`,
+   `id` y `coolify` siempre se convierten en `{base}-{service}.kombify.me`.
 3. Apunta el servicio a la URL del origen público.
-4. Expón la ruta del servicio. Los nombres de servicio no expuestos siguen sin
-   publicarse.
+4. Expón la ruta del servicio. Los nombres de servicio no expuestos permanecen
+   sin publicar.
 
 Después abre `https://{base}-{service}.kombify.me` en un navegador.
 
-Los nombres apex reservados, como `auth.kombify.me`, permanecen sin usar. El
+Para un recorrido en lenguaje sencillo con nombres de ejemplo, consulta
+[Obtén tu primera dirección de kombify.me](/es/kombify-me/get-your-first-address).
+
+## Qué esperar después de cada paso
+
+- Después de registrar el nombre base, kombify.me responde con el nombre base
+  completo. Anótalo; todos los nombres de app se construyen a partir de él.
+- Después de registrar el servicio y su origen, el nombre existe pero sigue
+  desactivado. Los visitantes reciben una respuesta "not exposed" (404) hasta
+  que lo expongas.
+- Después de exponer el servicio, el nombre acepta visitantes. Los cambios
+  pueden tardar hasta aproximadamente un minuto en verse, porque kombify.me
+  mantiene una caché de enrutamiento corta.
+- En una instalación autoalojada, mientras la dirección de correo electrónico no
+  esté verificada, los nombres nuevos empiezan en pausa y los visitantes reciben
+  una respuesta "inactive" (503). Termina la verificación o establece la
+  dirección como activa.
+
+Cualquiera que conozca el nombre puede abrir una dirección pública a menos que
+la app pida un inicio de sesión. Mantén las apps con datos sensibles tras su
+propio inicio de sesión.
+
+Los nombres apex reservados como `auth.kombify.me` permanecen sin usar. El
 inicio de sesión del kit sigue llegando a `{your-lab}-auth.kombify.me`.
 
 ## Si el origen no es público
@@ -41,3 +70,17 @@ No publiques una URL de localhost o solo de LAN en el proxy público.
 
 Los nombres solo locales permanecen en el resolvedor del homelab que instala
 StackKits. No son nombres de kombify.me.
+
+## Si algo sale mal
+
+| Qué ves | Qué hacer |
+| --- | --- |
+| "service subdomain not exposed" (404) | Expón la ruta del servicio. |
+| "subdomain inactive" (503) | La dirección está en pausa o aún no verificada. Establécela como activa. |
+| Se rechaza guardar el origen | La ruta pública solo acepta direcciones `http` o `https` públicas. Usa una [dirección privada](/es/kombify-me/private-targets) para cualquier otra cosa. |
+| 502 "Bad Gateway" | kombify.me no pudo alcanzar tu origen. Comprueba que la app se está ejecutando y responde desde internet. |
+| "already taken", "reserved" o un error de límite | Elige otro nombre o elimina una dirección que ya no uses. |
+
+Más comprobaciones: [solución de problemas de kombify.me](/es/kombify-me/troubleshooting).
+Para pausar, cambiar o eliminar una dirección más adelante, consulta
+[Cambia, pausa o elimina una dirección](/es/kombify-me/change-pause-or-remove-an-address).

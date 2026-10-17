@@ -1,46 +1,72 @@
 ---
 title: "Fotos"
-description: "Bewahre Familienfotos und -videos auf einem Host auf, den du kontrollierst, mit Immich und Backup von deinem Smartphone"
+description: "Bewahre Familienfotos und -videos auf einem Host auf, den du kontrollierst, mit Immich und Backup vom Handy"
 sidebarTitle: "Fotos"
 icon: camera-retro
 ---
 
 <Info>
-  Evidenzstand (2026-09-24, v0.41.0): Fotos mit Immich ist `available,
-  lifecycle-verified`. Fotos wurde auf dem öffentlichen v0.39.7-Archiv verifiziert,
-  wo ein Depot-Producer-Lifecycle-Lauf auf Ubuntu 24.04 amd64 (Basement Kit,
-  standalone) install, init, generate, apply, Owner-Setup, verify,
-  backup, restore und restore activation bestanden hat, wobei die Anwendungs-Rückmeldung
-  über das Gast-lokale Loopback verifiziert wurde. Cloud Kit ist eine Vorschau ohne
-  automatisierten Lifecycle-Lauf.
+  Nachweisstand (2026-09-24, v0.41.0): Fotos mit Immich ist `available,
+  lifecycle-verified`. Fotos wurde auf dem öffentlichen v0.39.7-Archiv
+  verifiziert, auf dem ein Depot-Producer-Lifecycle-Lauf unter Ubuntu 24.04
+  amd64 (Basement Kit, eigenständig) Installation, Init, Generierung, Anwendung,
+  Eigentümer-Einrichtung, Verifikation, Backup, Wiederherstellung und
+  Aktivierung der Wiederherstellung bestand, wobei das Anwendungs-Readback über
+  das gastlokale Loopback verifiziert wurde. Cloud Kit ist eine Vorschau ohne
+  bisherigen automatisierten Lifecycle-Lauf.
 </Info>
 
-Fotos gibt deinem Haushalt eine gemeinsame Bibliothek für Fotos und Videos auf einem Host, den du betreibst. Immich betreibt die Bibliothek, und seine Mobile-Apps laden Bilder von euren Smartphones hoch. Der Release-Katalog nennt diesen Anwendungsfall Photos and Memories und liefert ihn als optionalen Workload `photos` aus.
+Fotos gibt deinem Haushalt eine gemeinsame Bibliothek für Fotos und Videos auf einem Host, den du betreibst. Immich betreibt die Bibliothek, und seine mobilen Apps laden Bilder von deinen Handys hoch. Der Release-Katalog nennt diesen Anwendungsfall Photos and Memories und liefert ihn als optionalen Workload `photos` aus.
+
+## In einfachen Worten
+
+Fotos ist deine eigene Familien-Fotobibliothek zu Hause. Ein Programm namens Immich speichert deine Bilder und Videos auf deinem Host, und eine App auf jedem Handy sendet neue Bilder automatisch dorthin. Es funktioniert wie ein Cloud-Fotodienst, nur dass sich die Bibliothek auf einem Computer befindet, den du kontrollierst.
+
+## Was du zuerst brauchst
+
+- Eine abgeschlossene Grundlage: Lies [Bevor du beginnst](/de/guides/stackkits/before-you-start) und verifiziere dein Kit.
+- Genug freien Speicherplatz für die Bibliothek und einen Ort für Backups.
+- Handys im selben Netzwerk für den ersten Upload.
+- Eine Entscheidung, welches Kit sie hostet (siehe unten).
 
 ## Anwendungen
 
 <CardGroup cols={2}>
   <Card title="Immich" icon="images" href="/de/stackkits/apps/immich">
-    Die Foto- und Videobibliothek hinter Fotos: freigegebener Vertrag, Auswahl und erste Nutzung.
+    Die Foto- und Videobibliothek hinter Fotos: veröffentlichter Vertrag, Auswahl und erste Nutzung.
   </Card>
-  <Card title="Fotos von deinem Smartphone sichern" icon="mobile-screen-button" href="/de/guides/stackkits/use-cases/photos/phone-backup">
-    Verbinde die Immich-App, wähle Alben aus und prüfe deinen ersten Upload.
+  <Card title="Fotos vom Handy sichern" icon="mobile-screen-button" href="/de/guides/stackkits/use-cases/photos/phone-backup">
+    Verbinde die Immich-App, wähle Alben und prüfe deinen ersten Upload.
   </Card>
 </CardGroup>
 
 ## Den Host wählen
 
-- Nutze [Basement Kit](/de/stackkits/kits/basement-kit) für lokale Hardware und LAN-first-Zugriff.
-- Nutze [Cloud Kit](/de/stackkits/kits/cloud-kit) für einen vorhandenen VPS oder Cloud-Host mit einer Domain, die du kontrollierst.
+- Nutze [Basement Kit](/de/stackkits/kits/basement-kit) für lokale Hardware und LAN-zuerst-Zugriff.
+- Nutze [Cloud Kit](/de/stackkits/kits/cloud-kit) für einen bestehenden VPS oder Cloud-Host mit einer Domain, die du kontrollierst.
 
 ## Speicher und Wiederherstellung planen
 
 Fotos und Videos werden oft zum größten Datenbestand in einem Homelab. Plane Speicher und Backups, bevor du eine Familienbibliothek importierst.
 
-- Dimensioniere primären und Backup-Speicher für das Wachstum von Fotos und Videos.
+- Dimensioniere den primären und den Backup-Speicher für das Wachstum von Fotos und Videos.
 - Die Wiederherstellung braucht sowohl die Original-Fotos und -Videos als auch die Immich-Datenbank. Jeder Teil allein ist keine vollständige Wiederherstellung.
-- Übe eine gestufte Wiederherstellung, bevor die Bibliothek die einzige Kopie deiner Fotos ist. Siehe [Sichern und wiederherstellen](/de/guides/stackkits/back-up-and-restore).
+- Übe eine gestufte Wiederherstellung, bevor die Bibliothek die einzige Kopie deiner Fotos ist. Siehe [Sichern und Wiederherstellen](/de/guides/stackkits/back-up-and-restore).
+
+## Was wo gespeichert wird
+
+- Die Original-Fotos und -Videos werden auf deinem Host gespeichert, in der persistenten Zuweisung, die der Plan für den Workload `photos` anlegt.
+- Die Immich-Datenbank, die Alben, Personen und Einstellungen enthält, wird getrennt auf dem Host gespeichert. Ihr Passwort liegt in der lokalen Eigentümer-Verwahrung, nicht in der Konfiguration.
+- Backups sind eine separate Kopie. Eine Wiederherstellung braucht sowohl die Originaldateien als auch die Datenbank.
 
 ## Einrichten
 
-Wähle den Workload aus und schließe die erste Nutzung auf der Seite [Immich](/de/stackkits/apps/immich) ab. Verbinde danach jedes Smartphone mit [Fotos von deinem Smartphone sichern](/de/guides/stackkits/use-cases/photos/phone-backup) und prüfe, ob ein Testfoto ankommt.
+Wähle den Workload und schließe die erste Nutzung auf der Seite [Immich](/de/stackkits/apps/immich) ab. Verbinde dann jedes Handy mit [Fotos vom Handy sichern](/de/guides/stackkits/use-cases/photos/phone-backup) und prüfe, ob ein Testfoto ankommt.
+
+Nach jedem Schritt solltest du Folgendes sehen: Der Plan listet den Workload `photos`, eine Fotos-Adresse erscheint im Node Hub oder in der Rollout-Ausgabe, du kannst das Immich-Eigentümerkonto anlegen, und ein Testfoto von deinem Handy erscheint in der Bibliothek.
+
+## Wenn etwas schiefgeht
+
+- Die Fotos-Adresse öffnet sich nicht: Vergleiche sie mit der Adresse im Node Hub und siehe [Fehlerbehebung](/de/guides/stackkits/troubleshooting).
+- Ein Handy lädt nicht hoch: Prüfe, ob es die Namen deines Homelabs auflöst, wie unter [Im Alltag](/de/guides/stackkits/daily-use) beschrieben, und folge [Fotos vom Handy sichern](/de/guides/stackkits/use-cases/photos/phone-backup).
+- Du bist unsicher, ob deine Fotos sicher sind: Betrachte die Bibliothek nicht als einzige Kopie, bis du eine Wiederherstellung unter [Sichern und Wiederherstellen](/de/guides/stackkits/back-up-and-restore) geübt hast.

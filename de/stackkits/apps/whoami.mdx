@@ -7,4 +7,33 @@ icon: bug
 
 Whoami wird als veröffentlichter Modulvertrag für die Routing-Diagnose ausgeliefert, aber die anfängliche native v2-StackSpec wählt es nicht aus. Erwarte in einem frischen Basement Kit keine generierte Whoami-Route und kopiere keine Adresse aus einem älteren Rollout.
 
-Ändere die generierte Router-Konfiguration nicht als Reaktion auf eine einzelne Diagnoseanfrage. Aktualisiere stattdessen den validierten StackKits-Intent und generiere den Rollout neu.
+## Was es ist
+
+Whoami ist ein winziger Testdienst. Wenn du ihn öffnest, antwortet er mit einem kurzen Text, der die empfangene Anfrage beschreibt. Ein StackKit kann ihn enthalten, um zu beweisen, dass der Reverse-Proxy ([Traefik](/de/stackkits/apps/traefik)) und der Name des Dienstes zusammenspielen, bevor du dich auf eine größere Anwendung verlässt. Er ist eine Prüfung, nichts für den täglichen Gebrauch.
+
+## Welche Kits es enthalten
+
+Der Katalog definiert Whoami als optionales Modul, das Traefik benötigt. Die anfängliche native v2-StackSpec wählt es nicht aus, daher enthält ein frisches Basement Kit es nicht. Betrachte die generierte Ausgabe deines eigenen Rollouts als einzige Wahrheit darüber, was installiert ist.
+
+## Wie du es öffnest
+
+Wenn eine Version es auswählt, nennt der Katalog das Muster `https://whoami.<domain>`, zum Beispiel `https://whoami.home.test` mit der Standarddomain. Kopiere die Adresse aus der CLI-Ausgabe oder dem [Node Hub](/de/guides/stackkits/node-hub), statt sie zu tippen.
+
+## Erste Nutzung
+
+1. Bestätige, dass Whoami in deiner Rollout-Ausgabe oder im Node Hub aufgeführt ist.
+2. Öffne die generierte Adresse in deinem Browser.
+3. Lies den kurzen Text, der erscheint. Eine Antwort bedeutet, dass der Name aufgelöst wurde und die Route den Dienst erreicht hat.
+4. Schließe die Seite. Es gibt nichts einzurichten.
+
+## Was du erwarten kannst und was du nicht ändern solltest
+
+- Erwarte einfachen Text, keine Anwendung.
+- Wenn dein Rollout die Route schützt, erwarte zuerst eine Anmeldung.
+- Ändere die generierte Router-Konfiguration nicht als Reaktion auf eine einzelne Diagnoseanfrage. Aktualisiere stattdessen den validierten StackKits-Intent und generiere den Rollout neu.
+
+## Wenn etwas schiefgeht
+
+- Die Adresse öffnet sich nicht: Vergleiche sie mit der Adresse in der Rollout-Ausgabe und prüfe, ob der Name auf dem Gerät aufgelöst wird, das du verwendest. Siehe [Fehlerbehebung](/de/guides/stackkits/troubleshooting).
+- Der Dienst ist nicht aufgeführt: Deine StackSpec wählt ihn nicht aus. Erfinde keine Auswahl aus einem älteren Schema.
+- Führe `stackkit verify --json` in deinem Workspace-Ordner aus und lies die Befunde, bevor du etwas änderst.

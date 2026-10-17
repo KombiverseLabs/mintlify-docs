@@ -1,27 +1,65 @@
 ---
 title: "Solución de problemas de kombify.me"
-description: "Por qué no se abre un nombre de kombify.me y qué comprobar"
+description: "Por qué un nombre de kombify.me no se abre y qué comprobar"
 sidebarTitle: "Solución de problemas"
 icon: "life-ring"
 ---
+
+Abre el nombre en un navegador y anota lo que ves. La respuesta te indica con
+qué comprobación empezar. Si todavía no has creado una dirección, empieza con
+[Obtén tu primera dirección de kombify.me](/es/kombify-me/get-your-first-address).
+
+## Qué muestra el navegador
+
+| Qué ves | Motivo más probable |
+| --- | --- |
+| 404, "service subdomain not exposed" | La app está desactivada. Actívala. |
+| 503, "subdomain inactive" | La dirección está en pausa. Vuelve a establecerla como activa. |
+| 503, "try again" en una dirección privada | El ayudante de casa no está conectado. |
+| 502, "Bad Gateway" | kombify.me no pudo alcanzar tu app. Comprueba que se está ejecutando y es pública. |
+| 410, "publication expired" | Terminó un periodo temporal de uso compartido. |
 
 ## El nombre muestra un error o no se abre
 
 | Comprobación | Qué significa |
 | --- | --- |
-| La ruta del servicio está expuesta | El nombre de un servicio no expuesto permanece sin publicar. La exposición está desactivada por defecto. |
-| El nombre tiene la forma correcta | Los servicios de kits propios usan `{base}-{service}.kombify.me`. Los nombres de apex reservados, como `auth.kombify.me`, permanecen sin usar. |
-| El origen es público (dirección pública) | La ruta pública rechaza destinos privados, de loopback y de enlace local. |
-| El agente del nodo está conectado (destino privado) | Si el agente está desconectado, el nombre público permanece no disponible y pide al cliente que reintente. |
-| El mismo propietario se reconecta | Al reconectarse el mismo propietario se restablece el reenvío. El agente de otro propietario no puede servir la ruta. |
+| La ruta del servicio está expuesta | Un nombre de servicio no expuesto permanece sin publicar. La exposición está desactivada por defecto. |
+| El nombre tiene la forma correcta | Los servicios de kit propios usan `{base}-{service}.kombify.me`. Los nombres apex reservados como `auth.kombify.me` permanecen sin usar. |
+| El origen es público (dirección pública) | La ruta pública rechaza los destinos privados, de loopback y de enlace local. |
+| El agente de nodo está conectado (destino privado) | Si el agente está desconectado, el nombre público permanece no disponible y pide al cliente que reintente. |
+| El mismo propietario se reconecta | Reconectar al mismo propietario restablece el reenvío. El agente de otro propietario no puede servir la ruta. |
+
+## Pasos a seguir
+
+1. Vuelve a abrir el nombre pasado aproximadamente un minuto. kombify.me mantiene
+   una caché de enrutamiento de unos 60 segundos, así que un cambio puede no
+   verse de inmediato.
+2. Revisa la respuesta en la tabla anterior y sigue su fila en las
+   comprobaciones de abajo.
+3. Comprueba que la propia app funciona: para una dirección pública, abre
+   directamente su dirección pública; para una dirección privada, ábrela desde
+   dentro de tu red doméstica.
+4. Si registrar un nombre nuevo falla con un error de límite, elimina uno que ya
+   no uses. Consulta
+   [Obtén tu primera dirección de kombify.me](/es/kombify-me/get-your-first-address)
+   para ver los límites.
+
+Para cambiar, pausar o eliminar una dirección, consulta
+[Cambia, pausa o elimina una dirección](/es/kombify-me/change-pause-or-remove-an-address).
+Para la diferencia entre pública y privada, consulta
+[Pública, privada o redirección](/es/kombify-me/public-or-private). Para las
+apps de un kit, consulta
+[Usa una dirección con un servidor de StackKits](/es/kombify-me/connect-a-stackkits-server).
 
 ## Solo necesito el servicio en casa
 
-Usa en su lugar el nombre local. Los nombres locales permanecen en el resolutor
-que instala StackKits. kombify.me no publica nombres `*.lan.kombify.me`.
+Usa en su lugar el nombre local. Los nombres locales permanecen en el
+resolvedor que instala StackKits. kombify.me no publica nombres
+`*.lan.kombify.me`.
 
-## Sigue sin funcionar
+## Sigues atascado
 
-kombify.me es software Alpha, por lo que los nombres y las formas de los errores
-aún pueden cambiar. Escribe a [info@kombify.io](mailto:info@kombify.io) con el
-nombre que usaste y la hora del intento.
+kombify.me es software Alpha, así que los nombres y la forma de los errores
+todavía pueden cambiar. Escribe a [info@kombify.io](mailto:info@kombify.io) con
+el nombre que usaste y la hora del intento. Nunca envíes una contraseña ni una
+clave de API.

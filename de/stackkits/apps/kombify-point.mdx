@@ -1,12 +1,40 @@
 ---
 title: "kombify Point DNS"
-description: "Das optionale lokale StackKits-DNS-Modul für eine Zone nutzen, die du kontrollierst"
+description: "Das optionale lokale DNS-Modul von StackKits für eine Zone verwenden, die du kontrollierst"
 sidebarTitle: "kombify Point DNS"
 icon: globe
 ---
 
-kombify Point DNS wird als veröffentlichter Modulvertrag für eine lokale DNS-Zone ausgeliefert, aber die anfängliche native v2-StackSpec stellt keine aktuelle öffentliche Anleitung zur Aktivierung bereit.
+kombify Point DNS wird als veröffentlichter Modulvertrag für eine lokale DNS-Zone ausgeliefert, aber die anfängliche native v2-StackSpec bietet derzeit keine öffentliche Anleitung zur Aktivierung.
 
-Nutze es nur für ein LAN-Resolver-Setup, das du betreibst. Öffentliches DNS bleibt in der Verantwortung deines eigenen DNS-Providers und deiner Domain-Einrichtung.
+## Was es ist
 
-Erfinde kein Aktivierungsobjekt aus älteren Beispielen. Wenn eine veröffentlichte StackSpec das Modul bereitstellt, teste generierte Namen nur von Clients, die bewusst so konfiguriert sind, dass sie diesen Resolver nutzen.
+DNS ist das Adressbuch, das einen Dienstnamen in die Adresse deines Servers übersetzt. kombify Point ist ein kleiner Resolver für dein Heimnetzwerk, der für deine StackKit-Dienstnamen antwortet. Ein StackKit kann ihn enthalten, damit Geräte zu Hause deine Dienste anhand ihres Namens finden.
+
+## Welche Kits es enthalten
+
+Der Katalog kennzeichnet es als Opt-in und in jedem Kontext standardmäßig deaktiviert. Kein Kit aktiviert es über die anfängliche native v2-StackSpec.
+
+## Wie du es öffnest
+
+Du öffnest es nicht wie eine Anwendung. Der Katalog beschreibt einen Resolver auf Port 53 der LAN-Adresse des Servers und eine Health-Seite unter `http://point.<domain>/health`. Verlasse dich darauf nur, wenn dein Rollout sie aufführt.
+
+## Erste Nutzung
+
+Wenn eine veröffentlichte StackSpec das Modul bereitstellt:
+
+1. Verwende es nur für eine LAN-Resolver-Konfiguration, die du selbst betreibst.
+2. Richte ein Testgerät bewusst auf den Resolver aus.
+3. Öffne von diesem Gerät aus einen generierten Dienstnamen.
+4. Erst danach erwäge, den Resolver auf weiteren Geräten zu verwenden.
+
+## Was du erwarten kannst und was du nicht ändern solltest
+
+- Öffentliches DNS bleibt in der Verantwortung deines eigenen DNS-Anbieters und deines Domain-Setups.
+- Erfinde kein Aktivierungsobjekt aus älteren Beispielen.
+- Teste generierte Namen nur von Clients, die bewusst für diesen Resolver konfiguriert sind. Andere Geräte finden die Namen nicht.
+
+## Wenn etwas schiefgeht
+
+- Ein Name öffnet sich auf einem Gerät nicht: Dieses Gerät verwendet wahrscheinlich den Resolver nicht. Siehe [Fehlerbehebung](/de/guides/stackkits/troubleshooting).
+- Namen schlagen überall fehl: Führe `stackkit verify --json` aus und lies die Befunde.
