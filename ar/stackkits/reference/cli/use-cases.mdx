@@ -38,9 +38,11 @@ stackkit use-cases add mail --expected-spec-hash sha256:<current-hash>
 
 اعرض حالات الاستخدام الاختيارية للـ Kit وبدّل حالتها في الطرفية.
 
-تحرّك مفاتيح الأسهم أو j/k المؤشر. تبدّل المسافة العنصر المظلّل. يؤكد Enter. تبدأ Files وPhotos وVault محددة (القيم الافتراضية L3 للـ Kit).
+Arrow keys or j/k move the cursor. Space toggles the highlighted item. Enter confirms. Without `--kit`, the legacy Files, Photos and Vault selection is used.
 
-يكتب `--print` المعرّفات المحددة في سطر واحد مفصول بفواصل على stdout ليتمكن المثبّتون من تمريرها إلى stackkit init `--use-case`. تذهب المطالبات إلى stderr. وعندما لا يكون stdin طرفية تُعاد القيم الافتراضية الحالية دون مطالبة.
+With `--kit` (Basement or Cloud), choices and defaults come from the embedded CUE kit catalog. Each choice shows its standard profile minimum (CPU / RAM GiB / disk GiB). The running numeric preview includes required Core and selected default alternatives. It observes this host unless `--inventory` and `--node` select another target. Data budgets, add-ons, profile changes and resident policy need a resolved plan. This preview writes no configuration and grants no Apply admission.
+
+`--print` writes the selected IDs as a comma-separated line on stdout so installers can pass them to stackkit init `--use-case`. Prompts go to stderr. When stdin is not a terminal, defaults are returned without a prompt; a kit preview is still printed to stderr. Unknown facts are shown as ?, never zero.
 
 ```bash
 stackkit use-cases pick [flags]
@@ -48,6 +50,9 @@ stackkit use-cases pick [flags]
 
 | الخيار | النوع | الافتراضي | الوصف |
 | --- | --- | --- | --- |
+| `--inventory` | string | — | Read capacity from this Inventory instead of observing the local host; requires `--kit` and `--node` |
+| `--kit` | string | — | Preview main use cases admitted by this kit at standard profiles; observe this host by default |
+| `--node` | string | — | Explicit Inventory node for the kit capacity preview |
 | `--print` | bool | — | اكتب معرّفات حالات الاستخدام المحددة في سطر واحد مفصول بفواصل على stdout |
 
 **أمثلة**
@@ -58,5 +63,10 @@ stackkit use-cases pick
 
 # Print the selected IDs as one comma-separated line for stackkit init --use-case
 stackkit use-cases pick --print
-```
 
+# Preview standard footprints and capacity on this target, from its kit catalog
+stackkit use-cases pick --kit basement-kit --print
+
+# Preview one explicitly selected Inventory node
+stackkit use-cases pick --kit cloud-kit --inventory inventory.yaml --node cloud-node --print
+```

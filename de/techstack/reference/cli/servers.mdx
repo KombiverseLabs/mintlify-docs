@@ -2,9 +2,9 @@
 title: "techstack api servers"
 description: "Generierte Referenz für die Befehle unter techstack api servers"
 sidebarTitle: "servers"
-release: "v0.39.0"
+release: "v0.41.15"
 ---
-<Note>Generiert aus dem Techstack-Release v0.39.0 (Quelle `49677b729cb9`). Für eine installierte Version ist `techstack api <command> --help` maßgeblich.</Note>
+<Note>Generated from the Techstack v0.41.15 release (source `b5b268760b34`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
 
 ## techstack api servers detach
 
@@ -68,6 +68,27 @@ techstack api servers list [flags]
 | --- | --- | --- |
 | `--kit-deployment-id` | string | — |
 
+## techstack api servers maintenance cancel
+
+Cancel an owned maintenance job before execution starts.
+
+Uses the same tenant, entitlement, server and requesting-owner scope as the job read. Cancellation and execution claim use the same queued-state compare-and-set. Repeating a successful cancellation returns its receipt; a claimed or finished job returns maintenance_not_cancellable. Cancelling never claims to stop a command that has already reached the server.
+
+```bash
+techstack api servers maintenance cancel <server-id> <job-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/actions/{jobId}/cancel` |
+| Changes state | Yes |
+| MCP tool | None |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `<job-id>` | string | **Required.** |
+
 ## techstack api servers maintenance get
 
 Einen Wartungs-Job eines eigenen Servers lesen.
@@ -89,11 +110,32 @@ techstack api servers maintenance get <server-id> <job-id> [flags]
 | `<server-id>` | string | **Erforderlich.** Kanonische Server-Runtime-ID. |
 | `<job-id>` | string | **Erforderlich.** |
 
+## techstack api servers maintenance impact
+
+Preview service and stack impact before confirming OS maintenance.
+
+Requires the signed maintenance entitlement and ownership of the server. Lists canonical service placement and stack membership, with reasons and inventory freshness and completeness. An empty services array means no affected services only when inventory.status is current. An incomplete, stale or unavailable inventory cannot authorize maintenance. The digest binds the server, operation and material dependency snapshot; ordinary observation timestamps do not invalidate unchanged impact. Responses are private and must not be cached.
+
+```bash
+techstack api servers maintenance impact <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/maintenance-impact` |
+| Changes state | No |
+| MCP tool | `get_server_maintenance_impact` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `--action` | string | **Required.** One of `os_update`, `reboot`. |
+
 ## techstack api servers maintenance run
 
 Für einen eigenen Server einen OS-Update-Plan, ein OS-Update oder einen Neustart einreihen.
 
-Erfordert das Edge-signierte Entitlement `techstack.servers.maintenance`, die Ownership des Servers im Tenant und für delegierte native MCP-Aufrufe eine aktuelle, an den Server gebundene dauerhafte Autorisierung. Diese drei gewöhnlichen Aktionen erfordern weder eine frische MFA noch eine separate owner_approved-Bestätigung. Der Body wird strikt dekodiert: exakte Schlüssel in Kleinbuchstaben, keine Duplikate, keine unbekannten Felder. Eine Wiederholung mit demselben Idempotency-Key gibt den gespeicherten Beleg vor der Zielvalidierung zurück. Pro Server darf ein Neustart oder OS-Update und getrennt davon ein Update-Plan aktiv sein; ein Job, der bis zu seiner Frist nicht fertig ist, schlägt mit `deadline_exceeded` fehl und gibt seinen Slot frei. Die Aktion wird in `allowed_actions` nur angeboten, wenn der Server-Agent `stackkit.host-maintenance.v1` ankündigt, und `reboot` nur, wenn der Server außerdem `host_boot_id` meldet. Ablehnungen sind client-error-envelope/v1-Dokumente; der 409-`reason_code` ist einer von control_plane_host, substrate_node, protected_demo_server, service_locked, maintenance_active, node_operation_active, plan_stale, agent_capability_missing, boot_id_unknown, agent_not_connected, heartbeat_stale, inventory_revision_stale oder idempotency_key_reused; 403 trägt entitlement_required oder maintenance_origin_authority_denied.
+Requires the Edge-signed `techstack.servers.maintenance` entitlement, ownership of the server in the tenant, and current server-bound standing authority for delegated native MCP calls. These three ordinary actions require no fresh MFA or separate owner_approved assertion. Reboot and os_update require expected_impact_digest from the preview the user confirmed. Impact is compared atomically at admission and again at execution claim; changed or incomplete evidence sends no command and requires a refreshed preview and renewed confirmation with a new request key. The body is decoded strictly: exact lowercase keys, no duplicates, no unknown fields. A replay with the same Idempotency-Key returns the stored receipt before target validation. One reboot or OS update and, separately, one update plan may be active per server; a job not finished by its deadline fails with `deadline_exceeded` and frees its slot. The action is offered in `allowed_actions` only when the server agent advertises `stackkit.host-maintenance.v1`, and `reboot` only when the server also reports `host_boot_id`. Refusals are client-error-envelope/v1 documents; 409 `reason_code` is one of control_plane_host, substrate_node, protected_demo_server, service_locked, maintenance_active, node_operation_active, plan_stale, agent_capability_missing, boot_id_unknown, agent_not_connected, heartbeat_stale, inventory_revision_stale, idempotency_key_reused, impact_confirmation_required, impact_changed or impact_unavailable; 403 carries entitlement_required or maintenance_origin_authority_denied.
 
 ```bash
 techstack api servers maintenance run <server-id> [flags]
@@ -109,6 +151,7 @@ techstack api servers maintenance run <server-id> [flags]
 | --- | --- | --- |
 | `<server-id>` | string | **Erforderlich.** Kanonische Server-Runtime-ID. |
 | `--action` | string | **Erforderlich.** Mögliche Werte: `os_update_plan`, `os_update`, `reboot`. |
+| `--expected-impact-digest` | string | Required for os_update and reboot, forbidden for os_update_plan. snapshot_digest of the current impact preview confirmed for this exact server and action. Changing it under an existing Idempotency-Key is a conflict; a renewed confirmation uses a new key. |
 | `--expected-inventory-revision` | integer | **Erforderlich.** |
 | `--expected-plan-digest` | string | Nur für os_update: der plan_digest eines abgeschlossenen os_update_plan für diesen Server, der höchstens 15 Minuten alt ist. |
 | `--owner-approved` | boolean | Optionales Legacy-Feld; es erteilt keine Wartungsautorität. |

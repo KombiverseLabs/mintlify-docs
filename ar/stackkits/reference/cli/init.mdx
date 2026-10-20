@@ -7,7 +7,7 @@ sidebarTitle: "init"
 
 أنشئ ملف stack-spec.yaml في دليل النشر لديك. يحفظ هذا اختياراتك؛ ولا يثبّت خدمات ولا يغيّر المضيف. يعمل المسار المحلي المستقل دون حساب kombify أو Techstack.
 
-ابدأ بالقيم الافتراضية في كتالوج الـ Kit المحدد. يُبقي `--owner-source=local` المالك على هذا الجهاز ويحتاج إلى `--owner-email` لمالك PocketID المحلي. يستخدم Cloud Kit عنوان kombify.me ما لم يسمِّ `--domain` نطاقًا يشير بالفعل إلى هذا المضيف.
+Start with the selected Kit's catalog defaults. `--owner-source=local` keeps the owner on this machine and needs `--owner-email` for the local PocketID owner. Cloud Kit local ownership requires `--domain` with your own domain or an allocated &lt;zone&gt;.kombify.me install zone. The shared kombify.me parent cannot isolate this installation's login cookies. DNS may be configured after init.
 
 راجع الإعداد المحفوظ قبل إنشائه أو تطبيقه. تُسجَّل القيم الافتراضية بوصفها نية صريحة ويتحقق منها عقد CUE الخاص بالـ Kit. تُطلب المعلومات المطلوبة، مثل النطاق، عندما يحتاج إليها الـ Kit. استخدم `--non-interactive` في السكربتات ليفشل الأمر بدل أن يسأل.
 
@@ -29,6 +29,7 @@ stackkit init [stackkit] [flags]
 | `--cloud-oidc-issuer` | string | — | لتوافق v0.6 فقط: عنوان URL لمُصدِر Cloud OIDC لتسليم المالك تلقائيًا/عبر Cloud |
 | `--cluster-mode` | string | `first` | لتوافق v0.6 فقط: وضع العنقود (first\|join) |
 | `--compute-tier` | string | — | v2alpha1 القديم فقط: رسم الـ Kit البياني المعلن (low وstandard وhigh) |
+| `--data-capacity` | stringArray | — | Native v2alpha2: binding=JSON with explicit initialGiB, growthGiBPerMonth, horizonMonths and reservePercent; repeat per selected data binding |
 | `--domain` | string | — | تجاوز النطاق لمواصفة stack المُنشأة |
 | `--enable` | strings | — | v2 الأصلي فقط: قدرات الـ Kit الاختيارية المطلوب تفعيلها (capabilities.enable، مثل lan-dns,internal-pki) |
 | `--expected-spec-hash` | string | — | v2 الأصلي فقط: تجزئة المواصفة الحالية الدقيقة المطبَّعة في CUE المطلوبة للاستبدال |
@@ -42,6 +43,8 @@ stackkit init [stackkit] [flags]
 | `--module-storage-profile` | stringArray | — | v2alpha2 الأصلي: module-id=storage-profile لبُعد تخزين معلن |
 | `--name` | string | — | معرّف عقد النشر (يُشتق افتراضيًا من اسم دليل العمل بعد تطبيعه) |
 | `--non-interactive` | bool | — | التشغيل في وضع غير تفاعلي (يفشل إذا لزم إدخال) |
+| `--notify-ntfy-server` | string | — | ntfy server URL for `--notify-ntfy-topic` (default https://ntfy.sh) |
+| `--notify-ntfy-topic` | string | — | Declare an ntfy owner notification channel (spec.notifications); interactive init asks when omitted |
 | `--output, -o` | string | `deploy` | لتوافق v0.6 فقط: دليل الإخراج للملفات المُنشأة |
 | `--owner-bootstrap-mode` | string | — | لتوافق v0.6 فقط: وضع تمهيد المالك (auto\|custom\|none) |
 | `--owner-display-name` | string | — | الاسم المعروض المطلوب لمالك PocketID لـ `--owner-source=local` |
@@ -67,9 +70,9 @@ stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email
 # Basement Kit with the optional Photos and Files use cases
 stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com --use-case photos,files
 
-# Cloud Kit for a public VPS on a kombify.me address
+# Cloud Kit for a public VPS with an allocated kombify.me install zone
 mkdir my-cloud && cd my-cloud
-stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email you@example.com
+stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email you@example.com --domain your-zone.kombify.me
 
 # Cloud Kit on your own domain, without prompts (for scripts)
 stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email you@example.com --domain example.com --non-interactive
@@ -80,4 +83,3 @@ stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email
 # Pick the core alternative and module profile explicitly instead of catalog defaults
 stackkit init basement-kit --owner-source=local --owner-email you@example.com --use-case-alternative basement-core=standalone --module-compute-profile stackkits-basement-core-runtime=standard
 ```
-

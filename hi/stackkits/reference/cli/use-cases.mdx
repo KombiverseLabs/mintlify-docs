@@ -38,9 +38,11 @@ stackkit use-cases add mail --expected-spec-hash sha256:<current-hash>
 
 kit के वैकल्पिक यूज़ केस सूचीबद्ध करें और टर्मिनल में उन्हें टॉगल करें।
 
-ऐरो कीज़ या j/k कर्सर हिलाते हैं। Space हाइलाइट किए गए आइटम को टॉगल करता है। Enter पुष्टि करता है। Files, Photos और Vault पहले से चुने हुए शुरू होते हैं (kit L3 डिफ़ॉल्ट)।
+Arrow keys or j/k move the cursor. Space toggles the highlighted item. Enter confirms. Without `--kit`, the legacy Files, Photos and Vault selection is used.
 
-`--print` चुनी गई ID को stdout पर अल्पविराम-विभाजित पंक्ति के रूप में लिखता है ताकि इंस्टॉलर उन्हें stackkit init `--use-case` को दे सकें। प्रॉम्प्ट stderr पर जाते हैं। जब stdin टर्मिनल नहीं होता, तो बिना प्रॉम्प्ट के वर्तमान डिफ़ॉल्ट लौटाए जाते हैं।
+With `--kit` (Basement or Cloud), choices and defaults come from the embedded CUE kit catalog. Each choice shows its standard profile minimum (CPU / RAM GiB / disk GiB). The running numeric preview includes required Core and selected default alternatives. It observes this host unless `--inventory` and `--node` select another target. Data budgets, add-ons, profile changes and resident policy need a resolved plan. This preview writes no configuration and grants no Apply admission.
+
+`--print` writes the selected IDs as a comma-separated line on stdout so installers can pass them to stackkit init `--use-case`. Prompts go to stderr. When stdin is not a terminal, defaults are returned without a prompt; a kit preview is still printed to stderr. Unknown facts are shown as ?, never zero.
 
 ```bash
 stackkit use-cases pick [flags]
@@ -48,6 +50,9 @@ stackkit use-cases pick [flags]
 
 | Flag | प्रकार | डिफ़ॉल्ट | विवरण |
 | --- | --- | --- | --- |
+| `--inventory` | string | — | Read capacity from this Inventory instead of observing the local host; requires `--kit` and `--node` |
+| `--kit` | string | — | Preview main use cases admitted by this kit at standard profiles; observe this host by default |
+| `--node` | string | — | Explicit Inventory node for the kit capacity preview |
 | `--print` | bool | — | चुनी गई यूज़-केस ID को stdout पर अल्पविराम-विभाजित पंक्ति के रूप में लिखें |
 
 **उदाहरण**
@@ -58,5 +63,10 @@ stackkit use-cases pick
 
 # Print the selected IDs as one comma-separated line for stackkit init --use-case
 stackkit use-cases pick --print
-```
 
+# Preview standard footprints and capacity on this target, from its kit catalog
+stackkit use-cases pick --kit basement-kit --print
+
+# Preview one explicitly selected Inventory node
+stackkit use-cases pick --kit cloud-kit --inventory inventory.yaml --node cloud-node --print
+```

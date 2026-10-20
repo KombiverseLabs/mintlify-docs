@@ -31,24 +31,15 @@ After verification, open the generated Files route printed by the CLI or listed 
 
 ## Select the workload
 
-Merge this object into the complete StackSpec created by `stackkit init`:
+For a new Files-only workspace, use the [released init interface](/stackkits/reference/cli/init):
 
-```json
-{
-  "workloads": {
-    "files": {
-      "alternative": "cloudreve",
-      "runtimeAdapterRef": "standalone-compose",
-      "placement": {
-        "siteRefs": ["home"],
-        "nodeRefs": ["main"]
-      }
-    }
-  }
-}
+```bash
+mkdir my-files && cd my-files
+stackkit init basement-kit --catalog-defaults \
+  --owner-source=local --owner-email you@example.com --use-case files
 ```
 
-The example was validated and generated with release v0.32.x. If your generated site or node IDs differ, use those exact IDs.
+The [v0.54.2 CLI reference](https://github.com/kombifyio/StackKits/releases/download/v0.54.2/stackkits-cli-reference-v1.json) declares these flags. This command writes the StackSpec; it does not install Cloudreve or prove a rollout. Review the generated site and node IDs before deploying. In an existing workspace, use [Add a workload](/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace) instead of running init again.
 
 ## Deploy and verify
 
@@ -75,7 +66,7 @@ Cloudreve's standalone selection needs no secret reference, which makes Files a 
 
 ## What is backed up
 
-The data that matters is the file bytes and the Cloudreve database with users and share links; the recovery sequence covers the Cloudreve data volume. In the lifecycle run, the restore returned the original bytes. Keep the backup root separate from primary data, and see [Back up and restore](/guides/stackkits/back-up-and-restore).
+The data that matters is the file bytes and the Cloudreve database with users and share links; the recovery sequence covers the Cloudreve data volume. The [v0.39.7 published compatibility record](https://github.com/kombifyio/StackKits/releases/download/v0.39.7/stackkits-compatibility-evidence-v3.json) records passing Files backup and restore phases. The [latest projected lifecycle record, v0.53.10](https://github.com/kombifyio/StackKits/releases/download/v0.53.10/stackkits-compatibility-evidence-v3.json), grades standalone Files `supported`; it is not a lifecycle receipt for the newer v0.54.2 release. Keep the backup root separate from primary data, and see [Back up and restore](/guides/stackkits/back-up-and-restore).
 
 ## What to expect
 
