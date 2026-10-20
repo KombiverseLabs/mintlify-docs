@@ -1,0 +1,82 @@
+---
+title: "kombify Guard"
+description: "Understand how server identity, authorized operations and protection evidence fit together"
+sidebarTitle: "Why Guard matters"
+icon: "shield-halved"
+mode: "explanation"
+---
+
+kombify Guard is Techstack's server-side reliability and security component.
+It connects an enrolled server to its owner, supervises authorized operations
+and reports what happened. Its value is the connection between configuration,
+execution and evidence: you can distinguish a reachable server from a protected
+application and a backup job from a demonstrated recovery.
+
+<Note>
+These pages explain Guard's architecture and the meaning of its evidence.
+Techstack is pre-1.0; connected and managed operation remain preview scope.
+Available operations depend on the installed release and server profile. See
+[availability](/techstack/availability) and the release-bound
+[API and CLI reference](/techstack/reference/cli/overview).
+</Note>
+
+## What changes for the owner
+
+| Situation | What Guard helps establish | What still needs its own proof |
+| --- | --- | --- |
+| A server reconnects after a power or network interruption | Which server returned and what operation outcomes were recorded | Whether the application and its dependencies recovered |
+| A firewall or SSH setting changes | The observed baseline, drift and the authority needed for a repair | Whether every application has appropriate exposure and permissions |
+| A connection drops during an operation | Whether the original operation completed, failed or has an uncertain outcome | An uncertain effect must be reconciled before another change |
+| A backup finishes | The recorded backup and restore evidence | Whether the required application data can actually be recovered |
+| A new Guard version is installed | Artifact verification, activation and recovery evidence for that profile | A signature alone does not establish healthy operation |
+
+For example, a photo service can have a healthy web container while its database
+is unavailable. Its host can also meet a security baseline while that service
+exposes an unintended endpoint. Guard's protection model keeps these facts
+separate so an apparently healthy server does not hide an application problem.
+
+## One operating model across home and cloud
+
+A homelab can span home hardware and rented servers. Techstack coordinates
+those servers; each Guard is bound to one server. The design keeps the same
+identity, authorization and evidence boundaries across placements.
+
+Self-managed Techstack can control its Guards without a hosted kombify account.
+Connecting an installation to hosted services does not implicitly transfer its
+local owner's authority. Guard is part of Techstack, with no separate product or
+security tier. Standalone StackKits remains independent of Guard and Techstack.
+See [operating modes](/techstack/operating-modes).
+
+## The responsibilities fit together
+
+| Component | Responsibility |
+| --- | --- |
+| Techstack | Server inventory, admission of operations and coordination across servers |
+| Guard | Server identity, local supervision of admitted work and operation evidence |
+| StackKits | Desired host and application configuration, lifecycle execution and node backup/restore custody |
+| Application | Its own data, permissions and application-specific health requirements |
+
+An AI assistant can explain a finding or propose an operation. It uses the same
+authorization and execution boundaries; an explanation is not permission to
+change the server.
+
+## What the trust mark means
+
+Guard is built around verifiable conditions, not the presence of a running
+agent. Enrollment, an authenticated command round trip, durable operations,
+secured configuration, update posture, tested recovery and governed reach each
+need their own evidence. Unknown or stale evidence cannot establish protection.
+An aggregate indicator alone is insufficient to qualify an entire deployment.
+
+Guard does not establish that a server is immune to compromise, that every
+application is managed, or that no data can be lost. Its useful promise is
+observable protection and controlled recovery within a declared scope.
+
+<CardGroup cols={2}>
+  <Card title="Architecture and operation truth" icon="diagram-project" href="/techstack/guard/architecture">
+    How identity, durable results and execution boundaries handle failures.
+  </Card>
+  <Card title="Protection and recovery evidence" icon="clipboard-check" href="/techstack/guard/protection-and-recovery">
+    Understand host and application coverage, repairs and recovery claims.
+  </Card>
+</CardGroup>
