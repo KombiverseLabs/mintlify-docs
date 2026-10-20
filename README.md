@@ -93,7 +93,10 @@ unreviewed proposals stay in the ignored `drafts/` tree.
 | Site | Mintlify (`docs.json`), hosted at `docs.kombify.io` |
 | Toolchain | `mise`, Node 24, pinned `mint@4.2.684` |
 | Validation | PowerShell gates plus `public-safety-policy.json` |
-| Analytics | PostHog via `e.kombify.io`, session recording disabled |
+| Analytics | Repository configuration disables Mintlify telemetry; PostHog and PostHog session recording are not configured |
+
+Disabling Mintlify telemetry also disables collection of page feedback. See
+[Mintlify's privacy settings](https://www.mintlify.com/docs/integrations/privacy/overview).
 
 ## Commands
 
@@ -118,6 +121,22 @@ mise run local:e2e
 | `scripts/check-product-docs-external-links.ps1` | Public Techstack entry and SpeechKit release destinations. |
 | `scripts/check-code-example-relevance.ps1` | Executable and structured examples only on pages with a topic-specific workflow or configuration. |
 | `scripts/render-api-surface-reference.mjs` | Render a release's OpenAPI and `api-surface.json` into the API and CLI reference; `--check` reports drift. |
+
+## Telemetry regression journey
+
+Use a deployed PR preview with production analytics initialization in a fresh
+private browser context. This public reading flow needs no sign-in. The pinned
+development preview is a navigation smoke only: its development mode suppresses
+analytics independently of this configuration.
+
+1. Capture network requests from the initial home-page load, then follow the
+   published StackKits overview and identity links through the UI.
+2. Reload and navigate back. Assert that no request goes to
+   `/_mintlify/api/v1/e`, `e.kombify.io` or a PostHog collection endpoint.
+3. Assert that `mintlify_anonymous_id` and `mintlify_session_id` are absent
+   from browser storage, and that documentation navigation still works.
+4. Record the tested source and preview or deployment identity with the
+   observations. Page-feedback collection is intentionally disabled with telemetry.
 
 ## Documents
 
