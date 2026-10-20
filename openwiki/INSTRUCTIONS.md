@@ -2,7 +2,7 @@
 
 Status: generated against `fc905e821407cc6f74f0252d7724a9a4dcd7cf81` (init, 2026-07-24 UTC) by the local subscription automation. Scope, classification, and cadence are governed by the workspace HANDOFF-OPENWIKI.md and repo-manifest.json.
 
-Authority: `kombify-Core/standards/CODE-INTELLIGENCE-STANDARD.md` section 2a; the current version in the workspace checkout governs.
+Authority: `platform/standards/CODE-INTELLIGENCE-STANDARD.md` section 2a; the current version in the workspace checkout governs.
 
 ## Repository role
 

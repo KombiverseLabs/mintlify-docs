@@ -128,7 +128,7 @@ mise run local:e2e
 [openwiki/](openwiki/) (generated, non-authoritative agent documentation).
 Standards: [DOCUMENTATION-STANDARD.md](../DOCUMENTATION-STANDARD.md),
 [KOMBIFY-DESIGN-SYSTEM-STANDARD.md](../KOMBIFY-DESIGN-SYSTEM-STANDARD.md) §11,
-[CODE-INTELLIGENCE-STANDARD.md](../kombify-Core/standards/CODE-INTELLIGENCE-STANDARD.md) §11.
+[CODE-INTELLIGENCE-STANDARD.md](../platform/standards/CODE-INTELLIGENCE-STANDARD.md) §11.
 
 ## Issue tracking
 
