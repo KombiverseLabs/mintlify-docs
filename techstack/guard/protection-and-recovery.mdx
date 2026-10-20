@@ -1,0 +1,126 @@
+---
+title: "Guard protection and recovery evidence"
+description: "Understand security scope, bounded repairs and the difference between a backup and a demonstrated recovery"
+sidebarTitle: "Protection and recovery"
+icon: "clipboard-check"
+mode: "explanation"
+---
+
+A server can be connected while its configuration is out of date. An application
+can be running while its backup is unusable. Guard's protection model describes
+these as separate conditions with a scope, evidence time and responsible owner.
+
+The controls below explain the architecture and the published operation
+contracts. Coverage depends on the installed release, operating system and
+application lifecycle binding. They do not assert that every profile has been
+qualified; see [availability](/techstack/availability).
+
+## Host protection and application protection
+
+| Scope | What can be established | Boundary |
+| --- | --- | --- |
+| Host baseline | Observed firewall/exposure, SSH configuration, brute-force protection, updates and supported system controls | A secured host is not proof that each application is secure |
+| Stacked application | Configuration and lifecycle evidence for an application with an accepted StackKits binding | Only supported, authorized lifecycle operations are admitted |
+| Unstacked application | Inventory and observations available through explicitly granted integrations | Discovery grants no authority to update, restart, reconfigure or adopt it |
+
+Mixed installations keep these boundaries per application. A manually installed
+service does not become managed because Guard runs on its host. Adoption requires
+an explicit lifecycle binding; its data and existing responsibilities must be
+understood before changes are admitted.
+
+## Baseline observations have more than two states
+
+- **Compliant:** the measured control matches the selected baseline.
+- **Drifted:** the observed state differs from that baseline.
+- **Unknown:** current evidence is missing, stale or cannot be obtained.
+- **Approved exception:** a specific deviation has an explicit scope and reason.
+
+An exception is not the same as passing the control. A useful finding explains
+the affected resource, baseline version, observation time and available next
+action. Unsupported checks and unavailable observations remain visible.
+
+The [server reference](/techstack/reference/cli/servers) distinguishes a request
+for a fresh security observation from the report itself. Requesting verification
+changes nothing on the host; only the returned observation updates its security
+evidence.
+
+## A repair is a separate authorized operation
+
+Detection does not authorize remediation. The published host-security repair
+contract accepts named controls through the owning StackKits operation, with
+owner authorization and the documented authentication requirements. It rejects
+changes that would cut the management path or lock the owner out.
+
+Concurrency limits, per-control cooldowns, attempt budgets and circuit breakers
+bound repeated repairs. A control that is already compliant, covered by an
+approved exception, not repairable automatically or missing a prerequisite is
+not silently rewritten. Exact requirements and refusal codes are in the
+[released server operations](/techstack/reference/cli/servers).
+
+For example, changing SSH settings without a usable authorized key can remove
+the only recovery path. Refusing that change preserves access while explaining
+the missing prerequisite.
+
+## A backup is not yet a recovery
+
+StackKits retains the node's backup and restore custody; Techstack coordinates
+authorized operations and Guard reports the resulting evidence.
+
+| Evidence | What it tells you |
+| --- | --- |
+| Backup configuration | A backup policy or destination is configured |
+| Successful backup | A particular backup operation completed |
+| Integrity verification | The checked backup data passed the selected integrity checks |
+| Isolated restore | The named recovery point was restored in the tested environment |
+| Application recovery | The restored application and its required data passed the specified checks |
+
+These are different proof levels. A restore report should identify its recovery
+point, target, versions, observation time and checks. An isolated file restore
+does not establish a working database, user sign-in or a complete application.
+Recoverability also depends on required configuration, decryption material and
+dependencies being available when needed.
+
+A drill must keep restored services from producing unintended live effects,
+such as sending notifications. Recovery time and the age of recoverable data
+must be measured for the tested scenario; neither follows from a green backup
+job alone.
+
+## Update trust and update health
+
+Guard's update design separates verification of the published artifact from
+staged activation and recovery. An authentic release can still fail to start.
+Evidence must show that the admitted version activated successfully or that
+recovery restored an admissible previous version while preserving identity
+and operation state.
+
+This describes Guard's own update path. It does not promise transactional
+rollback for every application or database migration. Those changes stay with
+the supported StackKits lifecycle and its data-recovery contract.
+
+## Interpreting Guard readiness
+
+The complete Guard-ready contract requires fresh evidence for all seven
+facts below. A panel showing seven indicators does not by itself prove that
+their evidence satisfies this contract.
+
+| Fact | Evidence needed |
+| --- | --- |
+| Bound | Confirmed enrollment and accepted host identity |
+| Connected | A recent authenticated command/result round trip |
+| Operations durable | A healthy journal with no unresolved operation outcome |
+| Configuration secured | A current baseline that is compliant or has approved, scoped exceptions |
+| Up to date | A signed Guard artifact at or above the minimum version, with operating-system security updates within policy |
+| Recoverable | A fresh backup and verified isolated restore within the selected policy |
+| Reachable and governed | A verified intended route, resource registration and working revocation |
+
+The final fact concerns the intended authorized route; it does not require
+making every application public. A disabled or untested route cannot count as
+proof of verified reach. Heartbeat freshness cannot substitute for a command
+round trip, and an aggregate must not hide unknown evidence.
+
+Readiness is scoped to the release, server profile and checks actually qualified.
+It is not a certification, an endpoint-detection guarantee or a promise of zero
+outages, compromise or data loss.
+
+See [Guard architecture](/techstack/guard/architecture) for operation outcomes,
+and [kombify.me](/kombify-me/overview) for the documented reachability model.
