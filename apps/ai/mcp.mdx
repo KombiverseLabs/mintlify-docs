@@ -1,0 +1,61 @@
+---
+title: "Customer MCP access"
+description: "The customer endpoint and its hosted sign-in requirements."
+sidebarTitle: "Customer MCP"
+icon: "network-wired"
+---
+
+The customer MCP address is `https://api.kombify.io/mcp`. Access requires
+hosted sign-in and the permissions enabled for your account.
+
+## Connection information
+
+The endpoint advertises these authentication requirements:
+
+| Setting | Value |
+| --- | --- |
+| Server name | `kombify` |
+| Customer endpoint | `https://api.kombify.io/mcp` |
+| Sign-in service | `https://login.kombify.io/` |
+| Required OAuth scope | `mcp:connect` |
+| Protected resource metadata | `https://api.kombify.io/.well-known/oauth-protected-resource/mcp` |
+
+Public clients use OAuth authorization with PKCE. The sign-in service advertises
+`S256` for PKCE. A client that supports this flow handles sign-in through the
+login service; keep account passwords and access tokens out of chat messages.
+
+<Note>
+The advertised endpoint and sign-in requirements do not establish which tools
+are enabled for an account. Use the catalog returned to your client after
+authorization to check its available tools and permissions.
+</Note>
+
+## Access and errors
+
+A request without authorization receives HTTP 401 and a challenge pointing to
+the protected resource metadata. The service also requires customer MCP access
+for the account, identified as `mcp.customer.access` in its access guidance.
+A signed-in account is still subject to permission and entitlement checks.
+
+If authorization fails or your client has no usable tools, keep the returned
+error code and contact [info@kombify.io](mailto:info@kombify.io). An empty catalog
+alone does not identify the cause. Do not send passwords or tokens to support.
+
+## Permission boundaries
+
+A connected assistant remains limited by your account's permissions and the
+action policy. Customer access does not grant staff administration, infrastructure
+management, or database credentials. The tools returned for your account define
+the actions your client can request.
+
+## Local StackKits
+
+The [local StackKits MCP connector](/stackkits/reference/mcp-connector) operates
+your local homelab. It is configured separately from the hosted customer endpoint.
+Your local owner identity remains authoritative for the local stack.
+
+## Related pages
+
+- [Identity and Access](/identity/overview)
+- [AI Guide and Workbench](/apps/ai/overview)
+- [Security and privacy](/apps/security-and-privacy)
