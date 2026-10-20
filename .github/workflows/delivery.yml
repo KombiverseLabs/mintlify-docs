@@ -43,7 +43,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.event_name == 'pull_request' && format('delivery-pr-{0}', github.event.pull_request.number) || format('delivery-{0}', github.run_id) }}
+  group: delivery-${{ github.event_name == 'pull_request' && format('pr-{0}-{1}', github.event.pull_request.number, (!github.event.pull_request.draft && (!github.event.pull_request.stack || github.event.pull_request.stack.position == github.event.pull_request.stack.size)) && 'active' || 'inactive') || github.event_name == 'merge_group' && format('merge-group-{0}', github.event.merge_group.head_sha) || format('{0}-{1}', github.event_name, github.run_id) }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
