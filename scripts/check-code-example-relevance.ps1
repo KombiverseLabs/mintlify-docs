@@ -51,7 +51,8 @@ $allowedInlineCommands = @{
         "stackkit secrets materialize"
     )
     "stackkits/apps/cloudreve.mdx" = @(
-        "stackkit init"
+        "stackkit init",
+        "stackkit verify"
     )
     "stackkits/apps/gitea.mdx" = @(
         "stackkit secrets reveal --workload dev --slot owner-password"
@@ -74,6 +75,50 @@ $allowedInlineCommands = @{
     )
     "stackkits/reference/os-compatibility.mdx" = @(
         "stackkit compat"
+    )
+    "guides/stackkits/choosing-a-kit.mdx" = @(
+        "stackkit logs latest --json"
+    )
+    "guides/stackkits/troubleshooting.mdx" = @(
+        "stackkit verify --json",
+        "stackkit logs latest --json"
+    )
+    "stackkits/apps/dozzle.mdx" = @(
+        "stackkit verify --json"
+    )
+    "stackkits/apps/immich.mdx" = @(
+        "stackkit backup status --json"
+    )
+    "stackkits/apps/kombify-point.mdx" = @(
+        "stackkit verify --json"
+    )
+    "stackkits/apps/komodo.mdx" = @(
+        "stackkit app compatibility --json"
+    )
+    "stackkits/apps/pocketid.mdx" = @(
+        "stackkit verify --json"
+    )
+    "stackkits/apps/traefik.mdx" = @(
+        "stackkit verify --json"
+    )
+    "stackkits/apps/whoami.mdx" = @(
+        "stackkit verify --json"
+    )
+    "stackkits/kits/basement-kit.mdx" = @(
+        "stackkit logs latest --json"
+    )
+    "stackkits/kits/cloud-kit.mdx" = @(
+        "stackkit logs latest --json"
+    )
+    "stackkits/kits/modern-homelab.mdx" = @(
+        "stackkit logs latest --json"
+    )
+    "stackkits/quickstart.mdx" = @(
+        "stackkit version",
+        "stackkit logs latest --json"
+    )
+    "stackkits/apps/login-gateway.mdx" = @(
+        "stackkit verify --json"
     )
 }
 

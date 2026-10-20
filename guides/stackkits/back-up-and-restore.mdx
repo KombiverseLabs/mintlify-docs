@@ -6,23 +6,23 @@ icon: clock-rotate-left
 ---
 
 <Info>
-  Evidence state (2026-09-17, v0.35.0): the Basement Kit backup and restore
-  cycle passed on fresh Ubuntu 24.04 and Debian 13 virtual machines on
-  v0.35.0. For [Documents & Files](/guides/stackkits/use-cases/documents-and-files) (Cloudreve), the
-  restored bytes match the original, activation completed, and the
-  application readback was verified over the guest-local loopback. For
-  [Passwords](/guides/stackkits/use-cases/passwords) (Vaultwarden), backup,
-  isolated restore, and restore activation passed on Ubuntu 24.04 amd64 on
-  v0.35.0. For [Photos](/guides/stackkits/use-cases/photos) (Immich), they
-  were last verified on v0.33.3. For Passwords and Photos, the
-  application-level readback after restore is pending. The published
-  compatibility projection grades the Documents & Files, Photos and Passwords
-  workloads `unverified` for the current release (last receipt v0.46.8), so
-  treat these results as dated evidence and practice a restore yourself. Restore evidence on a
-  released archive is pending for Media (Jellyfin) and Smart Home (Home
-  Assistant). Personal AI, Development (Gitea), and Documents (Paperless-ngx)
-  are experimental with no runtime evidence.
+  The current public release is [v0.54.2](https://github.com/kombifyio/StackKits/releases/tag/v0.54.2).
+  Its backup declarations and the executed lifecycle evidence are separate:
+  the newest [published lifecycle projection](https://github.com/kombifyio/StackKits/releases/download/v0.53.10/stackkits-compatibility-evidence-v3.json)
+  is v0.53.10, not a v0.54.2 runtime validation. The grades below refer to
+  that projection. Personal AI, Development (Gitea), and Documents
+  (Paperless-ngx) remain experimental with no runtime evidence.
 </Info>
+
+| Standalone workload | v0.53.10 projected grade | Evidence limit |
+| --- | --- | --- |
+| [Documents & Files](/guides/stackkits/use-cases/documents-and-files) (Cloudreve) | `supported` | Passing phases through restore on v0.53.10 |
+| [Photos](/guides/stackkits/use-cases/photos) (Immich) | `preview` | `restore-failed`; last fully verified release v0.46.8 |
+| [Passwords](/guides/stackkits/use-cases/passwords) (Vaultwarden) | `unverified` | Current-release receipt pending; last verified release v0.46.8 |
+| [Media](/guides/stackkits/use-cases/media) (Jellyfin) | `unverified` | Current-release receipt pending; last verified release v0.39.7 |
+| [Smart Home](/guides/stackkits/use-cases/smart-home) (Home Assistant) | `unverified` | Current-release receipt pending; last verified release v0.39.7 |
+
+The historical [v0.39.7 compatibility record](https://github.com/kombifyio/StackKits/releases/download/v0.39.7/stackkits-compatibility-evidence-v3.json) records passing install, init, generate, apply, workload setup, verify, backup and restore phases for all five workloads. This is dated phase evidence, not proof that current clients, household devices or a new release recover correctly. Vault setup prepares an invitation; it does not prove Bitwarden registration or entry sync. Smart Home restore does not prove physical-device pairing. Consult [Application delivery compatibility](/stackkits/reference/application-delivery-compatibility) before choosing an adapter.
 
 The released Basement Kit includes a local, owner-controlled Kopia backup lifecycle. Run it only from the applied StackKits workspace whose data you intend to protect.
 

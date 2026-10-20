@@ -9,7 +9,7 @@ Operaciones del contrato de host independientes del proveedor.
 stackkit host [flags]
 ```
 
-Subcomandos: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host delivery`](#stackkit-host-delivery), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host migrate-browser-ca`](#stackkit-host-migrate-browser-ca), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host security`](#stackkit-host-security), [`stackkit host ssh`](#stackkit-host-ssh), [`stackkit host updates`](#stackkit-host-updates)
+Subcommands: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host delivery`](#stackkit-host-delivery), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host gpu-check`](#stackkit-host-gpu-check), [`stackkit host migrate-browser-ca`](#stackkit-host-migrate-browser-ca), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host security`](#stackkit-host-security), [`stackkit host ssh`](#stackkit-host-ssh), [`stackkit host updates`](#stackkit-host-updates)
 
 ## stackkit host attach-conformance
 
@@ -134,6 +134,36 @@ stackkit host environment --json
 
 # Override a wrong detection for the next command, here Basement Kit init on a home host
 STACKKIT_NETWORK_ENV=home stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com
+```
+
+## stackkit host gpu-check
+
+Prove the NVIDIA GPU under a short real CUDA load.
+
+Run NVIDIA's CUDA vectorAdd sample in a container on the GPU (Docker CDI device nvidia.com/gpu=all), then read the kernel log for NVRM Xid errors and ask nvidia-smi again.
+
+nvidia-smi listing the GPU is not proof that it works: a GPU on a weak power supply or a marginal link, typical for a Thunderbolt eGPU, answers at idle and falls off the bus (Xid 79) as soon as CUDA draws power. This check refuses then and names the cause.
+
+It changes nothing on the host except pulling the pinned sample image. Run it as root so the kernel log can be read.
+
+```bash
+stackkit host gpu-check [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--image` | string | `nvcr.io/nvidia/k8s/cuda-sample:vectoradd-cuda12.5.0@sha256:7c7540bdf1f942d4fb6db97069fd6c289471b54ac29e3c7fcdf914cf77af7d41` | CUDA sample image that prints "Test PASSED" |
+| `--json` | bool | — | Emit the check and its evidence as machine-readable JSON |
+| `--runs` | int | `10` | How many times the CUDA sample runs |
+
+**Examples**
+
+```bash
+# Prove the GPU after the driver and Container Toolkit are installed
+sudo stackkit host gpu-check
+
+# Longer load, machine-readable result
+sudo stackkit host gpu-check --runs 50 --json
 ```
 
 ## stackkit host migrate-browser-ca

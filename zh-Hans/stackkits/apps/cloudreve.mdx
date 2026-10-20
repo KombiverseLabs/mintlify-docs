@@ -31,24 +31,15 @@ Cloudreve 是“文档与文件”中“文件”那一半的默认应用。已�
 
 ## 选择工作负载
 
-将此对象合并到由 `stackkit init` 创建的完整 StackSpec 中：
+为新的 Files 工作区运行以下命令：
 
-```json
-{
-  "workloads": {
-    "files": {
-      "alternative": "cloudreve",
-      "runtimeAdapterRef": "standalone-compose",
-      "placement": {
-        "siteRefs": ["home"],
-        "nodeRefs": ["main"]
-      }
-    }
-  }
-}
+```bash
+mkdir my-files && cd my-files
+stackkit init basement-kit --catalog-defaults \
+  --owner-source=local --owner-email you@example.com --use-case files
 ```
 
-该示例已在 v0.32.x 版本中验证并生成。如果你生成的站点或节点 ID 不同，请使用那些确切的 ID。
+[v0.54.2 CLI 参考](https://github.com/kombifyio/StackKits/releases/download/v0.54.2/stackkits-cli-reference-v1.json)列出了这些选项。此命令写入 StackSpec，不会安装 Cloudreve，也不是运行时验证。请检查生成的站点和节点 ID。对于现有工作区，请修改配置，不要重新运行 init。
 
 ## 部署与验证
 

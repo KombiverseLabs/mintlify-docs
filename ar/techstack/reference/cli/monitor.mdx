@@ -2,9 +2,9 @@
 title: "techstack api monitor"
 description: "مرجع مولَّد لأوامر techstack api monitor"
 sidebarTitle: "monitor"
-release: "v0.32.8"
+release: "v0.41.15"
 ---
-<Note>مولَّد من إصدار Techstack v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `techstack api <command> --help` هو المرجع.</Note>
+<Note>Generated from the Techstack v0.41.15 release (source `b5b268760b34`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
 
 ## techstack api monitor alerts list
 
@@ -54,6 +54,98 @@ techstack api monitor availability [flags]
 | --- | --- | --- |
 | `--window` | string | مجموعة مغلقة؛ فالنافذة غير المحدودة ستكون منفذاً لهجمات حجب الخدمة. إحدى القيم: `24h`، `7d`، `30d`، `90d`. الافتراضي `"30d"`. |
 | `--server-id` | string | حصر التقرير في خادم واحد، لصفحة تفاصيل الخادم. |
+
+## techstack api monitor domains
+
+Read domain lifecycle and observed DNS/TLS differences.
+
+Owner and tenant scoped, read-only projection of canonical routing,
+server domains and service endpoints. Registration expiry from RDAP
+and certificate expiry from the presented public TLS leaf are separate
+facts with independent sources and observation deadlines. Missing data
+stays unknown. Expected DNS is never inferred from observed addresses.
+Proxied origins are explicitly unobservable from recursive public DNS.
+Conditions persist across failures and stale observations, and resolve
+only after fresh positive evidence. An unavailable store returns 503.
+
+```bash
+techstack api monitor domains [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/domains` |
+| Changes state | No |
+| MCP tool | `get_monitor_domains` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--server-id` | string | — |
+| `--service-id` | string | — |
+
+## techstack api monitor drive-health alerts
+
+Read active and recovered drive-health condition episodes.
+
+Authenticated, tenant-scoped read of hardware and collection conditions.
+Each condition names its affected server and, when attributable, immutable
+drive identity, severity, observed evidence and recommended next step.
+Collection failures are distinct from hardware diagnoses. Stable episode
+IDs deduplicate unchanged conditions; resolved_at records recovery only
+when fresh evidence covers the condition. Anonymous collection incidents
+deduplicate by server and path, independently of anonymous hardware IDs.
+Nonzero cumulative counters describe historical totals; measured increases
+are separate conditions. NVMe command-error increases and consumed rated
+endurance are advisories, rather than standalone evidence of media failure.
+Resolved history is bounded to 64 episodes per condition scope and 90 days.
+Reads initiate no repair, device mutation or provider action.
+
+```bash
+techstack api monitor drive-health alerts [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/drive-health/alerts` |
+| Changes state | No |
+| MCP tool | `get_monitor_drive_health_alerts` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--server-id` | string | Restrict evidence to one server within the authenticated tenant; an unobserved server remains explicitly missing. |
+
+## techstack api monitor drive-health get
+
+Read per-drive SMART and NVMe health evidence.
+
+Authenticated, tenant-scoped projection of Guard drive observations.
+Self-hosted installations use their configured installation tenant.
+Hardware identities retain history independently of mutable device paths;
+replacements never inherit earlier readings. Anonymous observations have
+attempt-specific IDs and cannot establish historical continuity.
+Missing, unsupported, inaccessible, incomplete, stale and disconnected
+observations stay explicit and cannot imply healthy hardware. A server
+with no observations returns a missing state when selected explicitly.
+Last successful readings remain historical evidence when a new attempt
+fails. Only a complete inventory or an explicit missing observation can
+establish disconnection, and an unreadable identity at a seen path stays
+uncertain. Reads age evidence and condition episodes, without initiating
+collection, self-tests, repairs, provisioning or other device actions.
+Capacity growth forecasts remain on the separate storage-forecast route.
+
+```bash
+techstack api monitor drive-health get [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/drive-health` |
+| Changes state | No |
+| MCP tool | `get_monitor_drive_health` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--server-id` | string | Restrict evidence to one server within the authenticated tenant; an unobserved server remains explicitly missing. |
 
 ## techstack api monitor health
 
@@ -168,3 +260,38 @@ techstack api monitor status [flags]
 | HTTP | `GET /api/v1/monitor/status` |
 | يغيّر الحالة | لا |
 | أداة MCP | `get_monitor_status` |
+
+## techstack api monitor storage-forecast
+
+Project filesystem growth from observed storage gauges.
+
+Read-only, tenant-scoped projection of node_disk_used_bytes with
+contemporaneous node_disk_total_bytes or used plus free bytes. The
+latter is effective usable capacity, not physical disk capacity.
+Uses a 14-day window with hourly query evaluation, retaining actual
+source observation times and deduplicating repeated lookback values.
+Counts describe hourly sampled observations, not all ingested samples;
+sparse observations outside the backend lookback may be absent. No
+interpolation or per-service storage attribution is performed. Separate
+origin/source streams remain separate resources and are never summed.
+Guard OTLP times describe Guard collection, not original OTLP point time.
+Unknown capacity, stale/inadequate history and inconsistent measurements
+return an explicit state without an exhaustion estimate. Exhaustion is
+a growth scenario range measured from the latest observation, not a
+statistical confidence interval. Both bounded queries share a timeout.
+
+```bash
+techstack api monitor storage-forecast [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/monitor/storage-forecast` |
+| Changes state | No |
+| MCP tool | `get_monitor_storage_forecast` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--node-id` | string | — |
+| `--server-id` | string | — |
+| `--agent-id` | string | — |
