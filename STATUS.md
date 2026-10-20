@@ -58,7 +58,7 @@ is published.
 | Techstack | Public unsigned Windows Alpha; API and CLI reference synced from release `v0.41.0`; `techstack/availability` names the current release. |
 | SpeechKit | Docs snapshot `v0.76.6` (`data/speechkit/latest.json`). |
 | Mintlify CLI / Node | `mint@4.2.684` / Node 24 through `mise`. |
-| Hosting / analytics | Mintlify at `docs.kombify.io`; PostHog via `e.kombify.io`, session recording disabled. |
+| Hosting / analytics | Mintlify at `docs.kombify.io`; repository configuration disables telemetry and page-feedback collection. PostHog and PostHog session recording are not configured. Hosted verification is pending. |
 
 ## Known issues
 
