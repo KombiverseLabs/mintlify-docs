@@ -37,6 +37,14 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           path: candidate
           persist-credentials: false
+      - name: Test boundary guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          # No unit-test growth outside the declared boundaries (D-2026-10-20-04).
+          # The producer's copy of the organization guard reads the candidate as data.
+          git -C candidate fetch --no-tags --quiet --depth=2 origin "$GITHUB_SHA"
+          node producer/scripts/test-boundary-guard.mjs --repo candidate --base "${GITHUB_SHA}^1" --head "$GITHUB_SHA"
       - name: Run trusted static publication validator
         shell: bash
         run: node producer/scripts/trusted-public-safety.mjs "$GITHUB_WORKSPACE/candidate" "$SOURCE_SHA" "$PRODUCER_SHA"

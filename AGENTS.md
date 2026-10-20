@@ -11,6 +11,7 @@ navigation source of truth; pages are MDX files.
 ## Kombify Development Standard
 
 - Binding: workspace `CONSTITUTION.md` rules 12 to 16, with the detail in workspace `DEVELOPMENT-THROUGHPUT-STANDARD.md` ("Development feedback loop", "Testing", "Development-probe admission") and skill `kombify-development:kombify-fast-development`.
+- Tests (owner decision 2026-10-20, D-2026-10-20-04): end-to-end journeys with the shared test users against the running product are the proof that a change works. No new unit or in-process tests except inside the repository's declared sensitive boundaries (`auth`, `billing`, `crypto`, `migration`, `compiler`, with their paths in `.kombify/test-boundaries.json`); the test boundary guard inside the required check blocks any other growth, and unit tests outside the boundaries are deleted per product once its journeys cover the main flows. A fixed bug gets a journey step, not a unit test.
 <!-- END GENERATED: elastic-development-throughput kombify-throughput-policy-sync -->
 
 <!-- BEGIN GENERATED: planning-policy kombify-agent-policy-sync -->
