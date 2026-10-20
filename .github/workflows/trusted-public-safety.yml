@@ -45,6 +45,24 @@ jobs:
           # The producer's copy of the organization guard reads the candidate as data.
           git -C candidate fetch --no-tags --quiet --depth=2 origin "$GITHUB_SHA"
           node producer/scripts/test-boundary-guard.mjs --repo candidate --base "${GITHUB_SHA}^1" --head "$GITHUB_SHA"
+      - name: Check added engineering prose with the trusted producer
+        env:
+          STACK_BASE_SHA: ${{ github.event.pull_request.stack.base.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_SHA" =~ ^[a-f0-9]{40}$ ]]
+          node producer/.github/actions/engineering-prose/verify-projection.mjs
+          base=$(git -C candidate rev-parse --verify "${GITHUB_SHA}^1^{commit}")
+          if [ -n "$STACK_BASE_SHA" ]; then
+            [[ "$STACK_BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
+            git -C candidate fetch --no-tags --quiet --depth=1 origin "$STACK_BASE_SHA"
+            base=$(git -C candidate rev-parse --verify "${STACK_BASE_SHA}^{commit}")
+            [ "$base" = "$STACK_BASE_SHA" ]
+          fi
+          # Execute only the ruleset-selected producer; candidate scripts are data.
+          node producer/.github/actions/engineering-prose/runner.mjs \
+            --repo candidate --repo-id mintlify-docs --base "$base" --head "$SOURCE_SHA" --exact-base
       - name: Run trusted static publication validator
         shell: bash
         run: node producer/scripts/trusted-public-safety.mjs "$GITHUB_WORKSPACE/candidate" "$SOURCE_SHA" "$PRODUCER_SHA"
