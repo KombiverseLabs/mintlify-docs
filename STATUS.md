@@ -67,6 +67,5 @@ Cloud, AI Guide and Workbench, and Companion are published as the Apps tab
 
 ## Verification
 
-`mise run check` (policy, navigation, content, links), `mise run
-public-safety:test` (forbidden content fails), `mise run local:e2e` (local
+`mise run check` (policy, navigation, content, links), `mise run local:e2e` (local
 Mintlify runtime), `mise run remote:public-safety` (deployed surface).
