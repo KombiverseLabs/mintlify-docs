@@ -1,0 +1,45 @@
+---
+title: "kombify.me 故障排查"
+description: "kombify.me 名称为何打不开，以及需要检查什么"
+sidebarTitle: "故障排查"
+icon: "life-ring"
+---
+
+在浏览器中打开该名称，并记下你看到的内容。得到的响应会告诉你应该从下面哪项检查开始。如果你还没有创建地址，请从[获取你的第一个 kombify.me 地址](/zh-Hans/kombify-me/get-your-first-address)开始。
+
+## 浏览器显示的内容
+
+| 你看到的情况 | 最可能的原因 |
+| --- | --- |
+| 404，“service subdomain not exposed” | 应用处于关闭状态。请将其开启。 |
+| 503，“subdomain inactive” | 该地址已暂停。请将其重新设置为 active。 |
+| 私有地址上出现 503，“try again” | 家里的助手未连接。 |
+| 502，“Bad Gateway” | kombify.me 无法访问你的应用。请检查它是否在运行并且是公开的。 |
+| 410，“publication expired” | 临时共享期限已结束。 |
+
+## 名称显示错误或无法打开
+
+| 检查项 | 含义 |
+| --- | --- |
+| 服务路由已暴露 | 未暴露的服务名称保持未发布状态。暴露默认是关闭的。 |
+| 名称格式正确 | 第一方 kit 服务使用 `{base}-{service}.kombify.me`。`auth.kombify.me` 这类保留的顶级名称不会被使用。 |
+| 源站是公开的（公开地址） | 公开路径会拒绝私有、回环和链路本地目标。 |
+| 节点代理已连接（私有目标） | 如果代理断开连接，公开名称会保持不可用，并要求客户端重试。 |
+| 同一所有者重新连接 | 同一所有者重新连接后，转发会恢复。其他所有者的代理无法为该路由提供服务。 |
+
+## 逐步排查
+
+1. 大约一分钟后再次打开该名称。kombify.me 保留约 60 秒的路由缓存，因此更改可能不会立即显示。
+2. 在上表中核对得到的响应，并在下面的检查项中按其对应的行处理。
+3. 检查应用本身是否正常：对于公开地址，直接打开它的公开地址；对于私有地址，从你的家庭网络内部打开它。
+4. 如果注册新名称因达到限制而失败，请删除一个你不再使用的名称。限制请参阅[获取你的第一个 kombify.me 地址](/zh-Hans/kombify-me/get-your-first-address)。
+
+如需更改、暂停或删除地址，请参阅[更改、暂停或删除地址](/zh-Hans/kombify-me/change-pause-or-remove-an-address)。公开与私有的区别，请参阅[公开、私有还是重定向](/zh-Hans/kombify-me/public-or-private)。对于 kit 应用，请参阅[在 StackKits 服务器上使用地址](/zh-Hans/kombify-me/connect-a-stackkits-server)。
+
+## 我只需要在家里使用该服务
+
+请改用本地名称。本地名称保留在 StackKits 安装的解析器上。kombify.me 不会发布 `*.lan.kombify.me` 名称。
+
+## 仍然无法解决
+
+kombify.me 是 Alpha 软件，因此名称和错误格式仍可能发生变化。请写信到 [info@kombify.io](mailto:info@kombify.io)，附上你使用的名称和尝试的时间。切勿发送密码或 API 密钥。

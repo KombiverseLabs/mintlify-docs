@@ -1,0 +1,57 @@
+---
+title: "Use an address with a StackKits server"
+description: "How kit apps get their kombify.me names, and what stays local"
+sidebarTitle: "StackKits server"
+icon: "server"
+---
+
+A StackKits server works on its own, without kombify.me. An address is an
+optional extra that makes some apps reachable from outside.
+
+## What happens automatically
+
+When a connected StackKits or Techstack flow registers your server, it can:
+
+- create your base name, for example `mylab-u8f3k2.kombify.me`
+- create one name per kit app, always as `{base}-{app}.kombify.me`
+- keep new apps switched off until you allow them
+
+Kit apps such as `auth`, `id` and `coolify` always get the form
+`mylab-u8f3k2-auth.kombify.me`. The bare name `auth.kombify.me` is never used.
+Kit apps do not count against your limit of 20 custom apps per base name.
+
+## Steps
+
+1. Install and start your StackKits server as usual. Check that it works on your
+   local network first.
+2. Connect the server to your kombify account through the connected flow.
+3. Decide per app whether it is reachable from the internet.
+   - Reachable: it gets a [public address](/kombify-me/public-addresses).
+   - Home-only: use a [private address](/kombify-me/private-targets).
+4. Switch on only the apps you want visitors to reach.
+5. Open the app's `kombify.me` address in a browser.
+
+## What stays local
+
+Names inside your home network are handled by the resolver that StackKits
+installs. Hosted `*.lan.kombify.me` names are not implemented. Remove the
+internet address and the app keeps working locally.
+
+## Removing a server
+
+When a connected server is removed, its addresses can be removed with it. The
+helper addresses that kombify.me created for it are released too. If the clean-up
+fails, the request reports an error and can be repeated safely.
+
+## If something goes wrong
+
+| What you see | What to do |
+| --- | --- |
+| The app works at home but not through kombify.me | Check that the address is switched on and active. |
+| "binding conflict" (409) | That address already belongs to another owner or server. It cannot be taken over. |
+| Mixed address layouts (409) | A base name keeps the layout of its first app. Keep using that layout. |
+| 429 limit error | You hit the base name or app limit. Remove an unused one. |
+| Login for a kit app fails | Make sure the address uses the `{base}-auth.kombify.me` form. |
+
+See also [Overview](/kombify-me/overview) and
+[Troubleshooting](/kombify-me/troubleshooting).

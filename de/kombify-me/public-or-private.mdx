@@ -1,0 +1,67 @@
+---
+title: "Öffentlich, privat oder Weiterleitung: Was brauche ich?"
+description: "Die drei Arten von kombify.me-Adressen in einfachen Worten"
+sidebarTitle: "Öffentlich oder privat"
+icon: "route"
+---
+
+Jede kombify.me-Adresse zeigt irgendwohin. Es gibt drei Arten. Wähle die, die
+dazu passt, wo deine App läuft.
+
+## Die drei Arten
+
+| Art | In einfachen Worten | Nutze sie, wenn |
+| --- | --- | --- |
+| Öffentliche Adresse (`proxy`) | kombify.me steht vor deiner App und reicht Besucher durch. Der Besucher sieht weiterhin den kombify.me-Namen. | Deine App schon aus dem Internet erreichbar ist. |
+| Weiterleitung | kombify.me schickt den Besucher an eine andere Webadresse weiter. Der Browser zeigt dann diese andere Adresse. | Du nur einen kurzen, einprägsamen Namen willst, der woandershin weiterleitet. |
+| Private Adresse (`tunnel`) | Ein kleiner Helfer bei dir zu Hause öffnet eine ausgehende Verbindung zu kombify.me und trägt Anfragen hinein. An deinem Router muss nichts geöffnet werden. | Deine App nur innerhalb deines Heimnetzwerks erreichbar ist. |
+
+## So wählst du
+
+1. Kann jemand außerhalb deines Zuhauses die Webadresse der App heute öffnen?
+   Wenn ja, wähle eine **öffentliche Adresse**.
+2. Willst du nur einen schöneren Namen für eine Seite, die schon woanders
+   liegt? Wähle eine **Weiterleitung**.
+3. Ist die App nur unter Adressen wie `192.168.x.x` oder `localhost`
+   erreichbar? Wähle eine **private Adresse**.
+
+Eine öffentliche Adresse akzeptiert nie eine private, Loopback- oder
+Link-Local-Adresse. Das schützt dein Heimnetzwerk. Wenn du es versuchst,
+bekommst du einen Fehler, und nichts wird gespeichert.
+
+## Was eine private Adresse braucht
+
+- Einen Techstack-Node-Agent, der zu Hause läuft und die App erreichen kann.
+- Der Agent muss verbunden bleiben. Wenn er getrennt ist, bekommen Besucher die
+  Antwort "try again in a few seconds" (503).
+- Seiten und Dateien sind auf 10 MiB pro Anfrage oder Antwort und 30 Sekunden
+  pro Anfrage begrenzt. Live-Streams und beliebige Netzwerkverbindungen werden
+  nicht unterstützt.
+
+Den vollständigen Weg findest du unter
+[Einen privaten Dienst erreichen](/de/kombify-me/private-targets).
+
+## Öffentlich heißt nicht "alle müssen es sehen"
+
+Eine öffentliche Adresse kann von jedem geöffnet werden, der sie kennt, es sei
+denn, deine App verlangt eine Anmeldung. Die App behält ihre eigene Anmeldung
+und ihre Cookies. Lasse Apps mit sensiblen Daten hinter ihrer eigenen Anmeldung
+oder lasse sie ausgeschaltet, bis du bereit bist.
+
+Jede App startet außerdem ausgeschaltet. Niemand kann sie öffnen, bis du sie
+einschaltest.
+
+kombify.me kann eine App auch für begrenzte Zeit mit namentlich genannten
+Besuchern teilen. Das ist eine eigene Funktion mit eigenen Owner-Steuerungen im
+kombify-Dashboard. Sie ist hier nicht abgedeckt.
+
+## Wenn etwas schiefgeht
+
+| Was du siehst | Was es bedeutet |
+| --- | --- |
+| Fehler beim Speichern einer privaten Adresse als öffentliche Adresse | Der öffentliche Pfad lehnt private Adressen ab. Verwende stattdessen eine private Adresse. |
+| 503 "try again" bei einer privaten Adresse | Der Heim-Helfer ist nicht verbunden. Starte ihn und warte einen Moment. |
+| 502 "Bad Gateway" bei einer öffentlichen Adresse | kombify.me konnte deine App nicht erreichen. Prüfe, ob sie läuft und öffentlich ist. |
+
+Gehostete `*.lan.kombify.me`-Namen sind nicht implementiert. StackKits stellt
+Namen innerhalb deines Heimnetzwerks bereit.

@@ -1,36 +1,75 @@
 ---
 title: "Einen privaten Dienst über kombify.me erreichen"
-description: "Einen privaten HTTP(S)-Origin über den Techstack-Node-Agent weiterleiten"
+description: "Leite einen privaten HTTP(S)-Origin über den Techstack-Node-Agent weiter"
 sidebarTitle: "Private Ziele"
 icon: "network-wired"
 ---
 
-Nutze diesen Pfad, wenn der Dienst aus dem Internet nicht erreichbar ist.
+Nutze diesen Pfad, wenn der Dienst nicht aus dem Internet erreichbar ist.
 kombify.me ruft die private Adresse nicht selbst ab. Ein Techstack-Node-Agent im
-Homelab öffnet eine authentifizierte Verbindung und leitet begrenzte
+Homelab baut eine authentifizierte Verbindung auf und leitet begrenzte
 HTTP(S)-Anfragen weiter.
 
-## Bevor du startest
+Im Alltag gesprochen: Deine App funktioniert nur innerhalb deines Heimnetzwerks,
+zum Beispiel unter einer Adresse wie `192.168.x.x`. Du musst nichts an deinem
+Router öffnen. Ein kleiner Helfer zu Hause, der Techstack-Node-Agent, verbindet
+sich nach außen mit kombify.me und trägt die Anfragen der Besucher hinein. Du bist
+nicht sicher, ob das die richtige Art ist? Lies zuerst
+[Öffentlich, privat oder Weiterleitung](/de/kombify-me/public-or-private).
+
+## Bevor du beginnst
 
 - Im Homelab muss ein Techstack-Node-Agent laufen, der den Origin erreichen kann.
 - Die Route muss den Typ „privates Ziel“ verwenden, nicht den öffentlichen Proxy.
-- Die Veröffentlichung eines Dienstes ist standardmäßig aus. Aktiviere sie nur,
+- Die Freigabe von Diensten ist standardmäßig ausgeschaltet. Aktiviere sie nur,
   wenn der öffentliche Name Datenverkehr annehmen soll.
 
 ## Den privaten Namen öffnen
 
-1. Registriere den Dienstnamen wie bei einer öffentlichen Adresse.
+1. Registriere den Dienstnamen auf dieselbe Weise wie eine öffentliche Adresse.
 2. Setze das Ziel als privaten HTTP(S)-Origin im Homelab.
 3. Halte den Techstack-Node-Agent verbunden.
-4. Veröffentliche die Dienstroute.
+4. Gib die Dienstroute frei.
 5. Öffne `https://{base}-{service}.kombify.me`.
 
 Ist der Agent getrennt, bleibt der öffentliche Name nicht verfügbar und fordert
-den Client auf, es erneut zu versuchen. Sobald derselbe Owner wieder verbindet,
-funktioniert die Weiterleitung erneut. Der Agent eines anderen Owners kann die
-Route nicht bedienen.
+den Client auf, es erneut zu versuchen. Die erneute Verbindung desselben
+Eigentümers stellt die Weiterleitung wieder her. Der Agent eines anderen
+Eigentümers kann die Route nicht bedienen.
+
+## Was nach jedem Schritt zu erwarten ist
+
+- Nach der Registrierung des Namens und dem Setzen des privaten Ziels existiert
+  der Name, ist aber ausgeschaltet. Besucher erhalten die Antwort „nicht
+  freigegeben“ (404).
+- Nachdem sich der Node-Agent verbunden hat, kann die Route Datenverkehr tragen.
+  Ist der Agent noch nicht verbunden, erhalten Besucher die Antwort „in ein paar
+  Sekunden erneut versuchen“ (503).
+- Nachdem du die Route freigegeben hast, öffnet `https://{base}-{service}.kombify.me`
+  deine App.
+
+## Grenzen, die du kennen solltest
+
+- Seiten und Dateien sind auf 10 MiB pro Anfrage oder Antwort begrenzt, und jede
+  Anfrage hat 30 Sekunden.
+- Live-Streams und beliebige Netzwerkverbindungen werden nicht unterstützt. Das
+  Relay transportiert nur Web-Anfragen (HTTP und HTTPS).
+
+## Wenn etwas schiefgeht
+
+| Was du siehst | Was zu tun ist |
+| --- | --- |
+| 503, „erneut versuchen“ | Der Node-Agent ist nicht verbunden. Starte ihn im Homelab und warte einen Moment. |
+| 404 „nicht freigegeben“ | Gib die Dienstroute frei. |
+| Das Ziel wird abgelehnt | Ein privates Ziel muss auf einer Route vom privaten Typ gesetzt werden, nicht auf einer öffentlichen Adresse. |
+| 502 „Bad Gateway“ | Der Helfer ist verbunden, aber deine App hat nicht geantwortet. Prüfe, ob die App läuft und der Helfer sie erreichen kann. |
+| Der Agent ist verbunden, aber der Name bleibt nicht verfügbar | Nur der Agent desselben Eigentümers kann die Route bedienen. Prüfe, ob er mit dem Konto verbunden ist, dem der Name gehört. |
+
+Weitere Prüfungen: [kombify.me-Fehlerbehebung](/de/kombify-me/troubleshooting). Zur
+Nutzung mit einem StackKits-Server siehe
+[Eine Adresse mit einem StackKits-Server nutzen](/de/kombify-me/connect-a-stackkits-server).
 
 ## Lokale Namen lokal halten
 
-Das Surfen nur im LAN bleibt auf dem Resolver, den StackKits im Homelab
-installiert. kombify.me veröffentlicht keine `*.lan.kombify.me`-Namen.
+Das Surfen nur im LAN bleibt beim Resolver, den StackKits im Homelab installiert.
+kombify.me veröffentlicht keine Namen unter `*.lan.kombify.me`.

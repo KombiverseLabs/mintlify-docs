@@ -1,0 +1,64 @@
+---
+title: "stackkit wallet-item"
+description: "交付到此节点加密本地托管的 Wallet 项目"
+sidebarTitle: "wallet-item"
+---
+交付到此节点加密本地托管的 Wallet 项目。
+
+```bash
+stackkit wallet-item [flags]
+```
+
+Subcommands: [`stackkit wallet-item import`](#stackkit-wallet-item-import), [`stackkit wallet-item remove`](#stackkit-wallet-item-remove), [`stackkit wallet-item status`](#stackkit-wallet-item-status)
+
+## stackkit wallet-item import
+
+从标准输入打开密封的 Wallet 项目交付，并存入加密本地托管。
+
+在标准输入读取一个由已固定的交付权威签名的密封 wallet-item-import 或 wallet-item-rotate 信封。节点会打开它、将其记录为已消费，并使用本地托管密钥加密存储该值，以项目引用和版本为键。轮换会删除所有更旧的版本。结果只包含引用和版本。
+
+```bash
+stackkit wallet-item import [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | 授权存储此 Wallet 项目 |
+| `--tenant-ref` | string | — | 密封交付必须寻址到的租户 |
+
+**示例**
+
+```bash
+stackkit wallet-item import --tenant-ref "$TENANT" --owner-approve < envelope.json
+```
+
+## stackkit wallet-item remove
+
+Open a sealed Wallet item removal from stdin and drop the item from local custody.
+
+Read one sealed wallet-item-remove envelope on stdin, signed by the pinned delivering authority. The node opens it, records it as consumed, and deletes every version of the item it names from local custody. A bound consumer such as the Private AI provider key fails closed on its next apply until another item is delivered. Removing an item this node does not hold succeeds and removes nothing. The result names the reference and the removed versions only.
+
+```bash
+stackkit wallet-item remove [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Authorize removing this Wallet item |
+| `--tenant-ref` | string | — | Tenant the sealed removal must be addressed to |
+
+**Examples**
+
+```bash
+stackkit wallet-item remove --tenant-ref "$TENANT" --owner-approve < envelope.json
+```
+
+## stackkit wallet-item status
+
+列出本地托管中的 Wallet 项目及其引用和版本。
+
+按租户、项目引用和版本列出本地托管中的每个 Wallet 项目，以及在分离后是否需要轮换。不会读取任何值。
+
+```bash
+stackkit wallet-item status [flags]
+```

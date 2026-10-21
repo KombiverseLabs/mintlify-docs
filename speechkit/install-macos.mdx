@@ -9,7 +9,7 @@ SpeechKit for macOS is an early beta that does Dictation only. It runs on
 macOS 14 or newer on Apple Silicon. Intel Macs are not supported.
 
 {/* speechkit-release:begin */}
-The current public release is [v0.75.7](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.7), published 2026-10-05.
+The current public release is [v0.77.7](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.7), published 2026-10-18.
 {/* speechkit-release:end */}
 
 <Warning>
@@ -17,6 +17,20 @@ The macOS bundle is signed ad-hoc, without an Apple Developer ID and without
 notarization. macOS quarantines it and may claim the app is damaged. It is not.
 Removing the quarantine label takes one documented command, described below.
 </Warning>
+
+In everyday terms: this is a first, limited version for Macs with an Apple chip.
+It turns your speech into text and types it into the app you are using. It is
+free to try, but macOS treats it with suspicion because it is not signed by an
+Apple developer account, so the install needs one extra step that you do in
+Terminal. Nothing below needs an administrator password.
+
+## Before you start
+
+- A Mac with an Apple chip (M-series) running macOS 14 or newer. Intel Macs are
+  not supported.
+- A few minutes. Local speech models are downloaded later, on demand.
+- Know that Terminal is an app on your Mac (press Cmd+Space and type
+  `Terminal`). You only paste one command into it.
 
 ## Download
 
@@ -49,6 +63,14 @@ grep SpeechKit-macOS-arm64.zip SHA256SUMS.txt | shasum -a 256 -c
 3. Open SpeechKit from Applications and grant **Microphone** and
    **Accessibility** when asked.
 
+What to expect after each step:
+
+- After step 1, the app sits in your Applications folder, no longer in
+  Downloads.
+- After step 2, Terminal prints nothing. That means the command worked.
+- After step 3, SpeechKit opens without the "damaged" message, shows its item
+  in the menu bar at the top of the screen, and macOS asks for the permissions.
+
 Read the full
 [unsigned-release notice](https://github.com/kombifyio/SpeechKit/releases/latest/download/UNSIGNED-MACOS-RELEASE.txt)
 for the reasoning behind each step. Nothing in the procedure asks you to
@@ -77,6 +99,37 @@ ad-hoc signed build has a different signature, so macOS asks for Microphone
 and Accessibility again after each update, and sometimes for keychain access.
 That is expected for an unsigned beta.
 
+If a permission still seems missing, SpeechKit may also ask for Input
+Monitoring, which the hotkey needs. Hotkeys do not work in this build, so you
+can leave that one off for now.
+
 If an update leaves dictation unresponsive, open **System Settings → Privacy &
 Security → Accessibility** and switch SpeechKit back on. It picks the
 permission up while running; no restart is needed.
+
+## If something goes wrong
+
+- **macOS says the app is damaged.** It is not; the bundle is intact. Run the quarantine command from step 2 and open
+  it again.
+- **The command prints an error.** Check that the app is in `/Applications` and
+  that the spelling matches step 2, including the capital letters.
+- **Nothing is typed into the other app.** Check **System Settings → Privacy &
+  Security → Accessibility** and switch SpeechKit on. Text also cannot be typed
+  into a password field; macOS blocks it on purpose.
+- **No microphone input.** Check **System Settings → Privacy & Security →
+  Microphone** for SpeechKit, and the input you chose in SpeechKit. See
+  [Set up hotkeys, microphone and language](/speechkit/hotkeys-microphone-language).
+- **The hotkey does nothing.** Expected in this build. Use the menu-bar item to
+  start a dictation.
+- **An update asked for everything again.** Expected; see "Permissions after an
+  update" above.
+- **A speech model does not download.** Check your connection and the privacy
+  scope. See [Work offline with local models](/speechkit/work-offline) and
+  [Fix common problems](/speechkit/fix-common-problems).
+- **You want to update or remove it.** See
+  [Update or uninstall SpeechKit](/speechkit/update-and-uninstall).
+
+## Next steps
+
+- [Set up hotkeys, microphone and language](/speechkit/hotkeys-microphone-language)
+- [Fix common problems](/speechkit/fix-common-problems)

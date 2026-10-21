@@ -9,152 +9,373 @@ keywords: ["Passwörter", "Vaultwarden", "Bitwarden", "Passwortmanager", "Browse
 
 import { clientSetupLabelsDe } from "/snippets/client-setup-labels-de.jsx";
 
-import { ClientSetupGuide } from "/snippets/client-setup-guide.jsx";
+import { ClientSetupGuide, ClientGuideDialog } from "/snippets/client-setup-guide.jsx";
 
-<ClientSetupGuide
-  labels={clientSetupLabelsDe}
-  locale="de"
-  id="kcg-passwords"
-  meta={[
-    { icon: "phone", text: "Handy, Browser & Computer" },
-    { icon: "steps", text: "6 kurze Schritte" },
-    { icon: "book", text: "Keine Vorkenntnisse nötig" },
-  ]}
-  requirements={[
-    "Deine Tresor-Adresse, zum Beispiel https://vault.home.test",
-    "Eine Einladung für deine E-Mail-Adresse",
-    "Jedes Gerät ist von der Person, die kombify eingerichtet hat, für deinen Heimtresor vorbereitet",
-    "Ein Master-Passwort, das du dir merken kannst",
-  ]}
-  requirementsHelp={{ label: "Noch keine Einladung?", target: "kcg-passwords-no-invite" }}
-  appsTitle="Lade zuerst die Bitwarden-App herunter."
-  vendor={{ label: "Alle Downloads von Bitwarden", href: "https://bitwarden.com/download/" }}
-  apps={[
-    { platform: "apple", label: "iPhone & iPad", detail: "Bitwarden Password Manager", store: "Im App Store öffnen", href: "https://apps.apple.com/app/bitwarden-password-manager/id1137397744", vendor: "Bitwarden", official: true },
-    { platform: "android", label: "Android", detail: "Bitwarden Password Manager", store: "In Google Play öffnen", href: "https://play.google.com/store/apps/details?id=com.x8bit.bitwarden", vendor: "Bitwarden", official: true },
-    { platform: "browser", label: "Browser-Erweiterung", detail: "Chrome, Firefox, Edge, Safari und mehr", store: "Bitwarden-Downloadseite öffnen", href: "https://bitwarden.com/download/", vendor: "Bitwarden", official: true },
-    { platform: "desktop", label: "Computer", detail: "Windows, macOS und Linux", store: "Bitwarden-Downloadseite öffnen", href: "https://bitwarden.com/download/", vendor: "Bitwarden", official: true },
-  ]}
-  appsNote="Browser-Stores: [Chrome](https://chromewebstore.google.com/detail/bitwarden-password-manager/nngceckbapebfimnlniiiahkandclblb) · [Firefox](https://addons.mozilla.org/firefox/addon/bitwarden-password-manager/) · [Edge](https://microsoftedge.microsoft.com/addons/detail/bitwarden-password-manager/jbkfoedolllekgbhcbcoahefnbanhhlh) · [Safari (Mac App Store)](https://apps.apple.com/app/bitwarden/id1352778147). Dein Tresor läuft auf Vaultwarden, das mit diesen offiziellen Bitwarden-Apps funktioniert. Eine eigene Vaultwarden-App brauchst du nicht."
-  stepsTitle="Richte deinen Tresor Schritt für Schritt ein."
-  steps={[
-    {
-      tab: "Tresor öffnen",
-      title: "Öffne deinen Tresor im Browser.",
-      intro: "Fang am Computer an. Dein Tresor hat eine eigene Webadresse, wie eine Website, die nur dein Haushalt nutzt.",
-      clicks: [
-        "Gib deine Tresor-Adresse in die Adressleiste des Browsers ein, zum Beispiel **https://vault.home.test**, und drücke die Eingabetaste.",
-        "Klicke unter dem Anmeldefeld auf [[Create account]].",
-      ],
-      note: "Die Adresse in dieser Anleitung ist ein Beispiel. Verwende die Adresse, die du von der Person bekommen hast, die kombify eingerichtet hat.",
-      faq: { q: "Was ist eine Tresor-Adresse?", a: "Das ist die Webadresse des Passwort-Tresors deines Haushalts. Sie beginnt meist mit **https://vault.** und endet mit dem Namen deines Heimnetzwerks. Die Person, die kombify eingerichtet hat, nennt dir die genaue Adresse." },
-      check: "Du siehst das Formular [[Create account]].",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-01-open-vault.webp", width: 1088, height: 830, alt: "Vaultwarden-Anmeldeseite mit markiertem Link Create account", caption: "Anmeldeseite des Tresors", credit: "kombify-Screenshot", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · Web-Tresor 2026.7.0", captured: "2026-09-24", annotations: [{ n: 2, top: 84.3, left: 38.3, width: 23.5, height: 7.2 }] },
-    },
-    {
-      tab: "Konto erstellen",
-      title: "Erstelle dein Konto.",
-      intro: "Dein Tresor akzeptiert nur eingeladene E-Mail-Adressen. Verwende dieselbe Adresse, an die die Einladung ging.",
-      clicks: [
-        "Gib bei [[Email address]] deine eingeladene E-Mail-Adresse ein.",
-        "Gib bei [[Name]] deinen Namen ein. Die Person, die den Tresor betreibt, und alle, mit denen du Passwörter teilst, können ihn sehen.",
-        "Klicke auf [[Continue]].",
-      ],
-      faq: { q: "Ist das mein kombify-Konto?", a: "Nein. Dieses Konto gehört nur zu deinem Passwort-Tresor. Es hat eine eigene E-Mail-Adresse und ein eigenes Master-Passwort." },
-      check: "Die Seite fordert dich jetzt auf, [[Set a strong password]].",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-02-create-account.webp", width: 1088, height: 718, alt: "Formular Create account mit der E-Mail-Adresse alex@example.com und dem Namen Alex Example", caption: "Konto erstellen", credit: "kombify-Screenshot", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · Web-Tresor 2026.7.0", captured: "2026-09-24", annotations: [{ n: 1, top: 37.6, left: 16.4, width: 65.1, height: 13.4 }, { n: 2, top: 61, left: 16.4, width: 65.1, height: 13.4 }, { n: 3, top: 76.3, left: 14, width: 72.1, height: 13.9 }] },
-    },
-    {
-      tab: "Master-Passwort",
-      title: "Wähle dein Master-Passwort.",
-      intro: "Das Master-Passwort ist das einzige Passwort, das du dir noch merken musst. Es schaltet alle anderen frei.",
-      clicks: [
-        "Gib bei [[Master password]] ein langes Passwort ein. Ein kurzer Satz aus vier oder mehr Wörtern funktioniert gut.",
-        "Gib dasselbe Passwort bei [[Confirm master password]] noch einmal ein.",
-        "Klicke auf [[Create account]]. Wenn die Seite die Browser-Erweiterung vorschlägt, klicke auf [[Add it later]] und dann auf [[Skip to web app]]. Die Erweiterung verbindest du in Schritt 5.",
-      ],
-      note: "**Ein vergessenes Master-Passwort kann niemand wiederherstellen**, auch nicht die Person, die deinen Tresor betreibt. Schreib es auf und bewahre den Zettel an einem sicheren Ort außerhalb des Tresors auf.",
-      faq: { q: "Was bedeutet die Stärkeanzeige?", a: "Sie schätzt, wie schwer dein Passwort zu erraten ist. Ziel ist **Strong**. Länger ist besser als kompliziert." },
-      check: "Dein leerer Tresor öffnet sich mit dem Titel [[All vaults]].",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-03-master-password.webp", width: 1088, height: 1310, alt: "Seite Set a strong password mit zweimal eingegebenem Master-Passwort, bewertet mit Strong", caption: "Set a strong password", credit: "kombify-Screenshot", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · Web-Tresor 2026.7.0", captured: "2026-09-24", annotations: [{ n: 1, top: 25.5, left: 16.4, width: 60.7, height: 7.3 }, { n: 2, top: 52.2, left: 16.4, width: 60.7, height: 7.3 }, { n: 3, top: 87, left: 14, width: 72.1, height: 7.6 }] },
-    },
-    {
-      tab: "Erstes Passwort",
-      title: "Speichere dein erstes Passwort.",
-      intro: "Speichere eine Anmeldung zum Testen. Sie zeigt dir später, dass deine Apps mit deinem Tresor verbunden sind.",
-      clicks: [
-        "Klicke oben rechts auf [[New]] und wähle [[Login]]. Wenn zuerst ein Willkommensfenster erscheint, klicke auf [[Skip]].",
-        "Gib bei [[Item name]] einen Namen ein, den du wiedererkennst, zum Beispiel den Namen eines Shops.",
-        "Gib deinen [[Username]] ein. Klicke neben [[Password]] auf die kreisförmigen Pfeile, um ein Passwort zu erzeugen, und dann auf [[Use this password]].",
-        "Klicke auf [[Save]].",
-      ],
-      note: "Trag die Webadresse des Shops unter [[Website (URI)]] ein. Die Browser-Erweiterung schlägt diese Anmeldung dann auf dieser Website vor.",
-      check: "Die Meldung [[Item added]] erscheint und deine Anmeldung steht in der Liste.",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-04-new-login.webp", width: 1472, height: 1664, alt: "Fenster New Login mit dem Eintragsnamen Example Shop, einem Benutzernamen und einem erzeugten Passwort", caption: "New Login", credit: "kombify-Screenshot", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · Web-Tresor 2026.7.0", captured: "2026-09-24", annotations: [{ n: 2, top: 12.1, left: 7.9, width: 82.6, height: 5.8 }, { n: 3, top: 41.8, left: 7.9, width: 79.3, height: 5.8 }, { n: 3, top: 52.3, left: 87.5, width: 5.7, height: 5 }, { n: 4, top: 92.1, left: 2.7, width: 10.4, height: 6 }] },
-    },
-    {
-      tab: "Apps verbinden",
-      title: "Verbinde die Bitwarden-Apps.",
-      intro: "Jede Bitwarden-App verbindet sich zuerst mit den Servern von Bitwarden. Sag ihr einmalig, dass sie stattdessen deinen Tresor verwenden soll.",
-      clicks: [
-        "Installiere die Bitwarden-App aus der Liste oben und öffne sie.",
-        "Öffne auf dem Anmeldebildschirm das Menü [[Logging in on]] und wähle [[Self-hosted]]. In der Computer-App heißt das Menü [[Accessing]].",
-        "Gib bei [[Server URL]] deine Tresor-Adresse mit **https://** am Anfang ein und tippe auf [[Save]].",
-        "Melde dich mit deiner E-Mail-Adresse und deinem Master-Passwort an.",
-      ],
-      note: "Wiederhole diese Schritte auf jedem Handy, in jedem Browser und auf jedem Computer, den du nutzt. Jeder braucht deine Tresor-Adresse einmal.",
-      faq: { q: "Warum gibt es hier kein Bild der App?", a: "Die Nutzungsbedingungen von Bitwarden erlauben nicht, die Bilder weiterzuverwenden. Die eigene Anleitung von Bitwarden zeigt jeden Bildschirm, und die Bezeichnungen oben passen dazu." },
-      check: "Die App zeigt die Anmeldung, die du in Schritt 4 gespeichert hast.",
-      visual: {
-        tag: "BITWARDEN-ANLEITUNG",
-        title: "Bitwarden zeigt jeden Bildschirm",
-        text: "Wähle in der Bitwarden-Anleitung dein Gerät aus. Suche den Abschnitt zu einem **selbst gehosteten** Server.",
-        links: [
-          { label: "Eine App mit dem eigenen Server verbinden", detail: "bitwarden.com · alle Geräte", href: "https://bitwarden.com/help/change-client-environment/", icon: "server" },
-          { label: "Erste Schritte mit der Browser-Erweiterung", detail: "bitwarden.com", href: "https://bitwarden.com/help/getting-started-browserext/", icon: "browser" },
-          { label: "Erste Schritte mit der Mobile-App", detail: "bitwarden.com", href: "https://bitwarden.com/help/getting-started-mobile/", icon: "phone" },
-        ],
-      },
-    },
-    {
-      tab: "Prüfen",
-      title: "Ist alles verbunden?",
-      intro: "Prüfe es im Web-Tresor und in einer App. Hake nur ab, was du selbst geprüft hast.",
-      verify: [
-        "Ich kann meine Tresor-Adresse öffnen und mich anmelden.",
-        "Die von mir gespeicherte Anmeldung erscheint in einer Bitwarden-App auf meinem Handy, in meinem Browser oder auf meinem Computer.",
-        "Mein Master-Passwort ist aufgeschrieben und außerhalb des Tresors aufbewahrt.",
-      ],
-      note: "Diese Anleitung liest deinen Tresor nicht aus. Deine Haken bleiben in diesem Browser.",
-      check: "Jetzt kannst du deine anderen Passwörter in den Tresor übertragen.",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-05-first-item.webp", width: 1430, height: 300, alt: "Liste All vaults mit der gespeicherten Anmeldung Example Shop", caption: "Deine erste Anmeldung im Tresor", credit: "kombify-Screenshot", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · Web-Tresor 2026.7.0", captured: "2026-09-24", annotations: [{ n: null, top: 37.2, left: 1, width: 98, height: 58.1 }] },
-    },
-  ]}
-  nextTitle="Wie es weitergeht."
-  next={[
-    { icon: "shield", title: "Zwei-Schritt-Anmeldung aktivieren", text: "Bitwarden erklärt, wie du einen zweiten Anmeldeschritt hinzufügst.", href: "https://bitwarden.com/help/setup-two-step-login/" },
-    { icon: "server", title: "Den Tresor sichern", text: "Für die Person, die kombify betreibt: schütze die Tresordaten.", href: "/de/guides/stackkits/back-up-and-restore" },
-  ]}
-  help={[
-    { id: "kcg-passwords-no-invite", q: "Ich habe noch keine Tresor-Adresse und keine Einladung.", a: "Frag die Person, die kombify in deinem Haushalt eingerichtet hat. Sie fügt den Dienst Passwörter hinzu und lädt deine E-Mail-Adresse ein. [So funktioniert Passwörter mit kombify](/de/guides/stackkits/use-cases/passwords) · [Owner-Setup](/de/stackkits/apps/vaultwarden)." },
-    { q: "Create account meldet „Registration not allowed or user already exists“.", a: "Prüfe, ob du genau die eingeladene E-Mail-Adresse verwendest. Wenn du dein Konto schon erstellt hast, geh zurück und melde dich stattdessen an. Sonst bitte um eine neue Einladung." },
-    { q: "Die Adresse lässt sich nicht öffnen, oder der Browser warnt vor der Verbindung.", a: "Probiere die Adresse zuerst auf einem Gerät in deinem Heimnetzwerk. Wenn dein Tresor nur zu Hause läuft, verbinde dich mit deinem Heim-WLAN oder mit der Heimverbindungs-App, die du bekommen hast. Jedes Gerät muss außerdem so eingerichtet sein, dass es deinem Heimserver vertraut; das erledigt die Person, die kombify eingerichtet hat. Wenn der Browser meldet, die Verbindung sei nicht privat, brich hier ab und frag sie. Klicke nicht über die Warnung hinweg. [Über Heimadressen](/de/guides/stackkits/use-cases/network)." },
-    { q: "Ich habe mein Master-Passwort vergessen.", a: "Niemand kann es wiederherstellen. Dein Tresor ist damit verschlüsselt. Die Person, die deinen Tresor betreibt, kann dein Konto löschen, damit du neu anfangen kannst, aber die darin gespeicherten Passwörter gehen verloren. [Bitwarden zu Master-Passwörtern](https://bitwarden.com/help/master-password/)." },
-    { q: "Mein Android-Handy hat kein Google Play.", a: "Bitwarden betreibt ein eigenes F-Droid-Repository. Die Adresse steht auf der [Bitwarden-Downloadseite](https://bitwarden.com/download/)." },
-    { q: "Warum steht hier Vaultwarden und Bitwarden?", a: "Vaultwarden ist das Programm, das deinen Tresor betreibt. Es ist ein inoffizieller Server, der mit den offiziellen Bitwarden-Apps funktioniert. Vaultwarden steht in keiner Verbindung zu Bitwarden, Inc. Die Bilder zeigen Vaultwarden 1.37.2 auf Englisch; neuere Versionen und andere Sprachen können anders aussehen." },
-  ]}
-  attribution="**Vaultwarden betreibt deinen Tresor, und die Bitwarden-Apps öffnen ihn. kombify installiert ihn für dich.** kombify stellt keine der beiden Apps her. [Vaultwarden](https://github.com/dani-garcia/vaultwarden) (AGPL-3.0) · Web-Tresor: [Bitwarden-Web-Client für Vaultwarden](https://github.com/dani-garcia/bw_web_builds) (GPL-3.0) · [Bitwarden](https://bitwarden.com/)"
-  sources={{
-    summary: "Screenshots von kombify aus einer lokalen Vaultwarden-Installation · erfundenes Konto · englische Menüs.",
-    paragraphs: [
-      "**Screenshots · 24. September 2026.** kombify hat die Bilder des Web-Tresors aus einer lokalen Referenzinstallation aufgenommen: Vaultwarden 1.37.2, das Image, das der StackKits-Katalog für Passwörter ausliefert, mit dem mitgelieferten Web-Tresor 2026.7.0 (dem Bitwarden-Web-Client, GPL-3.0). Die Installation nutzte die Beispieladresse https://vault.home.test und das erfundene Konto alex@example.com. Es ist eine Referenzinstallation, kein StackKits-Rollout-Test. Diese Anleitung hat die violetten Markierungen ergänzt.",
-      "Die Bildschirme der Bitwarden-Apps werden nicht gezeigt. Die [Bedingungen von Bitwarden](https://bitwarden.com/terms/) erlauben nicht, seine Inhalte weiterzuverwenden, deshalb verweist Schritt 5 auf die eigene Anleitung von Bitwarden.",
-      "Store-Links und Hilfeseiten wurden am 24. September 2026 geprüft. Dein Fortschritt bleibt in diesem Browser. Die Anleitung verbindet keine Konten und fragt nach keinen Passwörtern.",
-    ],
-    links: [
-      { label: "Bitwarden: einzelne Apps verbinden", href: "https://bitwarden.com/help/change-client-environment/" },
-      { label: "Bitwarden-Downloads", href: "https://bitwarden.com/download/" },
-      { label: "Vaultwarden-Projekt", href: "https://github.com/dani-garcia/vaultwarden" },
-    ],
-  }}
-/>
+<div className="kombify-client-guide not-prose" id="kcg-passwords" dir="ltr" lang="de" style={{"--kcg-steps": "6"}}>
+<div className="guide-content">
+<ClientSetupGuide id="kcg-passwords" labels={clientSetupLabelsDe} locale="de" checks={[0,0,0,0,0,3]} />
+
+<div className="page-top">
+<div className="intro-meta">
+<span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="20" rx="3" width="12" x="6" y="2"></rect><path d="M10 5h4M11 19h2"></path></svg> Handy, Browser &amp; Computer</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="7" rx="1.5" width="7" x="3" y="3"></rect><rect height="7" rx="1.5" width="7" x="14" y="3"></rect><rect height="7" rx="1.5" width="7" x="3" y="14"></rect><rect height="7" rx="1.5" width="7" x="14" y="14"></rect></svg> 6 kurze Schritte</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M12 5v15M3 4c4-1 6 0 9 1 3-1 5-2 9-1v15c-4-1-6 0-9 1-3-1-5-2-9-1Z"></path></svg> Keine Vorkenntnisse nötig</span>
+</div>
+<div className="page-tools">
+<button aria-label="Anleitung drucken" className="tool-button" type="button" data-guide-action="print"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M6 8V3h12v5M6 17H3V8h18v9h-3M6 14h12v7H6Z"></path><path d="M17 11h.01"></path></svg></button>
+</div>
+</div>
+<div className="ready-strip">
+<span className="guide-strong">Was du brauchst</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg> Deine Tresor-Adresse, zum Beispiel https://vault.home.test</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg> Eine Einladung für deine E-Mail-Adresse</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg> Jedes Gerät ist von der Person, die kombify eingerichtet hat, für deinen Heimtresor vorbereitet</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg> Ein Master-Passwort, das du dir merken kannst</span><a href="#kcg-passwords-no-invite">Noch keine Einladung? <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+</div>
+<section aria-labelledby="kcg-passwords-apps-title" className="downloads" id="kcg-passwords-apps">
+<div className="section-top">
+<h2 id="kcg-passwords-apps-title">Lade zuerst die Bitwarden-App herunter.</h2><a className="small-link" href="https://bitwarden.com/download/" rel="noopener noreferrer" target="_blank">Alle Downloads von Bitwarden <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (öffnet in einem neuen Tab)</span></a>
+</div>
+<div className="downloads-grid">
+<a className="download-card" href="https://apps.apple.com/app/bitwarden-password-manager/id1137397744" rel="noopener noreferrer" target="_blank"><span className="platform-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M16.7 1.8c0 2.1-1.7 4.4-3.7 4.2-.4-2.1 1.8-4.3 3.7-4.2ZM20.4 17.3c-.5 1.2-.8 1.7-1.5 2.7-1 1.5-2.4 3.3-4.2 3.3-1.6 0-2-1-4.1-.9-2.1 0-2.5 1-4.2.9-1.8-.1-3.1-1.7-4.1-3.2C-.5 15.9-.7 10.4 1 7.6c1.2-2 3.1-3.1 4.9-3.1 1.9 0 3.1 1 4.7 1 1.5 0 2.5-1 4.7-1 1.6 0 3.3.9 4.5 2.3-4 2.2-3.3 8 0 10.5Z" fill="currentColor" stroke="none" transform="translate(2 0) scale(.87)"></path></svg></span><span className="download-text"><strong>iPhone &amp; iPad</strong><small>Bitwarden Password Manager</small><span className="store-name">Im App Store öffnen <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg></span><span className="badge official">Offiziell · Bitwarden</span></span><span className="sr-only"> (öffnet in einem neuen Tab)</span></a><a className="download-card" href="https://play.google.com/store/apps/details?id=com.x8bit.bitwarden" rel="noopener noreferrer" target="_blank"><span className="platform-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M5 12a7 7 0 0 1 14 0v6H5Zm2-6L5 3m12 3 2-3M2 12v5m20-5v5M8 18v4m8-4v4"></path><path d="M8.5 9h.01M15.5 9h.01"></path></svg></span><span className="download-text"><strong>Android</strong><small>Bitwarden Password Manager</small><span className="store-name">In Google Play öffnen <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg></span><span className="badge official">Offiziell · Bitwarden</span></span><span className="sr-only"> (öffnet in einem neuen Tab)</span></a><a className="download-card" href="https://bitwarden.com/download/" rel="noopener noreferrer" target="_blank"><span className="platform-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="16" rx="2" width="20" x="2" y="4"></rect><path d="M2 9h20M6 6.5h.01M9 6.5h.01"></path></svg></span><span className="download-text"><strong>Browser-Erweiterung</strong><small>Chrome, Firefox, Edge, Safari und mehr</small><span className="store-name">Bitwarden-Downloadseite öffnen <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg></span><span className="badge official">Offiziell · Bitwarden</span></span><span className="sr-only"> (öffnet in einem neuen Tab)</span></a><a className="download-card" href="https://bitwarden.com/download/" rel="noopener noreferrer" target="_blank"><span className="platform-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="14" rx="2" width="20" x="2" y="3"></rect><path d="M8 22h8M12 17v5"></path></svg></span><span className="download-text"><strong>Computer</strong><small>Windows, macOS und Linux</small><span className="store-name">Bitwarden-Downloadseite öffnen <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg></span><span className="badge official">Offiziell · Bitwarden</span></span><span className="sr-only"> (öffnet in einem neuen Tab)</span></a>
+</div>
+<p className="download-hint">Browser-Stores: <a className="" href="https://chromewebstore.google.com/detail/bitwarden-password-manager/nngceckbapebfimnlniiiahkandclblb" rel="noopener noreferrer" target="_blank">Chrome <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (öffnet in einem neuen Tab)</span></a> · <a className="" href="https://addons.mozilla.org/firefox/addon/bitwarden-password-manager/" rel="noopener noreferrer" target="_blank">Firefox <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (öffnet in einem neuen Tab)</span></a> · <a className="" href="https://microsoftedge.microsoft.com/addons/detail/bitwarden-password-manager/jbkfoedolllekgbhcbcoahefnbanhhlh" rel="noopener noreferrer" target="_blank">Edge <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (öffnet in einem neuen Tab)</span></a> · <a className="" href="https://apps.apple.com/app/bitwarden/id1352778147" rel="noopener noreferrer" target="_blank">Safari (Mac App Store) <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (öffnet in einem neuen Tab)</span></a>. Dein Tresor läuft auf Vaultwarden, das mit diesen offiziellen Bitwarden-Apps funktioniert. Eine eigene Vaultwarden-App brauchst du nicht.</p>
+</section>
+<section aria-labelledby="kcg-passwords-guide-title" className="guide-section" id="kcg-passwords-guide">
+<div className="guide-heading">
+<h2 id="kcg-passwords-guide-title">Richte deinen Tresor Schritt für Schritt ein.</h2>
+</div>
+<div className="wizard">
+<div aria-label="Einrichtungsschritte" className="step-tabs" role="tablist">
+<button aria-controls="kcg-passwords-panel-0" aria-selected="true" className="step-tab" id="kcg-passwords-tab-0" data-guide-tab="0" role="tab" tabIndex="0" type="button"><span className="step-dot">1</span><span>Tresor öffnen</span></button><button aria-controls="kcg-passwords-panel-1" aria-selected="false" className="step-tab" id="kcg-passwords-tab-1" data-guide-tab="1" role="tab" tabIndex="-1" type="button"><span className="step-dot">2</span><span>Konto erstellen</span></button><button aria-controls="kcg-passwords-panel-2" aria-selected="false" className="step-tab" id="kcg-passwords-tab-2" data-guide-tab="2" role="tab" tabIndex="-1" type="button"><span className="step-dot">3</span><span>Master-Passwort</span></button><button aria-controls="kcg-passwords-panel-3" aria-selected="false" className="step-tab" id="kcg-passwords-tab-3" data-guide-tab="3" role="tab" tabIndex="-1" type="button"><span className="step-dot">4</span><span>Erstes Passwort</span></button><button aria-controls="kcg-passwords-panel-4" aria-selected="false" className="step-tab" id="kcg-passwords-tab-4" data-guide-tab="4" role="tab" tabIndex="-1" type="button"><span className="step-dot">5</span><span>Apps verbinden</span></button><button aria-controls="kcg-passwords-panel-5" aria-selected="false" className="step-tab" id="kcg-passwords-tab-5" data-guide-tab="5" role="tab" tabIndex="-1" type="button"><span className="step-dot">6</span><span>Prüfen</span></button>
+</div>
+<div aria-labelledby="kcg-passwords-tab-0" className="guide-panel active" id="kcg-passwords-panel-0" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+SCHRITT 01 / 06
+</div>
+
+<div className="step-content">
+
+### Öffne deinen Tresor im Browser.
+
+<p className="step-intro">Fang am Computer an. Dein Tresor hat eine eigene Webadresse, wie eine Website, die nur dein Haushalt nutzt.</p>
+
+<ol className="click-list">
+<li><span className="click-num">1</span><span>Gib deine Tresor-Adresse in die Adressleiste des Browsers ein, zum Beispiel <strong>https://vault.home.test</strong>, und drücke die Eingabetaste.</span></li>
+<li><span className="click-num">2</span><span>Klicke unter dem Anmeldefeld auf <span className="key">Create account</span>.</span></li>
+</ol>
+
+<div className="micro-note">Die Adresse in dieser Anleitung ist ein Beispiel. Verwende die Adresse, die du von der Person bekommen hast, die kombify eingerichtet hat.</div>
+
+<div style={{ marginBlock: "1rem" }}>
+<p><strong>Was ist eine Tresor-Adresse?</strong></p>
+
+Das ist die Webadresse des Passwort-Tresors deines Haushalts. Sie beginnt meist mit <strong>https://vault.</strong> und endet mit dem Namen deines Heimnetzwerks. Die Person, die kombify eingerichtet hat, nennt dir die genaue Adresse.
+
+</div>
+
+<div className="step-check">Du siehst das Formular <span className="key">Create account</span>.</div>
+
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> KOMBIFY-SCREENSHOT</span>
+<div role="figure" className="screen-figure" aria-labelledby="kcg-passwords-capture-0">
+<div className="screen-image">
+<img noZoom alt="Vaultwarden-Anmeldeseite mit markiertem Link Create account" decoding="async" height="830" loading="eager" referrerPolicy="no-referrer" src="/images/guides/passwords/vaultwarden/web-01-open-vault.webp" width="1088"/><span aria-hidden="true" className="annotation" data-n="2" style={{"top": "84.3%", "left": "38.3%", "width": "23.5%", "height": "7.2%"}}></span><a className="image-fallback" href="/images/guides/passwords/vaultwarden/web-01-open-vault.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> Screenshot öffnen<span>Das Bild konnte nicht geladen werden.</span></a><button aria-label="Screenshot vergrößern: Vaultwarden-Anmeldeseite mit markiertem Link Create account" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-passwords-capture-0">
+Anmeldeseite des Tresors · <a className="" href="#kcg-passwords-sources">kombify-Screenshot</a><span className="meta">Vaultwarden 1.37.2 · Web-Tresor 2026.7.0 · aufgenommen am 2026-09-24</span>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby="kcg-passwords-tab-1" className="guide-panel" id="kcg-passwords-panel-1" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+SCHRITT 02 / 06
+</div>
+
+<div className="step-content">
+
+### Erstelle dein Konto.
+
+<p className="step-intro">Dein Tresor akzeptiert nur eingeladene E-Mail-Adressen. Verwende dieselbe Adresse, an die die Einladung ging.</p>
+
+<ol className="click-list">
+<li><span className="click-num">1</span><span>Gib bei <span className="key">Email address</span> deine eingeladene E-Mail-Adresse ein.</span></li>
+<li><span className="click-num">2</span><span>Gib bei <span className="key">Name</span> deinen Namen ein. Die Person, die den Tresor betreibt, und alle, mit denen du Passwörter teilst, können ihn sehen.</span></li>
+<li><span className="click-num">3</span><span>Klicke auf <span className="key">Continue</span>.</span></li>
+</ol>
+
+<div style={{ marginBlock: "1rem" }}>
+<p><strong>Ist das mein kombify-Konto?</strong></p>
+
+Nein. Dieses Konto gehört nur zu deinem Passwort-Tresor. Es hat eine eigene E-Mail-Adresse und ein eigenes Master-Passwort.
+
+</div>
+
+<div className="step-check">Die Seite fordert dich jetzt auf, <span className="key">Set a strong password</span>.</div>
+
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> KOMBIFY-SCREENSHOT</span>
+<div role="figure" className="screen-figure" aria-labelledby="kcg-passwords-capture-1">
+<div className="screen-image">
+<img noZoom alt="Formular Create account mit der E-Mail-Adresse alex@example.com und dem Namen Alex Example" decoding="async" height="718" loading="lazy" referrerPolicy="no-referrer" src="/images/guides/passwords/vaultwarden/web-02-create-account.webp" width="1088"/><span aria-hidden="true" className="annotation" data-n="1" style={{"top": "37.6%", "left": "16.4%", "width": "65.1%", "height": "13.4%"}}></span><span aria-hidden="true" className="annotation" data-n="2" style={{"top": "61%", "left": "16.4%", "width": "65.1%", "height": "13.4%"}}></span><span aria-hidden="true" className="annotation" data-n="3" style={{"top": "76.3%", "left": "14%", "width": "72.1%", "height": "13.9%"}}></span><a className="image-fallback" href="/images/guides/passwords/vaultwarden/web-02-create-account.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> Screenshot öffnen<span>Das Bild konnte nicht geladen werden.</span></a><button aria-label="Screenshot vergrößern: Formular Create account mit der E-Mail-Adresse alex@example.com und dem Namen Alex Example" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-passwords-capture-1">
+Konto erstellen · <a className="" href="#kcg-passwords-sources">kombify-Screenshot</a><span className="meta">Vaultwarden 1.37.2 · Web-Tresor 2026.7.0 · aufgenommen am 2026-09-24</span>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby="kcg-passwords-tab-2" className="guide-panel" id="kcg-passwords-panel-2" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+SCHRITT 03 / 06
+</div>
+
+<div className="step-content">
+
+### Wähle dein Master-Passwort.
+
+<p className="step-intro">Das Master-Passwort ist das einzige Passwort, das du dir noch merken musst. Es schaltet alle anderen frei.</p>
+
+<ol className="click-list">
+<li><span className="click-num">1</span><span>Gib bei <span className="key">Master password</span> ein langes Passwort ein. Ein kurzer Satz aus vier oder mehr Wörtern funktioniert gut.</span></li>
+<li><span className="click-num">2</span><span>Gib dasselbe Passwort bei <span className="key">Confirm master password</span> noch einmal ein.</span></li>
+<li><span className="click-num">3</span><span>Klicke auf <span className="key">Create account</span>. Wenn die Seite die Browser-Erweiterung vorschlägt, klicke auf <span className="key">Add it later</span> und dann auf <span className="key">Skip to web app</span>. Die Erweiterung verbindest du in Schritt 5.</span></li>
+</ol>
+
+<div className="micro-note"><strong>Ein vergessenes Master-Passwort kann niemand wiederherstellen</strong>, auch nicht die Person, die deinen Tresor betreibt. Schreib es auf und bewahre den Zettel an einem sicheren Ort außerhalb des Tresors auf.</div>
+
+<div style={{ marginBlock: "1rem" }}>
+<p><strong>Was bedeutet die Stärkeanzeige?</strong></p>
+
+Sie schätzt, wie schwer dein Passwort zu erraten ist. Ziel ist <strong>Strong</strong>. Länger ist besser als kompliziert.
+
+</div>
+
+<div className="step-check">Dein leerer Tresor öffnet sich mit dem Titel <span className="key">All vaults</span>.</div>
+
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> KOMBIFY-SCREENSHOT</span>
+<div role="figure" className="screen-figure" aria-labelledby="kcg-passwords-capture-2">
+<div className="screen-image">
+<img noZoom alt="Seite Set a strong password mit zweimal eingegebenem Master-Passwort, bewertet mit Strong" decoding="async" height="1310" loading="lazy" referrerPolicy="no-referrer" src="/images/guides/passwords/vaultwarden/web-03-master-password.webp" width="1088"/><span aria-hidden="true" className="annotation" data-n="1" style={{"top": "25.5%", "left": "16.4%", "width": "60.7%", "height": "7.3%"}}></span><span aria-hidden="true" className="annotation" data-n="2" style={{"top": "52.2%", "left": "16.4%", "width": "60.7%", "height": "7.3%"}}></span><span aria-hidden="true" className="annotation" data-n="3" style={{"top": "87%", "left": "14%", "width": "72.1%", "height": "7.6%"}}></span><a className="image-fallback" href="/images/guides/passwords/vaultwarden/web-03-master-password.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> Screenshot öffnen<span>Das Bild konnte nicht geladen werden.</span></a><button aria-label="Screenshot vergrößern: Seite Set a strong password mit zweimal eingegebenem Master-Passwort, bewertet mit Strong" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-passwords-capture-2">
+Set a strong password · <a className="" href="#kcg-passwords-sources">kombify-Screenshot</a><span className="meta">Vaultwarden 1.37.2 · Web-Tresor 2026.7.0 · aufgenommen am 2026-09-24</span>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby="kcg-passwords-tab-3" className="guide-panel" id="kcg-passwords-panel-3" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+SCHRITT 04 / 06
+</div>
+
+<div className="step-content">
+
+### Speichere dein erstes Passwort.
+
+<p className="step-intro">Speichere eine Anmeldung zum Testen. Sie zeigt dir später, dass deine Apps mit deinem Tresor verbunden sind.</p>
+
+<ol className="click-list">
+<li><span className="click-num">1</span><span>Klicke oben rechts auf <span className="key">New</span> und wähle <span className="key">Login</span>. Wenn zuerst ein Willkommensfenster erscheint, klicke auf <span className="key">Skip</span>.</span></li>
+<li><span className="click-num">2</span><span>Gib bei <span className="key">Item name</span> einen Namen ein, den du wiedererkennst, zum Beispiel den Namen eines Shops.</span></li>
+<li><span className="click-num">3</span><span>Gib deinen <span className="key">Username</span> ein. Klicke neben <span className="key">Password</span> auf die kreisförmigen Pfeile, um ein Passwort zu erzeugen, und dann auf <span className="key">Use this password</span>.</span></li>
+<li><span className="click-num">4</span><span>Klicke auf <span className="key">Save</span>.</span></li>
+</ol>
+
+<div className="micro-note">Trag die Webadresse des Shops unter <span className="key">Website (URI)</span> ein. Die Browser-Erweiterung schlägt diese Anmeldung dann auf dieser Website vor.</div>
+
+<div className="step-check">Die Meldung <span className="key">Item added</span> erscheint und deine Anmeldung steht in der Liste.</div>
+
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> KOMBIFY-SCREENSHOT</span>
+<div role="figure" className="screen-figure" aria-labelledby="kcg-passwords-capture-3">
+<div className="screen-image">
+<img noZoom alt="Fenster New Login mit dem Eintragsnamen Example Shop, einem Benutzernamen und einem erzeugten Passwort" decoding="async" height="1664" loading="lazy" referrerPolicy="no-referrer" src="/images/guides/passwords/vaultwarden/web-04-new-login.webp" width="1472"/><span aria-hidden="true" className="annotation" data-n="2" style={{"top": "12.1%", "left": "7.9%", "width": "82.6%", "height": "5.8%"}}></span><span aria-hidden="true" className="annotation" data-n="3" style={{"top": "41.8%", "left": "7.9%", "width": "79.3%", "height": "5.8%"}}></span><span aria-hidden="true" className="annotation" data-n="3" style={{"top": "52.3%", "left": "87.5%", "width": "5.7%", "height": "5%"}}></span><span aria-hidden="true" className="annotation" data-n="4" style={{"top": "92.1%", "left": "2.7%", "width": "10.4%", "height": "6%"}}></span><a className="image-fallback" href="/images/guides/passwords/vaultwarden/web-04-new-login.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> Screenshot öffnen<span>Das Bild konnte nicht geladen werden.</span></a><button aria-label="Screenshot vergrößern: Fenster New Login mit dem Eintragsnamen Example Shop, einem Benutzernamen und einem erzeugten Passwort" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-passwords-capture-3">
+New Login · <a className="" href="#kcg-passwords-sources">kombify-Screenshot</a><span className="meta">Vaultwarden 1.37.2 · Web-Tresor 2026.7.0 · aufgenommen am 2026-09-24</span>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby="kcg-passwords-tab-4" className="guide-panel" id="kcg-passwords-panel-4" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+SCHRITT 05 / 06
+</div>
+
+<div className="step-content">
+
+### Verbinde die Bitwarden-Apps.
+
+<p className="step-intro">Jede Bitwarden-App verbindet sich zuerst mit den Servern von Bitwarden. Sag ihr einmalig, dass sie stattdessen deinen Tresor verwenden soll.</p>
+
+<ol className="click-list">
+<li><span className="click-num">1</span><span>Installiere die Bitwarden-App aus der Liste oben und öffne sie.</span></li>
+<li><span className="click-num">2</span><span>Öffne auf dem Anmeldebildschirm das Menü <span className="key">Logging in on</span> und wähle <span className="key">Self-hosted</span>. In der Computer-App heißt das Menü <span className="key">Accessing</span>.</span></li>
+<li><span className="click-num">3</span><span>Gib bei <span className="key">Server URL</span> deine Tresor-Adresse mit <strong>https://</strong> am Anfang ein und tippe auf <span className="key">Save</span>.</span></li>
+<li><span className="click-num">4</span><span>Melde dich mit deiner E-Mail-Adresse und deinem Master-Passwort an.</span></li>
+</ol>
+
+<div className="micro-note">Wiederhole diese Schritte auf jedem Handy, in jedem Browser und auf jedem Computer, den du nutzt. Jeder braucht deine Tresor-Adresse einmal.</div>
+
+<div style={{ marginBlock: "1rem" }}>
+<p><strong>Warum gibt es hier kein Bild der App?</strong></p>
+
+Die Nutzungsbedingungen von Bitwarden erlauben nicht, die Bilder weiterzuverwenden. Die eigene Anleitung von Bitwarden zeigt jeden Bildschirm, und die Bezeichnungen oben passen dazu.
+
+</div>
+
+<div className="step-check">Die App zeigt die Anmeldung, die du in Schritt 4 gespeichert hast.</div>
+
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> BITWARDEN-ANLEITUNG</span>
+<div className="link-visual">
+<span className="guide-strong">Bitwarden zeigt jeden Bildschirm</span><p>Wähle in der Bitwarden-Anleitung dein Gerät aus. Suche den Abschnitt zu einem <strong>selbst gehosteten</strong> Server.</p><a className="vendor-link" href="https://bitwarden.com/help/change-client-environment/" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="7" rx="2" width="18" x="3" y="3"></rect><rect height="7" rx="2" width="18" x="3" y="14"></rect><path d="M7 6.5h.01M7 17.5h.01M16 6.5h2M16 17.5h2"></path></svg><span>Eine App mit dem eigenen Server verbinden<small>bitwarden.com · alle Geräte</small></span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (öffnet in einem neuen Tab)</span></a><a className="vendor-link" href="https://bitwarden.com/help/getting-started-browserext/" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="16" rx="2" width="20" x="2" y="4"></rect><path d="M2 9h20M6 6.5h.01M9 6.5h.01"></path></svg><span>Erste Schritte mit der Browser-Erweiterung<small>bitwarden.com</small></span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (öffnet in einem neuen Tab)</span></a><a className="vendor-link" href="https://bitwarden.com/help/getting-started-mobile/" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="20" rx="3" width="12" x="6" y="2"></rect><path d="M10 5h4M11 19h2"></path></svg><span>Erste Schritte mit der Mobile-App<small>bitwarden.com</small></span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (öffnet in einem neuen Tab)</span></a>
+</div>
+</div>
+</div>
+<div aria-labelledby="kcg-passwords-tab-5" className="guide-panel" id="kcg-passwords-panel-5" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+SCHRITT 06 / 06
+</div>
+
+<div className="step-content">
+
+### Ist alles verbunden?
+
+<p className="step-intro">Prüfe es im Web-Tresor und in einer App. Hake nur ab, was du selbst geprüft hast.</p>
+
+<div className="verify-list">
+<label><input type="checkbox" data-guide-step="5" data-guide-check="0" id="kcg-passwords-verify-5-0" /><span>Ich kann meine Tresor-Adresse öffnen und mich anmelden.</span></label>
+<label><input type="checkbox" data-guide-step="5" data-guide-check="1" id="kcg-passwords-verify-5-1" /><span>Die von mir gespeicherte Anmeldung erscheint in einer Bitwarden-App auf meinem Handy, in meinem Browser oder auf meinem Computer.</span></label>
+<label><input type="checkbox" data-guide-step="5" data-guide-check="2" id="kcg-passwords-verify-5-2" /><span>Mein Master-Passwort ist aufgeschrieben und außerhalb des Tresors aufbewahrt.</span></label>
+</div>
+
+<div className="micro-note">Diese Anleitung liest deinen Tresor nicht aus. Deine Haken bleiben in diesem Browser.</div>
+
+<div className="step-check">Jetzt kannst du deine anderen Passwörter in den Tresor übertragen.</div>
+
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> KOMBIFY-SCREENSHOT</span>
+<div role="figure" className="screen-figure" aria-labelledby="kcg-passwords-capture-4">
+<div className="screen-image">
+<img noZoom alt="Liste All vaults mit der gespeicherten Anmeldung Example Shop" decoding="async" height="300" loading="lazy" referrerPolicy="no-referrer" src="/images/guides/passwords/vaultwarden/web-05-first-item.webp" width="1430"/><span aria-hidden="true" className="annotation" style={{"top": "37.2%", "left": "1%", "width": "98%", "height": "58.1%"}}></span><a className="image-fallback" href="/images/guides/passwords/vaultwarden/web-05-first-item.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> Screenshot öffnen<span>Das Bild konnte nicht geladen werden.</span></a><button aria-label="Screenshot vergrößern: Liste All vaults mit der gespeicherten Anmeldung Example Shop" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-passwords-capture-4">
+Deine erste Anmeldung im Tresor · <a className="" href="#kcg-passwords-sources">kombify-Screenshot</a><span className="meta">Vaultwarden 1.37.2 · Web-Tresor 2026.7.0 · aufgenommen am 2026-09-24</span>
+</div>
+</div>
+</div>
+</div>
+<div className="wizard-bottom">
+<div className="progress-note">
+<span>0 von 6 Schritten erledigt</span>
+<div aria-hidden="true" className="progress-meter">
+<span></span><span></span><span></span><span></span><span></span><span></span>
+</div>
+</div>
+<button className="prev" disabled="" type="button"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"></path></svg> Zurück</button><button className="next" type="button"><span>Erledigt · weiter</span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+</div>
+</div>
+<p className="provenance-inline">Screenshots von kombify aus einer lokalen Vaultwarden-Installation · erfundenes Konto · englische Menüs. <a href="#kcg-passwords-sources">Bildquellen und Datum</a></p>
+</section>
+<section aria-labelledby="kcg-passwords-more-title" className="more-section" id="kcg-passwords-more">
+<div className="section-top">
+<h2 id="kcg-passwords-more-title">Wie es weitergeht.</h2>
+</div>
+<div className="more-grid">
+<a className="more-card" href="https://bitwarden.com/help/setup-two-step-login/" rel="noopener noreferrer" target="_blank"><span className="more-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M12 3 3 7v6c0 5 9 9 9 9s9-4 9-9V7Z"></path><path d="m8 12 3 3 5-6"></path></svg></span><span><strong>Zwei-Schritt-Anmeldung aktivieren</strong><small>Bitwarden erklärt, wie du einen zweiten Anmeldeschritt hinzufügst.</small></span> <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (öffnet in einem neuen Tab)</span></a><a className="more-card" href="/de/guides/stackkits/back-up-and-restore"><span className="more-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="7" rx="2" width="18" x="3" y="3"></rect><rect height="7" rx="2" width="18" x="3" y="14"></rect><path d="M7 6.5h.01M7 17.5h.01M16 6.5h2M16 17.5h2"></path></svg></span><span><strong>Den Tresor sichern</strong><small>Für die Person, die kombify betreibt: schütze die Tresordaten.</small></span></a>
+</div>
+</section>
+<section aria-labelledby="kcg-passwords-help-title" className="faq-section" id="kcg-passwords-help">
+<h2 id="kcg-passwords-help-title">Du kommst nicht weiter?</h2>
+<div data-guide-disclosure="" className="faq" id="kcg-passwords-no-invite">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>Ich habe noch keine Tresor-Adresse und keine Einladung.</strong></button>
+<div className="answer">
+Frag die Person, die kombify in deinem Haushalt eingerichtet hat. Sie fügt den Dienst Passwörter hinzu und lädt deine E-Mail-Adresse ein. <a className="" href="/de/guides/stackkits/use-cases/passwords">So funktioniert Passwörter mit kombify</a> · <a className="" href="/de/stackkits/apps/vaultwarden">Owner-Setup</a>.
+</div>
+</div>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>Create account meldet „Registration not allowed or user already exists“.</strong></button>
+<div className="answer">
+Prüfe, ob du genau die eingeladene E-Mail-Adresse verwendest. Wenn du dein Konto schon erstellt hast, geh zurück und melde dich stattdessen an. Sonst bitte um eine neue Einladung.
+</div>
+</div>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>Die Adresse lässt sich nicht öffnen, oder der Browser warnt vor der Verbindung.</strong></button>
+<div className="answer">
+Probiere die Adresse zuerst auf einem Gerät in deinem Heimnetzwerk. Wenn dein Tresor nur zu Hause läuft, verbinde dich mit deinem Heim-WLAN oder mit der Heimverbindungs-App, die du bekommen hast. Jedes Gerät muss außerdem so eingerichtet sein, dass es deinem Heimserver vertraut; das erledigt die Person, die kombify eingerichtet hat. Wenn der Browser meldet, die Verbindung sei nicht privat, brich hier ab und frag sie. Klicke nicht über die Warnung hinweg. <a className="" href="/de/guides/stackkits/use-cases/network">Über Heimadressen</a>.
+</div>
+</div>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>Ich habe mein Master-Passwort vergessen.</strong></button>
+<div className="answer">
+Niemand kann es wiederherstellen. Dein Tresor ist damit verschlüsselt. Die Person, die deinen Tresor betreibt, kann dein Konto löschen, damit du neu anfangen kannst, aber die darin gespeicherten Passwörter gehen verloren. <a className="" href="https://bitwarden.com/help/master-password/" rel="noopener noreferrer" target="_blank">Bitwarden zu Master-Passwörtern <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (öffnet in einem neuen Tab)</span></a>.
+</div>
+</div>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>Mein Android-Handy hat kein Google Play.</strong></button>
+<div className="answer">
+Bitwarden betreibt ein eigenes F-Droid-Repository. Die Adresse steht auf der <a className="" href="https://bitwarden.com/download/" rel="noopener noreferrer" target="_blank">Bitwarden-Downloadseite <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (öffnet in einem neuen Tab)</span></a>.
+</div>
+</div>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>Warum steht hier Vaultwarden und Bitwarden?</strong></button>
+<div className="answer">
+Vaultwarden ist das Programm, das deinen Tresor betreibt. Es ist ein inoffizieller Server, der mit den offiziellen Bitwarden-Apps funktioniert. Vaultwarden steht in keiner Verbindung zu Bitwarden, Inc. Die Bilder zeigen Vaultwarden 1.37.2 auf Englisch; neuere Versionen und andere Sprachen können anders aussehen.
+</div>
+</div>
+</section>
+<div className="footline">
+<div className="attribution">
+<span className="guide-strong">Vaultwarden betreibt deinen Tresor, und die Bitwarden-Apps öffnen ihn. kombify installiert ihn für dich.</span> kombify stellt keine der beiden Apps her. <a className="" href="https://github.com/dani-garcia/vaultwarden" rel="noopener noreferrer" target="_blank">Vaultwarden <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (öffnet in einem neuen Tab)</span></a> (AGPL-3.0) · Web-Tresor: <a className="" href="https://github.com/dani-garcia/bw_web_builds" rel="noopener noreferrer" target="_blank">Bitwarden-Web-Client für Vaultwarden <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (öffnet in einem neuen Tab)</span></a> (GPL-3.0) · <a className="" href="https://bitwarden.com/" rel="noopener noreferrer" target="_blank">Bitwarden <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (öffnet in einem neuen Tab)</span></a>
+</div>
+<button className="reset" type="button">Fortschritt zurücksetzen</button>
+</div>
+<section className="source-section" id="kcg-passwords-sources">
+<div data-guide-disclosure="" id="kcg-passwords-sources-detail">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>Bildquellen, geprüfte Links und Datum</strong></button>
+<div className="source-content">
+<p><strong>Screenshots · 24. September 2026.</strong> kombify hat die Bilder des Web-Tresors aus einer lokalen Referenzinstallation aufgenommen: Vaultwarden 1.37.2, das Image, das der StackKits-Katalog für Passwörter ausliefert, mit dem mitgelieferten Web-Tresor 2026.7.0 (dem Bitwarden-Web-Client, GPL-3.0). Die Installation nutzte die Beispieladresse https://vault.home.test und das erfundene Konto alex@example.com. Es ist eine Referenzinstallation, kein StackKits-Rollout-Test. Diese Anleitung hat die violetten Markierungen ergänzt.</p><p>Die Bildschirme der Bitwarden-Apps werden nicht gezeigt. Die <a className="" href="https://bitwarden.com/terms/" rel="noopener noreferrer" target="_blank">Bedingungen von Bitwarden <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (öffnet in einem neuen Tab)</span></a> erlauben nicht, seine Inhalte weiterzuverwenden, deshalb verweist Schritt 5 auf die eigene Anleitung von Bitwarden.</p><p>Store-Links und Hilfeseiten wurden am 24. September 2026 geprüft. Dein Fortschritt bleibt in diesem Browser. Die Anleitung verbindet keine Konten und fragt nach keinen Passwörtern.</p>
+<div className="source-links">
+<a className="" href="https://bitwarden.com/help/change-client-environment/" rel="noopener noreferrer" target="_blank">Bitwarden: einzelne Apps verbinden <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (öffnet in einem neuen Tab)</span></a><a className="" href="https://bitwarden.com/download/" rel="noopener noreferrer" target="_blank">Bitwarden-Downloads <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (öffnet in einem neuen Tab)</span></a><a className="" href="https://github.com/dani-garcia/vaultwarden" rel="noopener noreferrer" target="_blank">Vaultwarden-Projekt <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (öffnet in einem neuen Tab)</span></a>
+</div>
+</div>
+</div>
+<div className="dim">
+Anleitung von kombify · Produktnamen, Screenshots von Hersteller-Apps und Marken gehören ihren jeweiligen Inhabern.
+</div>
+</section>
+</div>
+<ClientGuideDialog aria-labelledby="kcg-passwords-zoom-title" className="zoom-dialog">
+<div className="dialog-header">
+<h2 id="kcg-passwords-zoom-title">Screenshot</h2><button aria-label="Bild schließen" className="dialog-close" type="button"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"></path></svg></button>
+</div>
+<div className="zoom-content">
+</div>
+</ClientGuideDialog>
+<div aria-live="polite" className="sr-only" role="status">
+</div>
+<div aria-hidden="true" className="toast">
+</div>
+</div>

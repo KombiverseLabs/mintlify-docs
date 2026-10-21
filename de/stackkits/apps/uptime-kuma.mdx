@@ -5,8 +5,33 @@ sidebarTitle: "Uptime Kuma"
 icon: chart-line
 ---
 
-Uptime Kuma wird als veröffentlichter Modulvertrag ausgeliefert, aber die anfängliche native v2-StackSpec wählt es nicht aus. Leite aus dem Archiv allein keinen aktiven Monitor-Satz ab.
+Uptime Kuma wird als veröffentlichter Modulvertrag ausgeliefert, aber die anfängliche native v2-StackSpec wählt es nicht aus. Schließe nicht allein aus dem Archiv auf einen aktiven Monitor-Satz.
 
-Richte Monitore nur für Dienste ein, die du betreibst. Nutze für geschützte Routen einen bewussten Health-Endpunkt oder erwarte die konfigurierte Authentifizierungsantwort; schwäche den Routenschutz nicht, nur damit ein Monitor HTTP 200 zurückgibt.
+## Was es ist
 
-Es gibt kein unterstütztes Uptime-Kuma-Konfigurationsbeispiel für die anfängliche StackSpec. Der StackKits-Lebenszyklus bleibt die Quelle der Stack-Verifikation, auch wenn du einen separaten Monitor betreibst; [Den Stack überwachen](/de/stackkits/reference/day-2-operations#den-stack-überwachen) listet die auszuführenden Prüfungen auf.
+Uptime Kuma prüft regelmäßig, ob deine Dienste antworten. Der Katalog nennt Verfügbarkeitsprüfungen, Statusseiten und Benachrichtigungen. Ein StackKit kann es enthalten, damit du ein Problem bemerkst, bevor dein Haushalt es tut.
+
+## Welche Kits es enthalten
+
+Der Katalog kennzeichnet es als Modul mit Standard-Reifegrad, das Traefik benötigt, und die Kit-Definitionen nennen es als Monitoring-Werkzeug. Die anfängliche native v2-StackSpec wählt es nicht aus, daher entscheidet deine Rollout-Ausgabe, was du hast.
+
+## Wie du es öffnest
+
+Wenn dein Rollout es enthält, nennt der Katalog das Muster `https://kuma.<domain>`, zum Beispiel `https://kuma.home.test` mit der Standarddomain. Kopiere die generierte Adresse.
+
+## Erste Nutzung
+
+1. Öffne die generierte Adresse.
+2. Füge einen Monitor für einen Dienst hinzu, den du betreibst.
+3. Prüfe, dass der Monitor den Dienst als erreichbar meldet.
+
+## Was du erwarten kannst und was du nicht ändern solltest
+
+- Füge Monitore nur für Dienste hinzu, die du betreibst.
+- Verwende für geschützte Routen einen bewusst eingerichteten Health-Endpunkt oder erwarte die konfigurierte Authentifizierungsantwort; schwäche den Routenschutz nicht ab, nur damit ein Monitor HTTP 200 liefert.
+- Es gibt kein unterstütztes Uptime-Kuma-Konfigurationsbeispiel für die anfängliche StackSpec. Der StackKits-Lifecycle bleibt die Quelle der Stack-Verifikation, auch wenn du einen separaten Monitor betreibst; [Den Stack überwachen](/de/stackkits/reference/day-2-operations#monitor-the-stack) listet die durchzuführenden Prüfungen auf.
+
+## Wenn etwas schiefgeht
+
+- Die Adresse öffnet sich nicht: Vergleiche sie mit der Rollout-Ausgabe und prüfe, ob der Name auf deinem Gerät aufgelöst wird. Siehe [Fehlerbehebung](/de/guides/stackkits/troubleshooting).
+- Ein Monitor für einen geschützten Dienst schlägt fehl: Prüfe die Authentifizierungsantwort der Route, bevor du den Schutz änderst.

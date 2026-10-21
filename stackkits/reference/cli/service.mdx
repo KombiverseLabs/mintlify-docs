@@ -4,8 +4,8 @@ description: "Control services declared by the active StackKits plan"
 sidebarTitle: "service"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:8711ca83672be5ace8615aac1267a84820ffc62fbfcb23d720a560268b901a25"
-source_hash: "8808f0b70fa55b18383455f94ff7eed1b8051f87"
+content_hash: "sha256:ef454620ffdb9e2bc396ed1eb48af2a33a795afdec703bc2149b6c38b79ee55e"
+source_hash: "721b28cf58d148556aabcc6eec77161fc5a36f8d"
 ---
 Control services declared by the active StackKits plan.
 
@@ -13,7 +13,7 @@ Control services declared by the active StackKits plan.
 stackkit service [flags]
 ```
 
-Subcommands: [`stackkit service logs`](#stackkit-service-logs), [`stackkit service restart`](#stackkit-service-restart), [`stackkit service start`](#stackkit-service-start), [`stackkit service stop`](#stackkit-service-stop)
+Subcommands: [`stackkit service logs`](#stackkit-service-logs), [`stackkit service manager`](#stackkit-service-manager), [`stackkit service restart`](#stackkit-service-restart), [`stackkit service start`](#stackkit-service-start), [`stackkit service stop`](#stackkit-service-stop)
 
 ## stackkit service logs
 
@@ -40,6 +40,32 @@ stackkit service logs id --json
 
 # Read the next page with the cursor the previous JSON result returned
 stackkit service logs id --json --cursor <cursor>
+```
+
+## stackkit service manager
+
+Transfer an existing node-owned workload between managers or to its native Core.
+
+```bash
+stackkit service manager <workload-ref> [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--cancel` | bool | — | Cancel the exact pending native Core transfer before any target attachment request |
+| `--json` | bool | — | Write the versioned manager result as JSON |
+| `--native-core` | bool | — | Transfer an existing Komodo workload to this node's native Core using its fresh generated Plan |
+| `--owner-approve` | bool | — | Explicitly approve the owner-bound manager transition |
+| `--resume` | string | — | Resume the exact pending handover operation |
+| `--status` | bool | — | Read the durable manager and handover outcome without mutation |
+| `--to` | string | — | Target manager: standalone-compose or komodo |
+
+**Examples**
+
+```bash
+stackkit service manager media --to standalone-compose --owner-approve
+stackkit service manager media --to komodo --owner-approve
+stackkit service manager media --to komodo --resume handover-<operation-id> --owner-approve
 ```
 
 ## stackkit service restart

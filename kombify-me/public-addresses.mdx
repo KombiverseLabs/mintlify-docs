@@ -9,6 +9,12 @@ Use this path when the service already answers on a public HTTP(S) URL. kombify.
 terminates TLS and proxies the browser to that origin. Private, loopback, and
 link-local targets are rejected on this path.
 
+In everyday terms: your app already has a web address that anyone on the internet
+can open. kombify.me gives it a second, tidier name on `kombify.me`, with HTTPS
+handled for you. Visitors type the kombify.me name and kombify.me passes them
+through to your app. Not sure this is the right kind? Read
+[Public, private or redirect](/kombify-me/public-or-private) first.
+
 ## Before you start
 
 - The origin must be reachable from the internet over HTTP or HTTPS.
@@ -30,6 +36,24 @@ link-local targets are rejected on this path.
 
 Then open `https://{base}-{service}.kombify.me` in a browser.
 
+For a plain-language walk-through with example names, see
+[Get your first kombify.me address](/kombify-me/get-your-first-address).
+
+## What to expect after each step
+
+- After registering the base name, kombify.me answers with the full base name.
+  Write it down; every app name is built from it.
+- After registering the service and its origin, the name exists but is still
+  switched off. Visitors get a "not exposed" answer (404) until you expose it.
+- After you expose the service, the name accepts visitors. Changes can take
+  up to about a minute to show, because kombify.me keeps a short routing cache.
+- On a self-hosted install, while the e-mail address is not verified yet, new names start paused
+  and visitors get an "inactive" answer (503). Finish the verification, or set
+  the address to active.
+
+Anyone who knows the name can open a public address unless the app asks for a
+login. Keep apps with sensitive data behind their own login.
+
 Reserved apex names such as `auth.kombify.me` stay unused. Kit login still
 lands on `{your-lab}-auth.kombify.me`.
 
@@ -40,3 +64,17 @@ Do not publish a localhost or LAN-only URL on the public proxy.
 
 Local-only names stay on the homelab resolver that StackKits installs. They
 are not kombify.me names.
+
+## If something goes wrong
+
+| What you see | What to do |
+| --- | --- |
+| "service subdomain not exposed" (404) | Expose the service route. |
+| "subdomain inactive" (503) | The address is paused or not yet verified. Set it to active. |
+| Saving the origin is refused | The public path accepts only public `http` or `https` addresses. Use a [private address](/kombify-me/private-targets) for anything else. |
+| 502 "Bad Gateway" | kombify.me could not reach your origin. Check that the app runs and answers from the internet. |
+| "already taken", "reserved" or a limit error | Choose another name, or remove an address you no longer use. |
+
+More checks: [kombify.me troubleshooting](/kombify-me/troubleshooting). To pause,
+change or remove an address later, see
+[Change, pause or remove an address](/kombify-me/change-pause-or-remove-an-address).

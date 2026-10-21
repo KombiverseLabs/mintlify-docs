@@ -1,15 +1,27 @@
 ---
 title: "Gitea"
-description: "运行已发布的私有 Git 开发工作负载，支持原生 HTTPS Git，并由所有者掌管凭据"
+description: "运行已发布的私有 Git 开发工作负载，采用原生 HTTPS Git 和所有者托管"
 sidebarTitle: "Gitea"
 icon: code-branch
 ---
 
-Gitea 提供[开发](/zh-Hans/guides/stackkits/use-cases/development)用例。使用 Gitea 的 dev 工作负载会在一个选定的节点上，以无 root 容器运行私有 Git 服务器，并使用 SQLite。公开注册已被禁用，新仓库被强制设为私有。它不会暴露 SSH，不会安装 CI runner，也不会启用 Actions；面向其他用户的工作流和 API 令牌仍属于 Gitea 原生操作。[用例目录](/zh-Hans/stackkits/reference/use-case-catalog)列出了已发布版本所声明的组件。
+Gitea 提供[开发](/zh-Hans/guides/stackkits/use-cases/development)用例。使用 Gitea 的开发工作负载在一个选定节点上，于无根（rootless）容器中运行一个私有 Git 服务器，并使用 SQLite。公开注册已被禁用，新仓库被强制设为私有。它不会暴露 SSH，不会安装 CI 运行器，也不会启用 Actions；面向其他用户的工作流和 API 令牌仍属于 Gitea 原生操作。[用例目录](/zh-Hans/stackkits/reference/use-case-catalog)列出了已发布版本所声明的组件。
 
-## 显式选择 dev 工作负载
+## 它是什么
 
-在一个空的所有者工作区中，选择 Gitea 并建立它的本地所有者托管：
+Gitea 是保存你代码的私有场所，类似于一个小型的、自行运行的代码托管网站。你可以用普通的 Git 工具向它推送项目，并保持其私有。StackKit 包含它，是为了让你的仓库不必存放在外部提供商那里。
+
+## 哪些套件和用例包含它
+
+Gitea 是 Dev 用例中 Developer Platform 部分的默认应用。下面的示例在独立 Compose 上使用 `basement-kit`。根据[开发](/zh-Hans/guides/stackkits/use-cases/development)页面上的证据状态，它可以选择，但尚未经过生命周期验证。
+
+## 如何打开
+
+打开你为该工作负载配置的路由；示例使用 `https://dev.home.test`。如下所述，该主机名必须能在每个客户端上解析到你的主机。
+
+## 显式选择开发工作负载
+
+在一个空的所有者工作区中，选择 Gitea 并建立其本地所有者托管：
 
 ```bash
 stackkit init basement-kit --platform standalone-compose \
@@ -20,7 +32,7 @@ stackkit init basement-kit --platform standalone-compose \
   --owner-source local --owner-email owner@example.com --non-interactive
 ```
 
-在生成之前，把下面的字段合并到你的 [StackSpec](/zh-Hans/guides/stackkits/configure-stack-spec) 中已有的 `capabilities`、`data` 和 `routes` 部分。请保留它们的其他条目。这个片段使用初始的 `home` 站点和 `home-private` 访问策略；请根据你的实际主机调整这些引用、家庭域名和主机存储根目录。
+在生成之前，请将以下字段合并到你的 [StackSpec](/zh-Hans/guides/stackkits/configure-stack-spec) 中已有的 `capabilities`、`data` 和 `routes` 部分，并保留其中的其他条目。此片段使用初始的 `home` 站点和 `home-private` 访问策略；请根据你的实际主机调整这些引用、家庭域名和主机存储根目录。
 
 ```yaml
 capabilities:
@@ -50,38 +62,57 @@ stackkit validate
 stackkit generate --local-node main --local-site home
 ```
 
-然后按正常的交付生命周期继续：验证、检查计划，并按照[审查、应用并验证](/zh-Hans/guides/stackkits/review-plan-and-apply)中的说明应用并验证。观测到的主机清单必须满足所选的模块配置；示例配置不是硬件证据。
+然后遵循常规的交付生命周期：验证、检查计划，并按照[审查、应用与验证](/zh-Hans/guides/stackkits/review-plan-and-apply)所述进行应用和验证。观察到的主机清单必须满足所选的模块配置文件；示例配置不是硬件证据。
 
-## 提供名称并信任路由
+## 提供名称并确保信任该路由
 
-原生 HTTPS Git 需要你的主机已经满足两个条件：
+原生 HTTPS Git 需要你的主机已经满足两点：
 
-- 路由的主机名（示例使用 `dev.home.test`）必须能从你打算克隆的每个客户端解析到该主机。
+- 路由的主机名（示例使用 `dev.home.test`）必须能在你打算克隆的每个客户端上解析到该主机。
 - Git 客户端必须信任主机的内部 CA 证书。没有客户端信任，HTTPS 克隆会在认证之前失败。
 
 ## 查看所有者密码并登录
 
-首次启动会先迁移 SQLite 数据库并创建管理员 `owner`，然后才开始提供流量；所有者邮箱来自你的本地所有者身份，`owner-password` 引用保存在已有的本地密钥托管中。请在私密的终端中读取密码：
+首次启动会迁移 SQLite 数据库，并在提供服务之前创建管理员 `owner`；所有者邮箱来自你的本地所有者身份，`owner-password` 引用保存在现有的本地密钥托管中。请在私密终端中读取密码：
 
 ```bash
 stackkit secrets reveal --workload dev --slot owner-password
 ```
 
-该命令只接受当前已验证的 StackSpec 所声明的槽位，把值写到标准输出而不是部署日志，也不会创建或重置密码。如果存在不匹配的现有管理员，或数据库中的用户没有归属，交付会失败，而不会替换账户或重置密码。
+该命令只接受当前已验证 StackSpec 所声明的槽位，会把值写到标准输出（绝不写入部署日志），既不会创建也不会重置密码。如果存在不匹配的现有管理员，或存在无归属的用户数据库，交付会失败，而不会替换账户或重置密码。
 
-以 `owner` 身份登录，创建一个私有仓库，并配合你的原生 Git 凭据存储使用它的 HTTPS 克隆 URL。Git 直接与 Gitea 认证：没有浏览器转发认证网关拦截 Git 请求。仅报告 HTTP 进程和 SQLite 可达的就绪检查，并不能证明你已经克隆、推送或恢复过任何内容，请从目标客户端测试一次真实的推送。
+## 首次使用
+
+1. 在私密终端中用上述命令查看所有者密码。
+2. 打开 Gitea 路由，以 `owner` 身份登录。
+3. 创建一个私有仓库。
+4. 复制其 HTTPS 克隆 URL，并使用你的原生 Git 凭据存储，从真实的客户端克隆它。
+5. 推送一个小的测试提交。
+
+以 `owner` 身份登录，创建一个私有仓库，并配合你的原生 Git 凭据存储使用其 HTTPS 克隆 URL。Git 直接与 Gitea 进行认证：没有浏览器转发认证网关会拦截 Git 请求。仅报告 HTTP 进程和 SQLite 可达的就绪状态，并不能证明你已经克隆、推送或恢复了任何内容——请从预期使用的客户端实际测试一次推送。
 
 ## 存储与恢复边界
 
 | 分配 | 容器路径 | 内容 |
 | --- | --- | --- |
 | `gitea/data` | `/var/lib/gitea` | SQLite 数据库、仓库、LFS 对象、应用数据 |
-| `gitea/config` | `/etc/gitea` | `app.ini` 以及持久化的应用密钥和配置 |
+| `gitea/config` | `/etc/gitea` | `app.ini` 以及持久化的应用密钥/配置 |
 
-这两个命名卷都属于该工作负载的数据和备份契约。正确的恢复需要先让应用的单一写入者静默，捕获两个卷，并在停止写入的状态下一起激活它们，只对 SQLite 文件做一次实时复制不符合这一契约。工作区生命周期请参照[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。无 root 和有 root 的 Gitea 使用不同的目录布局，因此更换镜像不是存储迁移。
+这两个命名卷都属于该工作负载的数据和备份契约。正确的恢复需要先让应用的单一写入者静默，捕获这两个卷，并在停止写入的情况下将它们一起激活——仅对 SQLite 文件做一次实时拷贝不符合该契约。工作区生命周期请参见[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。无根和有根的 Gitea 使用不同的目录布局，因此更换镜像并不是存储迁移。
+
+## 预期情况
+
+Gitea 是在一个选定节点上使用 SQLite 的单个小型服务器。对一个家庭来说，登录和仓库页面速度很快。如果页面能加载但克隆失败，通常原因是名称解析或证书信任，而不是 Gitea 本身。
+
+## 出现问题时
+
+- 克隆在询问密码之前就失败：该客户端无法解析主机名，或该客户端不信任内部 CA 证书。
+- 你记不起所有者密码：用 `stackkit secrets reveal --workload dev --slot owner-password` 再次查看；该命令既不会创建也不会重置密码。
+- 交付因现有管理员或用户数据库而失败：它不会替换账户或重置密码；请先有意识地解决冲突。
+- 将任何地址与部署输出对比，并参见[故障排查](/zh-Hans/guides/stackkits/troubleshooting)。
 
 ## 已知限制
 
-- 不暴露 SSH；原生 HTTPS 是文档记载的 Git 访问路径。
-- 不安装 Gitea Actions 和 CI runner；目前没有文档记载的 runner 集成路径。
-- 强制重建容器会保留所有者访问权限、私有仓库元数据和应用配置，但完整的 Linux 主机配置、真实的局域网 DNS/CA 分发以及完整的备份与恢复周期属于独立的证据层级，此处并未证明。
+- 不暴露 SSH；原生 HTTPS 是有文档记载的 Git 访问路径。
+- 不安装 Gitea Actions 和 CI 运行器；运行器集成目前还没有文档记载的路径。
+- 强制重建容器会保留所有者访问权限、私有仓库元数据和应用配置，但完整的 Linux 主机预配、真实的局域网 DNS/CA 分发以及完整的备份/恢复周期属于独立的证据层级，此处并未证明。

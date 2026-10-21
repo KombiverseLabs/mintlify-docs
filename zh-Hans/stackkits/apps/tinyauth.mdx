@@ -1,14 +1,43 @@
 ---
 title: "TinyAuth"
-description: "StackKits 已发布的默认转发认证入口"
+description: "已发布的 StackKits 默认转发认证入口"
 sidebarTitle: "TinyAuth"
 icon: lock-keyhole
 ---
 
-TinyAuth 是已发布的 StackKits 目录中默认的转发认证入口。它通常出现在 `auth.<domain>`，并使用本地 PocketID 所有者设置来保护路由。
+TinyAuth 是已发布的 StackKits 目录中的默认转发认证入口。它通常出现在 `auth.<domain>`，并为受保护的路由使用本地 PocketID 所有者设置。
 
-部署成功后，打开生成的地址，完成本地所有者设置，并验证受保护的路由会通过预期的登录路径重定向。
+## 它是什么
 
-如果某条路由出现循环或绕过了认证，请先把请求的主机名与生成的路由对比，并确认本地 PocketID 所有者可以完成认证。不要仅仅为了绕开路由或所有者设置问题而修改应用。
+TinyAuth 是你的服务门口的守卫。当你打开一个受保护的地址时，[Traefik](/zh-Hans/stackkits/apps/traefik) 会询问 TinyAuth 你是否已登录；如果没有，你会被送到登录页面，登录后再回到你原本要去的地方。StackKit 包含它，是为了让受保护的服务由同一个登录统一覆盖。
 
-本地身份组件参见 [PocketID](/zh-Hans/stackkits/apps/pocketid)。
+## 哪些套件包含它
+
+[Basement Kit](/zh-Hans/stackkits/kits/basement-kit) 页面列出了使用 PocketID 和 TinyAuth 的本地所有者托管，套件定义也将 TinyAuth 标记为默认平台服务。
+
+## 如何打开
+
+目录给出的地址模式是 `https://auth.<domain>`，例如使用默认域名时为 `https://auth.home.test`。日常使用中，你通过打开某个受保护的服务而被重定向到它。
+
+## 首次使用
+
+1. 部署成功后，打开生成的地址。
+2. 使用 [PocketID](/zh-Hans/stackkits/apps/pocketid) 完成本地所有者设置。
+3. 打开一个受保护的路由，例如 Node Hub，并验证它会通过预期的登录路径重定向。
+4. 登录并确认你会返回到该服务。
+
+## 预期情况与不应更改的内容
+
+- 预期看到的是登录页面，而不是某个应用。
+- TinyAuth 本身无需登录即可访问，这样登录才能正常进行。
+- 不要仅仅为了绕开路由或所有者设置问题而更改某个应用。
+- 不要为了消除警告而关闭某个路由的保护。
+
+## 出现问题时
+
+如果某个路由出现循环或绕过了认证，请先将请求的主机名与生成的路由对比，并确认本地 PocketID 所有者可以完成认证。不要仅仅为了绕开路由或所有者设置问题而更改某个应用。
+
+- 无法登录：使用所有者为你创建的账户。它不是你的 kombify Cloud 账户。
+- 更多检查：[故障排查](/zh-Hans/guides/stackkits/troubleshooting)。
+
+关于本地身份组件，参见 [PocketID](/zh-Hans/stackkits/apps/pocketid)。

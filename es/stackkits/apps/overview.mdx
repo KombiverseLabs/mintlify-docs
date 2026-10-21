@@ -1,17 +1,29 @@
 ---
 title: "Servicios de plataforma"
-description: "Los servicios que hay bajo tus casos de uso: inicio de sesión, enrutamiento, entrega de aplicaciones y visibilidad"
+description: "Los servicios que sustentan tus casos de uso: inicio de sesión, enrutamiento, entrega de aplicaciones y visibilidad"
 sidebarTitle: "Servicios de plataforma"
 icon: grid-2
 ---
 
-Los servicios de plataforma se ejecutan bajo tus casos de uso. Se encargan del inicio de sesión, el enrutamiento, la entrega de aplicaciones y la visibilidad. Las aplicaciones que aportan un caso de uso, como Immich para Fotos, se listan en [Casos de uso](/es/guides/stackkits/use-cases/overview).
+Los servicios de plataforma se ejecutan por debajo de tus casos de uso. Se encargan del inicio de sesión, el enrutamiento, la entrega de aplicaciones y la visibilidad. Las aplicaciones que proporcionan un caso de uso, como Immich para Fotos, se enumeran en [Casos de uso](/es/guides/stackkits/use-cases/overview).
 
-La presencia en el catálogo, una instalación correcta y una recuperación completada significan cosas distintas. Consulta la [compatibilidad de entrega de aplicaciones](/es/stackkits/reference/application-delivery-compatibility) del release instalado.
+La presencia en el catálogo, una instalación correcta y una recuperación completada significan cosas distintas. Consulta la [compatibilidad de entrega de aplicaciones](/es/stackkits/reference/application-delivery-compatibility) de la versión instalada.
+
+## Qué hacen estos servicios
+
+Piensa en las aplicaciones de los casos de uso como las habitaciones de una casa y en los servicios de plataforma como las puertas, las cerraduras y las señales. Deciden quién puede entrar, cómo una dirección encuentra la aplicación correcta y cómo ves lo que se está ejecutando. Normalmente no los eliges uno a uno: el kit trae los principales.
+
+## Qué kits los incluyen
+
+El runtime principal forma parte del espacio de trabajo v2 nativo generado; la página del Basement Kit describe su Node Hub generado y los servicios locales, consulta [Basement Kit](/es/stackkits/kits/basement-kit). Los elementos marcados a continuación como contratos de módulo, y las plataformas de aplicaciones, solo aparecen cuando los seleccionas.
+
+## Cómo se abren
+
+Tras un despliegue, abre el Node Hub en la dirección `base.<domain>` que imprime la CLI; el dominio local por defecto es `home.test`. Cualquier otro servicio usa la dirección generada para ese despliegue.
 
 ## Acceso y enrutamiento
 
-El runtime central generado incluye:
+El runtime principal generado incluye:
 
 - [PocketID](/es/stackkits/apps/pocketid), la identidad local del propietario
 - [TinyAuth](/es/stackkits/apps/tinyauth), el punto de entrada de forward-auth para las rutas protegidas
@@ -21,10 +33,23 @@ El runtime central generado incluye:
 
 ## Plataformas de aplicaciones
 
-Compose independiente entrega los workloads por defecto y no necesita una plataforma de aplicaciones. [Coolify](/es/stackkits/apps/coolify) y [Komodo](/es/stackkits/apps/komodo) son integraciones de plataforma que seleccionas de forma explícita. [Elige la entrega de aplicaciones](/es/guides/stackkits/application-delivery) compara las tres.
+Compose independiente entrega las cargas de trabajo por defecto y no necesita ninguna plataforma de aplicaciones. [Coolify](/es/stackkits/apps/coolify) y [Komodo](/es/stackkits/apps/komodo) son integraciones de plataforma que seleccionas explícitamente. [Elegir la entrega de aplicaciones](/es/guides/stackkits/application-delivery) compara las tres.
 
-## Paneles y monitorización
+## Paneles y supervisión
 
 El [Node Hub](/es/guides/stackkits/node-hub) es la vista general generada de tus servicios. [Homepage](/es/stackkits/apps/homepage), [Uptime Kuma](/es/stackkits/apps/uptime-kuma) y [Dozzle](/es/stackkits/apps/dozzle) se distribuyen como contratos de módulo que la StackSpec v2 nativa inicial no selecciona.
 
-No edites los archivos de despliegue generados ni deduzcas la habilitación a partir de la presencia en el archivo.
+No edites los archivos de despliegue generados ni deduzcas la activación por la presencia en el archivo.
+
+## Primeros pasos
+
+1. Verifica el despliegue principal desde la CLI.
+2. Abre el [Node Hub](/es/guides/stackkits/node-hub).
+3. Establece el propietario local en PocketID y confirma que TinyAuth protege las rutas que esperas.
+4. Configura el repositorio de copias de seguridad y practica una restauración con [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).
+
+## Si algo sale mal
+
+- Una dirección no se abre o un nombre no se resuelve: consulta [Solución de problemas](/es/guides/stackkits/troubleshooting).
+- El inicio de sesión falla: los servicios detrás de TinyAuth usan la cuenta del propietario en PocketID, que no es tu cuenta de kombify Cloud.
+- No edites nunca los archivos de despliegue o de router generados; cambia la StackSpec y vuelve a generar.

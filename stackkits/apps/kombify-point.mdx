@@ -7,6 +7,34 @@ icon: globe
 
 kombify Point DNS ships as a released module contract for a local DNS zone, but the initial native v2 StackSpec exposes no current public enablement how-to.
 
-Use it only for a LAN resolver arrangement you operate. Public DNS remains the responsibility of your own DNS provider and domain setup.
+## What it is
 
-Do not invent an enablement object from older examples. When a released StackSpec exposes the module, test generated names only from clients deliberately configured to use that resolver.
+DNS is the address book that turns a service name into the address of your server. kombify Point is a small resolver for your home network that answers for your StackKit service names. A StackKit can include it so that devices at home find your services by name.
+
+## Which kits include it
+
+The catalog marks it as opt-in and disabled by default in every context. No kit enables it through the initial native v2 StackSpec.
+
+## How you open it
+
+You do not open it like an application. The catalog describes a resolver on port 53 of the server's LAN address and a health page at `http://point.<domain>/health`. Rely on these only if your rollout lists them.
+
+## First use
+
+When a released StackSpec exposes the module:
+
+1. Use it only for a LAN resolver arrangement you operate.
+2. Point one test device at the resolver deliberately.
+3. Open a generated service name from that device.
+4. Only then consider using the resolver on more devices.
+
+## What to expect and what not to change
+
+- Public DNS remains the responsibility of your own DNS provider and domain setup.
+- Do not invent an enablement object from older examples.
+- Test generated names only from clients deliberately configured to use that resolver. Other devices will not find the names.
+
+## If something goes wrong
+
+- A name does not open on one device: that device probably does not use the resolver. See [Troubleshooting](/guides/stackkits/troubleshooting).
+- Names fail everywhere: run `stackkit verify --json` and read the findings.

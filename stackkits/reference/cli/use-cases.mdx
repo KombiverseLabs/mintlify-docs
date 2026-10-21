@@ -4,8 +4,8 @@ description: "Select optional kit use cases"
 sidebarTitle: "use-cases"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:8711ca83672be5ace8615aac1267a84820ffc62fbfcb23d720a560268b901a25"
-source_hash: "8808f0b70fa55b18383455f94ff7eed1b8051f87"
+content_hash: "sha256:ef454620ffdb9e2bc396ed1eb48af2a33a795afdec703bc2149b6c38b79ee55e"
+source_hash: "721b28cf58d148556aabcc6eec77161fc5a36f8d"
 ---
 Select optional kit use cases.
 
@@ -42,9 +42,11 @@ Interactively select optional use cases.
 
 List the kit-optional use cases and toggle them in the terminal.
 
-Arrow keys or j/k move the cursor. Space toggles the highlighted item. Enter confirms. Files, Photos, and Vault start selected (kit L3 defaults).
+Arrow keys or j/k move the cursor. Space toggles the highlighted item. Enter confirms. Without `--kit`, the legacy Files, Photos and Vault selection is used.
 
-`--print` writes the selected IDs as a comma-separated line on stdout so installers can pass them to stackkit init `--use-case`. Prompts go to stderr. When stdin is not a terminal, the current defaults are returned without a prompt.
+With `--kit` (Basement or Cloud), choices and defaults come from the embedded CUE kit catalog. Each choice shows its standard profile minimum (CPU / RAM GiB / disk GiB). The running numeric preview includes required Core and selected default alternatives. It observes this host unless `--inventory` and `--node` select another target. Data budgets, add-ons, profile changes and resident policy need a resolved plan. This preview writes no configuration and grants no Apply admission.
+
+`--print` writes the selected IDs as a comma-separated line on stdout so installers can pass them to stackkit init `--use-case`. Prompts go to stderr. When stdin is not a terminal, defaults are returned without a prompt; a kit preview is still printed to stderr. Unknown facts are shown as ?, never zero.
 
 ```bash
 stackkit use-cases pick [flags]
@@ -52,6 +54,9 @@ stackkit use-cases pick [flags]
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
+| `--inventory` | string | — | Read capacity from this Inventory instead of observing the local host; requires `--kit` and `--node` |
+| `--kit` | string | — | Preview main use cases admitted by this kit at standard profiles; observe this host by default |
+| `--node` | string | — | Explicit Inventory node for the kit capacity preview |
 | `--print` | bool | — | Write selected use-case IDs as a comma-separated line on stdout |
 
 **Examples**
@@ -62,5 +67,11 @@ stackkit use-cases pick
 
 # Print the selected IDs as one comma-separated line for stackkit init --use-case
 stackkit use-cases pick --print
+
+# Preview standard footprints and capacity on this target, from its kit catalog
+stackkit use-cases pick --kit basement-kit --print
+
+# Preview one explicitly selected Inventory node
+stackkit use-cases pick --kit cloud-kit --inventory inventory.yaml --node cloud-node --print
 ```
 

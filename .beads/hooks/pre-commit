@@ -1,9 +1,11 @@
 #!/usr/bin/env sh
 # --- BEGIN KOMBIFY BEADS MERGE GUARD (platform-qsts1) ---
-# KOMBIFY BEADS HOOK SAFETY VERSION: 1
-# Import records that exist only in the working-tree .beads/issues.jsonl before
-# beads exports the local DB over that file. `git pull --rebase` fires no
-# post-merge hook, so a pull's records would otherwise be deleted silently.
+# KOMBIFY BEADS HOOK SAFETY VERSION: 3
+# Tracker target safety for the beads hook section. The remote Dolt history is
+# the tracker authority and .beads/issues.jsonl is only its derived export, so
+# no hook imports that file into a database: hydration is `beads:write` (pull
+# before every mutation) and `beads:bootstrap` for fresh clones. The JSONL
+# import that once lived here (platform-qsts1) was retired for that reason.
 # Managed by the kombify-workspace development-fleet projection.
 # Deliberately OUTSIDE the beads section markers: `bd hooks install` preserves
 # out-of-marker content (verified against bd 1.0.3, including --force).
@@ -95,16 +97,6 @@ if [ "$_kb_skip_beads_hook" -eq 0 ] && command -v bd >/dev/null 2>&1; then
       ;;
   esac
 fi
-
-_kb_guard=""
-for _kb_candidate in "scripts/beads-hook-precommit.sh" "../scripts/beads-hook-precommit.sh"; do
-  if [ -f "$_kb_candidate" ]; then _kb_guard="$_kb_candidate"; break; fi
-done
-if [ "$_kb_skip_beads_hook" -eq 0 ] && [ -n "$_kb_guard" ]; then
-  sh "$_kb_guard" || exit $?
-elif [ "$_kb_skip_beads_hook" -eq 0 ]; then
-  echo >&2 "beads merge guard: scripts/beads-hook-precommit.sh not found; pulled tracker records may be dropped by the beads export (platform-qsts1)."
-fi
 # --- END KOMBIFY BEADS MERGE GUARD (platform-qsts1) ---
 # --- BEGIN KOMBIFY BEADS TARGET WRAPPER (platform-qsts1) ---
 if [ "${_kb_skip_beads_hook:-0}" -ne 1 ]; then
@@ -133,3 +125,15 @@ fi
 # --- END BEADS INTEGRATION v1.0.3 ---
 fi
 # --- END KOMBIFY BEADS TARGET WRAPPER (platform-qsts1) ---
+# --- BEGIN KOMBIFY BEADS JSONL NORMALIZE (platform-qsts1) ---
+if [ "${_kb_skip_beads_hook:-0}" -ne 1 ] && [ -f .beads/issues.jsonl ] && command -v node >/dev/null 2>&1; then
+  _kb_norm=""
+  for _kb_candidate in "scripts/beads-normalize-jsonl.mjs" "../scripts/beads-normalize-jsonl.mjs"; do
+    if [ -f "$_kb_candidate" ]; then _kb_norm="$_kb_candidate"; break; fi
+  done
+  if [ -n "$_kb_norm" ]; then
+    node "$_kb_norm" .beads/issues.jsonl || exit $?
+    git add .beads/issues.jsonl
+  fi
+fi
+# --- END KOMBIFY BEADS JSONL NORMALIZE (platform-qsts1) ---

@@ -6,18 +6,32 @@ icon: house
 ---
 
 <Info>
-  Evidence state (2026-09-17, v0.35.0): Basement Kit is the supported
-  one-command path of the current public release. On the public v0.35.0
-  archive, Basement Kit passed install, init, generate, apply, verify, backup,
-  and restore on fresh Ubuntu 24.04 and Debian 13 virtual machines, and in a
-  virtual machine on a home network, where its local service addresses also
-  answered from another machine on that network. Phone passkey and client
-  certificate trust are pending. Cloud Kit is a preview and Modern Homelab an
-  alpha definition archive, not an install target; neither has an automated
-  lifecycle run yet.
+  The current public release is [v0.54.2](https://github.com/kombifyio/StackKits/releases/tag/v0.54.2),
+  while the [latest lifecycle projection](https://github.com/kombifyio/StackKits/releases/download/v0.53.10/stackkits-compatibility-evidence-v3.json)
+  is v0.53.10. It grades both Basement Kit CI and home-network lanes
+  `unverified` until current-release receipts exist. The historical
+  [v0.50.3 compatibility record](https://github.com/kombifyio/StackKits/releases/download/v0.50.3/stackkits-compatibility-evidence-v3.json)
+  records passing install, init, generate, apply, verify, backup and restore
+  on Ubuntu 26.04, Ubuntu 24.04 and Debian 13 (amd64). The home-network lane
+  was last verified on v0.35.0. Second-client passkey and client certificate
+  trust remain pending. Cloud Kit has partial lifecycle evidence, with the
+  complete public-VPS bootstrap pending. Modern Homelab remains an alpha
+  definition archive, not a Standard install target.
 </Info>
 
-Basement Kit is the supported local profile of the current public StackKits release. Use it for a homelab on hardware you already control, with one home site and a local owner.
+Basement Kit is the released local profile of the current public StackKits release. Use it for a homelab on hardware you already control, with one home site and a local owner.
+
+## In plain words
+
+A Basement Kit turns one computer in your home into a small private server. It installs the programs that protect and organize your services, and you can add things like files, photos or media later. Nothing leaves your home network unless you decide to publish it. If you are new to this, read [Before you start](/guides/stackkits/before-you-start) first.
+
+## What you need first
+
+- A computer you control that can stay on, running a system listed in [OS compatibility](/stackkits/reference/os-compatibility).
+- Access to a terminal on it.
+- Your home network, with phones and laptops that can resolve the local names (see [Day to day](/guides/stackkits/daily-use)).
+- A private place for the access details in `.stackkit/access.json`.
+- No kombify account and no rented server.
 
 ## What it provides
 
@@ -40,6 +54,22 @@ The baseline stays standalone. The StackKits website helps you choose and bootst
 3. Configure the local backup repository and practice a restore. See [Back up and restore](/guides/stackkits/back-up-and-restore).
 
 Change the StackSpec and re-validate rather than editing generated files.
+
+After each step you should see the following:
+
+1. The Quickstart leaves a workspace folder with your configuration and an access record.
+2. The Node Hub opens, you can sign in as the local owner, and protected routes ask you to sign in.
+3. You have a backup and know that a restore works.
+
+## What is stored where
+
+Your configuration, logs and access details stay in the workspace folder on the home computer. Owner identity lives in PocketID on that computer. Backups are a separate copy that you configure. Keep the folder private and do not share `.stackkit/access.json`.
+
+## If something goes wrong
+
+- An address does not open on a phone or laptop: the device probably cannot resolve your local names. See [Troubleshooting](/guides/stackkits/troubleshooting).
+- Setup stops with an error: read it with `stackkit logs latest --json` before you run the installer again.
+- You are not sure the setup is healthy: see the checks in [Day to day](/guides/stackkits/daily-use).
 
 ## Add use cases
 

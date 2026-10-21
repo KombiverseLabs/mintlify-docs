@@ -7,4 +7,33 @@ icon: list
 
 Dozzle is a publicly released module contract for viewing container logs. The initial native v2 StackSpec does not expose a current public Dozzle selection, so archive presence is not an installation recipe.
 
-If a future released StackSpec selects it, use Dozzle for quick inspection of a named container. It does not replace StackKits verification or durable evidence, and it must not be used to change StackKits-managed containers.
+## What it is
+
+Every service on your server runs in a container, and each container writes a running log of what it is doing. Dozzle shows those logs live in a web page. A StackKit can offer it so that you can look at what one service just reported without using a command line.
+
+## Which kits include it
+
+The catalog marks Dozzle as opt-in. No kit includes it by default, and the initial native v2 StackSpec has no selection for it.
+
+## How you open it
+
+If a future released StackSpec selects it, the catalog gives the pattern `https://logs.<domain>`, for example `https://logs.home.test` with the default domain. Copy the generated address from the rollout output or the [Node Hub](/guides/stackkits/node-hub).
+
+## First use
+
+1. Open the generated address.
+2. Sign in if the route asks you to.
+3. Pick the container you are interested in.
+4. Read the newest lines, then close the page.
+
+## What to expect and what not to change
+
+- Expect a view of log text. The catalog has Dozzle reach the Docker API through a socket proxy, not by mounting the Docker socket directly.
+- If a future released StackSpec selects it, use Dozzle for quick inspection of a named container. It does not replace StackKits verification or durable evidence, and it must not be used to change StackKits-managed containers.
+- Do not copy log text that contains secrets or personal data into public places.
+
+## If something goes wrong
+
+- The address does not open: compare it with the generated address and check that the name resolves on your device. See [Troubleshooting](/guides/stackkits/troubleshooting).
+- The service is not listed: your StackSpec does not select it.
+- For the state of the whole stack, run `stackkit verify --json` and see [Monitor the stack](/stackkits/reference/day-2-operations#monitor-the-stack).

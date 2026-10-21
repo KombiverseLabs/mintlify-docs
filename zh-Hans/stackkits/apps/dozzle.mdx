@@ -1,10 +1,39 @@
 ---
 title: "Dozzle"
-description: "使用需主动启用的 StackKits 容器日志查看器"
+description: "使用可选启用的 StackKits 容器日志查看器"
 sidebarTitle: "Dozzle"
 icon: list
 ---
 
-Dozzle 是已公开发布的、用于查看容器日志的模块契约。初始的原生 v2 StackSpec 目前没有公开暴露 Dozzle 的选择项，因此归档中存在它并不等于一份安装教程。
+Dozzle 是一个已发布的模块契约，用于查看容器日志。初始的原生 v2 StackSpec 目前没有公开的 Dozzle 选项，因此归档中存在它并不等于一份安装方案。
 
-如果将来发布的 StackSpec 选择了它，请用 Dozzle 快速查看某个指定名称的容器。它不能取代 StackKits 验证或持久证据，也不得用来修改由 StackKits 管理的容器。
+## 它是什么
+
+服务器上的每个服务都运行在容器中，每个容器都会持续写下自己正在做什么的日志。Dozzle 以网页形式实时展示这些日志。StackKit 可以提供它，让你无需使用命令行，就能查看某个服务刚刚报告了什么。
+
+## 哪些套件包含它
+
+目录将 Dozzle 标记为可选启用。没有任何套件默认包含它，初始的原生 v2 StackSpec 也没有对应的选项。
+
+## 如何打开
+
+如果将来发布的 StackSpec 选择了它，目录给出的地址模式是 `https://logs.<domain>`，例如使用默认域名时为 `https://logs.home.test`。请从部署输出或 [Node Hub](/zh-Hans/guides/stackkits/node-hub) 中复制生成的地址。
+
+## 首次使用
+
+1. 打开生成的地址。
+2. 如果路由要求登录，请先登录。
+3. 选择你感兴趣的容器。
+4. 查看最新的几行日志，然后关闭页面。
+
+## 预期情况与不应更改的内容
+
+- 你将看到日志文本的视图。按照目录的设计，Dozzle 通过套接字代理访问 Docker API，而不是直接挂载 Docker 套接字。
+- 如果将来发布的 StackSpec 选择了它，请将 Dozzle 用于快速检查某个指定的容器。它不能替代 StackKits 验证或持久的证据，也不得用于更改由 StackKits 管理的容器。
+- 不要把包含密钥或个人数据的日志文本复制到公开的地方。
+
+## 出现问题时
+
+- 地址打不开：将其与生成的地址对比，并确认该名称能在你的设备上解析。参见[故障排查](/zh-Hans/guides/stackkits/troubleshooting)。
+- 服务未列出：你的 StackSpec 没有选择它。
+- 要了解整个栈的状态，请运行 `stackkit verify --json`，并参见[监控栈](/zh-Hans/stackkits/reference/day-2-operations#监控栈)。

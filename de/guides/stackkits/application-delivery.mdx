@@ -5,7 +5,7 @@ sidebarTitle: "Anwendungsbereitstellung"
 icon: route
 ---
 
-StackKits trennt die Wahl der Anwendung von der Bereitstellung der Anwendung. Ein Workload wie Files wählt seine Anwendungsalternative, während `runtimeAdapterRef` festlegt, wie genau dieser eine Workload bereitgestellt wird.
+StackKits trennt die Anwendungswahl von der Ausführungsverantwortung. Standalone Compose ist der native Standard. Komodo ist eine Betriebsplattform ohne App-Store. Marketplace ist als optionaler Anwendungsfall mit Coolify geplant; Coolify ist dessen Anwendung und kein natives Laufzeitziel.
 
 Sieh dir die Matrix an, die in deinem installierten Release eingebettet ist:
 
@@ -17,11 +17,11 @@ stackkit app compatibility --json
 
 | Adapter | Aktueller Status | Nutze ihn, wenn |
 | --- | --- | --- |
-| `standalone-compose` | Unterstützt | Du den lokalen Workload-Pfad mit deklarierter Backup- und Restore-Fähigkeit brauchst und keine separate Anwendungsplattform willst. |
-| [Coolify](/de/stackkits/apps/coolify) | Unterstützt | Du die generierte Anwendungsplattform bereits betreibst und akzeptierst, dass Workload-Backup und -Restore außerhalb dieses Adapters liegen. |
-| [Komodo](/de/stackkits/apps/komodo) | Beta | Du die Beta-Reife des Adapters bewusst akzeptierst und ihn in deinem eigenen Workspace validierst. |
+| `standalone-compose` | Nativer Standard | Nutze den deklarierten Workload-Pfad des installierten Releases und prüfe seinen Lifecycle-Nachweis. |
+| [Coolify](/de/stackkits/apps/coolify) | Geplante Marketplace-Anwendung | Als Marketplace erst installierbar, wenn der veröffentlichte Katalog den Anwendungsfall enthält und sein Lifecycle verifiziert ist. |
+| [Komodo](/de/stackkits/apps/komodo) | Entwurf einer Betriebsplattform | Wähle den Pfad ausdrücklich und nur für Workloads mit einem Nachweis am aktuellen Pin. |
 
-Die Reife beschreibt den Katalogvertrag, nicht die beobachtete Gesundheit auf deinem Host. Die generierte Matrix zur [Kompatibilität der Anwendungsbereitstellung](/de/stackkits/reference/application-delivery-compatibility) listet für jeden Workload und Adapter im veröffentlichten Release die Fähigkeiten für Deployment, Route, TLS, Backup und Restore auf. Prüfe die Zeile für deine gewählte Anwendung; die Deployment-Unterstützung einer Plattform allein belegt ihre Recovery-Fähigkeit nicht. Schließe nicht auf öffentliche Unterstützung für eine Komponente, die die Matrix nicht aufführt.
+Die veröffentlichte Matrix zur [Kompatibilität der Anwendungsbereitstellung](/de/stackkits/reference/application-delivery-compatibility) beschreibt deklarierte Adapterverträge. Historische Kompatibilitätszeilen belegen keine Unterstützung am aktuellen Pin. Prüfe den Lifecycle-Nachweis für deine Anwendung und dein Release; Deployment allein belegt weder Backup noch Wiederherstellung.
 
 Beginne bei einem eigenständigen Basement Kit mit `standalone-compose`, sofern du nicht bewusst eine der Anwendungsplattformen betreibst:
 
@@ -44,7 +44,7 @@ Beginne bei einem eigenständigen Basement Kit mit `standalone-compose`, sofern 
 
 - Route denselben Workload nicht gleichzeitig über Coolify und Standalone Compose.
 - Füge Docker-Labels oder generierte Routen nicht von Hand hinzu.
-- Behandle Komodo in diesem Release als Beta-Wahl, nicht als Standardalternative.
+- Ein expliziter Komodo-Pfad benötigt einen Nachweis am aktuellen Pin; er ist weder Standard noch App-Store.
 - Validiere die geänderte Absicht (Intent) und prüfe den aufgelösten Plan, bevor du einen anderen Adapter anwendest.
 
 Siehe [Plattformdienste](/de/stackkits/apps/overview) für die Plattformintegrationen und [Eine StackSpec konfigurieren](/de/guides/stackkits/configure-stack-spec) für den vollständigen Bearbeitungsablauf.

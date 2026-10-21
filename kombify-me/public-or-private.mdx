@@ -1,0 +1,62 @@
+---
+title: "Public, private or redirect: which one do I need?"
+description: "The three kinds of kombify.me address in everyday terms"
+sidebarTitle: "Public or private"
+icon: "route"
+---
+
+Every kombify.me address points somewhere. There are three kinds. Pick the one
+that matches where your app lives.
+
+## The three kinds
+
+| Kind | In everyday terms | Use it when |
+| --- | --- | --- |
+| Public address (`proxy`) | kombify.me stands in front of your app and passes visitors through. The visitor still sees the kombify.me name. | Your app can already be reached from the internet. |
+| Redirect | kombify.me sends the visitor on to another web address. The browser then shows that other address. | You only want a short, memorable name that forwards elsewhere. |
+| Private address (`tunnel`) | A small helper at your home opens a connection out to kombify.me and carries requests in. Nothing needs to be opened on your router. | Your app is only reachable inside your home network. |
+
+## How to choose
+
+1. Can someone outside your home open the app's web address today? If yes,
+   choose a **public address**.
+2. Do you just want a nicer name for a page that already lives elsewhere?
+   Choose a **redirect**.
+3. Is the app only reachable at addresses like `192.168.x.x` or `localhost`?
+   Choose a **private address**.
+
+A public address never accepts a private, loopback or link-local address. This
+protects your home network. If you try, you get an error and nothing is saved.
+
+## What a private address needs
+
+- A Techstack node agent running at home that can reach the app.
+- The agent must stay connected. If it is disconnected, visitors get a "try again
+  in a few seconds" answer (503).
+- Pages and files are limited to 10 MiB per request or response and 30 seconds per
+  request. Live streams and arbitrary network connections are not supported.
+
+See [Reach a private service](/kombify-me/private-targets) for the full path.
+
+## Public does not mean "everyone must see it"
+
+A public address can be opened by anyone who knows it, unless your app asks for
+a login. The app keeps its own sign-in and cookies. Keep apps with sensitive
+data behind their own login, or leave them off until you are ready.
+
+Every app also starts switched off. Nobody can open it until you switch it on.
+
+kombify.me can also share an app for a limited time with named visitors. That
+is a separate feature with its own owner controls in the kombify dashboard. It
+is not covered here.
+
+## If something goes wrong
+
+| What you see | What it means |
+| --- | --- |
+| Error saving a private address on a public address | The public path refuses private addresses. Use a private address instead. |
+| 503 "try again" on a private address | The home helper is not connected. Start it and wait a moment. |
+| 502 "Bad Gateway" on a public address | kombify.me could not reach your app. Check that it runs and is public. |
+
+Hosted `*.lan.kombify.me` names are not implemented. StackKits provides names
+inside your home network.

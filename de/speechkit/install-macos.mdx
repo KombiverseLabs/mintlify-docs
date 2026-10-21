@@ -5,18 +5,34 @@ sidebarTitle: "Unter macOS installieren"
 icon: "apple"
 ---
 
-SpeechKit für macOS ist eine frühe Beta, die nur Dictation beherrscht. Sie läuft unter
-macOS 14 oder neuer auf Apple Silicon. Intel-Macs werden nicht unterstützt.
+SpeechKit für macOS ist eine frühe Beta, die nur Dictation beherrscht. Sie läuft
+unter macOS 14 oder neuer auf Apple Silicon. Intel-Macs werden nicht unterstützt.
 
 {/* speechkit-release:begin */}
-Das aktuelle öffentliche Release ist [v0.72.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.1), veröffentlicht am 2026-09-20.
+The current public release is [v0.77.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.1), published 2026-10-16.
 {/* speechkit-release:end */}
 
 <Warning>
 Das macOS-Bundle ist ad hoc signiert, ohne Apple Developer ID und ohne
-Notarisierung. macOS stellt es unter Quarantäne und behauptet unter Umständen, die App sei beschädigt. Das ist sie nicht.
-Die Quarantäne-Kennzeichnung zu entfernen erfordert einen dokumentierten Befehl, der unten beschrieben ist.
+Notarisierung. macOS stellt es unter Quarantäne und behauptet möglicherweise, die
+App sei beschädigt. Das ist sie nicht. Das Entfernen der Quarantäne-Markierung
+erfordert einen dokumentierten Befehl, der unten beschrieben ist.
 </Warning>
+
+Im Alltag gesprochen: Dies ist eine erste, eingeschränkte Version für Macs mit
+Apple-Chip. Sie wandelt deine Sprache in Text um und tippt ihn in die App, die du
+gerade verwendest. Sie ist kostenlos zum Ausprobieren, aber macOS begegnet ihr mit
+Misstrauen, weil sie nicht von einem Apple-Entwicklerkonto signiert ist. Die
+Installation braucht daher einen zusätzlichen Schritt, den du im Terminal
+ausführst. Nichts davon erfordert ein Administratorpasswort.
+
+## Bevor du beginnst
+
+- Ein Mac mit Apple-Chip (M-Serie) unter macOS 14 oder neuer. Intel-Macs werden
+  nicht unterstützt.
+- Ein paar Minuten. Lokale Sprachmodelle werden später bei Bedarf heruntergeladen.
+- Wisse, dass das Terminal eine App auf deinem Mac ist (drücke Cmd+Leertaste und
+  tippe `Terminal`). Du fügst dort nur einen einzigen Befehl ein.
 
 ## Herunterladen
 
@@ -24,10 +40,10 @@ Die Quarantäne-Kennzeichnung zu entfernen erfordert einen dokumentierten Befehl
   Lade `SpeechKit-macOS-arm64.zip` aus dem neuesten veröffentlichten Release herunter.
 </Card>
 
-Prüfe den Download gegen
+Verifiziere den Download anhand von
 [SHA256SUMS.txt](https://github.com/kombifyio/SpeechKit/releases/latest/download/SHA256SUMS.txt),
-bevor du ihn öffnest. Diese Datei listet auch die Windows-Assets auf, prüfe also nur die
-Zeile für das macOS-Archiv:
+bevor du ihn öffnest. Diese Datei listet auch die Windows-Assets auf, prüfe also
+nur die Zeile für das macOS-Archiv:
 
 ```bash
 grep SpeechKit-macOS-arm64.zip SHA256SUMS.txt | shasum -a 256 -c
@@ -36,47 +52,90 @@ grep SpeechKit-macOS-arm64.zip SHA256SUMS.txt | shasum -a 256 -c
 ## Installieren
 
 1. Entpacke den Download und ziehe `SpeechKit.app` in deinen Programme-Ordner.
-   Verschiebe sie vor dem nächsten Schritt: macOS führt eine App, die in Downloads liegt,
-   aus einer versteckten schreibgeschützten Kopie aus, und SpeechKit kann sich von dort nicht selbst aktualisieren.
-2. Entferne die Quarantäne-Kennzeichnung im Terminal:
+   Verschiebe sie vor dem nächsten Schritt: macOS führt eine im Downloads-Ordner
+   belassene App von einer versteckten schreibgeschützten Kopie aus, und SpeechKit
+   kann sich von dort nicht selbst aktualisieren.
+2. Entferne die Quarantäne-Markierung im Terminal:
 
    ```bash
    xattr -dr com.apple.quarantine /Applications/SpeechKit.app
    ```
 
-   Wenn es funktioniert, wird nichts ausgegeben. Der Befehl braucht kein Passwort und wirkt
-   nur auf diese App.
-3. Öffne SpeechKit aus Programme und erteile **Microphone** und
-   **Accessibility**, wenn danach gefragt wird.
+   Wenn es funktioniert, wird nichts ausgegeben. Der Befehl braucht kein Passwort
+   und betrifft nur diese App.
+3. Öffne SpeechKit aus Programme und erteile **Mikrofon** und
+   **Bedienungshilfen**, wenn du danach gefragt wirst.
 
-Lies die vollständige
-[Mitteilung zum unsignierten Release](https://github.com/kombifyio/SpeechKit/releases/latest/download/UNSIGNED-MACOS-RELEASE.txt)
-für die Begründung hinter jedem Schritt. Nichts in diesem Ablauf verlangt von dir, Gatekeeper
-systemweit zu deaktivieren oder irgendetwas als root auszuführen.
+Was nach jedem Schritt zu erwarten ist:
+
+- Nach Schritt 1 liegt die App in deinem Programme-Ordner, nicht mehr in
+  Downloads.
+- Nach Schritt 2 gibt das Terminal nichts aus. Das bedeutet, dass der Befehl
+  funktioniert hat.
+- Nach Schritt 3 öffnet sich SpeechKit ohne die Meldung „beschädigt“, zeigt seinen
+  Eintrag in der Menüleiste oben am Bildschirm, und macOS fragt nach den
+  Berechtigungen.
+
+Lies den vollständigen
+[Hinweis zum unsignierten Release](https://github.com/kombifyio/SpeechKit/releases/latest/download/UNSIGNED-MACOS-RELEASE.txt)
+für die Begründung hinter jedem Schritt. Nichts in diesem Vorgehen verlangt von dir,
+Gatekeeper systemweit zu deaktivieren oder etwas als root auszuführen.
 
 ## Was funktioniert und was nicht
 
-| Fähigkeit | macOS-Beta |
+| Funktion | macOS-Beta |
 | --- | --- |
 | Dictation mit dem mitgelieferten lokalen Modell | Verfügbar |
-| Dictation mit Cloud-Speech-to-Text-Providern | Verfügbar |
-| Mikrofonaufnahme, Texteinfügung, Menüleisten-Eintrag | Verfügbar |
-| Globale Hotkeys und Hold-to-Talk | Funktioniert in diesem Build nicht |
+| Dictation mit Cloud-Speech-to-Text-Anbietern | Verfügbar |
+| Mikrofonaufnahme, Texteingabe, Menüleisten-Eintrag | Verfügbar |
+| Globale Hotkeys und Push-to-talk | Funktioniert in diesem Build nicht |
 | Assist und Voice Agent | Unter macOS nicht verifiziert |
-| Meeting-Systemaudio-Aufnahme, Bildschirm-Snapshots, Wake-Word, lokales LLM | Nicht portiert; jedes verweigert mit einem typisierten Fehler, und seine Bedienelemente sind ausgeblendet |
+| Meeting-Systemaudio-Aufnahme, Bildschirm-Snapshots, Wake Word, lokales LLM | Nicht portiert; jedes lehnt mit einem typisierten Fehler ab, und seine Bedienelemente sind ausgeblendet |
 
-Der Hotkey-Listener wird installiert, empfängt aber keine Tastenereignisse, daher ist der Menüleisten-Eintrag
-der Weg, ein Diktat zu starten, bis das behoben ist. Nutze den
-[Windows-Client](/de/speechkit/install-windows), wenn du den vollständigen
-Funktionsumfang brauchst.
+Der Hotkey-Listener wird installiert, empfängt aber keine Tastenereignisse, daher
+ist der Menüleisten-Eintrag der Weg, eine Dictation zu starten, bis dies behoben
+ist. Nutze den [Windows-Client](/de/speechkit/install-windows), wenn du den
+vollständigen Funktionsumfang brauchst.
 
 ## Berechtigungen nach einem Update
 
-macOS merkt sich Berechtigungen anhand der exakten Signatur einer App. Jeder
-ad hoc signierte Build hat eine andere Signatur, daher fragt macOS nach jedem Update erneut nach Microphone
-und Accessibility und manchmal nach Zugriff auf den Schlüsselbund.
+macOS merkt sich Berechtigungen anhand der genauen Signatur einer App. Jeder ad hoc
+signierte Build hat eine andere Signatur, daher fragt macOS nach jedem Update
+erneut nach Mikrofon und Bedienungshilfen, manchmal auch nach Schlüsselbundzugriff.
 Das ist bei einer unsignierten Beta zu erwarten.
 
-Wenn ein Update dazu führt, dass Dictation nicht mehr reagiert, öffne **System Settings → Privacy &
-Security → Accessibility** und schalte SpeechKit wieder ein. Die
-Berechtigung wird im laufenden Betrieb übernommen; ein Neustart ist nicht nötig.
+Wenn eine Berechtigung weiterhin zu fehlen scheint, fragt SpeechKit möglicherweise
+auch nach Eingabeüberwachung, die der Hotkey braucht. Hotkeys funktionieren in
+diesem Build nicht, du kannst diese Berechtigung also vorerst ausgeschaltet lassen.
+
+Wenn eine Dictation nach einem Update nicht mehr reagiert, öffne **Systemeinstellungen →
+Datenschutz & Sicherheit → Bedienungshilfen** und schalte SpeechKit wieder ein. Es
+übernimmt die Berechtigung im laufenden Betrieb; ein Neustart ist nicht nötig.
+
+## Wenn etwas schiefgeht
+
+- **macOS sagt, die App sei beschädigt.** Das ist sie nicht; das Bundle ist intakt.
+  Führe den Quarantäne-Befehl aus Schritt 2 aus und öffne sie erneut.
+- **Der Befehl gibt einen Fehler aus.** Prüfe, ob die App in `/Applications` liegt
+  und die Schreibweise mit Schritt 2 übereinstimmt, einschließlich der
+  Großbuchstaben.
+- **Es wird nichts in die andere App getippt.** Prüfe **Systemeinstellungen →
+  Datenschutz & Sicherheit → Bedienungshilfen** und schalte SpeechKit ein. Text
+  kann auch nicht in ein Passwortfeld getippt werden; macOS blockiert das absichtlich.
+- **Keine Mikrofoneingabe.** Prüfe **Systemeinstellungen → Datenschutz & Sicherheit →
+  Mikrofon** auf SpeechKit sowie die in SpeechKit gewählte Eingabe. Siehe
+  [Hotkeys, Mikrofon und Sprache einrichten](/de/speechkit/hotkeys-microphone-language).
+- **Der Hotkey tut nichts.** In diesem Build zu erwarten. Nutze den
+  Menüleisten-Eintrag, um eine Dictation zu starten.
+- **Ein Update hat wieder nach allem gefragt.** Zu erwarten; siehe „Berechtigungen
+  nach einem Update“ oben.
+- **Ein Sprachmodell wird nicht heruntergeladen.** Prüfe deine Verbindung und den
+  Datenschutzbereich. Siehe [Offline mit lokalen Modellen arbeiten](/de/speechkit/work-offline)
+  und [Häufige Probleme beheben](/de/speechkit/fix-common-problems).
+- **Du möchtest aktualisieren oder entfernen.** Siehe
+  [SpeechKit aktualisieren oder deinstallieren](/de/speechkit/update-and-uninstall).
+
+## Nächste Schritte
+
+- [Hotkeys, Mikrofon und Sprache einrichten](/de/speechkit/hotkeys-microphone-language)
+- [Häufige Probleme beheben](/de/speechkit/fix-common-problems)

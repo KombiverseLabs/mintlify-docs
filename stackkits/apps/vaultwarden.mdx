@@ -7,6 +7,16 @@ icon: vault
 
 Vaultwarden provides the [Passwords](/guides/stackkits/use-cases/passwords) use case. It is the released alternative for the optional native v2 `vault` workload, and the initial Basement and Cloud StackSpecs do not enable it.
 
+## What it is
+
+Vaultwarden is a small server that keeps your household's passwords and secure notes on a machine you run yourself. It speaks the same language as Bitwarden, so everyone uses the normal Bitwarden apps and browser extensions and simply points them at your own server. A StackKit includes it so the family does not have to trust a third party with its passwords.
+
+## Which kits and use cases include it
+
+When you choose the optional Passwords experience of the Vault use case, Vaultwarden is its default alternative. The released catalog commits it for the Basement Kit and the Cloud Kit on standalone Compose. It is optional, so you select it yourself.
+
+## Released contract
+
 | Property | Value |
 | --- | --- |
 | Workload | `vault` |
@@ -17,10 +27,30 @@ Vaultwarden provides the [Passwords](/guides/stackkits/use-cases/passwords) use 
 
 The `admin-token` slot holds an opaque `secret://` reference; the actual token stays in local owner custody. Choose the workload, placement and adapter in the [StackSpec](/guides/stackkits/configure-stack-spec), then follow [Add a workload](/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace) to validate, establish custody, generate, inspect the plan, apply and verify.
 
+## How to open it
+
+After a rollout, open the generated Passwords address printed by the CLI or listed in the [Node Hub](/guides/stackkits/node-hub). The default local domain is `home.test`, and the name must resolve on the device you use. Bitwarden apps need this same address as their server URL.
+
 ## First use
 
 1. Create the application owner account and choose the registration policy before adding real secrets.
 2. After accepting an invitation, complete account registration and sign in through your Bitwarden client.
 3. Create and sync a vault entry to confirm that the account is ready. An invitation alone does not complete this setup.
+
+The [Passwords](/guides/stackkits/use-cases/passwords) page explains how to point a Bitwarden client at your own server, and [Set up your password manager apps](/guides/stackkits/use-cases/passwords/clients) walks through it for the people in your household.
+
+## What is backed up
+
+The recovery sequence covers the Vaultwarden data volume, which holds the vault database and attachments. Keep your recovery material outside the server. Confirm that your backups cover that volume and practice a staged restore with [Back up and restore](/guides/stackkits/back-up-and-restore) before the vault holds secrets you cannot recreate. The [v0.39.7 published compatibility record](https://github.com/kombifyio/StackKits/releases/download/v0.39.7/stackkits-compatibility-evidence-v3.json) records passing Vault backup and restore phases. The [latest projected record, v0.53.10](https://github.com/kombifyio/StackKits/releases/download/v0.53.10/stackkits-compatibility-evidence-v3.json), grades standalone Vault `unverified`, with v0.46.8 as its last verified release. These phase results do not establish Bitwarden client registration, sign-in or encrypted-entry sync after recovery; complete those checks yourself before relying on the vault.
+
+## What to expect
+
+The vault is small and always running. It is ready for a person only after they register in a Bitwarden client, sign in and sync one entry. Master passwords are held by the people who choose them.
+
+## If something goes wrong
+
+- The Bitwarden app cannot reach the server: check that the server URL is your generated Passwords address and that the name resolves from that device. See [Troubleshooting](/guides/stackkits/troubleshooting).
+- A person has an invitation but cannot sign in: the account is complete only after an official Bitwarden client registers it.
+- The browser warns about the connection: do not click through a warning you do not understand. Compare the address with the one in the Node Hub.
 
 For an already admitted workload, change StackKits intent through the StackSpec and lifecycle commands; do not edit generated application configuration on the target.

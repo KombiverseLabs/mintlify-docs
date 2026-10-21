@@ -1,0 +1,86 @@
+---
+title: "stackkit device"
+description: "Enroll, list and revoke household devices (CLI token fallback of the State Console ceremony)"
+sidebarTitle: "device"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:ef454620ffdb9e2bc396ed1eb48af2a33a795afdec703bc2149b6c38b79ee55e"
+source_hash: "721b28cf58d148556aabcc6eec77161fc5a36f8d"
+---
+Enroll, list and revoke household devices (CLI token fallback of the State Console ceremony).
+
+```bash
+stackkit device [flags]
+```
+
+Subcommands: [`stackkit device enroll`](#stackkit-device-enroll), [`stackkit device list`](#stackkit-device-list), [`stackkit device overlay`](#stackkit-device-overlay), [`stackkit device revoke`](#stackkit-device-revoke)
+
+## stackkit device enroll
+
+Issue a single-use pairing token after Owner step-up, or redeem one with a device CSR.
+
+With `--owner-session-file`, issue a single-use 300-second pairing token; the file holds a PocketID Owner session authenticated within the last 60 seconds ('-' reads stdin). With `--code` and `--csr`, redeem the token for the device-generated key in the CSR and receive a client certificate from the node-local step-ca device provisioner. Both steps also combine in one call. Enrollment is refused from outside the LAN.
+
+```bash
+stackkit device enroll [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--code` | string | — | single-use pairing token to redeem |
+| `--csr` | string | — | PEM certificate request generated on the device |
+| `--out` | string | — | write the issued certificate chain to this file instead of stdout |
+| `--owner-session-file` | string | — | file with a fresh PocketID Owner session token ('-' for stdin); issues a pairing token |
+
+## stackkit device list
+
+List enrolled and revoked household devices.
+
+```bash
+stackkit device list [flags]
+```
+
+## stackkit device overlay
+
+Join enrolled devices to the kit-owned WireGuard overlay for remote-private access.
+
+The node generates its WireGuard private key into local custody; it is never printed or rendered. Each device generates its own key pair and registers only its public key. Revoked or expired devices drop out of the rendered interface configuration. No kombify account is involved.
+
+```bash
+stackkit device overlay [flags]
+```
+
+Subcommands: [`stackkit device overlay bind`](#stackkit-device-overlay-bind), [`stackkit device overlay render`](#stackkit-device-overlay-render)
+
+### stackkit device overlay bind
+
+Register an enrolled device's WireGuard public key and assign its overlay address.
+
+```bash
+stackkit device overlay bind <device-id> [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--public-key` | string | — | **Required.** the device's base64 WireGuard public key (generated on the device) |
+
+### stackkit device overlay render
+
+Render the node's wg-quick configuration (public keys only; the private key loads from custody).
+
+```bash
+stackkit device overlay render [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--out` | string | — | write the configuration to this file instead of stdout |
+
+## stackkit device revoke
+
+Permanently revoke a household device key.
+
+```bash
+stackkit device revoke <device-id> [flags]
+```
+

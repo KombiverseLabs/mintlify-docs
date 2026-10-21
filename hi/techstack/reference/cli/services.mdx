@@ -2,9 +2,9 @@
 title: "techstack api services"
 description: "techstack api services कमांड के लिए जनरेट किया गया संदर्भ"
 sidebarTitle: "services"
-release: "v0.39.0"
+release: "v0.41.15"
 ---
-<Note>Techstack v0.39.0 रिलीज़ (सोर्स `49677b729cb9`) से जनरेट किया गया। इंस्टॉल किए गए वर्ज़न के लिए `techstack api <command> --help` ही प्रामाणिक है।</Note>
+<Note>Generated from the Techstack v0.41.15 release (source `b5b268760b34`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
 
 ## techstack api services execute-application-adoption
 
@@ -243,3 +243,24 @@ techstack api services setup-application-connector [flags]
 | `--lifespan-days` | integer | **आवश्यक।** |
 | `--owner-approved` | boolean | **आवश्यक।** इनमें से एक: `true`. |
 | `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## techstack api services verify-application-connector
+
+Refresh the current node-owned connector through a distinct read-only job.
+
+Retains the original signed setup operation and exact receipt, requires current published catalog and positive backend node/resource authority, and never reissues setup. Ordinary authenticated inventory reconciliation uses the same consumer for stale projections. Current v0.51.8 remains nondispatchable SourcePreview.
+
+```bash
+techstack api services verify-application-connector [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/connector/verify` |
+| Changes state | No |
+| MCP tool | `verify_application_connector` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+| `--body` | json | **Required.** JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |

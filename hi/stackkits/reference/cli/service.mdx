@@ -9,7 +9,7 @@ sidebarTitle: "service"
 stackkit service [flags]
 ```
 
-उप-कमांड: [`stackkit service logs`](#stackkit-service-logs), [`stackkit service restart`](#stackkit-service-restart), [`stackkit service start`](#stackkit-service-start), [`stackkit service stop`](#stackkit-service-stop)
+उप-कमांड: [`stackkit service logs`](#stackkit-service-logs), [`stackkit service manager`](#stackkit-service-manager), [`stackkit service restart`](#stackkit-service-restart), [`stackkit service start`](#stackkit-service-start), [`stackkit service stop`](#stackkit-service-stop)
 
 ## stackkit service logs
 
@@ -36,6 +36,30 @@ stackkit service logs id --json
 
 # Read the next page with the cursor the previous JSON result returned
 stackkit service logs id --json --cursor <cursor>
+```
+
+## stackkit service manager
+
+नोड के स्वामित्व वाले मौजूदा वर्कलोड को Compose और Komodo के बीच स्थानांतरित करें।
+
+```bash
+stackkit service manager <workload-ref> [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--json` | bool | — | वर्ज़नयुक्त मैनेजर परिणाम JSON के रूप में लिखें |
+| `--owner-approve` | bool | — | ओनर से बँधे मैनेजर संक्रमण को स्पष्ट रूप से स्वीकृत करें |
+| `--resume` | string | — | सटीक लंबित हैंडओवर ऑपरेशन फिर शुरू करें |
+| `--status` | bool | — | बिना बदलाव किए टिकाऊ मैनेजर और हैंडओवर परिणाम पढ़ें |
+| `--to` | string | — | लक्ष्य मैनेजर: standalone-compose या komodo |
+
+**उदाहरण**
+
+```bash
+stackkit service manager media --to standalone-compose --owner-approve
+stackkit service manager media --to komodo --owner-approve
+stackkit service manager media --to komodo --resume handover-<operation-id> --owner-approve
 ```
 
 ## stackkit service restart

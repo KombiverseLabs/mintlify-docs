@@ -7,7 +7,21 @@ icon: grid-2
 
 Platform services run underneath your use cases. They handle sign-in, routing, application delivery and visibility. The applications that provide a use case, such as Immich for Photos, are listed under [Use cases](/guides/stackkits/use-cases/overview).
 
+The [released application catalog](/stackkits/reference/application-catalog) lists every application choice, add-on and recorded-only exclusion in the synced release.
+
 Catalog presence, a successful installation and a completed recovery mean different things. Check the [application delivery compatibility](/stackkits/reference/application-delivery-compatibility) of the installed release.
+
+## What these services do
+
+Think of the use-case applications as the rooms of a house and platform services as the doors, locks and signs. They decide who may come in, how an address finds the right application and how you see what is running. You usually do not choose them one by one: the kit brings the core ones.
+
+## Which kits include them
+
+The core runtime is part of the generated native v2 workspace; the Basement Kit page describes its generated Node Hub and local services, see [Basement Kit](/stackkits/kits/basement-kit). Items marked below as module contracts, and the application platforms, only appear when you select them.
+
+## How you open them
+
+After a rollout, open the Node Hub at the `base.<domain>` address printed by the CLI; the default local domain is `home.test`. Every other service uses the generated address for that rollout.
 
 ## Access and routing
 
@@ -15,6 +29,7 @@ The generated core runtime includes:
 
 - [PocketID](/stackkits/apps/pocketid), the local owner identity
 - [TinyAuth](/stackkits/apps/tinyauth), the forward-auth entrypoint for protected routes
+- [Login gateway](/stackkits/apps/login-gateway), the module that ties TinyAuth to PocketID for protected routes
 - [Traefik](/stackkits/apps/traefik), the reverse proxy for generated routes
 
 [kombify Point DNS](/stackkits/apps/kombify-point) and the [Whoami](/stackkits/apps/whoami) routing diagnostic ship as module contracts that the initial native v2 StackSpec does not select.
@@ -28,3 +43,16 @@ Standalone Compose delivers workloads by default and needs no application platfo
 The [Node Hub](/guides/stackkits/node-hub) is the generated overview of your services. [Homepage](/stackkits/apps/homepage), [Uptime Kuma](/stackkits/apps/uptime-kuma) and [Dozzle](/stackkits/apps/dozzle) ship as module contracts that the initial native v2 StackSpec does not select.
 
 Do not edit generated deployment files or infer enablement from archive presence.
+
+## First steps
+
+1. Verify the core rollout from the CLI.
+2. Open the [Node Hub](/guides/stackkits/node-hub).
+3. Establish the local owner in PocketID and confirm that TinyAuth protects the routes you expect.
+4. Configure the backup repository and practice a restore with [Back up and restore](/guides/stackkits/back-up-and-restore).
+
+## If something goes wrong
+
+- An address does not open or a name does not resolve: see [Troubleshooting](/guides/stackkits/troubleshooting).
+- Sign-in fails: services behind TinyAuth use the owner account in PocketID, which is not your kombify Cloud account.
+- Never edit generated deployment or router files; change the StackSpec and regenerate.

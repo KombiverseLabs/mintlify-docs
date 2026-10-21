@@ -1,10 +1,39 @@
 ---
 title: "Whoami"
-description: "Un módulo de diagnóstico de enrutamiento publicado que queda fuera de la StackSpec v2 nativa inicial"
+description: "Un módulo de diagnóstico de enrutamiento publicado fuera de la StackSpec v2 nativa inicial"
 sidebarTitle: "Whoami"
 icon: bug
 ---
 
 Whoami se distribuye como contrato de módulo de diagnóstico de enrutamiento publicado, pero la StackSpec v2 nativa inicial no lo selecciona. No esperes una ruta de Whoami generada en un Basement Kit nuevo ni copies una dirección de un despliegue anterior.
 
-No cambies la configuración generada del router en respuesta a una sola petición de diagnóstico. Actualiza la intención validada de StackKits y regenera el despliegue.
+## Qué es
+
+Whoami es un pequeño servicio de prueba. Cuando lo abres, responde con un texto breve que describe la petición que recibió. Un StackKit puede incluirlo para demostrar que el proxy inverso ([Traefik](/es/stackkits/apps/traefik)) y el nombre del servicio funcionan juntos, antes de depender de una aplicación mayor. Es una comprobación, no algo que uses a diario.
+
+## Qué kits lo incluyen
+
+El catálogo define Whoami como un módulo opcional que necesita Traefik. La StackSpec v2 nativa inicial no lo selecciona, así que un Basement Kit nuevo no lo contiene. Considera la salida generada de tu propio despliegue como la única verdad sobre lo que está instalado.
+
+## Cómo se abre
+
+Cuando una versión lo selecciona, el catálogo da el patrón `https://whoami.<domain>`, por ejemplo `https://whoami.home.test` con el dominio por defecto. Copia la dirección de la salida de la CLI o del [Node Hub](/es/guides/stackkits/node-hub) en lugar de escribirla.
+
+## Primer uso
+
+1. Confirma que Whoami figura en la salida de tu despliegue o en el Node Hub.
+2. Abre la dirección generada en tu navegador.
+3. Lee el texto breve que aparece. Ver una respuesta significa que el nombre se resolvió y que la ruta llegó al servicio.
+4. Cierra la página. No hay nada que configurar.
+
+## Qué esperar y qué no cambiar
+
+- Espera texto plano, no una aplicación.
+- Si tu despliegue protege la ruta, espera primero un inicio de sesión.
+- No cambies la configuración generada del router en respuesta a una sola petición de diagnóstico. Actualiza la intención validada de StackKits y regenera el despliegue.
+
+## Si algo sale mal
+
+- La dirección no se abre: compárala con la dirección de la salida del despliegue y comprueba que el nombre se resuelve en el dispositivo que usas. Consulta [Solución de problemas](/es/guides/stackkits/troubleshooting).
+- El servicio no aparece en la lista: tu StackSpec no lo selecciona. No inventes una selección a partir de un esquema anterior.
+- Ejecuta `stackkit verify --json` desde la carpeta de tu espacio de trabajo y lee los hallazgos antes de cambiar nada.

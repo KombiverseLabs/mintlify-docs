@@ -1,19 +1,52 @@
 ---
 title: "Komodo"
-description: "El adaptador beta de entrega de aplicaciones en la matriz de workloads publicada"
+description: "El adaptador beta de entrega de aplicaciones en la matriz de cargas de trabajo publicada"
 sidebarTitle: "Komodo"
 icon: rocket
 ---
 
-Komodo es un adaptador beta en la matriz de compatibilidad de workloads publicada; la tabla generada de [compatibilidad de entrega de aplicaciones](/es/stackkits/reference/application-delivery-compatibility) es la propietaria de sus filas declaradas. Elígelo solo cuando aceptes ese nivel de madurez; Coolify y Compose independiente son las vías de adaptador compatibles.
+Komodo es un adaptador beta en la matriz de compatibilidad de cargas de trabajo publicada; la tabla generada de [compatibilidad de entrega de aplicaciones](/es/stackkits/reference/application-delivery-compatibility) contiene sus filas declaradas. Elígelo solo si aceptas ese nivel de madurez; Coolify y Compose independiente son las rutas de adaptador compatibles.
+
+## Qué es
+
+Komodo es una herramienta para ejecutar y gestionar aplicaciones en un servidor. En palabras sencillas, es un panel de control que se sitúa junto a tus aplicaciones y se ocupa de cómo se inician y se mantienen en marcha. Un StackKit puede incluirlo cuando quieres ese panel en lugar de la forma por defecto de iniciar aplicaciones, que son simples archivos Compose. Es una plataforma de operaciones, no una tienda de aplicaciones: no ofrece un catálogo de aplicaciones para instalar con un clic.
+
+## Qué kits y casos de uso lo incluyen
+
+Komodo nunca se incluye por defecto. Es una integración de plataforma que seleccionas explícitamente en la intención de carga de trabajo de tu StackSpec, para las cargas de trabajo que enumeran las filas declaradas de la tabla de compatibilidad (por ejemplo `files`, `media`, `photos`, `smart-home` y `vault`). La mayoría de la gente nunca lo necesita: Compose independiente es el valor nativo por defecto y Coolify es la otra ruta de plataforma compatible.
+
+## Cómo abrirlo
+
+Tras un despliegue, StackKits imprime en la salida del despliegue la dirección y las credenciales generadas de Komodo. Abre esa dirección en un navegador desde un dispositivo que pueda resolver los nombres de tu homelab. El dominio local por defecto es `home.test`; copia la dirección en lugar de escribirla de memoria.
 
 ## Úsalo con seguridad
 
-- Selecciona explícitamente el adaptador beta `komodo` en la intención del workload de tu release instalado.
-- Valida la intención del workload antes de generar o aplicar la configuración.
+- Selecciona explícitamente el adaptador beta `komodo` en la intención de carga de trabajo de la versión que tienes instalada.
+- Valida la intención de carga de trabajo antes de generar o aplicar la configuración.
 - Usa la URL y las credenciales de Komodo generadas que aparecen en la salida del despliegue.
-- Mantén una sola vía de entrega de aplicaciones por workload.
+- Mantén una sola ruta de entrega de aplicaciones por carga de trabajo.
 
-No copies un fragmento de configuración antiguo ni crees a mano una segunda ruta de plataforma. La validación CUE del release instalado es la autoridad.
+No copies un fragmento de configuración antiguo ni crees a mano una segunda ruta de plataforma. La validación CUE de la versión instalada es la autoridad.
 
-[Elige la entrega de aplicaciones](/es/guides/stackkits/application-delivery) compara Komodo con Coolify y Compose independiente.
+## Primer uso
+
+1. Completa y verifica el despliegue de StackKits antes de abrir Komodo.
+2. Abre la dirección de Komodo generada de la salida del despliegue.
+3. Inicia sesión con las credenciales generadas que figuran en la salida del despliegue. No las pegues en un chat ni en una incidencia.
+4. Mira la aplicación que StackKits entregó para tu carga de trabajo. Considera la StackSpec como el lugar donde cambias los ajustes, no las pantallas de Komodo.
+
+## Qué se respalda
+
+La tabla de compatibilidad de entrega de aplicaciones tiene una columna de copia de seguridad/restauración para cada carga de trabajo y adaptador; comprueba la fila de tu carga de trabajo y tu versión. La capacidad de despliegue por sí sola no establece la copia de seguridad ni la restauración. Practica una restauración por etapas como se describe en [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore) antes de depender de ella.
+
+## Qué esperar
+
+Komodo es una ruta beta. Espera menos filas verificadas que con Compose independiente, y espera que quizá necesites leer la tabla de compatibilidad antes de confiar en una carga de trabajo concreta sobre él. El panel muestra y ejecuta lo que StackKits generó; no sustituye la validación de tu configuración.
+
+## Si algo sale mal
+
+- La dirección no se abre: compárala con la dirección de la salida del despliegue y asegúrate de que tu dispositivo resuelve el nombre del homelab. Consulta [Solución de problemas](/es/guides/stackkits/troubleshooting).
+- Una carga de trabajo falta o está duplicada: probablemente tienes dos rutas de entrega para ella. Mantén una sola ruta de entrega de aplicaciones por carga de trabajo, corrige la StackSpec y vuelve a generar.
+- No estás seguro de si la ruta es compatible: ejecuta `stackkit app compatibility --json` y lee la fila de tu versión.
+
+[Elegir la entrega de aplicaciones](/es/guides/stackkits/application-delivery) compara Komodo con Coolify y Compose independiente.

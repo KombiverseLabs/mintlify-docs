@@ -4,8 +4,8 @@ description: "Manage backups (Kopia engine)"
 sidebarTitle: "backup"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:8711ca83672be5ace8615aac1267a84820ffc62fbfcb23d720a560268b901a25"
-source_hash: "8808f0b70fa55b18383455f94ff7eed1b8051f87"
+content_hash: "sha256:ef454620ffdb9e2bc396ed1eb48af2a33a795afdec703bc2149b6c38b79ee55e"
+source_hash: "721b28cf58d148556aabcc6eec77161fc5a36f8d"
 ---
 Manage backups (Kopia engine).
 
@@ -183,9 +183,12 @@ stackkit backup restore activate <restore-result-id> [flags]
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
+| `--expected-plan-hash` | string | — | Require this admitted sha256 ResolvedPlan before the safety snapshot or live activation |
 | `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+| `--marketplace-service` | string | — | Activate only the explicitly selected upstream filesystem service |
 | `--operation-id` | string | — | Stable idempotency key for this live restore activation |
 | `--owner-approve` | bool | — | Authorize live activation with the established local Owner custody |
+| `--workload` | string | — | Activate only this selected managed application's backed-up volumes |
 
 **Examples**
 
@@ -209,7 +212,12 @@ stackkit backup restore recover <activation-operation-id> [flags]
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
+| `--expected-plan-hash` | string | — | Require the original journal's admitted sha256 ResolvedPlan before recovery or finalization |
 | `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+| `--original-archive-sha256` | string | — | Require the original release archive digest before historical recovery |
+| `--original-index-sha256` | string | — | Require the original signed release-index digest before historical recovery |
+| `--original-release` | string | — | Recover only through this exact originally admitted StackKits tag |
+| `--original-release-cache` | string | — | Absolute retained node release cache, used offline only when the workspace original cache is absent |
 | `--owner-approve` | bool | — | Authorize recovery with the established local Owner custody |
 | `--rollback` | bool | — | Authorize rollback if the interrupted activation has not committed |
 
@@ -343,6 +351,10 @@ stackkit backup status [flags]
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
 | `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+| `--marketplace-component` | string | — | Exact upstream service application UUID |
+| `--marketplace-data-class` | string | `config` | Selected filesystem data class: config or user-content |
+| `--marketplace-service` | string | — | Inspect an explicit upstream service for filesystem backup selection |
+| `--marketplace-volume` | string | — | Exact local named volume |
 
 **Examples**
 

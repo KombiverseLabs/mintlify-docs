@@ -1,26 +1,54 @@
 ---
 title: "Modern Homelab"
-description: "面向横跨家庭与云的 homelab 的 alpha StackKits 定义归档"
+description: "面向横跨家庭与云的 homelab 的 alpha 版 StackKits 定义归档"
 sidebarTitle: "Modern Homelab (alpha)"
 icon: network-wired
 ---
 
-Modern Homelab 描述一个横跨 Home 环境和 Cloud 环境的 homelab。它的定义把控制权和默认的数据权限保留在 Home，并要求在各位置之间显式声明连接和发布。
+Modern Homelab 描述的是横跨 Home 环境和 Cloud 环境的 homelab。其定义将控制权和默认的数据权限保留在 Home，并要求在各位置之间显式声明连接和发布。
+
+## 通俗地说
+
+普通的 homelab 位于一个地方。Modern Homelab 描述的则是横跨两处的 homelab：你的家和一台云服务器。目前它只是一份早期定义，你可以阅读、初始化、验证和生成它。它还不是运行双位置 homelab 的成品方案，因此适用于探索，而不适合用于家人的照片或密码。
 
 <Warning>
-  Modern Homelab 是没有受支持安装路径的 alpha 定义归档。你可以使用已发布的 CLI 对它进行初始化、验证和生成。下载它的归档并不能建立主机之间的有效连接、受保护的应用访问，或跨位置的恢复。如需已有安装的指南，请使用 Basement Kit 或 Cloud Kit。
+  Modern Homelab 是 alpha 版定义归档，没有受支持的安装路径。你可以使用已发布的 CLI
+  初始化、验证并生成它。下载其归档并不能建立主机之间可用的连接、受保护的应用访问，
+  也不能实现跨位置的恢复。如需现有的安装指南，请使用 Basement Kit 或 Cloud Kit。
 </Warning>
 
 ## alpha 归档包含什么
 
-[公开的 StackKits 版本](https://github.com/kombifyio/StackKits/releases/latest)在 CLI 之外还包含 Modern Homelab 定义归档。它们描述了预期的站点、应用放置、连接和权限边界。请查看该版本的 `release-evidence.json`，了解实际附在该版本上的运行时证据。
+[公开的 StackKits 版本](https://github.com/kombifyio/StackKits/releases/latest)在 CLI 之外还包含 Modern Homelab 定义归档。它们描述了预期的站点、应用放置、连接和权限边界。请查看该版本的 `release-evidence.json`，了解实际附加到该版本的运行时证据。
 
-[仅工具链安装指南](/zh-Hans/guides/stackkits/choosing-a-kit#仅安装工具链)说明了如何下载 CLI 和 Modern 定义。完整的 Modern 部署仍然需要具体的连接、身份、路由、TLS 和位置故障行为。仅有配置或生成的计划并不能验证这些行为。
+[仅工具链的安装指南](/zh-Hans/guides/stackkits/choosing-a-kit#仅安装工具链)说明了如何下载 CLI 和 Modern 定义。完整的 Modern 部署仍然需要具体的连接、身份、路由、TLS 以及位置故障时的行为。仅凭配置或生成的计划无法验证这些行为。
+
+## 你需要先准备什么
+
+- 使用过其中一个套件的经验，最好是一个可正常运行的 [Basement Kit](/zh-Hans/stackkits/kits/basement-kit)。如果你是新手，请阅读[开始之前](/zh-Hans/guides/stackkits/before-you-start)。
+- 如果你想遵循该定义的预期形态，需要一台家中的主机，以及一台云主机和你所掌控的域名。
+- CLI，按上述仅工具链指南中的说明安装。
+
+## 你现在可以尝试什么
+
+1. 安装 CLI 和 Modern 定义。预期该工具会出现在你的电脑上，而服务器上不会有任何更改。
+2. 初始化并验证一个工作区。预期得到一个配置文件，以及一份关于其是否有效的报告。
+3. 生成并阅读计划。预期得到描述预期布局的文件和计划，而不是一个正在运行的系统。
+
+## 什么存放在哪里
+
+定义和生成的文件保存在你的工作区文件夹中。该定义将控制权和默认的数据权限保留在 Home。alpha 归档中的任何内容都不会自行在各位置之间移动数据。
+
+## 出现问题时
+
+- 验证或生成失败：用 `stackkit logs latest --json` 读取日志，并参见[故障排查](/zh-Hans/guides/stackkits/troubleshooting)。
+- 你现在就需要一个可用的 homelab：请使用 [Basement Kit](/zh-Hans/stackkits/kits/basement-kit) 或 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。
+- 你不确定某个结果能证明什么：仅凭生成的计划无法验证连接、访问或恢复。
 
 ## 选择入口路径
 
-对于家中已有的 Linux 主机，请选择 [Basement Kit](/zh-Hans/stackkits/kits/basement-kit)；对于带有你所掌控域名的已有云主机，请选择 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。它们的指南把配置引导和特定版本的运行时证据分开陈述。
+对于家中现有的 Linux 主机，请选择 [Basement Kit](/zh-Hans/stackkits/kits/basement-kit)；对于带有你所掌控域名的现有云主机，请选择 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。它们的指南将配置引导与特定版本的运行时证据区分开来。
 
-探索 Modern 时也请保持同样的区分：保护已有数据，并保留每个工作区的配置和运维输出。在所选版本对该行为有证据之前，不要假定应用在连接或 Cloud 故障期间仍然可用。
+探索 Modern 时也要保持同样的区分：保护现有数据，并保留每个工作区的配置和操作输出。在所选版本有证据证明该行为之前，不要假设应用在连接中断或 Cloud 故障期间仍然可用。
 
-所有入口路径参见[选择 StackKit](/zh-Hans/guides/stackkits/choosing-a-kit)，已发布应用适配器所声明的能力参见[应用交付兼容性](/zh-Hans/stackkits/reference/application-delivery-compatibility)。
+所有入口路径请参见[选择 StackKit](/zh-Hans/guides/stackkits/choosing-a-kit)，已发布应用适配器所声明的能力请参见[应用交付兼容性](/zh-Hans/stackkits/reference/application-delivery-compatibility)。

@@ -1,0 +1,76 @@
+---
+title: "Offline mit lokalen Modellen arbeiten"
+description: "Behalte deine Stimme auf deinem Computer mit dem rein lokalen Pfad"
+sidebarTitle: "Offline arbeiten"
+icon: "lock"
+---
+
+SpeechKit kann ohne Cloud-Schlüssel laufen. Auf dem lokalen Pfad wird deine
+Stimme auf deinem Computer verarbeitet. Diese Anleitung zeigt, wie du das unter
+Windows einrichtest.
+
+## Was du brauchst
+
+- Einen Windows-10- oder -11-Computer mit der installierten App. Siehe
+  [Unter Windows installieren](/de/speechkit/install-windows).
+- Eine Internetverbindung für die erste Einrichtung. Der Installer enthält die
+  lokale Sprach-Engine. Das Sprachmodell selbst wird heruntergeladen, wenn du es
+  auswählst.
+
+## Schritte
+
+<Steps>
+  <Step title="Im Setup Local wählen">
+    Wähle im Setup beim ersten Start **Local**. Es führt Dictation und Assist auf
+    diesem Gerät aus, und die Modelle liegen auf deinem Computer.
+  </Step>
+  <Step title="Ein Sprachmodell wählen">
+    Wähle ein lokales Whisper-Modell zum Herunterladen. Wenn du keins wählst,
+    startet SpeechKit mit dem kleinsten Starter-Modell. Der Download läuft im
+    Hintergrund, und du kannst weitermachen, während er abschließt.
+  </Step>
+  <Step title="Dein Mikrofon testen">
+    Das Setup kann einen kurzen lokalen Test aufnehmen. Er ist optional, und
+    nichts wird gespeichert. Der Text wird nur im Setup-Fenster angezeigt.
+  </Step>
+  <Step title="Den Datenschutzumfang festlegen">
+    Öffne **Settings > Privacy & Data**. Wähle unter **Network scope** **This
+    device only**. Dann dürfen nur Modelle verwendet werden, die SpeechKit auf
+    dem Gerät ausführt. Alles, was das Netzwerk braucht, wird pausiert, nicht
+    gelöscht.
+  </Step>
+  <Step title="Nichts aufbewahren, was du nicht brauchst">
+    Wähle **Zero retention**, wenn rohes Meeting-Material nach einem Meeting
+    entfernt werden soll. Siehe
+    [Datenschutzeinstellungen wählen](/de/speechkit/privacy-settings).
+  </Step>
+</Steps>
+
+## Gut zu wissen
+
+- Mit **This device only** sind standardmäßig sogar Modell-Downloads und
+  Update-Prüfungen blockiert. Wenn du später ein Modell herunterladen musst,
+  erweitere den Umfang für diesen Moment. Eine Einstellung namens
+  `allow_setup_traffic` in `config.toml` kann Modell- und Update-Downloads von
+  offiziellen Quellen erlauben, ohne Audio, Transkripte oder Prompts.
+- Text, den du diktierst, bleibt in deinem Verlauf auf dem Computer. Ein
+  Computer ohne Internet speichert Transkripte trotzdem, es sei denn, du wählst
+  Zero retention.
+- Assist und der Voice Agent können ebenfalls mit lokalen Modellen laufen. Ein
+  lokales Sprachmodell und lokale Sprachausgabe sind getrennte Downloads oder
+  Dienste. Prüfe den Tab **Model** jedes Modus.
+- Unter macOS funktioniert die Dictation-Beta mit der mitgelieferten lokalen
+  Engine, und Modelle werden bei Bedarf heruntergeladen.
+
+## Wenn etwas schiefgeht
+
+- **Das Modell lässt sich nicht herunterladen.** Bei einem strengen Umfang
+  werden Downloads blockiert. Erweitere den Umfang für den Download und wechsle
+  dann zurück. Prüfe auch den freien Speicherplatz.
+- **Der Modell-Download bleibt hängen.** Wiederhole den Download in den
+  Settings.
+- **Dictation meldet, dass die Engine nicht bereit ist.** Die lokale Engine
+  startet vielleicht noch, oder das Modell fehlt. Sieh unter **Needs attention**
+  in **Overview** nach.
+- **Eine Einstellung ist ausgegraut.** Sie braucht das Netzwerk. Settings zeigt,
+  warum sie deaktiviert ist.

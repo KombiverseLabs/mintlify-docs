@@ -1,0 +1,83 @@
+---
+title: "Consigue tu primera dirección de kombify.me"
+description: "Paso a paso: elige un nombre, apúntalo a tu servicio y actívalo"
+sidebarTitle: "Tu primera dirección"
+icon: "rocket"
+---
+
+Esta guía te lleva por tu primera dirección `kombify.me`, desde elegir un nombre
+hasta abrirla en un navegador.
+
+<Warning>
+kombify.me es software Alpha. Los nombres y los mensajes de error todavía pueden
+cambiar.
+</Warning>
+
+## Qué obtienes
+
+Una dirección tiene dos niveles:
+
+- Un **nombre base** para tu servidor doméstico, por ejemplo
+  `mylab-u8f3k2.kombify.me`.
+- Un **nombre de servicio** para cada app que hay en él, por ejemplo
+  `mylab-u8f3k2-grafana.kombify.me`.
+
+kombify.me construye estos nombres por ti. Tú eliges el nombre del servidor
+doméstico y el nombre de la app. kombify.me añade el resto.
+
+| Tipo de cuenta | Aspecto del nombre base |
+| --- | --- |
+| Cuenta de kombify | `{your name}-{short id}.kombify.me` |
+| Autoalojada | `sh-{your name}-{device code}.kombify.me` |
+
+Conviene saber:
+
+- Los nombres usan letras minúsculas, números y guiones, hasta 63 caracteres.
+- El nombre de una app puede tener hasta 20 caracteres.
+- Puedes tener hasta 5 nombres base y hasta 20 apps por nombre base.
+- Nombres como `auth`, `api` o `www` no se pueden usar solos. Las apps de kit
+  como `auth` siguen funcionando y se convierten en `{base}-auth.kombify.me`.
+
+## Antes de empezar
+
+- Decide qué app quieres compartir.
+- Averigua si la app es accesible desde internet. Si lo es, sigue leyendo. Si solo
+  funciona dentro de tu red doméstica, lee primero
+  [Pública o privada](/es/kombify-me/public-or-private).
+- Ten acceso a kombify.me. Las cuentas alojadas se registran mediante los flujos
+  conectados de kombify. Las instalaciones autoalojadas se registran con una
+  dirección de e-mail y reciben una clave de API. Hoy kombify.me no tiene una
+  pantalla para esto.
+
+## Pasos
+
+1. **Registra tu servidor doméstico.** Dale un nombre corto como `mylab`.
+   kombify.me responde con el nombre base completo.
+2. **Apunta el nombre base a tu servidor.** Para una app accesible desde
+   internet, usa su dirección pública `http://` o `https://`.
+3. **Añade una app.** Dale un nombre corto como `grafana` y su dirección. Los
+   flujos conectados de StackKits y Techstack pueden hacer los pasos 1 a 3 por
+   ti.
+4. **Activa la app.** Las apps nuevas están desactivadas por defecto. Activa la
+   app ("exposed") cuando quieras que la dirección acepte visitantes.
+5. **Abre la dirección.** Ve a `https://mylab-u8f3k2-grafana.kombify.me` en un
+   navegador. El HTTPS se gestiona por ti.
+
+Registrar de nuevo el mismo nombre para la misma cuenta no crea uno segundo.
+Devuelve el que ya tienes.
+
+## Si algo sale mal
+
+| Lo que ves | Qué hacer |
+| --- | --- |
+| "service subdomain not exposed" (404) | Activa la app (paso 4). |
+| "subdomain inactive" (503) | La dirección está en pausa. Vuelve a ponerla en activa. |
+| "subdomain already taken" (409) | Elige otro nombre. |
+| Error de cuota (429) | Alcanzaste 5 nombres base o 20 apps. Elimina uno que ya no uses. |
+| Error "reserved" | Elige otro nombre. |
+| 502 "Bad Gateway" | Tu servidor no respondió. Comprueba que está en marcha y es público. |
+| El registro dice que el servicio de correo no está disponible | Inténtalo más tarde. En ese caso no se crea ninguna cuenta. |
+
+Hay más comprobaciones en la [página de solución de problemas](/es/kombify-me/troubleshooting).
+Los nombres alojados `*.lan.kombify.me` no existen. Para nombres dentro de tu red
+doméstica, usa los nombres locales que configura StackKits.

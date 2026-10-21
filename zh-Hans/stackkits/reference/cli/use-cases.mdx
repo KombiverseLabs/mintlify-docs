@@ -38,9 +38,11 @@ stackkit use-cases add mail --expected-spec-hash sha256:<current-hash>
 
 列出 Kit 的可选用例，并在终端中切换选中状态。
 
-方向键或 j/k 移动光标。空格键切换高亮项。回车键确认。Files、Photos 和 Vault 默认选中（Kit L3 默认值）。
+Arrow keys or j/k move the cursor. Space toggles the highlighted item. Enter confirms. Without `--kit`, the legacy Files, Photos and Vault selection is used.
 
-`--print` 会将选中的 ID 以逗号分隔的一行写到 stdout，方便安装器把它们传给 stackkit init `--use-case`。提示信息输出到 stderr。当 stdin 不是终端时，会直接返回当前默认值而不提示。
+With `--kit` (Basement or Cloud), choices and defaults come from the embedded CUE kit catalog. Each choice shows its standard profile minimum (CPU / RAM GiB / disk GiB). The running numeric preview includes required Core and selected default alternatives. It observes this host unless `--inventory` and `--node` select another target. Data budgets, add-ons, profile changes and resident policy need a resolved plan. This preview writes no configuration and grants no Apply admission.
+
+`--print` writes the selected IDs as a comma-separated line on stdout so installers can pass them to stackkit init `--use-case`. Prompts go to stderr. When stdin is not a terminal, defaults are returned without a prompt; a kit preview is still printed to stderr. Unknown facts are shown as ?, never zero.
 
 ```bash
 stackkit use-cases pick [flags]
@@ -48,6 +50,9 @@ stackkit use-cases pick [flags]
 
 | 标志 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
+| `--inventory` | string | — | Read capacity from this Inventory instead of observing the local host; requires `--kit` and `--node` |
+| `--kit` | string | — | Preview main use cases admitted by this kit at standard profiles; observe this host by default |
+| `--node` | string | — | Explicit Inventory node for the kit capacity preview |
 | `--print` | bool | — | 将选中的用例 ID 以逗号分隔的一行写到 stdout |
 
 **示例**
@@ -58,5 +63,10 @@ stackkit use-cases pick
 
 # Print the selected IDs as one comma-separated line for stackkit init --use-case
 stackkit use-cases pick --print
-```
 
+# Preview standard footprints and capacity on this target, from its kit catalog
+stackkit use-cases pick --kit basement-kit --print
+
+# Preview one explicitly selected Inventory node
+stackkit use-cases pick --kit cloud-kit --inventory inventory.yaml --node cloud-node --print
+```

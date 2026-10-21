@@ -1,0 +1,69 @@
+---
+title: "stackkit wallet-item"
+description: "Wallet items delivered to this node's encrypted local custody"
+sidebarTitle: "wallet-item"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:ef454620ffdb9e2bc396ed1eb48af2a33a795afdec703bc2149b6c38b79ee55e"
+source_hash: "721b28cf58d148556aabcc6eec77161fc5a36f8d"
+---
+Wallet items delivered to this node's encrypted local custody.
+
+```bash
+stackkit wallet-item [flags]
+```
+
+Subcommands: [`stackkit wallet-item import`](#stackkit-wallet-item-import), [`stackkit wallet-item remove`](#stackkit-wallet-item-remove), [`stackkit wallet-item status`](#stackkit-wallet-item-status)
+
+## stackkit wallet-item import
+
+Open a sealed Wallet item delivery from stdin into encrypted local custody.
+
+Read one sealed wallet-item-import or wallet-item-rotate envelope on stdin, signed by the pinned delivering authority. The node opens it, records it as consumed, and stores the value encrypted under its local custody key, keyed by item reference and version. A rotation removes every older version. The result names the reference and version only.
+
+```bash
+stackkit wallet-item import [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Authorize storing this Wallet item |
+| `--tenant-ref` | string | — | Tenant the sealed delivery must be addressed to |
+
+**Examples**
+
+```bash
+stackkit wallet-item import --tenant-ref "$TENANT" --owner-approve < envelope.json
+```
+
+## stackkit wallet-item remove
+
+Open a sealed Wallet item removal from stdin and drop the item from local custody.
+
+Read one sealed wallet-item-remove envelope on stdin, signed by the pinned delivering authority. The node opens it, records it as consumed, and deletes every version of the item it names from local custody. A bound consumer such as the Private AI provider key fails closed on its next apply until another item is delivered. Removing an item this node does not hold succeeds and removes nothing. The result names the reference and the removed versions only.
+
+```bash
+stackkit wallet-item remove [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Authorize removing this Wallet item |
+| `--tenant-ref` | string | — | Tenant the sealed removal must be addressed to |
+
+**Examples**
+
+```bash
+stackkit wallet-item remove --tenant-ref "$TENANT" --owner-approve < envelope.json
+```
+
+## stackkit wallet-item status
+
+List Wallet items in local custody by reference and version.
+
+List every Wallet item in local custody by tenant, item reference and versions, and whether it needs rotation after a detach. No value is read.
+
+```bash
+stackkit wallet-item status [flags]
+```
+

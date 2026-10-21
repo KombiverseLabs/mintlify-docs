@@ -7,6 +7,18 @@ icon: film
 
 Jellyfin provides the [Media](/guides/stackkits/use-cases/media) use case through the `media` workload on a Standalone Compose host. Set it up after the baseline of your [Basement Kit](/stackkits/kits/basement-kit) verifies. Use `stackkit app compatibility --json` to inspect the installed release's adapter capabilities.
 
+## What it is
+
+Jellyfin is a media server for the films, music and home videos you own. It scans your files, shows them as a tidy library with covers and descriptions, and streams them to TVs, phones and computers in your home. A StackKit includes it so your household can watch its own collection without a subscription service.
+
+## Which kits and use cases include it
+
+When you choose the optional Media use case, Jellyfin is its default alternative, delivered as the `media` workload on a standalone Compose host after the baseline of your [Basement Kit](/stackkits/kits/basement-kit) verifies. Coolify and Komodo appear in the compatibility table for `media` without backup and restore.
+
+## How to open it
+
+Open the declared private Media route printed by the CLI or listed in the [Node Hub](/guides/stackkits/node-hub). The default local domain is `home.test`; the name must resolve on each device you watch on.
+
 ## Point the workload at an existing media directory
 
 To use an existing library, set `storage.mediaRoot` in the StackSpec to the media's absolute directory on the runtime host, for example `/srv/household-media`, before generating and applying the stack:
@@ -45,6 +57,14 @@ stackkit setup media --credentials-file .stackkit/setup/media-owner.json --owner
 
 The flag only finishes the startup wizard. It does not add libraries, change remote-access settings, or configure transcoding. When you add a library, follow the plan's media volume mapping — the read-only `/media` mount for an owner-custodied directory. Give household viewers separate non-administrator Jellyfin accounts and connect each player directly to the declared Media URL.
 
+## First use
+
+1. Prepare your media directory on the host and set `storage.mediaRoot` in the StackSpec.
+2. Apply the stack and run the owner setup command above.
+3. Open the Media route and sign in with the administrator account you chose.
+4. Add a library that follows the plan's volume mapping.
+5. Create separate non-administrator accounts for household viewers.
+
 ## Recovery limits
 
 Application configuration and media bytes are custodied separately:
@@ -56,6 +76,17 @@ Application configuration and media bytes are custodied separately:
 ## Test a real client
 
 Test playback of one of your own files from an intended client. Check direct play first, and transcoding only when you have explicitly configured it. Client compatibility, bandwidth, and transcoding quality are not proven by a healthy container — verify them on the devices you actually plan to watch on.
+
+## What to expect
+
+Scanning a large library takes time. A healthy container does not say anything about playback on a particular TV or phone, so test the devices you actually plan to use.
+
+## If something goes wrong
+
+- Delivery fails right away: the media directory is missing. StackKits does not create it; prepare the host storage and apply again.
+- A player cannot connect: confirm it uses the declared Media URL and that the name resolves from that device.
+- Playback stutters: check direct play first, and transcoding only if you configured it.
+- See also [Troubleshooting](/guides/stackkits/troubleshooting).
 
 ## Resume an interrupted setup
 

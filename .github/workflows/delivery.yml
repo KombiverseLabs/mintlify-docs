@@ -7,8 +7,19 @@ name: Delivery v2
 on:
   push:
     branches: [main]
+    # Bootstrap/policy maintenance and this trigger correction do not publish docs.
+    # A mixed product change still follows the existing commit Delivery route.
+    paths-ignore:
+      - AGENTS.md
+      - scripts/kombify-bootstrap.mjs
+      - scripts/lib/staff-mcp-bootstrap.mjs
+      - .github/workflows/delivery.yml
+  # Delivery-definition pull requests retain their compile-only qualification.
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - ".kombify/delivery*"
+      - ".github/workflows/delivery.yml"
   workflow_dispatch:
     inputs:
       execute:
@@ -32,7 +43,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.event_name == 'pull_request' && format('delivery-pr-{0}', github.event.pull_request.number) || format('delivery-{0}', github.run_id) }}
+  group: delivery-${{ github.event_name == 'pull_request' && format('pr-{0}-{1}', github.event.pull_request.number, (!github.event.pull_request.draft && (!github.event.pull_request.stack || github.event.pull_request.stack.position == github.event.pull_request.stack.size)) && 'active' || 'inactive') || github.event_name == 'merge_group' && format('merge-group-{0}', github.event.merge_group.head_sha) || format('{0}-{1}', github.event_name, github.run_id) }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:

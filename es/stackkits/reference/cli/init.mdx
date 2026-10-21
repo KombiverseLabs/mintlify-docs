@@ -7,7 +7,7 @@ Inicializa un nuevo despliegue a partir de un StackKit.
 
 Crea un stack-spec.yaml en tu directorio de despliegue. Esto guarda tus elecciones; no instala servicios ni cambia el host. La ruta local independiente funciona sin una cuenta de kombify ni Techstack.
 
-Empieza con los valores predeterminados del catálogo del Kit seleccionado. `--owner-source=local` mantiene al propietario en esta máquina y necesita `--owner-email` para el propietario local de PocketID. Cloud Kit usa una dirección kombify.me, salvo que `--domain` indique un dominio que ya apunte a este host.
+Start with the selected Kit's catalog defaults. `--owner-source=local` keeps the owner on this machine and needs `--owner-email` for the local PocketID owner. Cloud Kit local ownership requires `--domain` with your own domain or an allocated &lt;zone&gt;.kombify.me install zone. The shared kombify.me parent cannot isolate this installation's login cookies. DNS may be configured after init.
 
 Revisa la configuración guardada antes de generarla o aplicarla. Los valores predeterminados se registran como intención explícita y los valida el contrato CUE del Kit. La información necesaria, como un dominio, se solicita cuando el Kit la necesita. Usa `--non-interactive` en scripts para que falle en lugar de preguntar.
 
@@ -29,6 +29,7 @@ stackkit init [stackkit] [flags]
 | `--cloud-oidc-issuer` | string | — | Solo compatibilidad v0.6: URL del emisor OIDC de Cloud para el traspaso automático/cloud del propietario |
 | `--cluster-mode` | string | `first` | Solo compatibilidad v0.6: modo de clúster (first\|join) |
 | `--compute-tier` | string | — | Solo v2alpha1 heredado: grafo de kit declarado (low, standard, high) |
+| `--data-capacity` | stringArray | — | Native v2alpha2: binding=JSON with explicit initialGiB, growthGiBPerMonth, horizonMonths and reservePercent; repeat per selected data binding |
 | `--domain` | string | — | Sobrescribe el dominio de la stack spec generada |
 | `--enable` | strings | — | Solo v2 nativo: capacidades opcionales del kit que se habilitan (capabilities.enable, p. ej. lan-dns,internal-pki) |
 | `--expected-spec-hash` | string | — | Solo v2 nativo: hash exacto y actual de la spec normalizada por CUE que se exige para el reemplazo |
@@ -42,6 +43,8 @@ stackkit init [stackkit] [flags]
 | `--module-storage-profile` | stringArray | — | v2alpha2 nativo: module-id=storage-profile para una dimensión de almacenamiento declarada |
 | `--name` | string | — | ID del contrato de despliegue (por defecto, un nombre normalizado del directorio de trabajo) |
 | `--non-interactive` | bool | — | Ejecuta en modo no interactivo (falla si se requiere entrada) |
+| `--notify-ntfy-server` | string | — | ntfy server URL for `--notify-ntfy-topic` (default https://ntfy.sh) |
+| `--notify-ntfy-topic` | string | — | Declare an ntfy owner notification channel (spec.notifications); interactive init asks when omitted |
 | `--output, -o` | string | `deploy` | Solo compatibilidad v0.6: directorio de salida de los archivos generados |
 | `--owner-bootstrap-mode` | string | — | Solo compatibilidad v0.6: modo de bootstrap del propietario (auto\|custom\|none) |
 | `--owner-display-name` | string | — | Nombre visible deseado del propietario de PocketID para `--owner-source=local` |
@@ -67,9 +70,9 @@ stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email
 # Basement Kit with the optional Photos and Files use cases
 stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com --use-case photos,files
 
-# Cloud Kit for a public VPS on a kombify.me address
+# Cloud Kit for a public VPS with an allocated kombify.me install zone
 mkdir my-cloud && cd my-cloud
-stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email you@example.com
+stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email you@example.com --domain your-zone.kombify.me
 
 # Cloud Kit on your own domain, without prompts (for scripts)
 stackkit init cloud-kit --catalog-defaults --owner-source=local --owner-email you@example.com --domain example.com --non-interactive

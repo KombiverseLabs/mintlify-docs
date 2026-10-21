@@ -1,0 +1,111 @@
+---
+title: "Guard architecture and operation truth"
+description: "How server identity, durable operations and bounded execution preserve an explainable outcome"
+sidebarTitle: "Architecture"
+icon: "diagram-project"
+mode: "explanation"
+---
+
+Guard separates four questions: **which server is connected, who may request a
+change, which executor owns the effect, and what evidence shows its outcome**.
+Keeping them separate matters when a server restarts, a connection drops or a
+client retries a request.
+
+This is an architecture explanation. The
+[published reference](/techstack/reference/cli/overview) identifies its release;
+the installed version and qualified transport determine available behavior.
+[Availability](/techstack/availability) describes the public and preview scope.
+
+## Identity is not permission
+
+Enrollment binds a server to its intended Techstack installation. Guard's
+host-key design makes that binding depend on a key generated on the server,
+instead of treating a copied bearer credential as sufficient host identity.
+Server identity, the application owner and a user's sign-in are different facts.
+
+The published [worker reference](/techstack/reference/cli/workers) exposes
+identity inspection and upgrade operations. A legacy bearer-only binding is
+observe-only until the proposed host key is approved through the documented
+owner flow. Listing a key or discovering a server grants no additional rights.
+
+Even an authenticated Guard must receive an operation admitted for the correct
+resource, capability and server generation. A replacement server must not
+inherit permission to replay an old server's commands.
+
+## One request, one durable operation identity
+
+The durable HTTPS command profile is designed around this sequence:
+
+<Steps>
+  <Step title="Admit the operation">
+    Techstack admits a command bound to the intended target and payload.
+  </Step>
+  <Step title="Preserve intent before the effect">
+    Guard records the intent durably and checks the server generation.
+  </Step>
+  <Step title="Execute through the owner">
+    The owning executor performs the typed operation and returns its result
+    and verification evidence.
+  </Step>
+  <Step title="Preserve the outcome before delivery">
+    Guard records the outcome, then delivers the original result to Techstack.
+  </Step>
+  <Step title="Acknowledge the same result">
+    Techstack durably acknowledges that exact command and result identity.
+  </Step>
+</Steps>
+
+The intent binds the command identity, target generation and payload digest
+before a side effect. The local journal preserves an outcome before delivery.
+A retry can redeliver the original result without authorizing another execution.
+Fencing prevents an obsolete process or generation from continuing a mutation.
+
+| Interruption | Required interpretation |
+| --- | --- |
+| Before durable intent | The operation has not been admitted for execution |
+| After the outcome is recorded and before result delivery | Recover the recorded result and deliver it under the original identity |
+| After the effect but before its outcome can be recorded | The outcome is unknown until observation settles it |
+| After delivery and before acknowledgement | Redeliver the same result; delivery uncertainty does not grant another effect |
+
+This is not a generic exactly-once guarantee. If the system cannot determine
+whether an effect happened, guessing success or blindly repeating it can both
+damage the server.
+
+## Uncertainty stays visible
+
+The released [worker operations](/techstack/reference/cli/workers) describe
+unresolved outcomes and their reconciliation. An unresolved outcome fences
+further changes. A timeout can change how the issue is presented to an operator;
+it does not itself release the fence.
+
+An authorized resolution records whether the effect was verified as applied,
+verified as absent, or explicitly accepted as still unknown. It includes the
+actor and a revision check. Accepting uncertainty permits progress but does not
+retroactively turn an unknown operation into a successful one.
+
+## Bounded execution and privilege
+
+Guard supervises typed operations through the executor that owns them.
+StackKits owns the host baseline and application lifecycle. Techstack owns
+provider operations and coordination. Guard does not create a second lifecycle
+or use a general remote shell as a substitute for those contracts.
+
+The Linux privilege-split design runs the Guard daemon unprivileged and delegates
+admitted privileged effects to a restricted executor. That executor remains a
+sensitive boundary: permitted operations can materially change the host.
+Privilege isolation depends on the supported operating-system profile and its
+qualification, rather than applying automatically to every installation.
+
+## Transport security and operation reliability are separate
+
+HTTPS polling and gRPC/mTLS are distinct transport profiles. Encryption and a
+valid certificate do not by themselves prove journal durability, generation
+fencing or binding to the host key. The gRPC/mTLS profile is not qualified for
+the durable HTTPS profile's full Guard guarantees.
+
+Similarly, a heartbeat establishes recent contact. It does not prove that an
+authenticated command and its result completed a round trip, that the baseline
+is current or that an application is recoverable.
+
+Read [protection and recovery evidence](/techstack/guard/protection-and-recovery)
+for how these operation guarantees relate to the state of your services.

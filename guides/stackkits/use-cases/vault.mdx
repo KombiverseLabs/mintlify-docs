@@ -6,7 +6,7 @@ icon: vault
 ---
 
 <Info>
-  Evidence state (2026-09-24, v0.39.7): Passwords with Vaultwarden is
+  Historical evidence (2026-09-24, v0.39.7): Passwords with Vaultwarden was
   `available, lifecycle-verified`. A lifecycle run on Ubuntu 24.04 amd64
   (Basement Kit, standalone) passed install, init, generate, apply,
   setup-vault, verify, backup, isolated restore and restore activation. The
@@ -27,7 +27,43 @@ yet.
 
 See the [Passwords](/guides/stackkits/use-cases/passwords) page and the
 [Vaultwarden](/stackkits/apps/vaultwarden) application page to select and set
-up the current, lifecycle-verified experience.
+up the released password-vault experience.
+
+## Install the password vault
+
+This recipe covers the released Vaultwarden alternative in an existing,
+verified standalone Basement or Cloud workspace. It does not install any of
+the planned extensions below. The current [application recovery evidence](/stackkits/apps/vaultwarden#what-is-backed-up)
+is more limited than the historical v0.39.7 result above.
+
+1. In the existing `stack-spec.yaml`, select `vault` in `workloads`, with
+   `alternative: vaultwarden` and `runtimeAdapterRef: standalone-compose`.
+   Set its `secretRefs.admin-token` to the opaque reference
+   `secret://workloads/vault/admin-token`.
+   Keep the site's existing storage and placement. Follow the selection
+   structure in [Configure a StackSpec](/guides/stackkits/configure-stack-spec).
+2. Validate the selection and establish custody for its `admin-token`
+   reference before generating. The released
+   [`stackkit secrets materialize`](/stackkits/reference/cli/secrets) creates
+   or reuses the local owner-bound secret without printing it. Run
+   `stackkit validate`, then `stackkit secrets materialize`, then
+   `stackkit generate` and `stackkit plan --json` in that order.
+
+   Stop on a validation, custody or readiness error. Never put the token in
+   the StackSpec or replace invalid or foreign custody to make a plan pass.
+3. Review the plan's `vault` placement and persistent data, then run
+   `stackkit apply` followed by `stackkit verify --http --json`.
+
+4. Open the generated Passwords address and complete
+   [Vaultwarden first use](/stackkits/apps/vaultwarden#first-use). Set the
+   registration policy, invite one person, then use an official Bitwarden
+   client to register, sign in, create and sync one test entry. An invitation
+   alone is not a working vault.
+
+Keep recovery material outside the server. Follow
+[Back up and restore](/guides/stackkits/back-up-and-restore) and verify client
+sign-in and entry sync after recovery before relying on the vault for secrets
+you cannot recreate.
 
 ## Planned extensions
 

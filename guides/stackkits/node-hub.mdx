@@ -7,6 +7,17 @@ icon: grid-2
 
 The StackKits Node Hub is the generated local service overview. After a successful rollout, open the `base.<domain>` address printed by the CLI or shown in the verified output.
 
+## In plain words
+
+The Node Hub is a start page for your own homelab. After setup, it lists the services you chose, each with a link that opens it. Think of it as the front door of your homelab: you open it to find your services and to finish protecting them. It only lists what your configuration selected, so a service you did not choose does not appear.
+
+## What you need first
+
+- A finished setup. If you have not done it yet, follow the [Quickstart](/stackkits/quickstart) and read [Before you start](/guides/stackkits/before-you-start).
+- The `base.<domain>` address that the setup printed. With the default local domain this is `base.home.test`.
+- A phone or computer on your home network that can resolve that name (see [Day to day](/guides/stackkits/daily-use)).
+- The access details in `.stackkit/access.json` in your workspace folder. Keep them private.
+
 ## What to check
 
 - The page identifies the current StackKits workspace.
@@ -24,6 +35,25 @@ If the Node Hub does not open, compare its expected `base.<domain>` address with
 5. Use the Hub's protection action only after the owner can authenticate.
 6. Configure the local backup repository and practice a restore with [Back up and restore](/guides/stackkits/back-up-and-restore).
 
+After each step you should see the following:
+
+- After step 1, the CLI reports a verified rollout and prints the Hub address.
+- After step 2, the Hub page opens in your browser and shows your workspace and the services you selected.
+- After step 3, you can sign in as the local owner through PocketID.
+- After step 4, opening a protected service asks you to sign in first.
+- After step 6, you have a backup and know that a restore works.
+
 The Hub reviews state and approved operations. It is not a component installer, provider console, or replacement for StackSpec validation.
+
+## What is stored where
+
+Everything stays on the computer that runs your homelab. The owner identity lives in PocketID there, and the access details for your setup are in `.stackkit/access.json` in your workspace folder. Your configuration (the StackSpec) is also in that folder. The Hub itself is generated from that configuration, which is why you change the StackSpec and not the Hub. Backups are separate from this data, so check where your backup repository is kept. See [Back up and restore](/guides/stackkits/back-up-and-restore).
+
+## If something goes wrong
+
+- The Hub address does not open: use the checks above, then see [Troubleshooting](/guides/stackkits/troubleshooting).
+- You cannot sign in: use the account the owner created in PocketID, not a kombify Cloud account.
+- A service is missing from the list: it was not selected in the validated configuration. Change the StackSpec and regenerate.
+- Never paste the contents of `.stackkit/access.json` into a chat, an issue or an e-mail.
 
 [Platform services](/stackkits/apps/overview) explains the services behind the Hub. [Use cases](/guides/stackkits/use-cases/overview) lists the workloads you can add.

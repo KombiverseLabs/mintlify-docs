@@ -1,90 +1,71 @@
 ---
 title: mintlify-docs Status
-last_verified: 2026-09-17
+last_verified: 2026-10-21
 maturity: alpha
 ---
 
 # mintlify-docs Status
 
-## Public Surface
+Cloud, AI Guide and Workbench, and Companion are published as the Apps tab
+(`apps/`) in all six locales.
 
-- StackKits use cases, OS compatibility, and application delivery now have
-  dedicated public pages plus a strict release-manifest consumer. The consumer
-  accepts only published release assets with matching schema, tag, private and
-  public source SHAs, canonical digests, and public release URL; it rejects
-  internal gate fields and positive OS rows without public receipt evidence.
-  A repository-dispatch and weekly reconciliation opens a generated-only PR,
-  while a release without both assets remains visibly `DocsSyncPending`.
+## Public surface
 
-- Mintlify site configured from this repository and published at
-  `docs.kombify.io`.
-- Six allowed navigation tabs: Start, StackKits, Techstack, SpeechKit,
-  Identity & Access, and Changelog.
-- StackKits content is limited to capabilities verified against the current
-  public StackKits release.
-- The navigation contains 101 pages: 85 in the StackKits tab (41 of them the
-  generated CLI reference), seven in Techstack, six in SpeechKit, and one each
-  for Start, Identity & Access, and Changelog.
-- Techstack documents the current product and operating boundary but makes no
-  public installer, public source, or general-availability claim.
-- SpeechKit documentation describes the current public release through a
-  generated release block and `releases/latest` download links.
-- The StackKits tab groups Get started, Use cases, Guides, Platform services,
-  and Reference. Six use-case guides (Photos, Files, Passwords, Media,
-  Personal AI, Development) each nest the applications that provide them; the
-  CLI reference sits under Reference.
-- Identity is a single concise concept page; it does not expose internal
-  architecture or security runbooks.
+- Published at `docs.kombify.io` from this repository via Mintlify.
+- Seven tabs (the `docs.json` navigation is the page inventory): Start,
+  StackKits (largest; CLI reference generated), Techstack, SpeechKit, Apps,
+  Identity & Access, Changelog.
+- StackKits: Get started, six use-case guides (Photos, Files, Passwords, Media,
+  Personal AI, Development) each nesting the applications that provide them,
+  Guides, Platform services, Reference. Use-case, OS-compatibility and
+  application-delivery pages come from a strict release-manifest consumer
+  (published release assets only, matching schema, tag, source SHAs, digests and
+  release URL; internal gate fields and positive OS rows without public receipt
+  evidence are rejected). A repository dispatch and a weekly reconciliation open a
+  generated-only PR; a release missing either asset shows `DocsSyncPending`.
+- Techstack: product and operating boundary including the public, unsigned
+  Windows Alpha (`techstack/install-windows`, `techstack/availability`); no
+  general-availability claim.
+- SpeechKit: generated release block and `releases/latest` download links.
+- Identity: one concise concept page, no internal architecture or runbooks.
 - No dependency on the retired legacy documentation repository.
 
-## Safety And Delivery
+## Safety and delivery
 
-- `public-safety-policy.json` is a positive page-scope allowlist.
-- Every MDX page must be both in the approved scope and in `docs.json`.
+- `public-safety-policy.json` is a positive page-scope allowlist; every MDX
+  page must be in the approved scope and in `docs.json`.
 - Simulate-as-product, Proxmox, excluded products, internal paths, secret
-  material, and restricted-content markers fail closed.
-- Local E2E uses pinned Mintlify `4.2.684` and verifies all 47 public pages plus
-  every forbidden route through real HTTP.
-- Remote safety checks verify removed direct routes, `llms.txt`, and sitemap
-  projections after deployment.
-- A focused release-truth gate pins the singular `stackkit.cc` website,
-  installer endpoints, exact v0.16.0 commands, local-domain wording, and the
-  boundary that one-line installers never perform Apply. A bounded external
-  link gate checks the website, installer, and immutable release destinations.
-- Every public page is checked for example relevance. Executable and structured
-  blocks are limited to pages with a topic-specific workflow or configuration;
-  component and concept pages use prose when no supported example explains the
-  topic.
+  material and restricted-content markers fail closed.
+- Local E2E (pinned Mintlify `4.2.684`) checks every navigation page and every
+  forbidden route over real HTTP; remote checks verify removed direct routes,
+  `llms.txt` and sitemap projections after deployment.
+- Release-truth gate: the `stackkit.cc` website, installer endpoints, commands
+  bound to the synced release snapshot, local-domain wording, and one-line
+  installers never perform Apply; a bounded external-link gate covers website,
+  installer and immutable release destinations.
+- Example relevance: executable and structured blocks only on pages with a
+  topic-specific workflow or configuration.
 - Promotion waits for a successful Mintlify deployment bound to the exact full
-  source commit before the live smoke can satisfy delivery.
+  source commit before the live smoke counts.
 
-## Verified Dependencies
+## Verified dependencies
 
-| Dependency | Verified State |
+| Dependency | State |
 | --- | --- |
-| StackKits | Public release `v0.16.0`, commit `22705dd4bbee9caaa7601bffb4769a7c40314490`. |
-| Techstack | Preview product source `9e5c30e699a482d149d89f9a3383db6718a9e360`; public distribution unavailable. |
-| SpeechKit | Public release `v0.52.14`, commit `46ed2b0580fb7ff412c7b88db96401973a4c7a2e`. |
-| Mintlify CLI | Pinned `mint@4.2.684` through `mise`. |
-| Node | Version 24 through `mise`. |
-| Hosting | Mintlify at `docs.kombify.io`. |
-| Analytics | PostHog through `e.kombify.io`; session recording disabled. |
+| StackKits | Docs snapshot `v0.54.3` (`data/stackkits/latest.json`); newer releases arrive through the generated-only sync PR. |
+| Techstack | Public unsigned Windows Alpha; API and CLI reference synced from release `v0.41.15`; `techstack/availability` names the current release. |
+| SpeechKit | Docs snapshot `v0.77.7` (`data/speechkit/latest.json`). |
+| Mintlify CLI / Node | `mint@4.2.684` / Node 24 through `mise`. |
+| Hosting / analytics | Mintlify at `docs.kombify.io`; repository configuration disables telemetry and page-feedback collection. PostHog and PostHog session recording are not configured. Anonymous hosted verification on 2026-10-21 observed telemetry disabled in the delivered configuration, no PostHog integration or analytics storage, and no session recording on the sampled security/privacy page. This is bounded runtime evidence, not a full privacy or accessibility certification. |
 
-## Known Issues
+## Known issues
 
-- Cloud Kit is present in the release, but its public v0.16.0 live-runtime
-  evidence is pending; the docs make no production-readiness claim.
-- Photos and Vault workload contracts validate and generate, but v0.16.0 has no
-  safe public post-init command for adding their required owner-bound secret
-  custody. Their pages remain descriptive rather than installation recipes.
-- Techstack has no supported public installer or anonymous source distribution;
-  its pages remain preview guidance until official artifacts exist.
-- Additional product documentation remains excluded until an explicit public
-  decision and evidence-backed content audit expands the allowlist.
+- The Techstack Windows installer is an unsigned Alpha (SmartScreen warning;
+  verify the published checksums).
+- Additional products stay excluded until an explicit public decision and an
+  evidence-backed content audit expand the allowlist.
 
 ## Verification
 
-- `mise run check` validates policy, navigation, content, and local links.
-- `mise run public-safety:test` proves representative forbidden content fails.
-- `mise run local:e2e` exercises the local Mintlify runtime.
-- `mise run remote:public-safety` exercises the deployed anonymous surface.
+`mise run check` (policy, navigation, content, links), `mise run local:e2e` (local
+Mintlify runtime), `mise run remote:public-safety` (deployed surface).

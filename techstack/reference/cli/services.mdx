@@ -4,11 +4,11 @@ description: "Generated reference for the techstack api services commands"
 sidebarTitle: "services"
 generated: true
 generated_by: "render-api-surface-reference"
-release: "v0.39.0"
-content_hash: "sha256:bf842a128153ff0edff706c0f43c62e0ebfa29a7c220fdb34bbb9f5578fcb3a7"
-source_hash: "49677b729cb9818d81aa9e3aa3acabe9a65d84eb"
+release: "v0.41.15"
+content_hash: "sha256:58866d0be6395935e0c83f5a61a255add2bc059fb4c73e005fc356b5edf04bae"
+source_hash: "b5b268760b34ada8a17c3c2f06ee031f242ec22e"
 ---
-<Note>Generated from the Techstack v0.39.0 release (source `49677b729cb9`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+<Note>Generated from the Techstack v0.41.15 release (source `b5b268760b34`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
 
 ## techstack api services execute-application-adoption
 
@@ -247,3 +247,24 @@ techstack api services setup-application-connector [flags]
 | `--lifespan-days` | integer | **Required.** |
 | `--owner-approved` | boolean | **Required.** One of `true`. |
 | `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api services verify-application-connector
+
+Refresh the current node-owned connector through a distinct read-only job.
+
+Retains the original signed setup operation and exact receipt, requires current published catalog and positive backend node/resource authority, and never reissues setup. Ordinary authenticated inventory reconciliation uses the same consumer for stale projections. Current v0.51.8 remains nondispatchable SourcePreview.
+
+```bash
+techstack api services verify-application-connector [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/connector/verify` |
+| Changes state | No |
+| MCP tool | `verify_application_connector` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+| `--body` | json | **Required.** JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |

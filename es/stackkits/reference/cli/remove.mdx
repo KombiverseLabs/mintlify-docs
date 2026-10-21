@@ -7,7 +7,7 @@ Desinstala el despliegue local de StackKits.
 
 Desinstala el runtime de StackKits en esta máquina.
 
-Sin `--workload`, es la desinstalación del producto: detiene y elimina cada proyecto Compose llamado stackkit-\* (núcleo de Basement, núcleo de Cloud y casos de uso seleccionados), incluidas sus redes y volúmenes. Busca en el directorio actual y después en ~/my-homelab o ~/my-cloud-homelab.
+Sin `--workload`, es la desinstalación del producto: detiene y elimina cada proyecto Compose llamado stackkit-\* (núcleo de Basement, núcleo de Cloud y casos de uso seleccionados), incluidas sus redes, y conserva los volúmenes de datos con nombre. Añade `--delete-data` para eliminarlos de forma intencionada. `--purge` además elimina el estado del workspace seleccionado, su directorio de despliegue y las imágenes en caché. Busca en el directorio actual y después en ~/my-homelab o ~/my-cloud-homelab.
 
 `--workload` elimina un workload exacto de Architecture v2 a través de su propietario de runtime aplicado. Esa vía conserva los volúmenes de la aplicación salvo que se establezca `--delete-data`.
 
@@ -19,15 +19,15 @@ stackkit remove [flags]
 | --- | --- | --- | --- |
 | `--artifact-manifest` | string | — | Manifiesto de generación de Architecture v2 |
 | `--auto-approve` | bool | — | Omite la aprobación interactiva |
-| `--delete-data` | bool | — | Elimina los volúmenes con nombre propiedad de este workload aplicado exacto (por defecto se conservan los datos de la aplicación) |
-| `--force` | bool | — | Fuerza la eliminación incluso con errores |
+| `--delete-data` | bool | — | Elimina los volúmenes con nombre del ámbito de eliminación seleccionado (por defecto se conservan los datos de la aplicación) |
+| `--force` | bool | — | Opción de compatibilidad heredada; una eliminación incompleta sigue fallando y conserva el estado de recuperación |
 | `--generation-receipt` | string | — | Recibo de generación de Architecture v2 |
 | `--inventory` | string | — | Inventory observado de Architecture v2 (si no, se selecciona un archivo de inventario convencional) |
 | `--json` | bool | — | Emite como JSON el resultado canónico de eliminación de Architecture v2 |
 | `--local-execution-channel` | string | — | Canal de ejecución aplicado exacto propiedad de este proceso de eliminación |
 | `--local-node` | string | — | Ubicación exacta de nodo aplicada, propiedad de este proceso de eliminación |
 | `--local-site` | string | — | Ubicación exacta de Site aplicada, propiedad de este proceso de eliminación |
-| `--purge` | bool | — | Elimina todos los datos de StackKit, incluidas imágenes, estado y el directorio de despliegue |
+| `--purge` | bool | — | Elimina los volúmenes con nombre del runtime, el estado y el directorio de despliegue del workspace seleccionado, y las imágenes de StackKit en caché |
 | `--resolved-plan` | string | — | ResolvedPlan canónico de Architecture v2 |
 | `--terminal-evidence-json` | bool | — | Emite como JSON la evidencia terminal canónica y acotada de Architecture v2 |
 | `--workload` | string | — | Referencia exacta del workload del ResolvedPlan de Architecture v2 que se elimina |
@@ -40,6 +40,9 @@ stackkit remove
 
 # Uninstall without the confirmation prompt
 stackkit remove --auto-approve
+
+# Uninstall the local deployment and intentionally delete its named volumes
+stackkit remove --delete-data --auto-approve
 
 # Remove only the Files workload and keep its data volumes
 stackkit remove --workload files

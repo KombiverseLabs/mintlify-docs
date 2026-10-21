@@ -31,7 +31,7 @@ stackkit setup photos --owner-approve --complete-onboarding
 # Create the Files owner from a workspace-relative credentials file of your choice
 stackkit setup files --owner-approve --credentials-file private/files-owner.json
 ```
-الأوامر الفرعية: [`stackkit setup ai-connect`](#stackkit-setup-ai-connect)
+الأوامر الفرعية: [`stackkit setup ai-connect`](#stackkit-setup-ai-connect)، [`stackkit setup ai-provider`](#stackkit-setup-ai-provider)، [`stackkit setup connector`](#stackkit-setup-connector)
 
 ## stackkit setup ai-connect
 
@@ -63,3 +63,50 @@ stackkit setup ai-connect --token-file ~/kombify-connector-token
 # Turn the connector off and remove its token
 stackkit setup ai-connect --disable
 ```
+
+## stackkit setup ai-provider
+
+قدّم مزوّدًا خارجيًا متوافقًا مع OpenAI في Private AI بمفتاح من kombify Wallet الخاص بك.
+
+دع Open WebUI في حالة استخدام Private AI يستخدم مزوّد استدلال خارجيًا متوافقًا مع OpenAI (مثل OpenAI أو Mistral أو Groq أو OpenRouter) إلى جانب Ollama الخاص بالعقدة. لا يمر مفتاح API الخاص بالمزوّد عبر هذا الأمر ولا StackSpec ولا الحزمة المُنشأة: احتفظ به كبيانات اعتماد AI في kombify Wallet، واسمح لهذه العقدة على العنصر، وسلّمه مختومًا إلى هذه العقدة عبر "stackkit wallet-item import". يربط هذا الأمر مفتاح المزوّد بذلك العنصر المسلَّم ويضبط عنوان https الأساسي للمزوّد. ثم يقرأ كل apply أحدث إصدار مسلَّم، فيسري التدوير في Wallet بعد "stackkit wallet-item import" للعنصر المدوَّر وapply التالي. يفشل apply بإغلاق آمن إذا لم يكن العنصر في عهدة هذه العقدة.
+
+يزيل `--disable` المزوّد من Open WebUI والربط من العهدة المحلية. يبقى العنصر المسلَّم في عهدة عناصر Wallet للعقدة.
+
+```bash
+stackkit setup ai-provider [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--base-url` | string | — | عنوان https الأساسي لواجهة API الخاصة بالمزوّد المتوافق مع OpenAI |
+| `--disable` | bool | — | أزل المزوّد الخارجي وربط مفتاحه |
+| `--json` | bool | — | أخرج نتيجة stackkit.command-result/v1 الخالية من الأسرار |
+| `--tenant-ref` | string | — | المستأجر (tenant) الذي سُلِّم عنصر Wallet تحته |
+| `--wallet-item` | string | — | مرجع عنصر Wallet لمفتاح المزوّد المسلَّم |
+
+**أمثلة**
+
+```bash
+# Bind the provider key delivered as Wallet item itm_... and set the provider
+stackkit setup ai-provider --base-url https://api.openai.com/v1 --tenant-ref "$TENANT" --wallet-item itm_abc...
+
+# Remove the provider
+stackkit setup ai-provider --disable
+```
+
+## stackkit setup connector
+
+أصدر موصل Home Assistant المحلي بعينه أو أبطله أو تحقق منه.
+
+```bash
+stackkit setup connector [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--json` | bool | — | أخرج بايتات الإيصال الموقّع الدقيق والمصدّق والحقائق المحلية الحالية |
+| `--operation-id` | string | — | معرّف عملية إعداد الموصل الثابت بعينه |
+| `--owner-approve` | bool | — | وافق على طلب ensure أو revoke الدقيق لهذا الموصل |
+| `--request-file` | string | — | JSON طلب الموصل الخاص المقتصر على البيانات الوصفية نسبةً إلى مساحة العمل؛ لا يحتوي بيانات اعتماد أبدًا |
+| `--verify-only` | bool | — | اقرأ إيصالًا محتفظًا به وتحقق منه مقابل الربط المحلي الحالي دون إصدار أو إبطال |
+| `--workload` | string | — | حمل العمل المحلي بعينه؛ لا يُقبل إلا smart-home |

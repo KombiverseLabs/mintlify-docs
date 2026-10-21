@@ -1,10 +1,39 @@
 ---
 title: "Dozzle"
-description: "Usa el visor de logs de contenedores opcional de StackKits"
+description: "Usa el visor de registros de contenedores opcional de StackKits"
 sidebarTitle: "Dozzle"
 icon: list
 ---
 
-Dozzle es un contrato de módulo publicado para ver los logs de los contenedores. La StackSpec v2 nativa inicial no expone una selección pública actual de Dozzle, así que la presencia en el archivo no es una receta de instalación.
+Dozzle es un contrato de módulo publicado para ver los registros de los contenedores. La StackSpec v2 nativa inicial no expone una selección pública actual de Dozzle, así que la presencia en el archivo no es una receta de instalación.
 
-Si una futura StackSpec publicada lo selecciona, usa Dozzle para inspeccionar rápidamente un contenedor concreto. No sustituye la verificación de StackKits ni la evidencia duradera, y no debe usarse para cambiar contenedores gestionados por StackKits.
+## Qué es
+
+Cada servicio de tu servidor se ejecuta en un contenedor, y cada contenedor escribe un registro continuo de lo que hace. Dozzle muestra esos registros en vivo en una página web. Un StackKit puede ofrecerlo para que puedas ver lo que acaba de informar un servicio sin usar la línea de comandos.
+
+## Qué kits lo incluyen
+
+El catálogo marca Dozzle como opcional. Ningún kit lo incluye por defecto, y la StackSpec v2 nativa inicial no tiene una selección para él.
+
+## Cómo se abre
+
+Si una futura StackSpec publicada lo selecciona, el catálogo da el patrón `https://logs.<domain>`, por ejemplo `https://logs.home.test` con el dominio por defecto. Copia la dirección generada de la salida del despliegue o del [Node Hub](/es/guides/stackkits/node-hub).
+
+## Primer uso
+
+1. Abre la dirección generada.
+2. Inicia sesión si la ruta lo pide.
+3. Elige el contenedor que te interesa.
+4. Lee las líneas más recientes y cierra la página.
+
+## Qué esperar y qué no cambiar
+
+- Espera una vista de texto de registros. El catálogo hace que Dozzle acceda a la API de Docker mediante un proxy de socket, sin montar directamente el socket de Docker.
+- Si una futura StackSpec publicada lo selecciona, usa Dozzle para inspeccionar rápidamente un contenedor concreto. No sustituye la verificación de StackKits ni las evidencias duraderas, y no debe usarse para modificar contenedores gestionados por StackKits.
+- No copies a lugares públicos texto de registros que contenga secretos o datos personales.
+
+## Si algo sale mal
+
+- La dirección no se abre: compárala con la dirección generada y comprueba que el nombre se resuelve en tu dispositivo. Consulta [Solución de problemas](/es/guides/stackkits/troubleshooting).
+- El servicio no aparece en la lista: tu StackSpec no lo selecciona.
+- Para ver el estado de toda la pila, ejecuta `stackkit verify --json` y consulta [Supervisar la pila](/es/stackkits/reference/day-2-operations#monitor-the-stack).

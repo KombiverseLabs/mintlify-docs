@@ -30,7 +30,7 @@ stackkit user list
 stackkit user remove alex --owner-approve
 ```
 
-Subcomandos: [`stackkit user activate`](#stackkit-user-activate), [`stackkit user add`](#stackkit-user-add), [`stackkit user files`](#stackkit-user-files), [`stackkit user list`](#stackkit-user-list), [`stackkit user owner`](#stackkit-user-owner), [`stackkit user remove`](#stackkit-user-remove)
+Subcommands: [`stackkit user activate`](#stackkit-user-activate), [`stackkit user add`](#stackkit-user-add), [`stackkit user apps`](#stackkit-user-apps), [`stackkit user files`](#stackkit-user-files), [`stackkit user list`](#stackkit-user-list), [`stackkit user owner`](#stackkit-user-owner), [`stackkit user remove`](#stackkit-user-remove)
 
 ## stackkit user activate
 
@@ -60,6 +60,7 @@ stackkit user add <username> [flags]
 
 | Flag | Tipo | Predeterminado | Descripción |
 | --- | --- | --- | --- |
+| `--app` | stringArray | — | Node app this member may sign into (repeatable); without it the member can use every app |
 | `--display-name` | string | — | Nombre visible opcional |
 | `--email` | string | — | **Obligatorio.** Correo del miembro del hogar |
 | `--owner-approve` | bool | — | Aprueba explícitamente la creación de este usuario del hogar |
@@ -78,6 +79,37 @@ stackkit user add alex --email alex@example.com --owner-approve
 
 # Set a display name and return the invitation as JSON
 stackkit user add sam --email sam@example.com --display-name "Sam Doe" --owner-approve --json
+```
+
+## stackkit user apps
+
+Set which node apps a household user may sign into.
+
+```bash
+stackkit user apps <username> [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--all` | bool | — | Allow every app |
+| `--app` | stringArray | — | App the member may sign into (repeatable) |
+| `--none` | bool | — | Allow no app |
+| `--owner-approve` | bool | — | Explicitly approve changing this member's apps |
+
+Inherited from `stackkit user`:
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
+
+**Examples**
+
+```bash
+# Allow Photos and Files only
+stackkit user apps alex --app photos --app files --owner-approve
+
+# Allow every app again
+stackkit user apps alex --all --owner-approve
 ```
 
 ## stackkit user files
@@ -174,7 +206,7 @@ Heredado de `stackkit user`:
 | --- | --- | --- | --- |
 | `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
 
-Subcomandos: [`stackkit user owner activate`](#stackkit-user-owner-activate), [`stackkit user owner migrate-domain`](#stackkit-user-owner-migrate-domain), [`stackkit user owner status`](#stackkit-user-owner-status)
+Subcommands: [`stackkit user owner activate`](#stackkit-user-owner-activate), [`stackkit user owner migrate-domain`](#stackkit-user-owner-migrate-domain), [`stackkit user owner reconcile`](#stackkit-user-owner-reconcile), [`stackkit user owner status`](#stackkit-user-owner-status)
 
 ### stackkit user owner activate
 
@@ -215,6 +247,26 @@ Heredado de `stackkit user`:
 | Flag | Tipo | Predeterminado | Descripción |
 | --- | --- | --- | --- |
 | `--json` | bool | — | Emite JSON stackkit.command-result/v1 |
+
+### stackkit user owner reconcile
+
+Enable legacy TinyAuth PKCE only against the verified existing Owner binding.
+
+Requires explicit Owner approval and an idle native lifecycle. Verifies every existing Owner, client, callback and group binding before enabling PKCE, then verifies again. Keeps Owner keys, users, groups, client secret, enrollment links, Plan and release pin. Other identity drift fails closed. On a managed server invoke through authorized Techstack server access; this performs no Advanced apply or provider execution.
+
+```bash
+stackkit user owner reconcile [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Explicitly approve PKCE-only convergence of the existing verified identity binding |
+
+Inherited from `stackkit user`:
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
 
 ### stackkit user owner status
 

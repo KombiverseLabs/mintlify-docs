@@ -1,18 +1,14 @@
-# Install the beads merge guard into every workspace repo that tracks a beads
-# export (bead: platform-qsts1).
+# Install the Beads hook-safety guard into every workspace repo that tracks a
+# beads export (bead: platform-qsts1).
 #
-# The beads pre-commit hook rewrites .beads/issues.jsonl from the LOCAL bd DB.
-# `git pull --rebase` fires no post-merge hook, and bd's own post-merge does not
-# hydrate the DB either (verified 2026-08-10 against bd 1.0.3), so records that
-# arrived with a pull live only in the working-tree file until something imports
-# them. The next commit's export deletes them without a word — observed in
-# kombify-AI-Platform on 2026-08-10 (5 issues dropped, 11 statuses reverted,
-# reconciled by hand in f1b736a).
-#
-# This script writes a guard block into pre-commit / post-merge / post-checkout
-# / post-rewrite that calls scripts/beads-hook-precommit.sh, which merges the
-# working-tree JSONL into the DB before beads exports over it. post-rewrite is
-# the hook git actually fires after a rebase; beads does not install one.
+# The guard block in pre-commit / post-merge / post-checkout / post-rewrite
+# verifies the writable tracker target before the beads section runs: a linked
+# worktree must not write another checkout's database, and a remote-backed
+# tracker skips the beads section entirely because mutations go through
+# `mise run beads:write`. The remote Dolt history is the tracker authority;
+# .beads/issues.jsonl is a derived export that no hook imports. The former
+# JSONL-into-DB import (scripts/beads-jsonl-merge.mjs) was retired for that
+# reason.
 #
 # The guard block sits OUTSIDE the `BEADS INTEGRATION` section markers, which
 # `bd hooks install` preserves across bd upgrades (verified, including --force).
@@ -26,12 +22,14 @@
 [CmdletBinding()]
 param(
   [switch]$Check,
+  [string]$WorkspaceRoot,
   [string[]]$Repo,
   [string[]]$Skip = @()
 )
 
 $ErrorActionPreference = "Stop"
-$root = Split-Path $PSScriptRoot -Parent
+$sourceRoot = Split-Path $PSScriptRoot -Parent
+$root = if ($WorkspaceRoot) { [System.IO.Path]::GetFullPath($WorkspaceRoot) } else { $sourceRoot }
 
 $GuardBegin = "# --- BEGIN KOMBIFY BEADS MERGE GUARD (platform-qsts1) ---"
 $GuardEnd = "# --- END KOMBIFY BEADS MERGE GUARD (platform-qsts1) ---"
@@ -41,8 +39,24 @@ $TargetWrapperBegin = "# --- BEGIN KOMBIFY BEADS TARGET WRAPPER (platform-qsts1)
 $TargetWrapperEnd = "# --- END KOMBIFY BEADS TARGET WRAPPER (platform-qsts1) ---"
 $NormalizeGuardOld = 'if [ -f .beads/issues.jsonl ] && command -v python >/dev/null 2>&1; then'
 $NormalizeGuardNew = 'if [ "${_kb_skip_beads_hook:-0}" -ne 1 ] && [ -f .beads/issues.jsonl ] && command -v python >/dev/null 2>&1; then'
+$JsonlNormalizeBegin = "# --- BEGIN KOMBIFY BEADS JSONL NORMALIZE (platform-qsts1) ---"
+$JsonlNormalizeEnd = "# --- END KOMBIFY BEADS JSONL NORMALIZE (platform-qsts1) ---"
+$LegacyNormalizeBegin = "# --- kombify: normalize memory export order ---"
+$LegacyNormalizeEnd = "# --- end kombify normalize ---"
+$jsonlNormalizeBody = $JsonlNormalizeBegin + "`n" + @'
+if [ "${_kb_skip_beads_hook:-0}" -ne 1 ] && [ -f .beads/issues.jsonl ] && command -v node >/dev/null 2>&1; then
+  _kb_norm=""
+  for _kb_candidate in "scripts/beads-normalize-jsonl.mjs" "../scripts/beads-normalize-jsonl.mjs"; do
+    if [ -f "$_kb_candidate" ]; then _kb_norm="$_kb_candidate"; break; fi
+  done
+  if [ -n "$_kb_norm" ]; then
+    node "$_kb_norm" .beads/issues.jsonl || exit $?
+    git add .beads/issues.jsonl
+  fi
+fi
+'@ + "`n" + $JsonlNormalizeEnd + "`n"
 
-$guardSource = Join-Path $root ".kombify/beads-hook-safety-guard.sh"
+$guardSource = Join-Path $sourceRoot ".kombify/beads-hook-safety-guard.sh"
 if (-not (Test-Path -LiteralPath $guardSource -PathType Leaf)) {
   throw "Beads hook safety authority missing: $guardSource"
 }
@@ -56,6 +70,20 @@ $hookNames = @("pre-commit", "post-merge", "post-checkout", "post-rewrite")
 function Write-Text([string]$Path, [string]$Content) {
   # LF endings: these run under sh, and CRLF breaks the shebang on some setups.
   [System.IO.File]::WriteAllText($Path, ($Content -replace "`r`n", "`n"))
+}
+
+function Test-HookExecutable([string]$Path) {
+  if ($IsWindows) { return $true }
+  if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { return $false }
+  return ([System.IO.File]::GetUnixFileMode($Path) -band [System.IO.UnixFileMode]::UserExecute) -ne 0
+}
+
+function Write-Hook([string]$Path, [string]$Content) {
+  Write-Text $Path $Content
+  if (-not $IsWindows) {
+    $mode = [System.IO.File]::GetUnixFileMode($Path)
+    [System.IO.File]::SetUnixFileMode($Path, ($mode -bor [System.IO.UnixFileMode]::UserExecute))
+  }
 }
 
 function Normalize-Text([string]$Content) {
@@ -95,8 +123,28 @@ function Add-BeadsTargetWrapper([string]$Content) {
   return $Content.Substring(0, $start) + $wrapped + $Content.Substring($end)
 }
 
-function Get-ExpectedHook([string]$Existing) {
-  if (-not $Existing) { return "#!/usr/bin/env sh`n$guardBody" }
+function Add-JsonlNormalize([string]$Content, [string]$Hook) {
+  if ($Hook -ne "pre-commit") { return $Content }
+  $replaced = Replace-MarkedBlock $Content $JsonlNormalizeBegin $JsonlNormalizeEnd $jsonlNormalizeBody
+  if ($null -ne $replaced) { return $replaced }
+  $legacy = Replace-MarkedBlock $Content $LegacyNormalizeBegin $LegacyNormalizeEnd $jsonlNormalizeBody
+  if ($null -ne $legacy) { return $legacy }
+  $wrapperEnd = $Content.IndexOf($TargetWrapperEnd, [StringComparison]::Ordinal)
+  if ($wrapperEnd -ge 0) {
+    $insertAt = $wrapperEnd + $TargetWrapperEnd.Length
+    if ($insertAt -lt $Content.Length -and $Content[$insertAt] -eq "`n") {
+      $insertAt = [int]$insertAt + 1
+    }
+    return $Content.Substring(0, $insertAt) + $jsonlNormalizeBody + $Content.Substring($insertAt)
+  }
+  if (-not $Content.EndsWith("`n")) { $Content += "`n" }
+  return $Content + $jsonlNormalizeBody
+}
+
+function Get-ExpectedHook([string]$Existing, [string]$Hook) {
+  if (-not $Existing) {
+    return (Add-JsonlNormalize "#!/usr/bin/env sh`n$guardBody" $Hook)
+  }
 
   $content = Normalize-Text $Existing
   $replaced = Replace-MarkedBlock $content $GuardBegin $GuardEnd $guardBody
@@ -123,7 +171,63 @@ function Get-ExpectedHook([string]$Existing) {
   # the managed beads section. It also writes/stages tracker state and must obey
   # the same target decision.
   $content = $content.Replace($NormalizeGuardOld, $NormalizeGuardNew)
-  return $content
+  return (Add-JsonlNormalize $content $Hook)
+}
+
+# Husky- and vite-plus-managed hooks: core.hooksPath points at a "<dir>/_"
+# folder of tiny stubs whose "h" dispatcher runs "<dir>/<hook>". The scripts
+# that actually execute live in the parent, so that is where a chain into the
+# tracked .beads/hooks belongs; the guard itself stays in .beads/hooks.
+function Get-DispatcherScriptsDir([string]$HooksDir) {
+  if (-not $HooksDir) { return $null }
+  $leaf = Split-Path $HooksDir -Leaf
+  if ($leaf -ne "_") { return $null }
+  if (-not (Test-Path (Join-Path $HooksDir "h") -PathType Leaf)) { return $null }
+  return (Split-Path $HooksDir -Parent)
+}
+
+$ChainBegin = "# --- BEGIN KOMBIFY BEADS HOOK CHAIN (platform-qsts1) ---"
+$ChainEnd = "# --- END KOMBIFY BEADS HOOK CHAIN (platform-qsts1) ---"
+function Get-ChainBody([string]$Hook) {
+  return @(
+    $ChainBegin,
+    '_kb_root="$(git rev-parse --show-toplevel 2>/dev/null)"',
+    "if [ -n `"`$_kb_root`" ] && [ -f `"`$_kb_root/.beads/hooks/$Hook`" ]; then",
+    "  sh `"`$_kb_root/.beads/hooks/$Hook`" `"`$@`" || exit `$?",
+    "fi",
+    $ChainEnd,
+    ""
+  ) -join "`n"
+}
+
+function Get-ExpectedChainScript([string]$Existing, [string]$Hook, [string]$TargetContent) {
+  $body = Get-ChainBody $Hook
+  if (-not $Existing) { return "#!/usr/bin/env sh`n$body" }
+
+  $content = Normalize-Text $Existing
+  $replaced = Replace-MarkedBlock $content $ChainBegin $ChainEnd $body
+  if ($null -ne $replaced) { $content = $replaced }
+
+  # Get-ExpectedHook preserves a repository's own hook body inside
+  # .beads/hooks/<hook>, so a dispatcher script that still carries the same
+  # body would run it twice through the chain. Keep only the chain whenever
+  # every one of its own commands already lives in the target.
+  $ownLines = @(($content -split "`n") | Where-Object {
+    $line = $_.Trim()
+    $line -and -not $line.StartsWith("#") -and -not $line.StartsWith("#!")
+  })
+  $chainLines = @(($body -split "`n") | Where-Object { $_.Trim() })
+  $carried = @($ownLines | Where-Object { $chainLines -notcontains $_ })
+  if ($TargetContent -and $carried.Count -gt 0) {
+    $duplicated = @($carried | Where-Object { $TargetContent.Contains($_.Trim()) })
+    if ($duplicated.Count -eq $carried.Count) {
+      return "#!/usr/bin/env sh`n$body"
+    }
+  }
+
+  if ($null -ne $replaced) { return $content }
+  if (-not $content.EndsWith("`n")) { $content += "`n" }
+  return $content + $body
 }
 
 function Test-PathInsideRepo([string]$RepoPath, [string]$CandidatePath) {
@@ -239,6 +343,18 @@ foreach ($target in $redirectTargets) {
   }
 }
 
+# Linked product worktrees sit inside the workspace directory tree. Without a
+# checkout-local redirect, `bd -C` walks up into the workspace store.
+$worktreeRedirect = Join-Path $PSScriptRoot "install-beads-worktree-redirect.mjs"
+if (Test-Path -LiteralPath $worktreeRedirect -PathType Leaf) {
+  $worktreeArgs = @($worktreeRedirect, "--root", $root)
+  if ($Check) { $worktreeArgs += "--check" }
+  & node @worktreeArgs
+  if ($Check -and $LASTEXITCODE -ne 0) {
+    $gaps += "linked-worktree-redirect"
+  }
+}
+
 # Every repo that tracks a beads export is exposed to the hazard.
 $candidates = @([pscustomobject]@{ Path = $root; Name = "workspace-root" })
 $candidates += Get-ChildItem $root -Directory |
@@ -314,6 +430,27 @@ foreach ($t in $targets) {
         Write-Host "  isolated target safety: using repo-local hooks instead of foreign core.hooksPath ($configured)"
       }
       $hooksDir = $localHooksDir
+    } elseif (($scriptsDir = Get-DispatcherScriptsDir $configuredTarget)) {
+      # The dispatcher runs <scripts>/<hook>; chain those into the tracked
+      # .beads/hooks so the guard and the beads integration keep executing.
+      Write-Host "  managed dispatcher: chaining $(Split-Path $scriptsDir -Leaf)/<hook> into .beads/hooks"
+      foreach ($chainHook in $hookNames) {
+        $chainPath = Join-Path $scriptsDir $chainHook
+        $chainExisting = if (Test-Path $chainPath) { [System.IO.File]::ReadAllText($chainPath) } else { $null }
+        $chainTargetPath = Join-Path $localHooksDir $chainHook
+        $chainTarget = if (Test-Path $chainTargetPath) { [System.IO.File]::ReadAllText($chainTargetPath) } else { "" }
+        $chainExpected = Get-ExpectedChainScript $chainExisting $chainHook $chainTarget
+        if ($Check) {
+          if ($null -eq $chainExisting -or (Normalize-Text $chainExisting) -ne $chainExpected -or -not (Test-HookExecutable $chainPath)) {
+            $gaps += "$($t.Name)/$(Split-Path $scriptsDir -Leaf)/$chainHook"
+            Write-Host "  $chainHook : CHAIN MISSING OR STALE"
+          }
+        } elseif ($null -eq $chainExisting -or (Normalize-Text $chainExisting) -ne $chainExpected -or -not (Test-HookExecutable $chainPath)) {
+          Write-Hook $chainPath $chainExpected
+          Write-Host "  $chainHook : chain installed/refreshed"
+        }
+      }
+      $hooksDir = $localHooksDir
     } else {
       $gaps += "$($t.Name)/core.hooksPath"
       Write-Host "  core.hooksPath : custom target requires dedicated reconciliation ($configured)"
@@ -332,15 +469,19 @@ foreach ($t in $targets) {
     New-Item -ItemType Directory -Path $hooksDir -Force | Out-Null
   }
 
-  foreach ($hook in $hookNames) {
+  # Earlier bd installs also carry preparation/push hooks. Protect existing ones
+  # without creating extra hooks or changing the projected consumer contract.
+  $targetHookNames = @($hookNames)
+  $targetHookNames += @("prepare-commit-msg", "pre-push") | Where-Object { Test-Path (Join-Path $hooksDir $_) -PathType Leaf }
+  foreach ($hook in $targetHookNames) {
     $path = Join-Path $hooksDir $hook
     $existing = if (Test-Path $path) { [System.IO.File]::ReadAllText($path) } else { $null }
 
-    $expected = Get-ExpectedHook $existing
+    $expected = Get-ExpectedHook $existing $hook
     $current = Normalize-Text $existing
 
     if ($Check) {
-      if ($null -eq $current -or $current -ne $expected) {
+      if ($null -eq $current -or $current -ne $expected -or -not (Test-HookExecutable $path)) {
         $gaps += "$($t.Name)/$hook"
         Write-Host "  $hook : GUARD MISSING OR STALE"
       } else {
@@ -349,11 +490,11 @@ foreach ($t in $targets) {
       continue
     }
 
-    if ($null -ne $current -and $current -eq $expected) {
+    if ($null -ne $current -and $current -eq $expected -and (Test-HookExecutable $path)) {
       Write-Host "  $hook : guard current"
       continue
     }
-    Write-Text $path $expected
+    Write-Hook $path $expected
     Write-Host "  $hook : guard installed/refreshed"
   }
 }
@@ -363,8 +504,8 @@ if ($Check) {
     Write-Host "Beads hook safety has $($gaps.Count) gap(s) — run: pwsh scripts/install-beads-hook-guard.ps1" -ForegroundColor Yellow
     exit 1
   }
-  Write-Host "beads merge guard present in all $($targets.Count) beads-tracking repo(s)."
+  Write-Host "beads hook-safety guard present in all $($targets.Count) beads-tracking repo(s)."
   exit 0
 }
 
-Write-Host "beads merge guard installed across $($targets.Count) beads-tracking repo(s) (platform-qsts1)."
+Write-Host "beads hook-safety guard installed across $($targets.Count) beads-tracking repo(s) (platform-qsts1)."

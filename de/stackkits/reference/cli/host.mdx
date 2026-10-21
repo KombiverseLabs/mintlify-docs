@@ -9,7 +9,7 @@ Anbieterneutrale Operationen des Host-Vertrags.
 stackkit host [flags]
 ```
 
-Unterbefehle: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host security`](#stackkit-host-security), [`stackkit host updates`](#stackkit-host-updates)
+Subcommands: [`stackkit host attach-conformance`](#stackkit-host-attach-conformance), [`stackkit host conformance`](#stackkit-host-conformance), [`stackkit host delivery`](#stackkit-host-delivery), [`stackkit host environment`](#stackkit-host-environment), [`stackkit host gpu-check`](#stackkit-host-gpu-check), [`stackkit host migrate-browser-ca`](#stackkit-host-migrate-browser-ca), [`stackkit host preflight`](#stackkit-host-preflight), [`stackkit host prepare`](#stackkit-host-prepare), [`stackkit host reboot`](#stackkit-host-reboot), [`stackkit host remediate`](#stackkit-host-remediate), [`stackkit host security`](#stackkit-host-security), [`stackkit host ssh`](#stackkit-host-ssh), [`stackkit host updates`](#stackkit-host-updates)
 
 ## stackkit host attach-conformance
 
@@ -37,6 +37,75 @@ stackkit host conformance [flags]
 | --- | --- | --- | --- |
 | `--binding` | string | — | **Erforderlich.** Lokale ExternalHostBinding-JSON-Datei |
 | `--output, -o` | string | `-` | Ziel des Belegs ('-' für JSON auf stdout) |
+
+## stackkit host delivery
+
+Den versiegelten Host-Delivery-Empfänger dieses Nodes verwalten.
+
+Versiegelte Host-Delivery bringt Wallet-Einträge, Backup-Ziele und SSH-Zugriff auf diesen Node. Eine liefernde Instanz versiegelt jeden Wert mit dem Empfängerschlüssel dieses Nodes (HPKE, pkg/hostdelivery); nur dieser Node öffnet ihn in seine eigene Verwahrung. Techstack und Guard transportieren ausschließlich Chiffretext und Referenzen.
+
+```bash
+stackkit host delivery [flags]
+```
+
+Unterbefehle: [`stackkit host delivery detach`](#stackkit-host-delivery-detach), [`stackkit host delivery recipient`](#stackkit-host-delivery-recipient), [`stackkit host delivery status`](#stackkit-host-delivery-status)
+
+### stackkit host delivery detach
+
+Host-Delivery zu diesem Node beenden und die gelieferten Secrets zur Rotation auflisten.
+
+Diesen Node von Host-Delivery trennen: Jedes gelieferte Secret wird als rotationsbedürftig markiert, ausgemusterte Empfängerschlüssel werden vernichtet, und bis der Node mit 'host delivery recipient `--rotate`' neu registriert ist, wird keine Delivery mehr geöffnet. Das Ergebnis listet die Referenzen und Versionen auf, die dort rotiert werden müssen, wo sie herkommen; es enthält nie einen Wert. Werte, die bereits in der lokalen Verwahrung liegen, bleiben hier nutzbar.
+
+```bash
+stackkit host delivery detach [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Das Trennen dieses Nodes autorisieren |
+
+**Beispiele**
+
+```bash
+stackkit host delivery detach --owner-approve
+```
+
+### stackkit host delivery recipient
+
+Den Empfängerschlüssel dieses Nodes nachweisen, die liefernde Instanz festlegen oder den Schlüssel rotieren.
+
+Eine Erklärung ausgeben, die vom lokalen Owner-Schlüssel signiert ist, den Empfängerschlüssel dieses Nodes und seine Generation an dieses Site und den Node bindet und die Challenge des Aufrufers wiederholt. Der private Schlüssel verlässt nie die lokale Verwahrung.
+
+`--authority-key` legt den öffentlichen Ed25519-Schlüssel der liefernden Instanz für die aktuelle Generation fest; Wallet-Einträge und SSH-Zugriff öffnen sich nur, wenn sie von ihm signiert sind. Ein festgelegter Schlüssel wird nie in place ersetzt. `--rotate` registriert den Node unter der nächsten Generation neu (und mit `--authority-key` wird eine neue Instanz festgelegt): Der bisherige Schlüssel öffnet vor der Rotation ausgestellte Deliveries noch höchstens für deren 15-minütige Gültigkeit und wird danach vernichtet. Eine Rotation beendet außerdem ein Detach.
+
+```bash
+stackkit host delivery recipient [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--authority-key` | string | — | Öffentlicher Ed25519-Schlüssel (base64) der liefernden Instanz, der für diese Generation festgelegt wird |
+| `--authority-key-id` | string | — | Schlüssel-ID, mit der die liefernde Instanz die Envelopes signiert |
+| `--challenge` | string | — | Frischer Wert der liefernden Instanz, den die Erklärung wiederholen muss |
+| `--owner-approve` | bool | — | Diese Änderung des Empfängers für den Node autorisieren |
+| `--rotate` | bool | — | Unter der nächsten Empfänger-Generation neu registrieren |
+
+**Beispiele**
+
+```bash
+stackkit host delivery recipient --challenge "$CHALLENGE" --authority-key "$WALLET_KEY" --authority-key-id wallet-1 --owner-approve
+stackkit host delivery recipient --challenge "$CHALLENGE" --rotate --owner-approve
+```
+
+### stackkit host delivery status
+
+Die Empfänger-Generation, die festgelegte Instanz, den Detach-Status und die gelieferten Referenzen anzeigen.
+
+Die Empfänger-Generation und ihren Fingerprint dieses Nodes melden, außerdem noch öffenbare ausgemusterte Generationen, die festgelegte liefernde Instanz, ob der Node getrennt ist, und jedes gelieferte Secret mit Referenz und Version samt Rotationsmarkierung. Es wird kein Wert gelesen.
+
+```bash
+stackkit host delivery status [flags]
+```
 
 ## stackkit host environment
 
@@ -66,6 +135,51 @@ stackkit host environment --json
 # Override a wrong detection for the next command, here Basement Kit init on a home host
 STACKKIT_NETWORK_ENV=home stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email you@example.com
 ```
+
+## stackkit host gpu-check
+
+Prove the NVIDIA GPU under a short real CUDA load.
+
+Run NVIDIA's CUDA vectorAdd sample in a container on the GPU (Docker CDI device nvidia.com/gpu=all), then read the kernel log for NVRM Xid errors and ask nvidia-smi again.
+
+nvidia-smi listing the GPU is not proof that it works: a GPU on a weak power supply or a marginal link, typical for a Thunderbolt eGPU, answers at idle and falls off the bus (Xid 79) as soon as CUDA draws power. This check refuses then and names the cause.
+
+It changes nothing on the host except pulling the pinned sample image. Run it as root so the kernel log can be read.
+
+```bash
+stackkit host gpu-check [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--image` | string | `nvcr.io/nvidia/k8s/cuda-sample:vectoradd-cuda12.5.0@sha256:7c7540bdf1f942d4fb6db97069fd6c289471b54ac29e3c7fcdf914cf77af7d41` | CUDA sample image that prints "Test PASSED" |
+| `--json` | bool | — | Emit the check and its evidence as machine-readable JSON |
+| `--runs` | int | `10` | How many times the CUDA sample runs |
+
+**Examples**
+
+```bash
+# Prove the GPU after the driver and Container Toolkit are installed
+sudo stackkit host gpu-check
+
+# Longer load, machine-readable result
+sudo stackkit host gpu-check --runs 50 --json
+```
+
+## stackkit host migrate-browser-ca
+
+Die authentifizierte Legacy-CA dieses Nodes auf die browserfähige Richtlinie migrieren.
+
+Legacy-Basement-CA-Signaturschlüssel explizit migrieren und dabei den Owner-Signaturschlüssel, PocketID-Identitäten, Laufzeit-Secrets, Ingress-Leaf-Schlüssel, Adressen und Volumes erhalten. Eine bereits aktuelle Root bleibt bestehen. Vor `--complete` den aktuellen nativen Plan anwenden und verifizieren. Clients müssen eine geänderte öffentliche Root über die vorhandene Client-Trust-Übergabe genehmigen.
+
+```bash
+stackkit host migrate-browser-ca [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--complete` | bool | — | Das Wiederherstellungsjournal nach aktuellem nativen Apply und regulärer TLS-Verifikation schließen |
+| `--owner-approve` | bool | — | Den expliziten CA-Übergang dieses Nodes autorisieren |
 
 ## stackkit host preflight
 
@@ -132,7 +246,7 @@ stackkit host reboot [flags]
 
 | Flag | Typ | Standard | Beschreibung |
 | --- | --- | --- | --- |
-| `--delay` | duration | `30s` | Zeit bis zum Start des Neustarts (1 s bis 5 min) |
+| `--delay` | duration | `30s` | Zeit bis zum Start des Neustarts (1s bis 5m) |
 | `--json` | bool | — | Das stackkit.host-maintenance/v1-Ergebnis als maschinenlesbares JSON ausgeben |
 | `--yes` | bool | — | Bestätigen, dass dieser Node neu starten darf |
 
@@ -187,7 +301,7 @@ Die Host-Sicherheitsbaseline mit versionierten Nachweisen verifizieren und repar
 
 Diesen Knoten anhand der StackKits-Host-Sicherheitsbaseline beobachten und Abweichungen beheben, ohne den Verwaltungspfad zu unterbrechen.
 
-`verify` ändert niemals den Host. Es erzeugt stackkit.host-security-evidence/v1 für Firewall, sshd, Brute-Force-Schutz, automatische und ausstehende Sicherheitsupdates, Neustartstatus, Kernelparameter, exponierte Listener und Zertifikatsablauf. Jedes Kontrollelement ist konform, abweichend, unbekannt oder eine vom Besitzer genehmigte Ausnahme, und der Nachweis läuft ab: Eine veraltete Beobachtung ist unbekannt, und ein unbekanntes Kontrollelement gilt niemals als konform.
+`verify` ändert niemals den Host. Es erzeugt stackkit.host-security-evidence/v1 für Firewall, sshd, Brute-Force-Schutz, automatische und ausstehende Sicherheitsupdates, Neustartstatus, Kernelparameter, exponierte Listener und Zertifikatsablauf sowie für die SSH-CA-Vertrauensstellung und das Host-Zertifikat, die an diesen Node geliefert wurden ('host ssh apply'), sobald sie aufgezeichnet sind. Jedes Kontrollelement ist konform, abweichend, unbekannt oder eine vom Besitzer genehmigte Ausnahme, und der Nachweis läuft ab: Eine veraltete Beobachtung ist unbekannt, und ein unbekanntes Kontrollelement gilt niemals als konform.
 
 Es funktioniert eigenständig (Standard Mode, ohne Konto) und über die festgelegte CLI, wenn Techstack die Bereitstellung verwaltet (`--mode` advanced).
 
@@ -230,6 +344,7 @@ stackkit host security repair [flags]
 | `--declared-port` | stringArray | — | Deklarierter Dienst-Port als tcp/443 oder udp/5353 (wiederholbar) |
 | `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | Vom Besitzer kontrollierte Ausnahmedatei (jede Ausnahme benötigt einen Besitzer und ein Ablaufdatum) |
 | `--freshness` | duration | `15m0s` | Wie lange dem Nachweis bis zum Ablauf vertraut werden darf (1m bis 24h) |
+| `--host-name` | stringArray | — | Name, den das gelieferte SSH-Host-Zertifikat tragen muss (wiederholbar; Standard: der Systemhostname) |
 | `--json` | bool | — | Das Ergebnis als maschinenlesbares JSON ausgeben |
 | `--kit` | string | — | Aufzuzeichnender Kit-Slug (Standard: das Kit der StackSpec im Workspace) |
 | `--local-node` | string | — | Exakter lokaler Node im angegebenen ResolvedPlan |
@@ -280,10 +395,11 @@ stackkit host security verify [flags]
 | Flag | Typ | Standard | Beschreibung |
 | --- | --- | --- | --- |
 | `--declared-port` | stringArray | — | Deklarierter Dienst-Port als tcp/443 oder udp/5353 (wiederholbar) |
-| `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | Vom Besitzer kontrollierte Ausnahmedatei (jede Ausnahme benötigt einen Besitzer und ein Ablaufdatum) |
 | `--drift-scope` | string | `all` | Kontrollelemente, die über `--fail-on-drift` entscheiden: all oder enforced (nur die von der Baseline selbst durchgesetzten Elemente; verzögerte Updates, ausstehende Neustarts, Exposition und Zertifikate werden weiterhin beobachtet und gemeldet) |
+| `--exceptions` | string | `/etc/stackkit/host-security/exceptions.json` | Vom Besitzer kontrollierte Ausnahmedatei (jede Ausnahme benötigt einen Besitzer und ein Ablaufdatum) |
 | `--fail-on-drift` | bool | — | Mit 5 beenden, wenn der Host abweicht, und mit 6, wenn sein Zustand unbekannt ist |
 | `--freshness` | duration | `15m0s` | Wie lange dem Nachweis bis zum Ablauf vertraut werden darf (1m bis 24h) |
+| `--host-name` | stringArray | — | Name, den das gelieferte SSH-Host-Zertifikat tragen muss (wiederholbar; Standard: der Systemhostname) |
 | `--json` | bool | — | Das Ergebnis als maschinenlesbares JSON ausgeben |
 | `--kit` | string | — | Aufzuzeichnender Kit-Slug (Standard: das Kit der StackSpec im Workspace) |
 | `--local-node` | string | — | Exakter lokaler Node im angegebenen ResolvedPlan |
@@ -307,6 +423,53 @@ sudo stackkit host security verify --mode advanced --json --fail-on-drift --drif
 
 # Judge exposure against the ports the verified plan declares
 sudo stackkit host security verify --resolved-plan plan.json --local-node node-1
+```
+
+## stackkit host ssh
+
+SSH-Zertifikatszugriff, der an diesen Node geliefert wird.
+
+```bash
+stackkit host ssh [flags]
+```
+
+Unterbefehle: [`stackkit host ssh apply`](#stackkit-host-ssh-apply)
+
+### stackkit host ssh apply
+
+Eine versiegelte SSH-CA-Vertrauensstellung, Sperrung oder Host-Zertifikat-Lieferung von stdin anwenden.
+
+Genau ein versiegeltes ssh-ca-trust-, ssh-ca-revoke- oder ssh-host-certificate-Envelope von stdin lesen, das von der festgelegten liefernden Instanz signiert ist, und es auf den sshd dieses Servers anwenden:
+
+```text
+  - ssh-ca-trust installs the owner's user CA keys as TrustedUserCAKeys
+    (/etc/ssh/stackkit/trusted_user_ca_keys) and one AuthorizedPrincipalsFile
+    per local user (/etc/ssh/stackkit/principals/<user>). Root is never a
+    target. An empty key list revokes like ssh-ca-revoke.
+  - ssh-ca-revoke removes that trust. Revocations take effect at once and are
+    never rolled back; one sshd cannot reload for is recorded as cleanup
+    pending and finished by 'host security repair'.
+  - ssh-host-certificate installs a host certificate beside the host key it
+    certifies, only if it names every --host-name (default: the system
+    hostname) and is currently valid.
+```
+
+sshd wird nur neu geladen, nachdem 'sshd -t' die neue Konfiguration akzeptiert hat; eine fehlgeschlagene Änderung wird zurückgerollt. Der angewendete Zustand wird in der Owner-Verwahrung aufgezeichnet, sodass 'host security verify' Abweichungen meldet und 'host security repair' ihn wieder installiert.
+
+```bash
+stackkit host ssh apply [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--host-name` | stringArray | — | Name, den ein Host-Zertifikat als Principal tragen muss (wiederholbar; Standard: der Systemhostname) |
+| `--owner-approve` | bool | — | Die Änderung des SSH-Zugriffs auf diesem Server autorisieren |
+| `--tenant-ref` | string | — | Mandant, an den die versiegelte Delivery adressiert sein muss |
+
+**Beispiele**
+
+```bash
+sudo stackkit host ssh apply --tenant-ref "$TENANT" --owner-approve < envelope.json
 ```
 
 ## stackkit host updates

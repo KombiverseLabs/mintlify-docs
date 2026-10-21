@@ -1,11 +1,20 @@
 ---
-title: "StackKits 快速开始"
+title: "StackKits 快速入门"
 description: "引导、检查并显式应用已发布的 Basement Kit"
-sidebarTitle: "快速开始"
+sidebarTitle: "快速入门"
 icon: rocket
 ---
 
-本快速开始会在你已经运维的服务器上，安装带有 Basement Kit 的当前公开 StackKits 版本。开始之前，请查看[操作系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)，了解该版本和主机组合是否有已发布的生命周期证据。CLI 仍然是本地的执行权威。
+本快速入门会在你已经运营的服务器上，使用 Basement Kit 安装当前的公开 StackKits 版本。开始之前，请在[操作系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)中查看具有已发布生命周期证据的版本与主机组合。CLI 仍然是本地执行的权威。
+
+## 你需要先准备什么
+
+- 一台你已在运营、并且被允许在其上运行命令的服务器或电脑。
+- 操作系统兼容性页面中列出的系统。
+- 该电脑上的终端。
+- 一个用于保存设置所创建的访问详情的私密位置。
+
+刚接触服务器？[开始之前](/zh-Hans/guides/stackkits/before-you-start)用通俗的语言解释了这些概念，值得读一遍。
 
 ## 引导 Basement Kit
 
@@ -20,16 +29,19 @@ cat .stackkit/access.json
 ```
 
 <Warning>
-  不需要托管的 kombify 账户。StackKits 本身仍然需要一个本地 Owner/Admin，此次引导会自动创建它。请保管好生成的访问详情，不要泄露。
+  不需要托管的 kombify 账户。StackKits 自身仍然需要一个本地 Owner/Admin，
+  本次引导会自动创建它。请保持生成的访问详情私密。
 </Warning>
 
-需要其他安装程序？仅工具链的路径请参见[选择 kit](/zh-Hans/guides/stackkits/choosing-a-kit)，你已在运维的 VPS 请参见 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)，配置、审查、应用和验证分开的步骤请参见 [CLI 演练](/zh-Hans/guides/stackkits/cli-walkthrough)。
+运行该命令之后，你应当看到以下结果：文件夹 `~/my-homelab` 已存在，`stackkit version` 会打印已安装的版本，最新日志会报告设置的结果，`.stackkit/access.json` 中保存着你的本地访问详情。
+
+需要其他安装程序？仅工具链的路径请使用[选择套件](/zh-Hans/guides/stackkits/choosing-a-kit)，你已在运营的 VPS 请使用 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)，而独立的配置、审查、应用和验证步骤请使用 [CLI 演练](/zh-Hans/guides/stackkits/cli-walkthrough)。
 
 ## 审查或更改生成的意图
 
-在生成输出之前，请检查 `stack-spec.yaml`。尤其要审查绝对存储根目录、本地域名（Basement 安装程序使用 `home`，因此设备登记之后，服务会解析为 `*.home`）、站点和节点标识，以及空的可选工作负载选择。
+在生成输出之前，请检查 `stack-spec.yaml`。尤其要审查绝对存储根目录、本地域名（Basement 安装程序使用 `home`，因此在设备注册之后，服务会解析为 `*.home`）、站点和节点身份，以及为空的可选工作负载选择。
 
-StackSpec 是配置输入。CUE 仍然是验证权威，生成的部署文件是输出，不要手动编辑。当前示例请参见[配置 StackSpec](/zh-Hans/guides/stackkits/configure-stack-spec)。
+StackSpec 是配置输入。CUE 仍是验证的权威，生成的部署文件是输出，不应手动编辑。当前示例请参见[配置 StackSpec](/zh-Hans/guides/stackkits/configure-stack-spec)。
 
 ## 生成并检查变更后的计划
 
@@ -38,7 +50,7 @@ stackkit generate
 stackkit plan --json
 ```
 
-确认生成就绪状态和应用就绪状态都是 `ready`，然后审查所选的工作负载和产物路径。
+确认生成就绪状态和应用就绪状态均为 `ready`，然后审查所选的工作负载和产物路径。
 
 ## 应用有意的变更
 
@@ -48,18 +60,29 @@ stackkit logs latest --json
 cat .stackkit/access.json
 ```
 
-Basement 一行命令已经执行了初始的应用。只有在你有意更改 `stack-spec.yaml` 之后，才运行这些生命周期命令。请把本地日志和访问记录与工作区放在一起。
+Basement 的一行命令已经执行了初始应用。只有在你有意修改了 `stack-spec.yaml` 之后，才运行这些生命周期命令。请将本地日志和访问记录与工作区放在一起。
+
+## 什么存放在哪里
+
+你的配置（`stack-spec.yaml`）、日志和访问记录位于服务器上的工作区文件夹 `~/my-homelab` 中。生成的部署文件是配置的输出。没有托管的 kombify 账户保存其中任何内容。请保持该文件夹私密。
+
+## 出现问题时
+
+- 安装程序因错误而停止：用 `stackkit logs latest --json` 读取错误，在弄清错误之前不要再次运行那条一行命令。参见[故障排查](/zh-Hans/guides/stackkits/troubleshooting)。
+- 计划不是 `ready`：请修改 StackSpec 而不是生成的文件，然后重新审查。
+- 服务地址打不开：参见[故障排查](/zh-Hans/guides/stackkits/troubleshooting)和[日常使用](/zh-Hans/guides/stackkits/daily-use)。
+- 接下来，请在 [Node Hub 指南](/zh-Hans/guides/stackkits/node-hub)中完成保护。
 
 ## 继续
 
 <CardGroup cols={3}>
   <Card title="Basement Kit" icon="house" href="/zh-Hans/stackkits/kits/basement-kit">
-    了解本地单环境 kit。
+    了解本地的单环境套件。
   </Card>
   <Card title="Cloud Kit" icon="cloud" href="/zh-Hans/stackkits/kits/cloud-kit">
-    在你运维的 VPS 上使用相同的独立生命周期。
+    在你运营的 VPS 上使用相同的独立生命周期。
   </Card>
   <Card title="安全应用" icon="clipboard-check" href="/zh-Hans/guides/stackkits/review-plan-and-apply">
-    在更改主机之前，审查就绪状态和生成的产物。
+    在更改主机之前，先审查就绪状态和生成的产物。
   </Card>
 </CardGroup>

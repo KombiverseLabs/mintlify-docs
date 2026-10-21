@@ -24,7 +24,15 @@ export const LOCALES = {
 };
 
 function localize(node, code, labels) {
-  if (Array.isArray(node)) return node.map((n) => localize(n, code, labels));
+  if (Array.isArray(node)) {
+    // A page without a translated counterpart yet (Mintlify's automatic
+    // translation delivers it by pull request) stays out of the locale branch,
+    // and so does a group that would be left empty.
+    return node
+      .filter((n) => typeof n !== "string" || existsSync(join(root, code, `${n}.mdx`)))
+      .map((n) => localize(n, code, labels))
+      .filter((n) => typeof n === "string" || !Array.isArray(n.pages) || n.pages.length > 0);
+  }
   if (typeof node === "string") return `${code}/${node}`;
   const out = {};
   for (const [key, value] of Object.entries(node)) {

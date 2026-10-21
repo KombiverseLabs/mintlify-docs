@@ -1,50 +1,100 @@
 ---
 title: "Ein StackKit wählen"
 description: "Vergleiche die Einstiegspfade Home und Cloud mit der Modern-Homelab-Vorschau"
-sidebarTitle: "Ein Kit wählen"
+sidebarTitle: "Kit wählen"
 ---
 
-Das öffentliche StackKits-Release enthält Basement Kit, Cloud Kit und eine
-Vorschau-Definition von Modern Homelab. Wähle einen Pfad für die Hosts, die du
-bereits betreibst. Die Live-Runtime-Nachweise für Cloud Kit bleiben
-release-spezifisch; für Modern gibt es noch keinen unterstützten vollständigen
-Installationspfad.
+Die öffentliche StackKits-Version enthält Basement Kit, Cloud Kit und eine
+Modern-Homelab-Vorschaudefinition. Wähle einen Pfad für die Hosts, die du bereits
+betreibst. Die Live-Runtime-Nachweise für Cloud Kit bleiben release-spezifisch;
+für Modern gibt es noch keinen unterstützten vollständigen Installationspfad.
 
-| Wenn du betreibst... | Wähle | Warum |
+## In einfachen Worten
+
+Ein Kit ist ein fertiger Ausgangspunkt für dein Homelab. Es legt fest, wo deine
+Dienste laufen und wie du sie erreichst. Welches Kit passt, hängt vom Computer
+ab, den du hast, nicht davon, welche Funktionen du möchtest: Ein Computer bei dir
+zu Hause spricht für Basement Kit, und ein Server, den du bereits mietest und mit
+eigener Domain betreibst, für Cloud Kit. Wenn du noch nie einen Server
+eingerichtet hast, lies zuerst [Bevor du beginnst](/de/guides/stackkits/before-you-start)
+und beginne dann mit Basement Kit.
+
+## Was du zuerst brauchst
+
+- Wisse, welchen Computer oder Server du verwenden wirst und dass du dort Befehle
+  ausführen darfst.
+- Für Cloud Kit eine Domain und DNS-Einträge, die du kontrollierst.
+- Zugriff auf ein Terminal auf diesem Rechner.
+- Für den eigenständigen Pfad ist kein kombify-Konto erforderlich.
+
+## Die Pfade vergleichen
+
+| Wenn du betreibst ... | Wähle | Warum |
 | --- | --- | --- |
-| lokale Hardware in einem Heim- oder privaten Netzwerk | [Basement Kit](/de/stackkits/kits/basement-kit) | Es ist das veröffentlichte, lokale, LAN-zuerst-Profil. |
-| einen vorhandenen VPS oder Cloud-Host mit einer Domain, die du kontrollierst | [Cloud Kit](/de/stackkits/kits/cloud-kit) | Es ist das veröffentlichte Public-Domain-Profil für diesen Host. |
-| Home- und Cloud-Umgebungen, deren Verbindung du erkunden willst | [Modern Homelab (Alpha)](/de/stackkits/kits/modern-homelab) | Die veröffentlichte Definition beschreibt beide Standorte; die vollständige Runtime-Unterstützung steht noch aus. |
+| lokale Hardware in einem Heim- oder privaten Netzwerk | [Basement Kit](/de/stackkits/kits/basement-kit) | Es ist das veröffentlichte lokale, LAN-zuerst-Profil. |
+| einen bestehenden VPS oder Cloud-Host mit einer Domain, die du kontrollierst | [Cloud Kit](/de/stackkits/kits/cloud-kit) | Es ist das veröffentlichte Profil mit öffentlicher Domain für diesen Host. |
+| Home- und Cloud-Umgebungen, deren Verbindung du erkunden möchtest | [Modern Homelab (Alpha)](/de/stackkits/kits/modern-homelab) | Die veröffentlichte Definition beschreibt beide Standorte; die vollständige Runtime-Unterstützung steht noch aus. |
 
-Beginne bei den vorhandenen Installationsanleitungen mit einer Umgebung. StackKits stellt keine Server bereit und übernimmt keine Verwahrung von Provider-Zugangsdaten. Wähle also erst ein Kit, wenn du weißt, welchen Host und welche Domain du kontrollierst.
+Beginne bei den bestehenden Installationsanleitungen mit einer Umgebung.
+StackKits stellt keine Server bereit und übernimmt keine Verwahrung von
+Anbieter-Zugangsdaten. Wähle daher erst ein Kit, wenn du weißt, welchen Host und
+welche Domain du kontrollierst.
 
-Der erste erfolgreiche Basement-Pfad ist der [Quickstart](/de/stackkits/quickstart). Für einen VPS, den du bereits betreibst, nutze [Cloud Kit](/de/stackkits/kits/cloud-kit). Auch die [StackKits-Website](https://stackkit.cc/getting-started) kann dir bei der Wahl helfen.
+Der erste erfolgreiche Basement-Pfad ist der [Schnellstart](/de/stackkits/quickstart).
+Für einen VPS, den du bereits betreibst, nutze [Cloud Kit](/de/stackkits/kits/cloud-kit).
+Auch die [StackKits-Website](https://stackkit.cc/getting-started) kann dir bei der
+Auswahl helfen.
+
+<span id="install-only-the-toolchain"></span>
 
 ## Nur die Toolchain installieren
 
-So installierst du die CLI und den vollständigen öffentlichen Katalog ohne den Basement-Einzeiler:
+Um die CLI und den vollständigen öffentlichen Katalog ohne den Basement-Einzeiler
+zu installieren:
 
 ```bash
 curl -sSL https://install.stackkit.cc | sh
 ```
 
-Um neben der CLI nur die Definitionen eines Kits zu installieren, übergib seinen Namen:
+Um neben der CLI nur die Definitionen eines Kits zu installieren, gib seinen
+Namen an:
 
 ```bash
 curl -sSL https://install.stackkit.cc | sh -s -- basement-kit
 ```
 
-Du kannst `cloud-kit` oder `modern-homelab` auf dieselbe Weise übergeben.
+Du kannst `cloud-kit` oder `modern-homelab` auf dieselbe Weise angeben.
 
 <Note>
-  Der eingestellte Name `base-kit` wird abgelehnt. Aktualisiere Skripte, die ihn
-  noch übergeben, auf `basement-kit`.
+  Der eingestellte Name `base-kit` wird abgelehnt. Passe Skripte, die ihn noch
+  übergeben, auf `basement-kit` an.
 </Note>
 
-Die Shell-Installer lösen das aktuelle öffentliche Release auf und unterstützen Linux und
-macOS auf `amd64` und `arm64`. Unter Windows lädst du das `windows_amd64`-ZIP
-vom [neuesten Release](https://github.com/kombifyio/StackKits/releases/latest) herunter.
+Die Shell-Installer ermitteln die aktuelle öffentliche Version und unterstützen
+Linux und macOS auf `amd64` und `arm64`. Windows-Nutzer können das
+`windows_amd64`-ZIP aus dem [neuesten Release](https://github.com/kombifyio/StackKits/releases/latest)
+herunterladen.
 
-Initialisiere nach einer reinen Toolchain-Installation den Workspace mit
+## Was nach deiner Wahl passiert
+
+1. Installiere über die passende Anleitung: den [Schnellstart](/de/stackkits/quickstart) für Basement Kit oder [Cloud Kit](/de/stackkits/kits/cloud-kit). Erwarte einen Workspace-Ordner auf dem Host, der deine Konfiguration enthält.
+2. Prüfe die Konfiguration und sieh dir dann den Plan an, bevor er den Host verändert. Erwarte, dass die CLI dir mitteilt, ob sie bereit ist.
+3. Schließe den Schutz beim ersten Start im [Node Hub](/de/guides/stackkits/node-hub) ab.
+
+## Was wo gespeichert wird
+
+Deine Kit-Wahl wird in der StackSpec gespeichert, einer Konfigurationsdatei in
+deinem Workspace-Ordner auf dem Host. Für den eigenständigen Pfad wird nichts in
+einem kombify-Konto gespeichert, und StackKits speichert keine
+Anbieter-Zugangsdaten. Siehe [Eine StackSpec konfigurieren](/de/guides/stackkits/configure-stack-spec).
+
+## Wenn etwas schiefgeht
+
+- Der Installer bricht mit einem Fehler ab: Lies das Log mit `stackkit logs latest --json` und siehe [Fehlerbehebung](/de/guides/stackkits/troubleshooting). Führe den Installer nicht erneut aus, bevor du den Fehler gelesen hast.
+- Du hast ein Kit gewählt, das nicht zu deinem Host passt: Lies zuerst das Log und beginne dann von vorn mit dem Kit, das zu dem Host passt, den du kontrollierst.
+- Ein Skript schlägt bei `base-kit` fehl: Dieser Name ist eingestellt, nutze `basement-kit`.
+- Für alltägliche Fragen nach der Einrichtung siehe [Im Alltag](/de/guides/stackkits/daily-use).
+
+Initialisiere den Workspace nach einer reinen Toolchain-Installation mit
 [Basement Kit](/de/stackkits/kits/basement-kit) oder
 [Eine StackSpec konfigurieren](/de/guides/stackkits/configure-stack-spec).

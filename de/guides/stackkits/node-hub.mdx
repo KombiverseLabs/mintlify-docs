@@ -5,25 +5,55 @@ sidebarTitle: "Node Hub"
 icon: grid-2
 ---
 
-Der StackKits Node Hub ist die generierte lokale Dienstübersicht. Öffne nach einem erfolgreichen Rollout die Adresse `base.<domain>`, die die CLI ausgibt oder die in der verifizierten Ausgabe steht.
+Der StackKits Node Hub ist die generierte lokale Dienstübersicht. Öffne nach einem erfolgreichen Rollout die Adresse `base.<domain>`, die die CLI ausgibt oder die in der verifizierten Ausgabe angezeigt wird.
 
-## Was du prüfen solltest
+## In einfachen Worten
+
+Der Node Hub ist eine Startseite für dein eigenes Homelab. Nach der Einrichtung listet er die Dienste auf, die du gewählt hast, jeweils mit einem Link zum Öffnen. Stell ihn dir als Haustür deines Homelabs vor: Du öffnest ihn, um deine Dienste zu finden und ihren Schutz abzuschließen. Er listet nur auf, was deine Konfiguration ausgewählt hat; ein Dienst, den du nicht gewählt hast, erscheint nicht.
+
+## Was du zuerst brauchst
+
+- Eine abgeschlossene Einrichtung. Falls du sie noch nicht durchgeführt hast, folge dem [Schnellstart](/de/stackkits/quickstart) und lies [Bevor du beginnst](/de/guides/stackkits/before-you-start).
+- Die Adresse `base.<domain>`, die die Einrichtung ausgegeben hat. Mit der lokalen Standarddomain ist das `base.home.test`.
+- Ein Handy oder Computer in deinem Heimnetzwerk, der diesen Namen auflösen kann (siehe [Im Alltag](/de/guides/stackkits/daily-use)).
+- Die Zugangsdaten in `.stackkit/access.json` in deinem Workspace-Ordner. Halte sie privat.
+
+## Was zu prüfen ist
 
 - Die Seite identifiziert den aktuellen StackKits-Workspace.
-- Nur Dienste, die die validierte Konfiguration ausgewählt hat, sind sichtbar.
-- Jeder aufgeführte Dienst nutzt die für diesen Rollout generierte Adresse.
+- Es sind nur Dienste sichtbar, die von der validierten Konfiguration ausgewählt wurden.
+- Jeder aufgelistete Dienst nutzt die für diesen Rollout generierte Adresse.
 
-Öffnet sich der Node Hub nicht, vergleiche seine erwartete Adresse `base.<domain>` mit der Adresse in der Rollout-Ausgabe. Bestätige, dass sich der Hostname von deinem Client aus auflösen lässt und die Route zum aktuellen Workspace gehört. Ändere die StackSpec und generiere die Artefakte neu, statt den generierten Node Hub oder die Router-Konfiguration zu bearbeiten.
+Wenn sich der Node Hub nicht öffnet, vergleiche die erwartete Adresse `base.<domain>` mit der Adresse in der Rollout-Ausgabe. Stelle sicher, dass sich der Hostname von dem Client aus auflösen lässt, den du verwendest, und dass die Route zum aktuellen Workspace gehört. Ändere die StackSpec und generiere die Artefakte neu, statt den generierten Node Hub oder die Router-Konfiguration zu bearbeiten.
 
-## Den Schutz bei der ersten Ausführung abschließen
+## Schutz beim ersten Start abschließen
 
 1. Verifiziere den Kern-Rollout über die CLI.
 2. Öffne die generierte Hub-Route.
-3. Richte den lokalen PocketID-Owner ein.
+3. Richte den lokalen PocketID-Eigentümer ein.
 4. Bestätige, dass TinyAuth die erwarteten Routen schützt.
-5. Nutze die Schutzaktion des Hubs erst, nachdem sich der Owner authentifizieren kann.
-6. Konfiguriere das lokale Backup-Repository und übe eine Wiederherstellung mit [Sichern und wiederherstellen](/de/guides/stackkits/back-up-and-restore).
+5. Nutze die Schutzaktion des Hubs erst, nachdem sich der Eigentümer authentifizieren kann.
+6. Konfiguriere das lokale Backup-Repository und übe eine Wiederherstellung mit [Sichern und Wiederherstellen](/de/guides/stackkits/back-up-and-restore).
 
-Der Hub prüft Zustand und genehmigte Operationen. Er ist weder ein Komponenten-Installer noch eine Provider-Konsole noch ein Ersatz für die StackSpec-Validierung.
+Nach jedem Schritt solltest du Folgendes sehen:
+
+- Nach Schritt 1 meldet die CLI einen verifizierten Rollout und gibt die Hub-Adresse aus.
+- Nach Schritt 2 öffnet sich die Hub-Seite in deinem Browser und zeigt deinen Workspace und die gewählten Dienste.
+- Nach Schritt 3 kannst du dich über PocketID als lokaler Eigentümer anmelden.
+- Nach Schritt 4 fordert dich das Öffnen eines geschützten Dienstes zuerst zur Anmeldung auf.
+- Nach Schritt 6 hast du ein Backup und weißt, dass eine Wiederherstellung funktioniert.
+
+Der Hub prüft den Zustand und freigegebene Operationen. Er ist kein Komponenten-Installer, keine Anbieterkonsole und kein Ersatz für die StackSpec-Validierung.
+
+## Was wo gespeichert wird
+
+Alles bleibt auf dem Computer, der dein Homelab betreibt. Die Eigentümer-Identität liegt dort in PocketID, und die Zugangsdaten für deine Einrichtung befinden sich in `.stackkit/access.json` in deinem Workspace-Ordner. Auch deine Konfiguration (die StackSpec) liegt in diesem Ordner. Der Hub selbst wird aus dieser Konfiguration generiert, weshalb du die StackSpec und nicht den Hub änderst. Backups sind von diesen Daten getrennt, prüfe also, wo dein Backup-Repository liegt. Siehe [Sichern und Wiederherstellen](/de/guides/stackkits/back-up-and-restore).
+
+## Wenn etwas schiefgeht
+
+- Die Hub-Adresse öffnet sich nicht: Nutze die obigen Prüfungen und siehe dann [Fehlerbehebung](/de/guides/stackkits/troubleshooting).
+- Du kannst dich nicht anmelden: Verwende das Konto, das der Eigentümer in PocketID angelegt hat, nicht ein kombify-Cloud-Konto.
+- Ein Dienst fehlt in der Liste: Er wurde in der validierten Konfiguration nicht ausgewählt. Ändere die StackSpec und generiere neu.
+- Füge den Inhalt von `.stackkit/access.json` niemals in einen Chat, ein Issue oder eine E-Mail ein.
 
 [Plattformdienste](/de/stackkits/apps/overview) erklärt die Dienste hinter dem Hub. [Anwendungsfälle](/de/guides/stackkits/use-cases/overview) listet die Workloads auf, die du hinzufügen kannst.

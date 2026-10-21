@@ -11,7 +11,9 @@ sidebarTitle: "migrate"
 
 يقبل `--complete-with` StackSpec v2 كاملة وصريحة واحدة، وليس تراكبًا جزئيًا أبدًا. فهو يوفّق ارتباطات Site والعقد والعتاد القديمة الحتمية، ثم يستخدم مرجعية Architecture v2 المحكومة المضمَّنة. تحتوي النتيجة المكتملة على المرشّح القانوني الصريح وتجزئة ResolvedPlan الخاصة به. يُبلَّغ عن أهلية المولّد بصورة مستقلة عن صلاحية CUE، وتتبع جاهزية ResolvedPlan.
 
-يكتب `--spec-output` بالضبط StackSpec v2 القانونية المكتملة بصيغة JSON حتمية. وهو صالح فقط مع `--complete-with`، ولا يعيد الكتابة في المكان نفسه افتراضيًا، ويرفض استبدال هدف قانوني موجود؛ فالاستبدال القانوني يتطلب مسار تأليف StackSpec صريحًا مصرَّحًا بـ CAS.
+يكتب يوفر `--inventory` Inventory المرصود الذي يُحل الإكمال مقابله. لا يمكن حل Kit تربط خطته حقائق العقدة (يربط Basement عنوان node-site لمستمع LAN الخاص به) من دونه، ولا يخترعها الإكمال أبدًا.
+
+`--spec-output` بالضبط StackSpec v2 القانونية المكتملة بصيغة JSON حتمية. وهو صالح فقط مع `--complete-with`، ولا يعيد الكتابة في المكان نفسه افتراضيًا، ويرفض استبدال هدف قانوني موجود؛ فالاستبدال القانوني يتطلب مسار تأليف StackSpec صريحًا مصرَّحًا بـ CAS.
 
 تنتهي النتيجة الجاهزة لحل الظل بنجاح. أما النتيجة المحجوبة فتُصدَر أيضًا كإخراج قابل للقراءة الآلية، ثم ينتهي الأمر بفشل. يربط السياق المحلية القديمة وعتاد Pi فقط؛ ولا يختار Kit أبدًا.
 
@@ -24,6 +26,7 @@ stackkit migrate [v1-spec-file] [flags]
 | `--complete-with` | string | — | مرشّح StackSpec v2 كامل وصريح للتوفيق والحل بالمرجعية المضمَّنة (وليس تراكبًا جزئيًا أبدًا) |
 | `--force` | bool | — | استبدل بصورة ذرّية إخراج نتيجة ترحيل موجودًا؛ ويتطلب إخراج StackSpec القانونية مسارًا جديدًا |
 | `--format` | string | `json` | صيغة الإخراج القابلة للقراءة الآلية: json أو yaml |
+| `--inventory` | string | — | مسار مستند Inventory المرصود الذي يُحل الإكمال مقابله (يتطلب `--complete-with`) |
 | `--output, -o` | string | — | اكتب نتيجة الترحيل تحت دليل العمل بدل stdout |
 | `--spec-output` | string | — | اكتب StackSpec v2 القانونية المكتملة بصيغة JSON حتمية تحت دليل العمل (يتطلب `--complete-with`) |
 | `--target-kit` | string | — | KitProfile الهدف الصريح الذي تدعمه المرجعية (لا يُستنتج من السياق أبدًا) |
@@ -39,6 +42,9 @@ stackkit migrate legacy.yaml --target-kit cloud-kit
 
 # Reconcile with a full StackSpec v2 and write the completed canonical spec
 stackkit migrate legacy.yaml --target-kit basement-kit --complete-with explicit-v2.yaml --spec-output stack-spec.v2.json
+
+# Resolve the completion against an observed Inventory
+stackkit migrate legacy.yaml --target-kit basement-kit --complete-with explicit-v2.yaml --inventory inventory.yaml
 
 # Print the report as YAML
 stackkit migrate legacy.yaml --format yaml

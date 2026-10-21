@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 export const workspaceRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const platformKey = (platform = process.platform, arch = process.arch) => `${platform}-${arch}`;
 export const executableName = (binary, platform = process.platform) => (platform === 'win32' ? `${binary}.exe` : binary);
-const BOOTSTRAP_FILES = new Set(['.kombify/beads-cloudflare.json', 'scripts/beads-cloudflare-access.mjs', 'scripts/lib/beads-github-auth.mjs', 'scripts/beads-session-tools.mjs', 'scripts/beads-bridge-tools-lib.mjs', 'internal/planning/beads-bridge-tools.json']);
+const BOOTSTRAP_FILES = new Set(['.kombify/beads-cloudflare.json', 'scripts/beads-cloudflare-access.mjs', 'scripts/lib/beads-github-auth.mjs', 'scripts/lib/beads-session-broker.mjs', 'scripts/beads-session-tools.mjs', 'scripts/beads-bridge-tools-lib.mjs', 'internal/planning/beads-bridge-tools.json']);
 
 // Generated bootstrap files have a source-only syntax/JSON gate in every repo.
 export function bootstrapSourceChecks(files, fileExists = () => true) {

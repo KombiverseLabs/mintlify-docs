@@ -1,0 +1,76 @@
+---
+title: "Cambia, pausa o elimina una dirección"
+description: "Qué puedes editar, cómo desactivar una dirección y qué nombres no se pueden cambiar"
+sidebarTitle: "Cambiar o eliminar"
+icon: "sliders"
+---
+
+Esto es lo que puedes hacer con una dirección una vez que existe y lo que ven los
+visitantes después.
+
+## Qué puedes cambiar
+
+| Cambio | ¿Es posible? |
+| --- | --- |
+| A dónde apunta la dirección (destino) | Sí |
+| Activar o desactivar una app ("exposed") | Sí |
+| Pausar o reanudar la dirección (estado) | Sí |
+| Descripción | Sí |
+| El propio nombre | No |
+
+Un nombre no se puede renombrar. Para tener otro nombre, añade una dirección
+nueva con el nombre que quieras, traslada a tus visitantes y luego elimina la
+antigua.
+
+Los cambios surten efecto con rapidez. kombify.me mantiene una caché de
+enrutamiento de unos 60 segundos y la vacía cuando cambias o eliminas una
+dirección.
+
+## Pasos
+
+**Desactivar una app:** desactiva "exposed" para esa app. Los visitantes ven
+entonces una página "not exposed" (404). Vuelve a activarla cuando quieras.
+
+**Pausar una dirección:** define su estado como inactive. Los visitantes reciben
+una respuesta 503 "inactive". Defínelo como active para reanudarla.
+
+**Apuntarla a otro sitio:** cambia el destino. El nuevo destino debe seguir las
+mismas reglas que antes. Una dirección pública necesita una dirección web
+pública.
+
+**Eliminar una dirección:** bórrala. Tras la eliminación, el nombre deja de
+funcionar.
+
+## Lo que ven los visitantes
+
+| Situación | El visitante ve |
+| --- | --- |
+| App desactivada | 404 "not exposed" |
+| Dirección en pausa | 503 "inactive" |
+| Terminó el periodo de uso compartido temporal | 410 "publication expired" |
+| No se puede alcanzar tu servidor | 502 "Bad Gateway" |
+| Dirección privada, ayudante sin conexión | 503, inténtalo de nuevo en breve |
+
+## Cuentas suspendidas
+
+Si se suspende una cuenta autoalojada, su clave de API se rechaza con un mensaje
+403 "account suspended". kombify.me no tiene una página pública aparte sobre
+denuncias o direcciones bloqueadas. Si crees que ha ocurrido por error, escribe a
+[info@kombify.io](mailto:info@kombify.io) con el nombre y la hora.
+
+## Sustituir tu clave
+
+Una cuenta autoalojada puede sustituir su clave de API. La clave antigua deja de
+funcionar de inmediato, así que actualiza todos los lugares donde se usa.
+
+## Si algo sale mal
+
+| Lo que ves | Qué hacer |
+| --- | --- |
+| Cambio rechazado, "access denied" (403) | La dirección pertenece a otra cuenta. |
+| "subdomain not found" (404) | Comprueba el nombre. Puede que ya se haya eliminado. |
+| Destino rechazado | La ruta pública solo acepta direcciones `http` o `https` públicas. |
+| Se sigue mostrando el destino antiguo | Espera aproximadamente un minuto y recarga. |
+
+Consulta [Solución de problemas](/es/kombify-me/troubleshooting) para más
+información.

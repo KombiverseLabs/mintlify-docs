@@ -9,152 +9,373 @@ keywords: ["密码", "Vaultwarden", "Bitwarden", "密码管理器", "浏览器�
 
 import { clientSetupLabelsZhHans } from "/snippets/client-setup-labels-zh-Hans.jsx";
 
-import { ClientSetupGuide } from "/snippets/client-setup-guide.jsx";
+import { ClientSetupGuide, ClientGuideDialog } from "/snippets/client-setup-guide.jsx";
 
-<ClientSetupGuide
-  labels={clientSetupLabelsZhHans}
-  locale="zh-Hans"
-  id="kcg-passwords"
-  meta={[
-    { icon: "phone", text: "手机、浏览器和电脑" },
-    { icon: "steps", text: "6 个简短步骤" },
-    { icon: "book", text: "无需任何基础" },
-  ]}
-  requirements={[
-    "你的保险库地址，例如 https://vault.home.test",
-    "发送到你邮箱地址的邀请",
-    "每台设备都已由设置 kombify 的人为你的家庭保险库准备好",
-    "一个你能记住的主密码",
-  ]}
-  requirementsHelp={{ label: "还没有邀请？", target: "kcg-passwords-no-invite" }}
-  appsTitle="先下载 Bitwarden 应用。"
-  vendor={{ label: "Bitwarden 的全部下载", href: "https://bitwarden.com/download/" }}
-  apps={[
-    { platform: "apple", label: "iPhone 和 iPad", detail: "Bitwarden Password Manager", store: "在 App Store 中打开", href: "https://apps.apple.com/app/bitwarden-password-manager/id1137397744", vendor: "Bitwarden", official: true },
-    { platform: "android", label: "Android", detail: "Bitwarden Password Manager", store: "在 Google Play 中打开", href: "https://play.google.com/store/apps/details?id=com.x8bit.bitwarden", vendor: "Bitwarden", official: true },
-    { platform: "browser", label: "浏览器扩展", detail: "Chrome、Firefox、Edge、Safari 等", store: "打开 Bitwarden 下载页面", href: "https://bitwarden.com/download/", vendor: "Bitwarden", official: true },
-    { platform: "desktop", label: "电脑", detail: "Windows、macOS 和 Linux", store: "打开 Bitwarden 下载页面", href: "https://bitwarden.com/download/", vendor: "Bitwarden", official: true },
-  ]}
-  appsNote="浏览器商店：[Chrome](https://chromewebstore.google.com/detail/bitwarden-password-manager/nngceckbapebfimnlniiiahkandclblb) · [Firefox](https://addons.mozilla.org/firefox/addon/bitwarden-password-manager/) · [Edge](https://microsoftedge.microsoft.com/addons/detail/bitwarden-password-manager/jbkfoedolllekgbhcbcoahefnbanhhlh) · [Safari（Mac App Store）](https://apps.apple.com/app/bitwarden/id1352778147)。你的保险库运行在 Vaultwarden 上，它可以配合这些官方 Bitwarden 应用使用。你不需要单独的 Vaultwarden 应用。"
-  stepsTitle="按步骤设置你的保险库。"
-  steps={[
-    {
-      tab: "打开保险库",
-      title: "在浏览器中打开你的保险库。",
-      intro: "先从电脑开始。你的保险库有自己的网址，就像一个只有你们家庭使用的网站。",
-      clicks: [
-        "在浏览器的地址栏中输入你的保险库地址，例如 **https://vault.home.test**，然后按 Enter。",
-        "在登录框下方点击 [[Create account]]。",
-      ],
-      note: "本指南中的地址只是示例。请使用设置 kombify 的人提供给你的地址。",
-      faq: { q: "什么是保险库地址？", a: "它是你们家庭密码保险库的网址。通常以 **https://vault.** 开头，以你家庭网络的名称结尾。设置 kombify 的人可以告诉你确切的地址。" },
-      check: "你看到 [[Create account]] 表单。",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-01-open-vault.webp", width: 1088, height: 830, alt: "Vaultwarden 登录页面，标出了 Create account 链接", caption: "保险库登录页面", credit: "kombify 截图", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: 2, top: 84.3, left: 38.3, width: 23.5, height: 7.2 }] },
-    },
-    {
-      tab: "创建账号",
-      title: "创建你的账号。",
-      intro: "你的保险库只接受受邀的邮箱地址。请使用收到邀请的同一个地址。",
-      clicks: [
-        "在 [[Email address]] 中输入你受邀的邮箱地址。",
-        "在 [[Name]] 中输入你的名字。运营保险库的人以及你与之共享密码的人都可以看到它。",
-        "点击 [[Continue]]。",
-      ],
-      faq: { q: "这是我的 kombify 账号吗？", a: "不是。这个账号只属于你的密码保险库。它有自己的邮箱地址和自己的主密码。" },
-      check: "页面现在要求你 [[Set a strong password]]。",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-02-create-account.webp", width: 1088, height: 718, alt: "创建账号表单，邮箱地址为 alex@example.com，名字为 Alex Example", caption: "创建账号", credit: "kombify 截图", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: 1, top: 37.6, left: 16.4, width: 65.1, height: 13.4 }, { n: 2, top: 61, left: 16.4, width: 65.1, height: 13.4 }, { n: 3, top: 76.3, left: 14, width: 72.1, height: 13.9 }] },
-    },
-    {
-      tab: "主密码",
-      title: "选择你的主密码。",
-      intro: "主密码是你仍然需要记住的唯一一个密码。它可以解锁所有其他密码。",
-      clicks: [
-        "在 [[Master password]] 中输入一个较长的密码。由四个或更多词组成的一句短话效果很好。",
-        "在 [[Confirm master password]] 中再次输入相同的密码。",
-        "点击 [[Create account]]。如果页面建议安装浏览器扩展，请点击 [[Add it later]]，然后点击 [[Skip to web app]]。你会在第 5 步连接扩展。",
-      ],
-      note: "**忘记的主密码无人能够找回**，运营你保险库的人也不行。请把它写下来，并把纸条保存在保险库之外的安全地方。",
-      faq: { q: "强度条是什么意思？", a: "它估计你的密码有多难被猜到。请争取达到 **Strong**。长一些比复杂更好。" },
-      check: "你的空保险库会打开，标题为 [[All vaults]]。",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-03-master-password.webp", width: 1088, height: 1310, alt: "Set a strong password 页面，主密码输入了两次，强度评级为 Strong", caption: "设置强密码", credit: "kombify 截图", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: 1, top: 25.5, left: 16.4, width: 60.7, height: 7.3 }, { n: 2, top: 52.2, left: 16.4, width: 60.7, height: 7.3 }, { n: 3, top: 87, left: 14, width: 72.1, height: 7.6 }] },
-    },
-    {
-      tab: "第一个密码",
-      title: "保存你的第一个密码。",
-      intro: "保存一条登录信息作为测试。之后它可以证明你的应用已连接到你的保险库。",
-      clicks: [
-        "在右上角点击 [[New]]，然后选择 [[Login]]。如果先出现欢迎窗口，请点击 [[Skip]]。",
-        "在 [[Item name]] 中输入一个你认得的名称，例如某个商店的名称。",
-        "输入你的 [[Username]]。在 [[Password]] 旁点击圆形箭头生成一个密码，然后点击 [[Use this password]]。",
-        "点击 [[Save]]。",
-      ],
-      note: "在 [[Website (URI)]] 下添加该商店的网址。之后浏览器扩展就会在该网站上建议使用这条登录信息。",
-      check: "出现消息 [[Item added]]，并且你的登录信息显示在列表中。",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-04-new-login.webp", width: 1472, height: 1664, alt: "New Login 窗口，条目名称为 Example Shop，含用户名和生成的密码", caption: "New Login", credit: "kombify 截图", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: 2, top: 12.1, left: 7.9, width: 82.6, height: 5.8 }, { n: 3, top: 41.8, left: 7.9, width: 79.3, height: 5.8 }, { n: 3, top: 52.3, left: 87.5, width: 5.7, height: 5 }, { n: 4, top: 92.1, left: 2.7, width: 10.4, height: 6 }] },
-    },
-    {
-      tab: "连接应用",
-      title: "连接 Bitwarden 应用。",
-      intro: "每个 Bitwarden 应用起初都会连接到 Bitwarden 自己的服务器。请告诉它一次，改用你的保险库。",
-      clicks: [
-        "从上面的列表安装 Bitwarden 应用并打开它。",
-        "在登录界面中，打开 [[Logging in on]] 菜单并选择 [[Self-hosted]]。在电脑应用中，该菜单叫作 [[Accessing]]。",
-        "在 [[Server URL]] 中输入你的保险库地址，开头带上 **https://**，然后点按 [[Save]]。",
-        "使用你的邮箱地址和主密码登录。",
-      ],
-      note: "请在你使用的每部手机、每个浏览器和每台电脑上重复这些步骤。每一个都需要输入一次你的保险库地址。",
-      faq: { q: "为什么这里没有应用的图片？", a: "Bitwarden 的条款没有授权复用其图片。它自己的指南展示了每一个界面，上面的标签与之一致。" },
-      check: "应用显示你在第 4 步保存的登录信息。",
-      visual: {
-        tag: "BITWARDEN 指南",
-        title: "Bitwarden 展示了每个界面",
-        text: "在 Bitwarden 的指南中选择你的设备。请查找关于**自托管**服务器的部分。",
-        links: [
-          { label: "将应用连接到你自己的服务器", detail: "bitwarden.com · 所有设备", href: "https://bitwarden.com/help/change-client-environment/", icon: "server" },
-          { label: "浏览器扩展入门", detail: "bitwarden.com", href: "https://bitwarden.com/help/getting-started-browserext/", icon: "browser" },
-          { label: "移动应用入门", detail: "bitwarden.com", href: "https://bitwarden.com/help/getting-started-mobile/", icon: "phone" },
-        ],
-      },
-    },
-    {
-      tab: "检查",
-      title: "一切都连接好了吗？",
-      intro: "在网页版保险库和一个应用中检查。只勾选你亲自检查过的项目。",
-      verify: [
-        "我可以打开我的保险库地址并登录。",
-        "我保存的登录信息显示在我手机、浏览器或电脑上的 Bitwarden 应用中。",
-        "我的主密码已写下来，并保存在保险库之外。",
-      ],
-      note: "本指南不会读取你的保险库。你的勾选只保存在此浏览器中。",
-      check: "现在你可以把其他密码迁移到保险库中了。",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-05-first-item.webp", width: 1430, height: 300, alt: "All vaults 列表，显示已保存的 Example Shop 登录信息", caption: "保险库中的第一条登录信息", credit: "kombify 截图", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · web vault 2026.7.0", captured: "2026-09-24", annotations: [{ n: null, top: 37.2, left: 1, width: 98, height: 58.1 }] },
-    },
-  ]}
-  nextTitle="接下来做什么。"
-  next={[
-    { icon: "shield", title: "开启两步验证登录", text: "Bitwarden 介绍了如何添加第二道登录步骤。", href: "https://bitwarden.com/help/setup-two-step-login/" },
-    { icon: "server", title: "备份保险库", text: "面向运营 kombify 的人：保护保险库数据。", href: "/zh-Hans/guides/stackkits/back-up-and-restore" },
-  ]}
-  help={[
-    { id: "kcg-passwords-no-invite", q: "我还没有保险库地址或邀请。", a: "请询问你们家庭中设置 kombify 的人。他们会添加 Passwords 服务，并邀请你的邮箱地址。[Passwords 如何与 kombify 配合](/zh-Hans/guides/stackkits/use-cases/passwords) · [所有者设置](/zh-Hans/stackkits/apps/vaultwarden)。" },
-    { q: "创建账号时提示“Registration not allowed or user already exists”。", a: "请检查你使用的是否恰好是受邀的邮箱地址。如果你已经创建过账号，请返回并直接登录。否则，请索取新的邀请。" },
-    { q: "地址打不开，或者浏览器对连接发出警告。", a: "请先在你家庭网络中的设备上尝试该地址。如果你的保险库只在家里运行，请连接你的家庭 Wi-Fi，或你拿到的家庭连接应用。每台设备还必须设置为信任你的家庭服务器；这由设置 kombify 的人完成。如果浏览器提示连接不是私密连接，请到此为止并询问他们。不要点击跳过警告。[关于家庭地址](/zh-Hans/guides/stackkits/use-cases/network)。" },
-    { q: "我忘记了主密码。", a: "没有人能够找回它。你的保险库是用它加密的。运营你保险库的人可以删除你的账号，让你重新开始，但保存在其中的密码会丢失。[Bitwarden 关于主密码](https://bitwarden.com/help/master-password/)。" },
-    { q: "我的 Android 手机没有 Google Play。", a: "Bitwarden 运营着自己的 F-Droid 仓库。地址列在 [Bitwarden 下载页面](https://bitwarden.com/download/)上。" },
-    { q: "为什么既提到 Vaultwarden 又提到 Bitwarden？", a: "Vaultwarden 是运行你的保险库的程序。它是一个非官方的服务器，可与官方 Bitwarden 应用配合使用。Vaultwarden 与 Bitwarden, Inc. 没有关联。图片展示的是英文版 Vaultwarden 1.37.2；较新的版本和其他语言可能看起来不同。" },
-  ]}
-  attribution="**Vaultwarden 运行你的保险库，Bitwarden 应用打开它。kombify 为你安装它。** kombify 并不制作这两个应用。[Vaultwarden](https://github.com/dani-garcia/vaultwarden)（AGPL-3.0）· 网页版保险库：[为 Vaultwarden 构建的 Bitwarden 网页客户端](https://github.com/dani-garcia/bw_web_builds)（GPL-3.0）· [Bitwarden](https://bitwarden.com/)"
-  sources={{
-    summary: "kombify 从本地 Vaultwarden 安装中截取的截图 · 虚构账号 · 英文菜单。",
-    paragraphs: [
-      "**截图 · 2026 年 9 月 24 日。** kombify 从本地参考安装中截取了网页版保险库的图片：Vaultwarden 1.37.2，即 StackKits 目录为 Passwords 提供的镜像，附带其内置的 web vault 2026.7.0（Bitwarden 网页客户端，GPL-3.0）。该安装使用示例地址 https://vault.home.test 和虚构账号 alex@example.com。它是参考安装，而不是 StackKits 部署测试。本指南添加了紫色标记。",
-      "此处未展示 Bitwarden 应用的界面。[Bitwarden 的条款](https://bitwarden.com/terms/)没有授权复用其内容，因此第 5 步链接到 Bitwarden 自己的指南。",
-      "商店链接和帮助页面于 2026 年 9 月 24 日核对。你的进度只保存在此浏览器中。本指南不会连接任何账号，也不会索要任何密码。",
-    ],
-    links: [
-      { label: "Bitwarden：连接各个应用", href: "https://bitwarden.com/help/change-client-environment/" },
-      { label: "Bitwarden 下载", href: "https://bitwarden.com/download/" },
-      { label: "Vaultwarden 项目", href: "https://github.com/dani-garcia/vaultwarden" },
-    ],
-  }}
-/>
+<div className="kombify-client-guide not-prose" id="kcg-passwords" dir="ltr" lang="zh-Hans" style={{"--kcg-steps": "6"}}>
+<div className="guide-content">
+<ClientSetupGuide id="kcg-passwords" labels={clientSetupLabelsZhHans} locale="zh-Hans" checks={[0,0,0,0,0,3]} />
+
+<div className="page-top">
+<div className="intro-meta">
+<span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="20" rx="3" width="12" x="6" y="2"></rect><path d="M10 5h4M11 19h2"></path></svg> 手机、浏览器和电脑</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="7" rx="1.5" width="7" x="3" y="3"></rect><rect height="7" rx="1.5" width="7" x="14" y="3"></rect><rect height="7" rx="1.5" width="7" x="3" y="14"></rect><rect height="7" rx="1.5" width="7" x="14" y="14"></rect></svg> 6 个简短步骤</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M12 5v15M3 4c4-1 6 0 9 1 3-1 5-2 9-1v15c-4-1-6 0-9 1-3-1-5-2-9-1Z"></path></svg> 无需任何基础</span>
+</div>
+<div className="page-tools">
+<button aria-label="打印指南" className="tool-button" type="button" data-guide-action="print"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M6 8V3h12v5M6 17H3V8h18v9h-3M6 14h12v7H6Z"></path><path d="M17 11h.01"></path></svg></button>
+</div>
+</div>
+<div className="ready-strip">
+<span className="guide-strong">你需要准备什么</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg> 你的保险库地址，例如 https://vault.home.test</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg> 发送到你邮箱地址的邀请</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg> 每台设备都已由设置 kombify 的人为你的家庭保险库准备好</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg> 一个你能记住的主密码</span><a href="#kcg-passwords-no-invite">还没有邀请？ <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+</div>
+<section aria-labelledby="kcg-passwords-apps-title" className="downloads" id="kcg-passwords-apps">
+<div className="section-top">
+<h2 id="kcg-passwords-apps-title">先下载 Bitwarden 应用。</h2><a className="small-link" href="https://bitwarden.com/download/" rel="noopener noreferrer" target="_blank">Bitwarden 的全部下载 <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only">（在新标签页中打开）</span></a>
+</div>
+<div className="downloads-grid">
+<a className="download-card" href="https://apps.apple.com/app/bitwarden-password-manager/id1137397744" rel="noopener noreferrer" target="_blank"><span className="platform-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M16.7 1.8c0 2.1-1.7 4.4-3.7 4.2-.4-2.1 1.8-4.3 3.7-4.2ZM20.4 17.3c-.5 1.2-.8 1.7-1.5 2.7-1 1.5-2.4 3.3-4.2 3.3-1.6 0-2-1-4.1-.9-2.1 0-2.5 1-4.2.9-1.8-.1-3.1-1.7-4.1-3.2C-.5 15.9-.7 10.4 1 7.6c1.2-2 3.1-3.1 4.9-3.1 1.9 0 3.1 1 4.7 1 1.5 0 2.5-1 4.7-1 1.6 0 3.3.9 4.5 2.3-4 2.2-3.3 8 0 10.5Z" fill="currentColor" stroke="none" transform="translate(2 0) scale(.87)"></path></svg></span><span className="download-text"><strong>iPhone 和 iPad</strong><small>Bitwarden Password Manager</small><span className="store-name">在 App Store 中打开 <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg></span><span className="badge official">官方 · Bitwarden</span></span><span className="sr-only">（在新标签页中打开）</span></a><a className="download-card" href="https://play.google.com/store/apps/details?id=com.x8bit.bitwarden" rel="noopener noreferrer" target="_blank"><span className="platform-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M5 12a7 7 0 0 1 14 0v6H5Zm2-6L5 3m12 3 2-3M2 12v5m20-5v5M8 18v4m8-4v4"></path><path d="M8.5 9h.01M15.5 9h.01"></path></svg></span><span className="download-text"><strong>Android</strong><small>Bitwarden Password Manager</small><span className="store-name">在 Google Play 中打开 <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg></span><span className="badge official">官方 · Bitwarden</span></span><span className="sr-only">（在新标签页中打开）</span></a><a className="download-card" href="https://bitwarden.com/download/" rel="noopener noreferrer" target="_blank"><span className="platform-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="16" rx="2" width="20" x="2" y="4"></rect><path d="M2 9h20M6 6.5h.01M9 6.5h.01"></path></svg></span><span className="download-text"><strong>浏览器扩展</strong><small>Chrome、Firefox、Edge、Safari 等</small><span className="store-name">打开 Bitwarden 下载页面 <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg></span><span className="badge official">官方 · Bitwarden</span></span><span className="sr-only">（在新标签页中打开）</span></a><a className="download-card" href="https://bitwarden.com/download/" rel="noopener noreferrer" target="_blank"><span className="platform-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="14" rx="2" width="20" x="2" y="3"></rect><path d="M8 22h8M12 17v5"></path></svg></span><span className="download-text"><strong>电脑</strong><small>Windows、macOS 和 Linux</small><span className="store-name">打开 Bitwarden 下载页面 <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg></span><span className="badge official">官方 · Bitwarden</span></span><span className="sr-only">（在新标签页中打开）</span></a>
+</div>
+<p className="download-hint">浏览器商店：<a className="" href="https://chromewebstore.google.com/detail/bitwarden-password-manager/nngceckbapebfimnlniiiahkandclblb" rel="noopener noreferrer" target="_blank">Chrome <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only">（在新标签页中打开）</span></a> · <a className="" href="https://addons.mozilla.org/firefox/addon/bitwarden-password-manager/" rel="noopener noreferrer" target="_blank">Firefox <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only">（在新标签页中打开）</span></a> · <a className="" href="https://microsoftedge.microsoft.com/addons/detail/bitwarden-password-manager/jbkfoedolllekgbhcbcoahefnbanhhlh" rel="noopener noreferrer" target="_blank">Edge <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only">（在新标签页中打开）</span></a> · <a className="" href="https://apps.apple.com/app/bitwarden/id1352778147" rel="noopener noreferrer" target="_blank">Safari（Mac App Store） <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only">（在新标签页中打开）</span></a>。你的保险库运行在 Vaultwarden 上，它可以配合这些官方 Bitwarden 应用使用。你不需要单独的 Vaultwarden 应用。</p>
+</section>
+<section aria-labelledby="kcg-passwords-guide-title" className="guide-section" id="kcg-passwords-guide">
+<div className="guide-heading">
+<h2 id="kcg-passwords-guide-title">按步骤设置你的保险库。</h2>
+</div>
+<div className="wizard">
+<div aria-label="设置步骤" className="step-tabs" role="tablist">
+<button aria-controls="kcg-passwords-panel-0" aria-selected="true" className="step-tab" id="kcg-passwords-tab-0" data-guide-tab="0" role="tab" tabIndex="0" type="button"><span className="step-dot">1</span><span>打开保险库</span></button><button aria-controls="kcg-passwords-panel-1" aria-selected="false" className="step-tab" id="kcg-passwords-tab-1" data-guide-tab="1" role="tab" tabIndex="-1" type="button"><span className="step-dot">2</span><span>创建账号</span></button><button aria-controls="kcg-passwords-panel-2" aria-selected="false" className="step-tab" id="kcg-passwords-tab-2" data-guide-tab="2" role="tab" tabIndex="-1" type="button"><span className="step-dot">3</span><span>主密码</span></button><button aria-controls="kcg-passwords-panel-3" aria-selected="false" className="step-tab" id="kcg-passwords-tab-3" data-guide-tab="3" role="tab" tabIndex="-1" type="button"><span className="step-dot">4</span><span>第一个密码</span></button><button aria-controls="kcg-passwords-panel-4" aria-selected="false" className="step-tab" id="kcg-passwords-tab-4" data-guide-tab="4" role="tab" tabIndex="-1" type="button"><span className="step-dot">5</span><span>连接应用</span></button><button aria-controls="kcg-passwords-panel-5" aria-selected="false" className="step-tab" id="kcg-passwords-tab-5" data-guide-tab="5" role="tab" tabIndex="-1" type="button"><span className="step-dot">6</span><span>检查</span></button>
+</div>
+<div aria-labelledby="kcg-passwords-tab-0" className="guide-panel active" id="kcg-passwords-panel-0" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+第 01 步 / 共 06 步
+</div>
+
+<div className="step-content">
+
+### 在浏览器中打开你的保险库。
+
+<p className="step-intro">先从电脑开始。你的保险库有自己的网址，就像一个只有你们家庭使用的网站。</p>
+
+<ol className="click-list">
+<li><span className="click-num">1</span><span>在浏览器的地址栏中输入你的保险库地址，例如 <strong>https://vault.home.test</strong>，然后按 Enter。</span></li>
+<li><span className="click-num">2</span><span>在登录框下方点击 <span className="key">Create account</span>。</span></li>
+</ol>
+
+<div className="micro-note">本指南中的地址只是示例。请使用设置 kombify 的人提供给你的地址。</div>
+
+<div style={{ marginBlock: "1rem" }}>
+<p><strong>什么是保险库地址？</strong></p>
+
+它是你们家庭密码保险库的网址。通常以 <strong>https://vault.</strong> 开头，以你家庭网络的名称结尾。设置 kombify 的人可以告诉你确切的地址。
+
+</div>
+
+<div className="step-check">你看到 <span className="key">Create account</span> 表单。</div>
+
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> KOMBIFY 截图</span>
+<div role="figure" className="screen-figure" aria-labelledby="kcg-passwords-capture-0">
+<div className="screen-image">
+<img noZoom alt="Vaultwarden 登录页面，标出了 Create account 链接" decoding="async" height="830" loading="eager" referrerPolicy="no-referrer" src="/images/guides/passwords/vaultwarden/web-01-open-vault.webp" width="1088"/><span aria-hidden="true" className="annotation" data-n="2" style={{"top": "84.3%", "left": "38.3%", "width": "23.5%", "height": "7.2%"}}></span><a className="image-fallback" href="/images/guides/passwords/vaultwarden/web-01-open-vault.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> 打开截图<span>图片未能加载。</span></a><button aria-label="放大截图：Vaultwarden 登录页面，标出了 Create account 链接" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-passwords-capture-0">
+保险库登录页面 · <a className="" href="#kcg-passwords-sources">kombify 截图</a><span className="meta">Vaultwarden 1.37.2 · web vault 2026.7.0 · 截取于 2026-09-24</span>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby="kcg-passwords-tab-1" className="guide-panel" id="kcg-passwords-panel-1" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+第 02 步 / 共 06 步
+</div>
+
+<div className="step-content">
+
+### 创建你的账号。
+
+<p className="step-intro">你的保险库只接受受邀的邮箱地址。请使用收到邀请的同一个地址。</p>
+
+<ol className="click-list">
+<li><span className="click-num">1</span><span>在 <span className="key">Email address</span> 中输入你受邀的邮箱地址。</span></li>
+<li><span className="click-num">2</span><span>在 <span className="key">Name</span> 中输入你的名字。运营保险库的人以及你与之共享密码的人都可以看到它。</span></li>
+<li><span className="click-num">3</span><span>点击 <span className="key">Continue</span>。</span></li>
+</ol>
+
+<div style={{ marginBlock: "1rem" }}>
+<p><strong>这是我的 kombify 账号吗？</strong></p>
+
+不是。这个账号只属于你的密码保险库。它有自己的邮箱地址和自己的主密码。
+
+</div>
+
+<div className="step-check">页面现在要求你 <span className="key">Set a strong password</span>。</div>
+
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> KOMBIFY 截图</span>
+<div role="figure" className="screen-figure" aria-labelledby="kcg-passwords-capture-1">
+<div className="screen-image">
+<img noZoom alt="创建账号表单，邮箱地址为 alex@example.com，名字为 Alex Example" decoding="async" height="718" loading="lazy" referrerPolicy="no-referrer" src="/images/guides/passwords/vaultwarden/web-02-create-account.webp" width="1088"/><span aria-hidden="true" className="annotation" data-n="1" style={{"top": "37.6%", "left": "16.4%", "width": "65.1%", "height": "13.4%"}}></span><span aria-hidden="true" className="annotation" data-n="2" style={{"top": "61%", "left": "16.4%", "width": "65.1%", "height": "13.4%"}}></span><span aria-hidden="true" className="annotation" data-n="3" style={{"top": "76.3%", "left": "14%", "width": "72.1%", "height": "13.9%"}}></span><a className="image-fallback" href="/images/guides/passwords/vaultwarden/web-02-create-account.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> 打开截图<span>图片未能加载。</span></a><button aria-label="放大截图：创建账号表单，邮箱地址为 alex@example.com，名字为 Alex Example" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-passwords-capture-1">
+创建账号 · <a className="" href="#kcg-passwords-sources">kombify 截图</a><span className="meta">Vaultwarden 1.37.2 · web vault 2026.7.0 · 截取于 2026-09-24</span>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby="kcg-passwords-tab-2" className="guide-panel" id="kcg-passwords-panel-2" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+第 03 步 / 共 06 步
+</div>
+
+<div className="step-content">
+
+### 选择你的主密码。
+
+<p className="step-intro">主密码是你仍然需要记住的唯一一个密码。它可以解锁所有其他密码。</p>
+
+<ol className="click-list">
+<li><span className="click-num">1</span><span>在 <span className="key">Master password</span> 中输入一个较长的密码。由四个或更多词组成的一句短话效果很好。</span></li>
+<li><span className="click-num">2</span><span>在 <span className="key">Confirm master password</span> 中再次输入相同的密码。</span></li>
+<li><span className="click-num">3</span><span>点击 <span className="key">Create account</span>。如果页面建议安装浏览器扩展，请点击 <span className="key">Add it later</span>，然后点击 <span className="key">Skip to web app</span>。你会在第 5 步连接扩展。</span></li>
+</ol>
+
+<div className="micro-note"><strong>忘记的主密码无人能够找回</strong>，运营你保险库的人也不行。请把它写下来，并把纸条保存在保险库之外的安全地方。</div>
+
+<div style={{ marginBlock: "1rem" }}>
+<p><strong>强度条是什么意思？</strong></p>
+
+它估计你的密码有多难被猜到。请争取达到 <strong>Strong</strong>。长一些比复杂更好。
+
+</div>
+
+<div className="step-check">你的空保险库会打开，标题为 <span className="key">All vaults</span>。</div>
+
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> KOMBIFY 截图</span>
+<div role="figure" className="screen-figure" aria-labelledby="kcg-passwords-capture-2">
+<div className="screen-image">
+<img noZoom alt="Set a strong password 页面，主密码输入了两次，强度评级为 Strong" decoding="async" height="1310" loading="lazy" referrerPolicy="no-referrer" src="/images/guides/passwords/vaultwarden/web-03-master-password.webp" width="1088"/><span aria-hidden="true" className="annotation" data-n="1" style={{"top": "25.5%", "left": "16.4%", "width": "60.7%", "height": "7.3%"}}></span><span aria-hidden="true" className="annotation" data-n="2" style={{"top": "52.2%", "left": "16.4%", "width": "60.7%", "height": "7.3%"}}></span><span aria-hidden="true" className="annotation" data-n="3" style={{"top": "87%", "left": "14%", "width": "72.1%", "height": "7.6%"}}></span><a className="image-fallback" href="/images/guides/passwords/vaultwarden/web-03-master-password.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> 打开截图<span>图片未能加载。</span></a><button aria-label="放大截图：Set a strong password 页面，主密码输入了两次，强度评级为 Strong" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-passwords-capture-2">
+设置强密码 · <a className="" href="#kcg-passwords-sources">kombify 截图</a><span className="meta">Vaultwarden 1.37.2 · web vault 2026.7.0 · 截取于 2026-09-24</span>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby="kcg-passwords-tab-3" className="guide-panel" id="kcg-passwords-panel-3" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+第 04 步 / 共 06 步
+</div>
+
+<div className="step-content">
+
+### 保存你的第一个密码。
+
+<p className="step-intro">保存一条登录信息作为测试。之后它可以证明你的应用已连接到你的保险库。</p>
+
+<ol className="click-list">
+<li><span className="click-num">1</span><span>在右上角点击 <span className="key">New</span>，然后选择 <span className="key">Login</span>。如果先出现欢迎窗口，请点击 <span className="key">Skip</span>。</span></li>
+<li><span className="click-num">2</span><span>在 <span className="key">Item name</span> 中输入一个你认得的名称，例如某个商店的名称。</span></li>
+<li><span className="click-num">3</span><span>输入你的 <span className="key">Username</span>。在 <span className="key">Password</span> 旁点击圆形箭头生成一个密码，然后点击 <span className="key">Use this password</span>。</span></li>
+<li><span className="click-num">4</span><span>点击 <span className="key">Save</span>。</span></li>
+</ol>
+
+<div className="micro-note">在 <span className="key">Website (URI)</span> 下添加该商店的网址。之后浏览器扩展就会在该网站上建议使用这条登录信息。</div>
+
+<div className="step-check">出现消息 <span className="key">Item added</span>，并且你的登录信息显示在列表中。</div>
+
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> KOMBIFY 截图</span>
+<div role="figure" className="screen-figure" aria-labelledby="kcg-passwords-capture-3">
+<div className="screen-image">
+<img noZoom alt="New Login 窗口，条目名称为 Example Shop，含用户名和生成的密码" decoding="async" height="1664" loading="lazy" referrerPolicy="no-referrer" src="/images/guides/passwords/vaultwarden/web-04-new-login.webp" width="1472"/><span aria-hidden="true" className="annotation" data-n="2" style={{"top": "12.1%", "left": "7.9%", "width": "82.6%", "height": "5.8%"}}></span><span aria-hidden="true" className="annotation" data-n="3" style={{"top": "41.8%", "left": "7.9%", "width": "79.3%", "height": "5.8%"}}></span><span aria-hidden="true" className="annotation" data-n="3" style={{"top": "52.3%", "left": "87.5%", "width": "5.7%", "height": "5%"}}></span><span aria-hidden="true" className="annotation" data-n="4" style={{"top": "92.1%", "left": "2.7%", "width": "10.4%", "height": "6%"}}></span><a className="image-fallback" href="/images/guides/passwords/vaultwarden/web-04-new-login.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> 打开截图<span>图片未能加载。</span></a><button aria-label="放大截图：New Login 窗口，条目名称为 Example Shop，含用户名和生成的密码" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-passwords-capture-3">
+New Login · <a className="" href="#kcg-passwords-sources">kombify 截图</a><span className="meta">Vaultwarden 1.37.2 · web vault 2026.7.0 · 截取于 2026-09-24</span>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby="kcg-passwords-tab-4" className="guide-panel" id="kcg-passwords-panel-4" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+第 05 步 / 共 06 步
+</div>
+
+<div className="step-content">
+
+### 连接 Bitwarden 应用。
+
+<p className="step-intro">每个 Bitwarden 应用起初都会连接到 Bitwarden 自己的服务器。请告诉它一次，改用你的保险库。</p>
+
+<ol className="click-list">
+<li><span className="click-num">1</span><span>从上面的列表安装 Bitwarden 应用并打开它。</span></li>
+<li><span className="click-num">2</span><span>在登录界面中，打开 <span className="key">Logging in on</span> 菜单并选择 <span className="key">Self-hosted</span>。在电脑应用中，该菜单叫作 <span className="key">Accessing</span>。</span></li>
+<li><span className="click-num">3</span><span>在 <span className="key">Server URL</span> 中输入你的保险库地址，开头带上 <strong>https://</strong>，然后点按 <span className="key">Save</span>。</span></li>
+<li><span className="click-num">4</span><span>使用你的邮箱地址和主密码登录。</span></li>
+</ol>
+
+<div className="micro-note">请在你使用的每部手机、每个浏览器和每台电脑上重复这些步骤。每一个都需要输入一次你的保险库地址。</div>
+
+<div style={{ marginBlock: "1rem" }}>
+<p><strong>为什么这里没有应用的图片？</strong></p>
+
+Bitwarden 的条款没有授权复用其图片。它自己的指南展示了每一个界面，上面的标签与之一致。
+
+</div>
+
+<div className="step-check">应用显示你在第 4 步保存的登录信息。</div>
+
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> BITWARDEN 指南</span>
+<div className="link-visual">
+<span className="guide-strong">Bitwarden 展示了每个界面</span><p>在 Bitwarden 的指南中选择你的设备。请查找关于<strong>自托管</strong>服务器的部分。</p><a className="vendor-link" href="https://bitwarden.com/help/change-client-environment/" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="7" rx="2" width="18" x="3" y="3"></rect><rect height="7" rx="2" width="18" x="3" y="14"></rect><path d="M7 6.5h.01M7 17.5h.01M16 6.5h2M16 17.5h2"></path></svg><span>将应用连接到你自己的服务器<small>bitwarden.com · 所有设备</small></span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only">（在新标签页中打开）</span></a><a className="vendor-link" href="https://bitwarden.com/help/getting-started-browserext/" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="16" rx="2" width="20" x="2" y="4"></rect><path d="M2 9h20M6 6.5h.01M9 6.5h.01"></path></svg><span>浏览器扩展入门<small>bitwarden.com</small></span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only">（在新标签页中打开）</span></a><a className="vendor-link" href="https://bitwarden.com/help/getting-started-mobile/" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="20" rx="3" width="12" x="6" y="2"></rect><path d="M10 5h4M11 19h2"></path></svg><span>移动应用入门<small>bitwarden.com</small></span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only">（在新标签页中打开）</span></a>
+</div>
+</div>
+</div>
+<div aria-labelledby="kcg-passwords-tab-5" className="guide-panel" id="kcg-passwords-panel-5" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+第 06 步 / 共 06 步
+</div>
+
+<div className="step-content">
+
+### 一切都连接好了吗？
+
+<p className="step-intro">在网页版保险库和一个应用中检查。只勾选你亲自检查过的项目。</p>
+
+<div className="verify-list">
+<label><input type="checkbox" data-guide-step="5" data-guide-check="0" id="kcg-passwords-verify-5-0" /><span>我可以打开我的保险库地址并登录。</span></label>
+<label><input type="checkbox" data-guide-step="5" data-guide-check="1" id="kcg-passwords-verify-5-1" /><span>我保存的登录信息显示在我手机、浏览器或电脑上的 Bitwarden 应用中。</span></label>
+<label><input type="checkbox" data-guide-step="5" data-guide-check="2" id="kcg-passwords-verify-5-2" /><span>我的主密码已写下来，并保存在保险库之外。</span></label>
+</div>
+
+<div className="micro-note">本指南不会读取你的保险库。你的勾选只保存在此浏览器中。</div>
+
+<div className="step-check">现在你可以把其他密码迁移到保险库中了。</div>
+
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> KOMBIFY 截图</span>
+<div role="figure" className="screen-figure" aria-labelledby="kcg-passwords-capture-4">
+<div className="screen-image">
+<img noZoom alt="All vaults 列表，显示已保存的 Example Shop 登录信息" decoding="async" height="300" loading="lazy" referrerPolicy="no-referrer" src="/images/guides/passwords/vaultwarden/web-05-first-item.webp" width="1430"/><span aria-hidden="true" className="annotation" style={{"top": "37.2%", "left": "1%", "width": "98%", "height": "58.1%"}}></span><a className="image-fallback" href="/images/guides/passwords/vaultwarden/web-05-first-item.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> 打开截图<span>图片未能加载。</span></a><button aria-label="放大截图：All vaults 列表，显示已保存的 Example Shop 登录信息" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-passwords-capture-4">
+保险库中的第一条登录信息 · <a className="" href="#kcg-passwords-sources">kombify 截图</a><span className="meta">Vaultwarden 1.37.2 · web vault 2026.7.0 · 截取于 2026-09-24</span>
+</div>
+</div>
+</div>
+</div>
+<div className="wizard-bottom">
+<div className="progress-note">
+<span>6 个步骤中已完成 0 个</span>
+<div aria-hidden="true" className="progress-meter">
+<span></span><span></span><span></span><span></span><span></span><span></span>
+</div>
+</div>
+<button className="prev" disabled="" type="button"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"></path></svg> 返回</button><button className="next" type="button"><span>已完成 · 下一步</span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+</div>
+</div>
+<p className="provenance-inline">kombify 从本地 Vaultwarden 安装中截取的截图 · 虚构账号 · 英文菜单。 <a href="#kcg-passwords-sources">图片来源与日期</a></p>
+</section>
+<section aria-labelledby="kcg-passwords-more-title" className="more-section" id="kcg-passwords-more">
+<div className="section-top">
+<h2 id="kcg-passwords-more-title">接下来做什么。</h2>
+</div>
+<div className="more-grid">
+<a className="more-card" href="https://bitwarden.com/help/setup-two-step-login/" rel="noopener noreferrer" target="_blank"><span className="more-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M12 3 3 7v6c0 5 9 9 9 9s9-4 9-9V7Z"></path><path d="m8 12 3 3 5-6"></path></svg></span><span><strong>开启两步验证登录</strong><small>Bitwarden 介绍了如何添加第二道登录步骤。</small></span> <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only">（在新标签页中打开）</span></a><a className="more-card" href="/zh-Hans/guides/stackkits/back-up-and-restore"><span className="more-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="7" rx="2" width="18" x="3" y="3"></rect><rect height="7" rx="2" width="18" x="3" y="14"></rect><path d="M7 6.5h.01M7 17.5h.01M16 6.5h2M16 17.5h2"></path></svg></span><span><strong>备份保险库</strong><small>面向运营 kombify 的人：保护保险库数据。</small></span></a>
+</div>
+</section>
+<section aria-labelledby="kcg-passwords-help-title" className="faq-section" id="kcg-passwords-help">
+<h2 id="kcg-passwords-help-title">卡住了？</h2>
+<div data-guide-disclosure="" className="faq" id="kcg-passwords-no-invite">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>我还没有保险库地址或邀请。</strong></button>
+<div className="answer">
+请询问你们家庭中设置 kombify 的人。他们会添加 Passwords 服务，并邀请你的邮箱地址。<a className="" href="/zh-Hans/guides/stackkits/use-cases/passwords">Passwords 如何与 kombify 配合</a> · <a className="" href="/zh-Hans/stackkits/apps/vaultwarden">所有者设置</a>。
+</div>
+</div>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>创建账号时提示“Registration not allowed or user already exists”。</strong></button>
+<div className="answer">
+请检查你使用的是否恰好是受邀的邮箱地址。如果你已经创建过账号，请返回并直接登录。否则，请索取新的邀请。
+</div>
+</div>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>地址打不开，或者浏览器对连接发出警告。</strong></button>
+<div className="answer">
+请先在你家庭网络中的设备上尝试该地址。如果你的保险库只在家里运行，请连接你的家庭 Wi-Fi，或你拿到的家庭连接应用。每台设备还必须设置为信任你的家庭服务器；这由设置 kombify 的人完成。如果浏览器提示连接不是私密连接，请到此为止并询问他们。不要点击跳过警告。<a className="" href="/zh-Hans/guides/stackkits/use-cases/network">关于家庭地址</a>。
+</div>
+</div>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>我忘记了主密码。</strong></button>
+<div className="answer">
+没有人能够找回它。你的保险库是用它加密的。运营你保险库的人可以删除你的账号，让你重新开始，但保存在其中的密码会丢失。<a className="" href="https://bitwarden.com/help/master-password/" rel="noopener noreferrer" target="_blank">Bitwarden 关于主密码 <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only">（在新标签页中打开）</span></a>。
+</div>
+</div>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>我的 Android 手机没有 Google Play。</strong></button>
+<div className="answer">
+Bitwarden 运营着自己的 F-Droid 仓库。地址列在 <a className="" href="https://bitwarden.com/download/" rel="noopener noreferrer" target="_blank">Bitwarden 下载页面 <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only">（在新标签页中打开）</span></a>上。
+</div>
+</div>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>为什么既提到 Vaultwarden 又提到 Bitwarden？</strong></button>
+<div className="answer">
+Vaultwarden 是运行你的保险库的程序。它是一个非官方的服务器，可与官方 Bitwarden 应用配合使用。Vaultwarden 与 Bitwarden, Inc. 没有关联。图片展示的是英文版 Vaultwarden 1.37.2；较新的版本和其他语言可能看起来不同。
+</div>
+</div>
+</section>
+<div className="footline">
+<div className="attribution">
+<span className="guide-strong">Vaultwarden 运行你的保险库，Bitwarden 应用打开它。kombify 为你安装它。</span> kombify 并不制作这两个应用。<a className="" href="https://github.com/dani-garcia/vaultwarden" rel="noopener noreferrer" target="_blank">Vaultwarden <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only">（在新标签页中打开）</span></a>（AGPL-3.0）· 网页版保险库：<a className="" href="https://github.com/dani-garcia/bw_web_builds" rel="noopener noreferrer" target="_blank">为 Vaultwarden 构建的 Bitwarden 网页客户端 <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only">（在新标签页中打开）</span></a>（GPL-3.0）· <a className="" href="https://bitwarden.com/" rel="noopener noreferrer" target="_blank">Bitwarden <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only">（在新标签页中打开）</span></a>
+</div>
+<button className="reset" type="button">重置进度</button>
+</div>
+<section className="source-section" id="kcg-passwords-sources">
+<div data-guide-disclosure="" id="kcg-passwords-sources-detail">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>图片来源、已核对的链接和日期</strong></button>
+<div className="source-content">
+<p><strong>截图 · 2026 年 9 月 24 日。</strong> kombify 从本地参考安装中截取了网页版保险库的图片：Vaultwarden 1.37.2，即 StackKits 目录为 Passwords 提供的镜像，附带其内置的 web vault 2026.7.0（Bitwarden 网页客户端，GPL-3.0）。该安装使用示例地址 https://vault.home.test 和虚构账号 alex@example.com。它是参考安装，而不是 StackKits 部署测试。本指南添加了紫色标记。</p><p>此处未展示 Bitwarden 应用的界面。<a className="" href="https://bitwarden.com/terms/" rel="noopener noreferrer" target="_blank">Bitwarden 的条款 <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only">（在新标签页中打开）</span></a>没有授权复用其内容，因此第 5 步链接到 Bitwarden 自己的指南。</p><p>商店链接和帮助页面于 2026 年 9 月 24 日核对。你的进度只保存在此浏览器中。本指南不会连接任何账号，也不会索要任何密码。</p>
+<div className="source-links">
+<a className="" href="https://bitwarden.com/help/change-client-environment/" rel="noopener noreferrer" target="_blank">Bitwarden：连接各个应用 <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only">（在新标签页中打开）</span></a><a className="" href="https://bitwarden.com/download/" rel="noopener noreferrer" target="_blank">Bitwarden 下载 <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only">（在新标签页中打开）</span></a><a className="" href="https://github.com/dani-garcia/vaultwarden" rel="noopener noreferrer" target="_blank">Vaultwarden 项目 <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only">（在新标签页中打开）</span></a>
+</div>
+</div>
+</div>
+<div className="dim">
+由 kombify 提供的指南 · 产品名称、厂商应用截图和商标归其各自所有者所有。
+</div>
+</section>
+</div>
+<ClientGuideDialog aria-labelledby="kcg-passwords-zoom-title" className="zoom-dialog">
+<div className="dialog-header">
+<h2 id="kcg-passwords-zoom-title">截图</h2><button aria-label="关闭图片" className="dialog-close" type="button"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"></path></svg></button>
+</div>
+<div className="zoom-content">
+</div>
+</ClientGuideDialog>
+<div aria-live="polite" className="sr-only" role="status">
+</div>
+<div aria-hidden="true" className="toast">
+</div>
+</div>

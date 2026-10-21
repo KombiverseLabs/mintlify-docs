@@ -1,13 +1,22 @@
 ---
-title: "Identity in StackKits"
-description: "How local owner identity and optional hosted sign-in remain separate."
+title: "Identity and Access"
+description: "How local owner identity and hosted sign-in remain separate, with permissions for hosted services."
 icon: "shield-halved"
 ---
 
-# Identity in StackKits
-
 StackKits keeps the owner of a local homelab authoritative. Installing and
 operating a stack does not require a hosted account.
+
+## In plain words
+
+There are two kinds of sign-in. One belongs to your own homelab and stays on
+your computer. The other is your optional kombify account. They do not replace
+each other.
+
+## What you need first
+
+Nothing from kombify. The local identity comes with the StackKit you install.
+A kombify account is only needed if you choose to connect to a hosted service.
 
 ## Local owner identity
 
@@ -31,22 +40,54 @@ standalone lifecycle.
   </Card>
 </CardGroup>
 
-## Optional hosted identity
+## Optional hosted sign-in
 
-When a user deliberately connects to a hosted kombify service, interactive
-sign-in uses the official `login.kombify.io` domain. That hosted identity is
-an optional convenience layer; it does not replace or outrank the local owner.
+When you choose to connect to a hosted kombify service, interactive sign-in uses
+`login.kombify.io`, backed by Auth0 and OAuth 2.0 / OpenID Connect. Public clients
+use PKCE with `S256` to complete authorization without an embedded client secret.
+Hosted sign-in does not replace or outrank your local homelab identity.
+
+## Hosted permissions and entitlements
+
+The Kombify Gateway validates tokens on the routes it manages, including the
+[customer MCP endpoint](/apps/ai/mcp). Authentication identifies the account;
+it does not grant every feature or action.
+
+- **Audience:** A token must be valid for the requested audience. Services sharing
+  an API audience still enforce the required scopes, permissions, and resource access.
+- **Entitlements:** A feature can require account or tenant entitlements in addition
+  to a valid sign-in. Customer MCP access, for example, is a separate requirement.
+- **Delegation:** A service or assistant acting on your behalf cannot gain more
+  authority than you possess. The action's policy determines whether approval is needed.
+- **Denied access:** Protected requests with missing, invalid, expired, or insufficient
+  authorization are rejected. Follow the returned guidance to sign in again or
+  resolve the required account access.
+
+## Local data and account settings
+
+Local identity data and credentials remain in your own environment under your
+control. Hosted sign-in uses `login.kombify.io`. Your hosted account and
+subscription are managed separately through kombify's account and billing settings.
+Hosted sign-in does not move local homelab credentials into those settings.
 
 ## Security behavior
 
 - Missing or ambiguous identity information denies access.
-- Tokens are short-lived and scoped to their intended audience.
-- Protected routes do not become public when an identity service is
-  unavailable.
+- Access tokens expire and are scoped to their intended audience.
+- Protected routes do not become public when an identity service is unavailable.
 - An assistant acting for a user cannot receive more authority than that user.
 
+## If something goes wrong
+
+- Check the login address. The official domain is `login.kombify.io`.
+- If hosted sign-in fails, your local access is not affected. See
+  [Sign-in problems and account basics](/apps/cloud/sign-in-and-account).
+- To set up or review local sign-in, see [PocketID](/stackkits/apps/pocketid)
+  and [TinyAuth](/stackkits/apps/tinyauth).
+- Still stuck? Write to [info@kombify.io](mailto:info@kombify.io). Never send
+  a password.
+
 <Note>
-This page describes the public identity concept. Internal routing, tenant,
-billing, deployment, and operator architecture are intentionally not part of
-the public StackKits documentation.
+This page describes public identity and access concepts. Internal routing,
+tenant topology, billing engines, and operator runbooks are not part of this page.
 </Note>

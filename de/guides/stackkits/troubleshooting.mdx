@@ -1,0 +1,67 @@
+---
+title: "Fehlerbehebung"
+description: "Behebe die häufigsten Probleme nach einer StackKits-Einrichtung"
+sidebarTitle: "Fehlerbehebung"
+icon: "life-ring"
+---
+
+Beginne mit dem Problem, das du siehst, und folge dann den Prüfungen der
+Reihe nach.
+
+## Die Adresse eines Dienstes öffnet sich nicht
+
+1. Vergleiche die Adresse, die du getippt hast, mit der Adresse, die die CLI
+   ausgibt oder der Node Hub zeigt. Kopiere sie, statt sie aus dem Gedächtnis
+   zu tippen.
+2. Stelle sicher, dass das Gerät die Namensauflösung deines Homelabs nutzt.
+   StackKits ändert nicht stillschweigend jeden Router oder jedes Gerät. Die
+   lokale Standarddomain ist `home.test`; Namen darunter müssen auf dem Gerät,
+   das du benutzt, auflösbar sein.
+3. Öffne dieselbe Adresse von einem anderen Gerät in deinem Heimnetz. Wenn es
+   dort funktioniert, liegt das Problem am ersten Gerät, nicht am Homelab.
+4. Führe im Workspace-Ordner `stackkit verify --json` aus und suche nach
+   Befunden.
+
+## Der Node Hub öffnet sich nicht
+
+Prüfe, ob seine erwartete `base.<domain>`-Adresse die aus der Rollout-Ausgabe
+ist, ob der Name von deinem Gerät aus auflösbar ist und ob die Route zum
+aktuellen Workspace gehört. Erzeuge neu aus der StackSpec, statt den erzeugten
+Node Hub oder die Router-Dateien zu bearbeiten. Siehe [Node Hub](/de/guides/stackkits/node-hub).
+
+## Der Browser warnt vor der Verbindung
+
+Klicke nicht über eine Warnung hinweg, die du nicht verstehst. Frage die Person,
+die das Homelab eingerichtet hat, und vergleiche die Adresse mit der im Node Hub.
+Schalte den Schutz einer Route nicht ab, damit eine Warnung verschwindet.
+
+## Ich kann mich an einem Dienst nicht anmelden
+
+Dienste hinter TinyAuth bitten dich, dich über PocketID anzumelden. Nutze das
+Konto, das der Owner für dich angelegt hat. Es ist nicht dein kombify-Cloud-Konto.
+
+## Die Einrichtung ist mit einem Fehler stehen geblieben
+
+1. Lies das letzte Log mit `stackkit logs latest --json`.
+2. Führe den Einzeiler-Installer nicht ein zweites Mal aus, ohne den Fehler
+   gelesen zu haben.
+3. Prüfe, ob dein Betriebssystem in der [OS-Kompatibilität](/de/stackkits/reference/os-compatibility) aufgeführt ist.
+4. Wenn du die Ursache nicht findest, sende den Log-Text, aber nicht die Datei
+   `.stackkit/access.json`, an [info@kombify.io](mailto:info@kombify.io).
+
+## Ich habe eine Änderung angewendet und etwas ist kaputtgegangen
+
+Gehe zurück zu dem Plan, den du geprüft hast. Wenn du vorher ein Backup erstellt
+hast, stelle daraus wieder her, wie unter
+[Sichern und wiederherstellen](/de/guides/stackkits/back-up-and-restore)
+beschrieben. Deshalb gehört ein Backup vor einer Änderung zur Routine.
+
+## Ein öffentlicher kombify.me-Name öffnet sich nicht
+
+Siehe [kombify.me-Fehlerbehebung](/de/kombify-me/troubleshooting).
+
+<Warning>
+Füge den Inhalt von `.stackkit/access.json`, Passwörter oder
+Passkey-Wiederherstellungsmaterial niemals in einen Chat, ein Issue oder eine
+E-Mail ein.
+</Warning>

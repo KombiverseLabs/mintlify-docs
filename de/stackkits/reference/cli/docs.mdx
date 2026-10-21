@@ -9,7 +9,7 @@ Deterministische StackKits-Dokumentationsprojektionen generieren.
 stackkit docs [flags]
 ```
 
-Unterbefehle: [`stackkit docs emit-advanced-operations`](#stackkit-docs-emit-advanced-operations), [`stackkit docs emit-cli-reference`](#stackkit-docs-emit-cli-reference), [`stackkit docs emit-release-manifests`](#stackkit-docs-emit-release-manifests), [`stackkit docs emit-use-case-overview`](#stackkit-docs-emit-use-case-overview)
+Unterbefehle: [`stackkit docs emit-advanced-operations`](#stackkit-docs-emit-advanced-operations), [`stackkit docs emit-cli-reference`](#stackkit-docs-emit-cli-reference), [`stackkit docs emit-release-manifests`](#stackkit-docs-emit-release-manifests), [`stackkit docs emit-troubleshooting`](#stackkit-docs-emit-troubleshooting), [`stackkit docs emit-use-case-overview`](#stackkit-docs-emit-use-case-overview)
 
 ## stackkit docs emit-advanced-operations
 
@@ -81,6 +81,21 @@ stackkit docs emit-release-manifests [flags]
 | `--release-url` | string | — | **Erforderlich.** exakte öffentliche Release-URL |
 | `--source-sha` | string | — | **Erforderlich.** exakter privater Source-SHA |
 
+## stackkit docs emit-troubleshooting
+
+Die gemeinsame, eigenständige Troubleshooting-Quelle generieren.
+
+Stabile Fehler-IDs, Ursachen und Wiederherstellungsaktionen aus derselben Quelle generieren, die auch CLI-Fehlschläge und der MCP-Self-Check verwenden. Mit `--check` werden fehlende oder veraltete Dokumente abgelehnt, ohne etwas zu schreiben.
+
+```bash
+stackkit docs emit-troubleshooting [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--check` | bool | — | Nichts schreiben; fehlschlagen, wenn der generierte Leitfaden abweicht |
+| `--out` | string | `docs/TROUBLESHOOTING.md` | Ausgabepfad, relativ zu `--chdir` |
+
 ## stackkit docs emit-use-case-overview
 
 Die interne, abgeleitete Entwicklungsübersicht der Anwendungsfälle rendern.
@@ -93,6 +108,10 @@ stackkit docs emit-use-case-overview [flags]
 | --- | --- | --- | --- |
 | `--evidence-output` | string | — | Ausgabepfad des Evidence-Manifests |
 | `--output` | string | — | Markdown-Ausgabepfad |
-| `--source-sha` | string | — | **Erforderlich.** exakter Source-SHA |
+| `--source-sha` | string | — | exakter Source-SHA |
+| `--tables-only` | bool | — | Wahrheitstabellen ohne Übersicht, Evidence-Ausgabe oder Testbehauptungen rendern |
 | `--test-receipt` | string | — | an den Source-SHA gebundener Beleg über bestandene Tests |
 | `--tests-passed-for-source` | bool | — | Tests als abgeschlossen markieren, nachdem der Aufrufer die Katalogtests für source-sha synchron bestanden hat |
+| `--truth-table-counts-output` | string | — | Ausgabepfad der aus CUE abgeleiteten JSON-Zähler für Intent und Katalog (nur tables-only) |
+| `--truth-table-output` | string | — | Ausgabepfad der gemeinsamen, aus CUE abgeleiteten Wahrheitstabelle als Markdown |
+| `--truth-table-public-output` | string | — | Ausgabepfad der öffentlich gefilterten Wahrheitstabelle als Markdown |

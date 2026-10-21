@@ -32,7 +32,7 @@ stackkit verify [flags]
 | `--strict` | bool | — | Warnungen als Verifikationsfehler behandeln |
 | `--user` | string | — | SSH-Benutzername für die Remote-Verifikation |
 
-**Examples**
+**Beispiele**
 
 ```bash
 # Verify the applied deployment on this host
@@ -47,3 +47,20 @@ stackkit verify --json
 # Check recorded Apply evidence and cached release receipts without live probes or network access
 stackkit verify --offline
 ```
+
+Unterbefehle: [`stackkit verify client-trust`](#stackkit-verify-client-trust)
+
+## stackkit verify client-trust
+
+Öffentliche Owner-CA und die auf DNS begrenzte Verwahrung für einen Client prüfen.
+
+Prüft auf diesem installierten Host die signierte öffentliche CA und die Übergabe des LAN-Resolvers. Mit `--export` wird der Linux-Adapter für den Betriebssystem-Vertrauensspeicher vorbereitet. Dies prüft nicht die Anwendungslaufzeit, genehmigt kein Client-Vertrauen, stellt keine Geräte-Zugangsdaten aus und etabliert keine Dienstsitzung.
+
+```bash
+stackkit verify client-trust [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--export` | bool | — | .stackkit/client-trust/enroll-linux.sh aus authentifizierter öffentlicher Verwahrung exportieren |
+| `--json` | bool | — | Die vorbereitete öffentliche Vertrauensübergabe als JSON ausgeben |

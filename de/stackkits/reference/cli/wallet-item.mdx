@@ -1,0 +1,64 @@
+---
+title: "stackkit wallet-item"
+description: "Wallet-Einträge, die in die verschlüsselte lokale Verwahrung dieses Nodes geliefert werden"
+sidebarTitle: "wallet-item"
+---
+Wallet-Einträge, die in die verschlüsselte lokale Verwahrung dieses Nodes geliefert werden.
+
+```bash
+stackkit wallet-item [flags]
+```
+
+Subcommands: [`stackkit wallet-item import`](#stackkit-wallet-item-import), [`stackkit wallet-item remove`](#stackkit-wallet-item-remove), [`stackkit wallet-item status`](#stackkit-wallet-item-status)
+
+## stackkit wallet-item import
+
+Eine versiegelte Wallet-Eintrags-Lieferung von stdin in die verschlüsselte lokale Verwahrung öffnen.
+
+Genau ein versiegeltes Envelope wallet-item-import oder wallet-item-rotate von stdin lesen, das von der festgelegten liefernden Instanz signiert ist. Der Node öffnet es, zeichnet es als verbraucht auf und speichert den Wert verschlüsselt unter seinem lokalen Verwahrungsschlüssel, geordnet nach Eintrags-Referenz und Version. Eine Rotation entfernt jede ältere Version. Das Ergebnis nennt nur Referenz und Version.
+
+```bash
+stackkit wallet-item import [flags]
+```
+
+| Flag | Typ | Standard | Beschreibung |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Die Speicherung dieses Wallet-Eintrags autorisieren |
+| `--tenant-ref` | string | — | Mandant, an den die versiegelte Delivery adressiert sein muss |
+
+**Beispiele**
+
+```bash
+stackkit wallet-item import --tenant-ref "$TENANT" --owner-approve < envelope.json
+```
+
+## stackkit wallet-item remove
+
+Open a sealed Wallet item removal from stdin and drop the item from local custody.
+
+Read one sealed wallet-item-remove envelope on stdin, signed by the pinned delivering authority. The node opens it, records it as consumed, and deletes every version of the item it names from local custody. A bound consumer such as the Private AI provider key fails closed on its next apply until another item is delivered. Removing an item this node does not hold succeeds and removes nothing. The result names the reference and the removed versions only.
+
+```bash
+stackkit wallet-item remove [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Authorize removing this Wallet item |
+| `--tenant-ref` | string | — | Tenant the sealed removal must be addressed to |
+
+**Examples**
+
+```bash
+stackkit wallet-item remove --tenant-ref "$TENANT" --owner-approve < envelope.json
+```
+
+## stackkit wallet-item status
+
+Wallet-Einträge in der lokalen Verwahrung nach Referenz und Version auflisten.
+
+Jeden Wallet-Eintrag in der lokalen Verwahrung nach Mandant, Eintrags-Referenz und Versionen auflisten sowie angeben, ob er nach einem Detach rotiert werden muss. Es wird kein Wert gelesen.
+
+```bash
+stackkit wallet-item status [flags]
+```

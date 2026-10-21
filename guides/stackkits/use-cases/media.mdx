@@ -6,15 +6,27 @@ icon: clapperboard
 ---
 
 <Info>
-  Evidence state (2026-09-24, v0.41.0): Media with Jellyfin is `available,
-  lifecycle-verified`. Media was verified on the public v0.39.7 archive,
-  where a Depot producer lifecycle run on Ubuntu 24.04 amd64 (Basement Kit,
-  standalone) passed install, init, generate, apply, owner setup, verify,
-  backup, restore, and restore activation, with the application readback
-  verified over the guest-local loopback.
+  Historical evidence: the [v0.39.7 published compatibility record](https://github.com/kombifyio/StackKits/releases/download/v0.39.7/stackkits-compatibility-evidence-v3.json)
+  records passing install, init, generate, apply, workload setup, verify,
+  backup and restore phases for Media. The [latest projected lifecycle
+  record, v0.53.10](https://github.com/kombifyio/StackKits/releases/download/v0.53.10/stackkits-compatibility-evidence-v3.json),
+  grades standalone Media `unverified`, with v0.39.7 as its last verified
+  release. The current public release is v0.54.2; these older phase results
+  do not validate its full runtime or playback on your devices.
 </Info>
 
 Media streams the films, music and home videos you own to the devices in your household. The release catalog calls this use case Media Library and delivers it as the optional `media` workload.
+
+## In plain words
+
+Media turns your own collection of films, music and videos into something like a private streaming service at home. A program called Jellyfin keeps a catalog of your files and plays them on your TV, phone or computer. The files stay on your own host. Media is for content you own; it does not supply content.
+
+## What you need first
+
+- A finished baseline, so first read [Before you start](/guides/stackkits/before-you-start) and verify your [Basement Kit](/stackkits/kits/basement-kit).
+- Your media files in one directory on the host, or a decision to let the plan manage a library volume.
+- An independent copy of those files, because StackKits does not back them up.
+- The devices you want to watch on, connected to the same network.
 
 ## Applications
 
@@ -31,6 +43,26 @@ Media streams the films, music and home videos you own to the devices in your ho
 ## Set it up
 
 Set up Media after the baseline of your kit verifies. The [Jellyfin](/stackkits/apps/jellyfin) page covers the storage setting, owner setup and your first library, and ends with a playback test on a real client.
+
+## What happens, step by step
+
+1. Choose where the files live. Expect the plan to mount an existing directory read-only, or to create a library volume if you do not set one.
+2. Select the `media` workload and apply it. Expect a Media address in the Node Hub or the rollout output.
+3. Create the owner account as described on the [Jellyfin](/stackkits/apps/jellyfin) page. Expect a Jellyfin administrator that you chose yourself.
+4. Add your library and test one file on one real device. Expect it to play, or to show you which part needs attention.
+
+## What is stored where
+
+- Your media files stay where they are. An existing directory is read-only to Jellyfin, so it cannot edit or delete them.
+- Jellyfin's configuration and its transcoding cache live in separate volumes on the host.
+- Check the application's backup declaration before you rely on it. Your media files are not part of a StackKits backup, so keep your own copy.
+
+## If something goes wrong
+
+- The Media address does not open: see [Troubleshooting](/guides/stackkits/troubleshooting) and compare it with the address in the Node Hub.
+- Setup fails on a missing folder: the media directory must already exist, because StackKits does not create it.
+- A file does not play on one TV or phone: a healthy container does not prove playback on that device, so test another client and see [Jellyfin](/stackkits/apps/jellyfin).
+- Learn the everyday routine in [Day to day](/guides/stackkits/daily-use) and practice a restore in [Back up and restore](/guides/stackkits/back-up-and-restore).
 
 ## Get the apps
 

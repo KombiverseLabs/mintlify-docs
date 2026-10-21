@@ -1,42 +1,62 @@
 ---
 title: "kombify.me"
-description: "Direcciones HTTPS públicas para servicios de homelab que ya son accesibles, más un relay privado opcional"
+description: "Direcciones HTTPS públicas para servicios del homelab que ya son accesibles, más un relay privado opcional"
 sidebarTitle: "Resumen"
 icon: "globe"
 ---
 
-kombify.me da a un servicio de homelab un nombre HTTPS estable en
-`*.kombify.me`. Es la vía opcional de ingress conectado: resulta útil cuando
-quieres una dirección pública y no se usa cuando el stack permanece en la red
-local.
+kombify.me da a un servicio del homelab un nombre HTTPS estable en
+`*.kombify.me`. Es la ruta opcional de ingreso conectado: útil cuando quieres
+una dirección pública, y sin usar cuando el stack permanece en la red local.
 
 <Warning>
 kombify.me es software Alpha. Los nombres, las cabeceras y la forma de los
-errores todavía pueden cambiar. No lo consideres una versión de disponibilidad
+errores todavía pueden cambiar. No lo trates como una versión de disponibilidad
 general.
 </Warning>
+
+En términos cotidianos: una app en tu propio servidor normalmente tiene una
+dirección que solo funciona en casa. kombify.me puede darle una dirección web
+normal que funciona desde cualquier lugar, con el candado (HTTPS) ya puesto. Tú
+decides qué apps reciben una dirección y cuáles permanecen privadas.
 
 ## Qué puedes hacer
 
 - Abrir un servicio de un kit en un host `*.kombify.me` cuando el origen ya es
-  accesible desde internet.
+  accesible en internet público.
 - Mantener los nombres de kit propios, como `auth`, en
   `{your-lab}-auth.kombify.me`, nunca en un apex reservado como
   `auth.kombify.me`.
-- Reenviar un destino HTTP(S) privado a través del agente de nodo de Techstack
-  cuando el origen no es público.
+- Retransmitir un destino HTTP(S) privado a través del agente de nodo de
+  Techstack cuando el origen no es público.
 
 kombify.me no sustituye a StackKits. Un kit local sigue instalándose,
-verificándose y funcionando sin una dirección de kombify.me.
+verificándose y ejecutándose sin una dirección de kombify.me.
 
 ## Cómo encaja
 
-| Aspecto | Responsable |
+| Asunto | Responsable |
 | --- | --- |
 | Definiciones de kits, ciclo de vida local y accesibilidad en la LAN | StackKits |
-| Orquestación y agente de nodo para destinos privados | Techstack |
+| Orquestación y el agente de nodo para destinos privados | Techstack |
 | Nombres HTTPS públicos, proxy y relay HTTP privado | kombify.me |
-| Inicio de sesión de las cuentas alojadas de kombify | `login.kombify.io` |
+| Inicio de sesión para cuentas alojadas de kombify | `login.kombify.io` |
+
+## Por dónde empezar
+
+1. Lee [Pública, privada o redirección: ¿cuál necesito?](/es/kombify-me/public-or-private)
+   para elegir el tipo de dirección que coincide con el lugar donde vive tu app.
+2. Sigue [Obtén tu primera dirección de kombify.me](/es/kombify-me/get-your-first-address)
+   para elegir un nombre, apuntarlo a tu app y activarlo.
+3. Si usas un servidor de StackKits, consulta
+   [Usa una dirección con un servidor de StackKits](/es/kombify-me/connect-a-stackkits-server).
+4. Más adelante, [cambia, pausa o elimina una dirección](/es/kombify-me/change-pause-or-remove-an-address)
+   cuando lo necesites.
+
+## Si algo sale mal
+
+Empieza con la [solución de problemas de kombify.me](/es/kombify-me/troubleshooting).
+Lista lo que ve un visitante en cada situación y qué comprobar.
 
 <CardGroup cols={2}>
   <Card title="Publicar un servicio público" icon="lock" href="/es/kombify-me/public-addresses">

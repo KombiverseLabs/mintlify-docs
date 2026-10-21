@@ -9,7 +9,7 @@ sidebarTitle: "docs"
 stackkit docs [flags]
 ```
 
-الأوامر الفرعية: [`stackkit docs emit-advanced-operations`](#stackkit-docs-emit-advanced-operations)، [`stackkit docs emit-cli-reference`](#stackkit-docs-emit-cli-reference)، [`stackkit docs emit-release-manifests`](#stackkit-docs-emit-release-manifests)، [`stackkit docs emit-use-case-overview`](#stackkit-docs-emit-use-case-overview)
+الأوامر الفرعية: [`stackkit docs emit-advanced-operations`](#stackkit-docs-emit-advanced-operations)، [`stackkit docs emit-cli-reference`](#stackkit-docs-emit-cli-reference)، [`stackkit docs emit-release-manifests`](#stackkit-docs-emit-release-manifests)، [`stackkit docs emit-troubleshooting`](#stackkit-docs-emit-troubleshooting)، [`stackkit docs emit-use-case-overview`](#stackkit-docs-emit-use-case-overview)
 
 ## stackkit docs emit-advanced-operations
 
@@ -81,6 +81,21 @@ stackkit docs emit-release-manifests [flags]
 | `--release-url` | string | — | **مطلوب.** عنوان URL العام الدقيق للإصدار |
 | `--source-sha` | string | — | **مطلوب.** SHA المصدر الخاص بدقة |
 
+## stackkit docs emit-troubleshooting
+
+أنشئ مرجع استكشاف الأخطاء المستقل المشترك.
+
+أنشئ معرّفات الأخطاء الثابتة وأسبابها وإجراءات الاستعادة من المرجع نفسه المستخدم في إخفاقات CLI وself-check في MCP. مع `--check` يرفض الأمر الوثائق المفقودة أو القديمة دون الكتابة.
+
+```bash
+stackkit docs emit-troubleshooting [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--check` | bool | — | لا تكتب شيئًا؛ افشل عند اختلاف الدليل المُنشأ |
+| `--out` | string | `docs/TROUBLESHOOTING.md` | مسار الإخراج نسبةً إلى `--chdir` |
+
 ## stackkit docs emit-use-case-overview
 
 توليد النظرة العامة الداخلية المشتقة لتطوير حالات الاستخدام.
@@ -93,6 +108,10 @@ stackkit docs emit-use-case-overview [flags]
 | --- | --- | --- | --- |
 | `--evidence-output` | string | — | مسار إخراج بيان الأدلة |
 | `--output` | string | — | مسار إخراج Markdown |
-| `--source-sha` | string | — | **مطلوب.** SHA المصدر بدقة |
+| `--source-sha` | string | — | SHA المصدر بدقة |
+| `--tables-only` | bool | — | اعرض جداول الحقيقة دون النظرة العامة أو مخرجات الأدلة أو ادعاءات الاختبار |
 | `--test-receipt` | string | — | إيصال اختبار ناجح مرتبط بـ SHA المصدر |
 | `--tests-passed-for-source` | bool | — | وسم الاختبارات بأنها مكتملة بعد أن اجتاز المستدعي اختبارات الكتالوج بشكل متزامن لـ source-sha |
+| `--truth-table-counts-output` | string | — | مسار إخراج JSON لأعداد intent والكتالوج المشتقة من CUE (tables-only) |
+| `--truth-table-output` | string | — | مسار إخراج Markdown لجدول الحقيقة المشترك المشتق من CUE |
+| `--truth-table-public-output` | string | — | مسار إخراج Markdown لجدول الحقيقة المصفّى للعموم |

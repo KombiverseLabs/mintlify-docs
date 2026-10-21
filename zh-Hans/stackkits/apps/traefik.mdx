@@ -1,12 +1,39 @@
 ---
 title: "Traefik"
-description: "StackKits 路由已发布的默认反向代理组件"
+description: "已发布的 StackKits 路由默认反向代理组件"
 sidebarTitle: "Traefik"
 icon: route
 ---
 
-Traefik 是已发布的 StackKits 目录中默认的反向代理组件。它负责路由生成的服务名称，例如 `base.<domain>`、`auth.<domain>`，以及由你已验证的配置所选择的应用路由。
+Traefik 是已发布的 StackKits 目录中的默认反向代理组件。它负责路由生成的服务名称，例如 `base.<domain>`、`auth.<domain>`，以及由你已验证的配置所选择的应用路由。
 
-请使用生成的服务 URL 和 CLI 验证输出来诊断路由。不要直接向由 StackKits 管理的容器添加标签、路由器或中间件。
+## 它是什么
 
-已发布的 [Whoami](/zh-Hans/stackkits/apps/whoami) 契约描述了路由诊断角色，但初始的原生 v2 StackSpec 不会选择它。
+反向代理是服务器的前门。你输入的每个地址，例如 Node Hub 或某个服务名称，都会先到达 Traefik，再由它把请求转交给正确的服务。StackKit 包含它，是为了让每个服务拥有易读的名称而不是端口号，也让登录（[TinyAuth](/zh-Hans/stackkits/apps/tinyauth)）可以在一处统一应用。
+
+## 哪些套件包含它
+
+[Basement Kit](/zh-Hans/stackkits/kits/basement-kit) 页面列出了通过 Traefik 进行的路由，套件定义也将其标记为默认平台服务。目录还指出，所选的应用平台可能自带 Traefik；你实际拥有什么，请以部署输出为准。
+
+## 如何打开
+
+通常你无需打开 Traefik 本身。你打开的是它所路由的服务，使用 CLI 输出或 [Node Hub](/zh-Hans/guides/stackkits/node-hub) 中生成的地址即可。目录还定义了位于 `https://traefik.<domain>` 的 Traefik 仪表板；只有当你的部署列出了它时才需要打开。
+
+## 首次使用
+
+1. 在 `base.<domain>` 地址打开 Node Hub。
+2. 点击某个服务，确认它在自己的名称下打开。
+3. 如果某个服务打不开，请先运行 `stackkit verify --json`，再去检查路由。
+
+## 预期情况与不应更改的内容
+
+- 预期它在后台静默运行。
+- 目录为其路由提供了安全响应头和请求速率限制。
+- 请使用生成的服务 URL 和 CLI 验证输出来诊断路由。不要直接向由 StackKits 管理的容器添加标签、路由器或中间件。请改为编辑 StackSpec 并重新生成。
+
+已发布的 [Whoami](/zh-Hans/stackkits/apps/whoami) 契约描述了路由诊断的角色，但初始的原生 v2 StackSpec 不会选择它。
+
+## 出现问题时
+
+- 服务地址打不开：检查该名称能在你的设备上解析，并将地址与部署输出对比。参见[故障排查](/zh-Hans/guides/stackkits/troubleshooting)。
+- 某个路由反复要求登录：参见 [TinyAuth](/zh-Hans/stackkits/apps/tinyauth)。

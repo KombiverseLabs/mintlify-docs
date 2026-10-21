@@ -1,0 +1,63 @@
+---
+title: "Eine Adresse mit einem StackKits-Server nutzen"
+description: "Wie Kit-Apps ihre kombify.me-Namen bekommen und was lokal bleibt"
+sidebarTitle: "StackKits-Server"
+icon: "server"
+---
+
+Ein StackKits-Server funktioniert eigenständig, ohne kombify.me. Eine Adresse
+ist eine optionale Ergänzung, die manche Apps von außen erreichbar macht.
+
+## Was automatisch passiert
+
+Wenn ein verbundener StackKits- oder Techstack-Ablauf deinen Server
+registriert, kann er:
+
+- deinen Basisnamen anlegen, zum Beispiel `mylab-u8f3k2.kombify.me`
+- einen Namen pro Kit-App anlegen, immer als `{base}-{app}.kombify.me`
+- neue Apps ausgeschaltet lassen, bis du sie erlaubst
+
+Kit-Apps wie `auth`, `id` und `coolify` erhalten immer die Form
+`mylab-u8f3k2-auth.kombify.me`. Der bloße Name `auth.kombify.me` wird nie
+verwendet. Kit-Apps zählen nicht auf dein Limit von 20 eigenen Apps pro
+Basisname.
+
+## Schritte
+
+1. Installiere und starte deinen StackKits-Server wie gewohnt. Prüfe zuerst,
+   dass er in deinem lokalen Netzwerk funktioniert.
+2. Verbinde den Server über den verbundenen Ablauf mit deinem kombify-Konto.
+3. Entscheide pro App, ob sie aus dem Internet erreichbar ist.
+   - Erreichbar: Sie bekommt eine
+     [öffentliche Adresse](/de/kombify-me/public-addresses).
+   - Nur zu Hause: Nutze eine
+     [private Adresse](/de/kombify-me/private-targets).
+4. Schalte nur die Apps ein, die Besucher erreichen sollen.
+5. Öffne die `kombify.me`-Adresse der App in einem Browser.
+
+## Was lokal bleibt
+
+Namen innerhalb deines Heimnetzwerks werden von dem Resolver erledigt, den
+StackKits installiert. Gehostete `*.lan.kombify.me`-Namen sind nicht
+implementiert. Entferne die Internet-Adresse, und die App funktioniert lokal
+weiter.
+
+## Einen Server entfernen
+
+Wenn ein verbundener Server entfernt wird, können seine Adressen mit entfernt
+werden. Auch die Helfer-Adressen, die kombify.me dafür angelegt hat, werden
+freigegeben. Wenn das Aufräumen fehlschlägt, meldet die Anfrage einen Fehler
+und kann gefahrlos wiederholt werden.
+
+## Wenn etwas schiefgeht
+
+| Was du siehst | Was du tun kannst |
+| --- | --- |
+| Die App funktioniert zu Hause, aber nicht über kombify.me | Prüfe, ob die Adresse eingeschaltet und aktiv ist. |
+| "binding conflict" (409) | Diese Adresse gehört bereits einem anderen Owner oder Server. Sie kann nicht übernommen werden. |
+| Gemischte Adress-Layouts (409) | Ein Basisname behält das Layout seiner ersten App. Verwende weiter dieses Layout. |
+| 429-Limitfehler | Du hast das Limit für Basisnamen oder Apps erreicht. Entferne einen ungenutzten. |
+| Die Anmeldung für eine Kit-App schlägt fehl | Stelle sicher, dass die Adresse die Form `{base}-auth.kombify.me` hat. |
+
+Siehe auch [Übersicht](/de/kombify-me/overview) und
+[Fehlerbehebung](/de/kombify-me/troubleshooting).

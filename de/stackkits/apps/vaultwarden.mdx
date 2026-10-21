@@ -5,7 +5,17 @@ sidebarTitle: "Vaultwarden"
 icon: vault
 ---
 
-Vaultwarden liefert den Anwendungsfall [Passwörter](/de/guides/stackkits/use-cases/passwords). Es ist die veröffentlichte Alternative für den optionalen nativen v2-Workload `vault`, und die anfänglichen Basement- und Cloud-StackSpecs aktivieren ihn nicht.
+Vaultwarden stellt den Anwendungsfall [Passwörter](/de/guides/stackkits/use-cases/passwords) bereit. Es ist die veröffentlichte Alternative für den optionalen nativen v2-Workload `vault`; die anfänglichen StackSpecs für Basement und Cloud aktivieren ihn nicht.
+
+## Was es ist
+
+Vaultwarden ist ein kleiner Server, der die Passwörter und sicheren Notizen deines Haushalts auf einem Rechner speichert, den du selbst betreibst. Er spricht dieselbe Sprache wie Bitwarden, sodass alle die normalen Bitwarden-Apps und Browser-Erweiterungen verwenden und sie einfach auf deinen eigenen Server richten. Ein StackKit enthält ihn, damit die Familie ihre Passwörter keinem Dritten anvertrauen muss.
+
+## Welche Kits und Anwendungsfälle es enthalten
+
+Vaultwarden ist die Standardanwendung für die Passwörter-Erfahrung des Anwendungsfalls Vault. Der veröffentlichte Katalog sieht es für das Basement Kit und das Cloud Kit auf Standalone Compose vor. Es ist optional, du wählst es also selbst aus.
+
+## Veröffentlichter Vertrag
 
 | Eigenschaft | Wert |
 | --- | --- |
@@ -15,12 +25,32 @@ Vaultwarden liefert den Anwendungsfall [Passwörter](/de/guides/stackkits/use-ca
 | Erforderliche Secret-Referenz | `admin-token` |
 | Unterstützter Standalone-Adapter | `standalone-compose` |
 
-Der Slot `admin-token` enthält eine opake `secret://`-Referenz; das eigentliche Token bleibt in der lokalen Owner-Verwahrung. Wähle Workload, Platzierung und Adapter in der [StackSpec](/de/guides/stackkits/configure-stack-spec) und folge dann [Einen Workload hinzufügen](/de/stackkits/reference/day-2-operations#einen-workload-zu-einem-bestehenden-workspace-hinzufügen), um zu validieren, die Verwahrung herzustellen, zu generieren, den Plan zu prüfen, anzuwenden und zu verifizieren.
+Der Slot `admin-token` enthält eine opake `secret://`-Referenz; das eigentliche Token bleibt in der lokalen Owner-Custody. Wähle Workload, Platzierung und Adapter in der [StackSpec](/de/guides/stackkits/configure-stack-spec) und folge dann [Einen Workload hinzufügen](/de/stackkits/reference/day-2-operations#add-a-workload-to-an-existing-workspace), um zu validieren, die Custody einzurichten, zu generieren, den Plan zu prüfen, anzuwenden und zu verifizieren.
+
+## Wie du es öffnest
+
+Öffne nach einem Rollout die generierte Passwörter-Adresse, die die CLI ausgibt oder die im [Node Hub](/de/guides/stackkits/node-hub) aufgeführt ist. Die lokale Standarddomain ist `home.test`, und der Name muss auf dem Gerät aufgelöst werden, das du verwendest. Bitwarden-Apps benötigen genau diese Adresse als Server-URL.
 
 ## Erste Nutzung
 
-1. Lege das Anwendungs-Owner-Konto an und wähle die Registrierungsrichtlinie, bevor du echte Secrets hinzufügst.
+1. Lege das Owner-Konto der Anwendung an und wähle die Registrierungsrichtlinie, bevor du echte Geheimnisse hinzufügst.
 2. Schließe nach dem Annehmen einer Einladung die Kontoregistrierung ab und melde dich über deinen Bitwarden-Client an.
-3. Erstelle und synchronisiere einen Vault-Eintrag, um zu bestätigen, dass das Konto bereit ist. Eine Einladung allein schließt dieses Setup nicht ab.
+3. Lege einen Vault-Eintrag an und synchronisiere ihn, um zu bestätigen, dass das Konto bereit ist. Eine Einladung allein schließt dieses Setup nicht ab.
 
-Ändere bei einem bereits zugelassenen Workload den StackKits-Intent über die StackSpec und die Lebenszyklus-Befehle; bearbeite keine generierte Anwendungskonfiguration auf dem Ziel.
+Die Seite [Passwörter](/de/guides/stackkits/use-cases/passwords) erklärt, wie du einen Bitwarden-Client auf deinen eigenen Server richtest, und [Deine Passwortmanager-Apps einrichten](/de/guides/stackkits/use-cases/passwords/clients) führt die Personen in deinem Haushalt Schritt für Schritt hindurch.
+
+## Was gesichert wird
+
+Die Wiederherstellungssequenz umfasst das Vaultwarden-Daten-Volume, das die Vault-Datenbank und Anhänge enthält. Bewahre dein Wiederherstellungsmaterial außerhalb des Servers auf. Bestätige, dass deine Backups dieses Volume abdecken, und übe eine gestufte Wiederherstellung mit [Sichern und Wiederherstellen](/de/guides/stackkits/back-up-and-restore), bevor der Vault Geheimnisse enthält, die du nicht neu erstellen kannst. Das Auslesen auf Anwendungsebene nach der Wiederherstellung steht in den veröffentlichten Nachweisen noch aus.
+
+## Was du erwarten kannst
+
+Der Vault ist klein und läuft ständig. Er ist für eine Person erst bereit, nachdem sie sich in einem Bitwarden-Client registriert, angemeldet und einen Eintrag synchronisiert hat. Master-Passwörter werden von den Personen gehalten, die sie wählen.
+
+## Wenn etwas schiefgeht
+
+- Die Bitwarden-App erreicht den Server nicht: Prüfe, ob die Server-URL deine generierte Passwörter-Adresse ist und ob der Name von diesem Gerät aus aufgelöst wird. Siehe [Fehlerbehebung](/de/guides/stackkits/troubleshooting).
+- Eine Person hat eine Einladung, kann sich aber nicht anmelden: Das Konto ist erst vollständig, nachdem ein offizieller Bitwarden-Client es registriert hat.
+- Der Browser warnt vor der Verbindung: Klicke dich nicht durch eine Warnung, die du nicht verstehst. Vergleiche die Adresse mit der im Node Hub.
+
+Ändere bei einem bereits zugelassenen Workload den StackKits-Intent über die StackSpec und die Lifecycle-Befehle; bearbeite keine generierte Anwendungskonfiguration auf dem Ziel.

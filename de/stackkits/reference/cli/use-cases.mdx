@@ -38,9 +38,11 @@ Optionale Anwendungsfälle interaktiv auswählen.
 
 Listet die optionalen Anwendungsfälle des Kits auf und lässt dich sie im Terminal umschalten.
 
-Mit den Pfeiltasten oder j/k bewegst du den Cursor. Die Leertaste schaltet den markierten Eintrag um. Enter bestätigt. Files, Photos und Vault sind vorausgewählt (L3-Standards des Kits).
+Arrow keys or j/k move the cursor. Space toggles the highlighted item. Enter confirms. Without `--kit`, the legacy Files, Photos and Vault selection is used.
 
-`--print` schreibt die ausgewählten IDs als kommagetrennte Zeile nach stdout, damit Installer sie an stackkit init `--use-case` übergeben können. Eingabeaufforderungen gehen nach stderr. Wenn stdin kein Terminal ist, werden die aktuellen Standardwerte ohne Abfrage zurückgegeben.
+With `--kit` (Basement or Cloud), choices and defaults come from the embedded CUE kit catalog. Each choice shows its standard profile minimum (CPU / RAM GiB / disk GiB). The running numeric preview includes required Core and selected default alternatives. It observes this host unless `--inventory` and `--node` select another target. Data budgets, add-ons, profile changes and resident policy need a resolved plan. This preview writes no configuration and grants no Apply admission.
+
+`--print` writes the selected IDs as a comma-separated line on stdout so installers can pass them to stackkit init `--use-case`. Prompts go to stderr. When stdin is not a terminal, defaults are returned without a prompt; a kit preview is still printed to stderr. Unknown facts are shown as ?, never zero.
 
 ```bash
 stackkit use-cases pick [flags]
@@ -48,6 +50,9 @@ stackkit use-cases pick [flags]
 
 | Flag | Typ | Standard | Beschreibung |
 | --- | --- | --- | --- |
+| `--inventory` | string | — | Read capacity from this Inventory instead of observing the local host; requires `--kit` and `--node` |
+| `--kit` | string | — | Preview main use cases admitted by this kit at standard profiles; observe this host by default |
+| `--node` | string | — | Explicit Inventory node for the kit capacity preview |
 | `--print` | bool | — | Ausgewählte Anwendungsfall-IDs als kommagetrennte Zeile nach stdout schreiben |
 
 **Beispiele**
@@ -58,4 +63,10 @@ stackkit use-cases pick
 
 # Print the selected IDs as one comma-separated line for stackkit init --use-case
 stackkit use-cases pick --print
+
+# Preview standard footprints and capacity on this target, from its kit catalog
+stackkit use-cases pick --kit basement-kit --print
+
+# Preview one explicitly selected Inventory node
+stackkit use-cases pick --kit cloud-kit --inventory inventory.yaml --node cloud-node --print
 ```

@@ -1,31 +1,60 @@
 ---
 title: "Coolify"
-description: "Una plataforma de aplicaciones y adaptador de workloads opcional publicado de StackKits"
+description: "Una plataforma de aplicaciones y adaptador de cargas de trabajo opcional y publicado de StackKits"
 sidebarTitle: "Coolify"
 icon: cloud-upload
 ---
 
-Coolify es una plataforma de aplicaciones y un adaptador de workloads opcionales. Selecciónalo de forma explícita cuando quieras que Coolify gestione tus aplicaciones. El workspace independiente predeterminado usa Compose directamente.
+Coolify es una plataforma de aplicaciones y adaptador de cargas de trabajo opcional. Selecciónalo explícitamente cuando quieras que Coolify gestione tus aplicaciones. El espacio de trabajo independiente predeterminado usa Compose directamente.
 
-| Rol | Comportamiento del catálogo publicado |
+## Qué es
+
+Coolify es un panel de control para ejecutar aplicaciones en tu propio servidor. Puede iniciar, actualizar y enrutar aplicaciones por ti desde una página web. Un StackKit puede incluirlo como una capa opcional cuando quieres ese panel; de lo contrario, StackKits inicia las cargas de trabajo directamente con archivos de Compose y no necesita ningún panel.
+
+## Qué kits y casos de uso lo incluyen
+
+Es opcional en cada kit y nunca forma parte del espacio de trabajo predeterminado. En el catálogo de casos de uso es la aplicación principal del caso de uso Marketplace, descrito allí como tu propia tienda de aplicaciones para las aplicaciones que ejecutas en tu homelab. Marketplace está planificado como un caso de uso opcional sobre Coolify, y Coolify es una aplicación de ese caso de uso, no un destino de runtime nativo. Como adaptador de cargas de trabajo figura para `files`, `photos`, `media`, `smart-home` y `vault` en la tabla de compatibilidad.
+
+| Función | Comportamiento del catálogo publicado |
 | --- | --- |
 | Selección | Integración explícita opcional; Compose independiente no necesita una plataforma de aplicaciones |
-| Adaptador de workloads | Compatible con `files`, `photos` y `vault` |
+| Adaptador de cargas de trabajo | Compatible con `files`, `photos` y `vault` |
 | Evidencia de ruta y TLS | Compatible |
-| Copia de seguridad y restauración de workloads | No las proporciona el adaptador de Coolify |
+| Copia de seguridad y restauración de cargas de trabajo | No la proporciona el adaptador de Coolify |
+
+## Cómo abrirlo
+
+Abre la dirección de Coolify generada desde el Node Hub o desde la salida de StackKits. El dominio local predeterminado es `home.test`; copia la dirección de la salida en lugar de escribirla y asegúrate de que el nombre se resuelve en tu dispositivo.
 
 ## Úsalo con seguridad
 
 1. Completa y verifica el despliegue de StackKits antes de abrir la plataforma de aplicaciones.
 2. Abre la URL de Coolify generada desde el Node Hub o desde la salida de StackKits.
-3. Usa una sola vía de entrega de aplicaciones por workload; no crees a mano rutas generadas que compitan entre sí.
-4. Mantén las credenciales de la aplicación y el material de recuperación bajo el control del Owner local.
-5. Usa la vía de copia de seguridad de StackKits solo donde el adaptador seleccionado declare compatibilidad con copia de seguridad y restauración.
+3. Usa una sola ruta de entrega de aplicaciones por carga de trabajo; no crees a mano rutas generadas que compitan.
+4. Mantén las credenciales de las aplicaciones y el material de recuperación bajo el control del propietario local.
+5. Usa la ruta de copia de seguridad de StackKits solo cuando el adaptador seleccionado declare compatibilidad con copia de seguridad y restauración.
+
+## Primer uso
+
+1. Completa el despliegue de StackKits y ejecuta la verificación.
+2. Abre la dirección de Coolify generada.
+3. Crea o confirma el inicio de sesión del propietario como describe la salida del despliegue.
+4. Comprueba que la aplicación que seleccionaste aparece y se abre en su ruta generada.
+
+## Qué se respalda
+
+El adaptador de Coolify no proporciona copia de seguridad ni restauración de cargas de trabajo. El adaptador de Compose independiente sí lo hace, para las cargas de trabajo que lo declaran. Consulta [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore) y practica una restauración antes de confiar a cualquier carga de trabajo datos que no puedas recrear.
 
 ## Verifica
 
-- La ruta de Coolify generada se abre en la dirección que indica el despliegue.
+- La ruta de Coolify generada se abre en la dirección que informa el despliegue.
 - La verificación de StackKits informa de que la plataforma de aplicaciones y sus rutas configuradas están en buen estado.
-- El workspace de StackKits sigue siendo la fuente de la intención de configuración.
+- El espacio de trabajo de StackKits sigue siendo la fuente de la intención de configuración.
 
-Para la alternativa beta, consulta [Komodo](/es/stackkits/apps/komodo). Para la matriz completa de adaptadores, consulta [Entrega de aplicaciones](/es/guides/stackkits/application-delivery).
+## Si algo sale mal
+
+- La dirección no se abre: compárala con la salida del despliegue, confirma que el nombre se resuelve desde tu dispositivo y consulta [Solución de problemas](/es/guides/stackkits/troubleshooting).
+- La misma aplicación aparece dos veces o las rutas entran en conflicto: tienes dos rutas de entrega para una carga de trabajo. Conserva una, cambia la StackSpec y regenera; no añadas rutas ni etiquetas a mano.
+- Faltan copias de seguridad de una carga de trabajo: es lo esperado con este adaptador. Usa la ruta de Compose independiente si necesitas la copia de seguridad de StackKits para esa carga de trabajo.
+
+Para la alternativa en beta, consulta [Komodo](/es/stackkits/apps/komodo). Para la matriz completa de adaptadores, consulta [Entrega de aplicaciones](/es/guides/stackkits/application-delivery).

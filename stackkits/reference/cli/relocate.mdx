@@ -1,0 +1,133 @@
+---
+title: "stackkit relocate"
+description: "Move PaaS workloads to another server: plan, check, drain, send, receive"
+sidebarTitle: "relocate"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:ef454620ffdb9e2bc396ed1eb48af2a33a795afdec703bc2149b6c38b79ee55e"
+source_hash: "721b28cf58d148556aabcc6eec77161fc5a36f8d"
+---
+Move PaaS workloads to another server: plan, check, drain, send, receive.
+
+```bash
+stackkit relocate [flags]
+```
+
+Subcommands: [`stackkit relocate check`](#stackkit-relocate-check), [`stackkit relocate drain`](#stackkit-relocate-drain), [`stackkit relocate plan`](#stackkit-relocate-plan), [`stackkit relocate receive`](#stackkit-relocate-receive), [`stackkit relocate send`](#stackkit-relocate-send)
+
+## stackkit relocate check
+
+Check on this server whether a relocation plan can land here (read-only).
+
+Runs on the destination server with a plan from `stackkit relocate plan`. Reports blockers (Coolify version, disk space, host dependencies, a non-empty target for a full move) and warnings. Exits non-zero while any blocker remains.
+
+```bash
+stackkit relocate check [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--engine` | string | — | Path to the pinned relocation engine (default: /usr/local/lib/stackkit/coolify-mirror, $STACKKIT_COOLIFY_MIRROR or PATH) |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON (engine progress goes to stderr) |
+| `--plan` | string | — | Relocation plan file from the source server, or - for stdin |
+| `--platform` | string | `coolify` | PaaS platform to relocate (coolify) |
+
+## stackkit relocate drain
+
+Stop the planned applications and services on this server before the final send.
+
+Runs on the source server with its plan from `stackkit relocate plan`. Stops the plan's applications and services through Coolify; databases keep running, so the following `relocate send` takes a consistent backup with no writer left and the destination still starts everything. Nothing is deleted. `--undo` starts again exactly what the drain stopped (the rollback of a move).
+
+```bash
+stackkit relocate drain [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--engine` | string | — | Path to the pinned relocation engine (default: /usr/local/lib/stackkit/coolify-mirror, $STACKKIT_COOLIFY_MIRROR or PATH) |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON (engine progress goes to stderr) |
+| `--owner-approve` | bool | — | Confirm the owner approved stopping these workloads |
+| `--plan` | string | — | Relocation plan made on this server, or - for stdin |
+| `--platform` | string | `coolify` | PaaS platform to relocate (coolify) |
+| `--undo` | bool | — | Start again what the active drain stopped |
+
+## stackkit relocate plan
+
+Inventory what a move would take from this server (read-only, secret-free JSON).
+
+Runs on the source server. Writes the relocation plan: resources, volumes, host paths, images, database dumps and sizes, without credentials. Hand it to `stackkit relocate check` on the destination.
+
+```bash
+stackkit relocate plan [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--all` | bool | — | Every resource on this server |
+| `--domain` | strings | — | Resources serving these domains |
+| `--engine` | string | — | Path to the pinned relocation engine (default: /usr/local/lib/stackkit/coolify-mirror, $STACKKIT_COOLIFY_MIRROR or PATH) |
+| `--full` | bool | — | Whole Coolify (destination must be an empty Coolify) |
+| `--images` | string | — | Docker images to carry: apps, all or none (engine default apps) |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON (engine progress goes to stderr) |
+| `--no-deps` | bool | — | Do not add databases the selected resources depend on |
+| `--output, -o` | string | — | Write the plan to a file instead of stdout |
+| `--platform` | string | `coolify` | PaaS platform to relocate (coolify) |
+| `--project` | strings | — | Whole projects (name, name/environment or a domain) |
+| `--uuid` | strings | — | Resources by Coolify uuid |
+
+## stackkit relocate receive
+
+Download the shared backup from the source server and restore it here.
+
+Runs on the destination server while `stackkit relocate send` shares. Downloads over pinned HTTPS, verifies, and restores into this Coolify; a failed restore is rolled back by the engine. Run `stackkit relocate check` with the plan first.
+
+```bash
+stackkit relocate receive [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--engine` | string | — | Path to the pinned relocation engine (default: /usr/local/lib/stackkit/coolify-mirror, $STACKKIT_COOLIFY_MIRROR or PATH) |
+| `--from` | relocate send | — | Source server HOST\[:PORT\] as relocate send reports it |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON (engine progress goes to stderr) |
+| `--no-start` | bool | — | Restore without starting the resources |
+| `--on-conflict` | string | `copy` | A resource that already exists here: copy or skip |
+| `--owner-approve` | bool | — | Confirm the owner approved this move |
+| `--platform` | string | `coolify` | PaaS platform to relocate (coolify) |
+| `--secret-ref` | string | — | Wallet item holding this move's transfer secret (delivered to both servers) |
+| `--set-domain` | stringArray | — | Replace a restored domain, OLD=NEW (repeatable) |
+| `--tenant-ref` | string | — | Wallet tenant of the transfer secret |
+| `--wait` | duration | — | Wait this long for the source's share to come up before downloading |
+
+## stackkit relocate send
+
+Back up the selection and share it once with the destination server.
+
+Runs on the source server. Backs up the selected Coolify resources, encrypted with a key derived from the move's Wallet item, and shares the file over pinned HTTPS until the destination has downloaded it once. The source keeps running; nothing is stopped or removed here.
+
+```bash
+stackkit relocate send [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--all` | bool | — | Every resource on this server |
+| `--domain` | strings | — | Resources serving these domains |
+| `--engine` | string | — | Path to the pinned relocation engine (default: /usr/local/lib/stackkit/coolify-mirror, $STACKKIT_COOLIFY_MIRROR or PATH) |
+| `--file` | string | — | Share an existing backup made with the same Wallet item instead of a new one |
+| `--full` | bool | — | Whole Coolify (destination must be an empty Coolify) |
+| `--host` | string | — | Address the destination reaches this server on (default: detected) |
+| `--images` | string | — | Docker images to carry: apps, all or none (engine default apps) |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON (engine progress goes to stderr) |
+| `--no-deps` | bool | — | Do not add databases the selected resources depend on |
+| `--open-firewall` | bool | — | Open the share port in ufw while sharing |
+| `--output, -o` | string | `/data/coolify-mirror/backups/kombify-relocate` | Directory for the new backup |
+| `--owner-approve` | bool | — | Confirm the owner approved this move |
+| `--platform` | string | `coolify` | PaaS platform to relocate (coolify) |
+| `--port` | int | `8123` | HTTPS port of the share |
+| `--project` | strings | — | Whole projects (name, name/environment or a domain) |
+| `--secret-ref` | string | — | Wallet item holding this move's transfer secret (delivered to both servers) |
+| `--tenant-ref` | string | — | Wallet tenant of the transfer secret |
+| `--ttl` | string | `2h` | Stop sharing after this long without a complete download |
+| `--uuid` | strings | — | Resources by Coolify uuid |
+

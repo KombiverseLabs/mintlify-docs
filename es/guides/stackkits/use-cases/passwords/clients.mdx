@@ -9,152 +9,373 @@ keywords: ["Contraseñas", "Vaultwarden", "Bitwarden", "Gestor de contraseñas",
 
 import { clientSetupLabelsEs } from "/snippets/client-setup-labels-es.jsx";
 
-import { ClientSetupGuide } from "/snippets/client-setup-guide.jsx";
+import { ClientSetupGuide, ClientGuideDialog } from "/snippets/client-setup-guide.jsx";
 
-<ClientSetupGuide
-  labels={clientSetupLabelsEs}
-  locale="es"
-  id="kcg-passwords"
-  meta={[
-    { icon: "phone", text: "Teléfono, navegador y ordenador" },
-    { icon: "steps", text: "6 pasos cortos" },
-    { icon: "book", text: "No hacen falta conocimientos previos" },
-  ]}
-  requirements={[
-    "La dirección de tu bóveda, por ejemplo https://vault.home.test",
-    "Una invitación para tu dirección de correo electrónico",
-    "Cada dispositivo preparado para tu bóveda doméstica por la persona que configuró kombify",
-    "Una contraseña maestra que puedas recordar",
-  ]}
-  requirementsHelp={{ label: "¿Aún no tienes invitación?", target: "kcg-passwords-no-invite" }}
-  appsTitle="Primero, descarga la app de Bitwarden."
-  vendor={{ label: "Todas las descargas de Bitwarden", href: "https://bitwarden.com/download/" }}
-  apps={[
-    { platform: "apple", label: "iPhone y iPad", detail: "Bitwarden Password Manager", store: "Abrir en la App Store", href: "https://apps.apple.com/app/bitwarden-password-manager/id1137397744", vendor: "Bitwarden", official: true },
-    { platform: "android", label: "Android", detail: "Bitwarden Password Manager", store: "Abrir en Google Play", href: "https://play.google.com/store/apps/details?id=com.x8bit.bitwarden", vendor: "Bitwarden", official: true },
-    { platform: "browser", label: "Extensión de navegador", detail: "Chrome, Firefox, Edge, Safari y más", store: "Abrir la página de descargas de Bitwarden", href: "https://bitwarden.com/download/", vendor: "Bitwarden", official: true },
-    { platform: "desktop", label: "Ordenador", detail: "Windows, macOS y Linux", store: "Abrir la página de descargas de Bitwarden", href: "https://bitwarden.com/download/", vendor: "Bitwarden", official: true },
-  ]}
-  appsNote="Tiendas de navegadores: [Chrome](https://chromewebstore.google.com/detail/bitwarden-password-manager/nngceckbapebfimnlniiiahkandclblb) · [Firefox](https://addons.mozilla.org/firefox/addon/bitwarden-password-manager/) · [Edge](https://microsoftedge.microsoft.com/addons/detail/bitwarden-password-manager/jbkfoedolllekgbhcbcoahefnbanhhlh) · [Safari (Mac App Store)](https://apps.apple.com/app/bitwarden/id1352778147). Tu bóveda funciona con Vaultwarden, que es compatible con estas apps oficiales de Bitwarden. No necesitas una app de Vaultwarden aparte."
-  stepsTitle="Configura tu bóveda paso a paso."
-  steps={[
-    {
-      tab: "Abrir la bóveda",
-      title: "Abre tu bóveda en un navegador.",
-      intro: "Empieza en un ordenador. Tu bóveda tiene su propia dirección web, como un sitio web que solo usa tu hogar.",
-      clicks: [
-        "Escribe la dirección de tu bóveda en la barra de direcciones del navegador, por ejemplo **https://vault.home.test**, y pulsa Intro.",
-        "Debajo del cuadro de inicio de sesión, haz clic en [[Create account]].",
-      ],
-      note: "La dirección de esta guía es un ejemplo. Usa la dirección que te dio la persona que configuró kombify.",
-      faq: { q: "¿Qué es la dirección de una bóveda?", a: "Es la dirección web de la bóveda de contraseñas de tu hogar. Suele empezar por **https://vault.** y terminar con el nombre de tu red doméstica. La persona que configuró kombify puede darte la dirección exacta." },
-      check: "Ves el formulario [[Create account]].",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-01-open-vault.webp", width: 1088, height: 830, alt: "Página de inicio de sesión de Vaultwarden con el enlace Create account marcado", caption: "Página de inicio de sesión de la bóveda", credit: "Captura de kombify", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · bóveda web 2026.7.0", captured: "2026-09-24", annotations: [{ n: 2, top: 84.3, left: 38.3, width: 23.5, height: 7.2 }] },
-    },
-    {
-      tab: "Crear cuenta",
-      title: "Crea tu cuenta.",
-      intro: "Tu bóveda solo acepta direcciones de correo electrónico invitadas. Usa la misma dirección a la que llegó la invitación.",
-      clicks: [
-        "En [[Email address]], introduce tu dirección de correo electrónico invitada.",
-        "En [[Name]], introduce tu nombre. La persona que gestiona la bóveda y aquellos con quienes compartas contraseñas pueden verlo.",
-        "Haz clic en [[Continue]].",
-      ],
-      faq: { q: "¿Es esta mi cuenta de kombify?", a: "No. Esta cuenta pertenece solo a tu bóveda de contraseñas. Tiene su propia dirección de correo electrónico y su propia contraseña maestra." },
-      check: "La página te pide ahora [[Set a strong password]].",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-02-create-account.webp", width: 1088, height: 718, alt: "Formulario Create account con la dirección de correo alex@example.com y el nombre Alex Example", caption: "Crear cuenta", credit: "Captura de kombify", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · bóveda web 2026.7.0", captured: "2026-09-24", annotations: [{ n: 1, top: 37.6, left: 16.4, width: 65.1, height: 13.4 }, { n: 2, top: 61, left: 16.4, width: 65.1, height: 13.4 }, { n: 3, top: 76.3, left: 14, width: 72.1, height: 13.9 }] },
-    },
-    {
-      tab: "Contraseña maestra",
-      title: "Elige tu contraseña maestra.",
-      intro: "La contraseña maestra es la única contraseña que aún tienes que recordar. Desbloquea todas las demás.",
-      clicks: [
-        "En [[Master password]], introduce una contraseña larga. Una frase corta de cuatro palabras o más funciona bien.",
-        "Introduce la misma contraseña otra vez en [[Confirm master password]].",
-        "Haz clic en [[Create account]]. Si la página sugiere la extensión de navegador, haz clic en [[Add it later]] y después en [[Skip to web app]]. Conectarás la extensión en el paso 5.",
-      ],
-      note: "**Nadie puede recuperar una contraseña maestra olvidada**, ni siquiera la persona que gestiona tu bóveda. Anótala y guarda la nota en un lugar seguro fuera de la bóveda.",
-      faq: { q: "¿Qué significa la barra de seguridad?", a: "Estima lo difícil que es adivinar tu contraseña. Apunta a **Strong**. Es mejor una contraseña larga que una complicada." },
-      check: "Tu bóveda vacía se abre con el título [[All vaults]].",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-03-master-password.webp", width: 1088, height: 1310, alt: "Página Set a strong password con la contraseña maestra introducida dos veces y valorada como Strong", caption: "Set a strong password", credit: "Captura de kombify", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · bóveda web 2026.7.0", captured: "2026-09-24", annotations: [{ n: 1, top: 25.5, left: 16.4, width: 60.7, height: 7.3 }, { n: 2, top: 52.2, left: 16.4, width: 60.7, height: 7.3 }, { n: 3, top: 87, left: 14, width: 72.1, height: 7.6 }] },
-    },
-    {
-      tab: "Primera contraseña",
-      title: "Guarda tu primera contraseña.",
-      intro: "Guarda un inicio de sesión de prueba. Más adelante demuestra que tus apps están conectadas a tu bóveda.",
-      clicks: [
-        "Arriba a la derecha, haz clic en [[New]] y elige [[Login]]. Si primero aparece una ventana de bienvenida, haz clic en [[Skip]].",
-        "En [[Item name]], introduce un nombre que reconozcas, por ejemplo el nombre de una tienda.",
-        "Introduce tu [[Username]]. Junto a [[Password]], haz clic en las flechas circulares para generar una contraseña y después en [[Use this password]].",
-        "Haz clic en [[Save]].",
-      ],
-      note: "Añade la dirección web de la tienda en [[Website (URI)]]. Entonces la extensión de navegador sugiere este inicio de sesión en ese sitio web.",
-      check: "Aparece el mensaje [[Item added]] y tu inicio de sesión se muestra en la lista.",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-04-new-login.webp", width: 1472, height: 1664, alt: "Ventana New Login con el nombre de elemento Example Shop, un nombre de usuario y una contraseña generada", caption: "New Login", credit: "Captura de kombify", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · bóveda web 2026.7.0", captured: "2026-09-24", annotations: [{ n: 2, top: 12.1, left: 7.9, width: 82.6, height: 5.8 }, { n: 3, top: 41.8, left: 7.9, width: 79.3, height: 5.8 }, { n: 3, top: 52.3, left: 87.5, width: 5.7, height: 5 }, { n: 4, top: 92.1, left: 2.7, width: 10.4, height: 6 }] },
-    },
-    {
-      tab: "Conectar apps",
-      title: "Conecta las apps de Bitwarden.",
-      intro: "Cada app de Bitwarden se conecta primero a los servidores del propio Bitwarden. Indícale una vez que use tu bóveda en su lugar.",
-      clicks: [
-        "Instala la app de Bitwarden de la lista de arriba y ábrela.",
-        "En la pantalla de inicio de sesión, abre el menú [[Logging in on]] y elige [[Self-hosted]]. En la app de ordenador, el menú se llama [[Accessing]].",
-        "En [[Server URL]], introduce la dirección de tu bóveda con **https://** al principio y pulsa [[Save]].",
-        "Inicia sesión con tu dirección de correo electrónico y tu contraseña maestra.",
-      ],
-      note: "Repite estos pasos en cada teléfono, navegador y ordenador que uses. Cada uno necesita la dirección de tu bóveda una vez.",
-      faq: { q: "¿Por qué aquí no hay ninguna imagen de la app?", a: "Las condiciones de Bitwarden no dan permiso para reutilizar sus imágenes. Su propia guía muestra cada pantalla, y las etiquetas de arriba coinciden con ella." },
-      check: "La app muestra el inicio de sesión que guardaste en el paso 4.",
-      visual: {
-        tag: "GUÍA DE BITWARDEN",
-        title: "Bitwarden muestra cada pantalla",
-        text: "Elige tu dispositivo en la guía de Bitwarden. Busca la sección sobre un servidor **autoalojado**.",
-        links: [
-          { label: "Conectar una app a tu propio servidor", detail: "bitwarden.com · todos los dispositivos", href: "https://bitwarden.com/help/change-client-environment/", icon: "server" },
-          { label: "Primeros pasos con la extensión de navegador", detail: "bitwarden.com", href: "https://bitwarden.com/help/getting-started-browserext/", icon: "browser" },
-          { label: "Primeros pasos con la app móvil", detail: "bitwarden.com", href: "https://bitwarden.com/help/getting-started-mobile/", icon: "phone" },
-        ],
-      },
-    },
-    {
-      tab: "Comprobación",
-      title: "¿Está todo conectado?",
-      intro: "Compruébalo en la bóveda web y en una app. Marca solo lo que hayas comprobado por tu cuenta.",
-      verify: [
-        "Puedo abrir la dirección de mi bóveda e iniciar sesión.",
-        "El inicio de sesión que guardé aparece en una app de Bitwarden en mi teléfono, navegador u ordenador.",
-        "Mi contraseña maestra está anotada y guardada fuera de la bóveda.",
-      ],
-      note: "Esta guía no lee tu bóveda. Tus marcas permanecen en este navegador.",
-      check: "Ahora puedes trasladar tus otras contraseñas a la bóveda.",
-      screenshot: { src: "/images/guides/passwords/vaultwarden/web-05-first-item.webp", width: 1430, height: 300, alt: "Lista All vaults que muestra el inicio de sesión guardado de Example Shop", caption: "Tu primer inicio de sesión en la bóveda", credit: "Captura de kombify", creditHref: "#kcg-passwords-sources", version: "Vaultwarden 1.37.2 · bóveda web 2026.7.0", captured: "2026-09-24", annotations: [{ n: null, top: 37.2, left: 1, width: 98, height: 58.1 }] },
-    },
-  ]}
-  nextTitle="Qué viene después."
-  next={[
-    { icon: "shield", title: "Activa el inicio de sesión en dos pasos", text: "Bitwarden explica cómo añadir un segundo paso al inicio de sesión.", href: "https://bitwarden.com/help/setup-two-step-login/" },
-    { icon: "server", title: "Haz copia de seguridad de la bóveda", text: "Para la persona que gestiona kombify: protege los datos de la bóveda.", href: "/es/guides/stackkits/back-up-and-restore" },
-  ]}
-  help={[
-    { id: "kcg-passwords-no-invite", q: "Todavía no tengo la dirección de una bóveda ni una invitación.", a: "Pregunta a la persona que configuró kombify en tu hogar. Ella añade el servicio Passwords e invita a tu dirección de correo electrónico. [Cómo funciona Passwords con kombify](/es/guides/stackkits/use-cases/passwords) · [Configuración del propietario](/es/stackkits/apps/vaultwarden)." },
-    { q: "Create account dice «Registration not allowed or user already exists».", a: "Comprueba que usas exactamente la dirección de correo electrónico invitada. Si ya creaste tu cuenta, vuelve atrás e inicia sesión. En caso contrario, pide una nueva invitación." },
-    { q: "La dirección no se abre o el navegador avisa sobre la conexión.", a: "Prueba primero la dirección en un dispositivo de tu red doméstica. Si tu bóveda solo funciona en casa, conéctate a tu Wi-Fi doméstico o a la app de conexión doméstica que te dieron. Además, cada dispositivo debe estar configurado para confiar en tu servidor doméstico; la persona que configuró kombify se encarga de ello. Si el navegador dice que la conexión no es privada, detente ahí y pregúntale. No ignores la advertencia. [Sobre las direcciones domésticas](/es/guides/stackkits/use-cases/network)." },
-    { q: "He olvidado mi contraseña maestra.", a: "Nadie puede recuperarla. Tu bóveda está cifrada con ella. La persona que gestiona tu bóveda puede eliminar tu cuenta para que empieces de nuevo, pero las contraseñas guardadas en ella se pierden. [Bitwarden sobre las contraseñas maestras](https://bitwarden.com/help/master-password/)." },
-    { q: "Mi teléfono Android no tiene Google Play.", a: "Bitwarden mantiene su propio repositorio de F-Droid. La dirección figura en la [página de descargas de Bitwarden](https://bitwarden.com/download/)." },
-    { q: "¿Por qué dice Vaultwarden y Bitwarden?", a: "Vaultwarden es el programa que ejecuta tu bóveda. Es un servidor no oficial que funciona con las apps oficiales de Bitwarden. Vaultwarden no está asociado con Bitwarden, Inc. Las imágenes muestran Vaultwarden 1.37.2 en inglés; las versiones más recientes y otros idiomas pueden verse distintos." },
-  ]}
-  attribution="**Vaultwarden ejecuta tu bóveda y las apps de Bitwarden la abren. kombify lo instala por ti.** kombify no fabrica ninguna de las dos apps. [Vaultwarden](https://github.com/dani-garcia/vaultwarden) (AGPL-3.0) · bóveda web: [cliente web de Bitwarden compilado para Vaultwarden](https://github.com/dani-garcia/bw_web_builds) (GPL-3.0) · [Bitwarden](https://bitwarden.com/)"
-  sources={{
-    summary: "Capturas de kombify de una instalación local de Vaultwarden · cuenta ficticia · menús en inglés.",
-    paragraphs: [
-      "**Capturas · 24 de septiembre de 2026.** kombify tomó las imágenes de la bóveda web de una instalación de referencia local: Vaultwarden 1.37.2, la imagen que el catálogo de StackKits entrega para Passwords, con su bóveda web incluida 2026.7.0 (el cliente web de Bitwarden, GPL-3.0). La instalación usó la dirección de ejemplo https://vault.home.test y la cuenta ficticia alex@example.com. Es una instalación de referencia, no una prueba de despliegue de StackKits. Esta guía añadió los marcadores violeta.",
-      "Las pantallas de las apps de Bitwarden no se muestran. Las [condiciones de Bitwarden](https://bitwarden.com/terms/) no dan permiso para reutilizar su contenido, así que el paso 5 enlaza a la propia guía de Bitwarden.",
-      "Los enlaces de las tiendas y las páginas de ayuda se comprobaron el 24 de septiembre de 2026. Tu progreso permanece en este navegador. La guía no conecta ninguna cuenta ni pide contraseñas.",
-    ],
-    links: [
-      { label: "Bitwarden: conectar aplicaciones individuales", href: "https://bitwarden.com/help/change-client-environment/" },
-      { label: "Descargas de Bitwarden", href: "https://bitwarden.com/download/" },
-      { label: "Proyecto Vaultwarden", href: "https://github.com/dani-garcia/vaultwarden" },
-    ],
-  }}
-/>
+<div className="kombify-client-guide not-prose" id="kcg-passwords" dir="ltr" lang="es" style={{"--kcg-steps": "6"}}>
+<div className="guide-content">
+<ClientSetupGuide id="kcg-passwords" labels={clientSetupLabelsEs} locale="es" checks={[0,0,0,0,0,3]} />
+
+<div className="page-top">
+<div className="intro-meta">
+<span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="20" rx="3" width="12" x="6" y="2"></rect><path d="M10 5h4M11 19h2"></path></svg> Teléfono, navegador y ordenador</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="7" rx="1.5" width="7" x="3" y="3"></rect><rect height="7" rx="1.5" width="7" x="14" y="3"></rect><rect height="7" rx="1.5" width="7" x="3" y="14"></rect><rect height="7" rx="1.5" width="7" x="14" y="14"></rect></svg> 6 pasos cortos</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M12 5v15M3 4c4-1 6 0 9 1 3-1 5-2 9-1v15c-4-1-6 0-9 1-3-1-5-2-9-1Z"></path></svg> No hacen falta conocimientos previos</span>
+</div>
+<div className="page-tools">
+<button aria-label="Imprimir la guía" className="tool-button" type="button" data-guide-action="print"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M6 8V3h12v5M6 17H3V8h18v9h-3M6 14h12v7H6Z"></path><path d="M17 11h.01"></path></svg></button>
+</div>
+</div>
+<div className="ready-strip">
+<span className="guide-strong">Lo que necesitas</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg> La dirección de tu bóveda, por ejemplo https://vault.home.test</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg> Una invitación para tu dirección de correo electrónico</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg> Cada dispositivo preparado para tu bóveda doméstica por la persona que configuró kombify</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg> Una contraseña maestra que puedas recordar</span><a href="#kcg-passwords-no-invite">¿Aún no tienes invitación? <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+</div>
+<section aria-labelledby="kcg-passwords-apps-title" className="downloads" id="kcg-passwords-apps">
+<div className="section-top">
+<h2 id="kcg-passwords-apps-title">Primero, descarga la app de Bitwarden.</h2><a className="small-link" href="https://bitwarden.com/download/" rel="noopener noreferrer" target="_blank">Todas las descargas de Bitwarden <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (se abre en una pestaña nueva)</span></a>
+</div>
+<div className="downloads-grid">
+<a className="download-card" href="https://apps.apple.com/app/bitwarden-password-manager/id1137397744" rel="noopener noreferrer" target="_blank"><span className="platform-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M16.7 1.8c0 2.1-1.7 4.4-3.7 4.2-.4-2.1 1.8-4.3 3.7-4.2ZM20.4 17.3c-.5 1.2-.8 1.7-1.5 2.7-1 1.5-2.4 3.3-4.2 3.3-1.6 0-2-1-4.1-.9-2.1 0-2.5 1-4.2.9-1.8-.1-3.1-1.7-4.1-3.2C-.5 15.9-.7 10.4 1 7.6c1.2-2 3.1-3.1 4.9-3.1 1.9 0 3.1 1 4.7 1 1.5 0 2.5-1 4.7-1 1.6 0 3.3.9 4.5 2.3-4 2.2-3.3 8 0 10.5Z" fill="currentColor" stroke="none" transform="translate(2 0) scale(.87)"></path></svg></span><span className="download-text"><strong>iPhone y iPad</strong><small>Bitwarden Password Manager</small><span className="store-name">Abrir en la App Store <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg></span><span className="badge official">Oficial · Bitwarden</span></span><span className="sr-only"> (se abre en una pestaña nueva)</span></a><a className="download-card" href="https://play.google.com/store/apps/details?id=com.x8bit.bitwarden" rel="noopener noreferrer" target="_blank"><span className="platform-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M5 12a7 7 0 0 1 14 0v6H5Zm2-6L5 3m12 3 2-3M2 12v5m20-5v5M8 18v4m8-4v4"></path><path d="M8.5 9h.01M15.5 9h.01"></path></svg></span><span className="download-text"><strong>Android</strong><small>Bitwarden Password Manager</small><span className="store-name">Abrir en Google Play <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg></span><span className="badge official">Oficial · Bitwarden</span></span><span className="sr-only"> (se abre en una pestaña nueva)</span></a><a className="download-card" href="https://bitwarden.com/download/" rel="noopener noreferrer" target="_blank"><span className="platform-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="16" rx="2" width="20" x="2" y="4"></rect><path d="M2 9h20M6 6.5h.01M9 6.5h.01"></path></svg></span><span className="download-text"><strong>Extensión de navegador</strong><small>Chrome, Firefox, Edge, Safari y más</small><span className="store-name">Abrir la página de descargas de Bitwarden <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg></span><span className="badge official">Oficial · Bitwarden</span></span><span className="sr-only"> (se abre en una pestaña nueva)</span></a><a className="download-card" href="https://bitwarden.com/download/" rel="noopener noreferrer" target="_blank"><span className="platform-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="14" rx="2" width="20" x="2" y="3"></rect><path d="M8 22h8M12 17v5"></path></svg></span><span className="download-text"><strong>Ordenador</strong><small>Windows, macOS y Linux</small><span className="store-name">Abrir la página de descargas de Bitwarden <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg></span><span className="badge official">Oficial · Bitwarden</span></span><span className="sr-only"> (se abre en una pestaña nueva)</span></a>
+</div>
+<p className="download-hint">Tiendas de navegadores: <a className="" href="https://chromewebstore.google.com/detail/bitwarden-password-manager/nngceckbapebfimnlniiiahkandclblb" rel="noopener noreferrer" target="_blank">Chrome <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (se abre en una pestaña nueva)</span></a> · <a className="" href="https://addons.mozilla.org/firefox/addon/bitwarden-password-manager/" rel="noopener noreferrer" target="_blank">Firefox <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (se abre en una pestaña nueva)</span></a> · <a className="" href="https://microsoftedge.microsoft.com/addons/detail/bitwarden-password-manager/jbkfoedolllekgbhcbcoahefnbanhhlh" rel="noopener noreferrer" target="_blank">Edge <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (se abre en una pestaña nueva)</span></a> · <a className="" href="https://apps.apple.com/app/bitwarden/id1352778147" rel="noopener noreferrer" target="_blank">Safari (Mac App Store) <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (se abre en una pestaña nueva)</span></a>. Tu bóveda funciona con Vaultwarden, que es compatible con estas apps oficiales de Bitwarden. No necesitas una app de Vaultwarden aparte.</p>
+</section>
+<section aria-labelledby="kcg-passwords-guide-title" className="guide-section" id="kcg-passwords-guide">
+<div className="guide-heading">
+<h2 id="kcg-passwords-guide-title">Configura tu bóveda paso a paso.</h2>
+</div>
+<div className="wizard">
+<div aria-label="Pasos de configuración" className="step-tabs" role="tablist">
+<button aria-controls="kcg-passwords-panel-0" aria-selected="true" className="step-tab" id="kcg-passwords-tab-0" data-guide-tab="0" role="tab" tabIndex="0" type="button"><span className="step-dot">1</span><span>Abrir la bóveda</span></button><button aria-controls="kcg-passwords-panel-1" aria-selected="false" className="step-tab" id="kcg-passwords-tab-1" data-guide-tab="1" role="tab" tabIndex="-1" type="button"><span className="step-dot">2</span><span>Crear cuenta</span></button><button aria-controls="kcg-passwords-panel-2" aria-selected="false" className="step-tab" id="kcg-passwords-tab-2" data-guide-tab="2" role="tab" tabIndex="-1" type="button"><span className="step-dot">3</span><span>Contraseña maestra</span></button><button aria-controls="kcg-passwords-panel-3" aria-selected="false" className="step-tab" id="kcg-passwords-tab-3" data-guide-tab="3" role="tab" tabIndex="-1" type="button"><span className="step-dot">4</span><span>Primera contraseña</span></button><button aria-controls="kcg-passwords-panel-4" aria-selected="false" className="step-tab" id="kcg-passwords-tab-4" data-guide-tab="4" role="tab" tabIndex="-1" type="button"><span className="step-dot">5</span><span>Conectar apps</span></button><button aria-controls="kcg-passwords-panel-5" aria-selected="false" className="step-tab" id="kcg-passwords-tab-5" data-guide-tab="5" role="tab" tabIndex="-1" type="button"><span className="step-dot">6</span><span>Comprobación</span></button>
+</div>
+<div aria-labelledby="kcg-passwords-tab-0" className="guide-panel active" id="kcg-passwords-panel-0" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+PASO 01 / 06
+</div>
+
+<div className="step-content">
+
+### Abre tu bóveda en un navegador.
+
+<p className="step-intro">Empieza en un ordenador. Tu bóveda tiene su propia dirección web, como un sitio web que solo usa tu hogar.</p>
+
+<ol className="click-list">
+<li><span className="click-num">1</span><span>Escribe la dirección de tu bóveda en la barra de direcciones del navegador, por ejemplo <strong>https://vault.home.test</strong>, y pulsa Intro.</span></li>
+<li><span className="click-num">2</span><span>Debajo del cuadro de inicio de sesión, haz clic en <span className="key">Create account</span>.</span></li>
+</ol>
+
+<div className="micro-note">La dirección de esta guía es un ejemplo. Usa la dirección que te dio la persona que configuró kombify.</div>
+
+<div style={{ marginBlock: "1rem" }}>
+<p><strong>¿Qué es la dirección de una bóveda?</strong></p>
+
+Es la dirección web de la bóveda de contraseñas de tu hogar. Suele empezar por <strong>https://vault.</strong> y terminar con el nombre de tu red doméstica. La persona que configuró kombify puede darte la dirección exacta.
+
+</div>
+
+<div className="step-check">Ves el formulario <span className="key">Create account</span>.</div>
+
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> CAPTURA DE KOMBIFY</span>
+<div role="figure" className="screen-figure" aria-labelledby="kcg-passwords-capture-0">
+<div className="screen-image">
+<img noZoom alt="Página de inicio de sesión de Vaultwarden con el enlace Create account marcado" decoding="async" height="830" loading="eager" referrerPolicy="no-referrer" src="/images/guides/passwords/vaultwarden/web-01-open-vault.webp" width="1088"/><span aria-hidden="true" className="annotation" data-n="2" style={{"top": "84.3%", "left": "38.3%", "width": "23.5%", "height": "7.2%"}}></span><a className="image-fallback" href="/images/guides/passwords/vaultwarden/web-01-open-vault.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> Abrir la captura<span>La imagen no se ha cargado.</span></a><button aria-label="Ampliar captura: Página de inicio de sesión de Vaultwarden con el enlace Create account marcado" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-passwords-capture-0">
+Página de inicio de sesión de la bóveda · <a className="" href="#kcg-passwords-sources">Captura de kombify</a><span className="meta">Vaultwarden 1.37.2 · bóveda web 2026.7.0 · capturada el 2026-09-24</span>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby="kcg-passwords-tab-1" className="guide-panel" id="kcg-passwords-panel-1" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+PASO 02 / 06
+</div>
+
+<div className="step-content">
+
+### Crea tu cuenta.
+
+<p className="step-intro">Tu bóveda solo acepta direcciones de correo electrónico invitadas. Usa la misma dirección a la que llegó la invitación.</p>
+
+<ol className="click-list">
+<li><span className="click-num">1</span><span>En <span className="key">Email address</span>, introduce tu dirección de correo electrónico invitada.</span></li>
+<li><span className="click-num">2</span><span>En <span className="key">Name</span>, introduce tu nombre. La persona que gestiona la bóveda y aquellos con quienes compartas contraseñas pueden verlo.</span></li>
+<li><span className="click-num">3</span><span>Haz clic en <span className="key">Continue</span>.</span></li>
+</ol>
+
+<div style={{ marginBlock: "1rem" }}>
+<p><strong>¿Es esta mi cuenta de kombify?</strong></p>
+
+No. Esta cuenta pertenece solo a tu bóveda de contraseñas. Tiene su propia dirección de correo electrónico y su propia contraseña maestra.
+
+</div>
+
+<div className="step-check">La página te pide ahora <span className="key">Set a strong password</span>.</div>
+
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> CAPTURA DE KOMBIFY</span>
+<div role="figure" className="screen-figure" aria-labelledby="kcg-passwords-capture-1">
+<div className="screen-image">
+<img noZoom alt="Formulario Create account con la dirección de correo alex@example.com y el nombre Alex Example" decoding="async" height="718" loading="lazy" referrerPolicy="no-referrer" src="/images/guides/passwords/vaultwarden/web-02-create-account.webp" width="1088"/><span aria-hidden="true" className="annotation" data-n="1" style={{"top": "37.6%", "left": "16.4%", "width": "65.1%", "height": "13.4%"}}></span><span aria-hidden="true" className="annotation" data-n="2" style={{"top": "61%", "left": "16.4%", "width": "65.1%", "height": "13.4%"}}></span><span aria-hidden="true" className="annotation" data-n="3" style={{"top": "76.3%", "left": "14%", "width": "72.1%", "height": "13.9%"}}></span><a className="image-fallback" href="/images/guides/passwords/vaultwarden/web-02-create-account.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> Abrir la captura<span>La imagen no se ha cargado.</span></a><button aria-label="Ampliar captura: Formulario Create account con la dirección de correo alex@example.com y el nombre Alex Example" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-passwords-capture-1">
+Crear cuenta · <a className="" href="#kcg-passwords-sources">Captura de kombify</a><span className="meta">Vaultwarden 1.37.2 · bóveda web 2026.7.0 · capturada el 2026-09-24</span>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby="kcg-passwords-tab-2" className="guide-panel" id="kcg-passwords-panel-2" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+PASO 03 / 06
+</div>
+
+<div className="step-content">
+
+### Elige tu contraseña maestra.
+
+<p className="step-intro">La contraseña maestra es la única contraseña que aún tienes que recordar. Desbloquea todas las demás.</p>
+
+<ol className="click-list">
+<li><span className="click-num">1</span><span>En <span className="key">Master password</span>, introduce una contraseña larga. Una frase corta de cuatro palabras o más funciona bien.</span></li>
+<li><span className="click-num">2</span><span>Introduce la misma contraseña otra vez en <span className="key">Confirm master password</span>.</span></li>
+<li><span className="click-num">3</span><span>Haz clic en <span className="key">Create account</span>. Si la página sugiere la extensión de navegador, haz clic en <span className="key">Add it later</span> y después en <span className="key">Skip to web app</span>. Conectarás la extensión en el paso 5.</span></li>
+</ol>
+
+<div className="micro-note"><strong>Nadie puede recuperar una contraseña maestra olvidada</strong>, ni siquiera la persona que gestiona tu bóveda. Anótala y guarda la nota en un lugar seguro fuera de la bóveda.</div>
+
+<div style={{ marginBlock: "1rem" }}>
+<p><strong>¿Qué significa la barra de seguridad?</strong></p>
+
+Estima lo difícil que es adivinar tu contraseña. Apunta a <strong>Strong</strong>. Es mejor una contraseña larga que una complicada.
+
+</div>
+
+<div className="step-check">Tu bóveda vacía se abre con el título <span className="key">All vaults</span>.</div>
+
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> CAPTURA DE KOMBIFY</span>
+<div role="figure" className="screen-figure" aria-labelledby="kcg-passwords-capture-2">
+<div className="screen-image">
+<img noZoom alt="Página Set a strong password con la contraseña maestra introducida dos veces y valorada como Strong" decoding="async" height="1310" loading="lazy" referrerPolicy="no-referrer" src="/images/guides/passwords/vaultwarden/web-03-master-password.webp" width="1088"/><span aria-hidden="true" className="annotation" data-n="1" style={{"top": "25.5%", "left": "16.4%", "width": "60.7%", "height": "7.3%"}}></span><span aria-hidden="true" className="annotation" data-n="2" style={{"top": "52.2%", "left": "16.4%", "width": "60.7%", "height": "7.3%"}}></span><span aria-hidden="true" className="annotation" data-n="3" style={{"top": "87%", "left": "14%", "width": "72.1%", "height": "7.6%"}}></span><a className="image-fallback" href="/images/guides/passwords/vaultwarden/web-03-master-password.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> Abrir la captura<span>La imagen no se ha cargado.</span></a><button aria-label="Ampliar captura: Página Set a strong password con la contraseña maestra introducida dos veces y valorada como Strong" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-passwords-capture-2">
+Set a strong password · <a className="" href="#kcg-passwords-sources">Captura de kombify</a><span className="meta">Vaultwarden 1.37.2 · bóveda web 2026.7.0 · capturada el 2026-09-24</span>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby="kcg-passwords-tab-3" className="guide-panel" id="kcg-passwords-panel-3" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+PASO 04 / 06
+</div>
+
+<div className="step-content">
+
+### Guarda tu primera contraseña.
+
+<p className="step-intro">Guarda un inicio de sesión de prueba. Más adelante demuestra que tus apps están conectadas a tu bóveda.</p>
+
+<ol className="click-list">
+<li><span className="click-num">1</span><span>Arriba a la derecha, haz clic en <span className="key">New</span> y elige <span className="key">Login</span>. Si primero aparece una ventana de bienvenida, haz clic en <span className="key">Skip</span>.</span></li>
+<li><span className="click-num">2</span><span>En <span className="key">Item name</span>, introduce un nombre que reconozcas, por ejemplo el nombre de una tienda.</span></li>
+<li><span className="click-num">3</span><span>Introduce tu <span className="key">Username</span>. Junto a <span className="key">Password</span>, haz clic en las flechas circulares para generar una contraseña y después en <span className="key">Use this password</span>.</span></li>
+<li><span className="click-num">4</span><span>Haz clic en <span className="key">Save</span>.</span></li>
+</ol>
+
+<div className="micro-note">Añade la dirección web de la tienda en <span className="key">Website (URI)</span>. Entonces la extensión de navegador sugiere este inicio de sesión en ese sitio web.</div>
+
+<div className="step-check">Aparece el mensaje <span className="key">Item added</span> y tu inicio de sesión se muestra en la lista.</div>
+
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> CAPTURA DE KOMBIFY</span>
+<div role="figure" className="screen-figure" aria-labelledby="kcg-passwords-capture-3">
+<div className="screen-image">
+<img noZoom alt="Ventana New Login con el nombre de elemento Example Shop, un nombre de usuario y una contraseña generada" decoding="async" height="1664" loading="lazy" referrerPolicy="no-referrer" src="/images/guides/passwords/vaultwarden/web-04-new-login.webp" width="1472"/><span aria-hidden="true" className="annotation" data-n="2" style={{"top": "12.1%", "left": "7.9%", "width": "82.6%", "height": "5.8%"}}></span><span aria-hidden="true" className="annotation" data-n="3" style={{"top": "41.8%", "left": "7.9%", "width": "79.3%", "height": "5.8%"}}></span><span aria-hidden="true" className="annotation" data-n="3" style={{"top": "52.3%", "left": "87.5%", "width": "5.7%", "height": "5%"}}></span><span aria-hidden="true" className="annotation" data-n="4" style={{"top": "92.1%", "left": "2.7%", "width": "10.4%", "height": "6%"}}></span><a className="image-fallback" href="/images/guides/passwords/vaultwarden/web-04-new-login.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> Abrir la captura<span>La imagen no se ha cargado.</span></a><button aria-label="Ampliar captura: Ventana New Login con el nombre de elemento Example Shop, un nombre de usuario y una contraseña generada" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-passwords-capture-3">
+New Login · <a className="" href="#kcg-passwords-sources">Captura de kombify</a><span className="meta">Vaultwarden 1.37.2 · bóveda web 2026.7.0 · capturada el 2026-09-24</span>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby="kcg-passwords-tab-4" className="guide-panel" id="kcg-passwords-panel-4" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+PASO 05 / 06
+</div>
+
+<div className="step-content">
+
+### Conecta las apps de Bitwarden.
+
+<p className="step-intro">Cada app de Bitwarden se conecta primero a los servidores del propio Bitwarden. Indícale una vez que use tu bóveda en su lugar.</p>
+
+<ol className="click-list">
+<li><span className="click-num">1</span><span>Instala la app de Bitwarden de la lista de arriba y ábrela.</span></li>
+<li><span className="click-num">2</span><span>En la pantalla de inicio de sesión, abre el menú <span className="key">Logging in on</span> y elige <span className="key">Self-hosted</span>. En la app de ordenador, el menú se llama <span className="key">Accessing</span>.</span></li>
+<li><span className="click-num">3</span><span>En <span className="key">Server URL</span>, introduce la dirección de tu bóveda con <strong>https://</strong> al principio y pulsa <span className="key">Save</span>.</span></li>
+<li><span className="click-num">4</span><span>Inicia sesión con tu dirección de correo electrónico y tu contraseña maestra.</span></li>
+</ol>
+
+<div className="micro-note">Repite estos pasos en cada teléfono, navegador y ordenador que uses. Cada uno necesita la dirección de tu bóveda una vez.</div>
+
+<div style={{ marginBlock: "1rem" }}>
+<p><strong>¿Por qué aquí no hay ninguna imagen de la app?</strong></p>
+
+Las condiciones de Bitwarden no dan permiso para reutilizar sus imágenes. Su propia guía muestra cada pantalla, y las etiquetas de arriba coinciden con ella.
+
+</div>
+
+<div className="step-check">La app muestra el inicio de sesión que guardaste en el paso 4.</div>
+
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> GUÍA DE BITWARDEN</span>
+<div className="link-visual">
+<span className="guide-strong">Bitwarden muestra cada pantalla</span><p>Elige tu dispositivo en la guía de Bitwarden. Busca la sección sobre un servidor <strong>autoalojado</strong>.</p><a className="vendor-link" href="https://bitwarden.com/help/change-client-environment/" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="7" rx="2" width="18" x="3" y="3"></rect><rect height="7" rx="2" width="18" x="3" y="14"></rect><path d="M7 6.5h.01M7 17.5h.01M16 6.5h2M16 17.5h2"></path></svg><span>Conectar una app a tu propio servidor<small>bitwarden.com · todos los dispositivos</small></span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (se abre en una pestaña nueva)</span></a><a className="vendor-link" href="https://bitwarden.com/help/getting-started-browserext/" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="16" rx="2" width="20" x="2" y="4"></rect><path d="M2 9h20M6 6.5h.01M9 6.5h.01"></path></svg><span>Primeros pasos con la extensión de navegador<small>bitwarden.com</small></span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (se abre en una pestaña nueva)</span></a><a className="vendor-link" href="https://bitwarden.com/help/getting-started-mobile/" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="20" rx="3" width="12" x="6" y="2"></rect><path d="M10 5h4M11 19h2"></path></svg><span>Primeros pasos con la app móvil<small>bitwarden.com</small></span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (se abre en una pestaña nueva)</span></a>
+</div>
+</div>
+</div>
+<div aria-labelledby="kcg-passwords-tab-5" className="guide-panel" id="kcg-passwords-panel-5" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+PASO 06 / 06
+</div>
+
+<div className="step-content">
+
+### ¿Está todo conectado?
+
+<p className="step-intro">Compruébalo en la bóveda web y en una app. Marca solo lo que hayas comprobado por tu cuenta.</p>
+
+<div className="verify-list">
+<label><input type="checkbox" data-guide-step="5" data-guide-check="0" id="kcg-passwords-verify-5-0" /><span>Puedo abrir la dirección de mi bóveda e iniciar sesión.</span></label>
+<label><input type="checkbox" data-guide-step="5" data-guide-check="1" id="kcg-passwords-verify-5-1" /><span>El inicio de sesión que guardé aparece en una app de Bitwarden en mi teléfono, navegador u ordenador.</span></label>
+<label><input type="checkbox" data-guide-step="5" data-guide-check="2" id="kcg-passwords-verify-5-2" /><span>Mi contraseña maestra está anotada y guardada fuera de la bóveda.</span></label>
+</div>
+
+<div className="micro-note">Esta guía no lee tu bóveda. Tus marcas permanecen en este navegador.</div>
+
+<div className="step-check">Ahora puedes trasladar tus otras contraseñas a la bóveda.</div>
+
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> CAPTURA DE KOMBIFY</span>
+<div role="figure" className="screen-figure" aria-labelledby="kcg-passwords-capture-4">
+<div className="screen-image">
+<img noZoom alt="Lista All vaults que muestra el inicio de sesión guardado de Example Shop" decoding="async" height="300" loading="lazy" referrerPolicy="no-referrer" src="/images/guides/passwords/vaultwarden/web-05-first-item.webp" width="1430"/><span aria-hidden="true" className="annotation" style={{"top": "37.2%", "left": "1%", "width": "98%", "height": "58.1%"}}></span><a className="image-fallback" href="/images/guides/passwords/vaultwarden/web-05-first-item.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> Abrir la captura<span>La imagen no se ha cargado.</span></a><button aria-label="Ampliar captura: Lista All vaults que muestra el inicio de sesión guardado de Example Shop" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-passwords-capture-4">
+Tu primer inicio de sesión en la bóveda · <a className="" href="#kcg-passwords-sources">Captura de kombify</a><span className="meta">Vaultwarden 1.37.2 · bóveda web 2026.7.0 · capturada el 2026-09-24</span>
+</div>
+</div>
+</div>
+</div>
+<div className="wizard-bottom">
+<div className="progress-note">
+<span>0 de 6 pasos completados</span>
+<div aria-hidden="true" className="progress-meter">
+<span></span><span></span><span></span><span></span><span></span><span></span>
+</div>
+</div>
+<button className="prev" disabled="" type="button"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"></path></svg> Atrás</button><button className="next" type="button"><span>Hecho · siguiente</span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+</div>
+</div>
+<p className="provenance-inline">Capturas de kombify de una instalación local de Vaultwarden · cuenta ficticia · menús en inglés. <a href="#kcg-passwords-sources">Fuentes de las imágenes y fecha</a></p>
+</section>
+<section aria-labelledby="kcg-passwords-more-title" className="more-section" id="kcg-passwords-more">
+<div className="section-top">
+<h2 id="kcg-passwords-more-title">Qué viene después.</h2>
+</div>
+<div className="more-grid">
+<a className="more-card" href="https://bitwarden.com/help/setup-two-step-login/" rel="noopener noreferrer" target="_blank"><span className="more-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M12 3 3 7v6c0 5 9 9 9 9s9-4 9-9V7Z"></path><path d="m8 12 3 3 5-6"></path></svg></span><span><strong>Activa el inicio de sesión en dos pasos</strong><small>Bitwarden explica cómo añadir un segundo paso al inicio de sesión.</small></span> <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (se abre en una pestaña nueva)</span></a><a className="more-card" href="/es/guides/stackkits/back-up-and-restore"><span className="more-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="7" rx="2" width="18" x="3" y="3"></rect><rect height="7" rx="2" width="18" x="3" y="14"></rect><path d="M7 6.5h.01M7 17.5h.01M16 6.5h2M16 17.5h2"></path></svg></span><span><strong>Haz copia de seguridad de la bóveda</strong><small>Para la persona que gestiona kombify: protege los datos de la bóveda.</small></span></a>
+</div>
+</section>
+<section aria-labelledby="kcg-passwords-help-title" className="faq-section" id="kcg-passwords-help">
+<h2 id="kcg-passwords-help-title">¿Te has atascado?</h2>
+<div data-guide-disclosure="" className="faq" id="kcg-passwords-no-invite">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>Todavía no tengo la dirección de una bóveda ni una invitación.</strong></button>
+<div className="answer">
+Pregunta a la persona que configuró kombify en tu hogar. Ella añade el servicio Passwords e invita a tu dirección de correo electrónico. <a className="" href="/es/guides/stackkits/use-cases/passwords">Cómo funciona Passwords con kombify</a> · <a className="" href="/es/stackkits/apps/vaultwarden">Configuración del propietario</a>.
+</div>
+</div>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>Create account dice «Registration not allowed or user already exists».</strong></button>
+<div className="answer">
+Comprueba que usas exactamente la dirección de correo electrónico invitada. Si ya creaste tu cuenta, vuelve atrás e inicia sesión. En caso contrario, pide una nueva invitación.
+</div>
+</div>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>La dirección no se abre o el navegador avisa sobre la conexión.</strong></button>
+<div className="answer">
+Prueba primero la dirección en un dispositivo de tu red doméstica. Si tu bóveda solo funciona en casa, conéctate a tu Wi-Fi doméstico o a la app de conexión doméstica que te dieron. Además, cada dispositivo debe estar configurado para confiar en tu servidor doméstico; la persona que configuró kombify se encarga de ello. Si el navegador dice que la conexión no es privada, detente ahí y pregúntale. No ignores la advertencia. <a className="" href="/es/guides/stackkits/use-cases/network">Sobre las direcciones domésticas</a>.
+</div>
+</div>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>He olvidado mi contraseña maestra.</strong></button>
+<div className="answer">
+Nadie puede recuperarla. Tu bóveda está cifrada con ella. La persona que gestiona tu bóveda puede eliminar tu cuenta para que empieces de nuevo, pero las contraseñas guardadas en ella se pierden. <a className="" href="https://bitwarden.com/help/master-password/" rel="noopener noreferrer" target="_blank">Bitwarden sobre las contraseñas maestras <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (se abre en una pestaña nueva)</span></a>.
+</div>
+</div>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>Mi teléfono Android no tiene Google Play.</strong></button>
+<div className="answer">
+Bitwarden mantiene su propio repositorio de F-Droid. La dirección figura en la <a className="" href="https://bitwarden.com/download/" rel="noopener noreferrer" target="_blank">página de descargas de Bitwarden <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (se abre en una pestaña nueva)</span></a>.
+</div>
+</div>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>¿Por qué dice Vaultwarden y Bitwarden?</strong></button>
+<div className="answer">
+Vaultwarden es el programa que ejecuta tu bóveda. Es un servidor no oficial que funciona con las apps oficiales de Bitwarden. Vaultwarden no está asociado con Bitwarden, Inc. Las imágenes muestran Vaultwarden 1.37.2 en inglés; las versiones más recientes y otros idiomas pueden verse distintos.
+</div>
+</div>
+</section>
+<div className="footline">
+<div className="attribution">
+<span className="guide-strong">Vaultwarden ejecuta tu bóveda y las apps de Bitwarden la abren. kombify lo instala por ti.</span> kombify no fabrica ninguna de las dos apps. <a className="" href="https://github.com/dani-garcia/vaultwarden" rel="noopener noreferrer" target="_blank">Vaultwarden <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (se abre en una pestaña nueva)</span></a> (AGPL-3.0) · bóveda web: <a className="" href="https://github.com/dani-garcia/bw_web_builds" rel="noopener noreferrer" target="_blank">cliente web de Bitwarden compilado para Vaultwarden <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (se abre en una pestaña nueva)</span></a> (GPL-3.0) · <a className="" href="https://bitwarden.com/" rel="noopener noreferrer" target="_blank">Bitwarden <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (se abre en una pestaña nueva)</span></a>
+</div>
+<button className="reset" type="button">Restablecer progreso</button>
+</div>
+<section className="source-section" id="kcg-passwords-sources">
+<div data-guide-disclosure="" id="kcg-passwords-sources-detail">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>Fuentes de las imágenes, enlaces comprobados y fecha</strong></button>
+<div className="source-content">
+<p><strong>Capturas · 24 de septiembre de 2026.</strong> kombify tomó las imágenes de la bóveda web de una instalación de referencia local: Vaultwarden 1.37.2, la imagen que el catálogo de StackKits entrega para Passwords, con su bóveda web incluida 2026.7.0 (el cliente web de Bitwarden, GPL-3.0). La instalación usó la dirección de ejemplo https://vault.home.test y la cuenta ficticia alex@example.com. Es una instalación de referencia, no una prueba de despliegue de StackKits. Esta guía añadió los marcadores violeta.</p><p>Las pantallas de las apps de Bitwarden no se muestran. Las <a className="" href="https://bitwarden.com/terms/" rel="noopener noreferrer" target="_blank">condiciones de Bitwarden <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (se abre en una pestaña nueva)</span></a> no dan permiso para reutilizar su contenido, así que el paso 5 enlaza a la propia guía de Bitwarden.</p><p>Los enlaces de las tiendas y las páginas de ayuda se comprobaron el 24 de septiembre de 2026. Tu progreso permanece en este navegador. La guía no conecta ninguna cuenta ni pide contraseñas.</p>
+<div className="source-links">
+<a className="" href="https://bitwarden.com/help/change-client-environment/" rel="noopener noreferrer" target="_blank">Bitwarden: conectar aplicaciones individuales <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (se abre en una pestaña nueva)</span></a><a className="" href="https://bitwarden.com/download/" rel="noopener noreferrer" target="_blank">Descargas de Bitwarden <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (se abre en una pestaña nueva)</span></a><a className="" href="https://github.com/dani-garcia/vaultwarden" rel="noopener noreferrer" target="_blank">Proyecto Vaultwarden <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (se abre en una pestaña nueva)</span></a>
+</div>
+</div>
+</div>
+<div className="dim">
+Guía de kombify · Los nombres de producto, las capturas de las apps de los fabricantes y las marcas pertenecen a sus respectivos propietarios.
+</div>
+</section>
+</div>
+<ClientGuideDialog aria-labelledby="kcg-passwords-zoom-title" className="zoom-dialog">
+<div className="dialog-header">
+<h2 id="kcg-passwords-zoom-title">Captura</h2><button aria-label="Cerrar imagen" className="dialog-close" type="button"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"></path></svg></button>
+</div>
+<div className="zoom-content">
+</div>
+</ClientGuideDialog>
+<div aria-live="polite" className="sr-only" role="status">
+</div>
+<div aria-hidden="true" className="toast">
+</div>
+</div>

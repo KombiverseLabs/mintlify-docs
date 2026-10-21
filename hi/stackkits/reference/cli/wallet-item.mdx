@@ -1,0 +1,64 @@
+---
+title: "stackkit wallet-item"
+description: "इस नोड की एन्क्रिप्टेड स्थानीय कस्टडी में डिलीवर किए गए Wallet आइटम"
+sidebarTitle: "wallet-item"
+---
+इस नोड की एन्क्रिप्टेड स्थानीय कस्टडी में डिलीवर किए गए Wallet आइटम।
+
+```bash
+stackkit wallet-item [flags]
+```
+
+Subcommands: [`stackkit wallet-item import`](#stackkit-wallet-item-import), [`stackkit wallet-item remove`](#stackkit-wallet-item-remove), [`stackkit wallet-item status`](#stackkit-wallet-item-status)
+
+## stackkit wallet-item import
+
+stdin से सीलबंद Wallet आइटम डिलीवरी को एन्क्रिप्टेड स्थानीय कस्टडी में खोलें।
+
+stdin पर एक सीलबंद wallet-item-import या wallet-item-rotate envelope पढ़ें, जो पिन किए गए डिलीवर करने वाले प्राधिकार से हस्ताक्षरित हो। नोड उसे खोलता है, उपभुक्त दर्ज करता है, और मान को अपनी स्थानीय कस्टडी की के तहत एन्क्रिप्ट करके आइटम संदर्भ और संस्करण के अनुसार संग्रहीत करता है। रोटेशन हर पुराना संस्करण हटा देता है। परिणाम केवल संदर्भ और संस्करण बताता है।
+
+```bash
+stackkit wallet-item import [flags]
+```
+
+| Flag | प्रकार | डिफ़ॉल्ट | विवरण |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | इस Wallet आइटम के संग्रहण को अधिकृत करें |
+| `--tenant-ref` | string | — | वह tenant जिसे सीलबंद डिलीवरी संबोधित होनी चाहिए |
+
+**उदाहरण**
+
+```bash
+stackkit wallet-item import --tenant-ref "$TENANT" --owner-approve < envelope.json
+```
+
+## stackkit wallet-item remove
+
+Open a sealed Wallet item removal from stdin and drop the item from local custody.
+
+Read one sealed wallet-item-remove envelope on stdin, signed by the pinned delivering authority. The node opens it, records it as consumed, and deletes every version of the item it names from local custody. A bound consumer such as the Private AI provider key fails closed on its next apply until another item is delivered. Removing an item this node does not hold succeeds and removes nothing. The result names the reference and the removed versions only.
+
+```bash
+stackkit wallet-item remove [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Authorize removing this Wallet item |
+| `--tenant-ref` | string | — | Tenant the sealed removal must be addressed to |
+
+**Examples**
+
+```bash
+stackkit wallet-item remove --tenant-ref "$TENANT" --owner-approve < envelope.json
+```
+
+## stackkit wallet-item status
+
+स्थानीय कस्टडी के Wallet आइटम संदर्भ और संस्करण के अनुसार सूचीबद्ध करें।
+
+स्थानीय कस्टडी के हर Wallet आइटम को tenant, आइटम संदर्भ और संस्करणों के अनुसार सूचीबद्ध करें, और यह भी कि detach के बाद उसे रोटेशन चाहिए या नहीं। कोई मान नहीं पढ़ा जाता।
+
+```bash
+stackkit wallet-item status [flags]
+```

@@ -1,0 +1,46 @@
+---
+title: "故障排除"
+description: "解决 StackKits 设置之后最常见的问题"
+sidebarTitle: "故障排除"
+icon: "life-ring"
+---
+
+先从你看到的问题入手，然后按顺序进行检查。
+
+## 服务地址打不开
+
+1. 把你输入的地址与 CLI 打印出的地址或 Node Hub 中显示的地址进行比较。请复制它，而不是凭记忆输入。
+2. 确保设备使用的是你的家庭实验室的名称解析。StackKits 不会悄悄更改每个路由器或设备。默认的本地域名是 `home.test`；该域名下的名称必须能在你正在使用的设备上解析。
+3. 从家庭网络中的另一台设备打开同一个地址。如果在那里可以打开，问题出在第一台设备上，而不是家庭实验室。
+4. 在工作区文件夹中运行 `stackkit verify --json`，并查看其中的发现项。
+
+## Node Hub 打不开
+
+请检查它预期的 `base.<domain>` 地址是否就是部署输出中的那个地址，该名称能否从你的设备解析，以及该路由是否属于当前工作区。请根据 StackSpec 重新生成，而不是编辑生成的 Node Hub 或路由器文件。参见 [Node Hub](/zh-Hans/guides/stackkits/node-hub)。
+
+## 浏览器对连接发出警告
+
+不要点击跳过你不理解的警告。请询问设置家庭实验室的人，并把地址与 Node Hub 中的地址进行比较。不要为了让警告消失而关闭某个路由上的保护。
+
+## 我无法登录某个服务
+
+TinyAuth 后面的服务会要求你通过 PocketID 登录。请使用所有者为你创建的账号。它不是你的 kombify Cloud 账号。
+
+## 设置因错误而停止
+
+1. 使用 `stackkit logs latest --json` 阅读最新的日志。
+2. 在没有阅读错误信息之前，不要再次运行一行式安装程序。
+3. 检查你的操作系统是否列在[操作系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)中。
+4. 如果你找不到原因，请把日志文本（但不要包含文件 `.stackkit/access.json`）发送到 [info@kombify.io](mailto:info@kombify.io)。
+
+## 我应用了一项更改，结果出了问题
+
+回到你审阅过的计划。如果你事先做了备份，请按照[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)中的说明从备份恢复。这就是为什么在更改之前备份是例行流程的一部分。
+
+## 公开的 kombify.me 名称打不开
+
+参见 [kombify.me 故障排除](/zh-Hans/kombify-me/troubleshooting)。
+
+<Warning>
+绝不要把 `.stackkit/access.json` 的内容、密码或通行密钥恢复材料粘贴到聊天、问题单或电子邮件中。
+</Warning>

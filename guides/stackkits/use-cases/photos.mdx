@@ -6,16 +6,28 @@ icon: camera-retro
 ---
 
 <Info>
-  Evidence state (2026-09-24, v0.41.0): Photos with Immich is `available,
-  lifecycle-verified`. Photos was verified on the public v0.39.7 archive,
-  where a Depot producer lifecycle run on Ubuntu 24.04 amd64 (Basement Kit,
-  standalone) passed install, init, generate, apply, owner setup, verify,
-  backup, restore, and restore activation, with the application readback
-  verified over the guest-local loopback. Cloud Kit is a preview with no
-  automated lifecycle run yet.
+  Historical evidence: the [v0.39.7 published compatibility record](https://github.com/kombifyio/StackKits/releases/download/v0.39.7/stackkits-compatibility-evidence-v3.json)
+  records passing Photos phases through backup and restore. The [latest
+  projected lifecycle record, v0.53.10](https://github.com/kombifyio/StackKits/releases/download/v0.53.10/stackkits-compatibility-evidence-v3.json),
+  grades standalone Photos `preview` with `restore-failed`; the last fully
+  verified release is v0.46.8. The current docs snapshot v0.54.3 declares backup
+  and restore, but has no lifecycle projection here yet. Cloud Kit has
+  partial lifecycle evidence; its complete public-VPS bootstrap remains
+  pending. See [Cloud Kit](/stackkits/kits/cloud-kit) for that boundary.
 </Info>
 
 Photos gives your household one library for photos and videos on a host you operate. Immich runs the library, and its mobile apps upload pictures from your phones. The release catalog calls this use case Photos and Memories and delivers it as the optional `photos` workload.
+
+## In plain words
+
+Photos is your own family photo library at home. A program called Immich stores your pictures and videos on your host, and an app on each phone sends new pictures there automatically. It works like a cloud photo service, except that the library is on a computer you control.
+
+## What you need first
+
+- A finished baseline: read [Before you start](/guides/stackkits/before-you-start) and verify your kit.
+- Enough free disk space for the library, and a place for backups.
+- Phones on the same network for the first upload.
+- A decision about which kit hosts it (see below).
 
 ## Applications
 
@@ -41,6 +53,49 @@ Photos and videos often become the largest data set in a homelab. Plan storage a
 - Recovery needs both the original photos and videos and the Immich database. Either part alone is not a complete restore.
 - Practice a staged restore before the library is the only copy of your photos. See [Back up and restore](/guides/stackkits/back-up-and-restore).
 
+## What is stored where
+
+- The original photos and videos are stored on your host, in the persistent allocation the plan creates for the `photos` workload.
+- The Immich database, which holds albums, people and settings, is stored separately on the host. Its password is kept in local owner custody, not in the configuration.
+- Backups are a separate copy. A restore needs both the original files and the database.
+
 ## Set it up
 
-Select the workload and complete first use on the [Immich](/stackkits/apps/immich) page. Then connect each phone with [Back up photos from your phone](/guides/stackkits/use-cases/photos/phone-backup) and check that a test photo arrives.
+Use the released standalone workflow in an existing, verified Basement or
+Cloud workspace. The [v0.54.3 CLI reference](/stackkits/reference/cli/secrets)
+includes the post-init custody step; you do not need to initialize the kit again.
+
+1. Open the existing `stack-spec.yaml`. Select `photos` in `workloads`, with
+   `alternative: immich` and `runtimeAdapterRef: standalone-compose`. Set
+   its `secretRefs.database-password` to the opaque reference
+   `secret://workloads/photos/database-password`. Keep
+   the site's existing storage and placement. See
+   [Configure a StackSpec](/guides/stackkits/configure-stack-spec) for the
+   selection structure and [Immich](/stackkits/apps/immich) for its contract.
+2. Run `stackkit validate`, then `stackkit secrets materialize` to establish
+   local owner custody. Run `stackkit generate` followed by
+   `stackkit plan --json` to inspect the result.
+
+   The `database-password` slot is an opaque reference. The custody command
+   creates or reuses its local secret; never paste a database password into
+   the StackSpec. Stop if validation, custody or plan readiness fails.
+3. Check that the plan selects `photos` on the intended host and uses the
+   storage you reserved. Then run `stackkit apply`, followed by
+   `stackkit verify --http --json`.
+
+4. Open the generated Photos address from the Node Hub and complete the
+   [Immich first-use steps](/stackkits/apps/immich#first-use). Connect one
+   phone with [Back up photos from your phone](/guides/stackkits/use-cases/photos/phone-backup)
+   and upload one spare test photo before importing your library.
+
+After each step you should see the following: the plan lists the `photos` workload, a Photos address appears in the Node Hub or the rollout output, you can create the Immich owner account, and a test photo from your phone appears in the library.
+
+These installation steps do not change the recovery evidence at the top of
+this page. Keep a separate copy of your photos until a restore has been
+verified for your release and host.
+
+## If something goes wrong
+
+- The Photos address does not open: compare it with the address in the Node Hub and see [Troubleshooting](/guides/stackkits/troubleshooting).
+- A phone does not upload: check that it resolves your homelab names, as described in [Day to day](/guides/stackkits/daily-use), and follow [Back up photos from your phone](/guides/stackkits/use-cases/photos/phone-backup).
+- You are unsure whether your photos are safe: do not treat the library as the only copy until you have practiced a restore in [Back up and restore](/guides/stackkits/back-up-and-restore).

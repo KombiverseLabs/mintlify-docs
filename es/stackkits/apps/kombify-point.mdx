@@ -1,12 +1,40 @@
 ---
 title: "kombify Point DNS"
-description: "Usa el módulo de DNS local opcional de StackKits para una zona que controlas"
+description: "Usa el módulo DNS local opcional de StackKits para una zona que controlas"
 sidebarTitle: "kombify Point DNS"
 icon: globe
 ---
 
-kombify Point DNS se distribuye como contrato de módulo publicado para una zona DNS local, pero la StackSpec v2 nativa inicial no expone ninguna guía pública actual para habilitarlo.
+kombify Point DNS se distribuye como contrato de módulo publicado para una zona DNS local, pero la StackSpec v2 nativa inicial no expone una guía pública actual para activarlo.
 
-Úsalo solo para una configuración de resolutor de LAN que operes tú. El DNS público sigue siendo responsabilidad de tu propio proveedor de DNS y de la configuración de tu dominio.
+## Qué es
 
-No inventes un objeto de habilitación a partir de ejemplos anteriores. Cuando una StackSpec publicada exponga el módulo, prueba los nombres generados solo desde clientes configurados deliberadamente para usar ese resolutor.
+El DNS es la agenda de direcciones que convierte el nombre de un servicio en la dirección de tu servidor. kombify Point es un pequeño resolvedor para tu red doméstica que responde a los nombres de servicio de tu StackKit. Un StackKit puede incluirlo para que los dispositivos de casa encuentren tus servicios por su nombre.
+
+## Qué kits lo incluyen
+
+El catálogo lo marca como opcional y desactivado por defecto en todos los contextos. Ningún kit lo activa mediante la StackSpec v2 nativa inicial.
+
+## Cómo se abre
+
+No se abre como una aplicación. El catálogo describe un resolvedor en el puerto 53 de la dirección LAN del servidor y una página de estado en `http://point.<domain>/health`. Confía en ellos solo si tu despliegue los enumera.
+
+## Primer uso
+
+Cuando una StackSpec publicada exponga el módulo:
+
+1. Úsalo solo para una configuración de resolvedor LAN que tú operes.
+2. Apunta deliberadamente un dispositivo de prueba al resolvedor.
+3. Abre desde ese dispositivo un nombre de servicio generado.
+4. Solo entonces plantéate usar el resolvedor en más dispositivos.
+
+## Qué esperar y qué no cambiar
+
+- El DNS público sigue siendo responsabilidad de tu propio proveedor de DNS y de la configuración de tu dominio.
+- No inventes un objeto de activación a partir de ejemplos antiguos.
+- Prueba los nombres generados solo desde clientes configurados deliberadamente para usar ese resolvedor. Los demás dispositivos no encontrarán los nombres.
+
+## Si algo sale mal
+
+- Un nombre no se abre en un dispositivo: probablemente ese dispositivo no usa el resolvedor. Consulta [Solución de problemas](/es/guides/stackkits/troubleshooting).
+- Los nombres fallan en todas partes: ejecuta `stackkit verify --json` y lee los hallazgos.

@@ -2,122 +2,102 @@
 
 [![Maturity: alpha](https://img.shields.io/badge/maturity-alpha-orange.svg)](STATUS.md)
 
-This repository is the single source of truth for Kombify's anonymous public
-documentation at `https://docs.kombify.io`. Its current scope is deliberately
-narrow: released StackKits and SpeechKit capabilities, the truthful Techstack
-preview contract, and the identity concept needed to use them safely.
+Single source of truth for kombify's anonymous public documentation at
+`https://docs.kombify.io`: the published MDX tree, Mintlify navigation
+(`docs.json`), the positive publication allowlist (`public-safety-policy.json`)
+and the local and live gates. It owns no product code. Internal infrastructure
+and operator runbooks stay out; Simulate is reached through the kombify Cloud
+dashboard.
 
-## Public Scope
-
-This repository owns the published MDX tree, Mintlify navigation, positive
-publication allowlist, and the local and live gates for `docs.kombify.io`.
-
-The public surface has five tabs:
+## Public scope
 
 | Tab | Content |
 | --- | --- |
 | Start | Product entry points and current availability. |
-| StackKits | Released kits, modules, workflows, CLI, and MCP documentation. |
-| Techstack | Preview product boundary, operating modes, availability, and the release-bound API and `techstack api` CLI reference. |
-| SpeechKit | Released Windows beta, voice modes, and Go framework guidance. |
-| Identity & Access | The small identity boundary relevant to StackKits. |
+| StackKits | Released kits, modules, workflows, CLI and MCP documentation. |
+| Techstack | Preview product boundary, operating modes, availability, release-bound API and `techstack api` CLI reference. |
+| SpeechKit | Released Windows beta, voice modes, Go framework. |
+| Identity & Access | The identity boundary relevant to StackKits. |
+| Changelog | Customer-facing product updates. |
 
-Products are documented here as their public artifacts ship. Internal
-infrastructure and operator runbooks stay out of the public docs. Simulate is a
-kombify product that users reach through the kombify Cloud dashboard.
+Truth sources, never the retired legacy documentation repository:
 
-## Publication Boundary
+- StackKits and SpeechKit: public releases and assets (synced into `data/`
+  by generated-only pull requests).
+- Techstack: the product contract and preview status, with no public installer
+  or source distribution presented. The reference under `techstack/reference/`
+  is generated only from `api/surface/openapi.public.yaml` and
+  `api/surface/api-surface.json` of a published release
+  (`.github/workflows/techstack-release-docs.yml`); without both, it does not
+  exist.
+- Workspace standards define documentation and delivery policy and are linked,
+  never copied.
 
-Pull requests and merge groups run the centrally projected Post-Local checks.
-Repository tasks receive no private credentials or shared writable tool cache.
-The final check requires candidate validation, repository checks and dependency
-review to succeed; missing or cancelled evidence fails the check.
+## Publication boundary
 
-`public-safety-policy.json` is the explicit positive allowlist. A public page
-must match an approved exact path or prefix, appear in `docs.json`, and pass the
-forbidden-content checks. Navigation hiding and Mintlify authentication do not
-make a directly reachable file safe to publish.
-
-StackKits pages are accepted only when they describe the current public
-StackKits release. Repository presence, draft metadata, preview status, or an
-internal development workflow is not release evidence.
-
-SpeechKit instructions are pinned to its exact public release and assets.
-Techstack pages deliberately document the product contract and preview status
-without presenting a public installer or source distribution that does not yet
-exist. The Techstack API reference and `techstack api` CLI reference under
-`techstack/reference/` are generated only from `api/surface/openapi.public.yaml`
-and `api/surface/api-surface.json` of a published Techstack release
-(`.github/workflows/techstack-release-docs.yml`); until a release carries both,
-the reference does not exist.
-
-The old Kombify documentation repository is not an upstream source and must
-not be used for migration or content recovery. Product repositories and their
-public release artifacts are the verification sources.
+- `public-safety-policy.json` is the positive allowlist: a page must match an
+  approved path or prefix, appear in `docs.json` and pass the forbidden-content
+  checks. Hidden navigation and Mintlify authentication do not make a reachable
+  file safe.
+- A StackKits page needs the current public release as evidence; presence in the
+  repository, draft metadata or preview status is not evidence.
+- SpeechKit instructions are pinned to its exact public release and assets.
+- Pull requests run the trusted public safety workflow without private
+  credentials or a shared writable tool cache; the validator and the exact-head
+  check must succeed.
 
 ## Localization
 
-English is the source language and keeps its URLs unchanged (`/stackkits/quickstart`).
-Every other locale is a Mintlify language branch in `docs.json` under
-`navigation.languages` with its pages in a folder named after the locale code
-(`de/stackkits/quickstart` is served at `/de/stackkits/quickstart`). Mintlify
-renders the language switcher from that array. The published locales are
-listed in `allowedNavigationLanguages` of `public-safety-policy.json`.
-Supported codes: `ar`, `de`, `en`, `es`, `hi`, `zh-Hans` (Traditional Chinese
-is `zh-Hant` and is never mapped to Simplified).
+English is the only language that is written and edited by hand. It is the
+source and keeps its URLs (`/stackkits/quickstart`). The other locales (`ar`,
+`de`, `es`, `zh-Hans`, `hi`; Traditional Chinese is `zh-Hant`, never mapped to
+Simplified) are generated from the English pages into `<code>/` folders
+(`de/stackkits/quickstart` is served at `/de/stackkits/quickstart`) and arrive
+as pull requests that are reviewed and merged like any other change. Nobody
+translates a page by hand and no English change waits for a translation.
 
-Translator workflow, shown for German and identical for `es`, `zh-Hans`, `hi`
-and `ar`:
+Mintlify's own automatic translation is a paid add-on of its Pro plan with
+usage-based AI credits, which is above the documentation budget. The
+generation therefore runs as a repository job on kombify's own AI platform;
+until that job is merged, the existing locale files stay as they are and new
+English pages are reported as pending.
 
-1. Create `scripts/i18n/labels/<code>.json`, mapping each English tab and group
-   name to its translation, and enable the code in `LOCALES` of
-   `scripts/i18n/sync-navigation.mjs`.
-2. Translate every English page `P.mdx` to `<code>/P.mdx`. Keep frontmatter keys,
-   MDX components and props, and images. Translate only prose, `title`,
-   `description`, `sidebarTitle` and human-readable props. Copy fenced code
-   blocks byte for byte. Never translate product names (kombify, StackKits,
-   Techstack, Companion, SpeechKit, Paperwork, kombify Cloud, kombify Sites,
-   Simulate, CUE) or CLI commands, flags, paths and identifiers. Rewrite
-   internal links to `/<code>/...`; heading anchors follow the translated
-   heading. Guide pages import a translated message catalog or snippet copy
-   (`snippets/client-setup-labels-de.jsx`, `snippets/photo-backup-guide-de.jsx`).
-   Right-to-left locales need the guide components checked with `dir="rtl"`.
-3. Run `node scripts/i18n/sync-navigation.mjs <code>` to rebuild the locale branch
-   of `docs.json` from the English tree.
-4. Add the code to `allowedNavigationLanguages`, the localized tab names to
-   `allowedNavigationTabs` and `<code>/` to `allowedPagePrefixes` in
-   `public-safety-policy.json`.
-5. Run `node scripts/i18n/check.mjs <code>` (also part of `mise run check`). It
-   fails on a missing counterpart, changed frontmatter keys, differing code
-   blocks or component tags, and any internal link or anchor that does not
-   resolve inside the locale.
+How the pieces fit:
 
-Generated English pages (`stackkits/reference/cli/*`, `techstack/reference/cli/*`, release pages) are
-rendered from release data; regenerate or re-translate their localized copies
-after each release. A locale is advertised only after a competent-speaker review.
+- Each locale is a language branch in `docs.json` (`navigation.languages`).
+  `node scripts/i18n/sync-navigation.mjs <code>` rebuilds a branch from the
+  English tree and leaves out pages that have no translated file yet.
+- Published locales are listed in `allowedNavigationLanguages` of
+  `public-safety-policy.json`, with the localized tab names in
+  `allowedNavigationTabs` and `<code>/` in `allowedPagePrefixes`.
+- `node scripts/i18n/check.mjs <code>` (part of `mise run check`) validates the
+  translated files that exist: frontmatter keys, byte-identical code blocks,
+  component tags and internal links and anchors. A page without a counterpart
+  is reported as `pending_translation`, not as a failure; `--strict` (or
+  `I18N_STRICT=1`) fails on it.
+- A generated translation must keep frontmatter keys, MDX components, fenced
+  code and product names (kombify, StackKits, Techstack, Companion, SpeechKit,
+  Paperwork, kombify Cloud, kombify Sites, Simulate, CUE) unchanged and point
+  internal links to `/<code>/...`; the check enforces this.
+- Generated English pages (`stackkits/reference/cli/*`,
+  `techstack/reference/cli/*`, release pages) are rendered from release data;
+  their localized copies arrive with the next translation pull request.
 
-## Runtime And Dependencies
+Locale semantics are in `KOMBIFY-DESIGN-SYSTEM-STANDARD.md` §11.
+
+## Runtime
 
 | Concern | Choice |
 | --- | --- |
-| Site | Mintlify configured by `docs.json` |
-| Content | English MDX committed in this repository |
+| Site | Mintlify (`docs.json`), hosted at `docs.kombify.io` |
 | Toolchain | `mise`, Node 24, pinned `mint@4.2.684` |
 | Validation | PowerShell gates plus `public-safety-policy.json` |
-| Delivery | Mintlify hosting at `docs.kombify.io` |
-| Analytics | PostHog via `e.kombify.io`, session recording disabled |
+| Analytics | Repository configuration disables Mintlify telemetry; PostHog and PostHog session recording are not configured |
 
-```mermaid
-flowchart LR
-  SK["Released kombify-StackKits"] --> Docs["mintlify-docs"]
-  TS["Techstack preview truth"] --> Docs
-  SP["Released SpeechKit"] --> Docs
-  Docs --> Mint["Mintlify hosting"]
-  Mint --> Site["docs.kombify.io"]
-  Site --> PH["PostHog analytics"]
-```
+Disabling Mintlify telemetry also disables collection of page feedback. See
+[Mintlify's privacy settings](https://www.mintlify.com/docs/integrations/privacy/overview).
 
-## Local Workflow
+## Commands
 
 ```powershell
 mise install
@@ -127,39 +107,47 @@ mise run local:e2e
 
 | Command | Purpose |
 | --- | --- |
-| `mise run dev` | Start the pinned local Mintlify preview. |
-| `mise run check` | Validate the positive scope, navigation, content, and local links. |
-| `mise run public-safety:test` | Run fail-closed policy regression tests. |
-| `scripts/check-stackkits-release-truth.ps1` | Keep installer commands on the current public release and prevent stale lifecycle wording. |
-| `scripts/check-stackkits-external-links.ps1` | Verify the bounded website, installer, and release destinations used by the StackKits quickstart. |
-| `scripts/check-speechkit-release-truth.ps1` | Pin SpeechKit version, platform, module, and Windows assets to the public release. |
-| `scripts/check-techstack-public-boundary.ps1` | Keep the released Techstack Windows Alpha links and pre-1.0 availability boundary truthful, and the generated reference bound to one published release. |
-| `scripts/render-api-surface-reference.mjs` | Render a release's public OpenAPI document and `api-surface.json` into the API and CLI reference; `--check` reports drift. |
-| `scripts/check-product-docs-external-links.ps1` | Verify the public Techstack entry and SpeechKit release destinations. |
-| `scripts/check-code-example-relevance.ps1` | Allow executable and structured examples only on pages with a topic-specific workflow or configuration. |
-| `mise run local:e2e` | Prove allowed and forbidden routes over real local HTTP. |
-| `mise run remote:public-safety` | Prove the deployed route and projection matrix. |
-| `mise run delivery:wait-exact-live` | Wait for a successful `docs.kombify.io` deployment at exact `SOURCE_SHA`. |
+| `mise run dev` | Pinned local Mintlify preview. |
+| `mise run check` | Locale checks, positive scope, navigation, content and local links. |
+| `mise run local:e2e` | `mint validate` plus allowed and forbidden routes over real local HTTP; must pass before publication. |
+| `mise run remote:public-safety` | Deployed route and projection matrix. |
+| `mise run postlive:wait-exact-live` | Wait for a successful `docs.kombify.io` deployment at exact `SOURCE_SHA`. |
+| `scripts/check-stackkits-release-truth.ps1` | Installer commands on the current public release, no stale lifecycle wording. |
+| `scripts/check-stackkits-external-links.ps1` | Website, installer and release destinations of the StackKits quickstart. |
+| `scripts/check-speechkit-release-truth.ps1` | SpeechKit version, platform, module and Windows assets pinned to the public release. |
+| `scripts/check-techstack-public-boundary.ps1` | Windows Alpha links, pre-1.0 availability boundary, generated reference bound to one release. |
+| `scripts/check-product-docs-external-links.ps1` | Public Techstack entry and SpeechKit release destinations. |
+| `scripts/check-code-example-relevance.ps1` | Executable and structured examples only on pages with a topic-specific workflow or configuration. |
+| `scripts/render-api-surface-reference.mjs` | Render a release's OpenAPI and `api-surface.json` into the API and CLI reference; `--check` reports drift. |
 
-The local gate runs `mint validate` and the repository-owned route checks. It
-must pass before publication.
+## Telemetry regression journey
 
-## Authority
+Use a deployed PR preview with production analytics initialization in a fresh
+private browser context. This public reading flow needs no sign-in. The pinned
+development preview is a navigation smoke only: its development mode suppresses
+analytics independently of this configuration.
 
-- `docs.json` defines the Mintlify navigation.
-- `public-safety-policy.json` defines the permitted public page scope and live
-  smoke matrix.
-- `kombify-StackKits` public release artifacts define released StackKits truth.
-- `kombifyio/SpeechKit` public tag and release assets define SpeechKit truth.
-- The active Techstack product authority defines its public contract; the docs
-  keep distribution unavailable until a real public release exists.
-- Workspace standards define documentation and delivery policy; they are not
-  copied into public pages.
+1. Capture network requests from the initial home-page load, then follow the
+   published StackKits overview and identity links through the UI.
+2. Reload and navigate back. Assert that no request goes to
+   `/_mintlify/api/v1/e`, `e.kombify.io` or a PostHog collection endpoint.
+3. Assert that `mintlify_anonymous_id` and `mintlify_session_id` are absent
+   from browser storage, and that documentation navigation still works.
+4. Record the tested source and preview or deployment identity with the
+   observations. Page-feedback collection is intentionally disabled with telemetry.
 
-See [STATUS.md](STATUS.md), [ROADMAP.md](ROADMAP.md), and
-[CONTRIBUTING.md](CONTRIBUTING.md) for current state and contribution rules.
+## Documents
 
-## Issue Tracking
+[STATUS.md](STATUS.md) (published and verified now) -
+[ROADMAP.md](ROADMAP.md) (milestones) -
+[CONTRIBUTING.md](CONTRIBUTING.md) -
+[AGENTS.md](AGENTS.md) -
+[openwiki/](openwiki/) (generated, non-authoritative agent documentation).
+Standards: [DOCUMENTATION-STANDARD.md](../DOCUMENTATION-STANDARD.md),
+[KOMBIFY-DESIGN-SYSTEM-STANDARD.md](../KOMBIFY-DESIGN-SYSTEM-STANDARD.md) §11,
+[CODE-INTELLIGENCE-STANDARD.md](../platform/standards/CODE-INTELLIGENCE-STANDARD.md) §11.
+
+## Issue tracking
 
 ```bash
 bd ready

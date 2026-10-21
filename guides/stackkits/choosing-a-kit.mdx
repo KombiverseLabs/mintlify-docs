@@ -9,6 +9,19 @@ Homelab preview definition. Choose a path for the hosts you already operate.
 Cloud Kit live-runtime evidence remains release-specific; Modern does not yet
 have a supported complete installation path.
 
+## In plain words
+
+A kit is a ready-made starting point for your homelab. It decides where your services run and how you reach them. Which kit fits depends on the computer you have, not on which features you want: a computer in your home points to Basement Kit, and a server that you already rent and operate with your own domain points to Cloud Kit. If you have never set up a server, read [Before you start](/guides/stackkits/before-you-start) first and then begin with Basement Kit.
+
+## What you need first
+
+- Know which computer or server you will use and that you are allowed to run commands on it.
+- For Cloud Kit, a domain and DNS records that you control.
+- Access to a terminal on that machine.
+- No kombify account is required to follow the standalone path.
+
+## Compare the paths
+
 | If you operate... | Choose | Why |
 | --- | --- | --- |
 | local hardware on a home or private network | [Basement Kit](/stackkits/kits/basement-kit) | It is the released local, LAN-first profile. |
@@ -43,6 +56,23 @@ You can pass `cloud-kit` or `modern-homelab` the same way.
 The shell installers resolve the current public release and support Linux and
 macOS on `amd64` and `arm64`. Windows users can download the `windows_amd64`
 ZIP from the [latest release](https://github.com/kombifyio/StackKits/releases/latest).
+
+## What happens after you choose
+
+1. Install through the matching guide: the [Quickstart](/stackkits/quickstart) for Basement Kit or [Cloud Kit](/stackkits/kits/cloud-kit). Expect a workspace folder on the host with your configuration in it.
+2. Check the configuration, then review the plan before it changes the host. Expect the CLI to tell you whether it is ready.
+3. Finish first-run protection in the [Node Hub](/guides/stackkits/node-hub).
+
+## What is stored where
+
+Your choice of kit is stored in the StackSpec, a configuration file in your workspace folder on the host. Nothing is stored in a kombify account for the standalone path, and StackKits does not keep provider credentials. See [Configure a StackSpec](/guides/stackkits/configure-stack-spec).
+
+## If something goes wrong
+
+- The installer stops with an error: read the log with `stackkit logs latest --json` and see [Troubleshooting](/guides/stackkits/troubleshooting). Do not run the installer again before you have read the error.
+- You picked a kit that does not match your host: read the log first, then start again with the kit that matches the host you control.
+- A script fails on `base-kit`: that name is retired, use `basement-kit`.
+- For everyday questions after setup, see [Day to day](/guides/stackkits/daily-use).
 
 After a toolchain-only install, initialize the workspace on
 [Basement Kit](/stackkits/kits/basement-kit) or

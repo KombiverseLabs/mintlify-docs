@@ -11,7 +11,120 @@ sidebarTitle: "agent"
 stackkit agent [flags]
 ```
 
-子命令：[`stackkit agent install-plan`](#stackkit-agent-install-plan), [`stackkit agent mcp-config`](#stackkit-agent-mcp-config), [`stackkit agent prompt`](#stackkit-agent-prompt), [`stackkit agent self-check`](#stackkit-agent-self-check)
+Subcommands: [`stackkit agent approval`](#stackkit-agent-approval), [`stackkit agent credential`](#stackkit-agent-credential), [`stackkit agent diagnose`](#stackkit-agent-diagnose), [`stackkit agent install-plan`](#stackkit-agent-install-plan), [`stackkit agent mcp-config`](#stackkit-agent-mcp-config), [`stackkit agent prompt`](#stackkit-agent-prompt), [`stackkit agent self-check`](#stackkit-agent-self-check)
+
+## stackkit agent approval
+
+Answer per-call write approval requests from attached agents.
+
+A mutating MCP call from an agent with its own credential is denied until you approve that exact call. The denial names an approval request; approving it lets the agent repeat the identical call once, within 15 minutes.
+
+```bash
+stackkit agent approval [flags]
+```
+
+Subcommands: [`stackkit agent approval approve`](#stackkit-agent-approval-approve), [`stackkit agent approval deny`](#stackkit-agent-approval-deny), [`stackkit agent approval list`](#stackkit-agent-approval-list)
+
+### stackkit agent approval approve
+
+Allow the agent to run the requested call once.
+
+```bash
+stackkit agent approval approve <approval-id> [flags]
+```
+
+### stackkit agent approval deny
+
+Refuse the requested call.
+
+```bash
+stackkit agent approval deny <approval-id> [flags]
+```
+
+### stackkit agent approval list
+
+List open and recent approval requests.
+
+```bash
+stackkit agent approval list [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit JSON |
+
+## stackkit agent credential
+
+Mint, list, rotate and revoke per-agent MCP credentials.
+
+Each agent that attaches to the StackKits MCP endpoint of this server holds its own credential. The server stores only a digest, shows a token exactly once, and re-checks the credential on every request, so revoking one denies that agent on its next call without touching the others.
+
+```bash
+stackkit agent credential [flags]
+```
+
+Subcommands: [`stackkit agent credential list`](#stackkit-agent-credential-list), [`stackkit agent credential mint`](#stackkit-agent-credential-mint), [`stackkit agent credential revoke`](#stackkit-agent-credential-revoke), [`stackkit agent credential rotate`](#stackkit-agent-credential-rotate)
+
+### stackkit agent credential list
+
+List agent credentials (never their tokens).
+
+```bash
+stackkit agent credential list [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit JSON |
+
+### stackkit agent credential mint
+
+Create a credential for one agent.
+
+```bash
+stackkit agent credential mint --name <agent> [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit JSON |
+| `--name` | string | — | **Required.** Agent name (for example claude-laptop) |
+| `--token-file` | string | — | Write the token to this new private file instead of stdout |
+
+### stackkit agent credential revoke
+
+Deny an agent from its next request on.
+
+```bash
+stackkit agent credential revoke <agent-id> [flags]
+```
+
+### stackkit agent credential rotate
+
+Replace an agent's token; the old token stops working at once.
+
+```bash
+stackkit agent credential rotate <agent-id> [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit JSON |
+| `--token-file` | string | — | Write the token to this new private file instead of stdout |
+
+## stackkit agent diagnose
+
+说明稳定错误 ID 及其恢复操作。
+
+读取 CLI 失败、MCP 自检计划和 docs/TROUBLESHOOTING.md 所用的同一份恢复指引。此查询不会观测或修改主机。
+
+```bash
+stackkit agent diagnose <error-id> [flags]
+```
+
+| 标志 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--json` | bool | — | 以共享恢复契约输出 JSON；这是指引，而非已观测到的故障 |
 
 ## stackkit agent install-plan
 
@@ -46,14 +159,18 @@ stackkit agent install-plan --kit cloud-kit --target ssh --dir my-cloud --json
 
 对用户而言，这是一个 StackKits MCP 连接。在本地它会启动 stackkit-mcp 适配器；安装之后，在显式启用受保护端点时，同一个连接器也可以通过 stackkit-server /mcp 访问。
 
+With `--remote-url` the output also carries a remote HTTP entry named "stackkit-remote" for the deployed installation endpoint (own domain or kombify.me). It holds only the URL and the NAME of the environment variable that carries the dedicated MCP token; no key or session secret is ever written.
+
 ```bash
 stackkit agent mcp-config [flags]
 ```
 
 | 标志 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `--client` | string | `generic` | 客户端格式：generic、codex 或 claude |
+| `--client` | string | `generic` | Client format: generic, codex, claude, or cursor |
+| `--credential-env` | string | `STACKKIT_MCP_TOKEN` | Name of the environment variable that holds the dedicated MCP token for the remote entry |
 | `--mode` | string | `docs,local,server,actions` | MCP 模式；actions 会加入只读的生命周期工具，写入工具仍需 STACKKIT_MCP_ALLOW_WRITE=true |
+| `--remote-url` | string | — | Also emit a remote HTTP entry for the deployed installation MCP endpoint (https) |
 | `--server-url` | string | `http://localhost:8082` | stackkit-server 的 URL |
 
 **示例**
@@ -64,6 +181,9 @@ stackkit agent mcp-config --client claude
 
 # Print the Codex config.toml block
 stackkit agent mcp-config --client codex
+
+# Add the deployed installation endpoint for Claude, Codex or Cursor
+stackkit agent mcp-config --client cursor --remote-url https://home.example.com/mcp
 ```
 
 ## stackkit agent prompt
@@ -111,4 +231,3 @@ stackkit agent self-check
 # The same checks as JSON
 stackkit agent self-check --json
 ```
-
