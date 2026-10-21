@@ -58,10 +58,14 @@ Use `ClientSetupGuide` (`snippets/client-setup-guide.jsx`), in this order:
    case ("No invitation yet?") to an FAQ through `requirementsHelp`.
 3. **Get the app(s)** (`apps`): one card per platform, `official: true` (vendor)
    or `false` (third-party badge plus an `appsNote` sentence naming the maker).
-4. **Step by step** (`steps`, 3 to 6): `tab` (two words max), `title` (the
-   step goal), `intro` (one or two sentences), `clicks` (numbers match the
-   screenshot annotations), optional `note` and `faq` (`{ q, a }`), `check`,
-   and a `screenshot` or `visual`.
+4. **Step by step** (3 to 6): author each step as a direct MDX child of
+   `ClientSetupGuide`, with a heading, short intro, numbered click list,
+   optional note and FAQ, and a success check. Keep all instructional text
+   in those children so Mintlify can index and export it. The matching `steps`
+   metadata contains only the short `tab`, screenshot, optional `screenshots` gallery or vendor-link visual,
+   and verification `checks` count. The wrapper adds navigation and progress.
+   Native verification inputs use `data-guide-step` and `data-guide-check`
+   with zero-based indices; their labels remain MDX content.
 5. **Check it works**: last step, `verify` checkboxes (kept only in the
    reader's browser).
 6. **Troubleshooting** (`help`): real failure modes (wrong address, certificate
@@ -196,9 +200,17 @@ Engineering reading, not legal advice; recheck rows older than a year.
 
 ## Component notes
 
-- The component renders on the client, so props text is not indexed by
-  Mintlify search; put search terms into `description` and `keywords`.
+- Step text belongs in MDX children, never in JavaScript props. Check the
+  rendered page and its hosted Markdown export after publication. Frontmatter
+  keywords do not replace searchable instructions.
+- Mechanical migrations preserve existing translated prose. A page with
+  `surroundingContent` supplies its existing intro first, its step children,
+  then its existing notes last. This keeps those blocks readable in MDX too.
+- Keep a step FAQ as ordinary MDX paragraphs with a bold question. Mintlify
+  drops raw `details` and `summary` blocks; the wrapper's expandable help uses
+  React elements instead. Check that the question and answer are visible.
 - The local preview may miss snippet edits; restart `mise run dev` after
-  changing `snippets/client-setup-guide.jsx`.
+  changing `snippets/client-setup-guide.jsx`. If it still serves the old
+  compiled snippet, touch the affected MDX pages to rebuild their imports.
 - Panels switch visibility by class, not `[hidden]`, so steps are not hidden
   in print.

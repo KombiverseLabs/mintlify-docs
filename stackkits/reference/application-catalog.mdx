@@ -1,0 +1,325 @@
+---
+title: "Applications in the released catalog"
+description: "Application choices, add-ons and exclusions in StackKits v0.54.3"
+sidebarTitle: "Application catalog"
+icon: "table-list"
+---
+
+This reference covers the [v0.54.3 public release](https://github.com/kombifyio/StackKits/releases/tag/v0.54.3). It complements the generated [use-case catalog](/stackkits/reference/use-case-catalog) with the application choices and optional add-ons that its released modules declare. Start with the linked use-case guide; use [Configure the StackSpec](/guides/stackkits/configure-stack-spec) to change an existing workspace.
+
+An application in this reference is a catalog choice, not a promise that it is selected in your installation. `executable` and `apply-ready` describe the released module contract. They do not certify installation, backup or recovery on your machine. Check [OS compatibility](/stackkits/reference/os-compatibility) and [application delivery compatibility](/stackkits/reference/application-delivery-compatibility) before applying.
+
+The tables name the exact alternative or add-on and module, so you can match them to your generated plan. Add-ons are separate choices. A main application's supporting components are operated with their module, rather than installed one by one. Credentials stay in your own custody; follow the setup actions offered by your installed CLI and never edit generated deployment files.
+
+## Private AI
+
+Private AI workloads, local model serving, and user-facing AI workbench intent.
+
+[Use-case guide](/guides/stackkits/use-cases/personal-ai). The release selects `private-ai` when this use case is enabled without another alternative.
+
+| Choice | Selection | Released module | Compute profiles |
+| --- | --- | --- | --- |
+| `anythingllm` | Main application | `stackkits-anythingllm-runtime` | high, standard |
+| `private-ai` | Main application | `stackkits-private-ai-runtime` | high, standard |
+| `hermes` | Add-on `ai-assistant` | `stackkits-hermes-runtime` | high, standard |
+| `paperclip` | Add-on `ai-control-plane` | `stackkits-paperclip-runtime` | high, standard |
+| `docling` | Add-on `ai-documents` | `stackkits-docling-runtime` | high, standard |
+| `tika` | Add-on `ai-documents` | `stackkits-tika-runtime` | high, standard |
+| `litellm` | Add-on `ai-gateway` | `stackkits-litellm-runtime` | high, standard |
+| `openhands` | Add-on `ai-harness` | `stackkits-openhands-runtime` | high, standard |
+| `comfyui` | Add-on `ai-image-video` | `stackkits-comfyui-runtime` | high, standard |
+| `searxng` | Add-on `ai-search` | `stackkits-searxng-runtime` | high, standard |
+| `speechkit` | Add-on `ai-speech` | `stackkits-speechkit-runtime` | high, standard |
+
+| Declared component | Role | How to read it |
+| --- | --- | --- |
+| AnythingLLM (`anythingllm`) | alternative / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| ComfyUI (`comfyui`) | supporting / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Docling (`docling`) | supporting / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Hermes Agent (`hermes`) | supporting / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Ollama (`ollama`) | primary / application | Selected and operated together by `private-ai`; no separate application choice. |
+| Open WebUI (`open-webui`) | supporting / application | Selected and operated together by `private-ai`; no separate application choice. |
+| SearXNG (`searxng`) | supporting / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| kombify SpeechKit (`speechkit`) | supporting / application | The server image is an unreleased placeholder; do not treat the executable module declaration as an available server release. |
+| Apache Tika (`tika`) | supporting / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+
+The AI add-ons here are applications selected on your own StackKits host. Their presence does not publish kombify's internal AI services or grant access to hosted providers. Model downloads, provider credentials, accelerator requirements and permissions remain explicit choices.
+
+The released source still pins the optional SpeechKit server to an all-zero placeholder digest. That server is excluded from available application claims until a public image exists. The [SpeechKit product guide](/speechkit/overview) describes its separately released clients.
+
+## Automation
+
+Scheduled and event-driven automations on your own node through kombify Workpaths, a headless engine with a private owner-token API. Runs without a kombify plan.
+
+[Use-case guide](/guides/stackkits/use-cases/automation). The release selects `workpaths` when this use case is enabled without another alternative.
+
+| Choice | Selection | Released module | Compute profiles |
+| --- | --- | --- | --- |
+| `workpaths` | Main application | `stackkits-workpaths-runtime` | high, low, standard |
+| `ntfy-live` | Add-on `automation-notifications` | `stackkits-ntfy-live-runtime` | standard |
+
+| Declared component | Role | How to read it |
+| --- | --- | --- |
+| kombify Workpaths (`workpaths`) | primary / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+
+## Developer Platform
+
+Private source control, developer collaboration, and delivery-platform intent.
+
+[Use-case guide](/guides/stackkits/use-cases/development). The release selects `gitea` when this use case is enabled without another alternative.
+
+| Choice | Selection | Released module | Compute profiles |
+| --- | --- | --- | --- |
+| `forgejo` | Main application | `stackkits-forgejo-runtime` | high, standard |
+| `gitea` | Main application | `stackkits-gitea-runtime` | high, standard |
+
+| Declared component | Role | How to read it |
+| --- | --- | --- |
+| Forgejo (`forgejo`) | alternative / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Gitea (`gitea`) | primary / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+
+## Documents
+
+Private document ingestion, OCR, indexing and search through Paperless-ngx.
+
+[Use-case guide](/guides/stackkits/use-cases/documents-and-files). The release selects `paperless-ngx` when this use case is enabled without another alternative.
+
+| Choice | Selection | Released module | Compute profiles |
+| --- | --- | --- | --- |
+| `paperless-ngx` | Main application | `stackkits-paperless-runtime` | high, standard |
+
+| Declared component | Role | How to read it |
+| --- | --- | --- |
+| Paperless-ngx (`paperless-ngx`) | primary / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+
+## File Storage and Documents
+
+Private file storage and sharing: Cloudreve by default, Nextcloud or kombify Paperwork as alternatives, with optional office editing and a document archive.
+
+[Use-case guide](/guides/stackkits/use-cases/documents-and-files). The release selects `cloudreve` when this use case is enabled without another alternative.
+
+| Choice | Selection | Released module | Compute profiles |
+| --- | --- | --- | --- |
+| `cloudreve` | Main application | `stackkits-cloudreve-runtime` | high, low, standard |
+| `nextcloud` | Main application | `stackkits-nextcloud-runtime` | high, standard |
+| `opencloud` | Main application | `stackkits-opencloud-runtime` | high, standard |
+| `euro-office` | Add-on `files-office` | `stackkits-euro-office-runtime` | high, standard |
+
+| Declared component | Role | How to read it |
+| --- | --- | --- |
+| Cloudreve (`cloudreve`) | primary / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Euro-Office (`euro-office`) | supporting / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Nextcloud (`nextcloud`) | alternative / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| OpenCloud (`opencloud`) | alternative / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Paperless-ngx (`paperless-ngx`) | supporting / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| kombify Paperwork (`paperwork`) | alternative / connector | Recorded only; no installable choice is declared for this component in this release. |
+
+The kombify Paperwork entry is a recorded connector, not an installable application choice. Euro-Office is the optional `files-office` add-on.
+
+## Game Server
+
+Self-hosted game servers for friends and family through Calagopus (or Pelican or Pterodactyl), with curated Minecraft Java, Paper and Bedrock, Terraria and Valheim profiles.
+
+[Use-case guide](/guides/stackkits/use-cases/game). The release selects `calagopus` when this use case is enabled without another alternative.
+
+| Choice | Selection | Released module | Compute profiles |
+| --- | --- | --- | --- |
+| `calagopus` | Main application | `stackkits-calagopus-runtime` | high, standard |
+| `pelican` | Main application | `stackkits-pelican-runtime` | high, standard |
+| `pterodactyl` | Main application | `stackkits-pterodactyl-runtime` | high, standard |
+
+| Declared component | Role | How to read it |
+| --- | --- | --- |
+| Calagopus Panel (`calagopus`) | primary / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Pelican Panel (`pelican`) | alternative / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Pterodactyl (`pterodactyl`) | alternative / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+
+## Private Mail
+
+Private webmail through Roundcube for a mailbox you already have at an external provider. No mail server, DNS or MX record is created.
+
+[Use-case guide](/guides/stackkits/use-cases/mail). The release selects `roundcube` when this use case is enabled without another alternative.
+
+| Choice | Selection | Released module | Compute profiles |
+| --- | --- | --- | --- |
+| `roundcube` | Main application | `stackkits-roundcube-runtime` | high, low, standard |
+
+| Declared component | Role | How to read it |
+| --- | --- | --- |
+| kombify Paperwork (`paperwork`) | alternative / connector | Recorded only; no installable choice is declared for this component in this release. |
+| Roundcube Webmail (`roundcube`) | primary / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+
+## Own Mail Server
+
+Your own mail server on a dedicated Cloud node through Stalwart: mailboxes for your domain with SMTP, IMAP and submission. StackKits prints the DNS records you publish; it never changes DNS.
+
+[Use-case guide](/guides/stackkits/use-cases/mail). The release selects `stalwart` when this use case is enabled without another alternative.
+
+| Choice | Selection | Released module | Compute profiles |
+| --- | --- | --- | --- |
+| `stalwart` | Main application | `stackkits-stalwart-runtime` | high, low, standard |
+
+| Declared component | Role | How to read it |
+| --- | --- | --- |
+| mailcow (`mailcow`) | alternative / application | Recorded only; no installable choice is declared for this component in this release. |
+| Stalwart Mail Server (`stalwart`) | primary / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+
+Mailcow is recorded only. Stalwart is the executable mail-server choice. The separate Mail use case supplies Roundcube; selecting a mail client alone does not create a mail server.
+
+## Marketplace
+
+Your own app store for applications you run on your homelab, at home and in the cloud.
+
+[Use-case guide](/guides/stackkits/application-delivery). The release selects `coolify` when this use case is enabled without another alternative.
+
+| Choice | Selection | Released module | Compute profiles |
+| --- | --- | --- | --- |
+| `coolify` | Main application | `stackkits-marketplace-coolify-runtime` | high, standard |
+
+| Declared component | Role | How to read it |
+| --- | --- | --- |
+| Coolify (`coolify`) | primary / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+
+## Media Library
+
+Private media library and streaming intent for household media collections.
+
+[Use-case guide](/guides/stackkits/use-cases/media). The release selects `jellyfin` when this use case is enabled without another alternative.
+
+| Choice | Selection | Released module | Compute profiles |
+| --- | --- | --- | --- |
+| `emby` | Main application | `stackkits-emby-runtime` | high, standard |
+| `jellyfin` | Main application | `stackkits-jellyfin-runtime` | high, standard |
+| `audiobookshelf` | Add-on `media-audiobooks` | `stackkits-audiobookshelf-runtime` | high, standard |
+| `navidrome` | Add-on `media-music` | `stackkits-navidrome-runtime` | high, standard |
+
+| Declared component | Role | How to read it |
+| --- | --- | --- |
+| Audiobookshelf (`audiobookshelf`) | supporting / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Emby (`emby`) | alternative / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Jellyfin (`jellyfin`) | primary / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Navidrome (`navidrome`) | supporting / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+
+## Network
+
+Filter DNS for selected clients while preserving the existing local resolver and device DNS choices.
+
+[Use-case guide](/guides/stackkits/use-cases/network). The release selects `adguard-home` when this use case is enabled without another alternative.
+
+| Choice | Selection | Released module | Compute profiles |
+| --- | --- | --- | --- |
+| `adguard-home` | Main application | `stackkits-adguard-home-runtime` | high, low, standard |
+
+| Declared component | Role | How to read it |
+| --- | --- | --- |
+| AdGuard Home (`adguard-home`) | primary / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+
+## Photos and Memories
+
+Family photo and video vault with mobile backup, search, and shared memories.
+
+[Use-case guide](/guides/stackkits/use-cases/photos). The release selects `immich` when this use case is enabled without another alternative.
+
+| Choice | Selection | Released module | Compute profiles |
+| --- | --- | --- | --- |
+| `immich` | Main application | `stackkits-immich-runtime` | high, standard |
+| `immich-lite` | Main application | `stackkits-immich-lite-runtime` | low |
+| `immich-kiosk` | Add-on `photos-kiosk` | `stackkits-immich-kiosk-runtime` | high, standard |
+| `immich-public-proxy` | Add-on `photos-share` | `stackkits-immich-public-proxy-runtime` | high, standard |
+| `immich-power-tools` | Add-on `photos-tools` | `stackkits-immich-power-tools-runtime` | high, standard |
+
+| Declared component | Role | How to read it |
+| --- | --- | --- |
+| Ente Photos (`ente-photos`) | alternative / application | Recorded only; no installable choice is declared for this component in this release. |
+| Immich (`immich`) | primary / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Immich Kiosk (`immich-kiosk`) | supporting / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Immich Lite (no smart search) (`immich-lite`) | alternative / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Immich Power Tools (`immich-power-tools`) | supporting / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Immich Public Proxy (`immich-public-proxy`) | supporting / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+
+`immich-lite` is the low-profile alternative without smart search. Ente Photos is recorded in the component list but has no executable alternative in this release. The Kiosk, Public Proxy and Power Tools entries are separate optional add-ons; they do not replace Immich.
+
+## Remote Desktop
+
+Private remote desktop and browser-accessible workspace intent.
+
+[Use-case guide](/guides/stackkits/use-cases/development). The release selects `guacamole` when this use case is enabled without another alternative.
+
+| Choice | Selection | Released module | Compute profiles |
+| --- | --- | --- | --- |
+| `guacamole` | Main application | `stackkits-guacamole-runtime` | high, low, standard |
+
+| Declared component | Role | How to read it |
+| --- | --- | --- |
+| Apache Guacamole (`guacamole`) | primary / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+
+## Smart Home
+
+Home automation centered on Home Assistant, native product interfaces, and optional local device adjacency.
+
+[Use-case guide](/guides/stackkits/use-cases/smart-home). The release selects `home-assistant` when this use case is enabled without another alternative.
+
+| Choice | Selection | Released module | Compute profiles |
+| --- | --- | --- | --- |
+| `home-assistant` | Main application | `stackkits-home-assistant-runtime` | high, low, standard |
+| `home-assistant-existing` | Main application | `stackkits-home-assistant-existing-runtime` | standard |
+| `home-assistant-haos` | Main application | `stackkits-home-assistant-haos-runtime` | standard |
+| `home-assistant-imported` | Main application | `stackkits-home-assistant-imported-runtime` | standard |
+| `esphome` | Add-on `smart-home-esphome` | `stackkits-esphome-runtime` | high, standard |
+| `mosquitto` | Add-on `smart-home-mqtt` | `stackkits-mosquitto-runtime` | high, low, standard |
+| `zigbee2mqtt` | Add-on `smart-home-zigbee` | `stackkits-zigbee2mqtt-runtime` | high, standard |
+
+| Declared component | Role | How to read it |
+| --- | --- | --- |
+| ESPHome (`esphome`) | supporting / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Home Assistant (`home-assistant`) | primary / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Eclipse Mosquitto (`mosquitto`) | supporting / service | MQTT service supplied by the optional `smart-home-mqtt` add-on. |
+| Zigbee2MQTT (`zigbee2mqtt`) | supporting / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+
+## Password Vault
+
+Private password and secure-note vault with owner-controlled lifecycle and recovery.
+
+[Use-case guide](/guides/stackkits/use-cases/vault). The release selects `vaultwarden` when this use case is enabled without another alternative.
+
+| Choice | Selection | Released module | Compute profiles |
+| --- | --- | --- | --- |
+| `passbolt` | Main application | `stackkits-passbolt-runtime` | high, standard |
+| `vaultwarden` | Main application | `stackkits-vaultwarden-runtime` | high, low, standard |
+
+| Declared component | Role | How to read it |
+| --- | --- | --- |
+| Passbolt CE (`passbolt`) | alternative / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+| Vaultwarden (`vaultwarden`) | primary / application | Application component of the choices above; follow the use-case guide and review the generated plan. |
+
+## Recorded AI choices
+
+The release also records capability alternatives without an installable selection. These do not become shipped applications merely because their names appear in the catalog.
+
+| Recorded choice | Capability | Release limitation |
+| --- | --- | --- |
+| `llama-cpp` | Inference | Recorded alternative; no executable application choice. |
+| `speechkit` | Speech | Waiting for a public server image and release with the audio endpoints. |
+| `invokeai` | Image and video | Recorded alternative; no executable application choice. |
+| `openbot` | Assistant | Recorded alternative; no executable application choice. |
+| `goose` | Agent harness | Recorded desktop/CLI alternative with no self-hostable web surface. |
+| `langflow` | Agent control plane | Recorded alternative; no executable application choice. |
+| `langfuse` | Model routing and API access | Recorded alternative; its own PostgreSQL and ClickHouse stack is still pending. |
+
+These distinctions come from `capabilities[].default` and `capabilities[].alternative` realization fields, in addition to the component list. They are release exclusions, not instructions to install an internal or unreleased service.
+
+## Kit core and platform services
+
+The release also declares kit-core alternatives. They supply the baseline rather than another end-user application. [Platform services](/stackkits/apps/overview) explains PocketID, TinyAuth, the login gateway, Traefik, optional delivery platforms and the module-only dashboard and diagnostic entries.
+
+| Kit core | Alternative | Module |
+| --- | --- | --- |
+| `basement-core` | `standalone` | `stackkits-basement-core-runtime` |
+| `basement-core` | `standalone-compose` | `stackkits-basement-core-lite-runtime` |
+| `basement-core` | `standalone-lite` | `stackkits-basement-core-lite-runtime` |
+| `cloud-core` | `standalone` | `stackkits-cloud-core-runtime` |
+| `cloud-core` | `standalone-compose` | `stackkits-cloud-core-standalone-runtime` |
+
+## Source and limits
+
+The choices, component kinds, `recorded` exclusions and compute-profile lists come from the v0.54.3 release catalog. The SpeechKit exclusion comes from the [same release's application image contracts](https://github.com/kombifyio/StackKits/blob/721b28cf58d148556aabcc6eec77161fc5a36f8d/foundation/architecture_v2_catalog.cue). A newer module, a private build or a planned application does not extend this release's public availability.

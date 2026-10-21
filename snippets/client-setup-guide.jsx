@@ -1,4 +1,4 @@
-// Data-driven setup guide for non-technical readers. The authoring rules live in
+// MDX-authored setup guide for non-technical readers. The authoring rules live in
 // docs-guidelines/client-setup-guides.md; styles in /client-setup-guide.css.
 // Mintlify injects React hooks; snippets allow no external packages or cross-snippet imports.
 //
@@ -7,6 +7,8 @@
 // The page supplies the reviewed message catalog; keep id and step order stable across locales.
 export const ClientSetupGuide = ({
   id,
+  children,
+  surroundingContent = false,
   labels,
   locale = 'en',
   direction = 'ltr',
@@ -32,6 +34,11 @@ export const ClientSetupGuide = ({
   const number = new Intl.NumberFormat(locale);
   const stepNumber = new Intl.NumberFormat(locale, { minimumIntegerDigits: 2 });
   const message = (key, values = {}) => labels[key].replace(/\{(\w+)\}/g, (_, name) => String(values[name]));
+  // Instructional prose stays in MDX children for search and Markdown export.
+  const content = (Array.isArray(children) ? children.flat() : [children]).filter((child) => child && typeof child !== 'string');
+  const before = surroundingContent ? content[0] : null;
+  const after = surroundingContent ? content[content.length - 1] : null;
+  const panels = surroundingContent ? content.slice(1, -1) : content;
   const count = steps.length;
   const last = count - 1;
   const storageKey = `kombify-client-guide:${id}:v1`;
@@ -41,7 +48,7 @@ export const ClientSetupGuide = ({
   const focusTab = useRef(false);
   const [current, setCurrent] = useState(0);
   const [completed, setCompleted] = useState(() => steps.map(() => false));
-  const [verified, setVerified] = useState(() => steps.map((step) => (step.verify || []).map(() => false)));
+  const [verified, setVerified] = useState(() => steps.map((step) => Array(step.checks || 0).fill(false)));
   const [failed, setFailed] = useState({});
   const [zoom, setZoom] = useState(null);
   const [toast, setToast] = useState('');
@@ -92,7 +99,7 @@ export const ClientSetupGuide = ({
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
       if (Array.isArray(saved?.completed) && saved.completed.length === count) setCompleted(saved.completed.map(Boolean));
-      if (Array.isArray(saved?.verified) && saved.verified.length === count) setVerified(saved.verified.map((list, i) => (steps[i].verify || []).map((_, j) => Boolean(list?.[j]))));
+      if (Array.isArray(saved?.verified) && saved.verified.length === count) setVerified(saved.verified.map((list, i) => Array.from({ length: steps[i].checks || 0 }, (_, j) => Boolean(list?.[j]))));
     } catch (_) { /* Storage is optional, including private browsing. */ }
     // Images that failed before hydration never fire onError; check them once.
     const root = rootRef.current;
@@ -113,6 +120,12 @@ export const ClientSetupGuide = ({
     focusTab.current = false;
     rootRef.current?.querySelector(`[id="${id}-tab-${current}"]`)?.focus();
   }, [current]);
+
+  useEffect(() => {
+    rootRef.current?.querySelectorAll('input[data-guide-check]').forEach((input) => {
+      input.checked = Boolean(verified[Number(input.dataset.guideStep)]?.[Number(input.dataset.guideCheck)]);
+    });
+  }, [verified]);
 
   const persist = (nextCompleted, nextVerified) => {
     try { localStorage.setItem(storageKey, JSON.stringify({ completed: nextCompleted, verified: nextVerified })); } catch (_) {}
@@ -154,7 +167,7 @@ export const ClientSetupGuide = ({
   };
   const onReset = () => {
     const nextCompleted = steps.map(() => false);
-    const nextVerified = steps.map((step) => (step.verify || []).map(() => false));
+    const nextVerified = steps.map((step) => Array(step.checks || 0).fill(false));
     setCompleted(nextCompleted); setVerified(nextVerified); persist(nextCompleted, nextVerified); select(0);
     say(labels.progressReset);
   };
@@ -223,7 +236,11 @@ export const ClientSetupGuide = ({
 
   return (
     <div className="kombify-client-guide not-prose" id={id} dir={direction} lang={locale} ref={rootRef} style={{ '--kcg-steps': count }}>
-      <div className="guide-content">
+      <div className="guide-content" onClick={(event) => {
+        const anchor = event.target.closest('a[href^="#"]');
+        if (anchor) reveal(anchor.hash.slice(1));
+      }}>
+        {before ? <>{before}<div className="page-tools"><button aria-label={labels.printGuide} className="tool-button" onClick={() => window.print()} type="button">{icon('print')}</button></div></> : <>
         <div className="page-top">
           <div className="intro-meta">{meta.map((item, i) => <span key={i}>{icon(item.icon)} {item.text}</span>)}</div>
           <div className="page-tools"><button aria-label={labels.printGuide} className="tool-button" onClick={() => window.print()} type="button">{icon('print')}</button></div>
@@ -260,6 +277,8 @@ export const ClientSetupGuide = ({
           </section>
         ) : null}
 
+        </>}
+
         <section aria-labelledby={`${id}-guide-title`} className="guide-section" id={`${id}-guide`}>
           <div className="guide-heading"><h2 id={`${id}-guide-title`}>{stepsTitle}</h2></div>
           <div className="wizard">
@@ -272,28 +291,17 @@ export const ClientSetupGuide = ({
             </div>
             {steps.map((step, i) => (
               <Article aria-labelledby={`${id}-tab-${i}`} className={`guide-panel${i === current ? ' active' : ''}`} id={`${id}-panel-${i}`} key={i} role="tabpanel">
-                <div className="panel-copy">
+                <div className="panel-copy" onChange={(event) => {
+                  const input = event.target;
+                  if (input.matches('input[data-guide-check]')) onVerify(i, Number(input.dataset.guideCheck), input.checked);
+                }}>
                   <div className="step-kicker">{message('stepPosition', { current: stepNumber.format(i + 1), count: stepNumber.format(count) })}</div>
-                  <h3>{step.title}</h3>
-                  {step.intro ? <p className="step-intro">{rich(step.intro)}</p> : null}
-                  {step.clicks?.length ? (
-                    <ol className="click-list">{step.clicks.map((click, j) => <li key={j}><span className="click-num">{number.format(j + 1)}</span><span>{rich(click)}</span></li>)}</ol>
-                  ) : null}
-                  {step.verify?.length ? (
-                    <div className="verify-list">
-                      {step.verify.map((item, j) => (
-                        <label key={j}><input checked={Boolean(verified[i]?.[j])} id={`${id}-verify-${i}-${j}`} onChange={(event) => onVerify(i, j, event.target.checked)} type="checkbox" /><span>{rich(item)}</span></label>
-                      ))}
-                    </div>
-                  ) : null}
-                  {step.note ? <div className="micro-note">{icon('info')}<span>{rich(step.note)}</span></div> : null}
-                  {(step.faq ? [].concat(step.faq) : []).map((faq, j) => (
-                    <Details key={j}><Summary>{faq.q}</Summary><p>{rich(faq.a)}</p></Details>
-                  ))}
-                  {step.check ? <div className="step-check">{icon('ok')} {rich(step.check)}</div> : null}
+                  {panels[i]}
                 </div>
                 <div className="panel-visual">
-                  {step.screenshot ? renderShot(step.screenshot, i) : step.visual ? renderLinkVisual(step.visual) : null}
+                  {step.screenshot ? renderShot(step.screenshot, i) : null}
+                  {(step.screenshots || []).map((shot) => <div key={shot.src}>{renderShot(shot, i)}</div>)}
+                  {step.visual ? renderLinkVisual(step.visual) : null}
                 </div>
               </Article>
             ))}
@@ -309,6 +317,7 @@ export const ClientSetupGuide = ({
           {sources ? <p className="provenance-inline">{sources.summary} <Anchor href={`#${id}-sources`} onClick={() => reveal(`${id}-sources-detail`)}>{labels.imageSources}</Anchor></p> : null}
         </section>
 
+        {after || <>
         {next.length ? (
           <section aria-labelledby={`${id}-more-title`} className="more-section" id={`${id}-more`}>
             <div className="section-top"><h2 id={`${id}-more-title`}>{nextTitle}</h2></div>
@@ -331,6 +340,8 @@ export const ClientSetupGuide = ({
             ))}
           </section>
         ) : null}
+
+        </>}
 
         <Footer className="footline">
           <div className="attribution">{attribution ? rich(attribution) : null}</div>

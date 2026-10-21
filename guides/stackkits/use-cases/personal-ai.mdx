@@ -21,6 +21,12 @@ Personal AI runs a chat interface for language models on your Linux Docker host.
 
 This page covers both, because they are selected and operated together.
 
+## Optional applications in v0.54.3
+
+The synced release also declares AnythingLLM as another chat alternative, and separate add-ons for Hermes Agent, Paperclip, OpenHands, Docling, Apache Tika, LiteLLM, ComfyUI and SearXNG. These are applications on your own host; their module contracts do not expose kombify's internal AI services. The [released application catalog](/stackkits/reference/application-catalog#private-ai) lists each selection, module and compute profile. Select them explicitly and review their credentials, accelerator requirements and permissions before applying.
+
+The optional SpeechKit server entry is still backed by an unreleased placeholder image. It is excluded from available server claims even though a module contract exists. This does not change the availability of the separately released [SpeechKit clients](/speechkit/overview).
+
 ## Check your host capacity first
 
 The CPU profile has a declared host floor of 4 CPU cores, 12 GiB RAM, and 40 GiB disk; 8 CPU cores, 16 GiB RAM, and 80 GiB disk are recommended. Model size matters on top of that floor:
@@ -28,7 +34,7 @@ The CPU profile has a declared host floor of 4 CPU cores, 12 GiB RAM, and 40 GiB
 - Ollama has a declared 6 GiB RAM limit. The downloaded model weights plus the context you use must fit inside it.
 - Open WebUI has a declared 2 GiB RAM limit.
 - Allow disk space for container images and for downloaded model weights together.
-- GPU serving is not enabled; a higher compute tier uses the same CPU runtime.
+- A higher compute tier uses the same CPU runtime. The v0.54.3 module contract separately declares experimental NVIDIA and AMD accelerator profiles; selecting a higher compute tier alone does not enable one.
 
 These limits describe capacity, not response speed. Check the available host resources and the chosen model's requirements before installation. See [Choose a StackKit](/guides/stackkits/choosing-a-kit) for compute profiles.
 

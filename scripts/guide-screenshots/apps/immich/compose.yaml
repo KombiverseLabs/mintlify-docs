@@ -1,0 +1,32 @@
+# Unmodified upstream reference on an admitted real test server only.
+# Synthetic owned fixture, loopback ports, project-scoped cleanup.
+name: docs-c12-capture
+services:
+  immich:
+    image: ghcr.io/immich-app/immich-server:v2.7.0@sha256:ee60b98e7fcc836d61d7f5e7689514f3de7a9480f31ec6ca62d6221056b46ae1
+    mem_limit: 2g
+    environment:
+      DB_HOSTNAME: database
+      DB_USERNAME: immich
+      DB_PASSWORD: ${GUIDE_DATABASE_PASSWORD:?}
+      DB_DATABASE_NAME: immich
+      REDIS_HOSTNAME: cache
+      IMMICH_MACHINE_LEARNING_ENABLED: 'false'
+    ports: ['127.0.0.1:32283:2283']
+    volumes: ['photos:/data']
+    depends_on: [database, cache]
+  database:
+    image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
+    mem_limit: 1g
+    environment:
+      POSTGRES_USER: immich
+      POSTGRES_DB: immich
+      POSTGRES_PASSWORD: ${GUIDE_DATABASE_PASSWORD:?}
+      POSTGRES_INITDB_ARGS: --data-checksums
+    volumes: ['database:/var/lib/postgresql/data']
+  cache:
+    image: docker.io/valkey/valkey:9@sha256:3b55fbaa0cd93cf0d9d961f405e4dfcc70efe325e2d84da207a0a8e6d8fde4f9
+    mem_limit: 256m
+volumes:
+  photos:
+  database:
