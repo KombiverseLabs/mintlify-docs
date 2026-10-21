@@ -5,8 +5,7 @@
 //   node scripts/i18n/export-catalog.mjs <locale> <out.json> <page> [<page>...]
 //
 // <page> is an English page path without extension (for example apps/cloud/overview).
-// For en the source is <page>.mdx, or <page>.mdx.draft while a page is staged under
-// drafts/. For another locale it is <locale>/<page>.mdx. Keys are
+// For en the source is <page>.mdx; for another locale it is <locale>/<page>.mdx. Keys are
 // "<page>#fm.<key>" for title/description/sidebarTitle and "<page>#bNNN" for each
 // prose block (blank-line separated, fenced code and bare JSX tag lines skipped).
 // Markup, links and backticks inside a block stay unchanged so the producer can
@@ -23,9 +22,7 @@ if (!locale || !out || !pages.length) {
 }
 
 function source(page) {
-  const candidates = locale === "en"
-    ? [`${page}.mdx`, `drafts/${page}.mdx.draft`]
-    : [`${locale}/${page}.mdx`, `drafts/${locale}/${page}.mdx.draft`];
+  const candidates = [locale === "en" ? `${page}.mdx` : `${locale}/${page}.mdx`];
   const found = candidates.find((c) => existsSync(join(root, c)));
   if (!found) throw new Error(`no source for ${locale}/${page} (tried ${candidates.join(", ")})`);
   return readFileSync(join(root, found), "utf8").replace(/\r\n/g, "\n");

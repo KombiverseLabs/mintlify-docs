@@ -26,7 +26,7 @@ if (!code) {
 const strict = process.argv.includes("--strict") || process.env.I18N_STRICT === "1";
 const only = process.argv.slice(3).filter((a) => a !== "--strict");
 const pending = [];
-const skipDirs = new Set([".git", ".github", "node_modules", "drafts", "openwiki", "standards", "data", "docs-guidelines", "scripts", ".beads", ".kombify", ".mintlify"]);
+const skipDirs = new Set([".git", ".github", "node_modules", "openwiki", "standards", "data", "docs-guidelines", "scripts", ".beads", ".kombify", ".mintlify"]);
 const locales = new Set(["de", "es", "zh-Hans", "hi", "ar", "cn"]);
 
 function walk(dir, rel = "") {
