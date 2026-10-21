@@ -19,6 +19,34 @@ const browser = await chromium.launch({ headless: true });
 const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 const page = await context.newPage();
 const results = [];
+const geometryResults = [];
+const geometry = function geometry() {
+  const panel = document.querySelector('.guide-panel.active');
+  const heading = panel.querySelector('h3');
+  const instruction = panel.querySelector('.click-list li');
+  const navbar = document.querySelector('#navbar');
+  const navRect = navbar.getBoundingClientRect();
+  const inspect = (element) => {
+    const rect = element.getBoundingClientRect();
+    const hit = document.elementFromPoint(rect.x + rect.width / 2, rect.y + Math.min(10, rect.height / 2));
+    return { rect: rect.toJSON(), rendered: element.checkVisibility({ checkVisibilityCSS: true, checkOpacity: true }),
+      belowHeader: rect.top >= navRect.bottom, insideViewport: rect.top >= 0 && rect.bottom <= innerHeight,
+      hitInside: !!hit && element.contains(hit), hitTag: hit?.tagName, hitClass: hit?.className };
+  };
+  const h = inspect(heading), first = inspect(instruction);
+  return { url: location.href, assertion: 'Search-result target heading and first instruction are unobscured by fixed header',
+    context: 'local native anchor flow; not actual hosted Mint search', activePanel: panel.id,
+    viewport: { width: innerWidth, height: innerHeight }, navbar: navRect.toJSON(),
+    mintScrollMargin: getComputedStyle(document.documentElement).getPropertyValue('--scroll-mt'),
+    headingScrollMargin: getComputedStyle(heading).scrollMarginTop, heading: h, firstInstruction: first,
+    pass: [h, first].every(x => x.rendered && x.belowHeader && x.insideViewport && x.hitInside) };
+};
+const assertUnobscured = async (path, arrival) => {
+  await page.waitForTimeout(300);
+  const observed = await page.evaluate(geometry);
+  geometryResults.push({ path, arrival, ...observed });
+  assert.equal(observed.pass, true, `${path}: ${arrival}: target heading or first instruction obscured by fixed header`);
+};
 try {
   for (const locale of ['', 'de/', 'es/', 'zh-Hans/', 'hi/', 'ar/']) {
     for (const [guide, targetIndex, expectedCount] of [['passwords/clients', 3, 6], ['photos/phone-backup', 2, 4]]) {
@@ -41,6 +69,26 @@ try {
       const target = root.locator('.guide-panel').nth(targetIndex);
       assert.equal(await target.locator('h3').isVisible(), true, `${path}: hash target hidden`);
       const initial = await target.getAttribute('id');
+      // Native anchor arrivals exercise the real scroll layout. Local Mint
+      // search requires login, so these are not hosted search-result assertions.
+      for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
+        await page.setViewportSize(viewport);
+        if (viewport.width === 390) {
+          await page.reload();
+          await page.waitForFunction((expected) => document.querySelectorAll('.guide-panel')[expected]?.classList.contains('active'), targetIndex);
+        }
+        await assertUnobscured(path, `${viewport.width}px initial hash`);
+        const heading = target.locator('h3');
+        await heading.hover();
+        await heading.locator('a[href]').click();
+        await assertUnobscured(path, `${viewport.width}px same-page anchor`);
+        await root.locator('.step-tab').nth(0).click();
+        await root.locator('.step-tab').nth(targetIndex).click();
+        await heading.hover();
+        await heading.locator('a[href]').click();
+        await assertUnobscured(path, `${viewport.width}px repeated same-hash anchor`);
+      }
+      await page.setViewportSize({ width: 1280, height: 900 });
       const provenance = root.locator('.provenance-inline a');
       let sources = null;
       if (await provenance.count()) {
@@ -73,7 +121,7 @@ try {
     }
   }
 } finally {
-  await writeFile(resolve(output, 'reader-regression.json'), JSON.stringify({ baseUrl: base.href, hostedMarkdownOrSearchAcceptance: false, results }, null, 2) + '\n');
+  await writeFile(resolve(output, 'reader-regression.json'), JSON.stringify({ baseUrl: base.href, hostedMarkdownOrSearchAcceptance: false, geometryResults, results }, null, 2) + '\n');
   await context.close();
   await browser.close();
 }
