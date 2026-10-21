@@ -78,8 +78,7 @@ Use `ClientSetupGuide` (`snippets/client-setup-guide.jsx`), in this order:
    were checked, capture details.
 
 Location: `guides/stackkits/use-cases/<use-case>/<topic>.mdx`. Register it in
-`docs.json` inside the use-case group, add it to `localSmokePaths` in
-`public-safety-policy.json` and link it from the use-case page.
+`docs.json` inside the use-case group and link it from the use-case page.
 
 ## 3. Screenshot policy
 
@@ -184,8 +183,7 @@ Engineering reading, not legal advice; recheck rows older than a year.
 
 ## 7. Review checklist
 
-- [ ] Subpage of its use case, in `docs.json`, linked from the use-case page,
-      listed in `localSmokePaths`.
+- [ ] Subpage of its use case, in `docs.json`, linked from the use-case page.
 - [ ] 3 to 6 steps, each with goal, click list, `check` and a screenshot or
       vendor link card.
 - [ ] UI labels match the captured or documented app, in `[[...]]`; jargon
