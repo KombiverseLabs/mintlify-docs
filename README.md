@@ -83,8 +83,7 @@ How the pieces fit:
   `techstack/reference/cli/*`, release pages) are rendered from release data;
   their localized copies arrive with the next translation pull request.
 
-Locale semantics are in `KOMBIFY-DESIGN-SYSTEM-STANDARD.md` §11. Older
-unreviewed proposals stay in the ignored `drafts/` tree.
+Locale semantics are in `KOMBIFY-DESIGN-SYSTEM-STANDARD.md` §11.
 
 ## Runtime
 
