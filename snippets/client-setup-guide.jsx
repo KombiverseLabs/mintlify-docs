@@ -1,379 +1,206 @@
-// MDX-authored setup guide for non-technical readers. The authoring rules live in
-// docs-guidelines/client-setup-guides.md; styles in /client-setup-guide.css.
-// Mintlify injects React hooks; snippets allow no external packages or cross-snippet imports.
-//
-// Text props accept a small markup: [[UI label]] for an on-screen label,
-// **bold**, and [link text](https://... | /path | #anchor). External links open in a new tab.
-// The page supplies the reviewed message catalog; keep id and step order stable across locales.
-export const ClientSetupGuide = ({
-  id,
-  children,
-  surroundingContent = false,
-  labels,
-  locale = 'en',
-  direction = 'ltr',
-  meta = [],
-  requirements = [],
-  requirementsHelp,
-  appsTitle = labels.appsTitle,
-  vendor,
-  apps = [],
-  appsNote,
-  stepsTitle = labels.stepsTitle,
-  steps = [],
-  help = [],
-  helpTitle = labels.helpTitle,
-  next = [],
-  nextTitle = labels.nextTitle,
-  attribution,
-  sources,
-}) => {
-  // Tags live in variables so MDX does not route them through Mintlify's
-  // component overrides (figure, img and a gain wrappers otherwise).
-  const Anchor = 'a', Article = 'article', Details = 'details', Dialog = 'dialog', Figcaption = 'figcaption', Figure = 'figure', Footer = 'footer', Img = 'img', Summary = 'summary';
-  const number = new Intl.NumberFormat(locale);
-  const stepNumber = new Intl.NumberFormat(locale, { minimumIntegerDigits: 2 });
-  const message = (key, values = {}) => labels[key].replace(/\{(\w+)\}/g, (_, name) => String(values[name]));
-  // Instructional prose stays in MDX children for search and Markdown export.
-  const content = (Array.isArray(children) ? children.flat() : [children]).filter((child) => child && typeof child !== 'string');
-  const before = surroundingContent ? content[0] : null;
-  const after = surroundingContent ? content[content.length - 1] : null;
-  const panels = surroundingContent ? content.slice(1, -1) : content;
-  const count = steps.length;
-  const last = count - 1;
-  const storageKey = `kombify-client-guide:${id}:v1`;
-  const rootRef = useRef(null);
-  const zoomRef = useRef(null);
-  const toastTimer = useRef(null);
-  const focusTab = useRef(false);
-  const [current, setCurrent] = useState(0);
-  const [completed, setCompleted] = useState(() => steps.map(() => false));
-  const [verified, setVerified] = useState(() => steps.map((step) => Array(step.checks || 0).fill(false)));
-  const [failed, setFailed] = useState({});
-  const [zoom, setZoom] = useState(null);
-  const [toast, setToast] = useState('');
-
-  const isExternal = (href) => /^https?:\/\//.test(href || '');
-  const icon = (name) => {
-    const paths = {
-      apple: <path d="M16.7 1.8c0 2.1-1.7 4.4-3.7 4.2-.4-2.1 1.8-4.3 3.7-4.2ZM20.4 17.3c-.5 1.2-.8 1.7-1.5 2.7-1 1.5-2.4 3.3-4.2 3.3-1.6 0-2-1-4.1-.9-2.1 0-2.5 1-4.2.9-1.8-.1-3.1-1.7-4.1-3.2C-.5 15.9-.7 10.4 1 7.6c1.2-2 3.1-3.1 4.9-3.1 1.9 0 3.1 1 4.7 1 1.5 0 2.5-1 4.7-1 1.6 0 3.3.9 4.5 2.3-4 2.2-3.3 8 0 10.5Z" fill="currentColor" stroke="none" transform="translate(2 0) scale(.87)" />,
-      android: <><path d="M5 12a7 7 0 0 1 14 0v6H5Zm2-6L5 3m12 3 2-3M2 12v5m20-5v5M8 18v4m8-4v4" /><path d="M8.5 9h.01M15.5 9h.01" /></>,
-      browser: <><rect height="16" rx="2" width="20" x="2" y="4" /><path d="M2 9h20M6 6.5h.01M9 6.5h.01" /></>,
-      desktop: <><rect height="14" rx="2" width="20" x="2" y="3" /><path d="M8 22h8M12 17v5" /></>,
-      web: <><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" /></>,
-      server: <><rect height="7" rx="2" width="18" x="3" y="3" /><rect height="7" rx="2" width="18" x="3" y="14" /><path d="M7 6.5h.01M7 17.5h.01M16 6.5h2M16 17.5h2" /></>,
-      phone: <><rect height="20" rx="3" width="12" x="6" y="2" /><path d="M10 5h4M11 19h2" /></>,
-      steps: <><rect height="7" rx="1.5" width="7" x="3" y="3" /><rect height="7" rx="1.5" width="7" x="14" y="3" /><rect height="7" rx="1.5" width="7" x="3" y="14" /><rect height="7" rx="1.5" width="7" x="14" y="14" /></>,
-      book: <path d="M12 5v15M3 4c4-1 6 0 9 1 3-1 5-2 9-1v15c-4-1-6 0-9 1-3-1-5-2-9-1Z" />,
-      clock: <><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></>,
-      print: <><path d="M6 8V3h12v5M6 17H3V8h18v9h-3M6 14h12v7H6Z" /><path d="M17 11h.01" /></>,
-      check: <path d="m5 12 4 4L19 6" />,
-      arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
-      back: <path d="m15 5-7 7 7 7" />,
-      external: <><path d="M14 4h6v6m0-6L10 14" /><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5" /></>,
-      info: <><circle cx="12" cy="12" r="9" /><path d="M12 11v5M12 7h.01" /></>,
-      ok: <><circle cx="12" cy="12" r="9" /><path d="m8 12 3 3 5-6" /></>,
-      camera: <><path d="M3 7h4l2-3h6l2 3h4v13H3Z" /><circle cx="12" cy="13" r="4" /></>,
-      zoom: <><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5M7 10.5h7M10.5 7v7" /></>,
-      shield: <><path d="M12 3 3 7v6c0 5 9 9 9 9s9-4 9-9V7Z" /><path d="m8 12 3 3 5-6" /></>,
-      close: <path d="m6 6 12 12M6 18 18 6" />,
-    };
-    return <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24">{paths[name] || paths.info}</svg>;
-  };
-  const safeHref = (href) => (/^(https:\/\/|\/|#)/.test(href || '') ? href : '#');
-  const link = (href, children, className, key) => (isExternal(href)
-    ? <Anchor className={className || ''} href={safeHref(href)} key={key} rel="noopener noreferrer" target="_blank">{children} {icon('external')}<span className="sr-only">{labels.opensInNewTab}</span></Anchor>
-    : <Anchor className={className || ''} href={safeHref(href)} key={key} onClick={(href || '').startsWith('#') ? () => { zoomRef.current?.close(); reveal(href.slice(1)); } : undefined}>{children}</Anchor>);
-  const rich = (text) => {
-    if (!text || !text.split) return text;
-    return text.split(/(\[\[[^\]]+\]\]|\*\*[^*]+\*\*|\[[^\]]+\]\([^)\s]+\))/g).map((part, i) => {
-      if (/^\[\[[^\]]+\]\]$/.test(part)) return <span className="key" key={i}>{part.slice(2, -2)}</span>;
-      if (/^\*\*[^*]+\*\*$/.test(part)) return <strong key={i}>{part.slice(2, -2)}</strong>;
-      const match = /^\[([^\]]+)\]\(([^)\s]+)\)$/.exec(part);
-      if (match) return link(match[2], match[1], undefined, i);
-      return part;
-    });
-  };
-
+// Native MDX is the source of every instruction, caption and verification label.
+// This null-rendering component enhances only the guide with the matching id.
+// Mintlify injects React hooks; no external packages or cross-snippet imports.
+export const ClientSetupGuide = ({ id, labels, locale = 'en', checks = [] }) => {
   useEffect(() => {
+    const root = document.getElementById(id);
+    if (!root) return;
+    const $ = (selector, scope = root) => scope.querySelector(selector);
+    const $$ = (selector, scope = root) => Array.from(scope.querySelectorAll(selector));
+    const panels = $$('.guide-panel');
+    const tabs = $$('.step-tab');
+    const count = panels.length;
+    const last = count - 1;
+    const number = new Intl.NumberFormat(locale);
+    const message = (key, values = {}) => labels[key].replace(/\{(\w+)\}/g, (_, name) => String(values[name]));
+    const storageKey = `kombify-client-guide:${id}:v1`;
+    const abort = new AbortController();
+    const listen = (node, event, handler, options = {}) => node?.addEventListener(event, handler, { ...options, signal: abort.signal });
+    const dialog = $('.zoom-dialog');
+    let current = 0;
+    let completed = panels.map(() => false);
+    let verified = panels.map((_, i) => Array(checks[i] || 0).fill(false));
+    let toastTimer;
+    let announceTimer;
+    let hashFrame;
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
-      if (Array.isArray(saved?.completed) && saved.completed.length === count) setCompleted(saved.completed.map(Boolean));
-      if (Array.isArray(saved?.verified) && saved.verified.length === count) setVerified(saved.verified.map((list, i) => Array.from({ length: steps[i].checks || 0 }, (_, j) => Boolean(list?.[j]))));
+      if (Array.isArray(saved?.completed) && saved.completed.length === count) completed = saved.completed.map(Boolean);
+      if (Array.isArray(saved?.verified) && saved.verified.length === count) verified = verified.map((list, i) => list.map((_, j) => Boolean(saved.verified[i]?.[j])));
     } catch (_) { /* Storage is optional, including private browsing. */ }
-    // Images that failed before hydration never fire onError; check them once.
-    const root = rootRef.current;
-    const timer = setTimeout(() => {
-      if (!root) return;
-      const broken = {};
-      root.querySelectorAll('.screen-image > img').forEach((image) => { if (image.complete && !image.naturalWidth) broken[image.getAttribute('src')] = true; });
-      if (Object.keys(broken).length) setFailed((old) => ({ ...old, ...broken }));
-    }, 7000);
-    const openAll = () => root?.querySelectorAll('details').forEach((node) => { node.open = true; });
-    window.addEventListener('beforeprint', openAll);
-    return () => { clearTimeout(timer); clearTimeout(toastTimer.current); window.removeEventListener('beforeprint', openAll); };
-  }, []);
-
-  // Move focus after React committed the new tab (ARIA tabs pattern).
-  useEffect(() => {
-    if (!focusTab.current) return;
-    focusTab.current = false;
-    rootRef.current?.querySelector(`[id="${id}-tab-${current}"]`)?.focus();
-  }, [current]);
-
-  useEffect(() => {
-    rootRef.current?.querySelectorAll('input[data-guide-check]').forEach((input) => {
-      input.checked = Boolean(verified[Number(input.dataset.guideStep)]?.[Number(input.dataset.guideCheck)]);
+    // A verification step cannot stay completed after a check is removed.
+    completed = completed.map((done, i) => done && verified[i].every(Boolean));
+    const persist = () => {
+      try { localStorage.setItem(storageKey, JSON.stringify({ completed, verified })); } catch (_) {}
+    };
+    const say = (text) => {
+      const live = $('[role="status"]');
+      const toast = $('.toast');
+      live.textContent = '';
+      clearTimeout(announceTimer);
+      announceTimer = setTimeout(() => { live.textContent = text; }, 60);
+      toast.textContent = text;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 3800);
+    };
+    const updateProgress = () => {
+      $('.progress-note > span').textContent = message('progress', { done: number.format(completed.filter(Boolean).length), count: number.format(count) });
+      $$('.progress-meter span').forEach((node, i) => node.classList.toggle('done', completed[i]));
+      tabs.forEach((node, i) => {
+        node.classList.toggle('done', completed[i]);
+        $('.step-dot', node).textContent = completed[i] ? '✓' : number.format(i + 1);
+      });
+      $$('input[data-guide-check]').forEach((input) => {
+        input.checked = Boolean(verified[Number(input.dataset.guideStep)]?.[Number(input.dataset.guideCheck)]);
+      });
+    };
+    const select = (index, focus = false) => {
+      current = Math.max(0, Math.min(last, index));
+      tabs.forEach((tab, i) => {
+        tab.setAttribute('aria-selected', String(i === current));
+        tab.tabIndex = i === current ? 0 : -1;
+      });
+      panels.forEach((panel, i) => panel.classList.toggle('active', i === current));
+      $('.prev').disabled = current === 0;
+      $('.next > span').textContent = current === last ? labels.finish : labels.next;
+      if (focus) tabs[current].focus();
+    };
+    const reveal = (hash, scroll = true) => {
+      let targetId;
+      try { targetId = decodeURIComponent(hash.replace(/^#/, '')); } catch (_) { return; }
+      const target = document.getElementById(targetId);
+      if (!target || !root.contains(target)) return;
+      const disclosure = target.closest('[data-guide-disclosure]') || target.querySelector('[data-guide-disclosure]');
+      if (disclosure) { disclosure.classList.remove('collapsed'); $('.disclosure-title', disclosure).setAttribute('aria-expanded', 'true'); }
+      const panel = target.closest('.guide-panel');
+      if (panel) select(panels.indexOf(panel));
+      // Disclosures are optional; native prose remains readable without JS.
+      for (let node = target; node && node !== root; node = node.parentElement) {
+        if (node.tagName === 'DETAILS') node.open = true;
+      }
+      if (scroll) {
+        cancelAnimationFrame(hashFrame);
+        hashFrame = requestAnimationFrame(() => target.scrollIntoView({ block: 'start' }));
+      }
+    };
+    const followHash = () => {
+      if (window.location.hash) reveal(window.location.hash);
+      else select(0);
+    };
+    const next = () => {
+      const missing = verified[current].indexOf(false);
+      if (missing !== -1) {
+        say(labels.verifyRequired);
+        $(`input[data-guide-step="${current}"][data-guide-check="${missing}"]`)?.focus();
+        return;
+      }
+      completed[current] = true;
+      persist(); updateProgress();
+      if (current < last) select(current + 1, true);
+      else {
+        const done = completed.filter(Boolean).length;
+        say(done === count ? labels.allDone : message('remainingSteps', { done: number.format(done), count: number.format(count) }));
+        $(`[id="${id}-more"], [id="${id}-help"]`)?.scrollIntoView({ block: 'start' });
+      }
+    };
+    const openZoom = (button) => {
+      const figure = button.closest('.screen-figure');
+      const image = $('.screen-image > img', figure);
+      const content = $('.zoom-content', dialog);
+      const enlarged = document.createElement('img');
+      enlarged.src = image.currentSrc || image.src;
+      enlarged.alt = image.alt;
+      content.replaceChildren(enlarged);
+      const fallback = $('.image-fallback', figure);
+      if (fallback) {
+        const link = document.createElement('a');
+        link.href = fallback.href;
+        link.target = '_blank'; link.rel = 'noopener noreferrer';
+        link.textContent = `${labels.openScreenshot} · ${labels.opensInNewTab}`;
+        content.append(link);
+      }
+      if (!dialog.open) dialog.showModal();
+    };
+    listen(root, 'click', (event) => {
+      const button = event.target.closest('button');
+      if (button && root.contains(button)) {
+        if (button.matches('.step-tab')) select(Number(button.dataset.guideTab));
+        else if (button.matches('.next')) next();
+        else if (button.matches('.prev')) select(current - 1, true);
+        else if (button.matches('.reset')) {
+          completed = panels.map(() => false);
+          verified = panels.map((_, i) => Array(checks[i] || 0).fill(false));
+          persist(); updateProgress(); select(0);
+          say(labels.progressReset);
+        } else if (button.dataset.guideAction === 'print') window.print();
+        else if (button.dataset.guideAction === 'zoom') openZoom(button);
+        else if (button.matches('.dialog-close')) dialog.close();
+        else if (button.matches('.disclosure-title')) {
+          const disclosure = button.closest('[data-guide-disclosure]');
+          const collapsed = disclosure.classList.toggle('collapsed');
+          button.setAttribute('aria-expanded', String(!collapsed));
+        }
+      }
+      const anchor = event.target.closest('a[href^="#"]');
+      if (anchor && root.contains(anchor)) { dialog?.close(); reveal(anchor.hash); }
     });
-  }, [verified]);
+    listen(root, 'change', (event) => {
+      const input = event.target;
+      if (!input.matches('input[data-guide-check]')) return;
+      const step = Number(input.dataset.guideStep);
+      verified[step][Number(input.dataset.guideCheck)] = input.checked;
+      if (!input.checked) completed[step] = false;
+      persist(); updateProgress();
+    });
+    listen($('.step-tabs'), 'keydown', (event) => {
+      const moves = { ArrowRight: (current + 1) % count, ArrowLeft: (current - 1 + count) % count, Home: 0, End: last };
+      if (moves[event.key] === undefined) return;
+      event.preventDefault(); select(moves[event.key], true);
+    });
+    listen(dialog, 'click', (event) => {
+      if (event.target !== dialog) return;
+      const rect = dialog.getBoundingClientRect();
+      if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
+    });
+    const markBroken = (image) => image.closest('.screen-figure')?.classList.add('image-unavailable');
+    listen(root, 'error', (event) => {
+      if (event.target.matches('.screen-image > img')) markBroken(event.target);
+    }, { capture: true });
+    $$('.screen-image > img').forEach((image) => { if (image.complete && !image.naturalWidth) markBroken(image); });
+    // Mint search and the TOC can handle same-page anchors without a native
+    // hashchange. Observe their real link clicks as well, including repeat links.
+    listen(document, 'click', (event) => {
+      const anchor = event.target.closest('a[href]');
+      if (!anchor) return;
+      const url = new URL(anchor.href, window.location.href);
+      if (url.origin === location.origin && url.pathname === location.pathname && url.hash) reveal(url.hash);
+    }, { capture: true });
+    listen(window, 'hashchange', followHash);
+    listen(window, 'popstate', followHash);
+    $$('[data-guide-disclosure]').forEach((node, i) => {
+      const button = $('.disclosure-title', node);
+      const answer = $('.answer, .source-content', node);
+      answer.id = `${id}-disclosure-${i}`;
+      button.setAttribute('aria-controls', answer.id);
+      button.setAttribute('aria-expanded', 'false');
+      node.classList.add('collapsed');
+    });
+    updateProgress(); select(0);
+    root.classList.add('guide-enhanced');
+    // Initial links from Mint search/TOC must reveal their native heading too.
+    followHash();
+    return () => {
+      abort.abort(); clearTimeout(toastTimer); clearTimeout(announceTimer);
+      cancelAnimationFrame(hashFrame); dialog?.close(); root.classList.remove('guide-enhanced');
+    };
+  }, [id, labels, locale]);
+  return null;
+};
 
-  const persist = (nextCompleted, nextVerified) => {
-    try { localStorage.setItem(storageKey, JSON.stringify({ completed: nextCompleted, verified: nextVerified })); } catch (_) {}
-  };
-  const say = (text) => {
-    setToast('');
-    setTimeout(() => setToast(text), 60);
-    clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(''), 3800);
-  };
-  const select = (index, focus) => {
-    const target = Math.max(0, Math.min(last, index));
-    setCurrent(target);
-    focusTab.current = Boolean(focus);
-  };
-  const onNext = () => {
-    const checks = verified[current] || [];
-    if (checks.length && !checks.every(Boolean)) {
-      say(labels.verifyRequired);
-      rootRef.current?.querySelector(`[id="${id}-verify-${current}-${checks.indexOf(false)}"]`)?.focus();
-      return;
-    }
-    const nextCompleted = completed.map((done, i) => (i === current ? true : done));
-    setCompleted(nextCompleted);
-    persist(nextCompleted, verified);
-    if (current < last) select(current + 1, true);
-    else {
-      const done = nextCompleted.filter(Boolean).length;
-      say(done === count ? labels.allDone : message('remainingSteps', { done: number.format(done), count: number.format(count) }));
-      rootRef.current?.querySelector(`[id="${id}-more"], [id="${id}-help"]`)?.scrollIntoView({ block: 'start' });
-    }
-  };
-  const onVerify = (stepIndex, checkIndex, value) => {
-    const nextVerified = verified.map((list, i) => (i === stepIndex ? list.map((v, j) => (j === checkIndex ? value : v)) : list));
-    const nextCompleted = completed.map((done, i) => (i === stepIndex && !value ? false : done));
-    setVerified(nextVerified);
-    setCompleted(nextCompleted);
-    persist(nextCompleted, nextVerified);
-  };
-  const onReset = () => {
-    const nextCompleted = steps.map(() => false);
-    const nextVerified = steps.map((step) => Array(step.checks || 0).fill(false));
-    setCompleted(nextCompleted); setVerified(nextVerified); persist(nextCompleted, nextVerified); select(0);
-    say(labels.progressReset);
-  };
-  const onTabKey = (event) => {
-    const moves = { ArrowRight: (c) => (c + 1) % count, ArrowLeft: (c) => (c - 1 + count) % count, Home: () => 0, End: () => last };
-    const move = moves[event.key];
-    if (!move) return;
-    event.preventDefault();
-    focusTab.current = true;
-    // Functional update: fast repeated key presses must not read a stale step.
-    setCurrent(move);
-  };
-  const openZoom = (shot) => {
-    setZoom(shot);
-    const dialog = zoomRef.current;
-    if (dialog && !dialog.open) dialog.showModal();
-  };
-  const closeOnBackdrop = (event) => {
-    const dialog = event.currentTarget;
-    if (event.target !== dialog) return;
-    const rect = dialog.getBoundingClientRect();
-    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) dialog.close();
-  };
-  const reveal = (targetId) => {
-    const node = rootRef.current?.querySelector(`[id="${targetId}"]`);
-    const details = node && (node.tagName === 'DETAILS' ? node : node.querySelector('details'));
-    if (details) details.open = true;
-  };
-
-  const renderShot = (shot, stepIndex) => {
-    const unavailable = failed[shot.src];
-    const label = shot.vendor ? labels.vendorScreenshotTag : labels.kombifyScreenshotTag;
-    return (
-      <>
-        <span className="screenshot-tag">{icon('camera')} {label}</span>
-        <Figure className={`screen-figure${shot.frame === 'phone' ? ' phone' : ''}${unavailable ? ' image-unavailable' : ''}`}>
-          <div className="screen-image">
-            <Img alt={shot.alt} className={shot.srcDark ? 'only-light has-dark' : undefined} decoding="async" height={shot.height} loading={stepIndex === 0 ? 'eager' : 'lazy'} onError={() => setFailed((old) => ({ ...old, [shot.src]: true }))} referrerPolicy="no-referrer" src={shot.src} width={shot.width} />
-            {shot.srcDark ? <Img alt={shot.alt} className="only-dark" decoding="async" height={shot.height} loading="lazy" onError={() => setFailed((old) => ({ ...old, [shot.src]: true }))} src={shot.srcDark} width={shot.width} /> : null}
-            {(shot.vendor ? [] : shot.annotations || []).map((mark, i) => <span aria-hidden="true" className="annotation" data-n={mark.n ?? undefined} key={i} style={{ top: `${mark.top}%`, left: `${mark.left}%`, width: `${mark.width}%`, height: `${mark.height}%` }} />)}
-            <Anchor className="image-fallback" href={shot.vendor ? shot.creditHref || shot.src : shot.src} rel="noopener noreferrer" target="_blank">{icon('external')} {shot.vendor ? labels.openVendorPage : labels.openScreenshot}<span>{shot.vendor ? labels.vendorImageUnavailable : labels.imageUnavailable}</span></Anchor>
-            <button aria-label={message('enlargeScreenshot', { description: shot.alt })} className="zoom-button" onClick={() => openZoom(shot)} type="button">{icon('zoom')}</button>
-          </div>
-          <Figcaption>
-            {shot.caption}{shot.credit ? <> · {shot.creditHref ? link(shot.creditHref, shot.credit) : shot.credit}</> : null}
-            {shot.version || shot.captured ? <span className="meta">{[shot.version, shot.captured ? message('captured', { date: shot.captured }) : null].filter(Boolean).join(' · ')}</span> : null}
-          </Figcaption>
-        </Figure>
-      </>
-    );
-  };
-  const renderLinkVisual = (visual) => (
-    <>
-      <span className="screenshot-tag">{icon('external')} {visual.tag || labels.vendorGuideTag}</span>
-      <div className="link-visual">
-        {visual.title ? <strong>{visual.title}</strong> : null}
-        {visual.text ? <p>{rich(visual.text)}</p> : null}
-        {(visual.links || []).map((item, i) => (
-          <Anchor className="vendor-link" href={item.href} key={i} rel="noopener noreferrer" target="_blank">
-            {icon(item.icon || 'book')}<span>{item.label}{item.detail ? <small>{item.detail}</small> : null}</span>{icon('external')}<span className="sr-only">{labels.opensInNewTab}</span>
-          </Anchor>
-        ))}
-      </div>
-    </>
-  );
-
-  return (
-    <div className="kombify-client-guide not-prose" id={id} dir={direction} lang={locale} ref={rootRef} style={{ '--kcg-steps': count }}>
-      <div className="guide-content" onClick={(event) => {
-        const anchor = event.target.closest('a[href^="#"]');
-        if (anchor) reveal(anchor.hash.slice(1));
-      }}>
-        {before ? <>{before}<div className="page-tools"><button aria-label={labels.printGuide} className="tool-button" onClick={() => window.print()} type="button">{icon('print')}</button></div></> : <>
-        <div className="page-top">
-          <div className="intro-meta">{meta.map((item, i) => <span key={i}>{icon(item.icon)} {item.text}</span>)}</div>
-          <div className="page-tools"><button aria-label={labels.printGuide} className="tool-button" onClick={() => window.print()} type="button">{icon('print')}</button></div>
-        </div>
-        {requirements.length ? (
-          <div className="ready-strip">
-            <strong>{labels.requirementsTitle}</strong>
-            {requirements.map((item, i) => <span key={i}>{icon('check')} {rich(item)}</span>)}
-            {requirementsHelp ? <Anchor href={`#${requirementsHelp.target}`} onClick={() => reveal(requirementsHelp.target)}>{requirementsHelp.label} {icon('arrow')}</Anchor> : null}
-          </div>
-        ) : null}
-
-        {apps.length ? (
-          <section aria-labelledby={`${id}-apps-title`} className="downloads" id={`${id}-apps`}>
-            <div className="section-top">
-              <h2 id={`${id}-apps-title`}>{appsTitle}</h2>
-              {vendor ? link(vendor.href, vendor.label, 'small-link') : null}
-            </div>
-            <div className="downloads-grid">
-              {apps.map((app, i) => (
-                <Anchor className="download-card" href={app.href} key={i} rel="noopener noreferrer" target="_blank">
-                  <span className="platform-icon">{icon(app.platform)}</span>
-                  <span className="download-text">
-                    <strong>{app.label}</strong>
-                    <small>{app.detail}</small>
-                    <span className="store-name">{app.store} {icon('external')}</span>
-                    <span className={`badge ${app.official ? 'official' : 'unofficial'}`}>{app.official ? message('officialApp', { vendor: app.vendor }) : message('thirdPartyApp', { vendor: app.vendor })}</span>
-                  </span>
-                  <span className="sr-only">{labels.opensInNewTab}</span>
-                </Anchor>
-              ))}
-            </div>
-            {appsNote ? <p className="download-hint">{rich(appsNote)}</p> : null}
-          </section>
-        ) : null}
-
-        </>}
-
-        <section aria-labelledby={`${id}-guide-title`} className="guide-section" id={`${id}-guide`}>
-          <div className="guide-heading"><h2 id={`${id}-guide-title`}>{stepsTitle}</h2></div>
-          <div className="wizard">
-            <div aria-label={labels.setupSteps} className="step-tabs" onKeyDown={onTabKey} role="tablist">
-              {steps.map((step, i) => (
-                <button aria-controls={`${id}-panel-${i}`} aria-selected={i === current} className={`step-tab${completed[i] ? ' done' : ''}`} id={`${id}-tab-${i}`} key={i} onClick={() => select(i)} role="tab" tabIndex={i === current ? 0 : -1} type="button">
-                  <span className="step-dot">{completed[i] ? '✓' : number.format(i + 1)}</span><span>{step.tab}</span>
-                </button>
-              ))}
-            </div>
-            {steps.map((step, i) => (
-              <Article aria-labelledby={`${id}-tab-${i}`} className={`guide-panel${i === current ? ' active' : ''}`} id={`${id}-panel-${i}`} key={i} role="tabpanel">
-                <div className="panel-copy" onChange={(event) => {
-                  const input = event.target;
-                  if (input.matches('input[data-guide-check]')) onVerify(i, Number(input.dataset.guideCheck), input.checked);
-                }}>
-                  <div className="step-kicker">{message('stepPosition', { current: stepNumber.format(i + 1), count: stepNumber.format(count) })}</div>
-                  {panels[i]}
-                </div>
-                <div className="panel-visual">
-                  {step.screenshot ? renderShot(step.screenshot, i) : null}
-                  {(step.screenshots || []).map((shot) => <div key={shot.src}>{renderShot(shot, i)}</div>)}
-                  {step.visual ? renderLinkVisual(step.visual) : null}
-                </div>
-              </Article>
-            ))}
-            <div className="wizard-bottom">
-              <div className="progress-note">
-                <span>{message('progress', { done: number.format(completed.filter(Boolean).length), count: number.format(count) })}</span>
-                <div aria-hidden="true" className="progress-meter">{steps.map((step, i) => <span className={completed[i] ? 'done' : undefined} key={i} />)}</div>
-              </div>
-              <button className="prev" disabled={current === 0} onClick={() => select(current - 1, true)} type="button">{icon('back')} {labels.back}</button>
-              <button className="next" onClick={onNext} type="button"><span>{current === last ? labels.finish : labels.next}</span>{icon('arrow')}</button>
-            </div>
-          </div>
-          {sources ? <p className="provenance-inline">{sources.summary} <Anchor href={`#${id}-sources`} onClick={() => reveal(`${id}-sources-detail`)}>{labels.imageSources}</Anchor></p> : null}
-        </section>
-
-        {after || <>
-        {next.length ? (
-          <section aria-labelledby={`${id}-more-title`} className="more-section" id={`${id}-more`}>
-            <div className="section-top"><h2 id={`${id}-more-title`}>{nextTitle}</h2></div>
-            <div className="more-grid">
-              {next.map((item, i) => (
-                link(item.href, <>
-                  <span className="more-icon">{icon(item.icon || 'arrow')}</span>
-                  <span><strong>{item.title}</strong><small>{item.text}</small></span>
-                </>, 'more-card', i)
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        {help.length ? (
-          <section aria-labelledby={`${id}-help-title`} className="faq-section" id={`${id}-help`}>
-            <h2 id={`${id}-help-title`}>{helpTitle}</h2>
-            {help.map((item, i) => (
-              <Details className="faq" id={item.id} key={i}><Summary>{item.q}</Summary><div className="answer">{rich(item.a)}</div></Details>
-            ))}
-          </section>
-        ) : null}
-
-        </>}
-
-        <Footer className="footline">
-          <div className="attribution">{attribution ? rich(attribution) : null}</div>
-          <button className="reset" onClick={onReset} type="button">{labels.resetProgress}</button>
-        </Footer>
-
-        {sources ? (
-          <section className="source-section" id={`${id}-sources`}>
-            <Details id={`${id}-sources-detail`}>
-              <Summary>{labels.sourcesTitle}</Summary>
-              <div className="source-content">
-                {(sources.paragraphs || []).map((text, i) => <p key={i}>{rich(text)}</p>)}
-                <div className="source-links">{(sources.links || []).map((item, i) => link(item.href, item.label, undefined, i))}</div>
-              </div>
-            </Details>
-            <div className="dim">{labels.ownershipNotice}</div>
-          </section>
-        ) : null}
-      </div>
-
-      <Dialog aria-labelledby={`${id}-zoom-title`} className="zoom-dialog" onClick={closeOnBackdrop} ref={zoomRef}>
-        <div className="dialog-header">
-          <h2 id={`${id}-zoom-title`}>{zoom?.vendor ? labels.vendorScreenshot : labels.screenshot}</h2>
-          <button aria-label={labels.closeImage} className="dialog-close" onClick={() => zoomRef.current?.close()} type="button">{icon('close')}</button>
-        </div>
-        <div className="zoom-content">
-          {zoom ? <Img alt={zoom.alt} src={zoom.src} /> : null}
-          {zoom?.creditHref ? link(zoom.creditHref, zoom.vendor ? labels.openOriginal : labels.aboutScreenshot) : null}
-        </div>
-      </Dialog>
-      <div aria-live="polite" className="sr-only" role="status">{toast}</div>
-      <div aria-hidden="true" className={`toast${toast ? ' show' : ''}`}>{toast}</div>
-    </div>
-  );
+// Mintlify's native HTML allowlist omits dialog. This empty UI shell contains
+// no guide prose; its children are only the zoom heading and close control.
+export const ClientGuideDialog = ({ children, ...props }) => {
+  const Dialog = 'dialog';
+  return <Dialog {...props}>{children}</Dialog>;
 };

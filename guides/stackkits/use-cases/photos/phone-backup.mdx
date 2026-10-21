@@ -7,92 +7,47 @@ mode: "wide"
 keywords: ["Photos", "Immich", "Backup", "Smartphone", "iPhone", "iPad", "Android", "Upload"]
 ---
 
-import { ClientSetupGuide } from "/snippets/client-setup-guide.jsx";
 import { clientSetupLabelsEn } from "/snippets/client-setup-labels-en.jsx";
 
-<ClientSetupGuide
-  id="kcg-photos"
-  labels={clientSetupLabelsEn}
-  meta={[{ icon: "phone", text: "Android, iPhone and iPad" }, { icon: "steps", text: "4 short steps" }, { icon: "book", text: "No prior knowledge needed" }]}
-  requirements={["A running Immich server", "Your photo server's public HTTPS address", "Your Immich account", "One test photo in an album"]}
-  requirementsHelp={{ label: "Not set up yet?", target: "kcg-photos-no-server" }}
-  appsTitle="First, get the Immich app."
-  vendor={{ label: "Immich downloads", href: "https://immich.app" }}
-  apps={[
-    { platform: "android", label: "Android", detail: "Immich", store: "Open in Google Play", href: "https://play.google.com/store/apps/details?id=app.alextran.immich", vendor: "Immich", official: true },
-    { platform: "apple", label: "iPhone and iPad", detail: "Immich for iOS", store: "Open in the App Store", href: "https://apps.apple.com/app/immich/id1613945652", vendor: "Immich", official: true }
-  ]}
-  appsNote="The app capture shows Android in English. For iOS screens, use the linked Immich mobile guide."
-  stepsTitle="Connect step by step."
-  steps={[
-  {
-    "tab": "Connect",
-    "screenshot": {
-      "src": "/images/guides/photos/immich/android-01-connect.webp",
-      "width": 1080,
-      "height": 2400,
-      "frame": "phone",
-      "alt": "Official Immich Android app with an example photo server address entered in Server Endpoint URL",
-      "caption": "Enter your own photo server address",
-      "credit": "kombify capture",
-      "version": "Immich Android 2.7.0",
-      "captured": "2026-10-21"
-    }
-  },
-  {
-    "tab": "Choose albums",
-    "screenshot": {
-      "src": "/images/guides/photos/immich/android-02-albums.webp",
-      "width": 1080,
-      "height": 2400,
-      "frame": "phone",
-      "alt": "Immich Android Select albums with the synthetic test album selected",
-      "caption": "Choose only your test album first",
-      "credit": "kombify capture",
-      "version": "Immich Android 2.7.0",
-      "captured": "2026-10-21"
-    }
-  },
-  {
-    "tab": "Start upload",
-    "screenshot": {
-      "src": "/images/guides/photos/immich/android-03-backup.webp",
-      "width": 1080,
-      "height": 2400,
-      "frame": "phone",
-      "alt": "Immich Android backup enabled with two backed up assets and zero remaining",
-      "caption": "The test album is backed up; Remainder is zero",
-      "credit": "kombify capture",
-      "version": "Immich Android 2.7.0",
-      "captured": "2026-10-21"
-    }
-  },
-  {
-    "tab": "Check",
-    "checks": 3,
-    "screenshot": {
-      "src": "/images/guides/photos/immich/web-01-photo.webp",
-      "width": 1600,
-      "height": 902,
-      "alt": "Real Immich web photo view containing a synthetic example landscape image",
-      "caption": "Check the photo overview in a browser",
-      "credit": "kombify capture",
-      "version": "Immich server 2.7.0",
-      "captured": "2026-10-21"
-    }
-  }
-]}
-  help={[
-    { q: "How do I let iPhone or iPad upload in the background?", a: "Enable Background App Refresh for Immich in iOS Settings. iOS decides when the app may run; an immediate upload is not guaranteed. Keep Immich open for your first test and use the vendor mobile guide for your iOS version." },
-    { id: "kcg-photos-no-server", q: "Where do I get the address and account?", a: "Ask the person who set up kombify. Your Immich account belongs to the photo service; it is not automatically your kombify account. [Photos setup](/guides/stackkits/use-cases/photos)." },
-    { q: "The address does not open, or I see a certificate warning.", a: "Use the public HTTPS address provided for the photo service. It works away from home too. Stop at a certificate warning and ask the person who set up kombify to check the address and certificate; do not bypass the warning." },
-    { q: "Does a phone upload replace a backup?", a: "No. Protect the photo and video files and the Immich database with a separate backup, and test a restore. [Back up and restore](/guides/stackkits/back-up-and-restore)." },
-    { q: "Do I need smart search or face recognition to upload?", a: "No. Uploads, the photo view and albums work without those analysis features. [Immich search settings](https://docs.immich.app/features/searching/)." }
-  ]}
-  next={[{ icon: "shield", title: "Protect the server data", text: "For the person running kombify: keep a separate backup and test recovery.", href: "/guides/stackkits/back-up-and-restore" }]}
-  attribution="Immich is made by the [Immich project](https://github.com/immich-app/immich) and is licensed under AGPL-3.0. kombify captured the screens from unchanged software; names and logos remain their owners' trademarks. No endorsement is implied."
-  sources={{ summary: "Own Immich Android and web captures · synthetic examples · English UI.", paragraphs: ["Captured October 21, 2026 from official Immich Android 2.7.0 and the digest-pinned Immich 2.7.0 server used by the released StackKits catalog. The APK was verified against the official release asset digest. The server ran in Docker on an existing real test server, using a made-up Alex Example account and owned example graphics. These are application reference captures, not a StackKits rollout or recovery certification.", "The example HTTPS address is instructional; use your own installation's address. The guide sends no data to your server. Progress and checks stay in this browser.", "iOS screens remain links to the vendor guide; no third-party screenshot loads on this page."], links: [{ label: "Immich mobile app", href: "https://docs.immich.app/features/mobile-app/" }, { label: "Immich mobile backup", href: "https://docs.immich.app/features/mobile-backup/" }, { label: "Immich backup and restore", href: "https://docs.immich.app/administration/backup-and-restore/" }] }}
->
+import { ClientSetupGuide, ClientGuideDialog } from "/snippets/client-setup-guide.jsx";
+
+<div className="kombify-client-guide not-prose" id="kcg-photos" dir="ltr" lang="en" style={{"--kcg-steps": "4"}}>
+<div className="guide-content">
+<ClientSetupGuide id="kcg-photos" labels={clientSetupLabelsEn} locale="en" checks={[0,0,0,3]} />
+
+<div className="page-top">
+<div className="intro-meta">
+<span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="20" rx="3" width="12" x="6" y="2"></rect><path d="M10 5h4M11 19h2"></path></svg> Android, iPhone and iPad</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><rect height="7" rx="1.5" width="7" x="3" y="3"></rect><rect height="7" rx="1.5" width="7" x="14" y="3"></rect><rect height="7" rx="1.5" width="7" x="3" y="14"></rect><rect height="7" rx="1.5" width="7" x="14" y="14"></rect></svg> 4 short steps</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M12 5v15M3 4c4-1 6 0 9 1 3-1 5-2 9-1v15c-4-1-6 0-9 1-3-1-5-2-9-1Z"></path></svg> No prior knowledge needed</span>
+</div>
+<div className="page-tools">
+<button aria-label="Print guide" className="tool-button" type="button" data-guide-action="print"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M6 8V3h12v5M6 17H3V8h18v9h-3M6 14h12v7H6Z"></path><path d="M17 11h.01"></path></svg></button>
+</div>
+</div>
+<div className="ready-strip">
+<span className="guide-strong">What you need</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg> A running Immich server</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg> Your photo server&#x27;s public HTTPS address</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg> Your Immich account</span><span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"></path></svg> One test photo in an album</span><a href="#kcg-photos-no-server">Not set up yet? <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+</div>
+<section aria-labelledby="kcg-photos-apps-title" className="downloads" id="kcg-photos-apps">
+<div className="section-top">
+<h2 id="kcg-photos-apps-title">First, get the Immich app.</h2><a className="small-link" href="https://immich.app" rel="noopener noreferrer" target="_blank">Immich downloads <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (opens in a new tab)</span></a>
+</div>
+<div className="downloads-grid">
+<a className="download-card" href="https://play.google.com/store/apps/details?id=app.alextran.immich" rel="noopener noreferrer" target="_blank"><span className="platform-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M5 12a7 7 0 0 1 14 0v6H5Zm2-6L5 3m12 3 2-3M2 12v5m20-5v5M8 18v4m8-4v4"></path><path d="M8.5 9h.01M15.5 9h.01"></path></svg></span><span className="download-text"><strong>Android</strong><small>Immich</small><span className="store-name">Open in Google Play <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg></span><span className="badge official">Official · Immich</span></span><span className="sr-only"> (opens in a new tab)</span></a><a className="download-card" href="https://apps.apple.com/app/immich/id1613945652" rel="noopener noreferrer" target="_blank"><span className="platform-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M16.7 1.8c0 2.1-1.7 4.4-3.7 4.2-.4-2.1 1.8-4.3 3.7-4.2ZM20.4 17.3c-.5 1.2-.8 1.7-1.5 2.7-1 1.5-2.4 3.3-4.2 3.3-1.6 0-2-1-4.1-.9-2.1 0-2.5 1-4.2.9-1.8-.1-3.1-1.7-4.1-3.2C-.5 15.9-.7 10.4 1 7.6c1.2-2 3.1-3.1 4.9-3.1 1.9 0 3.1 1 4.7 1 1.5 0 2.5-1 4.7-1 1.6 0 3.3.9 4.5 2.3-4 2.2-3.3 8 0 10.5Z" fill="currentColor" stroke="none" transform="translate(2 0) scale(.87)"></path></svg></span><span className="download-text"><strong>iPhone and iPad</strong><small>Immich for iOS</small><span className="store-name">Open in the App Store <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg></span><span className="badge official">Official · Immich</span></span><span className="sr-only"> (opens in a new tab)</span></a>
+</div>
+<p className="download-hint">The app capture shows Android in English. For iOS screens, use the linked Immich mobile guide.</p>
+</section>
+<section aria-labelledby="kcg-photos-guide-title" className="guide-section" id="kcg-photos-guide">
+<div className="guide-heading">
+<h2 id="kcg-photos-guide-title">Connect step by step.</h2>
+</div>
+<div className="wizard">
+<div aria-label="Setup steps" className="step-tabs" role="tablist">
+<button aria-controls="kcg-photos-panel-0" aria-selected="true" className="step-tab" id="kcg-photos-tab-0" data-guide-tab="0" role="tab" tabIndex="0" type="button"><span className="step-dot">1</span><span>Connect</span></button><button aria-controls="kcg-photos-panel-1" aria-selected="false" className="step-tab" id="kcg-photos-tab-1" data-guide-tab="1" role="tab" tabIndex="-1" type="button"><span className="step-dot">2</span><span>Choose albums</span></button><button aria-controls="kcg-photos-panel-2" aria-selected="false" className="step-tab" id="kcg-photos-tab-2" data-guide-tab="2" role="tab" tabIndex="-1" type="button"><span className="step-dot">3</span><span>Start upload</span></button><button aria-controls="kcg-photos-panel-3" aria-selected="false" className="step-tab" id="kcg-photos-tab-3" data-guide-tab="3" role="tab" tabIndex="-1" type="button"><span className="step-dot">4</span><span>Check</span></button>
+</div>
+<div aria-labelledby="kcg-photos-tab-0" className="guide-panel active" id="kcg-photos-panel-0" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+STEP 01 / 04
+</div>
 
 <div className="step-content">
 
@@ -115,6 +70,25 @@ import { clientSetupLabelsEn } from "/snippets/client-setup-labels-en.jsx";
 </div>
 
 <div className="step-check"> Next, you see your photo overview.</div>
+</div>
+
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> KOMBIFY SCREENSHOT</span>
+<div role="figure" className="screen-figure phone" aria-labelledby="kcg-photos-capture-0">
+<div className="screen-image">
+<img noZoom alt="Official Immich Android app with an example photo server address entered in Server Endpoint URL" decoding="async" height="2400" loading="eager" referrerPolicy="no-referrer" src="/images/guides/photos/immich/android-01-connect.webp" width="1080"/><a className="image-fallback" href="/images/guides/photos/immich/android-01-connect.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> Open the screenshot<span>The image did not load.</span></a><button aria-label="Enlarge screenshot: Official Immich Android app with an example photo server address entered in Server Endpoint URL" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-photos-capture-0">
+Enter your own photo server address · kombify capture<span className="meta">Immich Android 2.7.0 · captured 2026-10-21</span>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby="kcg-photos-tab-1" className="guide-panel" id="kcg-photos-panel-1" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+STEP 02 / 04
 </div>
 
 <div className="step-content">
@@ -140,6 +114,25 @@ import { clientSetupLabelsEn } from "/snippets/client-setup-labels-en.jsx";
 <div className="step-check"> The backup view shows your selected album.</div>
 </div>
 
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> KOMBIFY SCREENSHOT</span>
+<div role="figure" className="screen-figure phone" aria-labelledby="kcg-photos-capture-1">
+<div className="screen-image">
+<img noZoom alt="Immich Android Select albums with the synthetic test album selected" decoding="async" height="2400" loading="lazy" referrerPolicy="no-referrer" src="/images/guides/photos/immich/android-02-albums.webp" width="1080"/><a className="image-fallback" href="/images/guides/photos/immich/android-02-albums.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> Open the screenshot<span>The image did not load.</span></a><button aria-label="Enlarge screenshot: Immich Android Select albums with the synthetic test album selected" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-photos-capture-1">
+Choose only your test album first · kombify capture<span className="meta">Immich Android 2.7.0 · captured 2026-10-21</span>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby="kcg-photos-tab-2" className="guide-panel" id="kcg-photos-panel-2" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+STEP 03 / 04
+</div>
+
 <div className="step-content">
 
 
@@ -163,6 +156,25 @@ import { clientSetupLabelsEn } from "/snippets/client-setup-labels-en.jsx";
 <div className="step-check"> No uploads are left for your test album.</div>
 </div>
 
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> KOMBIFY SCREENSHOT</span>
+<div role="figure" className="screen-figure phone" aria-labelledby="kcg-photos-capture-2">
+<div className="screen-image">
+<img noZoom alt="Immich Android backup enabled with two backed up assets and zero remaining" decoding="async" height="2400" loading="lazy" referrerPolicy="no-referrer" src="/images/guides/photos/immich/android-03-backup.webp" width="1080"/><a className="image-fallback" href="/images/guides/photos/immich/android-03-backup.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> Open the screenshot<span>The image did not load.</span></a><button aria-label="Enlarge screenshot: Immich Android backup enabled with two backed up assets and zero remaining" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-photos-capture-2">
+The test album is backed up; Remainder is zero · kombify capture<span className="meta">Immich Android 2.7.0 · captured 2026-10-21</span>
+</div>
+</div>
+</div>
+</div>
+<div aria-labelledby="kcg-photos-tab-3" className="guide-panel" id="kcg-photos-panel-3" role="tabpanel">
+<div className="panel-copy">
+<div className="step-kicker">
+STEP 04 / 04
+</div>
+
 <div className="step-content">
 
 
@@ -177,4 +189,102 @@ import { clientSetupLabelsEn } from "/snippets/client-setup-labels-en.jsx";
 <div className="step-check"> Now you can add more albums.</div>
 </div>
 
-</ClientSetupGuide>
+</div>
+<div className="panel-visual">
+<span className="screenshot-tag"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"></path><circle cx="12" cy="13" r="4"></circle></svg> KOMBIFY SCREENSHOT</span>
+<div role="figure" className="screen-figure" aria-labelledby="kcg-photos-capture-3">
+<div className="screen-image">
+<img noZoom alt="Real Immich web photo view containing a synthetic example landscape image" decoding="async" height="902" loading="lazy" referrerPolicy="no-referrer" src="/images/guides/photos/immich/web-01-photo.webp" width="1600"/><a className="image-fallback" href="/images/guides/photos/immich/web-01-photo.webp" rel="noopener noreferrer" target="_blank"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg> Open the screenshot<span>The image did not load.</span></a><button aria-label="Enlarge screenshot: Real Immich web photo view containing a synthetic example landscape image" className="zoom-button" type="button" data-guide-action="zoom"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m16 16 5 5M7 10.5h7M10.5 7v7"></path></svg></button>
+</div>
+<div className="screen-caption" id="kcg-photos-capture-3">
+Check the photo overview in a browser · kombify capture<span className="meta">Immich server 2.7.0 · captured 2026-10-21</span>
+</div>
+</div>
+</div>
+</div>
+<div className="wizard-bottom">
+<div className="progress-note">
+<span>0 of 4 steps done</span>
+<div aria-hidden="true" className="progress-meter">
+<span></span><span></span><span></span><span></span>
+</div>
+</div>
+<button className="prev" disabled="" type="button"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"></path></svg> Back</button><button className="next" type="button"><span>Done · next</span><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+</div>
+</div>
+<p className="provenance-inline">Own Immich Android and web captures · synthetic examples · English UI. <a href="#kcg-photos-sources">Image sources and date</a></p>
+</section>
+<section aria-labelledby="kcg-photos-more-title" className="more-section" id="kcg-photos-more">
+<div className="section-top">
+<h2 id="kcg-photos-more-title">What comes next.</h2>
+</div>
+<div className="more-grid">
+<a className="more-card" href="/guides/stackkits/back-up-and-restore"><span className="more-icon"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M12 3 3 7v6c0 5 9 9 9 9s9-4 9-9V7Z"></path><path d="m8 12 3 3 5-6"></path></svg></span><span><strong>Protect the server data</strong><small>For the person running kombify: keep a separate backup and test recovery.</small></span></a>
+</div>
+</section>
+<section aria-labelledby="kcg-photos-help-title" className="faq-section" id="kcg-photos-help">
+<h2 id="kcg-photos-help-title">Stuck?</h2>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>How do I let iPhone or iPad upload in the background?</strong></button>
+<div className="answer">
+Enable Background App Refresh for Immich in iOS Settings. iOS decides when the app may run; an immediate upload is not guaranteed. Keep Immich open for your first test and use the vendor mobile guide for your iOS version.
+</div>
+</div>
+<div data-guide-disclosure="" className="faq" id="kcg-photos-no-server">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>Where do I get the address and account?</strong></button>
+<div className="answer">
+Ask the person who set up kombify. Your Immich account belongs to the photo service; it is not automatically your kombify account. <a className="" href="/guides/stackkits/use-cases/photos">Photos setup</a>.
+</div>
+</div>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>The address does not open, or I see a certificate warning.</strong></button>
+<div className="answer">
+Use the public HTTPS address provided for the photo service. It works away from home too. Stop at a certificate warning and ask the person who set up kombify to check the address and certificate; do not bypass the warning.
+</div>
+</div>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>Does a phone upload replace a backup?</strong></button>
+<div className="answer">
+No. Protect the photo and video files and the Immich database with a separate backup, and test a restore. <a className="" href="/guides/stackkits/back-up-and-restore">Back up and restore</a>.
+</div>
+</div>
+<div data-guide-disclosure="" className="faq">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>Do I need smart search or face recognition to upload?</strong></button>
+<div className="answer">
+No. Uploads, the photo view and albums work without those analysis features. <a className="" href="https://docs.immich.app/features/searching/" rel="noopener noreferrer" target="_blank">Immich search settings <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (opens in a new tab)</span></a>.
+</div>
+</div>
+</section>
+<div className="footline">
+<div className="attribution">
+Immich is made by the <a className="" href="https://github.com/immich-app/immich" rel="noopener noreferrer" target="_blank">Immich project <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (opens in a new tab)</span></a> and is licensed under AGPL-3.0. kombify captured the screens from unchanged software; names and logos remain their owners&#x27; trademarks. No endorsement is implied.
+</div>
+<button className="reset" type="button">Reset progress</button>
+</div>
+<section className="source-section" id="kcg-photos-sources">
+<div data-guide-disclosure="" id="kcg-photos-sources-detail">
+<button className="disclosure-title" type="button" aria-expanded="true"><strong>Image sources, checked links and date</strong></button>
+<div className="source-content">
+<p>Captured October 21, 2026 from official Immich Android 2.7.0 and the digest-pinned Immich 2.7.0 server used by the released StackKits catalog. The APK was verified against the official release asset digest. The server ran in Docker on an existing real test server, using a made-up Alex Example account and owned example graphics. These are application reference captures, not a StackKits rollout or recovery certification.</p><p>The example HTTPS address is instructional; use your own installation&#x27;s address. The guide sends no data to your server. Progress and checks stay in this browser.</p><p>iOS screens remain links to the vendor guide; no third-party screenshot loads on this page.</p>
+<div className="source-links">
+<a className="" href="https://docs.immich.app/features/mobile-app/" rel="noopener noreferrer" target="_blank">Immich mobile app <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (opens in a new tab)</span></a><a className="" href="https://docs.immich.app/features/mobile-backup/" rel="noopener noreferrer" target="_blank">Immich mobile backup <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (opens in a new tab)</span></a><a className="" href="https://docs.immich.app/administration/backup-and-restore/" rel="noopener noreferrer" target="_blank">Immich backup and restore <svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="M14 4h6v6m0-6L10 14"></path><path d="M10 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5"></path></svg><span className="sr-only"> (opens in a new tab)</span></a>
+</div>
+</div>
+</div>
+<div className="dim">
+Guide by kombify · Product names, screenshots of vendor apps and trademarks belong to their respective owners.
+</div>
+</section>
+</div>
+<ClientGuideDialog aria-labelledby="kcg-photos-zoom-title" className="zoom-dialog">
+<div className="dialog-header">
+<h2 id="kcg-photos-zoom-title">Screenshot</h2><button aria-label="Close image" className="dialog-close" type="button"><svg aria-hidden="true" className="ico" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.7" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"></path></svg></button>
+</div>
+<div className="zoom-content">
+</div>
+</ClientGuideDialog>
+<div aria-live="polite" className="sr-only" role="status">
+</div>
+<div aria-hidden="true" className="toast">
+</div>
+</div>

@@ -104,3 +104,21 @@ layers another session may now use.
 For each image, retain the app version, release and verified artifact digest,
 viewport, synthetic-data description, dimensions, image digest and visual review
 in `captures.json`. Do not save credentials or authentication state there.
+
+## Verify the native MDX reader
+
+After a guide structure change, start the pinned preview with `mise run dev`,
+then run this bounded browser journey from this directory:
+
+```bash
+node verify-client-guides.mjs --base-url http://localhost:3000 --output-dir /absolute/path/to/ignored/evidence
+```
+
+It opens a fresh browser context, follows a native step hash in both guides in
+all six locales, and asserts that the target step is visible. It also checks
+all steps in the browser's print layout and writes one PDF per English guide
+for visual review. It closes its own browser. This is a reader regression,
+not hosted Markdown or Mint search acceptance: after publication, fetch all
+12 canonical `.md` exports and use the real Mint search dialog to confirm that
+instruction queries return results which open visible steps. Local preview
+routes and text found in a page body do not prove hosted exports or indexing.

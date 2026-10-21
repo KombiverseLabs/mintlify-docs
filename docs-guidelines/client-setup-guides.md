@@ -58,14 +58,16 @@ Use `ClientSetupGuide` (`snippets/client-setup-guide.jsx`), in this order:
    case ("No invitation yet?") to an FAQ through `requirementsHelp`.
 3. **Get the app(s)** (`apps`): one card per platform, `official: true` (vendor)
    or `false` (third-party badge plus an `appsNote` sentence naming the maker).
-4. **Step by step** (3 to 6): author each step as a direct MDX child of
-   `ClientSetupGuide`, with a heading, short intro, numbered click list,
-   optional note and FAQ, and a success check. Keep all instructional text
-   in those children so Mintlify can index and export it. The matching `steps`
-   metadata contains only the short `tab`, screenshot, optional `screenshots` gallery or vendor-link visual,
-   and verification `checks` count. The wrapper adds navigation and progress.
-   Native verification inputs use `data-guide-step` and `data-guide-check`
-   with zero-based indices; their labels remain MDX content.
+4. **Step by step** (3 to 6): author the entire guide as native MDX, outside
+   custom JSX components. Each `.guide-panel` has a heading, short intro,
+   numbered click list, optional note and FAQ, success check and visual. Keep
+   stable `id`, `role="tabpanel"` and `aria-labelledby` attributes matching
+   the native step tab. Put a self-closing `ClientSetupGuide` enhancer inside
+   the native `.guide-content`; pass only `id`, the reviewed `labels`, `locale`
+   and the zero-based per-step verification `checks` counts. The enhancer
+   returns no content: it adds navigation, progress and image zoom to the
+   existing markup. Native verification inputs use `data-guide-step` and
+   `data-guide-check`; their labels remain MDX content.
 5. **Check it works**: last step, `verify` checkboxes (kept only in the
    reader's browser).
 6. **Troubleshooting** (`help`): real failure modes (wrong address, certificate
@@ -200,17 +202,27 @@ Engineering reading, not legal advice; recheck rows older than a year.
 
 ## Component notes
 
-- Step text belongs in MDX children, never in JavaScript props. Check the
-  rendered page and its hosted Markdown export after publication. Frontmatter
-  keywords do not replace searchable instructions.
-- Mechanical migrations preserve existing translated prose. A page with
-  `surroundingContent` supplies its existing intro first, its step children,
-  then its existing notes last. This keeps those blocks readable in MDX too.
+- All instructional content belongs in native MDX outside custom components,
+  including requirements, downloads, steps, captions, troubleshooting and
+  sources. Mintlify's no-JavaScript compiler replaces custom components with
+  null stubs, so even literal component children disappear from that path.
+  Check the rendered page and actual hosted Markdown export after publication;
+  a local compiler check is not hosted export or search acceptance.
+- Mechanical migrations preserve existing translated prose, guide IDs, step
+  order, verification order and capture provenance. Keep translations visible;
+  do not add English fallback instructions to a translated page.
+- Hash navigation (initial URL, same-page link, hash change and browser history)
+  must activate the panel containing the native heading. Check real Mint search
+  after publication, including that its result opens a visible step. Report
+  indexing/tokenization delays separately from reader failures.
+- Native disclosures use a `.disclosure-title` button and `.answer` or
+  `.source-content` inside `[data-guide-disclosure]`; their prose is expanded
+  before enhancement and in print. `ClientGuideDialog` is only an empty image
+  zoom shell; never put instructions inside it.
 - Keep a step FAQ as ordinary MDX paragraphs with a bold question. Mintlify
-  drops raw `details` and `summary` blocks; the wrapper's expandable help uses
-  React elements instead. Check that the question and answer are visible.
+  drops raw `details` and `summary` blocks; the native disclosure pattern keeps help searchable and expandable. Check that the question and answer are visible.
 - The local preview may miss snippet edits; restart `mise run dev` after
   changing `snippets/client-setup-guide.jsx`. If it still serves the old
   compiled snippet, touch the affected MDX pages to rebuild their imports.
-- Panels switch visibility by class, not `[hidden]`, so steps are not hidden
-  in print.
+- Panels switch visibility by class after enhancement, not `[hidden]`. All
+  steps stay readable without JavaScript and in print.
