@@ -1,0 +1,111 @@
+---
+title: "Pair a server with Guard"
+description: "What happens when a server enrolls, what you check and approve, and how to recover an interrupted or revoked pairing"
+sidebarTitle: "Pair a server"
+icon: "link"
+---
+
+Pairing is how a server becomes yours in Techstack. This page follows it from
+your side: what you start, what the server does, what you confirm and how to
+recover when something stops halfway. To run the command itself, use
+[Pairing command](/techstack/pairing-command); to connect over SSH instead, see
+[Connect a server over SSH](/techstack/ssh-connection). Both install the same
+Guard.
+
+<Note>
+Techstack is pre-1.0 and connected operation is preview scope; see
+[availability](/techstack/availability). Details such as the key approval step
+depend on the Guard version installed on the server.
+</Note>
+
+## What happens, in order
+
+<Steps>
+  <Step title="You start pairing">
+    In the Add Node wizard Techstack creates a personal pairing token. It works
+    once and expires after 15 minutes.
+  </Step>
+  <Step title="The server installs Guard">
+    The command downloads Guard from your own Techstack, not from a public
+    mirror, and checks it against the checksum served in the same response.
+    Signature verification starts with Guard's first update, so the first
+    install trusts the connection to your Techstack.
+  </Step>
+  <Step title="The server creates its own key">
+    Guard generates an identity key on the server. The key stays on the server.
+    Techstack binds that key's public thumbprint to your server.
+  </Step>
+  <Step title="The server redeems the token">
+    The token is spent and Guard receives its credential. Techstack keeps only
+    a hash of it. Once the pairing is confirmed, Guard deletes the token it
+    held.
+  </Step>
+  <Step title="Guard connects">
+    From now on every request Guard makes carries a short-lived token and a
+    proof signed with the server's key, so a copied credential alone is refused.
+  </Step>
+</Steps>
+
+## What you see
+
+The progress page shows **Not connected yet** until Guard's first report
+arrives. After that, the Guard panel for the server lists facts, each with the
+time it was observed:
+
+| Fact | What it means for pairing |
+| --- | --- |
+| **Bound** | The server proves its identity with its own key on every connection |
+| **Connected** | Guard answered a command over its authenticated connection |
+
+**Connected** needs a command round trip, not only a heartbeat. A freshly paired
+server can show reports arriving and still wait for the first operation to
+confirm the connection. A fact with no fresh evidence shows as not evidenced,
+never as fine.
+
+## Approve a key on an older Guard
+
+A Guard installed before host keys existed identifies itself with its
+credential alone. It keeps reporting, but it is observe-only: Techstack sends
+it no changes. After you update Guard on the server, it proposes its key and the
+panel shows a fingerprint under **Approve this server's key**.
+
+1. On the server, read the key fingerprint Guard writes to its log
+   (`sudo journalctl -u techstack-agent`).
+2. Compare it with the fingerprint in the panel. Approve only if they match.
+3. Select **Approve key**. This needs a fresh sign-in with a second factor from
+   the last five minutes. The proposal is open for 24 hours; select
+   **Reject key** to refuse it.
+
+## If pairing is interrupted
+
+- **The command was cut off or the connection dropped.** Run the same command
+  again while its token is still valid. Guard resumes the same enrollment
+  instead of starting over.
+- **The token expired.** Select **Generate new command** and run the new one.
+  A new token with the same server key replaces a credential that never
+  confirmed, so you do not end up with two entries for one machine.
+- **The server was already confirmed.** A confirmed server is never taken over.
+  A different key enrolls as an additional machine.
+- **Guard reports a clock problem.** Proofs are accepted within one minute of
+  the server's clock, once each. A wrong clock shows the reason
+  `proof_clock_skew`; correct the time on the server.
+- **A token was copied or shown by mistake.** Delete it with
+  `techstack api pairing-tokens delete <id>`; see the
+  [pairing token reference](/techstack/reference/cli/pairing-tokens).
+
+## Pair a revoked server again
+
+After a [detach or revoke](/techstack/guard/revoke-and-uninstall), the server
+shows as revoked and Guard stops executing. To manage the machine again, create
+a new pairing command and run it. The new pairing is a new binding at a higher
+generation, so check the server's remote reach setting afterwards instead of
+assuming the earlier one carried over.
+
+<CardGroup cols={2}>
+  <Card title="Pairing command" icon="terminal" href="/techstack/pairing-command">
+    Prerequisites and the steps to run the command.
+  </Card>
+  <Card title="What Guard sends" icon="database" href="/techstack/guard/data">
+    The data a paired server reports.
+  </Card>
+</CardGroup>

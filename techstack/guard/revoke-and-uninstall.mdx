@@ -1,0 +1,153 @@
+---
+title: "Revoke, detach and uninstall Guard"
+description: "End a server's access, see what happens to its kombify.me address and Connect listing, and remove Guard from the host"
+sidebarTitle: "Revoke and uninstall"
+icon: "plug-circle-xmark"
+---
+
+You can end Guard's access to your homelab without touching the machine, stop
+only a published address, or remove Guard from a host. This page covers each,
+what it ends and what stays.
+
+<Note>
+Techstack is pre-1.0 and connected operation is preview scope; see
+[availability](/techstack/availability). Detach applies to servers you operate
+yourself. A server kombify prepared for you (see
+[managed servers](/techstack/managed-servers)) cannot be detached this way.
+</Note>
+
+## Choose what you want to end
+
+| I want to | Use | Effect |
+| --- | --- | --- |
+| Stop managing a server, for good | **Detach server** | Revokes Guard's credential and host key, and ends remote reach and the Connect listing |
+| Replace a credential I think is exposed | **Rotate credential** | The old credential stops being accepted; a replacement is shown once |
+| Take down a published address but keep the server | **Stop publishing** | Withdraws the kombify.me route only |
+| Cancel a pairing command nobody has used | Delete the pairing token | The command stops working |
+
+## Detach a server
+
+Open the server's Guard panel and select **Detach server**, then **Detach and
+revoke**. Or run `techstack api servers detach <server-id>` with
+`--confirm-server-id <server-id>`.
+
+The confirmation must repeat the exact server ID; see the
+[command reference](/techstack/reference/cli/servers).
+
+In one step Techstack revokes:
+
+- Guard's credential;
+- the server's host-key identity;
+- the server's kombify.me address and its kombify Connect listing.
+
+Nothing runs on your machine as part of this. The machine, its containers and
+its data are not touched, and no provider is called. The server's record stays
+in Techstack as a detached record.
+
+This cannot be undone from the panel. To manage the server again, pair it again
+(see [Pair a server](/techstack/guard/pairing)).
+
+### What happens to the address and the listing
+
+Detach ends the server's reach: its kombify.me route is revoked and it is
+removed from your devices in kombify Connect. Revocation is repeated until both
+confirm; until then the server shows a reason such as "Ending access has not
+finished everywhere yet. It is retried." The name can briefly remain, but it no
+longer reaches your server and answers with an error. Revoking the device from
+kombify Connect has the reverse effect: it ends Guard's access to Techstack as
+well.
+
+### What happens on the server
+
+The next time the detached Guard contacts Techstack it is refused with
+`guard_identity_revoked`, and it ends its local state:
+
+- it destroys its identity key and the credential it holds, including any
+  pairing token it still kept;
+- it removes its queued telemetry;
+- it deletes operation records Techstack acknowledged.
+
+Records that Techstack never acknowledged are kept, because they cannot be
+recreated. Guard logs how many remain. Keep or export the Guard state directory
+(`/var/lib/techstack/guard`), then delete it. A Guard with no secrets left stays idle. A new pairing command
+starts over.
+
+## Rotate a credential
+
+**Rotate credential** issues a replacement credential, shown once, and the old
+one stops being accepted. Copy the replacement to Guard on the server before you
+close the dialog.
+
+## Publish or stop publishing an address
+
+A paired server has no public route. Nothing is published until you turn it on
+for that server, and the relay carries no traffic until then.
+
+1. In the Guard panel, under **Publish at a kombify.me address**, enter a
+   **Service name** and the **Port on this server**.
+2. Select **Publish**. This needs a fresh sign-in with a second factor from the
+   last five minutes.
+
+The port is on the server's own loopback. Anyone on the internet can open the
+address, and the relay authenticates Guard, not the visitor, so publish only a
+service that protects itself. Select **Stop publishing** at any time to
+withdraw it; withdrawing never needs the second factor. This option is available
+only in a connected installation. See
+[kombify.me](/kombify-me/overview) for how addresses work.
+
+## Remove Guard from a host
+
+There is no packaged uninstall command for Guard on Linux in the current
+release. Detach first, so Techstack stops trusting the server and Guard destroys
+its secrets. Removing the software is then a manual step.
+
+<Warning>
+Do this only after you have detached the server, and after you have kept or
+exported any unacknowledged operation records in the Guard state directory.
+These steps remove Guard only. They do not remove Docker, your StackKits
+deployment or your applications.
+</Warning>
+
+Guard places these on the host:
+
+| What | Where |
+| --- | --- |
+| Guard daemon and its unit | `/usr/local/bin/techstack`, `techstack-agent.service` |
+| Privileged executor and its units | `/usr/local/libexec/techstack-stackkit-operations`, `techstack-guard-executor.socket`, `techstack-guard-executor@.service` |
+| Credential and configuration | `/etc/techstack` |
+| State, journal and caches | `/var/lib/techstack`, `/var/lib/techstack-guard-executor`, `/var/log/techstack` |
+| System user | `kombify-guard` |
+
+To remove Guard, run these steps as an administrator, in this order:
+
+1. Stop and disable the services:
+   `sudo systemctl disable --now techstack-agent.service techstack-guard-executor.socket`.
+2. Delete the unit files `techstack-agent.service`, `techstack-agent.service.legacy`,
+   `techstack-guard-executor.socket` and `techstack-guard-executor@.service` from
+   `/etc/systemd/system`, then run `sudo systemctl daemon-reload`.
+3. Delete the two executables listed above.
+4. Delete the credential, state and log directories listed above.
+5. Delete the system user with `sudo userdel kombify-guard`.
+
+A host that never switched to the privilege-split layout has only the daemon
+unit and no `kombify-guard` user, so the steps for the other items report
+that they do not exist. That is expected.
+
+### What remains
+
+Removing Guard does not remove what StackKits or you installed with it:
+
+- Docker and your containers, volumes and application data;
+- the StackKits runtime and workspace. Remove a StackKits deployment with the
+  [remove command](/stackkits/reference/cli/remove);
+- a published address. Removing Guard alone does not withdraw it, so select
+  **Stop publishing** or detach the server first.
+
+<CardGroup cols={2}>
+  <Card title="What Guard sends" icon="database" href="/techstack/guard/data">
+    What was reported while the server was paired, and how long it is kept.
+  </Card>
+  <Card title="Pair a server" icon="link" href="/techstack/guard/pairing">
+    Bring a detached server back under management.
+  </Card>
+</CardGroup>
