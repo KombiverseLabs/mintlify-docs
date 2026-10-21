@@ -33,6 +33,27 @@ and read the
 [`UNSIGNED-WINDOWS-RELEASE.txt`](https://github.com/kombifyio/TechStack/releases/latest/download/UNSIGNED-WINDOWS-RELEASE.txt)
 notice before opening the installer.
 
+## Verify the installer checksum
+
+Choose one version on the
+[official releases page](https://github.com/kombifyio/TechStack/releases).
+For example, [v0.42.15](https://github.com/kombifyio/TechStack/releases/tag/v0.42.15)
+publishes both `kombify-Techstack-Setup.exe` and `SHA256SUMS.txt`. Download
+both from that same release into one folder. Do not combine a previous
+installer with a checksum downloaded from `latest` after it has changed.
+
+1. Open PowerShell in that folder and run
+   `Get-FileHash -LiteralPath .\kombify-Techstack-Setup.exe -Algorithm SHA256`.
+2. Open `SHA256SUMS.txt` and find the single row ending in
+   `kombify-Techstack-Setup.exe`. Compare its 64-character hash with the
+   PowerShell result. Uppercase and lowercase letters represent the same hash.
+3. Continue only if every character matches. Stop if the row is absent,
+   ambiguous or different, and download both files again from the same
+   official release before retrying.
+
+A matching hash checks that the file matches the selected release; it does
+not make an unsigned Alpha installer signed.
+
 ## Use Techstack locally
 
 1. Start Techstack and choose **Use locally**. A hosted kombify account is not
@@ -64,3 +85,24 @@ not prerequisites for the local Alpha path.
   Use the standalone StackKits one-liner when you want to prepare the server
   independently and attach it through **Connect my server** afterwards.
 </Card>
+
+## Update the Windows client
+
+1. Note your installed client version and read the target release notes,
+   including the StackKits version it bundles. Keep recovery material and
+   backups for the servers you operate.
+2. Close Techstack. Download the installer and checksums from the same
+   selected public release, then repeat the checksum comparison above.
+3. Run the verified installer, start Techstack, and compare its displayed
+   version with the release you selected. Check your server connections
+   before making another rollout.
+
+## Returning to an earlier version
+
+Installing an older Windows client does not by itself restore a server's
+data or reverse a StackKits rollout. This guide has no release-backed
+client-data downgrade procedure. Keep the previous release and its matching
+checksums, but obtain recovery guidance before running it against data
+written by a newer client. For a StackKits change, use the
+[upgrade recovery guidance](/stackkits/reference/day-2-operations#recover-an-interrupted-upgrade)
+and the server's verified recovery evidence.
