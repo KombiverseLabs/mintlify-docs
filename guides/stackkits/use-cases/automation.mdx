@@ -1,50 +1,32 @@
 ---
 title: "Automation"
-description: "Workflow automation is planned; n8n is the preferred first engine, with alternatives under review"
+description: "The Workpaths workload and optional notification add-on in StackKits v0.54.3"
 sidebarTitle: "Automation"
 icon: gears
 ---
 
 <Info>
-  Evidence state (2026-09-24, v0.41.0): Automation is `planned`. It has no
-  release and no dates, and it does not yet have an entry in the release
-  catalog. This page describes a design direction under review, not
-  something you can install today.
+StackKits v0.54.3 declares Automation as the optional `automation` use case with the `workpaths` alternative. Its `stackkits-workpaths-runtime` module has executable, apply-ready contracts for low, standard and high compute profiles. This describes what the release can author; it is not installation or recovery evidence for your host.
 </Info>
 
-Automation is not a use case you can select yet. The team is evaluating a self-hosted workflow engine that connects your other use cases and runs reviewed routines with bounded permissions.
+## What the release includes
 
-## In plain words
+Workpaths is the application choice for workflow automation. The separate `automation-notifications` add-on selects `ntfy-live` through `stackkits-ntfy-live-runtime`, which declares a standard compute profile. The notification module is experimental in this release. Selecting Automation does not select every optional add-on.
 
-Automation means that the computer does a routine job for you without being asked each time, for example "when this happens, do that". Because Automation is only planned, there is nothing to install, nothing to configure and nothing stored on your host for it yet. This page tells you what the team is looking at so you can decide whether to wait for it.
+The [application catalog](/stackkits/reference/application-catalog#automation) lists the exact choices and modules. The generated [use-case catalog](/stackkits/reference/use-case-catalog) is the release-backed inventory. n8n, Activepieces, Node-RED and Windmill are not executable Automation alternatives in this release.
 
-## What you need first
+## Select and review the workload
 
-Nothing for Automation itself. To be ready when it arrives, set up the baseline first: read [Before you start](/guides/stackkits/before-you-start), follow the [Quickstart](/stackkits/quickstart) and learn the routine in [Day to day](/guides/stackkits/daily-use). Routines are most useful once you run at least one use case, such as [Photos](/guides/stackkits/use-cases/photos) or [Media](/guides/stackkits/use-cases/media).
+Start with the [Quickstart](/stackkits/quickstart) for the baseline. In an existing workspace, follow [Configure the StackSpec](/guides/stackkits/configure-stack-spec) to enable `automation` and select `workpaths`. Review the resulting module, compute profile, credential requirements and application delivery in the generated plan before [applying](/guides/stackkits/review-plan-and-apply).
 
-## Planned design
+Use the route and setup instructions produced by your installed release. Do not infer a public URL, provider connection, preset routine or permission from the catalog entry alone. A workflow needs its own explicit access to any service it uses.
 
-| Candidate | Role | Note |
-| --- | --- | --- |
-| [n8n](https://n8n.io/) | Preferred first engine | Distributed under its [Sustainable Use License](https://github.com/n8n-io/n8n/blob/master/LICENSE.md), which permits personal, non-commercial and internal business use under its stated conditions. It is not a general permissive open-source license, so check the license before commercial or hosted use. |
-| [Activepieces](https://www.activepieces.com/) | Alternative | Core is MIT-licensed; some enterprise features carry a separate license. |
-| [Node-RED](https://nodered.org/) | Specialist candidate | Considered for flow-based home and IoT automation. |
-| [Windmill](https://www.windmill.dev/) | Specialist candidate | Considered for script- and code-first workflows. |
+## Check the result
 
-## What to expect
+Run the verification offered by your installed CLI, then open the generated application route. Check the [OS compatibility](/stackkits/reference/os-compatibility) and [application delivery compatibility](/stackkits/reference/application-delivery-compatibility) evidence for your target. A successful application start alone does not prove that a particular workflow or external integration works.
 
-- A single workflow engine is the starting point, not all four tools at once.
-- Recipes will need explicit approval and scoped credentials; automation will not gain access to another use case just because it runs on the same kit.
-- Bounded, reviewed starter routines come before an open-ended workflow canvas.
+## Protect your workflows
 
-Check the [StackKits changelog](/changelog/overview) or the [use-case catalog](/stackkits/reference/use-case-catalog) for whether Automation has moved out of planning.
+Keep credentials in the custody selected for your installation. Follow [Back up and restore](/guides/stackkits/back-up-and-restore) and check which workload data your generated backup plan actually includes before relying on it.
 
-## What is stored where
-
-Nothing yet. Once Automation is released, the release notes and the use-case catalog will say where its workflows and credentials are kept. Until then, do not store credentials for it anywhere on the assumption that it exists.
-
-## If something goes wrong
-
-- You cannot find Automation in the selection: that is expected, because it is not released. Check the catalog page above.
-- You want a routine job today: keep it manual and review changes with [Review a plan and apply](/guides/stackkits/review-plan-and-apply).
-- A service you did install misbehaves: see [Troubleshooting](/guides/stackkits/troubleshooting).
+If Automation is absent from a release older than v0.54.3, check that version's catalog instead of assuming these choices exist. For a failed plan, apply or verification, see [Troubleshooting](/guides/stackkits/troubleshooting).

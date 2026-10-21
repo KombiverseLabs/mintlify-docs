@@ -30,7 +30,7 @@ track: v0-expansion
 | v0.6.0 | Localized Release-Synced Docs | done | C3 | `mintlify-docs-pa6` | Six locales (en, de, es, zh-Hans, hi, ar) with a per-locale check; StackKits, SpeechKit and the Techstack API and CLI reference sync from public release artifacts through generated-only pull requests. |
 | v0.7.0 | Apps Public Docs | current | C5 | `mintlify-docs-w78` | Cloud, AI Guide and Workbench, and Companion pages are written in English and staged under `drafts/apps/`; publication waits for the publication decision, the allowlist change and localized counterparts. |
 | v0.8.0 | Release-Synced Localization and Delivery Automation | planned | C3 | `mintlify-docs-d3v` | A new StackKits, SpeechKit or Techstack release reaches all six locales through generated-only pull requests with no manual translation, and the Mintlify delivery read token and legacy project cleanup are finished. |
-| v0.9.0 | Docs Consolidation and StackKits Catalog Completeness | planned | C3 | `mintlify-docs-dxk` | All product documentation lives in mintlify-docs with no docs/ remnants in product repositories, and every StackKits catalog application the public release ships is documented. |
+| v0.9.0 | Docs Consolidation and StackKits Catalog Completeness | planned | C3 | `mintlify-docs-dxk` | All public customer manuals live in mintlify-docs without competing public manuals in product repositories; developer documentation remains with its implementation, and every StackKits catalog application the public release ships is documented. |
 | v0.10.0 | Public API and MCP Reference | planned | C6 | `mintlify-docs-9d3` | The public Gateway API and the customer MCP endpoint have generated, release-backed reference pages in every locale, and the identity and entitlement concepts match the shipped Auth0 and Gateway behavior. |
 | v0.11.0 | Install and Upgrade Paths for Every Published Product | planned | C5 | `mintlify-docs-07w` | Each published product has release-backed install, upgrade and rollback pages and no page claims more than the published release does. |
 | v0.12.0 | Public Beta Docs Gate | planned | C7 | `mintlify-docs-otl` | Privacy and security overviews match the legal pages, public pages are accessible and mobile-ready, and docs analytics follow the privacy policy before the public beta gate. |
@@ -81,7 +81,7 @@ track: v0-expansion
 
 **Scope**
 
-- [ ] Migrate remaining docs/ content into mintlify-docs and retire the duplicates.
+- [ ] Consolidate public customer manuals in mintlify-docs and retire competing public manuals. Retain developer docs, ADRs, contracts and implementation runbooks in their owning repositories under DOCUMENTATION-STANDARD.md Tier 3.
 - [ ] Document the self-hosted login gateway and Authelia, then the rest of the catalog as releases ship.
 - [ ] Re-verify carried known issues against the current StackKits snapshot.
 

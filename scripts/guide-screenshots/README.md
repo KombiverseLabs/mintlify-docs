@@ -54,15 +54,53 @@ numbers.
    `getByRole` and `getByLabel` over CSS classes.
 3. Run it, review every image, commit images and `captures.json` with the guide.
 
-## Mobile apps
+## Official Android clients and browser extension
 
-Not capturable yet; guides link the vendor page for mobile-only screens. Planned:
+`vendor-clients.json` pins official Immich Android v2.7.0 (matching the released
+StackKits image), Bitwarden Android 2026.10.0 and the Bitwarden browser extension
+2026.10.0. Every download must match the GitHub release asset SHA-256 digest.
+Run `node vendor-clients.mjs download` to verify them before installation.
 
-- **Android**: emulator with a clean system image, app from its official store
-  or repository, `adb exec-out screencap -p`; the emulator reaches the
-  reference install via `10.0.2.2` plus a hosts entry, and must trust the
-  throwaway CA (some apps ignore user CAs; check per app).
-- **iOS**: Xcode Simulator (`xcrun simctl io booted screenshot`); only apps with
-  a simulator build, otherwise a physical device.
-- Convert PNG to WebP with the same settings, store as `ios-NN-*.webp` or
-  `android-NN-*.webp`, with a hand-written `captures.json` entry.
+Use T3 `device_list` and `device_open` to select an available Android emulator.
+Keep the returned exact agent-device launcher, config, serial and session on
+every operation. Preserve other apps and media. Drive the unchanged client
+through its normal UI. Bitwarden's own **App settings → Other → Allow screen
+capture** setting and confirmation permit screenshots; no instrumentation or
+app patch is needed. Restore the setting, or uninstall only the app installed
+for this capture, when finished. iOS remains a vendor link card.
+
+`node vendor-clients.mjs android <launcher> <config> <session> <serial>
+<package> <relative-image-path>` captures the foreground app, converts PNG to
+WebP and reports dimensions and digest. Pass `GUIDE_ADB` when adb is not on
+PATH. Inspect the image before adding it: a Back action can leave the app,
+and a successful screenshot command is not visual proof.
+
+For the extension use `xvfb-run -a node vendor-clients.mjs browser` on a headless
+Linux host, or `node vendor-clients.mjs browser` on a desktop. It uses the normal
+headed Chromium extension UI, skips the default-password-manager prompt and
+captures the self-hosted dialog with an example address. Its browser profile is
+temporary. `npx playwright install chromium` installs the browser for the pinned
+driver. No personal browser profile or real vault account is used.
+
+## Immich reference
+
+`apps/immich/compose.yaml` runs unchanged upstream Immich and its native
+persistence on an admitted real test server. It is not a substitute for a
+Kombify database. Follow workspace development-probe admission and access
+preflight, qualify server capacity, use a unique project and loopback-only
+ports, and preserve all foreign workloads. Generate the database password per
+run without logging it. The reference excludes machine learning and uses the
+released server, database and cache image digests.
+
+Use the normal web registration/onboarding and app login with a synthetic
+account and an owned example image. Forward only the owned loopback port to
+the emulator. Use a controlled media library containing only the owned test images; never
+capture or upload another fixture's media. The October 21 captures show the normal Android album
+and backup flow and web readback, not a StackKits rollout or recovery test.
+Delete only this Compose project's containers, volumes and temporary secrets,
+its port forward and owned media after capture. Do not remove cached image
+layers another session may now use.
+
+For each image, retain the app version, release and verified artifact digest,
+viewport, synthetic-data description, dimensions, image digest and visual review
+in `captures.json`. Do not save credentials or authentication state there.
