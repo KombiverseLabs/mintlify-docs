@@ -50,6 +50,22 @@ $allowedInlineCommands = @{
     "guides/stackkits/use-cases/personal-ai.mdx" = @(
         "stackkit secrets materialize"
     )
+    "guides/stackkits/use-cases/vault.mdx" = @(
+        "stackkit validate",
+        "stackkit secrets materialize",
+        "stackkit generate",
+        "stackkit plan --json",
+        "stackkit apply",
+        "stackkit verify --http --json"
+    )
+    "guides/stackkits/use-cases/photos.mdx" = @(
+        "stackkit validate",
+        "stackkit secrets materialize",
+        "stackkit generate",
+        "stackkit plan --json",
+        "stackkit apply",
+        "stackkit verify --http --json"
+    )
     "stackkits/apps/cloudreve.mdx" = @(
         "stackkit init",
         "stackkit verify"
@@ -68,6 +84,10 @@ $allowedInlineCommands = @{
         "stackkit plan --json",
         "stackkit remove",
         "stackkit verify --http --json",
+        "stackkit version",
+        "stackkit upgrade --dry-run --to v0.54.3",
+        "stackkit upgrade --to v0.54.3",
+        "stackkit upgrade --recover <operation-id>",
         "stackkit --help"
     )
     "stackkits/reference/spec-format.mdx" = @(

@@ -72,6 +72,52 @@ Add `--terminal-evidence-json` when you need a machine-readable removal record o
 
 ## Common workflows
 
+### Inspect an upgrade before changing the server
+
+Use a specific public release so the inspection and the upgrade select the
+same version. This example uses
+[v0.54.3](https://github.com/kombifyio/StackKits/releases/tag/v0.54.3), the
+release behind this documentation's CLI snapshot:
+
+1. Run `stackkit version` and note the installed release.
+2. Run `stackkit verify --http --json` and resolve any existing failures.
+3. Run `stackkit upgrade --dry-run --to v0.54.3` to inspect this target.
+
+The [released upgrade command](/stackkits/reference/cli/upgrade) verifies the
+archive, SPDX SBOM, GitHub attestation and cached trusted root before
+installing a release. Its dry run generates the target in a bounded shadow
+workspace and shows the plan and artifact differences without applying it.
+The release also publishes
+[`checksums.txt`](https://github.com/kombifyio/StackKits/releases/download/v0.54.3/checksums.txt)
+for its download assets. Compare a manually downloaded archive with the row
+for that exact filename and release; a checksum from another version is not
+a match.
+
+Review the differences and the release's compatibility and recovery limits.
+Fresh upgrades must be admitted by the embedded Kit policy. If the dry run
+fails or the release is not admitted, stop and retain the installed version.
+Do not replace the binary or edit the policy to force an upgrade.
+
+When the inspection succeeds and you intend to make the change, run
+`stackkit upgrade --to v0.54.3`, then `stackkit verify --http --json`.
+
+The upgrade creates a Kopia snapshot and an owner-signed executor recovery
+checkpoint, stages rollback data, and then runs the target generation,
+apply and verification transaction. Retain the operation ID and its result.
+
+### Recover an interrupted upgrade
+
+Resume the exact operation reported by the CLI with
+`stackkit upgrade --recover <operation-id>`. Replace the placeholder with
+that operation's ID.
+
+This follows the existing signed journal and checkpoint. It is not a general
+downgrade command. Before target Apply, a failed transaction can restore and
+verify the previous executor. After Apply, restarting the previous runtime
+requires verified activation of the previous data; staging a backup alone
+does not authorize it. Follow [Back up and restore](/guides/stackkits/back-up-and-restore)
+and the exact release's recovery result before restarting an older runtime.
+
 <CardGroup cols={2}>
   <Card title="Change StackSpec intent" icon="sliders" href="/guides/stackkits/configure-stack-spec">
     Edit released intent and regenerate governed output.
