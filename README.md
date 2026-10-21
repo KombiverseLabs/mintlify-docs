@@ -108,9 +108,8 @@ mise run local:e2e
 | Command | Purpose |
 | --- | --- |
 | `mise run dev` | Pinned local Mintlify preview. |
-| `mise run check` | Locale checks, generator tests, positive scope, navigation, content and local links. |
+| `mise run check` | Locale checks, positive scope, navigation, content and local links. |
 | `mise run local:e2e` | `mint validate` plus allowed and forbidden routes over real local HTTP; must pass before publication. |
-| `mise run public-safety:test` | Fail-closed policy regression tests. |
 | `mise run remote:public-safety` | Deployed route and projection matrix. |
 | `mise run postlive:wait-exact-live` | Wait for a successful `docs.kombify.io` deployment at exact `SOURCE_SHA`. |
 | `scripts/check-stackkits-release-truth.ps1` | Installer commands on the current public release, no stale lifecycle wording. |

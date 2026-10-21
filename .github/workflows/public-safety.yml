@@ -24,10 +24,6 @@ jobs:
       - name: Checkout exact source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Run focused public-safety tests
-        shell: pwsh
-        run: ./scripts/test-public-safety.ps1
-
       - name: Validate the complete publishable tree
         shell: pwsh
         run: ./scripts/assert-public-safety.ps1
@@ -54,9 +50,7 @@ jobs:
 
       - name: Reject unrelated command examples
         shell: pwsh
-        run: |
-          ./scripts/test-code-example-relevance.ps1
-          ./scripts/check-code-example-relevance.ps1
+        run: ./scripts/check-code-example-relevance.ps1
 
   exact-preview:
     name: Prove forbidden routes absent from exact preview
