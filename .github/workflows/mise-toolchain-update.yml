@@ -1,5 +1,5 @@
 # Public-repository adapter synchronized from KombiverseLabs/.github@fedaa2443f9b0615e4459936ce699e000b8ab1c1.
-# REPO_SYNC_PAT is repository-owned and used only when an update PR must be written.
+# The kombify-ci App token (org secret KOMBIFY_CI_APP_PRIVATE_KEY, variable KOMBIFY_CI_APP_ID) writes the update PR; no personal token.
 name: Mise Toolchain Update
 
 on:
@@ -40,9 +40,17 @@ jobs:
           mise trust "$PWD/mise.toml"
           mise upgrade --bump --yes
           mise lock --yes
+      - name: Mint the CI App token for the automation pull request
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.KOMBIFY_CI_APP_ID }}
+          private-key: ${{ secrets.KOMBIFY_CI_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
       - name: Open or refresh the automation pull request
         env:
-          GH_TOKEN: ${{ secrets.REPO_SYNC_PAT }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         shell: bash
         run: |
           set -euo pipefail
@@ -51,7 +59,7 @@ jobs:
             exit 0
           fi
           if [[ -z "${GH_TOKEN:-}" ]]; then
-            echo "::error::REPO_SYNC_PAT is required only when a mise update must write the repository-owned automation PR."
+            echo "::error::The kombify-ci App token is required when a mise update must write the automation PR."
             exit 1
           fi
           gh auth setup-git
