@@ -1,0 +1,108 @@
+---
+title: "What Guard sends and keeps"
+description: "The data kombify Guard reports from your server, where it goes, how long it is kept and what it never sends"
+sidebarTitle: "Data Guard sends"
+icon: "database"
+---
+
+kombify Guard reports a small, fixed set of facts about your server so
+Techstack can show its health, security state and operation results. This page
+lists those facts, says where they go and for how long they are kept, and names
+what Guard never sends.
+
+<Note>
+Techstack is pre-1.0 and connected operation is preview scope; see
+[availability](/techstack/availability). Retention below is what the current
+release enforces. Where a window is not listed, it is not yet confirmed and this
+page does not state one.
+</Note>
+
+## Where the data goes
+
+- **Self-managed Techstack:** Guard reports only to your own Techstack. kombify
+  receives nothing unless you connect that installation.
+- **Connected or managed:** Guard reports to the kombify-operated Techstack
+  over its authenticated, key-bound connection (see
+  [pairing a server](/techstack/guard/pairing)).
+
+Guard always connects outward over HTTPS. You do not open an inbound port for
+it. Every report is tied to your account at ingest, and every read is scoped to
+it: no customer can read another customer's hostnames, addresses or metrics.
+
+## What Guard reports
+
+| What | Examples | Used for |
+| --- | --- | --- |
+| Server identity | Server and owner identifiers, the thumbprint of the server's public key, Guard version | Authenticating the server and binding it to you |
+| Liveness | Time of the last report, boot ID, a digest of the machine ID (never the machine ID itself), journal health, count of unresolved operations | Showing whether the server is connected and detecting restarts or clones |
+| Resource use | CPU, memory, swap, load, disk per mount, uptime; CPU and memory per container | Capacity and health |
+| Host details | Hostname, operating system and version, architecture, CPU, RAM and disk size, runtime version, public, private and local IP addresses, SSH host public keys, listening ports, observed network position (address, gateway, subnet, interface, wireless network name), drive health | Reachability, SSH host pinning, exposure checks and detecting a move to another network |
+| Services | StackKit name, version and mode, service and container names, image references, probed health, endpoints | Operating and verifying your services |
+| Security posture | Which host controls are compliant, drifted or unknown, expected and observed values, approved exceptions, baseline version | Showing and alerting on the secured configuration |
+| Recovery posture | Age and status of the last backup, result of the last verified restore | Showing whether the server is recoverable |
+| Operation receipts | Command ID, action, result state, a bounded result summary, redacted log lines | An auditable record of what was run |
+
+Guard collects resource figures about every 30 seconds by default, and asks the
+host for a fresh security observation about every 15 minutes. Observing the host
+changes nothing on it.
+
+One more class is opt-in. If a smart-home automation on the server is set up to
+notify you, Guard forwards only the notice text its author wrote (at most 280
+characters) so it can reach you as a notification. It is off by default, is turned
+on per automation, and never sends entity states, presence, locks, cameras or
+sensor history.
+
+<Note>
+Metrics and label names are an allowlist enforced twice, on the server before
+anything is stored locally and again when the data arrives. A value that is not
+on the list is dropped, so a misbehaving collector cannot widen what leaves your
+host.
+</Note>
+
+## What Guard never sends
+
+- Application content: the files, databases, messages or photos your services
+  hold.
+- Environment variables, secrets or credentials of your applications.
+- Personal data of the people in your household.
+- The owner's email address. It is StackKits configuration, not Guard data.
+
+Application content reaches kombify only through a separate, read-only
+component with its own consent model, never through Guard's connection, spool,
+receipts or logs.
+
+## How long it is kept
+
+| Data | Kept |
+| --- | --- |
+| Security findings history | 90 days after a finding is resolved |
+| Resource metrics | About 15 days; the cockpit's trend charts keep coarser points for up to 30 days |
+| Current state of a server | While the server is paired |
+| Unsent data during an outage | In a bounded local queue on the server (8 MiB by default, roughly six hours). When it overflows, the oldest data is dropped and one marker records the gap. |
+
+After an outage Guard sends what it queued, oldest first. A gap is reported
+explicitly and is never silently filled.
+
+## What happens to the data when you detach a server
+
+Detaching a server revokes its credentials and ends its remote reach, as
+described in [revoke and detach](/techstack/guard/revoke-and-uninstall). On the
+server, Guard then deletes its identity key, its credential, its queued
+telemetry and the operation records Techstack has acknowledged. The server's
+record stays in Techstack as a detached record with its audit trail, and
+history that has already been collected ages out under the windows above.
+
+The data contract also sets a target of removing a detached server's inventory,
+metrics and posture within 30 days. This release does not yet confirm that
+automatic removal, so it is not stated here as a guarantee.
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Pair a server" icon="link" href="/techstack/guard/pairing">
+    How a server becomes bound to you, and what you see while it does.
+  </Card>
+  <Card title="Revoke, detach and uninstall" icon="plug-circle-xmark" href="/techstack/guard/revoke-and-uninstall">
+    End a server's access and remove Guard from the host.
+  </Card>
+</CardGroup>
