@@ -1,0 +1,151 @@
+---
+title: "Install a homelab in 10 minutes"
+description: "One linear path from a spare computer to a running Basement Kit, with checks after each step"
+sidebarTitle: "Install in 10 minutes"
+icon: stopwatch
+---
+
+This page takes you from one spare computer to a running Basement Kit on one
+straight path. Follow the steps in order. Each step says what you should see
+and roughly how long it takes.
+
+<Note>
+  StackKits is in an early-access pilot. The pilot is a test with real
+  homelabs, not a finished product promise. Check the current status of your
+  operating system in [OS compatibility](/stackkits/reference/os-compatibility)
+  before you start, and tell us what happened afterwards.
+</Note>
+
+## Step 1: Pre-check (about 1 minute)
+
+Go through this list before you run anything. If one item is a "no", stop here
+and read [Before you start](/guides/stackkits/before-you-start) first.
+
+- **A server you operate.** You own the computer, or you are allowed to run
+  administrator commands on it. You can use `sudo` there, or you are root. You
+  do not need a kombify account, a credit card or a rented server.
+- **A spare computer.** Use a computer that can stay on day and night, for
+  example a mini PC. Do not use a machine with important data or services on
+  it: setup changes host settings such as the firewall and SSH.
+- **Enough hardware.** The Basement Kit needs at least 2 CPU cores, 4 GB of
+  memory and 20 GB of free disk space; 4 CPU cores are recommended. The
+  published test runs used amd64 (x86-64) computers.
+- **A listed operating system.** The computer runs Linux with a system from
+  [OS compatibility](/stackkits/reference/os-compatibility). Read the status
+  column there. A row marked `unverified` has no completed test run on the
+  current release yet.
+- **Your home network.** The computer has internet access for the downloads.
+  Your phone or laptop is on the same network as the computer.
+- **An email address.** The installer asks for it to create your owner login.
+- **A private place for access details.** Setup writes them to the file
+  `.stackkit/access.json`. Decide now where you keep them, for example a
+  password manager.
+
+## Step 2: Run the installer (usually several minutes)
+
+Open a terminal on the computer and run:
+
+```bash
+curl -sSL https://base.stackkit.cc | sh
+```
+
+What you should see:
+
+1. The installer asks **How do you want to install?** Press Enter to keep
+   **1) Quick Install**.
+2. It asks for your email address and suggests a login username. Press Enter
+   to keep the suggestion.
+3. It shows a list of use cases. Files, Photos and Vault start checked. Use the
+   arrow keys and the space bar to change the selection, then press Enter.
+4. It downloads StackKits and the software it needs, creates the folder
+   `~/my-homelab`, checks the configuration and starts the services.
+
+The download and start phase is the longest part. The installer itself warns
+that it can take several minutes with little output. On a typical mini PC with
+a normal home internet connection, plan for a few minutes. Let it run and do
+not close the terminal.
+
+When it is done, you see **Your homelab is running!** followed by a dashboard
+address, the core services and the next steps.
+
+<Warning>
+  If the installer stops with an error, do not run the one-liner a second
+  time before you have read the error. Go to the section "Stuck? Get help"
+  below.
+</Warning>
+
+## Step 3: Verify the install (about 1 minute)
+
+Run these commands in the same terminal:
+
+```bash
+cd ~/my-homelab
+stackkit version
+stackkit logs latest --json
+```
+
+What you should see:
+
+- `stackkit version` prints the installed version.
+- `stackkit logs latest --json` reports the result of the setup.
+
+Then open the first service. Copy the **Dashboard** address from the end of the
+installer output into a browser on the computer, or on a phone or laptop in the
+same network. Copy it rather than typing it from memory.
+
+If the address does not open on another device, that device probably cannot
+resolve the local names of your homelab yet. See
+[Troubleshooting](/guides/stackkits/troubleshooting).
+
+## Step 4: Create your owner login (a few minutes)
+
+Follow the next steps that the installer printed:
+
+1. Create your owner passkey in PocketID at the setup address it shows.
+2. Sign in at the authentication address.
+3. Open the dashboard and finish protecting it.
+
+The [Node Hub guide](/guides/stackkits/node-hub) explains these steps in
+detail.
+
+## Where your access details are
+
+Setup writes your service addresses and setup details to
+`.stackkit/access.json` in the folder `~/my-homelab` on the computer. To read
+them:
+
+```bash
+cat .stackkit/access.json
+```
+
+Keep them private:
+
+- Never paste the contents of `.stackkit/access.json` or any password into a
+  chat, an issue or an email. That includes messages to kombify support.
+- Treat the installer output in your terminal the same way. It can show login
+  details.
+- Keep the folder `~/my-homelab` private. No hosted kombify account holds a
+  copy of it.
+
+## Stuck? Get help
+
+- Read the error with `stackkit logs latest --json`, then check
+  [Troubleshooting](/guides/stackkits/troubleshooting).
+- Still stuck? [Get help](/guides/stackkits/support) lists the support
+  channels and what to include so we can answer quickly.
+- Done, or gave up halfway? [Tell us how it went](https://github.com/kombifyio/StackKits/issues/new?template=pilot_report.yml).
+  Every pilot report helps, also a short one.
+
+## Continue
+
+<CardGroup cols={3}>
+  <Card title="Node Hub" icon="shield-halved" href="/guides/stackkits/node-hub">
+    Finish first-run protection of your homelab.
+  </Card>
+  <Card title="Back up and restore" icon="clock-rotate-left" href="/guides/stackkits/back-up-and-restore">
+    Set up a backup and try one restore.
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/stackkits/quickstart">
+    The same install with more detail on what it does.
+  </Card>
+</CardGroup>
