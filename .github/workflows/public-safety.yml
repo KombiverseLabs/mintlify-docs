@@ -63,6 +63,8 @@ jobs:
     steps:
       - name: Checkout exact source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 50
 
       - name: Wait for exact-head Mintlify deployment
         id: preview
@@ -72,6 +74,49 @@ jobs:
           REPOSITORY: ${{ github.repository }}
           HEAD_SHA: ${{ github.sha }}
         run: |
+          # Mintlify deploys main only when a published file changed. A push
+          # that touches only Mintlify-ignored files (built-in ignores plus
+          # .mintignore, e.g. public-safety-policy.json or .beads/) never gets
+          # a deployment, so its published tree is the one of the newest main
+          # deployment it descends from. Only then is that deployment the one
+          # the remote assertion checks, with this commit's policy.
+          function Get-LatestStatus([string]$DeploymentId) {
+            $statuses = gh api "repos/$env:REPOSITORY/deployments/$DeploymentId/statuses?per_page=20" | ConvertFrom-Json
+            return @($statuses | Sort-Object { [datetime]$_.created_at } -Descending | Select-Object -First 1)
+          }
+          $exact = @(gh api "repos/$env:REPOSITORY/deployments?sha=$env:HEAD_SHA&per_page=20" | ConvertFrom-Json)
+          if ($exact.Count -eq 0) {
+            $base = $null
+            $mainDeployments = gh api "repos/$env:REPOSITORY/deployments?ref=main&per_page=50" | ConvertFrom-Json
+            foreach ($candidate in @($mainDeployments | Sort-Object { [datetime]$_.created_at } -Descending)) {
+              if ($candidate.sha -eq $env:HEAD_SHA) { continue }
+              git merge-base --is-ancestor $candidate.sha $env:HEAD_SHA 2>$null
+              if ($LASTEXITCODE -ne 0) { continue }
+              $status = Get-LatestStatus $candidate.id
+              if ($status.Count -gt 0 -and $status[0].state -eq "success" -and -not [string]::IsNullOrWhiteSpace([string]$status[0].environment_url)) {
+                $base = @{ sha = [string]$candidate.sha; url = [string]$status[0].environment_url }
+                break
+              }
+            }
+            if ($null -ne $base) {
+              $changed = @(git diff --name-only --no-renames $base.sha $env:HEAD_SHA)
+              if ($LASTEXITCODE -ne 0) { throw "Could not diff $($base.sha)..$env:HEAD_SHA" }
+              $excludes = Join-Path $env:RUNNER_TEMP "mintlify-excludes"
+              @(".git/", ".github/", ".claude/", ".agents/", ".idea/", "node_modules/", "README.md", "LICENSE.md", "CHANGELOG.md", "CONTRIBUTING.md") + @(Get-Content -LiteralPath ".mintignore") | Set-Content -LiteralPath $excludes
+              $published = @($changed | Where-Object { $_ } | Where-Object {
+                git -c "core.excludesFile=$excludes" check-ignore --no-index -q -- $_
+                $LASTEXITCODE -ne 0
+              })
+              if ($changed.Count -gt 0 -and $published.Count -eq 0) {
+                Write-Host "No published file changed since deployed main $($base.sha); Mintlify builds no deployment for $env:HEAD_SHA."
+                Write-Host "Changed (all Mintlify-ignored): $($changed -join ', ')"
+                "url=$($base.url)" >> $env:GITHUB_OUTPUT
+                Write-Host "preview_url: $($base.url)"
+                exit 0
+              }
+              Write-Host "Published files changed since $($base.sha): $($published -join ', ')"
+            }
+          }
           $deadline = (Get-Date).AddMinutes(4)
           $environmentUrl = $null
           do {

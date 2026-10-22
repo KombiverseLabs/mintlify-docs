@@ -1,0 +1,159 @@
+---
+title: "Ein Homelab in 10 Minuten installieren"
+description: "Ein gerader Weg vom freien Computer zum laufenden Basement Kit, mit einer Prüfung nach jedem Schritt"
+sidebarTitle: "In 10 Minuten installieren"
+icon: stopwatch
+---
+
+Diese Seite bringt dich auf einem geraden Weg von einem freien Computer zu
+einem laufenden Basement Kit. Folge den Schritten der Reihe nach. Jeder Schritt
+sagt dir, was du sehen solltest und wie lange er ungefähr dauert.
+
+<Note>
+  StackKits befindet sich in einem Early-Access-Pilot. Der Pilot ist ein Test
+  mit echten Homelabs, kein Versprechen eines fertigen Produkts. Prüfe vor dem
+  Start den aktuellen Stand deines Betriebssystems in der
+  [OS-Kompatibilität](/de/stackkits/reference/os-compatibility) und erzähl uns
+  danach, wie es gelaufen ist.
+</Note>
+
+## Schritt 1: Vorabprüfung (etwa 1 Minute)
+
+Geh diese Liste durch, bevor du etwas ausführst. Wenn ein Punkt ein „Nein“ ist,
+halte hier an und lies zuerst [Bevor du startest](/de/guides/stackkits/before-you-start).
+
+- **Ein Server, den du betreibst.** Der Computer gehört dir, oder du darfst
+  darauf Administrator-Befehle ausführen. Du kannst dort `sudo` nutzen oder
+  bist root. Du brauchst kein kombify-Konto, keine Kreditkarte und keinen
+  gemieteten Server.
+- **Ein freier Computer.** Nimm einen Computer, der Tag und Nacht laufen kann,
+  zum Beispiel einen Mini-PC. Nimm keine Maschine mit wichtigen Daten oder
+  Diensten darauf: Die Einrichtung ändert Einstellungen des Hosts, etwa die
+  Firewall und SSH.
+- **Genug Hardware.** Das Basement Kit braucht mindestens 2 CPU-Kerne, 4 GB
+  Arbeitsspeicher und 20 GB freien Speicherplatz; empfohlen sind 4 CPU-Kerne.
+  Die veröffentlichten Testläufe nutzten amd64-Computer (x86-64).
+- **Ein aufgeführtes Betriebssystem.** Auf dem Computer läuft Linux mit einem
+  System aus der [OS-Kompatibilität](/de/stackkits/reference/os-compatibility).
+  Lies dort die Statusspalte. Eine Zeile mit `unverified` hat auf der aktuellen
+  Version noch keinen abgeschlossenen Testlauf.
+- **Dein Heimnetz.** Der Computer hat Internetzugang für die Downloads. Dein
+  Smartphone oder Laptop ist im selben Netz wie der Computer.
+- **Eine E-Mail-Adresse.** Der Installer fragt danach, um deinen Owner-Login
+  anzulegen.
+- **Ein privater Ort für die Zugangsdaten.** Die Einrichtung schreibt sie in
+  die Datei `.stackkit/access.json`. Leg jetzt fest, wo du sie aufbewahrst,
+  zum Beispiel in einem Passwortmanager.
+
+## Schritt 2: Den Installer ausführen (meist einige Minuten)
+
+Öffne ein Terminal auf dem Computer und führe aus:
+
+```bash
+curl -sSL https://base.stackkit.cc | sh
+```
+
+Was du sehen solltest:
+
+1. Der Installer fragt **How do you want to install?** Drück Enter, um
+   **1) Quick Install** zu behalten.
+2. Er fragt nach deiner E-Mail-Adresse und schlägt einen Login-Namen vor. Drück
+   Enter, um den Vorschlag zu behalten.
+3. Er zeigt eine Liste mit Anwendungsfällen. Files, Photos und Vault sind schon
+   angehakt. Ändere die Auswahl mit den Pfeiltasten und der Leertaste und drück
+   dann Enter.
+4. Er lädt StackKits und die nötige Software herunter, legt den Ordner
+   `~/my-homelab` an, prüft die Konfiguration und startet die Dienste.
+
+Herunterladen und Starten ist der längste Teil. Der Installer weist selbst
+darauf hin, dass das einige Minuten mit wenig Ausgabe dauern kann. Auf einem
+typischen Mini-PC mit einer normalen Internetverbindung zu Hause solltest du
+mit ein paar Minuten rechnen. Lass ihn laufen und schließ das Terminal nicht.
+
+Wenn er fertig ist, siehst du **Your homelab is running!**, danach eine
+Dashboard-Adresse, die Kerndienste und die nächsten Schritte.
+
+<Warning>
+  Wenn der Installer mit einem Fehler stoppt, führe den Einzeiler nicht ein
+  zweites Mal aus, bevor du den Fehler gelesen hast. Geh zum Abschnitt
+  „Du hängst fest? Hol dir Hilfe“ weiter unten.
+</Warning>
+
+## Schritt 3: Die Installation prüfen (etwa 1 Minute)
+
+Führe diese Befehle im selben Terminal aus:
+
+```bash
+cd ~/my-homelab
+stackkit version
+stackkit logs latest --json
+```
+
+Was du sehen solltest:
+
+- `stackkit version` gibt die installierte Version aus.
+- `stackkit logs latest --json` meldet das Ergebnis der Einrichtung.
+
+Öffne dann den ersten Dienst. Kopiere die **Dashboard**-Adresse vom Ende der
+Installer-Ausgabe in einen Browser auf dem Computer oder auf einem Smartphone
+oder Laptop im selben Netz. Kopiere sie, statt sie aus dem Gedächtnis zu
+tippen.
+
+Wenn sich die Adresse auf einem anderen Gerät nicht öffnet, kann dieses Gerät
+die lokalen Namen deines Homelabs wahrscheinlich noch nicht auflösen. Siehe
+[Fehlerbehebung](/de/guides/stackkits/troubleshooting).
+
+## Schritt 4: Deinen Owner-Login anlegen (ein paar Minuten)
+
+Folge den nächsten Schritten, die der Installer ausgegeben hat:
+
+1. Leg deinen Owner-Passkey in PocketID unter der angezeigten Setup-Adresse an.
+2. Melde dich unter der Anmeldeadresse an.
+3. Öffne das Dashboard und schließ seinen Schutz ab.
+
+Die [Node-Hub-Anleitung](/de/guides/stackkits/node-hub) erklärt diese Schritte
+im Detail.
+
+## Wo deine Zugangsdaten liegen
+
+Die Einrichtung schreibt deine Dienstadressen und Einrichtungsdetails in
+`.stackkit/access.json` im Ordner `~/my-homelab` auf dem Computer. So liest du
+sie:
+
+```bash
+cat .stackkit/access.json
+```
+
+Halte sie privat:
+
+- Füge den Inhalt von `.stackkit/access.json` oder ein Passwort nie in einen
+  Chat, ein Issue oder eine E-Mail ein. Das gilt auch für Nachrichten an den
+  kombify-Support.
+- Behandle die Installer-Ausgabe in deinem Terminal genauso. Sie kann
+  Login-Daten zeigen.
+- Halte den Ordner `~/my-homelab` privat. Kein gehostetes kombify-Konto hat
+  eine Kopie davon.
+
+## Du hängst fest? Hol dir Hilfe
+
+- Lies den Fehler mit `stackkit logs latest --json` und schau dann in die
+  [Fehlerbehebung](/de/guides/stackkits/troubleshooting).
+- Hängst du immer noch fest? [Hilfe bekommen](/de/guides/stackkits/support)
+  nennt die Support-Kanäle und was du mitschicken solltest, damit wir schnell
+  antworten können.
+- Fertig, oder auf halbem Weg aufgegeben? [Erzähl uns, wie es gelaufen ist](https://github.com/kombifyio/StackKits/issues/new?template=pilot_report.yml).
+  Jeder Pilotbericht hilft, auch ein kurzer.
+
+## Weiter
+
+<CardGroup cols={3}>
+  <Card title="Node Hub" icon="shield-halved" href="/de/guides/stackkits/node-hub">
+    Schließ den Schutz deines Homelabs beim ersten Start ab.
+  </Card>
+  <Card title="Sichern und wiederherstellen" icon="clock-rotate-left" href="/de/guides/stackkits/back-up-and-restore">
+    Richte ein Backup ein und probiere eine Wiederherstellung aus.
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/de/stackkits/quickstart">
+    Dieselbe Installation, mit mehr Details dazu, was sie tut.
+  </Card>
+</CardGroup>

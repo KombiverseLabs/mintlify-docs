@@ -23,6 +23,7 @@ $executableExamplePages = [System.Collections.Generic.HashSet[string]]::new(
     "guides/stackkits/cli-walkthrough.mdx",
     "guides/stackkits/configure-stack-spec.mdx",
     "guides/stackkits/review-plan-and-apply.mdx",
+    "guides/stackkits/support.mdx",
     "guides/stackkits/use-cases/game.mdx",
     "guides/stackkits/use-cases/personal-ai.mdx",
     "stackkits/apps/cloudreve.mdx",
@@ -30,6 +31,7 @@ $executableExamplePages = [System.Collections.Generic.HashSet[string]]::new(
     "stackkits/apps/jellyfin.mdx",
     "stackkits/kits/basement-kit.mdx",
     "stackkits/kits/cloud-kit.mdx",
+    "stackkits/install-in-10-minutes.mdx",
     "stackkits/overview.mdx",
     "stackkits/quickstart.mdx",
     "stackkits/reference/day-2-operations.mdx",
@@ -136,6 +138,10 @@ $allowedInlineCommands = @{
         "stackkit logs latest --json"
     )
     "stackkits/quickstart.mdx" = @(
+        "stackkit version",
+        "stackkit logs latest --json"
+    )
+    "stackkits/install-in-10-minutes.mdx" = @(
         "stackkit version",
         "stackkit logs latest --json"
     )
