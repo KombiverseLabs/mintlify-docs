@@ -4,8 +4,8 @@ description: "Enroll, list and revoke household devices (CLI token fallback of t
 sidebarTitle: "device"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:2bccf06894c713aaba8c1e80ccd9a59292eee4f876d4c46b9abd3ddf7255afbc"
-source_hash: "9ac1e5d972181599722602257c2da1876a55d032"
+content_hash: "sha256:95c3ff1fa3ce5716fe20ea99d7a4b694a4f951a303423dad213bbde9bf547e22"
+source_hash: "4049a888362a11795582ef0a63fba7d7a7df4942"
 ---
 Enroll, list and revoke household devices (CLI token fallback of the State Console ceremony).
 
@@ -50,7 +50,7 @@ The node generates its WireGuard private key into local custody; it is never pri
 stackkit device overlay [flags]
 ```
 
-Subcommands: [`stackkit device overlay bind`](#stackkit-device-overlay-bind), [`stackkit device overlay render`](#stackkit-device-overlay-render)
+Subcommands: [`stackkit device overlay bind`](#stackkit-device-overlay-bind), [`stackkit device overlay render`](#stackkit-device-overlay-render), [`stackkit device overlay up`](#stackkit-device-overlay-up)
 
 ### stackkit device overlay bind
 
@@ -75,6 +75,16 @@ stackkit device overlay render [flags]
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
 | `--out` | string | — | write the configuration to this file instead of stdout |
+
+### stackkit device overlay up
+
+Create or resync the node's WireGuard overlay interface and enable it at boot (requires root).
+
+Installs the rendered configuration as /etc/wireguard/wg-stackkit.conf, starts and enables wg-quick@wg-stackkit so the interface returns after a reboot, or resyncs the peers of a running interface in place. Fails closed when the kernel module, wireguard-tools or systemd are missing. Safe to repeat.
+
+```bash
+stackkit device overlay up [flags]
+```
 
 ## stackkit device revoke
 
