@@ -111,9 +111,11 @@ function validateAlternatives(owner, label) {
   if (!Array.isArray(owner.alternatives) || owner.alternatives.length === 0) throw new Error(`${label}.alternatives must be non-empty`)
   sortedUnique(owner.alternatives.map(alternative => alternative.id), `${label} alternative IDs`)
   for (const alternative of owner.alternatives) {
-    keys(alternative, ['id', 'name', 'modules'], `${label}.alternatives`)
+    keys(alternative, ['id', 'name', 'modules', 'providesRuntimeAdapterRef'], `${label}.alternatives`)
     string(alternative.id, `${label}.alternatives.id`, CONTRACT_ID)
     string(alternative.name, `${label}.alternatives.name`)
+    // Optional install internal (the runtime adapter an alternative provides); never rendered.
+    if (alternative.providesRuntimeAdapterRef !== undefined) string(alternative.providesRuntimeAdapterRef, `${label}.alternatives.providesRuntimeAdapterRef`, CONTRACT_ID)
     if (!Array.isArray(alternative.modules) || alternative.modules.length === 0) throw new Error(`${label}.alternatives.modules must be non-empty`)
     for (const module of alternative.modules) {
       keys(module, ['id', 'computeProfiles', 'computeProfileFacts', 'acceleratorProfileFacts'], `${label}.alternatives.modules`)
