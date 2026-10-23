@@ -7,6 +7,49 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits](https://github.com/kombifyio/stackKits/releases), [SpeechKit](https://github.com/kombifyio/SpeechKit/releases), and [Techstack](https://github.com/kombifyio/TechStack/releases) release notes on GitHub.
 
+<Update label="2026-10-23" description="Oct 16 – Oct 23">
+
+## StackKits enrolls household devices and adds private remote access; SpeechKit Voice answers faster
+
+StackKits shipped [v0.53.10](https://github.com/kombifyio/stackKits/releases/tag/v0.53.10) through [v0.54.8](https://github.com/kombifyio/stackKits/releases/tag/v0.54.8): household device enrollment, private remote access over WireGuard, owner notifications, and agent write approvals. SpeechKit rolled from [v0.77.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.1) to [v0.77.13](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.13): kombify account connection, device pairing, the standalone Box, and faster Voice Agent replies. Techstack Open Core is published at v0.43.6.
+
+### New features
+
+- **Enroll household devices.** [StackKits v0.53.13](https://github.com/kombifyio/stackKits/releases/tag/v0.53.13) adds `stackkit device enroll`, `list`, and `revoke`. Each device gets its own client certificate, and enrollment only works from your LAN. See [`stackkit device`](/stackkits/reference/cli/device).
+- **Private remote access over WireGuard.** [v0.53.14](https://github.com/kombifyio/stackKits/releases/tag/v0.53.14) reaches your home from enrolled devices through a kit-owned WireGuard overlay. No kombify account is involved, and revoked devices drop out. See [`stackkit device overlay`](/stackkits/reference/cli/device#stackkit-device-overlay).
+- **Owner notifications.** [v0.53.10](https://github.com/kombifyio/stackKits/releases/tag/v0.53.10) notifies you when an apply fails, drift is detected, an upgrade is available, or a certificate expires. It adds a backup digest and PagerDuty delivery. [v0.53.11](https://github.com/kombifyio/stackKits/releases/tag/v0.53.11) declares an ntfy channel during `stackkit init` and adds `stackkit verify --notify`. See [`stackkit notify`](/stackkits/reference/cli/notify).
+- **Approve agent writes with your passkey.** [v0.54.5](https://github.com/kombifyio/stackKits/releases/tag/v0.54.5) adds an Owner passkey page to approve or deny each agent write request. [v0.53.10](https://github.com/kombifyio/stackKits/releases/tag/v0.53.10) gives every agent its own MCP credentials. See [MCP connector](/stackkits/reference/mcp-connector).
+- **Local AI on Windows with a GPU.** [v0.54.3](https://github.com/kombifyio/stackKits/releases/tag/v0.54.3) runs Local AI on Windows through WSL2 GPU support. [v0.53.16](https://github.com/kombifyio/stackKits/releases/tag/v0.53.16) installs the NVIDIA driver on Ubuntu guests. See [Personal AI](/guides/stackkits/use-cases/personal-ai).
+- **Check placement before you apply.** [v0.53.17](https://github.com/kombifyio/stackKits/releases/tag/v0.53.17) adds `stackkit feasibility`. It reports per workload whether it fits your nodes and why. See [`stackkit feasibility`](/stackkits/reference/cli/feasibility).
+- **Import files into Jellyfin.** [v0.53.10](https://github.com/kombifyio/stackKits/releases/tag/v0.53.10) imports your files into Media with a receipt. See [Media](/guides/stackkits/use-cases/media).
+- **Connect your kombify account.** [SpeechKit v0.77.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.2) links SpeechKit to your kombify account, so your plan can switch on cloud voice. [v0.77.3](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.3) adds device pairing.
+- **xAI Grok as a full provider.** [v0.77.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.2) adds xAI Grok as a complete opt-in provider. See [Modes and data paths](/speechkit/modes).
+- **Standalone SpeechKit Box.** [v0.77.6](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.6) documents the standalone Box and its renewable Wi-Fi updater. [v0.77.12](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.12) publishes firmware for every board, including the RLCD 4.2.
+- **Conversation mode controls.** [v0.77.7](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.7) adds conversation mode controls to the Voice Agent. See [Voice Agent](/speechkit/voice-agent-guide).
+
+### Updates
+
+- **Early Access channel name.** [StackKits v0.54.6](https://github.com/kombifyio/stackKits/releases/tag/v0.54.6) names the opt-in channel `early-access`. Run `stackkit channel set early-access` to follow it. See [`stackkit channel`](/stackkits/reference/cli/channel).
+- **Restore through Coolify and Komodo.** [v0.53.11](https://github.com/kombifyio/stackKits/releases/tag/v0.53.11) restores Photos, Files, and Vault through Coolify and Komodo. [v0.53.13](https://github.com/kombifyio/stackKits/releases/tag/v0.53.13) recovers Marketplace service data you select. See [Back up and restore](/guides/stackkits/back-up-and-restore).
+- **Immich 3.3.4 and Home Assistant 2026.9.4.** [v0.54.5](https://github.com/kombifyio/stackKits/releases/tag/v0.54.5) moves Photos to Immich v3.3.4 and holds back an unreviewed major upgrade. [v0.53.19](https://github.com/kombifyio/stackKits/releases/tag/v0.53.19) pins Home Assistant 2026.9.4.
+- **Safer Cloudreve Files.** [v0.54.5](https://github.com/kombifyio/stackKits/releases/tag/v0.54.5) keeps Cloudreve behind sign-in and limits shares to owners until upstream fixes land.
+- **Stale plans are reported.** [v0.53.10](https://github.com/kombifyio/stackKits/releases/tag/v0.53.10) reports a plan from an older version as stale instead of failing.
+- **Voice Agent answers sooner.** [SpeechKit v0.77.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.10) speaks registered-agent answers sentence by sentence, with the disclosure first. [v0.77.12](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.12) recognizes your speech while you talk.
+- **Multilingual by default.** [v0.77.7](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.7) sets fresh installs to multilingual dictation. See [Hotkeys, microphone and language](/speechkit/hotkeys-microphone-language).
+- **Self-hosted server hardening.** [v0.77.3](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.3) keeps credentials out of startup notes and sets secure cookies on HTTPS. [v0.77.9](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.9) keeps the operator page private unless you opt in.
+
+### Bug fixes
+
+- **Upgrades recover.** [StackKits v0.54.3](https://github.com/kombifyio/stackKits/releases/tag/v0.54.3) and [v0.54.5](https://github.com/kombifyio/stackKits/releases/tag/v0.54.5) recover a prior release with its own verified tooling.
+- **Network fixes.** [v0.54.5](https://github.com/kombifyio/stackKits/releases/tag/v0.54.5) fixes the LAN DNS resolver on arm64 hosts and keeps the WireGuard interface up after a reboot.
+- **Clearer restores.** [v0.53.10](https://github.com/kombifyio/stackKits/releases/tag/v0.53.10) names the step of a failed restore, and [v0.53.11](https://github.com/kombifyio/stackKits/releases/tag/v0.53.11) activates exactly the volumes the restore staged.
+- **Sign-in and invites.** [v0.53.13](https://github.com/kombifyio/stackKits/releases/tag/v0.53.13) fixes Audiobookshelf sign-in through PocketID. [v0.53.14](https://github.com/kombifyio/stackKits/releases/tag/v0.53.14) re-issues the setup link when you re-send a household invite.
+- **Removal and certificates.** [v0.54.7](https://github.com/kombifyio/stackKits/releases/tag/v0.54.7) removes the Basement core cleanly, and [v0.54.6](https://github.com/kombifyio/stackKits/releases/tag/v0.54.6) serves a managed kombify.me standalone Cloud core with its origin certificate.
+- **Native Voice Agent voice.** [SpeechKit v0.77.9](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.9) speaks your session language's native voice. Sessions without tools know the local time and no longer announce checks they cannot do.
+- **Cloud sessions stay signed in.** [v0.77.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.2) keeps your session through token refreshes and renews it before voice sessions.
+
+</Update>
+
 <Update label="2026-10-16" description="Oct 9 – Oct 16">
 
 ## StackKits moves Coolify workloads between servers and adds an Early Access channel; SpeechKit adds Grok Voice
