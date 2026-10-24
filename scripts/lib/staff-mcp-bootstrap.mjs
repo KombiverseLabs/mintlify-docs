@@ -49,7 +49,8 @@ export async function checkStaffMcpSession({ check, session, source, install = f
 
 // Obtains the owning installer; registration, SDK policy and actual host proof
 // remain in Plugins. No provider credential/config is returned by this adapter.
-export async function prepareStaffMcp({ root, host, checkout, credentialSource, githubSession, install = false, run = spawnSync, env = process.env } = {}) {
+export async function prepareStaffMcp({ root, host, checkout, credentialSource, githubSession, install = false, inspectOnly = false, run = spawnSync, env = process.env } = {}) {
+  if (inspectOnly && install) return { status: 'pending', code: 'mcp_inspection_cannot_install' };
   if (env.GITHUB_ACTIONS === 'true') return { status: 'not-required', code: 'mcp_staff_host_not_ci' };
   const selected = host ?? (env.CODEX_THREAD_ID ? 'codex' : undefined);
   if (selected !== 'codex') return { status: 'pending', code: selected ? 'mcp_selected_host_unsupported' : 'mcp_host_selection_pending' };
@@ -84,6 +85,9 @@ export async function prepareStaffMcp({ root, host, checkout, credentialSource, 
   const dirty = git(['status', '--porcelain', '--', ...sourcePaths]);
   if (dirty.status !== 0 || dirty.stdout.trim()) return pending('mcp_plugins_source_unpublished');
   if (sourcePaths.some(p => !existsSync(join(source, p)))) return pending('mcp_plugins_bootstrap_adapter_unavailable');
+  // The native broker verifies execution by renewing credentials. Inspection
+  // must not invoke that probe or load a broker source that may be persisted.
+  if (inspectOnly) return { ...pending('mcp_execution_unverified'), repair_command: 'node scripts/kombify-bootstrap.mjs mcp --mcp-host codex --mcp-credential-source github-session --install' };
   let sessionSource, session;
   if (credentialSource === 'github-session') {
     try {

@@ -24,6 +24,7 @@
 //
 //   node scripts/kombify-bootstrap.mjs            # set up + verify, exit 1 on a gap
 //   node scripts/kombify-bootstrap.mjs --hook     # same, never fails, no broker dispatch
+//   node scripts/kombify-bootstrap.mjs --check    # inspect without configuration writes or credential renewal
 //   node scripts/kombify-bootstrap.mjs --install  # also pnpm install --frozen-lockfile
 //                                                 # (no token at all where packages are vendored, §6d)
 //   node scripts/kombify-bootstrap.mjs run -- <cmd...>   # cmd with the repo's Doppler secrets
@@ -48,6 +49,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { prepareAgentHome } from './lib/agent-home-bootstrap.mjs';
 import { prepareStaffMcp } from './lib/staff-mcp-bootstrap.mjs';
+import { ENV_GIT_HELPER, hostGithubTokens } from './lib/github-host-identity.mjs';
 
 const SELF = fileURLToPath(import.meta.url);
 export const ROOT = resolve(dirname(SELF), '..');
@@ -101,7 +103,7 @@ function cliToken(root) {
   return token ? { token } : {};
 }
 
-export async function loadBroker({ qualified = false } = {}) {
+export async function loadBroker({ qualified = false, readOnly = false } = {}) {
   if (qualified) {
     const git = args => spawnSync('git', ['-C', ROOT, ...args], { encoding: 'utf8', windowsHide: true, timeout: 15_000, stdio: ['ignore', 'pipe', 'pipe'] });
     const remote = git(['remote', 'get-url', 'origin']);
@@ -122,6 +124,14 @@ export async function loadBroker({ qualified = false } = {}) {
     const data = Buffer.from(bytes ?? '');
     if (!/^[0-9a-f]{40}$/.test(revision ?? '') || createHash('sha1').update(`blob ${data.length}\0`).update(data).digest('hex') !== blob || !bytes.includes('export async function login')) throw new Error('mcp_github_session_source_unverified');
     const path = join(homedir(), '.kombify', 'cloud-doppler-session.mjs');
+    if (readOnly) {
+      const local = join(ROOT, BROKER_FILE);
+      const held = [local, path].find(candidate => existsSync(candidate) && readFileSync(candidate).equals(data));
+      if (!held) throw new Error('mcp_github_session_source_inspection_pending');
+      const module = await import(`${pathToFileURL(held).href}?source=${revision}`);
+      if (typeof module.readCache !== 'function' || typeof module.login !== 'function') throw new Error('mcp_github_session_source_unverified');
+      return { ...module, source: { repository: BROKER_REPO, revision, git_blob: blob, sha256: createHash('sha256').update(data).digest('hex'), path: held } };
+    }
     mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
     writeFileSync(path, data, { mode: 0o600 });
     const module = await import(`${pathToFileURL(path).href}?source=${revision}`);
@@ -132,6 +142,10 @@ export async function loadBroker({ qualified = false } = {}) {
   if (existsSync(local)) return import(pathToFileURL(local).href);
   const cached = join(homedir(), '.kombify', 'cloud-doppler-session.mjs');
   const fresh = existsSync(cached) && Date.now() - statSync(cached).mtimeMs < BROKER_MAX_AGE_MS;
+  if (readOnly) {
+    if (!fresh) throw new Error('broker source is absent or stale; run bootstrap to repair');
+    return import(pathToFileURL(cached).href);
+  }
   if (!fresh) {
     const result = spawnSync('gh', ['api', `repos/${BROKER_REPO}/contents/${BROKER_FILE}`, '-H', 'Accept: application/vnd.github.raw'], { encoding: 'utf8' });
     if (result.status !== 0 || !result.stdout.includes('export async function login')) {
@@ -148,11 +162,46 @@ const AGENT_HOME_REPO = 'Soulcreek/agent-home';
 const OWNER_RULES_PATH = 'standards/rules.md';
 const OWNER_RULES_CACHE = join(homedir(), '.kombify', 'owner-rules.md');
 
+const authFailure = (result) => /auth|credential|Invalid username|could not read Username|Bad credentials|\b40[13]\b|denied/i.test(String(result.stderr ?? ''));
+
+// Non-interactive fast-forward (A4, 2026-10-16): each host identity in order
+// (env token, gh login, Doppler custody PAT) through an env-only credential
+// helper, so a stale credential-manager entry or a revoked gh login neither
+// fails the session start nor opens a sign-in prompt. Fetch then merge the
+// tracking ref: `git pull` merges FETCH_HEAD, which a concurrent session's
+// fetch can leave holding several branches ("multiple branches").
+export function fastForwardAgentHome(root, { run = spawnSync, env = process.env } = {}) {
+  const base = { ...env, GIT_TERMINAL_PROMPT: '0', GCM_INTERACTIVE: 'never', GH_PROMPT_DISABLED: '1' };
+  const git = (config, args, extra = {}) => run('git', ['-C', root, ...config, ...args], { encoding: 'utf8', timeout: 30_000, windowsHide: true, env: { ...base, ...extra } });
+  const pull = (config, extra = {}) => {
+    const fetched = git(config, ['fetch', '--quiet', 'origin', 'main'], extra);
+    return fetched.status === 0 ? git([], ['merge', '--ff-only', '--quiet', 'origin/main']) : fetched;
+  };
+  let last;
+  for (const identity of hostGithubTokens({ env, run })) {
+    last = pull(['-c', 'credential.helper=', '-c', `credential.helper=${ENV_GIT_HELPER}`], { KOMBIFY_GIT_TOKEN: identity.token });
+    if (last.status === 0) return { ok: true, source: identity.source };
+    if (!authFailure(last)) break;
+  }
+  last ??= pull([]);
+  return { ok: last.status === 0, source: 'git-default', reason: String(last.stderr ?? '').trim().split('\n')[0] };
+}
+
+// gh with the first host identity GitHub accepts; a revoked gh login is skipped.
+function ghWithHostIdentity(args, { run, env }) {
+  let last;
+  for (const identity of hostGithubTokens({ env, run })) {
+    last = run('gh', args, { encoding: 'utf8', timeout: 20_000, env: { ...env, GH_TOKEN: identity.token, GH_PROMPT_DISABLED: '1' } });
+    if (last.status === 0 || !authFailure(last)) return last;
+  }
+  return last ?? run('gh', args, { encoding: 'utf8', timeout: 20_000 });
+}
+
 // The owner's cross-project rules (AGENTS.md "Owner Rules") for every session
 // on every host. Keeps this device's Agent Home checkout current (fast-forward
 // only, on a clean main); a checkout off main or with edits is reported, never
 // moved, and the rules then come from GitHub, else from the last cached copy.
-export function ownerRules({ home = homedir(), run = spawnSync } = {}) {
+export function ownerRules({ home = homedir(), run = spawnSync, env = process.env } = {}) {
   const notes = [];
   let root = '';
   try { root = JSON.parse(readFileSync(join(home, '.agents', 'agent-home', 'state.json'), 'utf8')).repo_root ?? ''; } catch { /* no local install */ }
@@ -161,15 +210,15 @@ export function ownerRules({ home = homedir(), run = spawnSync } = {}) {
     const branch = git('rev-parse', '--abbrev-ref', 'HEAD').stdout?.trim();
     const dirty = git('status', '--porcelain', '--untracked-files=no').stdout?.trim();
     if (branch === 'main' && !dirty) {
-      const pull = git('pull', '--ff-only', '--quiet');
-      if (pull.status !== 0) notes.push(`agent-home ${root}: fast-forward failed (${String(pull.stderr ?? '').trim().split('\n')[0]})`);
+      const pull = fastForwardAgentHome(root, { run, env });
+      if (!pull.ok) notes.push(`agent-home ${root}: fast-forward failed (${pull.reason})`);
       const local = join(root, OWNER_RULES_PATH);
       if (existsSync(local)) return { text: readFileSync(local, 'utf8'), source: `${root}@${git('rev-parse', '--short', 'HEAD').stdout?.trim()}`, notes };
     } else {
       notes.push(`agent-home ${root} is ${branch === 'main' ? 'modified' : `on ${branch}`}: save that work to its own branch and return the checkout to main`);
     }
   }
-  const fetched = run('gh', ['api', `repos/${AGENT_HOME_REPO}/contents/${OWNER_RULES_PATH}`, '-H', 'Accept: application/vnd.github.raw'], { encoding: 'utf8', timeout: 20_000 });
+  const fetched = ghWithHostIdentity(['api', `repos/${AGENT_HOME_REPO}/contents/${OWNER_RULES_PATH}`, '-H', 'Accept: application/vnd.github.raw'], { run, env });
   if (fetched.status === 0 && String(fetched.stdout).startsWith('# Owner rules')) {
     mkdirSync(dirname(OWNER_RULES_CACHE), { recursive: true, mode: 0o700 });
     writeFileSync(OWNER_RULES_CACHE, fetched.stdout, { mode: 0o600 });
@@ -206,7 +255,7 @@ function ghLogin() {
 // never starts a broker run; the first command that needs secrets does.
 // The GitHub-OIDC broker serves every host whose gh acts as an owner identity,
 // so a fresh device needs only its GitHub sign-in, never a Doppler login.
-export async function resolveDoppler({ env = process.env, root = ROOT, dispatch = true, interactive = false, cli = cliToken, broker = loadBroker, gh = ghLogin } = {}) {
+export async function resolveDoppler({ env = process.env, root = ROOT, dispatch = true, interactive = false, readOnly = false, cli = cliToken, broker = loadBroker, gh = ghLogin } = {}) {
   if (env.DOPPLER_TOKEN) return { source: 'env', token: env.DOPPLER_TOKEN };
   const fromCli = cli(root);
   if (fromCli.token) return { source: 'cli', token: fromCli.token };
@@ -218,10 +267,10 @@ export async function resolveDoppler({ env = process.env, root = ROOT, dispatch 
   if (remote || BROKER_ACTORS.includes(gh())) {
     const source = remote ? 'cloud-broker' : 'github-broker';
     try {
-      const mod = await broker();
+      const mod = await broker({ readOnly });
       const cached = mod.readCache?.();
       if (cached) return { source, token: cached.token };
-      if (!dispatch) return { source, pending: true };
+      if (readOnly || !dispatch) return { source, pending: true };
       const record = await mod.login();
       return { source, token: record.token };
     } catch (error) {
@@ -229,7 +278,7 @@ export async function resolveDoppler({ env = process.env, root = ROOT, dispatch 
       brokerError = `; GitHub broker failed: ${error.message}`;
     }
   }
-  if (interactive && !fromCli.missing) {
+  if (!readOnly && interactive && !fromCli.missing) {
     spawnSync('doppler', ['login', '--scope', root], { stdio: 'inherit' });
     const after = cli(root);
     if (after.token) return { source: 'cli', token: after.token };
@@ -278,18 +327,42 @@ async function packagesToken(env, access) {
   return { source: `doppler:${PACKAGES_SECRET.project}/${PACKAGES_SECRET.config}`, token };
 }
 
-function configureGo({ required = false } = {}) {
-  const go = spawnSync('go', ['env', '-w', `GOPRIVATE=${PRIVATE_GO}`, `GONOSUMDB=${PRIVATE_GO}`], { encoding: 'utf8' });
-  console.log(`KOMBIFY_BOOTSTRAP_CAPABILITY ${JSON.stringify({ name: 'go', required, status: go.error ? 'pending' : go.status === 0 ? 'ready' : 'failed', errorCode: go.error?.code })}`);
-  if (go.error) return required ? `Go is required by the selected task (${go.error.code ?? 'unavailable'})` : null;
-  return go.status === 0 || !required ? null : 'go env -w failed for the selected Go task';
+// Private modules this repository's go.mod requires (none outside a Go repository).
+export function privateGoModules(goMod) {
+  // Comments and the repository's own module line name nothing to fetch.
+  const requires = goMod.split('\n').map(line => line.replace(/\/\/.*$/, '')).filter(line => !/^\s*module\s/.test(line)).join('\n');
+  return [...new Set([...requires.matchAll(/github\.com\/KombiverseLabs\/([A-Za-z0-9_.-]+)/g)].map(match => match[1]))].sort();
 }
 
-function configureNpm(env) {
+// A cloud session reaches a private module only when its repository is
+// attached to the session; probe each instead of reporting Go ready.
+function unreachableGoModules(env, cwd = process.cwd()) {
+  if (env.CLAUDE_CODE_REMOTE !== 'true' || !existsSync(join(cwd, 'go.mod'))) return [];
+  return privateGoModules(readFileSync(join(cwd, 'go.mod'), 'utf8')).filter(repo => spawnSync('git',
+    ['ls-remote', '--exit-code', `https://github.com/KombiverseLabs/${repo}`, 'HEAD'],
+    { encoding: 'utf8', timeout: 30000, env: { ...env, GIT_TERMINAL_PROMPT: '0' } }).status !== 0);
+}
+
+function configureGo({ required = false, env = process.env, check = false } = {}) {
+  const go = spawnSync('go', check ? ['env', 'GOPRIVATE', 'GONOSUMDB'] : ['env', '-w', `GOPRIVATE=${PRIVATE_GO}`, `GONOSUMDB=${PRIVATE_GO}`], { encoding: 'utf8', env });
+  const drift = check && !go.error && go.status === 0 && go.stdout.trim().split(/\r?\n/).some(value => value !== PRIVATE_GO);
+  const missing = go.error || go.status !== 0 ? [] : unreachableGoModules(env);
+  const status = go.error ? 'pending' : go.status !== 0 ? 'failed' : missing.length || drift ? 'pending' : 'ready';
+  console.log(`KOMBIFY_BOOTSTRAP_CAPABILITY ${JSON.stringify({ name: 'go', required, status, errorCode: go.error?.code ?? (missing.length ? 'private_module_not_attached' : undefined), ...(missing.length ? { attach: missing.map(repo => `KombiverseLabs/${repo}`) } : {}) })}`);
+  if (go.error) return required ? `Go is required by the selected task (${go.error.code ?? 'unavailable'})` : null;
+  if (go.status !== 0) return required ? `go env${check ? '' : ' -w'} failed for the selected Go task` : null;
+  if (drift) return 'Go private module configuration needs repair: node scripts/kombify-bootstrap.mjs';
+  return missing.length && required ? `private Go modules are not attached to this cloud session: add_repo ${missing.map(repo => `KombiverseLabs/${repo}`).join(', ')}` : null;
+}
+
+function configureNpm(env, { check = false } = {}) {
   const path = env.NPM_CONFIG_USERCONFIG || join(homedir(), '.npmrc');
   const current = existsSync(path) ? readFileSync(path, 'utf8') : '';
   const next = mergeNpmrc(current);
-  if (next !== current) writeFileSync(path, next, { mode: 0o600 });
+  if (next !== current) {
+    if (check) return 'npm scope configuration needs repair: node scripts/kombify-bootstrap.mjs';
+    writeFileSync(path, next, { mode: 0o600 });
+  }
 }
 
 function runWith(cmd, extraEnv) {
@@ -318,13 +391,15 @@ export async function main(argv, env = process.env) {
   const [command] = argv;
   const cmd = sep >= 0 ? argv.slice(sep + 1) : [];
   const own = sep >= 0 ? argv.slice(0, sep) : argv;
+  const check = own.includes('--check');
+  if (check && (own.includes('--install') || own.includes('--hook') || ['run', 'packages', 'rules'].includes(command))) throw new Error('--check cannot be combined with an installing or executing command');
   const scope = resolveScope({ argv: own });
   const option = (flag) => { const index = own.indexOf(flag); return index >= 0 ? own[index + 1] : undefined; };
   const personalContext = (install) => prepareAgentHome({
     home: option('--home'), checkout: option('--agent-home'), agents: option('--agents'), device: option('--device'), install,
   });
 
-  const staffMcp = install => prepareStaffMcp({ root: ROOT, host: option('--mcp-host'), checkout: option('--plugins-source'), credentialSource: own.includes('--mcp-credential-source') ? option('--mcp-credential-source') ?? '' : undefined, githubSession: () => loadBroker({ qualified: true }), install: install && !own.includes('--hook'), env });
+  const staffMcp = install => prepareStaffMcp({ root: ROOT, host: option('--mcp-host'), checkout: option('--plugins-source'), credentialSource: own.includes('--mcp-credential-source') ? option('--mcp-credential-source') ?? '' : undefined, githubSession: () => loadBroker({ qualified: true, readOnly: check }), install: install && !own.includes('--hook'), inspectOnly: check, env });
   if (command === 'mcp') {
     const capability = await staffMcp(own.includes('--install'));
     console.log(`KOMBIFY_BOOTSTRAP_CAPABILITY ${JSON.stringify({ name: 'staff-mcp', ...capability })}`);
@@ -355,10 +430,11 @@ export async function main(argv, env = process.env) {
 
   const hook = own.includes('--hook');
   const gaps = [];
-  const goGap = configureGo({ required: own.includes('--require-go') });
+  const goGap = configureGo({ required: own.includes('--require-go'), env, check });
   if (goGap) gaps.push(`go: ${goGap}`);
-  configureNpm(env);
-  const access = await resolveDoppler({ env, dispatch: !hook, interactive: !hook && process.stdin.isTTY }).catch((error) => ({ gap: error.message }));
+  const npmGap = configureNpm(env, { check });
+  if (npmGap) gaps.push(`npm: ${npmGap}`);
+  const access = await resolveDoppler({ env, dispatch: !hook && !check, interactive: !hook && !check && process.stdin.isTTY, readOnly: check }).catch((error) => ({ gap: error.message }));
   if (access.gap) gaps.push(`doppler: ${access.gap}`);
   if (access.token && scope) {
     const gap = await verifyScope(access.token, scope).catch((error) => `Doppler not reachable (${error.cause?.code ?? error.message})`);

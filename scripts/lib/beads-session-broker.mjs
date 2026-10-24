@@ -16,14 +16,26 @@ const FIRST_POLL_MS = 15_000;
 const POLL_MS = 15_000;
 const TIMEOUT_MS = 4 * 60_000;
 
-const ghApi = (args, input) => execFileSync('gh', ['api', ...args], {
-  encoding: 'utf8', input, stdio: ['pipe', 'pipe', 'pipe'], maxBuffer: 8 * 1024 * 1024, timeout: 30_000,
-});
+// gh shares one REST budget per identity. A spent budget is reported as throttling
+// with its reset time, never as a missing login (`gh api rate_limit` is free).
+export function throttledError(error, read = () => execFileSync('gh', ['api', 'rate_limit'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], timeout: 15_000 })) {
+  if (!/rate limit/i.test(String(error?.stderr ?? '') + String(error?.message ?? ''))) return null;
+  let reset = 'its reset';
+  try { reset = new Date(JSON.parse(read()).resources.core.reset * 1000).toISOString(); } catch { /* reset unknown */ }
+  return new Error(`GitHub REST budget of this gh identity is exhausted (throttled); retry after ${reset}. The gh login is valid: do not sign in again`);
+}
+
+const ghApi = (args, input) => {
+  try {
+    return execFileSync('gh', ['api', ...args], { encoding: 'utf8', input, stdio: ['pipe', 'pipe', 'pipe'], maxBuffer: 8 * 1024 * 1024, timeout: 30_000 });
+  } catch (error) { throw throttledError(error) ?? error; }
+};
 
 /** A host may broker when gh reaches GitHub and no Actions OIDC is present. */
 export function brokerAvailable(env = process.env, gh = ghApi) {
   if (env.BEADS_CLOUDFLARE_BROKER === '0' || env.ACTIONS_ID_TOKEN_REQUEST_URL) return false;
-  try { return Boolean(JSON.parse(gh(['user'])).login); } catch { return false; }
+  // A throttled login is still a login: broker, and let the dispatch report the reset.
+  try { return Boolean(JSON.parse(gh(['user'])).login); } catch (error) { return /throttled/.test(String(error?.message)); }
 }
 
 // Annotation: wrapped.iv.ciphertext.mac (base64). `wrapped` is RSA-OAEP-SHA256
