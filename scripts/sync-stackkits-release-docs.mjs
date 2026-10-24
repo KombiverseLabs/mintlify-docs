@@ -603,9 +603,10 @@ function validateRuntimeProjection(document, authority) {
     if (retained && phases.size !== RETAINED_FILES_PHASES.length) throw new Error('incomplete retained operations')
     if (row.applicability === 'current') {
       if (binding.operationScope !== row.operationScope || binding.requestedRelease !== row.testedRelease || !binding.runtimeIdentity || !row.runtimeIdentity
+        || (retained && ['candidateDigest', 'indexSha256', 'consumerSha'].some(key => !binding[key] || binding[key] !== row[key]))
         || ['sourceCommit', 'producerCommit', 'artifactSha256'].some(key => !binding[key] || binding[key] !== row[key])
         || BINDING_FIELDS.filter(key => !['scope', 'requestedRelease', 'runtimeIdentity', 'requiredPhases'].includes(key)).some(key => binding[key] !== undefined && binding[key] !== row[key])
-        || (binding.scope === 'test-window-candidate' && ['indexSha256', 'catalogSha256', 'scenarioDefinitionsDigest', 'candidateDigest', 'consumerSha'].some(key => !binding[key] || binding[key] !== row[key]))
+        || (!retained && binding.scope === 'test-window-candidate' && ['indexSha256', 'catalogSha256', 'scenarioDefinitionsDigest', 'candidateDigest', 'consumerSha'].some(key => !binding[key] || binding[key] !== row[key]))
         || JSON.stringify(normalize(binding.runtimeIdentity)) !== JSON.stringify(normalize(row.runtimeIdentity))) throw new Error('unbound current observation')
     } else if (row.currentResult !== 'NOT_RUN') throw new Error('historical observation cannot qualify current release')
     if (row.currentResult === 'PASS') {
