@@ -459,8 +459,8 @@ function validateEvidenceRow(row, identity, label) {
  * the release the runs cover, which trails the newest release until its runs
  * land. A projection bound to a release newer than the synced tag is rejected.
  */
-export function validateEvidence(document, tag) {
-  keys(document, ['schemaVersion', 'stackkitsVersion', 'generatedAt', 'results', 'virtualization', 'applications', 'environments'], 'evidence')
+export function validateEvidence(document, tag, authority = {}) {
+  keys(document, ['schemaVersion', 'stackkitsVersion', 'generatedAt', 'results', 'virtualization', 'applications', 'environments', 'requestedStackkitsVersion', 'testedStackkitsVersion', 'referenceBinding', 'currentResult', 'currentPassCount', 'runtimeObservations', 'windowCoverage'], 'evidence')
   if (document.schemaVersion !== 3) throw new Error(`evidence schemaVersion=${document.schemaVersion}, want 3`)
   string(document.stackkitsVersion, 'evidence.stackkitsVersion', EVIDENCE_RELEASE)
   if (compareTags(document.stackkitsVersion, tag) > 0) throw new Error(`evidence is bound to ${document.stackkitsVersion}, newer than ${tag}`)
@@ -494,7 +494,135 @@ export function validateEvidence(document, tag) {
     string(row.environment, 'evidence environment id', EVIDENCE_SLUG)
     string(row.name, 'evidence environment name', /^[^<>|\n]{1,80}$/)
   }
+  validateRuntimeProjection(document, authority)
+  if (document.windowCoverage !== undefined) validateWindowCoverage(document.windowCoverage, authority)
   return document
+}
+
+function validateWindowCoverage(value, authority) {
+  keys(value, ['reportSha256', 'candidateDigest', 'generatedAt', 'result', 'declared', 'passed', 'pending', 'failed', 'blocked', 'notRun', 'obligations'], 'window coverage')
+  for (const key of ['reportSha256', 'candidateDigest']) string(value[key], 'coverage digest', /^[a-f0-9]{64}$/)
+  string(value.generatedAt, 'coverage time', /^\d{4}-\d{2}-\d{2}T[0-9:.]+Z$/)
+  const results = ['passed', 'pending', 'failed', 'blocked', 'not-run']
+  if (!results.includes(value.result) || !Array.isArray(value.obligations) || !value.obligations.length) throw new Error('invalid coverage')
+  const suites = new Set()
+  for (const row of value.obligations) {
+    keys(row, ['suite', 'result'], 'coverage obligation')
+    const knownSuites = authority.catalog?.catalog.useCases.flatMap(useCase => { const prefix = `stackkits-standalone-${useCase.id}-restore`; return [prefix, ...(authority.compatibility?.compatibility.os ?? []).map(os => `${prefix}-${os.id}`)] }) ?? []
+    if (!knownSuites.includes(row.suite)) throw new Error('coverage suite not in released catalog')
+    if (!results.includes(row.result) || suites.has(row.suite)) throw new Error('invalid coverage obligation')
+    suites.add(row.suite)
+  }
+  if (value.declared !== value.obligations.length || results.some(result => value[result === 'not-run' ? 'notRun' : result] !== value.obligations.filter(row => row.result === result).length)) throw new Error('coverage count mismatch')
+}
+
+const OBSERVATION_FIELDS = ['schemaVersion', 'id', 'subject', 'originalOutcome', 'receiptSha256', 'operations', 'testedRelease', 'sourceCommit', 'producerCommit', 'controllerSourceCommit', 'artifactSha256', 'producerArtifactSha256', 'indexSha256', 'evidenceIndexSha256', 'catalogSha256', 'scenarioDefinitionsDigest', 'candidateDigest', 'consumerSha', 'suiteBindingSha256', 'suiteCandidateDigest', 'githubNativeArchiveSha256', 'githubSuiteArchiveSha256', 'githubMetadataSha256', 'windowReportSha256', 'suiteBindingState', 'observedAt', 'runtimeIdentity', 'capacity', 'executionState', 'applicability', 'currentResult', 'reasonCodes']
+const BINDING_FIELDS = ['scope', 'requestedRelease', 'sourceCommit', 'producerCommit', 'artifactSha256', 'indexSha256', 'catalogSha256', 'scenarioDefinitionsDigest', 'candidateDigest', 'consumerSha', 'runtimeIdentity', 'requiredPhases']
+const OBSERVATION_PHASES = ['install', 'init', 'generate', 'apply', 'verify', 'backup', 'restore', 'owner-setup', 'enrollment', 'connected', 'independent-readback', 'cleanup']
+const OBSERVATION_RESULTS = ['PASS', 'FAIL', 'PARTIAL', 'NOT_RUN']
+
+function validateRuntimeIdentity(value, document, authority) {
+  keys(value, ['family', 'distribution', 'version', 'arch', 'environment'], 'runtime identity')
+  const identities = document.results.map(row => row.os)
+  const os = authority.compatibility?.compatibility.os ?? []
+  const unknown = value.distribution === 'unknown' && value.version === 'unknown' && value.arch === 'unknown'
+  if (!identities.some(identity => identity.family === value.family) ||
+      (!unknown && (!['amd64', 'arm64'].includes(value.arch) || !identities.some(identity => identity.family === value.family && identity.distribution === value.distribution && identity.version === value.version) ||
+        !os.some(row => row.id === `${value.distribution}-${value.version}` && row.version === value.version)))) throw new Error('runtime OS not in released compatibility inputs')
+  const environments = new Set(['depot-vm', 'disposable-vm', 'retained-vm', 'physical-host', ...(document.environments ?? []).map(row => row.environment)])
+  if (!environments.has(value.environment)) throw new Error('invalid runtime environment')
+}
+
+// This consumer validates the publisher's projection. It never turns observation
+// time, an original PASS, or a catalog declaration into current acceptance.
+function validateRuntimeProjection(document, authority) {
+  const useCases = new Set(authority.catalog?.catalog.useCases.map(row => row.id) ?? [])
+  const validPhase = name => OBSERVATION_PHASES.includes(name) || [...useCases].some(id => name === `setup-${id}` || name === `${id}-restart`)
+  const fields = ['requestedStackkitsVersion', 'testedStackkitsVersion', 'referenceBinding', 'currentResult', 'currentPassCount', 'runtimeObservations']
+  if (fields.every(field => document[field] === undefined)) return
+  if (fields.some(field => document[field] === undefined)) throw new Error('incomplete runtime projection')
+  string(document.requestedStackkitsVersion, 'requested release', EVIDENCE_RELEASE)
+  if (document.testedStackkitsVersion !== null) string(document.testedStackkitsVersion, 'tested release', EVIDENCE_RELEASE)
+  const binding = document.referenceBinding
+  keys(binding, BINDING_FIELDS, 'reference binding')
+  if (!['product-artifact', 'test-window-candidate'].includes(binding.scope)) throw new Error('invalid reference scope')
+  if (binding.requestedRelease !== document.requestedStackkitsVersion) throw new Error('reference release mismatch')
+  for (const key of ['sourceCommit', 'producerCommit', 'consumerSha']) if (binding[key] !== undefined) string(binding[key], 'reference source', /^[a-f0-9]{40}$/)
+  for (const key of ['artifactSha256', 'indexSha256', 'catalogSha256', 'scenarioDefinitionsDigest', 'candidateDigest']) if (binding[key] !== undefined) string(binding[key], 'reference digest', /^[a-f0-9]{64}$/)
+  if (binding.runtimeIdentity !== undefined) validateRuntimeIdentity(binding.runtimeIdentity, document, authority)
+  if (binding.requiredPhases !== undefined && (!Array.isArray(binding.requiredPhases) || !binding.requiredPhases.length || binding.requiredPhases.some(phase => !validPhase(phase)))) throw new Error('invalid required phases')
+  if (!Array.isArray(document.runtimeObservations) || !OBSERVATION_RESULTS.includes(document.currentResult)) throw new Error('invalid runtime projection')
+  const ids = new Set()
+  for (const row of document.runtimeObservations) {
+    keys(row, OBSERVATION_FIELDS, 'runtime observation')
+    if (row.schemaVersion !== 'stackkits.runtime-observation/v1') throw new Error('invalid observation schema')
+    string(row.receiptSha256, 'receipt digest', /^[a-f0-9]{64}$/)
+    const archiveBindings = ['githubNativeArchiveSha256', 'githubSuiteArchiveSha256', 'githubMetadataSha256', 'windowReportSha256']
+    const identity = row.suiteBindingState === 'artifact-verified' ? [row.receiptSha256, row.suiteBindingSha256, ...archiveBindings.map(key => row[key])].join(':') : row.suiteBindingSha256 ? `${row.receiptSha256}:${row.suiteBindingSha256}` : null
+    const observationDigest = identity ? createHash('sha256').update(identity).digest('hex') : row.receiptSha256
+    if (row.id !== `runtime_${observationDigest}` || ids.has(row.id)) throw new Error('invalid observation identity')
+    ids.add(row.id)
+    keys(row.subject, ['kind', 'product', 'useCase'], 'observation subject')
+    const native = row.subject.kind === 'StackKitUseCase' && row.subject.product === 'stackkits' && useCases.has(row.subject.useCase)
+    const product = row.subject.kind === 'Product' && row.subject.product === 'guard' && row.subject.useCase === undefined
+    if (!native && !product) throw new Error('invalid observation subject')
+    for (const key of ['sourceCommit', 'producerCommit', 'controllerSourceCommit', 'consumerSha']) if (row[key] !== undefined) string(row[key], 'observation source', /^[a-f0-9]{40}$/)
+    for (const key of ['artifactSha256', 'producerArtifactSha256', 'indexSha256', 'evidenceIndexSha256', 'catalogSha256', 'scenarioDefinitionsDigest', 'candidateDigest', 'suiteBindingSha256', 'suiteCandidateDigest', 'githubNativeArchiveSha256', 'githubSuiteArchiveSha256', 'githubMetadataSha256', 'windowReportSha256']) if (row[key] !== undefined) string(row[key], 'observation digest', /^[a-f0-9]{64}$/)
+    if (row.suiteBindingState !== undefined && !['source-only', 'artifact-verified'].includes(row.suiteBindingState)) throw new Error('invalid suite binding')
+    if (row.suiteBindingState === 'artifact-verified' && (archiveBindings.some(key => !row[key]) || !row.candidateDigest || row.candidateDigest !== row.suiteCandidateDigest || row.consumerSha !== row.producerCommit)) throw new Error('incomplete artifact binding')
+    if (row.testedRelease !== undefined) string(row.testedRelease, 'observation release', EVIDENCE_RELEASE)
+    if (row.observedAt !== undefined && !/^\d{4}-\d{2}-\d{2}T[0-9:.]+Z$/.test(row.observedAt)) throw new Error('invalid observation time')
+    if (row.runtimeIdentity !== undefined) validateRuntimeIdentity(row.runtimeIdentity, document, authority)
+    if (row.capacity !== undefined) {
+      keys(row.capacity, ['cpus', 'memoryMiB', 'diskGiB'], 'capacity')
+      if (Object.values(row.capacity).some(value => !Number.isSafeInteger(value) || value <= 0)) throw new Error('invalid capacity')
+    }
+    if (!OBSERVATION_RESULTS.includes(row.originalOutcome) || !OBSERVATION_RESULTS.includes(row.currentResult)
+      || !['passed', 'failed', 'partial', 'not-run'].includes(row.executionState)
+      || !['current', 'historical', 'unbound', 'stale'].includes(row.applicability)
+      || !Array.isArray(row.reasonCodes) || row.reasonCodes.some(code => !['release-mismatch', 'exact-bindings-required', 'reference-binding-mismatch', 'required-phases-incomplete'].includes(code))) throw new Error('invalid observation state')
+    if (!Array.isArray(row.operations)) throw new Error('invalid observation operations')
+    const phases = new Set()
+    for (const operation of row.operations) {
+      keys(operation, ['name', 'status'], 'observation operation')
+      if (!validPhase(operation.name) || phases.has(operation.name) || !['passed', 'failed', 'partial', 'not-run'].includes(operation.status)) throw new Error('invalid observation operation')
+      phases.add(operation.name)
+    }
+    if (row.applicability === 'current') {
+      if (binding.requestedRelease !== row.testedRelease || !binding.runtimeIdentity || !row.runtimeIdentity
+        || ['sourceCommit', 'producerCommit', 'artifactSha256'].some(key => !binding[key] || binding[key] !== row[key])
+        || BINDING_FIELDS.filter(key => !['scope', 'requestedRelease', 'runtimeIdentity', 'requiredPhases'].includes(key)).some(key => binding[key] !== undefined && binding[key] !== row[key])
+        || (binding.scope === 'test-window-candidate' && ['indexSha256', 'catalogSha256', 'scenarioDefinitionsDigest', 'candidateDigest', 'consumerSha'].some(key => !binding[key] || binding[key] !== row[key]))
+        || JSON.stringify(normalize(binding.runtimeIdentity)) !== JSON.stringify(normalize(row.runtimeIdentity))) throw new Error('unbound current observation')
+    } else if (row.currentResult !== 'NOT_RUN') throw new Error('historical observation cannot qualify current release')
+    if (row.currentResult === 'PASS') {
+      const mandatory = native ? ['install', 'init', 'generate', 'apply', `setup-${row.subject.useCase}`, 'verify', 'backup', 'restore', 'cleanup'] : ['owner-setup', 'install', 'enrollment', 'connected', 'independent-readback', 'cleanup']
+      if (row.originalOutcome !== 'PASS' || row.executionState !== 'passed' || [...mandatory, ...(binding.requiredPhases ?? [])].some(name => !row.operations.some(op => op.name === name && op.status === 'passed'))) throw new Error('incomplete current observation')
+    }
+  }
+  if (document.currentPassCount !== document.runtimeObservations.filter(row => row.currentResult === 'PASS').length || (document.currentResult === 'PASS' && !document.currentPassCount)) throw new Error('invalid current pass count')
+}
+
+function runtimeObservationsMarkdown(release, evidence) {
+  if (!evidence.runtimeObservations?.length) return ''
+  let text = '\n## Recorded product journeys\n\nThese observations preserve the original tested artifacts. They do not establish operating-system or hardware-model support. Fresh virtual-machine flows do not prove retained-state modular changes.\n\n'
+  text += `Requested release: ${md(release.tag)}. Reference scope: ${md(evidence.referenceBinding.scope)}.\n\n`
+  if (evidence.windowCoverage) {
+    const coverage = evidence.windowCoverage
+    text += `Original test window: ${coverage.declared} declared journeys, ${coverage.passed} passed, ${coverage.pending} pending, ${coverage.failed} failed. These are the original window outcomes; pending obligations do not imply a product execution or operating-system support.\n\n`
+    text += '| Original coverage obligation | Original outcome |\n| --- | --- |\n'
+    for (const row of coverage.obligations) text += `| ${md(row.suite)} | ${md(row.result)} |\n`
+    text += '\n'
+  }
+  text += '| Subject | Tested release | Execution | Applicability to requested release | Current result | Verified operations |\n| --- | --- | --- | --- | --- | --- |\n'
+  for (const row of evidence.runtimeObservations) {
+    const requestedMatches = evidence.referenceBinding.requestedRelease === release.tag && evidence.referenceBinding.sourceCommit === release.sourceSha
+    const applicability = requestedMatches ? row.applicability : row.testedRelease && row.testedRelease !== release.tag ? 'historical' : 'unbound'
+    const current = requestedMatches ? row.currentResult : 'NOT_RUN'
+    const subject = row.subject.kind === 'StackKitUseCase' ? row.subject.useCase : 'Selfhost + Guard (virtual machine)'
+    text += `| ${md(subject)} | ${md(row.testedRelease ?? 'unbound')} | ${md(row.executionState)} | ${md(applicability)} | ${md(current)} | ${md(row.operations.filter(operation => operation.status === 'passed').map(operation => operation.name).join(', '))} |\n`
+  }
+  return text
 }
 
 function evidenceNote(row) {
@@ -559,6 +687,7 @@ function renderOperatingSystems(release, compatibility, evidence) {
   // stored projection under data/ keeps them and .mintignore keeps data/ unpublished.
   page += '\n## Hypervisors\n\nStackKits run inside a guest VM on your hypervisor, never on the hypervisor host itself. A status covers that rollout end to end: the guest is created on the hypervisor and the StackKit lifecycle runs inside it. It does not certify a vendor product or a server provider.\n\n'
   page += 'The hypervisor rollouts and their lifecycle evidence for this release are listed on [stackkit.cc/compatibility](https://stackkit.cc/compatibility). Run `stackkit compat` on a host for non-destructive diagnostics and the evidence published for its operating system and hypervisor.\n'
+  page += runtimeObservationsMarkdown(release, evidence)
   return page
 }
 
@@ -680,14 +809,14 @@ function writeExact(target, content) {
 // The newest stored projection not newer than `tag`. Each one lives under the
 // release it is bound to, so a later sync without an incoming asset renders
 // what the last handover delivered even when that release trails `tag`.
-function storedEvidence(releases, tag) {
+function storedEvidence(releases, tag, authority) {
   if (!existsSync(releases)) return null
   const bound = readdirSync(releases)
     .filter(name => EVIDENCE_RELEASE.test(name) && compareTags(name, tag) <= 0 && existsSync(path.join(releases, name, EVIDENCE_ASSET)))
     .sort(compareTags)
     .at(-1)
   if (!bound) return null
-  const document = validateEvidence(JSON.parse(readFileSync(path.join(releases, bound, EVIDENCE_ASSET), 'utf8')), tag)
+  const document = validateEvidence(JSON.parse(readFileSync(path.join(releases, bound, EVIDENCE_ASSET), 'utf8')), tag, authority)
   if (document.stackkitsVersion !== bound) throw new Error(`stored evidence under ${bound} is bound to ${document.stackkitsVersion}`)
   return document
 }
@@ -728,7 +857,7 @@ export function syncRelease({ repoRoot, inputDir, tag }) {
   const synced = readManifests(inputDir, tag)
   const incomingPath = path.join(inputDir, EVIDENCE_ASSET)
   const incomingBytes = existsSync(incomingPath) ? readFileSync(incomingPath, 'utf8') : null
-  const incoming = incomingBytes ? validateEvidence(JSON.parse(incomingBytes), tag) : null
+  const incoming = incomingBytes ? validateEvidence(JSON.parse(incomingBytes), tag, synced) : null
 
   const releases = path.join(repoRoot, 'data', 'stackkits', 'releases')
   for (const [name, bytes] of [[CATALOG_ASSET, synced.catalogBytes], [COMPATIBILITY_ASSET, synced.compatibilityBytes]]) {
@@ -760,7 +889,7 @@ export function syncRelease({ repoRoot, inputDir, tag }) {
   // not newer than it. Rendering from the store, not from the incoming asset,
   // means a sync for an older tag that updates that projection re-renders the
   // pages, and an older incoming projection never displaces a newer stored one.
-  const evidence = storedEvidence(releases, shown.catalog.release.tag)
+  const evidence = storedEvidence(releases, shown.catalog.release.tag, shown)
   const pages = renderPages(shown.catalog, shown.compatibility, evidence, docsRedirects(repoRoot))
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'use-case-catalog.mdx'), pages.useCases)
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'os-compatibility.mdx'), pages.os)
@@ -778,4 +907,11 @@ function main() {
   process.stdout.write(`stackkits_docs_sync: ${result.promoted ? 'promoted' : 'stored'} ${result.catalog.release.tag}; pages show ${result.shownTag}, lifecycle evidence ${result.evidence?.stackkitsVersion ?? 'not published'}\n`)
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main()
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  try { main() }
+  catch {
+    // Public workflow logs must not serialize rejected input or private paths.
+    process.stderr.write('stackkits_docs_sync: rejected release inputs\n')
+    process.exitCode = 1
+  }
+}
