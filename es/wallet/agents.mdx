@@ -1,0 +1,66 @@
+---
+title: "Agentes y Wallet"
+description: "Da a cada agente solo los derechos que necesita para un elemento: usar, leer o gestionar"
+sidebarTitle: "Agentes"
+icon: "robot"
+---
+
+<Note>
+kombify Wallet todavía no se ha publicado. Esta página describe cómo funciona.
+</Note>
+
+Un agente nunca hereda tu acceso. No tiene derechos sobre un elemento hasta que
+se los das, y solo ve los elementos sobre los que tiene algún derecho. Solo tú,
+con tu propia sesión, puedes gestionar tu Wallet. Un agente no puede.
+
+## Dar a un agente acceso a un elemento
+
+1. Abre **Ajustes** y elige **Claves y conexiones**.
+2. En la sección **Wallet**, selecciona **Acceso de agentes** en el elemento.
+3. Activa los derechos que quieras para cada uno de tus agentes.
+
+La lista muestra los agentes que has creado. Cada derecho se concede por
+separado y ninguno implica otro.
+
+| Derecho | Qué puede hacer el agente |
+| --- | --- |
+| **Usar** | Actuar con el valor, por ejemplo en una llamada a una API, sin verlo. Necesita [destinos de uso](/es/wallet/use-only-values). |
+| **Leer** | Ver el propio valor. |
+| **Gestionar** | Gestionar el elemento y sus ajustes. |
+
+Hoy un agente trabaja con un elemento solo mediante **Usar** y **Leer**. Añadir
+elementos, añadir versiones, cambiar ajustes, revocar y eliminar siguen en tus
+manos, tenga el agente los derechos que tenga.
+
+Dos casos que conviene recordar:
+
+- Si el valor de un elemento es de solo uso, **Leer** no se lo muestra a nadie.
+- Si un elemento no tiene destinos de uso, con **Usar** un agente no puede hacer
+  llamadas con él.
+
+En una autoridad de certificación SSH, **Usar** permite al agente solicitar
+certificados de corta duración dentro de la política de firma de la autoridad.
+Los agentes solo reciben certificados de usuario. Consulta
+[Certificados SSH](/es/wallet/ssh-certificates).
+
+## Cuando falta un derecho
+
+Wallet lo rechaza e indica qué derecho falta: usar, leer o gestionar. No se
+entrega nada. El agente tiene que pedir el derecho, y tú puedes concedérselo
+como se describe arriba.
+
+## Quitar un derecho
+
+Desactiva el derecho. Se aplica desde la siguiente operación del agente, y una
+operación que ya estaba permitida dura como máximo alrededor de un minuto. Por
+lo demás, un derecho se mantiene hasta que lo retiras o el agente termina.
+
+## Se cuentan las veces que se muestra
+
+Cada vez que un agente lee un valor, Wallet lo registra y lo cuenta por
+elemento. El elemento muestra entonces un aviso: **Se recomienda rotarlo: el
+valor se ha entregado N veces desde su última versión. Añade una versión nueva
+para sustituirlo.** Una versión nueva reinicia el contador.
+
+Siempre que puedas, prefiere **Usar** a **Leer**. Un agente que usa un valor
+nunca lo tiene en su poder, así que no hay nada que rotar.

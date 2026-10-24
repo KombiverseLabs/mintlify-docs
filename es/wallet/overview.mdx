@@ -1,0 +1,85 @@
+---
+title: "kombify Wallet"
+description: "El único lugar donde kombify guarda tus secretos, inicios de sesión, variables y accesos a servidores"
+sidebarTitle: "Resumen"
+icon: "wallet"
+---
+
+<Warning>
+kombify Wallet todavía no se ha publicado. Estas páginas describen cómo
+funciona para que sepas qué esperar. Hoy todavía no puedes usarla.
+</Warning>
+
+kombify Wallet es el único lugar donde kombify guarda lo que le confías: claves
+de API, inicios de sesión, variables, archivos de configuración y las formas de
+llegar a tus servidores. Tú, tus agentes y los productos de kombify que elijas
+usan estos elementos de la misma manera, y cada uno recibe solo los derechos que
+tú le des.
+
+## Qué guarda
+
+| Elemento | Para qué sirve |
+| --- | --- |
+| **Clave de API, token o certificado** | Un único valor secreto, como la clave de API de un proveedor. |
+| **Inicio de sesión** | Un nombre de usuario y una contraseña de otro servicio, con un secreto opcional para códigos de un solo uso. |
+| **Variable** | Un valor que tus herramientas buscan por nombre, como `DATABASE_URL`. |
+| **Configuración** | Un documento, como un archivo `.env`. |
+| **Acceso a servidor** | Cómo llegar a un servidor: host, usuario y una clave privada SSH o una contraseña. |
+| **Autoridad de certificación SSH** | Firma certificados SSH de corta duración para ti, tus agentes y tus servidores. |
+
+Las cuentas que conectes a otros servicios, por ejemplo mediante OAuth, están
+previstas y llegarán con su propio flujo.
+
+## Cómo protege Wallet lo que guardas
+
+- **Cifrado antes de salir de tu dispositivo.** Tu navegador, o la línea de
+  comandos `kombify-wallet`, cifra un valor en tu dispositivo. Los servicios
+  entre tú y Wallet solo retransmiten datos cifrados, y Wallet guarda únicamente
+  valores cifrados. Las claves que los abren se conservan separadas de los datos
+  almacenados, de modo que una copia de esos datos por sí sola no se puede leer.
+- **Cada uso queda registrado.** Wallet escribe un registro de auditoría antes
+  de entregar o usar un valor, tanto si lo muestras tú, como si lo usa un agente
+  o un producto. Si no puede escribir el registro, no entrega el valor.
+- **Tu acceso con Auth0 protege el acceso.** Llegas a tu Wallet iniciando sesión
+  en tu cuenta de kombify mediante Auth0 en `login.kombify.io`. No hay una
+  segunda contraseña de Wallet. Solo tú, con tu propia sesión, puedes gestionar
+  tu Wallet. Los agentes y las sesiones delegadas no pueden.
+- **Tú das los derechos uno a uno.** Usar un elemento, leer su valor y
+  gestionarlo son derechos distintos. Un agente o un producto nunca hereda los
+  tuyos.
+
+<Note>
+Quien pueda iniciar sesión en tu cuenta de kombify puede abrir tu Wallet como si
+fuera tú. Protege la cuenta con una passkey o con inicio de sesión de varios
+factores.
+</Note>
+
+## Lo que Wallet no puede hacer
+
+Un valor que alguien ya ha visto no se puede recuperar. Si un valor puede haber
+llegado a alguien a quien no debía, añade una versión nueva del elemento para
+sustituirlo.
+
+## Siguientes pasos
+
+<CardGroup cols={2}>
+  <Card title="Secretos, inicios de sesión y variables" icon="key" href="/es/wallet/secrets-and-variables">
+    Añade, muestra, sustituye, revoca y elimina elementos, y asígnalos a un
+    proyecto o a un entorno.
+  </Card>
+  <Card title="Valores de solo uso" icon="eye-slash" href="/es/wallet/use-only-values">
+    Deja que una clave se use en una llamada sin que nadie la vea.
+  </Card>
+  <Card title="Agentes" icon="robot" href="/es/wallet/agents">
+    Da a cada agente solo los derechos que necesita.
+  </Card>
+  <Card title="Productos" icon="puzzle-piece" href="/es/wallet/products">
+    Deja que un producto de kombify use un elemento por ti cuando no estás.
+  </Card>
+  <Card title="Certificados SSH" icon="certificate" href="/es/wallet/ssh-certificates">
+    Firma certificados de corta duración en lugar de compartir claves SSH.
+  </Card>
+  <Card title="Línea de comandos" icon="terminal" href="/es/wallet/cli">
+    Guarda, lee e inyecta elementos desde un terminal.
+  </Card>
+</CardGroup>

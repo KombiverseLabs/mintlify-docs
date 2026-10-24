@@ -1,0 +1,74 @@
+---
+title: "سطر الأوامر kombify-wallet"
+description: "سجّل الدخول، واحفظ العناصر واقرأها، وأدخل المتغيرات في عملية، واستورد من Doppler، ووقّع شهادات SSH"
+sidebarTitle: "سطر الأوامر"
+icon: "terminal"
+---
+
+<Note>
+لم يُطلق kombify Wallet بعد، كما أن سطر الأوامر لم يُوزَّع بعد. تصف هذه الصفحة طريقة عمله. ستُضاف خطوات التثبيت هنا عند صدوره.
+</Note>
+
+يضع `kombify-wallet` Wallet في طرفيتك. وكالمتصفح، يشفّر القيمة على جهازك قبل أن تغادره. ويقرأ القيم من الإدخال القياسي أو من مطالبة مخفية فقط، ولا يقرؤها من وسيط أبدًا، فلا تبقى في سجل الصدفة (shell) ولا في قائمة العمليات.
+
+## تسجيل الدخول
+
+```bash
+kombify-wallet login
+```
+
+يطبع الأمر رابطًا ورمزًا. افتح الرابط، وسجّل الدخول إلى حساب kombify عبر Auth0، وأكّد الرمز. يحتفظ الأمر بتسجيل دخوله الخاص في ملف لا يستطيع قراءته غيرك.
+
+يعرض `kombify-wallet status` من سجّل الدخول، ويزيل `kombify-wallet logout` تسجيل الدخول ويُلغيه. وللأتمتة التي تملك بالفعل رمز وصول من kombify، اضبط `KOMBIFY_WALLET_TOKEN`. وله الأسبقية على تسجيل الدخول المحفوظ.
+
+## حفظ العناصر وقراءتها
+
+```bash
+kombify-wallet set DATABASE_URL --type variable
+kombify-wallet list
+kombify-wallet get DATABASE_URL
+kombify-wallet get DATABASE_URL --reveal
+```
+
+يطلب `set` القيمة عبر مطالبة مخفية، أو يقرؤها من أنبوب. وإذا كان الاسم موجودًا في النطاق، يضيف `set` إصدارًا جديدًا. قيم `--type` هي `variable` أو `configuration` أو `generic_secret`. وقيم `--scope` هي `account` (الافتراضي) أو `project:<project>` أو `environment:<project>/<environment>`.
+
+يعرض `list` عناصرك مع معرّفاتها. ويعرض `get` تفاصيل عنصر، ولا يطبع القيمةَ إلا `get --reveal`. يعمل الأمران `kombify-wallet revoke <item>` و`kombify-wallet delete <item> --yes` كما في [الإعدادات](/ar/wallet/secrets-and-variables). أضف `--type` أو `--scope` عندما يطابق اسم عدة عناصر.
+
+## تشغيل أمر بمتغيراتك
+
+```bash
+kombify-wallet run --project shop --environment production -- ./deploy.sh
+```
+
+يحل `run` متغيراتك لذلك النطاق ويضيفها إلى بيئة الأمر. تتقدم البيئة على المشروع ويتقدم المشروع على الحساب. ولا تُفك القيم إلا في الذاكرة، ولا تُطبع ولا تُكتب أبدًا.
+
+- يقصر `--only NAME,NAME` المتغيرات على تلك الأسماء.
+- لا يُستبدل متغير مضبوط بالفعل في بيئتك ما لم تضف `--override`.
+- لا يتلقى الأمر `KOMBIFY_WALLET_TOKEN`، فلا يستطيع أي شيء يشغّله فتح عناصرك الأخرى.
+- رمز الخروج هو رمز الأمر نفسه.
+
+## الاستيراد من Doppler
+
+```bash
+doppler secrets download --no-file --format json | kombify-wallet import doppler --format json --scope project:shop
+```
+
+يتحول كل إدخال إلى متغير في ذلك النطاق، أو إلى إصدار جديد من متغير موجود بالاسم نفسه. يتخطى الاستيراد إدخالات البيانات الوصفية الخاصة بـ Doppler، والأسماء التي ليست أسماء متغيرات صالحة، والقيم الفارغة، والقيم التي ليست نصًّا. ويطبع الأسماء والنتائج، ولا يطبع القيم أبدًا.
+
+## توقيع شهادة SSH
+
+```bash
+kombify-wallet ssh-sign my-ca ~/.ssh/id_ed25519.pub --principals deploy --ttl 8h
+```
+
+يوقّع `--host` شهادة مضيف. ويضبط `--source-address` و`--extensions` هذين الحقلين في شهادة المستخدم. راجع [شهادات SSH](/ar/wallet/ssh-certificates).
+
+## رموز الخروج
+
+| الرمز | المعنى |
+| --- | --- |
+| 0 | تم |
+| 1 | أمر أو خيار غير صحيح |
+| 2 | لم يتم تسجيل الدخول |
+| 3 | رفضت Wallet الطلب |
+| 4 | خطأ في الشبكة أو Wallet غير متاحة |

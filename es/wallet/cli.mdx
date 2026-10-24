@@ -1,0 +1,101 @@
+---
+title: "La línea de comandos kombify-wallet"
+description: "Inicia sesión, guarda y lee elementos, inyecta variables en un proceso, importa desde Doppler y firma certificados SSH"
+sidebarTitle: "Línea de comandos"
+icon: "terminal"
+---
+
+<Note>
+kombify Wallet todavía no se ha publicado, y la línea de comandos todavía no se
+distribuye. Esta página describe cómo funciona. Los pasos de instalación se
+añadirán aquí cuando salga.
+</Note>
+
+`kombify-wallet` te da Wallet en un terminal. Como el navegador, cifra un valor
+en tu dispositivo antes de que salga de él. Lee los valores solo de la entrada
+estándar o de una solicitud oculta, nunca de un argumento, así que no quedan en
+el historial de tu shell ni en la lista de procesos.
+
+## Iniciar sesión
+
+```bash
+kombify-wallet login
+```
+
+El comando muestra un enlace y un código. Abre el enlace, inicia sesión en tu
+cuenta de kombify mediante Auth0 y confirma el código. El comando guarda su
+propio inicio de sesión en un archivo que solo tú puedes leer.
+
+`kombify-wallet status` muestra quién ha iniciado sesión, y
+`kombify-wallet logout` quita el inicio de sesión y lo revoca. Para
+automatizaciones que ya disponen de un token de acceso de kombify, define
+`KOMBIFY_WALLET_TOKEN`. Tiene prioridad sobre el inicio de sesión guardado.
+
+## Guardar y leer elementos
+
+```bash
+kombify-wallet set DATABASE_URL --type variable
+kombify-wallet list
+kombify-wallet get DATABASE_URL
+kombify-wallet get DATABASE_URL --reveal
+```
+
+`set` pide el valor con una solicitud oculta, o lo lee de una tubería. Si el
+nombre ya existe en el ámbito, `set` añade una versión nueva. `--type` es
+`variable`, `configuration` o `generic_secret`. `--scope` es `account` (el
+valor predeterminado), `project:<project>` o `environment:<project>/<environment>`.
+
+`list` muestra tus elementos con sus ID. `get` muestra los detalles de un
+elemento, y solo `get --reveal` imprime el valor. Los comandos
+`kombify-wallet revoke <item>` y `kombify-wallet delete <item> --yes`
+funcionan como en [Ajustes](/es/wallet/secrets-and-variables). Añade `--type` o
+`--scope` cuando un nombre coincida con varios elementos.
+
+## Ejecutar un comando con tus variables
+
+```bash
+kombify-wallet run --project shop --environment production -- ./deploy.sh
+```
+
+`run` resuelve tus variables para ese ámbito y las añade al entorno del comando.
+El entorno prevalece sobre el proyecto, y el proyecto sobre la cuenta. Los
+valores se descifran solo en memoria y nunca se imprimen ni se escriben.
+
+- `--only NAME,NAME` limita las variables a esos nombres.
+- Una variable que ya está definida en tu entorno no se sustituye, salvo que
+  añadas `--override`.
+- El comando no recibe `KOMBIFY_WALLET_TOKEN`, así que nada de lo que inicie
+  puede abrir tus demás elementos.
+- El código de salida es el del propio comando.
+
+## Importar desde Doppler
+
+```bash
+doppler secrets download --no-file --format json | kombify-wallet import doppler --format json --scope project:shop
+```
+
+Cada entrada se convierte en una variable de ese ámbito, o en una versión nueva
+de una variable existente con el mismo nombre. La importación omite las entradas
+de metadatos propias de Doppler, los nombres que no son nombres de variable
+válidos, los valores vacíos y los valores que no son texto. Imprime nombres y
+resultados, nunca valores.
+
+## Firmar un certificado SSH
+
+```bash
+kombify-wallet ssh-sign my-ca ~/.ssh/id_ed25519.pub --principals deploy --ttl 8h
+```
+
+`--host` firma un certificado de host. `--source-address` y `--extensions`
+definen esos campos de un certificado de usuario. Consulta
+[Certificados SSH](/es/wallet/ssh-certificates).
+
+## Códigos de salida
+
+| Código | Significado |
+| --- | --- |
+| 0 | Hecho |
+| 1 | Comando u opción incorrectos |
+| 2 | Sesión no iniciada |
+| 3 | Wallet rechazó la solicitud |
+| 4 | Error de red o Wallet no disponible |

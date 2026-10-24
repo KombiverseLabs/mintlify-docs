@@ -1,0 +1,74 @@
+---
+title: "kombify-wallet 命令行"
+description: "登录、存储和读取条目、将变量注入进程、从 Doppler 导入以及签发 SSH 证书"
+sidebarTitle: "命令行"
+icon: "terminal"
+---
+
+<Note>
+kombify Wallet 尚未发布，命令行也尚未分发。本页介绍它的工作方式。安装步骤会在它发布时补充到这里。
+</Note>
+
+`kombify-wallet` 把 Wallet 带进你的终端。和浏览器一样，它在值离开你的设备之前就在设备上加密。它只从标准输入或隐藏的输入提示读取值，绝不从参数读取，所以这些值不会留在你的 shell 历史记录和进程列表中。
+
+## 登录
+
+```bash
+kombify-wallet login
+```
+
+该命令会输出一个链接和一个代码。打开链接，通过 Auth0 登录你的 kombify 账户，并确认代码。该命令会把自己的登录状态保存在只有你能读取的文件中。
+
+`kombify-wallet status` 显示当前登录的是谁，`kombify-wallet logout` 会移除登录状态并将其撤销。对于已经持有 kombify 访问令牌的自动化任务，请设置 `KOMBIFY_WALLET_TOKEN`。它优先于已保存的登录状态。
+
+## 存储和读取条目
+
+```bash
+kombify-wallet set DATABASE_URL --type variable
+kombify-wallet list
+kombify-wallet get DATABASE_URL
+kombify-wallet get DATABASE_URL --reveal
+```
+
+`set` 通过隐藏的输入提示询问值，或从管道读取。如果该名称在此范围内已存在，`set` 会添加新版本。`--type` 为 `variable`、`configuration` 或 `generic_secret`。`--scope` 为 `account`（默认）、`project:<project>` 或 `environment:<project>/<environment>`。
+
+`list` 显示你的条目及其 ID。`get` 显示某个条目的详细信息，只有 `get --reveal` 才会输出值。命令 `kombify-wallet revoke <item>` 和 `kombify-wallet delete <item> --yes` 的作用与[设置](/zh-Hans/wallet/secrets-and-variables)中相同。当一个名称匹配多个条目时，请加上 `--type` 或 `--scope`。
+
+## 用你的变量运行命令
+
+```bash
+kombify-wallet run --project shop --environment production -- ./deploy.sh
+```
+
+`run` 为该范围解析你的变量，并把它们加入命令的环境。环境优先于项目，项目优先于账户。值只在内存中解密，绝不会被输出或写入。
+
+- `--only NAME,NAME` 把变量限制为这些名称。
+- 已在你的环境中设置的变量不会被替换，除非你加上 `--override`。
+- 该命令不会收到 `KOMBIFY_WALLET_TOKEN`，因此它启动的任何进程都无法打开你的其他条目。
+- 退出代码就是该命令自己的退出代码。
+
+## 从 Doppler 导入
+
+```bash
+doppler secrets download --no-file --format json | kombify-wallet import doppler --format json --scope project:shop
+```
+
+每个条目会成为该范围内的一个变量，或同名现有变量的新版本。导入会跳过 Doppler 自己的元数据条目、不是有效变量名的名称、空值以及不是文本的值。它输出名称和结果，绝不输出值。
+
+## 签发 SSH 证书
+
+```bash
+kombify-wallet ssh-sign my-ca ~/.ssh/id_ed25519.pub --principals deploy --ttl 8h
+```
+
+`--host` 签发主机证书。`--source-address` 和 `--extensions` 设置用户证书的相应字段。参见 [SSH 证书](/zh-Hans/wallet/ssh-certificates)。
+
+## 退出代码
+
+| 代码 | 含义 |
+| --- | --- |
+| 0 | 完成 |
+| 1 | 命令或选项有误 |
+| 2 | 未登录 |
+| 3 | Wallet 拒绝了请求 |
+| 4 | 网络错误或 Wallet 不可用 |

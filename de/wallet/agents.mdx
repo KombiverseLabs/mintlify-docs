@@ -1,0 +1,68 @@
+---
+title: "Agenten und die Wallet"
+description: "Gib jedem Agenten nur die Rechte, die er für einen Eintrag braucht: nutzen, lesen oder verwalten"
+sidebarTitle: "Agenten"
+icon: "robot"
+---
+
+<Note>
+Die kombify Wallet ist noch nicht veröffentlicht. Diese Seite beschreibt, wie
+sie funktioniert.
+</Note>
+
+Ein Agent erbt nie deinen Zugriff. Er hat auf einen Eintrag keine Rechte, bis
+du sie ihm gibst, und er sieht nur die Einträge, für die er ein Recht hat. Nur
+du selbst, persönlich angemeldet, kannst deine Wallet verwalten. Ein Agent kann
+das nicht.
+
+## Einem Agenten Zugriff auf einen Eintrag geben
+
+1. Öffne die **Einstellungen** und wähle **Schlüssel & Verbindungen**.
+2. Wähle im Bereich **Wallet** bei dem Eintrag **Agentenzugriff**.
+3. Schalte für jeden deiner Agenten die gewünschten Rechte ein.
+
+Die Liste zeigt die Agenten, die du erstellt hast. Jedes Recht wird einzeln
+vergeben, und keines schließt ein anderes ein.
+
+| Recht | Was der Agent tun kann |
+| --- | --- |
+| **Nutzen** | Mit dem Wert handeln, etwa in einem API-Aufruf, ohne ihn zu sehen. Dafür braucht er [Nutzungsziele](/de/wallet/use-only-values). |
+| **Lesen** | Den Wert selbst sehen. |
+| **Verwalten** | Den Eintrag und seine Einstellungen verwalten. |
+
+Heute arbeitet ein Agent mit einem Eintrag nur über **Nutzen** und **Lesen**.
+Einträge hinzufügen, Versionen anlegen, Einstellungen ändern, widerrufen und
+löschen bleibt bei dir, egal welche Rechte ein Agent hat.
+
+Zwei Fälle, die du im Blick behalten solltest:
+
+- Ist der Wert eines Eintrags nur nutzbar, zeigt **Lesen** ihn niemandem.
+- Hat ein Eintrag keine Nutzungsziele, kann ein Agent mit **Nutzen** keine
+  Aufrufe damit machen.
+
+Bei einer SSH-Zertifizierungsstelle erlaubt **Nutzen** dem Agenten, kurzlebige
+Zertifikate innerhalb der Signierrichtlinie der Stelle anzufordern. Agenten
+erhalten nur Benutzerzertifikate. Siehe [SSH-Zertifikate](/de/wallet/ssh-certificates).
+
+## Wenn ein Recht fehlt
+
+Die Wallet lehnt ab und nennt das fehlende Recht: nutzen, lesen oder verwalten.
+Es wird nichts freigegeben. Der Agent muss das Recht erfragen, und du kannst es
+wie oben beschrieben vergeben.
+
+## Ein Recht entziehen
+
+Schalte das Recht aus. Es gilt ab dem nächsten Vorgang des Agenten, und ein
+Vorgang, der schon erlaubt war, dauert höchstens etwa eine Minute. Sonst bleibt
+ein Recht bestehen, bis du es entziehst oder der Agent endet.
+
+## Das Anzeigen wird gezählt
+
+Jedes Mal, wenn ein Agent einen Wert liest, zeichnet die Wallet das auf und
+zählt es pro Eintrag. Der Eintrag zeigt dann einen Hinweis: **Erneuern
+empfohlen: Der Wert wurde seit seiner letzten Version N-mal freigegeben. Lege
+eine neue Version an, um ihn zu ersetzen.** Eine neue Version setzt den Zähler
+zurück.
+
+Nimm nach Möglichkeit **Nutzen** statt **Lesen**. Ein Agent, der einen Wert nur
+nutzt, hält ihn nie, also gibt es nichts zu erneuern.
