@@ -9,14 +9,20 @@
 // - npm: the @kombiverselabs/@kombify scopes in the user npmrc, reading
 //   ${NODE_AUTH_TOKEN} (pnpm >= 11.5.3 ignores a project .npmrc token).
 // - Doppler: access to the repository's own scope from .kombify/secrets.json
-//   or doppler.yaml, resolved in this order:
-//     1. DOPPLER_TOKEN already set (dev container from the host, broker);
-//     2. the Doppler CLI signed in on this host (workstation, dev container);
-//     3. GitHub Actions: none; CI uses its repository secrets (§4);
-//     4. any host whose gh acts as an owner identity (Claude cloud session,
-//        a fresh device, Codex, Cursor): the GitHub-OIDC broker of
-//        kombify-workspace (cloud-doppler-session.mjs, §6b), fetched with `gh`;
-//     5. an interactive terminal with the Doppler CLI: `doppler login`.
+//   or doppler.yaml, along two independent routes per environment
+//   (lib/doppler-routes.mjs), each token proven before use so a dead one
+//   falls through to the next:
+//     1. DOPPLER_TOKEN already set (dev container from the host, a parent `run`);
+//     2. the Doppler CLI signed in on this host (accelerator, never required);
+//     3. GitHub Actions: none; CI uses OIDC or its repository secrets (§4);
+//     4. a device: the device token in the OS credential store;
+//     5. a cached GitHub-OIDC broker token;
+//     6. a Claude cloud session: the environment's api.doppler.com credential,
+//        which the proxy injects (no value in the VM);
+//     7. any host whose gh acts as an owner identity: a fresh grant of the
+//        GitHub-OIDC broker of kombify-workspace (cloud-doppler-session.mjs, §6b);
+//     8. an interactive terminal with the Doppler CLI: `doppler login`.
+//   KOMBIFY_DOPPLER_DISABLE=cli,device (any route names) switches routes off.
 // - Package token: NODE_AUTH_TOKEN when set; in a cloud session the broker's
 //   read-only packages grant; elsewhere Doppler kombify-io/prd_gateway
 //   GITHUB_PACKAGES_READ_TOKEN through the access above. It reaches only the
@@ -28,6 +34,10 @@
 //   node scripts/kombify-bootstrap.mjs --install  # also pnpm install --frozen-lockfile
 //                                                 # (no token at all where packages are vendored, §6d)
 //   node scripts/kombify-bootstrap.mjs run -- <cmd...>   # cmd with the repo's Doppler secrets
+//   node scripts/kombify-bootstrap.mjs doppler-routes [--live] [--repair] [--json]
+//                                                 # both routes of this host; --live proves the
+//                                                 # broker with a fresh grant, --repair mints or
+//                                                 # renews this device's token
 //   node scripts/kombify-bootstrap.mjs packages -- <cmd...>  # cmd with NODE_AUTH_TOKEN
 //   node scripts/kombify-bootstrap.mjs rules     # the owner's rules (also printed by --hook)
 //   node scripts/kombify-bootstrap.mjs mcp --mcp-host codex --install # repair + prove selected native staff MCP
@@ -50,10 +60,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { prepareAgentHome } from './lib/agent-home-bootstrap.mjs';
 import { prepareStaffMcp } from './lib/staff-mcp-bootstrap.mjs';
 import { ENV_GIT_HELPER, hostGithubTokens } from './lib/github-host-identity.mjs';
+import { DOPPLER_API, REQUIRED_ROUTES, deviceTokenState, disabledRoutes, hostType, probeToken, readDeviceToken, renewDeviceToken } from './lib/doppler-routes.mjs';
 
 const SELF = fileURLToPath(import.meta.url);
 export const ROOT = resolve(dirname(SELF), '..');
-export const DOPPLER_API = 'https://api.doppler.com/v3';
+export { DOPPLER_API };
 export const REGISTRY = 'https://npm.pkg.github.com';
 export const PRIVATE_GO = 'github.com/KombiverseLabs/*';
 export const PACKAGES_SECRET = { project: 'kombify-io', config: 'prd_gateway', name: 'GITHUB_PACKAGES_READ_TOKEN' };
@@ -251,48 +262,152 @@ function ghLogin() {
   return result.status === 0 ? result.stdout.trim() : '';
 }
 
-// Finds the Doppler token for this environment. `dispatch: false` (the hook)
-// never starts a broker run; the first command that needs secrets does.
-// The GitHub-OIDC broker serves every host whose gh acts as an owner identity,
-// so a fresh device needs only its GitHub sign-in, never a Doppler login.
-export async function resolveDoppler({ env = process.env, root = ROOT, dispatch = true, interactive = false, readOnly = false, cli = cliToken, broker = loadBroker, gh = ghLogin } = {}) {
-  if (env.DOPPLER_TOKEN) return { source: 'env', token: env.DOPPLER_TOKEN };
-  const fromCli = cli(root);
-  if (fromCli.token) return { source: 'cli', token: fromCli.token };
-  if (env.GITHUB_ACTIONS === 'true') {
-    return { source: 'github-actions', skipped: 'GitHub Actions uses its repository secrets, not Doppler (SECRETS-ACCESS-STANDARD.md §4); pass DOPPLER_TOKEN explicitly for an operator-only job' };
-  }
+// Finds this host's Doppler access along its routes (header and
+// lib/doppler-routes.mjs). `validate` proves each token at GET /me first, so a
+// dead CLI login or device token falls through to the next route. The cloud
+// network route has no token value (`token: ''`, the proxy authenticates);
+// only callers that pass `requireToken: false` take it, the others (the Doppler
+// CLI, kombify-up) need a value and go on to the broker. `dispatch: false` (the
+// hook) never starts a broker run; the first command that needs secrets does.
+// The broker serves every host whose gh acts as an owner identity, so a fresh
+// device needs only its GitHub sign-in, never a Doppler login.
+export async function resolveDoppler({ env = process.env, root = ROOT, dispatch = true, interactive = false, readOnly = false, validate = false, requireToken = true, cli = cliToken, broker = loadBroker, gh = ghLogin, device = readDeviceToken, probe = probeToken } = {}) {
+  const off = disabledRoutes(env);
+  const notes = [];
+  const usable = async (route, value) => {
+    if (!validate) return true;
+    const status = await probe(value);
+    if (status === 200) return true;
+    notes.push(`${route} rejected (${typeof status === 'number' ? `HTTP ${status}` : status})`);
+    return false;
+  };
+  const explicit = env.DOPPLER_TOKEN;
   const remote = env.CLAUDE_CODE_REMOTE === 'true';
-  let brokerError = '';
-  if (remote || BROKER_ACTORS.includes(gh())) {
-    const source = remote ? 'cloud-broker' : 'github-broker';
+  // In a Claude cloud session DOPPLER_TOKEN is the placeholder of the
+  // environment's api.doppler.com credential, which the proxy swaps for the
+  // value: the network route, proven like any token so a dead one falls through.
+  if (explicit && remote && !off.has('network') && await usable('network', explicit)) return { source: 'network', token: explicit };
+  if (explicit && !remote && !off.has('env') && await usable('env', explicit)) return { source: 'env', token: explicit };
+  const fromCli = off.has('cli') || remote ? { disabled: true } : cli(root);
+  const cliValue = fromCli.token;
+  if (cliValue && await usable('cli', cliValue)) return { source: 'cli', token: cliValue };
+  if (env.GITHUB_ACTIONS === 'true') {
+    return { source: 'github-actions', skipped: 'GitHub Actions uses OIDC or its repository secrets, not a session route (SECRETS-ACCESS-STANDARD.md §4); pass DOPPLER_TOKEN explicitly for an operator-only job' };
+  }
+  if (!remote && !off.has('device')) {
+    const stored = device();
+    const deviceValue = stored.token;
+    if (deviceValue && await usable('device', deviceValue)) return { source: 'device', token: deviceValue };
+    if (!deviceValue) notes.push(`no device token in ${stored.store}`);
+  }
+  const source = remote ? 'cloud-broker' : 'github-broker';
+  let mod = null;
+  let staleGrant = false;
+  if (!off.has('broker') && (remote || BROKER_ACTORS.includes(gh()))) {
     try {
-      const mod = await broker({ readOnly });
+      mod = await broker({ readOnly });
       const cached = mod.readCache?.();
-      if (cached) return { source, token: cached.token };
-      if (readOnly || !dispatch) return { source, pending: true };
-      const record = await mod.login();
-      return { source, token: record.token };
+      const cachedValue = cached?.token;
+      if (cachedValue && await usable('broker', cachedValue)) return { source, token: cachedValue };
+      staleGrant = Boolean(cachedValue);
     } catch (error) {
-      if (remote) throw error;
-      brokerError = `; GitHub broker failed: ${error.message}`;
+      notes.push(`GitHub broker unavailable: ${error.message}`);
+      mod = null;
+    }
+  } else if (!off.has('broker') && !remote) notes.push('gh is not an owner identity for the broker');
+  if (remote && !explicit && !off.has('network') && !requireToken) {
+    const status = await probe('');
+    if (status === 200) return { source: 'network', token: '' };
+    notes.push(`no api.doppler.com credential in this environment (HTTP ${status})`);
+  }
+  if (mod) {
+    if (readOnly || !dispatch) return { source, pending: true };
+    try {
+      const record = await mod.login(staleGrant ? { force: true } : undefined);
+      const grantValue = record.token;
+      return { source, token: grantValue };
+    } catch (error) {
+      notes.push(`GitHub broker failed: ${error.message}`);
     }
   }
-  if (!readOnly && interactive && !fromCli.missing) {
+  if (!readOnly && interactive && !fromCli.missing && !off.has('cli')) {
     spawnSync('doppler', ['login', '--scope', root], { stdio: 'inherit' });
     const after = cli(root);
     if (after.token) return { source: 'cli', token: after.token };
   }
-  return {
-    gap: (fromCli.missing
-      ? 'Doppler CLI not installed and no owner GitHub identity in gh: `gh auth login` as an owner identity, or install the Doppler CLI and `doppler login`'
-      : 'Doppler CLI not signed in and no owner GitHub identity in gh: `gh auth login` as an owner identity, or `doppler login`') + brokerError,
-  };
+  const repair = remote
+    ? 'attach the environment\'s api.doppler.com credential or let the broker run (cloud-session-doppler.yml)'
+    : '`node scripts/kombify-bootstrap.mjs doppler-routes --repair` on a host with a Doppler route, or `gh auth login` as an owner identity';
+  return { gap: `no Doppler route ready${notes.length ? ` (${notes.join('; ')})` : ''}: ${repair}` };
+}
+
+// Every route of this host with its state, for `doppler-routes`, the session
+// check and the daily credential health. `live` proves the broker with a fresh
+// grant (one workflow run); without it a valid cached grant or an owner gh
+// identity (on demand) counts. `repair` mints or renews the device token.
+export async function checkRoutes({ env = process.env, root = ROOT, live = false, repair = false, cli = cliToken, broker = loadBroker, gh = ghLogin, probe = probeToken, deviceState = deviceTokenState, renew = renewDeviceToken } = {}) {
+  const host = hostType(env);
+  const required = REQUIRED_ROUTES[host] ?? [];
+  const off = disabledRoutes(env);
+  const routes = [];
+  const item = (route, status, detail) => routes.push({ route, role: required.includes(route) ? 'required' : 'accelerator', status: off.has(route) ? 'disabled' : status, detail });
+  const http = (status) => (typeof status === 'number' ? `HTTP ${status}` : status);
+  if (host === 'ci') return { host, required, routes, ready: true };
+  if (host === 'device') {
+    const fromCli = cli(root);
+    const cliValue = fromCli.token;
+    const cliStatus = cliValue ? await probe(cliValue) : null;
+    item('cli', cliStatus === 200 ? 'ready' : cliValue ? 'rejected' : 'missing', cliStatus === 200 ? 'signed-in Doppler CLI' : cliValue ? `CLI login rejected (${http(cliStatus)}); doppler login renews it` : fromCli.missing ? 'Doppler CLI not installed' : 'Doppler CLI not signed in');
+    let state = await deviceState();
+    if (repair && state.status !== 'ready') {
+      // The expiring token mints its own successor; a missing or dead one needs the CLI login.
+      const mintWith = state.status === 'expiring' ? state.token : cliStatus === 200 ? cliValue : env.DOPPLER_TOKEN;
+      try {
+        const renewed = await renew({ mintWith });
+        state = { status: 'repaired', detail: `${renewed.name} stored in ${renewed.store}, expires ${renewed.expiresAt}${renewed.revoked.length ? `; ${renewed.revoked.join(', ')}` : ''}` };
+      } catch (error) {
+        state = { ...state, detail: `${state.status}${state.name ? ` ${state.name}` : ''}; renewal failed: ${error.message}` };
+      }
+    }
+    const days = Number.isInteger(state.daysLeft) ? `, ${state.daysLeft} days left` : '';
+    item('device', state.status, state.detail && state.status !== 'rejected' ? state.detail : state.status === 'missing'
+      ? `no device token in ${state.store}; repair: node scripts/kombify-bootstrap.mjs doppler-routes --repair`
+      : `${state.name} in ${state.store}${days}${state.status === 'rejected' ? ` rejected (${state.detail})` : ''}`);
+  }
+  if (host === 'cloud') {
+    const placeholder = env.DOPPLER_TOKEN ?? '';
+    const status = await probe(placeholder);
+    item('network', status === 200 ? 'ready' : placeholder ? 'rejected' : 'missing', status === 200
+      ? 'the environment\'s api.doppler.com credential (DOPPLER_TOKEN placeholder, swapped by the proxy)'
+      : placeholder ? `the environment's api.doppler.com credential is rejected (${http(status)}); renew it in the environment dialog` : 'the environment has no api.doppler.com credential (no DOPPLER_TOKEN placeholder)');
+  }
+  if (!(host === 'cloud' || BROKER_ACTORS.includes(gh()))) {
+    item('broker', 'missing', `gh is not one of the broker identities ${BROKER_ACTORS.join(', ')}`);
+  } else {
+    try {
+      const mod = await broker({});
+      const cached = live ? null : mod.readCache?.();
+      if (cached) {
+        item('broker', await probe(cached.token) === 200 ? 'ready' : 'rejected', `cached grant until ${cached.expires_at ?? 'unknown'}`);
+      } else if (!live) {
+        item('broker', 'on-demand', 'owner gh identity present; the first command that needs secrets dispatches the grant');
+      } else {
+        const record = await mod.login({ force: true });
+        const status = await probe(record.token);
+        item('broker', status === 200 ? 'ready' : 'rejected', `fresh grant ${record.run ?? ''} (${http(status)})`.replace(' ()', ''));
+      }
+    } catch (error) {
+      item('broker', 'failed', error.message);
+    }
+  }
+  const usable = new Set(['ready', 'repaired', 'expiring', 'on-demand']);
+  const ready = required.every((route) => routes.some((r) => r.route === route && usable.has(r.status)));
+  return { host, required, routes, ready };
 }
 
 async function doppler(path, token, fetchImpl = fetch) {
   const response = await fetchImpl(`${DOPPLER_API}${path}`, {
-    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+    headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}), Accept: 'application/json' },
     signal: AbortSignal.timeout(15_000),
   });
   let body = null;
@@ -311,6 +426,18 @@ async function secretsOf(token, scope) {
   const { status, body } = await doppler(`/configs/config/secrets/download?${q}`, token);
   if (status !== 200 || !body) throw new Error(`Doppler answered HTTP ${status} for ${scope.project}/${scope.config}`);
   return body;
+}
+
+// One secret through this host's routes, for a script that needs a single value
+// outside `run` (pg-egress.mjs). The value is returned, never printed.
+export async function dopplerSecret({ project, config, name }, { env = process.env, interactive = false, resolve = resolveDoppler } = {}) {
+  const access = await resolve({ env, validate: true, requireToken: false, interactive });
+  if (typeof access.token !== 'string') throw new Error(access.gap ?? access.skipped ?? (access.pending ? 'Doppler broker grant pending' : 'no Doppler route'));
+  const q = new URLSearchParams({ project, config, name });
+  const { status, body } = await doppler(`/configs/config/secret?${q}`, access.token);
+  const value = body?.value?.computed ?? body?.value?.raw;
+  if (status !== 200 || !value) throw new Error(`Doppler answered HTTP ${status} for ${project}/${config} ${name} through route ${access.source}`);
+  return { value, source: access.source };
 }
 
 async function packagesToken(env, access) {
@@ -412,10 +539,22 @@ export async function main(argv, env = process.env) {
   }
   if (command === 'run') {
     if (!scope) throw new Error('no Doppler scope: add .kombify/secrets.json (secrets-bootstrap-marker.mjs) or pass --project and --config');
-    const access = await resolveDoppler({ env, interactive: process.stdin.isTTY });
-    if (!access.token) throw new Error(access.gap ?? access.skipped);
+    const access = await resolveDoppler({ env, interactive: process.stdin.isTTY, validate: true, requireToken: false });
+    if (typeof access.token !== 'string') throw new Error(access.gap ?? access.skipped ?? 'Doppler broker grant pending');
     const secrets = await secretsOf(access.token, scope);
-    return runWith(cmd, { ...secrets, DOPPLER_TOKEN: access.token, DOPPLER_PROJECT: scope.project, DOPPLER_CONFIG: scope.config });
+    // The network route has no value to pass on: the command gets the secrets, not DOPPLER_TOKEN.
+    const passOn = access.token ? { DOPPLER_TOKEN: access.token } : {};
+    return runWith(cmd, { ...secrets, ...passOn, DOPPLER_PROJECT: scope.project, DOPPLER_CONFIG: scope.config, KOMBIFY_DOPPLER_ROUTE: access.source });
+  }
+  if (command === 'doppler-routes') {
+    const result = await checkRoutes({ env, live: own.includes('--live'), repair: own.includes('--repair') });
+    if (own.includes('--json')) console.log(JSON.stringify(result, null, 2));
+    else for (const route of result.routes) console.log(`KOMBIFY_DOPPLER_ROUTE ${JSON.stringify(route)}`);
+    const names = (statuses) => result.routes.filter((r) => statuses.includes(r.status)).map((r) => r.route).join(',') || 'none';
+    console.log(result.ready
+      ? `KOMBIFY_DOPPLER_ROUTES_OK host=${result.host} required=${result.required.join(',') || 'none'} ready=${names(['ready', 'repaired', 'expiring', 'on-demand'])}`
+      : `KOMBIFY_DOPPLER_ROUTES_GAP host=${result.host} required=${result.required.join(',')} not-ready=${result.routes.filter((r) => r.role === 'required' && !['ready', 'repaired', 'expiring', 'on-demand'].includes(r.status)).map((r) => r.route).join(',')}`);
+    return result.ready ? 0 : 1;
   }
   if (command === 'rules') {
     printOwnerRules();
@@ -423,7 +562,7 @@ export async function main(argv, env = process.env) {
   }
   if (command === 'packages') {
     configureNpm(env);
-    const access = env.NODE_AUTH_TOKEN || env.CLAUDE_CODE_REMOTE === 'true' ? {} : await resolveDoppler({ env, interactive: process.stdin.isTTY });
+    const access = env.NODE_AUTH_TOKEN || env.CLAUDE_CODE_REMOTE === 'true' ? {} : await resolveDoppler({ env, interactive: process.stdin.isTTY, validate: true });
     const pkg = await packagesToken(env, access);
     return runWith(cmd, { NODE_AUTH_TOKEN: pkg.token });
   }
@@ -434,9 +573,9 @@ export async function main(argv, env = process.env) {
   if (goGap) gaps.push(`go: ${goGap}`);
   const npmGap = configureNpm(env, { check });
   if (npmGap) gaps.push(`npm: ${npmGap}`);
-  const access = await resolveDoppler({ env, dispatch: !hook && !check, interactive: !hook && !check && process.stdin.isTTY, readOnly: check }).catch((error) => ({ gap: error.message }));
+  const access = await resolveDoppler({ env, dispatch: !hook && !check, interactive: !hook && !check && process.stdin.isTTY, readOnly: check, validate: true, requireToken: false }).catch((error) => ({ gap: error.message }));
   if (access.gap) gaps.push(`doppler: ${access.gap}`);
-  if (access.token && scope) {
+  if (typeof access.token === 'string' && scope) {
     const gap = await verifyScope(access.token, scope).catch((error) => `Doppler not reachable (${error.cause?.code ?? error.message})`);
     if (gap) gaps.push(`doppler: ${gap}`);
   }
