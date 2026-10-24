@@ -84,7 +84,7 @@ This repository carries its non-secret tracker binding in
 automatically from the host's GitHub identity; do not request or copy a
 Cloudflare key. Trusted CI uses its configured GitHub OIDC identity. Where a
 proxy holds the GitHub identity (Claude cloud sessions), the script dispatches
-this repository's `beads-session.yml` workflow and receives an hourly
+this repository's `beads-session.yml` workflow and receives a 12-24 h
 credential by itself; `bd` then works directly. When `bd` reports no
 credential, rerun the script; never report Beads access as a blocker first.
 Cloudflare is the operational authority only for an explicitly activated

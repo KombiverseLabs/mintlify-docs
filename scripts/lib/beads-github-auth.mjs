@@ -9,6 +9,9 @@ export const repositoryValid = (value) => typeof value === "string" && /^[A-Za-z
 export const beadsTokenEnvValid = (value) => !value || /^BEADS_CLOUDFLARE_(?:[A-Z0-9_]+_)?TOKEN$/.test(value);
 export const credentialFresh = (entry, now = Date.now()) => Boolean(typeof entry?.token === "string" && /^[!-~]+$/.test(entry.token) && (!entry.expires_at || Date.parse(entry.expires_at) > now + 60_000));
 export const githubCredentialFresh = (entry, now = Date.now()) => typeof entry?.expires_at === "string" && credentialFresh(entry, now);
+// Past renew_at (half its lifetime) an exchange is attempted, but the held credential
+// stays usable until it expires, so a spent GitHub REST budget never blocks the tracker.
+export const githubCredentialCurrent = (entry, now = Date.now()) => githubCredentialFresh(entry, now) && !(typeof entry.renew_at === "string" && Date.parse(entry.renew_at) <= now);
 export const githubCredentialKey = (repository, tracker) => `${repository.toLowerCase()}#${tracker}`;
 
 export function exchangeOrigin(base) {
@@ -123,12 +126,44 @@ export function ambientBeadsStoreTrusted(base, options = {}) {
   return paired || githubStoreTrusted(origin, options) || credentialFresh(options.credentials?.[origin]);
 }
 
+// The store validates the identity against GitHub and reports any GitHub refusal,
+// a spent REST budget and a revoked token included, as "forbidden". /rate_limit
+// does not count against the budget, so a refusal is classified against it before
+// anyone is told to sign in: throttled (with reset), invalid (401) or refused.
+export async function githubIdentityState(identity, fetchImpl = fetch) {
+  try {
+    const response = await fetchImpl("https://api.github.com/rate_limit", { headers: { Authorization: `Bearer ${identity}`, Accept: "application/vnd.github+json" }, redirect: "error", signal: AbortSignal.timeout(10_000) });
+    if (response.status === 401) return { state: "invalid" };
+    const header = (name) => response.headers?.get?.(name) ?? null;
+    if ((response.status === 403 || response.status === 429) && (header("x-ratelimit-remaining") === "0" || header("retry-after"))) {
+      const reset = Number(header("x-ratelimit-reset"));
+      return { state: "throttled", reset: Number.isFinite(reset) && reset > 0 ? new Date(reset * 1000).toISOString() : null };
+    }
+    if (!response.ok) return { state: "unknown" };
+    const core = (await boundedJson(response))?.resources?.core;
+    return core && core.remaining === 0 && Number.isFinite(core.reset) ? { state: "throttled", reset: new Date(core.reset * 1000).toISOString() } : { state: "valid" };
+  } catch { return { state: "unknown" }; }
+}
+
+export async function githubThrottleReset(identity, fetchImpl = fetch) {
+  const verdict = await githubIdentityState(identity, fetchImpl);
+  return verdict.state === "throttled" ? verdict.reset : null;
+}
+
+const coded = (code, message, extra = {}) => Object.assign(new Error(message), { code, ...extra });
+export const throttledError = (reset) => coded("GITHUB_THROTTLED", `GitHub REST budget of this identity is exhausted (throttled); retry after ${reset ?? "the reset"}. The credential is valid: do not sign in again`, { reset });
+
 export async function resolveGithubCredential({ base, repository, tracker, env = process.env, credentials = {}, fetchImpl = fetch, spawnImpl = spawnSync, now = Date.now() }) {
   if (!repositoryValid(repository)) throw new Error("GitHub exchange needs github_repository in owner/repository form");
   const origin = exchangeOrigin(base);
   if (!githubStoreTrusted(origin, { env, credentials })) throw new Error(`GitHub exchange refused: ${origin} is not trusted by this host; set BEADS_CLOUDFLARE_TRUSTED_ORIGINS or run join with --trust-store`);
   const cached = credentials[origin]?.github?.[githubCredentialKey(repository, tracker)];
-  if (githubCredentialFresh(cached, now)) return { ...cached, cached: true };
+  if (githubCredentialCurrent(cached, now)) return { ...cached, cached: true };
+  try { return await exchangeGithubCredential({ origin, repository, tracker, env, fetchImpl, spawnImpl, now }); }
+  catch (error) { if (githubCredentialFresh(cached, now)) return { ...cached, cached: true }; throw error; }
+}
+
+async function exchangeGithubCredential({ origin, repository, tracker, env, fetchImpl, spawnImpl, now }) {
   let identity = env.GH_TOKEN || env.GITHUB_TOKEN;
   if (env.ACTIONS_ID_TOKEN_REQUEST_URL || env.ACTIONS_ID_TOKEN_REQUEST_TOKEN) {
     if (!env.ACTIONS_ID_TOKEN_REQUEST_URL || !env.ACTIONS_ID_TOKEN_REQUEST_TOKEN) throw new Error("GitHub Actions OIDC is incomplete; grant this job id-token: write");
@@ -144,14 +179,19 @@ export async function resolveGithubCredential({ base, repository, tracker, env =
     const result = spawnImpl("gh", ["auth", "token", "--hostname", "github.com"], { encoding: "utf8", env, timeout: 10_000, maxBuffer: 65_536, windowsHide: true, shell: false });
     if (!result.error && result.status === 0) identity = result.stdout?.trim();
   }
-  if (!identity || !/^[!-~]+$/.test(identity)) throw new Error("No GitHub identity: sign in with gh auth login, or provide GH_TOKEN/GITHUB_TOKEN through the host's credential custody");
+  if (!identity || !/^[!-~]+$/.test(identity)) throw coded("GITHUB_IDENTITY_MISSING", "No GitHub identity: sign in with gh auth login, or provide GH_TOKEN/GITHUB_TOKEN through the host's credential custody");
   let response;
   try {
     response = await fetchImpl(`${origin}/auth/github`, { method: "POST", headers: { Authorization: `Bearer ${identity}`, "Content-Type": "application/json" }, body: JSON.stringify({ repository, tracker }), redirect: "error", signal: AbortSignal.timeout(15_000) });
   } catch { throw new Error("GitHub credential exchange failed (network, timeout or redirect)"); }
-  if (!response.ok) throw new Error(`GitHub credential exchange refused (HTTP ${response.status}); check repository access and the server's repository-to-tracker policy`);
+  if (!response.ok) {
+    const verdict = response.status === 401 || response.status === 403 || response.status === 429 ? await githubIdentityState(identity, fetchImpl) : { state: "unknown" };
+    if (verdict.state === "throttled") throw throttledError(verdict.reset);
+    if (verdict.state === "invalid") throw coded("GITHUB_IDENTITY_INVALID", "GitHub rejected this host's identity (HTTP 401: revoked or expired gh login or GH_TOKEN); use the next valid host identity, never a login prompt");
+    throw coded("GITHUB_EXCHANGE_REFUSED", `GitHub credential exchange refused (HTTP ${response.status}); check repository access and the server's repository-to-tracker policy`);
+  }
   let entry;
   try { entry = await boundedJson(response); } catch { throw new Error("GitHub exchange returned an invalid response"); }
   if (typeof entry.token !== "string" || !/^[!-~]+$/.test(entry.token) || !githubCredentialFresh(entry, now)) throw new Error("GitHub exchange returned an invalid or expired credential");
-  return { token: entry.token, expires_at: entry.expires_at };
+  return { token: entry.token, expires_at: entry.expires_at, renew_at: new Date(now + (Date.parse(entry.expires_at) - now) / 2).toISOString() };
 }
