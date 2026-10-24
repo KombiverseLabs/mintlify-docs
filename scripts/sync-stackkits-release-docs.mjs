@@ -509,6 +509,7 @@ function validateWindowCoverage(value, authority) {
   for (const row of value.obligations) {
     keys(row, ['suite', 'result'], 'coverage obligation')
     const knownSuites = authority.catalog?.catalog.useCases.flatMap(useCase => { const prefix = `stackkits-standalone-${useCase.id}-restore`; return [prefix, ...(authority.compatibility?.compatibility.os ?? []).map(os => `${prefix}-${os.id}`)] }) ?? []
+    if (authority.catalog?.catalog.useCases.some(useCase => useCase.id === 'files')) knownSuites.push('stackkits-retained-marketplace')
     if (!knownSuites.includes(row.suite)) throw new Error('coverage suite not in released catalog')
     if (!results.includes(row.result) || suites.has(row.suite)) throw new Error('invalid coverage obligation')
     suites.add(row.suite)
@@ -516,9 +517,12 @@ function validateWindowCoverage(value, authority) {
   if (value.declared !== value.obligations.length || results.some(result => value[result === 'not-run' ? 'notRun' : result] !== value.obligations.filter(row => row.result === result).length)) throw new Error('coverage count mismatch')
 }
 
-const OBSERVATION_FIELDS = ['schemaVersion', 'id', 'subject', 'originalOutcome', 'receiptSha256', 'operations', 'testedRelease', 'sourceCommit', 'producerCommit', 'controllerSourceCommit', 'artifactSha256', 'producerArtifactSha256', 'indexSha256', 'evidenceIndexSha256', 'catalogSha256', 'scenarioDefinitionsDigest', 'candidateDigest', 'consumerSha', 'suiteBindingSha256', 'suiteCandidateDigest', 'githubNativeArchiveSha256', 'githubSuiteArchiveSha256', 'githubMetadataSha256', 'windowReportSha256', 'suiteBindingState', 'observedAt', 'runtimeIdentity', 'capacity', 'executionState', 'applicability', 'currentResult', 'reasonCodes']
-const BINDING_FIELDS = ['scope', 'requestedRelease', 'sourceCommit', 'producerCommit', 'artifactSha256', 'indexSha256', 'catalogSha256', 'scenarioDefinitionsDigest', 'candidateDigest', 'consumerSha', 'runtimeIdentity', 'requiredPhases']
+const OBSERVATION_FIELDS = ['schemaVersion', 'id', 'subject', 'operationScope', 'originalOutcome', 'receiptSha256', 'operations', 'testedRelease', 'sourceCommit', 'producerCommit', 'controllerSourceCommit', 'artifactSha256', 'producerArtifactSha256', 'indexSha256', 'evidenceIndexSha256', 'catalogSha256', 'scenarioDefinitionsDigest', 'candidateDigest', 'consumerSha', 'suiteBindingSha256', 'suiteCandidateDigest', 'githubNativeArchiveSha256', 'githubSuiteArchiveSha256', 'githubMetadataSha256', 'windowReportSha256', 'suiteBindingState', 'observedAt', 'runtimeIdentity', 'capacity', 'executionState', 'applicability', 'currentResult', 'reasonCodes']
+const BINDING_FIELDS = ['scope', 'operationScope', 'requestedRelease', 'sourceCommit', 'producerCommit', 'artifactSha256', 'indexSha256', 'catalogSha256', 'scenarioDefinitionsDigest', 'candidateDigest', 'consumerSha', 'runtimeIdentity', 'requiredPhases']
 const OBSERVATION_PHASES = ['install', 'init', 'generate', 'apply', 'verify', 'backup', 'restore', 'owner-setup', 'enrollment', 'connected', 'independent-readback', 'cleanup']
+// Additive StackKits runtime-observation codec; this is no OS-support grade.
+const RETAINED_FILES_SCOPE = 'retained-selective-files-removal'
+const RETAINED_FILES_PHASES = ['verify', 'remove', 'retain-data', 'cleanup']
 const OBSERVATION_RESULTS = ['PASS', 'FAIL', 'PARTIAL', 'NOT_RUN']
 
 function validateRuntimeIdentity(value, document, authority) {
@@ -529,7 +533,7 @@ function validateRuntimeIdentity(value, document, authority) {
   if (!identities.some(identity => identity.family === value.family) ||
       (!unknown && (!['amd64', 'arm64'].includes(value.arch) || !identities.some(identity => identity.family === value.family && identity.distribution === value.distribution && identity.version === value.version) ||
         !os.some(row => row.id === `${value.distribution}-${value.version}` && row.version === value.version)))) throw new Error('runtime OS not in released compatibility inputs')
-  const environments = new Set(['depot-vm', 'disposable-vm', 'retained-vm', 'physical-host', ...(document.environments ?? []).map(row => row.environment)])
+  const environments = new Set(['depot-vm', 'disposable-vm', 'retained-vm', 'retained-lxd-guest', 'physical-host', ...(document.environments ?? []).map(row => row.environment)])
   if (!environments.has(value.environment)) throw new Error('invalid runtime environment')
 }
 
@@ -545,12 +549,13 @@ function validateRuntimeProjection(document, authority) {
   if (document.testedStackkitsVersion !== null) string(document.testedStackkitsVersion, 'tested release', EVIDENCE_RELEASE)
   const binding = document.referenceBinding
   keys(binding, BINDING_FIELDS, 'reference binding')
+  if (binding.operationScope !== undefined && binding.operationScope !== RETAINED_FILES_SCOPE) throw new Error('invalid reference operation scope')
   if (!['product-artifact', 'test-window-candidate'].includes(binding.scope)) throw new Error('invalid reference scope')
   if (binding.requestedRelease !== document.requestedStackkitsVersion) throw new Error('reference release mismatch')
   for (const key of ['sourceCommit', 'producerCommit', 'consumerSha']) if (binding[key] !== undefined) string(binding[key], 'reference source', /^[a-f0-9]{40}$/)
   for (const key of ['artifactSha256', 'indexSha256', 'catalogSha256', 'scenarioDefinitionsDigest', 'candidateDigest']) if (binding[key] !== undefined) string(binding[key], 'reference digest', /^[a-f0-9]{64}$/)
   if (binding.runtimeIdentity !== undefined) validateRuntimeIdentity(binding.runtimeIdentity, document, authority)
-  if (binding.requiredPhases !== undefined && (!Array.isArray(binding.requiredPhases) || !binding.requiredPhases.length || binding.requiredPhases.some(phase => !validPhase(phase)))) throw new Error('invalid required phases')
+  if (binding.requiredPhases !== undefined && (!Array.isArray(binding.requiredPhases) || !binding.requiredPhases.length || binding.requiredPhases.some(phase => !(binding.operationScope === RETAINED_FILES_SCOPE ? RETAINED_FILES_PHASES.includes(phase) : validPhase(phase))))) throw new Error('invalid required phases')
   if (!Array.isArray(document.runtimeObservations) || !OBSERVATION_RESULTS.includes(document.currentResult)) throw new Error('invalid runtime projection')
   const ids = new Set()
   for (const row of document.runtimeObservations) {
@@ -566,6 +571,13 @@ function validateRuntimeProjection(document, authority) {
     const native = row.subject.kind === 'StackKitUseCase' && row.subject.product === 'stackkits' && useCases.has(row.subject.useCase)
     const product = row.subject.kind === 'Product' && row.subject.product === 'guard' && row.subject.useCase === undefined
     if (!native && !product) throw new Error('invalid observation subject')
+    const retained = row.operationScope === RETAINED_FILES_SCOPE
+    if (row.operationScope !== undefined && !retained) throw new Error('invalid observation operation scope')
+    if (retained && (!native || row.subject.useCase !== 'files' || row.suiteBindingState !== 'artifact-verified'
+      || row.runtimeIdentity?.family !== 'linux' || row.runtimeIdentity.distribution !== 'ubuntu'
+      || row.runtimeIdentity.version !== '24.04' || row.runtimeIdentity.arch !== 'amd64'
+      || row.runtimeIdentity.environment !== 'retained-lxd-guest')) throw new Error('invalid retained Files scope')
+    if (!retained && row.runtimeIdentity?.environment === 'retained-lxd-guest') throw new Error('retained runtime requires operation scope')
     for (const key of ['sourceCommit', 'producerCommit', 'controllerSourceCommit', 'consumerSha']) if (row[key] !== undefined) string(row[key], 'observation source', /^[a-f0-9]{40}$/)
     for (const key of ['artifactSha256', 'producerArtifactSha256', 'indexSha256', 'evidenceIndexSha256', 'catalogSha256', 'scenarioDefinitionsDigest', 'candidateDigest', 'suiteBindingSha256', 'suiteCandidateDigest', 'githubNativeArchiveSha256', 'githubSuiteArchiveSha256', 'githubMetadataSha256', 'windowReportSha256']) if (row[key] !== undefined) string(row[key], 'observation digest', /^[a-f0-9]{64}$/)
     if (row.suiteBindingState !== undefined && !['source-only', 'artifact-verified'].includes(row.suiteBindingState)) throw new Error('invalid suite binding')
@@ -585,18 +597,19 @@ function validateRuntimeProjection(document, authority) {
     const phases = new Set()
     for (const operation of row.operations) {
       keys(operation, ['name', 'status'], 'observation operation')
-      if (!validPhase(operation.name) || phases.has(operation.name) || !['passed', 'failed', 'partial', 'not-run'].includes(operation.status)) throw new Error('invalid observation operation')
+      if (!(retained ? RETAINED_FILES_PHASES.includes(operation.name) : validPhase(operation.name)) || phases.has(operation.name) || !['passed', 'failed', 'partial', 'not-run'].includes(operation.status)) throw new Error('invalid observation operation')
       phases.add(operation.name)
     }
+    if (retained && phases.size !== RETAINED_FILES_PHASES.length) throw new Error('incomplete retained operations')
     if (row.applicability === 'current') {
-      if (binding.requestedRelease !== row.testedRelease || !binding.runtimeIdentity || !row.runtimeIdentity
+      if (binding.operationScope !== row.operationScope || binding.requestedRelease !== row.testedRelease || !binding.runtimeIdentity || !row.runtimeIdentity
         || ['sourceCommit', 'producerCommit', 'artifactSha256'].some(key => !binding[key] || binding[key] !== row[key])
         || BINDING_FIELDS.filter(key => !['scope', 'requestedRelease', 'runtimeIdentity', 'requiredPhases'].includes(key)).some(key => binding[key] !== undefined && binding[key] !== row[key])
         || (binding.scope === 'test-window-candidate' && ['indexSha256', 'catalogSha256', 'scenarioDefinitionsDigest', 'candidateDigest', 'consumerSha'].some(key => !binding[key] || binding[key] !== row[key]))
         || JSON.stringify(normalize(binding.runtimeIdentity)) !== JSON.stringify(normalize(row.runtimeIdentity))) throw new Error('unbound current observation')
     } else if (row.currentResult !== 'NOT_RUN') throw new Error('historical observation cannot qualify current release')
     if (row.currentResult === 'PASS') {
-      const mandatory = native ? ['install', 'init', 'generate', 'apply', `setup-${row.subject.useCase}`, 'verify', 'backup', 'restore', 'cleanup'] : ['owner-setup', 'install', 'enrollment', 'connected', 'independent-readback', 'cleanup']
+      const mandatory = retained ? RETAINED_FILES_PHASES : native ? ['install', 'init', 'generate', 'apply', `setup-${row.subject.useCase}`, 'verify', 'backup', 'restore', 'cleanup'] : ['owner-setup', 'install', 'enrollment', 'connected', 'independent-readback', 'cleanup']
       if (row.originalOutcome !== 'PASS' || row.executionState !== 'passed' || [...mandatory, ...(binding.requiredPhases ?? [])].some(name => !row.operations.some(op => op.name === name && op.status === 'passed'))) throw new Error('incomplete current observation')
     }
   }
@@ -619,7 +632,9 @@ function runtimeObservationsMarkdown(release, evidence) {
     const requestedMatches = evidence.referenceBinding.requestedRelease === release.tag && evidence.referenceBinding.sourceCommit === release.sourceSha
     const applicability = requestedMatches ? row.applicability : row.testedRelease && row.testedRelease !== release.tag ? 'historical' : 'unbound'
     const current = requestedMatches ? row.currentResult : 'NOT_RUN'
-    const subject = row.subject.kind === 'StackKitUseCase' ? row.subject.useCase : 'Selfhost + Guard (virtual machine)'
+    const subject = row.subject.kind === 'StackKitUseCase'
+      ? `${row.subject.useCase}${row.operationScope === RETAINED_FILES_SCOPE ? ' (retained selective removal)' : ''}`
+      : 'Selfhost + Guard (virtual machine)'
     text += `| ${md(subject)} | ${md(row.testedRelease ?? 'unbound')} | ${md(row.executionState)} | ${md(applicability)} | ${md(current)} | ${md(row.operations.filter(operation => operation.status === 'passed').map(operation => operation.name).join(', '))} |\n`
   }
   return text
