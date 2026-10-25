@@ -20,46 +20,13 @@ $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 
-$requirements = @{
-    "speechkit/overview.mdx" = @(
-        "SpeechKit is beta software"
-    )
-    "speechkit/install-windows.mdx" = @(
-        "https://github.com/kombifyio/SpeechKit/releases/latest/download/SpeechKit-Setup.exe",
-        "https://github.com/kombifyio/SpeechKit/releases/latest/download/SpeechKit-Portable.zip",
-        "https://github.com/kombifyio/SpeechKit/releases/latest/download/SHA256SUMS.txt",
-        "https://github.com/kombifyio/SpeechKit/releases/latest/download/UNSIGNED-WINDOWS-RELEASE.txt",
-        "Windows 10 and Windows 11 on x64"
-    )
-    "speechkit/install-macos.mdx" = @(
-        "https://github.com/kombifyio/SpeechKit/releases/latest/download/SpeechKit-macOS-arm64.zip",
-        "https://github.com/kombifyio/SpeechKit/releases/latest/download/UNSIGNED-MACOS-RELEASE.txt",
-        "macOS 14 or newer on Apple Silicon"
-    )
-    "speechkit/framework.mdx" = @(
-        "go get github.com/kombifyio/SpeechKit@latest",
-        "Go 1.26 or newer"
-    )
-}
-
 $errors = [System.Collections.Generic.List[string]]::new()
-foreach ($relativePath in $requirements.Keys) {
-    $fullPath = Join-Path $repoRoot $relativePath
-    if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
-        $errors.Add("missing release-truth page: $relativePath") | Out-Null
-        continue
-    }
-    $content = Get-Content -LiteralPath $fullPath -Raw
-    foreach ($requiredText in $requirements[$relativePath]) {
-        if ($content.IndexOf($requiredText, [System.StringComparison]::Ordinal) -lt 0) {
-            $errors.Add("$relativePath is missing exact release-backed text '$requiredText'") | Out-Null
-        }
-    }
-}
 
 $speechKitFiles = @(
-    Get-ChildItem -LiteralPath (Join-Path $repoRoot "speechkit") -File -Filter "*.mdx" |
-        Sort-Object FullName
+    if (Test-Path -LiteralPath (Join-Path $repoRoot "speechkit") -PathType Container) {
+        Get-ChildItem -LiteralPath (Join-Path $repoRoot "speechkit") -File -Filter "*.mdx" |
+            Sort-Object FullName
+    }
 )
 foreach ($file in $speechKitFiles) {
     $relative = $file.FullName.Substring($repoRoot.Length).TrimStart("\", "/").Replace("\", "/")

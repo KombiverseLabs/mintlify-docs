@@ -70,15 +70,17 @@ How the pieces fit:
 - Published locales are listed in `allowedNavigationLanguages` of
   `public-safety-policy.json`, with the localized tab names in
   `allowedNavigationTabs` and `<code>/` in `allowedPagePrefixes`.
-- `node scripts/i18n/check.mjs <code>` (part of `mise run check`) validates the
-  translated files that exist: frontmatter keys, byte-identical code blocks,
-  component tags and internal links and anchors. A page without a counterpart
-  is reported as `pending_translation`, not as a failure; `--strict` (or
-  `I18N_STRICT=1`) fails on it.
-- A generated translation must keep frontmatter keys, MDX components, fenced
-  code and product names (kombify, StackKits, Techstack, Companion, SpeechKit,
-  Paperwork, kombify Cloud, kombify Sites, Simulate, CUE) unchanged and point
-  internal links to `/<code>/...`; the check enforces this.
+- `node scripts/i18n/check.mjs <code>` (part of `mise run check`) validates
+  existing translations: required frontmatter, visibility and routing values,
+  provenance restrictions, and internal links and anchors. Optional metadata,
+  examples and components may differ. Missing counterparts are reported as
+  `pending_translation`; presence enforcement via `--strict` is no longer
+  supported, and the obsolete `I18N_STRICT` environment variable is ignored
+  with a diagnostic.
+- Translations retain product names (kombify, StackKits, Techstack, Companion,
+  SpeechKit, Paperwork, kombify Cloud, kombify Sites, Simulate, CUE) and point
+  internal links to `/<code>/...`.
+
 - Generated English pages (`stackkits/reference/cli/*`,
   `techstack/reference/cli/*`, release pages) are rendered from release data;
   their localized copies arrive with the next translation pull request.
@@ -114,8 +116,8 @@ mise run local:e2e
 | `mise run postlive:wait-exact-live` | Wait for a successful `docs.kombify.io` deployment at exact `SOURCE_SHA`. |
 | `scripts/check-stackkits-release-truth.ps1` | Installer commands on the current public release, no stale lifecycle wording. |
 | `scripts/check-stackkits-external-links.ps1` | Website, installer and release destinations of the StackKits quickstart. |
-| `scripts/check-speechkit-release-truth.ps1` | SpeechKit version, platform, module and Windows assets pinned to the public release. |
-| `scripts/check-techstack-public-boundary.ps1` | Windows Alpha links, pre-1.0 availability boundary, generated reference bound to one release. |
+| `scripts/check-speechkit-release-truth.ps1` | Validate offered SpeechKit claims and mutable download links; check existing generated release blocks. |
+| `scripts/check-techstack-public-boundary.ps1` | Validate existing generated references against one release and source SHA; reject private API operations. |
 | `scripts/check-product-docs-external-links.ps1` | Public Techstack entry and SpeechKit release destinations. |
 | `scripts/check-code-example-relevance.ps1` | Executable and structured examples only on pages with a topic-specific workflow or configuration. |
 | `scripts/render-api-surface-reference.mjs` | Render a release's OpenAPI and `api-surface.json` into the API and CLI reference; `--check` reports drift. |

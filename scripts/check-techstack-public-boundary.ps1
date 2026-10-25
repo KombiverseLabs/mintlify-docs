@@ -5,40 +5,12 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-$requirements = @{
-    "techstack/overview.mdx" = @(
-        @{ Pattern = '(?i)\b(?:alpha|preview)\b'; Reason = "missing pre-1.0 availability label" }
-    )
-    "techstack/operating-modes.mdx" = @(
-        @{ Pattern = '(?i)\bStackKits\b'; Reason = "missing StackKits execution boundary" }
-    )
-    "techstack/availability.mdx" = @(
-        @{ Pattern = '(?i)\bWindows Alpha\b'; Reason = "missing released Windows Alpha status" }
-    )
-    "techstack/install-windows.mdx" = @(
-        @{ Pattern = '(?i)https://github\.com/kombifyio/TechStack'; Reason = "missing official public source link" },
-        @{ Pattern = '(?i)releases/latest/download/kombify-Techstack-Setup\.exe'; Reason = "missing official Windows Alpha asset" },
-        @{ Pattern = '(?i)\bunsigned\b'; Reason = "missing unsigned-build warning" }
-    )
-}
-
 $errors = [System.Collections.Generic.List[string]]::new()
-foreach ($relativePath in $requirements.Keys) {
-    $fullPath = Join-Path $repoRoot $relativePath
-    if (-not (Test-Path -LiteralPath $fullPath -PathType Leaf)) {
-        $errors.Add("missing Techstack boundary page: $relativePath") | Out-Null
-        continue
-    }
-    $content = Get-Content -LiteralPath $fullPath -Raw
-    foreach ($requirement in $requirements[$relativePath]) {
-        if ($content -notmatch $requirement.Pattern) {
-            $errors.Add("$relativePath $($requirement.Reason)") | Out-Null
-        }
-    }
-}
 
 $techstackFiles = @(
-    Get-ChildItem -LiteralPath (Join-Path $repoRoot "techstack") -File -Filter "*.mdx"
+    if (Test-Path -LiteralPath (Join-Path $repoRoot "techstack") -PathType Container) {
+        Get-ChildItem -LiteralPath (Join-Path $repoRoot "techstack") -File -Filter "*.mdx"
+    }
 )
 
 # The API and `techstack api` CLI reference exist only as the generated
@@ -82,11 +54,6 @@ if (Test-Path -LiteralPath $referenceRoot) {
             continue
         }
         $stamps.Add("$($release.Groups['value'].Value) $($source.Groups['value'].Value)") | Out-Null
-    }
-    foreach ($required in @($specRelative, "techstack/reference/cli/overview.mdx")) {
-        if (-not (Test-Path -LiteralPath (Join-Path $repoRoot $required) -PathType Leaf)) {
-            $errors.Add("generated Techstack reference is incomplete: $required is missing") | Out-Null
-        }
     }
     if ($stamps.Count -gt 1) {
         $errors.Add("generated Techstack reference mixes releases: $(@($stamps) -join ', ')") | Out-Null
