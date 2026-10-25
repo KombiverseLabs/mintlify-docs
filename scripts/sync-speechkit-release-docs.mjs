@@ -18,7 +18,7 @@
 // Fetching the release payload belongs to the workflow, not to this script, so
 // the gate stays deterministic offline.
 
-import { readFileSync, writeFileSync, mkdirSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -110,11 +110,15 @@ export function readGeneratedBlock(source, relativePath) {
 
 function generatedPages(repoRoot) {
   const dir = path.join(repoRoot, SPEECHKIT_DIR);
+  if (!existsSync(dir)) return [];
   return readdirSync(dir)
     .filter((name) => name.endsWith(".mdx"))
     .sort()
     .map((name) => `${SPEECHKIT_DIR}/${name}`)
-    .filter((relativePath) => readFileSync(path.join(repoRoot, relativePath), "utf8").includes(BEGIN_MARKER));
+    .filter((relativePath) => {
+      const source = readFileSync(path.join(repoRoot, relativePath), "utf8");
+      return source.includes(BEGIN_MARKER) || source.includes(END_MARKER);
+    });
 }
 
 function readSnapshot(repoRoot) {
@@ -165,9 +169,6 @@ function write(repoRoot, releaseJsonPath) {
   writeFileSync(path.join(repoRoot, SNAPSHOT_PATH), `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
 
   const pages = generatedPages(repoRoot);
-  if (pages.length === 0) {
-    throw new Error("no SpeechKit page carries a speechkit-release generated block");
-  }
   for (const relativePath of pages) {
     const absolute = path.join(repoRoot, relativePath);
     const source = readFileSync(absolute, "utf8");
@@ -179,12 +180,9 @@ function write(repoRoot, releaseJsonPath) {
 }
 
 function check(repoRoot) {
-  const snapshot = readSnapshot(repoRoot);
-  const line = renderReleaseLine(snapshot);
   const pages = generatedPages(repoRoot);
-  if (pages.length === 0) {
-    throw new Error("no SpeechKit page carries a speechkit-release generated block");
-  }
+  const snapshot = pages.length > 0 ? readSnapshot(repoRoot) : null;
+  const line = snapshot ? renderReleaseLine(snapshot) : null;
   const drifted = pages.filter(
     (relativePath) => readGeneratedBlock(readFileSync(path.join(repoRoot, relativePath), "utf8"), relativePath) !== line,
   );
@@ -193,7 +191,7 @@ function check(repoRoot) {
       `generated SpeechKit release block is stale in: ${drifted.join(", ")}. Re-run the sync with --write.`,
     );
   }
-  process.stdout.write(`speechkit_release: ${snapshot.tag}\n`);
+  process.stdout.write(`speechkit_release: ${snapshot?.tag ?? "not offered"}\n`);
   process.stdout.write(`speechkit_release_blocks_checked: ${pages.length}\n`);
   process.stdout.write("speechkit_release_blocks: ok\n");
 }

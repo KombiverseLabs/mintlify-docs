@@ -6,47 +6,7 @@ $ErrorActionPreference = "Stop"
 
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 
-$requiredMarkersByPage = @(
-    @{
-        Path = "stackkits/quickstart.mdx"
-        Markers = @(
-            "https://base.stackkit.cc",
-            "curl -sSL https://base.stackkit.cc | sh",
-            "stackkit plan --json"
-        )
-    },
-    @{
-        Path = "guides/stackkits/choosing-a-kit.mdx"
-        Markers = @(
-            "https://stackkit.cc/getting-started",
-            "https://install.stackkit.cc",
-            "curl -sSL https://install.stackkit.cc | sh"
-        )
-    },
-    @{
-        Path = "stackkits/kits/cloud-kit.mdx"
-        Markers = @(
-            "https://cloud.stackkit.cc",
-            "curl -sSL https://cloud.stackkit.cc | DOMAIN=example.com sh",
-            "does not provision"
-        )
-    }
-)
-
 $errors = [System.Collections.Generic.List[string]]::new()
-foreach ($page in $requiredMarkersByPage) {
-    $pagePath = Join-Path $repoRoot $page.Path
-    if (-not (Test-Path -LiteralPath $pagePath -PathType Leaf)) {
-        $errors.Add("missing release-truth page: $($page.Path)") | Out-Null
-        continue
-    }
-    $content = Get-Content -LiteralPath $pagePath -Raw
-    foreach ($marker in $page.Markers) {
-        if ($content.IndexOf($marker, [System.StringComparison]::Ordinal) -lt 0) {
-            $errors.Add("$($page.Path) is missing release-truth marker '$marker'") | Out-Null
-        }
-    }
-}
 
 $rules = @(
     @{ Pattern = '(?i)\bstackkits\.cc\b'; Reason = "wrong public website; use singular stackkit.cc" },

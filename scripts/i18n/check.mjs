@@ -4,13 +4,11 @@
 //   node scripts/i18n/check.mjs de                 check every English page
 //   node scripts/i18n/check.mjs de path/a path/b   check only the given page paths (no .mdx)
 //
-// Checks per page: counterpart exists, frontmatter keys and non-prose values
-// (icon, mode) match, fenced code blocks are byte-identical, the same JSX
-// component tags appear, and every internal link resolves (page links must
-// point to the locale, asset links stay shared, heading anchors must exist).
+// Checks existing translations for safe frontmatter and resolved internal links.
+// Translations may use different prose, examples and components.
 // Exit code 1 on any finding.
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
-import { join, dirname, posix } from "node:path";
+import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -19,12 +17,16 @@ if (!code) {
   console.error("usage: check.mjs <locale> [page paths]");
   process.exit(2);
 }
-// English is the only hand-maintained language. Mintlify's automatic
-// translation opens pull requests with the locale copies, so a page without a
-// counterpart is expected between a source change and that pull request. It is
-// reported as pending; --strict (or I18N_STRICT=1) restores the old failure.
-const strict = process.argv.includes("--strict") || process.env.I18N_STRICT === "1";
-const only = process.argv.slice(3).filter((a) => a !== "--strict");
+// A missing counterpart is pending translation, not a publication failure.
+const only = process.argv.slice(3);
+const unknownOption = [code, ...only].find((arg) => arg.startsWith("-"));
+if (unknownOption) {
+  console.error(`unsupported option ${unknownOption}; usage: check.mjs <locale> [page paths]`);
+  process.exit(2);
+}
+if (process.env.I18N_STRICT !== undefined) {
+  console.error("I18N_STRICT is obsolete and ignored; missing translations are reported as pending.");
+}
 const pending = [];
 const skipDirs = new Set([".git", ".github", "node_modules", "openwiki", "standards", "data", "docs-guidelines", "scripts", ".beads", ".kombify", ".mintlify"]);
 const locales = new Set(["de", "es", "zh-Hans", "hi", "ar", "cn"]);
@@ -50,11 +52,8 @@ const split = (src) => {
 };
 // Generator provenance keys describe the English render, not a translation.
 const GENERATED_KEYS = new Set(["generated", "generated_by", "content_hash", "source_hash"]);
-const fmKeys = (fm) => [...fm.matchAll(/^([A-Za-z][\w-]*):/gm)].map((m) => m[1]).filter((k) => !GENERATED_KEYS.has(k));
 const fmValue = (fm, k) => fm.match(new RegExp(`^${k}:\s*(.*)$`, "m"))?.[1].trim().replace(/^["']|["']$/g, "");
-const fences = (body) => [...body.matchAll(/^([ \t]*)(`{3,})[^\n]*\n[\s\S]*?\n\1\2[ \t]*$/gm)].map((m) => m[0].split("\n").map((l) => l.trimStart()).join("\n"));
 const stripCode = (body) => body.replace(/^([ \t]*)(`{3,})[^\n]*\n[\s\S]*?\n\1\2[ \t]*$/gm, "").replace(/`[^`\n]*`/g, "");
-const tags = (body) => [...stripCode(body).matchAll(/<([A-Z][A-Za-z0-9]*)[\s>/]/g)].map((m) => m[1]).sort().join(",");
 const slug = (t) =>
   t.replace(/<[^>]*>/g, "").replace(/[`*_]/g, "").replace(/\[([^\]]*)\]\([^)]*\)/g, "$1").trim().toLowerCase()
     .replace(/[^\p{L}\p{N}\s_-]/gu, "").replace(/\s/g, "-");
@@ -82,21 +81,12 @@ let linkCount = 0;
 for (const page of pages) {
   const enSrc = read(page);
   const dePath = `${code}/${page}`;
-  if (!isPage(dePath)) { if (strict) add(page, "missing translation"); else pending.push(page); continue; }
+  if (!isPage(dePath)) { pending.push(page); continue; }
   const en = split(enSrc), de = split(read(dePath));
   if (!en || !de) { add(page, "frontmatter missing or malformed"); continue; }
   for (const k of GENERATED_KEYS) if (fmValue(de.fm, k) !== undefined) add(page, `frontmatter ${k} must not be copied to a translation`);
-  if (fmKeys(en.fm).join() !== fmKeys(de.fm).join()) add(page, `frontmatter keys differ (${fmKeys(en.fm)} vs ${fmKeys(de.fm)})`);
-  for (const k of ["icon", "mode", "hidden", "public"]) if (fmValue(en.fm, k) !== fmValue(de.fm, k)) add(page, `frontmatter ${k} changed`);
+  for (const k of ["mode", "hidden", "public"]) if (fmValue(en.fm, k) !== fmValue(de.fm, k)) add(page, `frontmatter ${k} changed`);
   for (const k of ["title", "description"]) if (!fmValue(de.fm, k)) add(page, `frontmatter ${k} empty`);
-  const ef = fences(en.body), df = fences(de.body);
-  if (ef.length !== df.length) add(page, `code block count ${ef.length} vs ${df.length}`);
-  else ef.forEach((b, i) => { if (b !== df[i]) add(page, `code block #${i + 1} differs`); });
-  if (tags(en.body) !== tags(de.body)) add(page, "JSX component tags differ");
-  const enImports = enSrc.match(/^import .*$/gm) ?? [];
-  const deImports = read(dePath).match(/^import .*$/gm) ?? [];
-  if (enImports.length !== deImports.length) add(page, "import count differs");
-
   const ownAnchors = anchorsOf(de.body);
   for (const target of linkTargets(de.body)) {
     if (external(target)) continue;
