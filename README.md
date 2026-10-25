@@ -115,10 +115,10 @@ mise run local:e2e
 | `mise run remote:public-safety` | Deployed route and projection matrix. |
 | `mise run postlive:wait-exact-live` | Wait for a successful `docs.kombify.io` deployment at exact `SOURCE_SHA`. |
 | `scripts/check-stackkits-release-truth.ps1` | Installer commands on the current public release, no stale lifecycle wording. |
-| `scripts/check-stackkits-external-links.ps1` | Website, installer and release destinations of the StackKits quickstart. |
+| `scripts/check-stackkits-external-links.ps1` | Optional registered StackKits destinations actually offered as publishable literals. |
 | `scripts/check-speechkit-release-truth.ps1` | Validate offered SpeechKit claims and mutable download links; check existing generated release blocks. |
 | `scripts/check-techstack-public-boundary.ps1` | Validate existing generated references against one release and source SHA; reject private API operations. |
-| `scripts/check-product-docs-external-links.ps1` | Public Techstack entry and SpeechKit release destinations. |
+| `scripts/check-product-docs-external-links.ps1` | Optional registered Techstack and SpeechKit destinations actually offered as publishable literals. |
 | `scripts/check-code-example-relevance.ps1` | Executable and structured examples only on pages with a topic-specific workflow or configuration. |
 | `scripts/render-api-surface-reference.mjs` | Render a release's OpenAPI and `api-surface.json` into the API and CLI reference; `--check` reports drift. |
 
@@ -157,3 +157,32 @@ bd show <id>
 bd update <id> --claim
 bd close <id>
 ```
+
+The external checks retain their six/ten destination registries as a bounded
+coverage scope, not required content. They HEAD only exact registered HTTPS
+literals offered in non-ignored MDX or `docs.json` href values; no offered
+registered destinations succeeds with `checked: 0`. Fragments are removed;
+path case and queries remain significant (a latest-download link is not a
+latest-release link). Redirects stay HTTPS without credentials, at most five
+hops within the original per-destination timeout; HEAD never downloads assets.
+Logs omit query strings and redirect locations.
+
+Literal coverage includes inline/reference Markdown links, autolinks, literal
+JSX href attributes (including quoted expressions), and used local default MDX
+snippet imports. Comments, frontmatter, inline/fenced code examples, ignored
+files and unused snippets are excluded. Discovery and the public-safety MDX
+scan include dot-prefixed files because Mintlify serves those pages too; the
+privacy scan retains its existing allowlist and forbidden-content checks. A narrow exception retains literal
+`curl`/`wget` installer URLs on install/base/cloud.stackkit.cc in shell fences.
+Braced MDX expressions are omitted except quoted literal href values. MDX
+files declaring exports are reported as unevaluated and skipped, so unused JSX
+exports cannot create probes. Per-file diagnostics and aggregate unresolved
+expression/exported-module counts are reported separately from offered literals;
+values are never logged or evaluated. Dynamic MDX and JavaScript/JSX component
+evaluation are outside this scope; this
+is not an all-links audit or historical-link crawl. New destinations need an
+explicit registry update to receive these network checks.
+
+Remote safety inspects `llms.txt` when present (200), accepts its absence
+(404/410), and rejects other statuses or transport failures, as for sitemap.
+Private paths and markers still fail when exposed in a present projection.

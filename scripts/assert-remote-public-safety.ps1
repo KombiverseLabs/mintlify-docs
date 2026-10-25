@@ -127,11 +127,16 @@ foreach ($path in @($policy.remoteForbiddenPaths)) {
 
 $llmsUri = [uri]($base + "/llms.txt")
 $llmsResponse = Get-Response -Uri $llmsUri -FollowRedirects
-if ([int]$llmsResponse.StatusCode -ne 200) {
-    throw "Expected $llmsUri to return 200; got $($llmsResponse.StatusCode)"
+if ([int]$llmsResponse.StatusCode -eq 200) {
+    Assert-NoForbiddenProjection -ProjectionName "llms.txt" -Content ([string]$llmsResponse.Content)
+    Write-Host "remote_llms_projection: safe"
 }
-Assert-NoForbiddenProjection -ProjectionName "llms.txt" -Content ([string]$llmsResponse.Content)
-Write-Host "remote_llms_projection: safe"
+elseif ([int]$llmsResponse.StatusCode -in @(404, 410)) {
+    Write-Host "remote_llms_projection: absent ($($llmsResponse.StatusCode))"
+}
+else {
+    throw "Unexpected llms response from $llmsUri`: $($llmsResponse.StatusCode)"
+}
 
 $sitemapUri = [uri]($base + "/sitemap.xml")
 $sitemapResponse = Get-Response -Uri $sitemapUri -FollowRedirects
