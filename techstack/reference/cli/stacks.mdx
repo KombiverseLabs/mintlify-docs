@@ -4,11 +4,11 @@ description: "Generated reference for the techstack api stacks commands"
 sidebarTitle: "stacks"
 generated: true
 generated_by: "render-api-surface-reference"
-release: "v0.41.15"
-content_hash: "sha256:58866d0be6395935e0c83f5a61a255add2bc059fb4c73e005fc356b5edf04bae"
-source_hash: "b5b268760b34ada8a17c3c2f06ee031f242ec22e"
+release: "v0.43.5"
+content_hash: "sha256:e52553305854fbc269be110a0577183cde0787903b53eb0fb00ea15e6404dbde"
+source_hash: "20de7539f431df6bec4472a741f6397bdb4f16f8"
 ---
-<Note>Generated from the Techstack v0.41.15 release (source `b5b268760b34`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+<Note>Generated from the Techstack v0.43.5 release (source `20de7539f431`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
 
 ## techstack api stacks create
 
@@ -73,6 +73,8 @@ techstack api stacks deploy <stack-id> [flags]
 
 Decommission one StackKit deployment and its infrastructure.
 
+Removes the stack through its nodes: StackKits removes every applied workload on the server that runs it, then the control plane releases the stack. When a server holding the stack was deleted, the node cannot answer; the request is then refused with `server_absence_confirmation_required` and the offline servers, and is sent again with `offline_removal.confirm_server_ids` naming exactly those servers. The control plane accepts that confirmation only for a server it can prove offline (no heartbeat for longer than the stale window), without a lease and not operated by kombify or a provider: leased and provider-operated servers are proven absent by their provider. A confirmed server is never dispatched to; its agent credential is revoked and the server is retired. A server that reported recently is removed through its node.
+
 ```bash
 techstack api stacks destroy <stack-id> [flags]
 ```
@@ -88,6 +90,8 @@ techstack api stacks destroy <stack-id> [flags]
 | Argument | Type | Description |
 | --- | --- | --- |
 | `<stack-id>` | string | **Required.** Stack ID. |
+| `--offline-removal` | object | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
 
 ## techstack api stacks drift check
 
@@ -600,7 +604,7 @@ techstack api stacks routing targets <stack-id> [flags]
 
 Queue an owned node's typed Advanced or backup operation.
 
-Uses the same tenant- and owner-scoped dispatcher as the operator UI. The node executes through its authenticated channel, current release pin, native Advanced catalog and issued operation capability. Techstack never executes Terramate, apply, rollback, backup or restore itself. A mutation requires owner_approved; service locks and active server maintenance are checked before enqueue. Direct backup_run and backup_configure remain Basement-only; managed kits keep their schedule and sealed target-renewal authority. backup_configure derives the node's target and plan from existing custody and accepts no credential fields. advanced_change_set requires candidate_spec; rollback requires an exact rollback_target_ref; restore_drill may reuse a snapshot_anchor_id. ai_provider lets Private AI offer an external OpenAI-compatible provider: the kombify Wallet seals the item wallet_item_id (the provider's API key) to the node, which must be listed as a host target of that item, the node binds it to ai_provider_base_url, and a drift reconcile applies the setting. ai_provider_disable removes it. Restore activation requires exactly one Idempotency-Key header, while other operations have no replay guarantee. Acceptance is not execution success; read the returned job and its scoped result to observe effects.
+Uses the same tenant- and owner-scoped dispatcher as the operator UI. The node executes through its authenticated channel, current release pin, native Advanced catalog and issued operation capability. Techstack never executes Terramate, apply, rollback, backup or restore itself. A mutation requires owner_approved; service locks and active server maintenance are checked before enqueue. Direct backup_run and backup_configure remain Basement-only; managed kits keep their schedule and sealed target-renewal authority. backup_configure derives the node's target and plan from existing custody and accepts no credential fields. advanced_change_set requires candidate_spec; rollback requires an exact rollback_target_ref; restore_drill may reuse a snapshot_anchor_id. ai_provider lets Private AI offer an external OpenAI-compatible provider: the kombify Wallet seals the item wallet_item_id (the provider's API key) to the node, which must be listed as a host target of that item, the node binds it to ai_provider_base_url, and a drift reconcile applies the setting. ai_provider_disable removes it. ssh_trust_recipient and ssh_trust_apply let the server trust the owner's kombify Wallet SSH CA: ssh_trust_recipient has the node answer the owner's recipient_challenge with its owner-signed recipient statement and returns it with the host target the owner lists on the CA item; the owner then asks the Wallet for the ssh-ca-trust delivery and ssh_trust_apply hands its sealed_delivery to the node, which installs TrustedUserCAKeys and the principals of each local user. Restore activation requires exactly one Idempotency-Key header, while other operations have no replay guarantee. Acceptance is not execution success; read the returned job and its scoped result to observe effects.
 
 ```bash
 techstack api stacks stackkit run <stack-id> [flags]
@@ -624,11 +628,13 @@ techstack api stacks stackkit run <stack-id> [flags]
 | `--candidate-spec` | object | Canonical candidate StackSpec validated by the pinned node executor; required for advanced_change_set. |
 | `--operation-dry-run` | boolean | — |
 | `--offline` | boolean | — |
-| `--operation` | string | **Required.** One of `plan`, `apply`, `verify`, `upgrade`, `drift_detect`, `drift_reconcile`, `advanced_change_set`, `rollback`, `restore_drill`, `backup_run`, `backup_configure`, `backup_status`, `backup_restore`, `backup_restore_activate`, `backup_restore_recover`, `ai_provider`. |
+| `--operation` | string | **Required.** One of `plan`, `apply`, `verify`, `upgrade`, `drift_detect`, `drift_reconcile`, `advanced_change_set`, `rollback`, `restore_drill`, `backup_run`, `backup_configure`, `backup_status`, `backup_restore`, `backup_restore_activate`, `backup_restore_recover`, `ai_provider`, `ssh_trust_recipient`, `ssh_trust_apply`. |
 | `--owner-approved` | boolean | — |
+| `--recipient-challenge` | string | The owner's fresh challenge the node's recipient statement answers; ssh_trust_recipient only. |
 | `--restore-plan-hash` | string | — |
 | `--restore-result-id` | string | — |
 | `--rollback-target-ref` | string | Exact executor-state snapshot or change-set digest. |
+| `--sealed-delivery` | string | The kombify Wallet's sealed ssh-ca-trust, ssh-ca-revoke or ssh-host-certificate envelope (JSON text, public material only); ssh_trust_apply only. |
 | `--snapshot-anchor-id` | string | — |
 | `--stackkit` | string | Optional execution binding; normally derived from the stack's managed rollout. |
 | `--target-release` | string | — |
