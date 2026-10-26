@@ -4,11 +4,53 @@ description: "Generated reference for the techstack api servers commands"
 sidebarTitle: "servers"
 generated: true
 generated_by: "render-api-surface-reference"
-release: "v0.41.15"
-content_hash: "sha256:58866d0be6395935e0c83f5a61a255add2bc059fb4c73e005fc356b5edf04bae"
-source_hash: "b5b268760b34ada8a17c3c2f06ee031f242ec22e"
+release: "v0.43.5"
+content_hash: "sha256:e52553305854fbc269be110a0577183cde0787903b53eb0fb00ea15e6404dbde"
+source_hash: "20de7539f431df6bec4472a741f6397bdb4f16f8"
 ---
-<Note>Generated from the Techstack v0.41.15 release (source `b5b268760b34`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+<Note>Generated from the Techstack v0.43.5 release (source `20de7539f431`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api servers availability get
+
+How available the server is, observed and as the owner confirmed it.
+
+The class the Layout Planner reads for this machine (`always-on`, `part-time` or `unknown`) and where it came from. The observed class folds the server's connection transitions over 14 days: `always-on` at 97 % uptime or more, `part-time` below 90 %, `unknown` in between and whenever fewer than three days were observed. The owner's confirmation, when there is one, is the class; the observed class stays next to it. Owner only.
+
+```bash
+techstack api servers availability get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/availability` |
+| Changes state | No |
+| MCP tool | None |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+
+## techstack api servers availability set
+
+Confirm or correct how available the server is.
+
+The owner says whether the machine is on all the time (`always-on`) or switched off at times (`part-time`). The statement is stored next to what the Guard observed and replaces the observed class for planning. `unknown` or `null` withdraws it. Owner only; any other caller gets 404.
+
+```bash
+techstack api servers availability set <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/servers/{serverId}/availability` |
+| Changes state | Yes |
+| MCP tool | None |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `--class` | string | **Required.** always-on or part-time confirms; unknown or null withdraws the confirmation. One of `always-on`, `part-time`, `unknown`, `null`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
 
 ## techstack api servers detach
 
