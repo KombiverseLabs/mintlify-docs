@@ -1,0 +1,79 @@
+---
+title: "API stability and deprecation"
+description: "Which parts of the kombify API you can build on, how changes are versioned, and how long a removal is announced."
+sidebarTitle: "API stability"
+icon: "code-branch"
+---
+
+The kombify API is served at `https://api.kombify.io`. This page states which
+route families you can rely on and how kombify changes them.
+
+## Stability classes
+
+Every route family has one class. The class applies to the operations in the API
+reference. A route that is not in the reference is not part of the API you build on.
+
+| Class | What it means for you |
+| --- | --- |
+| Stable | You can build on it. It is frozen from the 1.0 API release: changes inside a version only add things. |
+| Protocol | The messages follow a shared protocol (A2A, AG-UI, A2UI, MCP, the Connect contract). The paths and error format are frozen like Stable; message shapes follow the protocol's own versions. |
+| Preview | Documented, but the product behind it can still change. Changes are listed in the release notes, without a deprecation window. |
+
+| Class | Route families |
+| --- | --- |
+| Stable | `/v1/ai`, `/v1/embed`, `/v1/agents`, `/v1/orchestrator`, `/v1/techstack`, `/v1/paperwork`, `/v1/speechkit`, `/v1/notifications`, `/v1/subdomains`, `/v1/content`, `/v1/connectors`, `/v1/harnesses`, `/v1/ril`, `/v1/decisions`, `/v1/supply-dock`, `/v2/supply-dock` |
+| Protocol | `/a2a`, `/ag-ui`, `/a2ui`, `/v1/mcp/knowledge`, `/v1/connect` |
+
+Every other documented route family is Preview until this page lists it.
+
+## Versioning
+
+The major version is the first path segment, such as `/v1`. Inside a version
+these changes are additive and can arrive at any time: a new route, a new
+optional request field, a new response field, a new value in an open response
+list, a new denial `reason_code`. Write your client to ignore fields it does not
+know.
+
+These changes are breaking and only ship as a new major version beside the old
+one: narrowing accepted input, making an optional field required, changing the
+type or meaning of a field, changing the status class of an existing outcome, and
+tightening sign-in or entitlement requirements for an existing caller without a
+new, documented denial.
+
+Removing a route, field or denial `reason_code` is allowed inside a version only
+through the deprecation sequence below. Security and legal fixes can break a
+contract before a window ends; the release note then says so and gives the
+migration path.
+
+Health and discovery endpoints (`/gateway/health`, `/.well-known/*`) are
+unversioned and follow the additive rule. `/v1/blog` is being retired and is not
+part of the freeze.
+
+## Deprecation
+
+A Stable or Protocol route, field or `reason_code` is removed only after this
+sequence:
+
+1. **Announcement.** The API reference marks the operation as deprecated with its
+   successor (for a field or `reason_code`, the operation that returns it says
+   so), and the release note names it. The announcement sets a sunset date.
+2. **Signal.** From the announcing release a deprecated route answers with the
+   `Deprecation` and `Sunset` headers and a `Link` header with
+   `rel="successor-version"` that points to the replacement. A field or
+   `reason_code` is announced in the reference and the release note.
+3. **Window.** At least 180 days pass between the announcement and the removal of
+   a route, and at least 90 days for a field or `reason_code`. If callers still
+   use it at the sunset date, the date moves later.
+4. **Removal.** After removal the route answers `410` and names its successor for
+   at least one more release before the path is freed.
+
+Preview routes have no window; their removal still appears in the release notes.
+
+## Superseded routes without a sunset date
+
+`GET /v1/agents/workbench-orchestrator/harnesses` is superseded by
+`GET /v1/agents/harnesses`. No sunset date is announced for it, so no deprecation
+window runs. When one is announced, the sequence above applies.
+
+See also the [changelog](/changelog/overview) and
+[Identity and access](/identity/overview).
