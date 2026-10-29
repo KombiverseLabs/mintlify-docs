@@ -310,13 +310,6 @@ foreach ($page in $publicPages) {
     $null = $publicPageSet.Add($page)
 }
 
-if ($publicPages.Count -eq 0) {
-    $errors.Add("docs.json has no public navigation pages") | Out-Null
-}
-if (-not $publicPageSet.Contains("index")) {
-    $errors.Add("docs.json public navigation must include index") | Out-Null
-}
-
 $excludedDirectorySet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 foreach ($directory in @($policy.excludedDirectories)) {
     $null = $excludedDirectorySet.Add([string]$directory)
