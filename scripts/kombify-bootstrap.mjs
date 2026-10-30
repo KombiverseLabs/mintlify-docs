@@ -46,14 +46,17 @@
 //
 // - Owner rules: `standards/rules.md` of Soulcreek/agent-home, from this
 //   device's Agent Home checkout (fast-forwarded on a clean main), else from
-//   GitHub through gh, else from the last cached copy.
+//   GitHub through gh, else from the last cached copy. A Claude cloud session
+//   whose git proxy refuses the unattached repository installs Agent Home
+//   from a sealed bundle of main the broker workflow hands it (`context`,
+//   grant agent-home), and kombify-up prints the rules after that step.
 //   flags: --project P --config C override the repository scope.
 //
 // Prints names, sources and statuses only, never a secret value.
 // KOMBIFY_BOOTSTRAP_SKIP=1 disables it.
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -214,14 +217,19 @@ function ghWithHostIdentity(args, { run, env }) {
 // moved, and the rules then come from GitHub, else from the last cached copy.
 export function ownerRules({ home = homedir(), run = spawnSync, env = process.env } = {}) {
   const notes = [];
+  // A cloud session's checkout was refreshed at session start by kombify-up's
+  // agent-home step, through the attached source or the broker bundle; a
+  // fast-forward here would only meet the proxy's refusal of an unattached one.
+  const cloud = env.CLAUDE_CODE_REMOTE === 'true';
   let root = '';
   try { root = JSON.parse(readFileSync(join(home, '.agents', 'agent-home', 'state.json'), 'utf8')).repo_root ?? ''; } catch { /* no local install */ }
+  if (!root && cloud && existsSync(join(home, '.agent-home', '.git'))) root = join(home, '.agent-home');
   if (root && existsSync(join(root, '.git'))) {
     const git = (...args) => run('git', ['-C', root, ...args], { encoding: 'utf8', timeout: 20_000 });
     const branch = git('rev-parse', '--abbrev-ref', 'HEAD').stdout?.trim();
     const dirty = git('status', '--porcelain', '--untracked-files=no').stdout?.trim();
     if (branch === 'main' && !dirty) {
-      const pull = fastForwardAgentHome(root, { run, env });
+      const pull = cloud ? { ok: true } : fastForwardAgentHome(root, { run, env });
       if (!pull.ok) notes.push(`agent-home ${root}: fast-forward failed (${pull.reason})`);
       const local = join(root, OWNER_RULES_PATH);
       if (existsSync(local)) return { text: readFileSync(local, 'utf8'), source: `${root}@${git('rev-parse', '--short', 'HEAD').stdout?.trim()}`, notes };
@@ -522,18 +530,34 @@ export async function main(argv, env = process.env) {
   if (check && (own.includes('--install') || own.includes('--hook') || ['run', 'packages', 'rules'].includes(command))) throw new Error('--check cannot be combined with an installing or executing command');
   const scope = resolveScope({ argv: own });
   const option = (flag) => { const index = own.indexOf(flag); return index >= 0 ? own[index + 1] : undefined; };
-  const personalContext = (install) => prepareAgentHome({
-    home: option('--home'), checkout: option('--agent-home'), agents: option('--agents'), device: option('--device'), install,
-  });
+  // A Claude cloud session reaches Soulcreek/agent-home through git only as an
+  // attached source; when the proxy refuses the clone or fetch, the broker
+  // workflow hands it a sealed bundle of main instead (grant agent-home). A
+  // checkout refreshed from a bundle within the hour (resume, compaction) is
+  // used as it is, and the kombify-up CI canary never takes this route.
+  const personalContext = async (install) => {
+    const options = { home: option('--home'), checkout: option('--agent-home'), agents: option('--agents'), device: option('--device'), install };
+    const context = prepareAgentHome(options);
+    if (!install || env.CLAUDE_CODE_REMOTE !== 'true' || env.KOMBIFY_UP_CANARY === '1' || !['agent_home_source_access_failed', 'agent_home_source_refresh_failed'].includes(context.code)) return context;
+    const fetched = context.source ? join(context.source, '.git', 'FETCH_HEAD') : '';
+    if (context.code === 'agent_home_source_refresh_failed' && fetched && existsSync(fetched) && Date.now() - statSync(fetched).mtimeMs < 60 * 60_000) {
+      return { ...prepareAgentHome({ ...options, refresh: false }), route: 'github-broker', run: 'refreshed within the hour' };
+    }
+    let bundle;
+    try { bundle = await (await loadBroker()).agentHomeBundle(); } catch (error) {
+      return { ...context, reason: `git proxy refused the unattached source; broker route failed: ${String(error.message).replace(/\s+/g, ' ').slice(0, 400)}` };
+    }
+    try { return { ...prepareAgentHome({ ...options, bundle }), route: 'github-broker', run: bundle.run }; } finally { rmSync(bundle.path, { force: true }); }
+  };
 
-  const staffMcp = install => prepareStaffMcp({ root: ROOT, host: option('--mcp-host'), checkout: option('--plugins-source'), credentialSource: own.includes('--mcp-credential-source') ? option('--mcp-credential-source') ?? '' : undefined, githubSession: () => loadBroker({ qualified: true, readOnly: check }), install: install && !own.includes('--hook'), inspectOnly: check, env });
+  const staffMcp = install => prepareStaffMcp({ root: ROOT, host: option('--mcp-host'), surface: option('--mcp-surface') ?? 'staff', checkout: option('--plugins-source'), credentialSource: own.includes('--mcp-credential-source') ? option('--mcp-credential-source') ?? '' : undefined, githubSession: () => loadBroker({ qualified: true, readOnly: check }), install: install && !own.includes('--hook'), inspectOnly: check, env });
   if (command === 'mcp') {
     const capability = await staffMcp(own.includes('--install'));
     console.log(`KOMBIFY_BOOTSTRAP_CAPABILITY ${JSON.stringify({ name: 'staff-mcp', ...capability })}`);
     return ['ready', 'not-required'].includes(capability.status) ? 0 : 1;
   }
   if (command === 'context') {
-    const context = personalContext(!own.includes('--check'));
+    const context = await personalContext(!own.includes('--check'));
     console.log(`KOMBIFY_BOOTSTRAP_CAPABILITY ${JSON.stringify({ name: 'personal-context', ...context })}`);
     return context.status === 'ready' ? 0 : 1;
   }
@@ -591,7 +615,7 @@ export async function main(argv, env = process.env) {
       if (status !== 0) gaps.push(`install: exited ${status}`);
     }
   }
-  const context = env.GITHUB_ACTIONS === 'true' ? { status: 'not-required', source: 'github-actions' } : personalContext(own.includes('--install'));
+  const context = env.GITHUB_ACTIONS === 'true' ? { status: 'not-required', source: 'github-actions' } : await personalContext(own.includes('--install'));
   console.log(`KOMBIFY_BOOTSTRAP_CAPABILITY ${JSON.stringify({ name: 'personal-context', ...context })}`);
   if (context.status === 'failed') gaps.push(`personal-context: ${context.code}`);
   const mcp = own.includes('--install') ? await staffMcp(true) : { status: 'not-requested' };
@@ -604,7 +628,10 @@ export async function main(argv, env = process.env) {
   if (hook) {
     const rel = 'scripts/kombify-bootstrap.mjs';
     console.log(`Install: node ${rel} --install. Secrets for a command: node ${rel} run -- <cmd>. Package token for a command: node ${rel} packages -- <cmd>. Tokens are fetched on demand; never report a missing NODE_AUTH_TOKEN or DOPPLER_TOKEN as a blocker.`);
-    printOwnerRules();
+    // In a cloud session of the workspace, kombify-up prints them right after
+    // its agent-home step installs Agent Home; SessionStart hooks run side by
+    // side, so this hook would race that install.
+    if (!(env.CLAUDE_CODE_REMOTE === 'true' && existsSync(join(ROOT, 'scripts', 'kombify-up.mjs')))) printOwnerRules();
   }
   return (gaps.length || pending) && !hook ? 1 : 0;
 }

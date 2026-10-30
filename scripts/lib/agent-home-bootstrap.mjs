@@ -9,7 +9,11 @@ const origins = new Set([sourceUrl.toLowerCase(), sourceUrl.slice(0, -4).toLower
 
 // Installation, conflict handling and rollback belong to Agent Home's installer.
 // This adapter only obtains its declared source and invokes that implementation.
-export function prepareAgentHome({ home = homedir(), checkout, agents, device, install = false, refresh = install, run = spawnSync } = {}) {
+// `bundle` ({ path, revision }): a git bundle of main that the broker workflow
+// hands a Claude cloud session without the repository attached (the git proxy
+// refuses it there); it stands in for the network clone and fetch, and origin
+// keeps the repository's own URL.
+export function prepareAgentHome({ home = homedir(), checkout, agents, device, install = false, refresh = install, bundle, run = spawnSync } = {}) {
   const targetHome = resolve(home);
   const receiptPath = join(targetHome, '.agents', 'agent-home', 'state.json');
   let receipt;
@@ -52,8 +56,14 @@ export function prepareAgentHome({ home = homedir(), checkout, agents, device, i
   if (!existsSync(source)) {
     if (!install) return { status: 'pending', code: 'agent_home_not_installed', source };
     mkdirSync(dirname(source), { recursive: true });
-    const clone = invoke('git', [...githubAuthentication, 'clone', '--branch', 'main', '--single-branch', sourceUrl, source], 120_000);
+    const clone = bundle
+      ? invoke('git', ['clone', '--quiet', '--branch', 'main', '--single-branch', bundle.path, source], 120_000)
+      : invoke('git', [...githubAuthentication, 'clone', '--branch', 'main', '--single-branch', sourceUrl, source], 120_000);
     if (clone.error || clone.status !== 0) return failed('agent_home_source_access_failed', clone);
+    if (bundle) {
+      const named = invoke('git', ['-C', source, 'remote', 'set-url', 'origin', sourceUrl]);
+      if (named.error || named.status !== 0) return failed('agent_home_source_access_failed', named);
+    }
   }
   const git = (args) => invoke('git', ['-C', source, ...args]);
   const origin = git(['remote', 'get-url', 'origin']);
@@ -66,14 +76,16 @@ export function prepareAgentHome({ home = homedir(), checkout, agents, device, i
     return { status: 'failed', code: 'agent_home_shared_source_unsettled', source };
   }
   if (refresh) {
-    const fetched = git([...githubAuthentication, 'fetch', '--quiet', 'origin', 'main']);
+    const fetched = bundle
+      ? git(['fetch', '--quiet', bundle.path, '+refs/heads/main:refs/remotes/origin/main'])
+      : git([...githubAuthentication, 'fetch', '--quiet', 'origin', 'main']);
     if (fetched.error || fetched.status !== 0) return failed('agent_home_source_refresh_failed', fetched);
     const merged = git(['merge', '--ff-only', '--quiet', 'origin/main']);
     if (merged.error || merged.status !== 0) return failed('agent_home_source_diverged', merged);
   }
   const revision = git(['rev-parse', 'HEAD']);
   const upstream = git(['rev-parse', 'origin/main']);
-  if (revision.status !== 0 || upstream.status !== 0 || revision.stdout !== upstream.stdout) {
+  if (revision.status !== 0 || upstream.status !== 0 || revision.stdout !== upstream.stdout || (bundle && String(revision.stdout).trim() !== bundle.revision)) {
     return { status: 'failed', code: 'agent_home_source_not_current', source };
   }
   const installer = join(source, 'bootstrap', 'agent_home.py');

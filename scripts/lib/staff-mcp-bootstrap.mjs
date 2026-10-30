@@ -6,7 +6,7 @@ import { dirname, isAbsolute, join, resolve } from 'node:path';
 
 const repository = 'KombiverseLabs/kombify-Plugins';
 const origin = `https://github.com/${repository}.git`;
-const sourcePaths = ['package.json', 'tooling/install-kombify-mcp.mjs', 'tooling/kombify-mcp-auth.mjs', 'tooling/codex-mcp-host.mjs', 'tooling/cursor-mcp-config.mjs'];
+const sourcePaths = ['package.json', 'tooling/install-kombify-mcp.mjs', 'tooling/kombify-mcp-auth.mjs', 'tooling/codex-mcp-host.mjs', 'tooling/codex-agents-host.mjs', 'tooling/cursor-mcp-config.mjs'];
 
 // Codex chooses its native configuration with CODEX_HOME. Broker/cache/runtime
 // overrides are separate authorities and are not silently redirected to default.
@@ -49,7 +49,8 @@ export async function checkStaffMcpSession({ check, session, source, install = f
 
 // Obtains the owning installer; registration, SDK policy and actual host proof
 // remain in Plugins. No provider credential/config is returned by this adapter.
-export async function prepareStaffMcp({ root, host, checkout, credentialSource, githubSession, install = false, inspectOnly = false, run = spawnSync, env = process.env } = {}) {
+export async function prepareStaffMcp({ root, host, checkout, surface = 'staff', credentialSource, githubSession, install = false, inspectOnly = false, run = spawnSync, env = process.env } = {}) {
+  if (!['staff', 'connect'].includes(surface)) return { status: 'pending', code: 'mcp_surface_unsupported' };
   if (inspectOnly && install) return { status: 'pending', code: 'mcp_inspection_cannot_install' };
   if (env.GITHUB_ACTIONS === 'true') return { status: 'not-required', code: 'mcp_staff_host_not_ci' };
   const selected = host ?? (env.CODEX_THREAD_ID ? 'codex' : undefined);
@@ -58,11 +59,16 @@ export async function prepareStaffMcp({ root, host, checkout, credentialSource, 
   let childEnv;
   try { childEnv = staffMcpEnvironment(env); }
   catch (error) { return { status: 'pending', code: error.code, host: selected }; }
+  if (surface === 'connect') {
+    childEnv.KOMBIFY_MCP_AUTH_MODE = 'staff-machine';
+    if (credentialSource) childEnv.KOMBIFY_MCP_CREDENTIAL_SOURCE = credentialSource;
+  }
   const sibling = [join(root, 'kombify-Plugins'), join(dirname(root), 'kombify-Plugins')].find(p => existsSync(join(p, '.git')));
   const source = resolve(checkout || sibling || join(homedir(), '.kombify', 'plugins-source'));
   const invoke = (command, args, cwd = root, timeout = 60_000, github = false, input) => run(command, args, { cwd, encoding: 'utf8', windowsHide: true, timeout, maxBuffer: 1024 * 1024, stdio: [input === undefined ? 'ignore' : 'pipe', 'pipe', 'pipe'], ...(input === undefined ? {} : { input }), env: { ...childEnv, ...(github ? Object.fromEntries(['GH_TOKEN', 'GITHUB_TOKEN', 'GH_HOST', 'GH_CONFIG_DIR'].filter(k => env[k]).map(k => [k, env[k]])) : {}), GIT_TERMINAL_PROMPT: '0', GCM_INTERACTIVE: 'never', GH_PROMPT_DISABLED: '1' } });
   const authentication = ['-c', 'credential.https://github.com.helper=', '-c', 'credential.https://github.com.helper=!gh auth git-credential'];
-  const pending = code => ({ status: 'pending', code, host: selected, source });
+  const pending = code => ({ status: 'pending', code, host: selected, source, surface });
+  const repairCommand = `node scripts/kombify-bootstrap.mjs mcp --mcp-host codex --mcp-surface ${surface} --mcp-credential-source github-session --install`;
   if (!existsSync(source)) {
     if (!install) return pending('mcp_plugins_source_missing');
     mkdirSync(dirname(source), { recursive: true });
@@ -87,7 +93,7 @@ export async function prepareStaffMcp({ root, host, checkout, credentialSource, 
   if (sourcePaths.some(p => !existsSync(join(source, p)))) return pending('mcp_plugins_bootstrap_adapter_unavailable');
   // The native broker verifies execution by renewing credentials. Inspection
   // must not invoke that probe or load a broker source that may be persisted.
-  if (inspectOnly) return { ...pending('mcp_execution_unverified'), repair_command: 'node scripts/kombify-bootstrap.mjs mcp --mcp-host codex --mcp-credential-source github-session --install' };
+  if (inspectOnly) return { ...pending('mcp_execution_unverified'), repair_command: repairCommand };
   let sessionSource, session;
   if (credentialSource === 'github-session') {
     try {
@@ -102,7 +108,7 @@ export async function prepareStaffMcp({ root, host, checkout, credentialSource, 
   }
   const installer = join(source, 'tooling', 'install-kombify-mcp.mjs');
   {
-    const installed = invoke(process.execPath, [installer, '--codex-staff', ...(sessionSource ? ['--github-session'] : []), ...(!install ? ['--check'] : [])], source, 60_000, false, sessionSource ? JSON.stringify(sessionSource) : undefined);
+    const installed = invoke(process.execPath, [installer, ...(surface === 'connect' ? ['--agents-only', '--staff-machine'] : ['--codex-staff']), ...(sessionSource ? ['--github-session'] : []), ...(!install ? ['--check'] : [])], source, 60_000, false, sessionSource ? JSON.stringify(sessionSource) : undefined);
     if (installed.error || installed.status !== 0) {
       let receipt; try { receipt = JSON.parse(installed.stdout); } catch { /* exact pending below */ }
       return pending(/^[a-z_]{1,100}$/.test(receipt?.code ?? '') ? receipt.code : 'mcp_installer_failed');
@@ -110,10 +116,13 @@ export async function prepareStaffMcp({ root, host, checkout, credentialSource, 
   }
   const broker = join(homedir(), '.config', 'kombify-mcp', 'current', 'kombify-mcp-auth.mjs');
   if (!existsSync(broker)) return pending('mcp_broker_not_installed');
-  const { checked, proof } = await checkStaffMcpSession({ check: () => invoke(process.execPath, [broker, 'check', 'staff', '--host', 'codex', '--profile', 'codex', '--isolated-state', '--doppler-project', 'kombify-io', '--doppler-config', 'dev_shared_test_users'], root), session, source: sessionSource, install });
+  const checkArgs = surface === 'connect'
+    ? ['check', 'connect', '--verify', '--host', 'codex', '--profile', 'codex', '--isolated-state']
+    : ['check', 'staff', '--host', 'codex', '--profile', 'codex', '--isolated-state', '--doppler-project', 'kombify-io', '--doppler-config', 'dev_shared_test_users'];
+  const { checked, proof } = await checkStaffMcpSession({ check: () => invoke(process.execPath, [broker, ...checkArgs], root), session, source: sessionSource, install });
   if (!proof) return pending('mcp_native_receipt_unreadable');
   if (checked.error || checked.status !== 0 || proof?.ready !== true || proof.configuration !== 'passed' || proof.execution !== 'passed' || proof.credential_renewal !== 'passed' || proof.state_boundary !== 'empty_isolated_native_cache' || (credentialSource === 'github-session' && proof.credential_source !== credentialSource)) {
-    return { ...pending(proof?.capability_code ?? 'mcp_native_machine_renewal_or_execution_pending'), failed_stage: proof?.failed_stage, credential_renewal: 'pending', repair_command: 'node scripts/kombify-bootstrap.mjs mcp --mcp-host codex --mcp-credential-source github-session --install' };
+    return { ...pending(proof?.capability_code ?? 'mcp_native_machine_renewal_or_execution_pending'), failed_stage: proof?.failed_stage, credential_renewal: 'pending', repair_command: repairCommand };
   }
-  return { status: 'ready', host: selected, source, revision: head.stdout.trim(), sdk: proof.sdk, credential_source: proof.credential_source, ...(proof.github_session_source ? { github_session_source: proof.github_session_source } : {}), configuration: proof.configuration, discovery: proof.discovery, execution: proof.execution, credential_renewal: proof.credential_renewal, state_boundary: proof.state_boundary, checked_at: proof.checked_at };
+  return { status: 'ready', host: selected, surface, source, revision: head.stdout.trim(), sdk: proof.sdk, credential_source: proof.credential_source, ...(proof.github_session_source ? { github_session_source: proof.github_session_source } : {}), configuration: proof.configuration, discovery: proof.discovery, execution: proof.execution, credential_renewal: proof.credential_renewal, state_boundary: proof.state_boundary, checked_at: proof.checked_at };
 }

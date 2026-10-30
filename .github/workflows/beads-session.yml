@@ -42,7 +42,9 @@ jobs:
   issue:
     if: github.ref == 'refs/heads/main'
     runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'ubuntu-24.04' }}
-    timeout-minutes: 3
+    # Depot runner boot counts against timeout-minutes (4-7 min on 2026-10-29);
+    # the floor keeps a slow boot from failing the job (constitution rule 7).
+    timeout-minutes: 15
     permissions:
       contents: read
       id-token: write

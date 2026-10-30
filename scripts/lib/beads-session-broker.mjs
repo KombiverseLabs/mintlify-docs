@@ -14,7 +14,8 @@ export const ANNOTATION_TITLE = 'beads-cloud-session';
 // One GitHub call per tick (shared REST budget); the run takes about 15 s.
 const FIRST_POLL_MS = 15_000;
 const POLL_MS = 15_000;
-const TIMEOUT_MS = 4 * 60_000;
+// Covers the issuing job's 15-minute limit, which includes Depot runner boot.
+const TIMEOUT_MS = 16 * 60_000;
 
 // gh shares one REST budget per identity. A spent budget is reported as throttling
 // with its reset time, never as a missing login (`gh api rate_limit` is free).
