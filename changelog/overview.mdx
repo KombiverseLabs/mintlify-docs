@@ -7,6 +7,43 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits](https://github.com/kombifyio/stackKits/releases), [SpeechKit](https://github.com/kombifyio/SpeechKit/releases), and [Techstack](https://github.com/kombifyio/TechStack/releases) release notes on GitHub.
 
+<Update label="2026-10-30" description="Oct 23 – Oct 30">
+
+## SpeechKit adds fast offline models on desktop and Android; StackKits adds Runtipi and Qdrant
+
+SpeechKit rolled from [v0.77.14](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.14) to [v0.77.19](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.19): Parakeet, Bark 3.0, and Phonon-2.5 local models, offline dictation on Android, and a new Local Models page. StackKits shipped [v0.54.9](https://github.com/kombifyio/stackKits/releases/tag/v0.54.9) through [v0.54.12](https://github.com/kombifyio/stackKits/releases/tag/v0.54.12): Runtipi, Qdrant, offline failure lookup, and many Coolify Marketplace fixes. Techstack published [0.44.4](/changelog/techstack) and 0.44.5.
+
+### New features
+
+- **Parakeet for local transcription.** [SpeechKit v0.77.15](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.15) adds Parakeet Ultra and Parakeet TDT 0.6B v3 next to Whisper. They transcribe 25 European languages, including mixed German and English, many times faster than real time on the CPU. See [Work offline](/speechkit/work-offline).
+- **Bark 3.0 and Phonon-2.5 models.** [v0.77.17](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.17) adds English-only Bark 3.0 and Bark 3.0 Clean, which leaves out fillers and false starts. Phonon-2.5 covers the same 25 languages as Parakeet in less than half the memory, and shows your text live while you dictate.
+- **Offline dictation on Android.** [v0.77.15](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.15) and [v0.77.17](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.17) dictate fully on the phone without a server. Phonon-2.5 is a 163 MB download and runs on phones with 3 GB of memory. Choose it under **Settings > On-device transcription**.
+- **Runtipi as a Marketplace alternative.** [StackKits v0.54.9](https://github.com/kombifyio/stackKits/releases/tag/v0.54.9) installs Runtipi behind the Kit router and Pocket ID sign-in when you choose it. Coolify stays the default. See [Coolify](/stackkits/apps/coolify).
+- **Qdrant for Private AI.** [v0.54.9](https://github.com/kombifyio/stackKits/releases/tag/v0.54.9) adds Qdrant as the vector database. It keeps its data in backed-up storage and connects to Open WebUI and AnythingLLM. See [Personal AI](/guides/stackkits/use-cases/personal-ai).
+- **Change installed use cases in place.** [v0.54.9](https://github.com/kombifyio/stackKits/releases/tag/v0.54.9) adds `stackkit use-cases configure` to change alternatives and settings of a running install. Your other apps, routes, and data stay untouched. See [`stackkit use-cases`](/stackkits/reference/cli/use-cases).
+- **Look up failures offline.** [v0.54.11](https://github.com/kombifyio/stackKits/releases/tag/v0.54.11) adds `stackkit failures lookup`. Describe a problem, such as "nextcloud does not start", and get known causes and fix steps without an internet connection.
+
+### Updates
+
+- **Local Models page and a simpler Model tab.** [SpeechKit v0.77.15](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.15) lists your local models in **Settings > Local Models**, with download progress. The Model tab of each mode is now one short list, and a choice that is not ready says why.
+- **Offline right after install on Windows.** [v0.77.18](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.18) includes Phonon-2.5 in the Windows installer, so Dictation works offline immediately. The Copilot runtime now downloads only when you turn on the Copilot integration.
+- **Faster Phonon on x86.** [v0.77.17](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.17) transcribes about twice as fast on AVX2 processors at the same accuracy.
+- **Parakeet in the server image.** [v0.77.15](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.15) adds Parakeet to the Linux server image and an optional Parakeet profile to the local-only Docker stack.
+- **Add use cases to existing servers.** [Techstack 0.44.4](/changelog/techstack) offers **Add use cases** on the dashboard and server pages, recognizes many more applications on your servers, and lets you move freely through the creation wizard.
+
+### Bug fixes
+
+- **Coolify Marketplace installs and signs in.** [StackKits v0.54.9](https://github.com/kombifyio/stackKits/releases/tag/v0.54.9) completes Basement Marketplace installs and lets you sign in to Coolify with [Pocket ID](/stackkits/apps/pocketid).
+- **Coolify workloads start and back up.** [v0.54.9](https://github.com/kombifyio/stackKits/releases/tag/v0.54.9) delivers secret variables to Coolify-managed apps again, so Vault and Photos start. Local backups of these apps now run, and `stackkit verify` checks them correctly.
+- **Tighter Coolify access.** [v0.54.9](https://github.com/kombifyio/stackKits/releases/tag/v0.54.9) revokes root-team access and pending invitations for every account other than the root admin on each Apply. The accounts stay for your review.
+- **Interrupted operations no longer block.** [v0.54.9](https://github.com/kombifyio/stackKits/releases/tag/v0.54.9) recovers when a backup or Apply process was killed, so later runs continue.
+- **Removed apps stay removed.** [v0.54.9](https://github.com/kombifyio/stackKits/releases/tag/v0.54.9) keeps a later Apply from reinstalling an app you removed. Data is kept by default. See [`stackkit remove`](/stackkits/reference/cli/remove).
+- **Android privacy.** [SpeechKit v0.77.15](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.15) removes the speech runtime's usage reporting to Microsoft, so on-device models send no data off the phone. Phones that cannot run Parakeet are no longer offered the download.
+- **Removing a household member.** Techstack 0.44.5 removes the person's account on your homelab even when their invite never completed.
+- **Techstack for Windows starts again.** [Techstack 0.44.4](/changelog/techstack) fixes startup on new and older installations.
+
+</Update>
+
 <Update label="2026-10-16" description="Oct 9 – Oct 16">
 
 ## StackKits moves Coolify workloads between servers and adds an Early Access channel; SpeechKit adds Grok Voice
