@@ -7,7 +7,8 @@ powershell = "7.6.7"
 [tasks.dev]
 description = "Run the Mintlify local preview"
 env = { NODE_COMPILE_CACHE = ".cache/node-compile" }
-run = "npx -y mint@4.2.684 dev --no-open"
+# Mintlify rejects Node 25+, so only its CLI uses the supported LTS line.
+run = "mise exec node@24.22.2 -- npx -y mint@4.2.684 dev --no-open"
 
 [tasks."public-safety"]
 description = "Validate that the complete Mintlify tree is public-safe"
@@ -46,11 +47,11 @@ run = [
 
 [tasks.build]
 description = "Validate the Mintlify MDX build (mint validate)"
-run = "npx -y mint@4.2.684 validate"
+run = "mise exec node@24.22.2 -- npx -y mint@4.2.684 validate"
 
 [tasks."local:e2e"]
 description = "Run the local docs gate"
-run = "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/run-local-e2e.ps1"
+run = "mise exec node@24.22.2 -- pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/run-local-e2e.ps1"
 
 [tasks."postlive:wait-exact-live"]
 description = "Wait for the exact merged Mintlify deployment on docs.kombify.io"
