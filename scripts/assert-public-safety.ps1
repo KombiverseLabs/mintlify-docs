@@ -303,6 +303,11 @@ foreach ($reference in $openApiReferences) {
     if ($spec -cmatch '(?m)^\s*(?:-\s+)?[''"]?x-kombify-[a-z-]+[''"]?\s*:') {
         $errors.Add("OpenAPI reference '$source' carries x-kombify-* annotations; only the published public artifact may be referenced") | Out-Null
     }
+    foreach ($pattern in @($policy.forbiddenContentPatterns)) {
+        if ($spec -match [string]$pattern.pattern) {
+            $errors.Add("OpenAPI reference '$source' matches forbidden public content '$($pattern.id)'") | Out-Null
+        }
+    }
 }
 
 $publicPageSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
