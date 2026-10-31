@@ -87,11 +87,10 @@ proxy holds the GitHub identity (Claude cloud sessions), the script dispatches
 this repository's `beads-session.yml` workflow and receives a 12-24 h
 credential by itself; `bd` then works directly. When `bd` reports no
 credential, rerun the script; never report Beads access as a blocker first.
-Cloudflare is the operational authority only for an explicitly activated
-binding (`authority: cloudflare`). Bootstrap selects its native backend and
-preserves local Dolt metadata for read-only comparison. Projection preserves
-existing authority and defaults new bindings inactive; it never activates a
-repository. Use the governed `beads:write` path and require independent
+Cloudflare is the only supported operational authority. Bootstrap selects its
+native backend; a fresh clone needs no local database or history conversion.
+Projection preserves active bindings and leaves new bindings inactive until explicit Cloudflare admission.
+Retired local tracker state is archived before removal and never read as fallback. Use the governed `beads:write` path and require independent
 remote readback; never fall back to Dolt or replay an uncertain mutation.
 Setup and recovery: the workspace `BEADS-REMOTE-WRITE-STANDARD.md` section
 "Repository-bound Cloudflare access". Regenerate this block and its repository

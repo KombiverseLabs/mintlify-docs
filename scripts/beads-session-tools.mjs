@@ -3,8 +3,7 @@
 // Quiet no-op when the pinned versions already resolve; never uses sudo and
 // never writes into the repository. --check reports without installing;
 // KOMBIFY_BEADS_TOOLS_SKIP=1 disables it; KOMBIFY_BEADS_TOOLS_DIR overrides
-// the install directory (default $HOME/.local/bin). --with-comparison adds the
-// optional bd-dolt/Dolt tools for retained read-only comparison snapshots.
+// the install directory (default $HOME/.local/bin).
 import { spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { appendFileSync, chmodSync, copyFileSync, mkdirSync, mkdtempSync, renameSync, rmSync } from 'node:fs';
@@ -13,7 +12,7 @@ import { delimiter, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { executableName, pinnedTools, platformKey, stageTool } from './beads-bridge-tools-lib.mjs';
 
-const versionArgs = { bd: ['--version'], dolt: ['version'] };
+const versionArgs = { bd: ['--version'] };
 export const toolsDirectory = (env = process.env) => resolve(env.KOMBIFY_BEADS_TOOLS_DIR || resolve(homedir(), '.local/bin'));
 
 // `bd version 1.3.1+cloudflare.19ee335 (...)` -> `1.3.1+cloudflare.19ee335`.
@@ -53,10 +52,11 @@ export async function installTools(tools, dir, { fetchImpl = fetch, tokenImpl, l
 
 export async function ensureSessionTools(argv = []) {
   if (process.env.KOMBIFY_BEADS_TOOLS_SKIP === '1') return 0;
+  if (argv.some(argument => argument !== '--check')) { console.error('beads-session-tools: only --check is supported'); return 1; }
   const check = argv.includes('--check');
-  const tools = pinnedTools(platformKey(), { optional: argv.includes('--with-comparison') || argv.includes('--with-bd-cf') });
+  const tools = pinnedTools(platformKey());
   if (!tools) {
-    console.error(`beads-session-tools: unsupported platform ${platformKey()}; no pinned bd/dolt in internal/planning/beads-bridge-tools.json`);
+    console.error(`beads-session-tools: unsupported platform ${platformKey()}; no pinned Cloudflare bd in internal/planning/beads-bridge-tools.json`);
     return 1;
   }
   const dir = toolsDirectory();

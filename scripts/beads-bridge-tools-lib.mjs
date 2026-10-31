@@ -16,11 +16,10 @@ export function bootstrapSourceChecks(files, fileExists = () => true) {
   return [...new Set(files.map(file => file.replaceAll('\\','/')))].filter(file => BOOTSTRAP_FILES.has(file) && fileExists(file)).map(file => ({command:'node',args:file.endsWith('.json') ? ['-e', "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))", file] : ['--check',file]}));
 }
 
-// Entries marked optional are comparison tools. Only native Cloudflare bd is
-// required for operational access; retained Dolt is installed on explicit request.
-export function pinnedTools(key = platformKey(), { optional = false } = {}) {
+// Only the native Cloudflare client is admitted for operational access.
+export function pinnedTools(key = platformKey()) {
   const tools = JSON.parse(readFileSync(resolve(workspaceRoot, 'internal/planning/beads-bridge-tools.json')))[key];
-  return tools?.filter(tool => optional || !tool.optional);
+  return tools?.filter(tool => tool.binary === "bd");
 }
 
 // Token for `"auth":"github"` downloads of a private release asset. The value is
