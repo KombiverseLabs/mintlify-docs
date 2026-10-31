@@ -1,0 +1,179 @@
+name: Gateway Release Docs
+
+on:
+  repository_dispatch:
+    types: [gateway-docs-release]
+  schedule:
+    - cron: "37 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published Gateway tag; empty selects the newest non-draft product release
+        required: false
+        type: string
+
+concurrency:
+  group: gateway-release-docs
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  reconcile:
+    if: github.repository == 'KombiverseLabs/mintlify-docs'
+    runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'ubuntu-24.04' }}
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24.22.2
+      - name: Mint exact Gateway source read identity
+        id: source-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.KOMBIFY_CI_APP_ID }}
+          private-key: ${{ secrets.KOMBIFY_CI_APP_PRIVATE_KEY }}
+          owner: KombiverseLabs
+          repositories: kombify-Gateway
+          permission-contents: read
+      - name: Resolve and render the published contract
+        id: release
+        env:
+          GH_TOKEN: ${{ steps.source-token.outputs.token }}
+          DISPATCH_TAG: ${{ github.event.client_payload.tag }}
+          INPUT_TAG: ${{ inputs.tag }}
+          EXPECTED_OPENAPI_DIGEST: ${{ github.event.client_payload.openapi_digest }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          repo=KombiverseLabs/kombify-Gateway
+          tag="${DISPATCH_TAG:-${INPUT_TAG:-}}"
+          newest="$(gh api --paginate "repos/$repo/releases?per_page=100" --jq '.[] | select(.draft == false and .published_at != null and (.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$"))) | .tag_name' | sort -V | tail -n 1)"
+          [[ "$newest" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          if [ -z "$tag" ]; then
+            tag="$newest"
+          fi
+          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          gh api "repos/$repo/releases/tags/$tag" --jq '.draft == false and .published_at != null' | grep -qx true
+          if [ "$tag" != "$newest" ]; then
+            printf '%s\n' "Requested published tag $tag is not the newest published Gateway release $newest; no reference write or publication occurred. A delayed event never downgrades the reference." >> "$GITHUB_STEP_SUMMARY"
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          source_sha="$(gh api "repos/$repo/commits/$tag" --jq .sha)"
+          [[ "$source_sha" =~ ^[a-f0-9]{40}$ ]]
+          mkdir -p .tmp/gateway-api-reference
+          gh api -H 'Accept: application/vnd.github.raw+json' "repos/$repo/contents/docs/openapi.yaml?ref=$source_sha" > .tmp/gateway-api-reference/openapi.yaml
+          digest="sha256:$(sha256sum .tmp/gateway-api-reference/openapi.yaml | cut -d ' ' -f 1)"
+          if [ -n "${EXPECTED_OPENAPI_DIGEST:-}" ]; then test "$digest" = "$EXPECTED_OPENAPI_DIGEST"; fi
+          node scripts/render-gateway-api-reference.mjs --openapi .tmp/gateway-api-reference/openapi.yaml --release "$tag" --source-sha "$source_sha" --write
+          node scripts/render-gateway-api-reference.mjs --openapi .tmp/gateway-api-reference/openapi.yaml --release "$tag" --source-sha "$source_sha" --check
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "source_sha=$source_sha" >> "$GITHUB_OUTPUT"
+          if [ -n "$(git status --porcelain --untracked-files=all -- docs.json identity/reference/api/openapi.yaml)" ]; then
+            echo 'changed=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Independently validate public content
+        id: public-check
+        if: steps.release.outputs.changed == 'true'
+        shell: pwsh
+        run: ./scripts/assert-public-safety.ps1
+      - name: Build the actual Mintlify OpenAPI consumer
+        id: consumer
+        if: steps.release.outputs.changed == 'true'
+        run: npx -y mint@4.2.684 validate
+      - name: Mint canonical publisher source read identity
+        if: steps.release.outputs.changed == 'true'
+        id: publisher-source
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.KOMBIFY_CI_APP_ID }}
+          private-key: ${{ secrets.KOMBIFY_CI_APP_PRIVATE_KEY }}
+          owner: KombiverseLabs
+          repositories: kombify-workspace
+          permission-contents: read
+      - name: Checkout the canonical publisher
+        if: steps.release.outputs.changed == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: KombiverseLabs/kombify-workspace
+          path: .tmp/workspace-publisher
+          token: ${{ steps.publisher-source.outputs.token }}
+          persist-credentials: false
+      - name: Mint exact docs publication identity
+        if: steps.release.outputs.changed == 'true'
+        id: publish-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.KOMBIFY_CI_APP_ID }}
+          private-key: ${{ secrets.KOMBIFY_CI_APP_PRIVATE_KEY }}
+          owner: KombiverseLabs
+          repositories: mintlify-docs
+          permission-contents: write
+          permission-pull-requests: write
+      - name: Publish only the generated reference
+        id: publish
+        if: steps.release.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ steps.publish-token.outputs.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+          SOURCE_SHA: ${{ steps.release.outputs.source_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh auth setup-git --hostname github.com
+          git fetch origin main --no-tags
+          previous=()
+          git ls-tree --name-only origin/main -- identity/reference/api/openapi.yaml > .tmp/gateway-api-reference/previous-path.txt
+          if [ -s .tmp/gateway-api-reference/previous-path.txt ]; then
+            git show origin/main:identity/reference/api/openapi.yaml > .tmp/gateway-api-reference/previous.yaml
+            previous=(--previous .tmp/gateway-api-reference/previous.yaml)
+          fi
+          node scripts/render-gateway-api-reference.mjs --openapi .tmp/gateway-api-reference/openapi.yaml --release "$TAG" --source-sha "$SOURCE_SHA" --check "${previous[@]}"
+          # A patch from this checkout's original tree preserves unrelated main
+          # changes. Its version-header context also refuses a later race that
+          # advances the reference after the remote monotonic check.
+          GIT_INDEX_FILE="$RUNNER_TEMP/gateway-reference-index" git read-tree HEAD
+          GIT_INDEX_FILE="$RUNNER_TEMP/gateway-reference-index" git add -- docs.json identity/reference/api/openapi.yaml
+          GIT_INDEX_FILE="$RUNNER_TEMP/gateway-reference-index" git diff --cached --binary HEAD -- docs.json identity/reference/api/openapi.yaml > .tmp/gateway-api-reference/reference.patch
+          cat > .tmp/gateway-api-reference/pr-body.md <<EOF
+          Generate the public Gateway API reference from published $TAG at immutable source $SOURCE_SHA. Six locale routes share the exact public contract. This reference does not claim that an unqualified newer runtime implements the same revision.
+
+          Automated review: the independent public-safety validator passed, the renderer reached its fixed point and the actual pinned Mintlify OpenAPI consumer built successfully. No private operator content or hand-edited API pages are published.
+
+          <!-- kombify-review: {"reviewer":"public-contract-projection-validator","effort":"deterministic","head":"{{head_sha}}","important":0,"nit":0,"fixed":0} -->
+          EOF
+          branch=chore/gateway-release-api-reference
+          node .tmp/workspace-publisher/scripts/session-publish.mjs --repo "$GITHUB_WORKSPACE" --branch "$branch" --update --message "docs(api): project Gateway $TAG public contract" --body-file .tmp/gateway-api-reference/pr-body.md --patch .tmp/gateway-api-reference/reference.patch --
+          pr="$(gh pr list --repo KombiverseLabs/mintlify-docs --head "$branch" --state open --json number --jq '.[0].number')"
+          if [ -n "$pr" ] && [ "$pr" != null ]; then
+            gh pr merge "$pr" --repo KombiverseLabs/mintlify-docs --squash --auto
+          fi
+      - name: Report the failed reconciliation and repair
+        if: failure()
+        env:
+          RELEASE_RESULT: ${{ steps.release.outcome }}
+          PUBLIC_RESULT: ${{ steps.public-check.outcome }}
+          CONSUMER_RESULT: ${{ steps.consumer.outcome }}
+          PUBLISH_RESULT: ${{ steps.publish.outcome }}
+        shell: bash
+        run: |
+          if [ "$RELEASE_RESULT" = failure ]; then
+            reason='The published release or canonical contract did not qualify. Repair the reported tag, immutable source, read access or public artifact before dispatching again.'
+          elif [ "$PUBLIC_RESULT" = failure ]; then
+            reason='The public-content validator refused the contract. Repair the release source; never filter private content silently or bypass the public boundary.'
+          elif [ "$CONSUMER_RESULT" = failure ]; then
+            reason='Mintlify could not consume the public contract. Repair the reported schema or rendering error before publishing.'
+          elif [ "$PUBLISH_RESULT" = failure ]; then
+            reason='Publication failed or its acknowledgement may be uncertain. Inspect the original branch and pull request before any new write; never replay an uncertain publication.'
+          else
+            reason='A required source or publication identity failed. Repair the exact repository-scoped App access reported by the failed step; do not substitute a personal token.'
+          fi
+          printf '%s\n' '## Gateway reference reconciliation failed' "$reason" >> "$GITHUB_STEP_SUMMARY"
