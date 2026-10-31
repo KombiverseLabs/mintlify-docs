@@ -130,3 +130,5 @@ and `pnpm install`.
 Multi-repository cloud sessions load no repository hooks, so run the
 bootstrap yourself there.
 <!-- END GENERATED: kombify-bootstrap -->
+
+<!-- Temporary M14 hosted policy acceptance probe; this PR is discarded. -->
