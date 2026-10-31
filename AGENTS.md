@@ -15,6 +15,7 @@ navigation source of truth; pages are MDX files.
 <!-- END GENERATED: elastic-development-throughput kombify-throughput-policy-sync -->
 
 <!-- BEGIN GENERATED: planning-policy kombify-agent-policy-sync -->
+<!-- Deliberate generated-policy drift: hosted refusal must reject this candidate. -->
 > Generated from `AGENTS.md` in the kombify workspace root. Do not edit this
 > block in child repos; update the root policy and run
 > `mise run agents:planning:sync`.
