@@ -37,6 +37,15 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           path: candidate
           persist-credentials: false
+      - name: Check generated AGENTS policy with the trusted producer
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Both code and provenance belong to the ruleset-selected producer, never the candidate.
+          if ! node producer/.github/actions/agents-policy/verify-projection.mjs || ! node producer/.github/actions/agents-policy/agents-policy-check.mjs --repo candidate --candidate "$SOURCE_SHA"; then
+            echo 'AGENTS policy check failed. Verify public agents-policy/current publication and regenerate candidate blocks from merged Workspace policy.' >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
       - name: Test boundary guard
         shell: bash
         run: |
