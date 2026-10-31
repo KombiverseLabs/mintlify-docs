@@ -98,8 +98,7 @@ export async function access(config, { allowStatic = false, env = process.env, f
   });
   return { ...entry, project_id: context.project_id };
 }
-// Non-secret project bootstrap. Concurrent callers preserve the first Dolt
-// metadata snapshot, and no database, export or credential is moved or deleted.
+// Native Cloudflare bootstrap never opens a local database or imports history.
 export function bootstrapCloudflare(config, repositoryRoot = root, { projectId } = {}) {
   if (config.authority !== 'cloudflare') return;
   const workspaceAlias = config.github_repository === 'KombiverseLabs/kombify-Cloud' && config.tracker === 'kombify-workspace';
@@ -108,7 +107,7 @@ export function bootstrapCloudflare(config, repositoryRoot = root, { projectId }
   mkdirSync(beads, { recursive: true });
   const metadataFile = join(beads, 'metadata.json');
   const current = existsSync(metadataFile) ? JSON.parse(readFileSync(metadataFile, 'utf8')) : {};
-  if (current.backend && !['dolt', 'cloudflare'].includes(current.backend)) throw new Error('Unsupported previous tracker authority');
+  if (current.backend && current.backend !== 'cloudflare') throw new Error('Archive the retired local tracker before native Cloudflare bootstrap; no conversion or import was attempted');
   const redirectFile = join(beads, 'redirect');
   if (workspaceAlias && existsSync(redirectFile)) {
     const target = resolve(repositoryRoot, readFileSync(redirectFile, 'utf8').trim());
@@ -120,17 +119,9 @@ export function bootstrapCloudflare(config, repositoryRoot = root, { projectId }
         || binding.base !== config.base || binding.tracker !== config.tracker
         || native.base !== config.base || native.tracker !== config.tracker || metadata.backend !== 'cloudflare'
         || !projectId || metadata.project_id !== projectId) throw new Error('Workspace alias native identity does not match authenticated context');
-    if (current.backend === 'dolt') {
-      try { writeFileSync(join(beads, 'dolt-comparison.json'), JSON.stringify(current, null, 2)+'\n', { flag: 'wx' }); }
-      catch (error) { if (error.code !== 'EEXIST') throw error; }
-    }
-    return; // Keep the canonical shared tracker route and its comparison source.
+    return; // Keep only the authenticated canonical shared tracker route.
   }
   if (workspaceAlias && current.project_id && current.project_id !== projectId) throw new Error('Workspace alias predecessor needs its canonical redirect');
-  if (current.backend === 'dolt') {
-    try { writeFileSync(join(beads, 'dolt-comparison.json'), JSON.stringify(current, null, 2)+'\n', { flag: 'wx' }); }
-    catch (error) { if (error.code !== 'EEXIST') throw error; }
-  }
   const atomic = (file, value) => {
     const staged = `${file}.${randomUUID()}.tmp`;
     try { writeFileSync(staged, JSON.stringify(value, null, 2)+'\n', { flag: 'wx' }); renameSync(staged, file); }
@@ -138,7 +129,8 @@ export function bootstrapCloudflare(config, repositoryRoot = root, { projectId }
   };
   atomic(join(beads, 'cloudflare.json'), { backend: 'cloudflare', base: config.base, tracker: config.tracker,
     github_repository: config.github_repository, token_env: 'BEADS_CLOUDFLARE_TOKEN' });
-  atomic(metadataFile, { ...current, backend: 'cloudflare', ...(workspaceAlias && projectId ? { project_id: projectId } : {}) });
+  // The pinned upstream bd codec requires database:'dolt'; this is not a local backend.
+  atomic(metadataFile, { backend: 'cloudflare', database: 'dolt', ...(projectId || current.project_id ? { project_id: projectId || current.project_id } : {}) });
   // bd resolves this legacy redirect before consulting metadata. Retire only
   // the local pointer after the validated repository binding is complete.
   rmSync(join(beads, 'redirect'), { force: true });
