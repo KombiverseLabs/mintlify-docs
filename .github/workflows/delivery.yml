@@ -90,7 +90,7 @@ jobs:
       SOURCE_REPOSITORY: mintlify-docs
       SOURCE_SHA: ${{ github.sha }}
       STABLE_APPROVED: ${{ github.event_name == 'workflow_dispatch' && inputs.approve-stable }}
-      STANDARDS_REF: c9657b9c852ea5f3b480e25f07ae470274137a2b
+      STANDARDS_REF: ${{ vars.KOMBIFY_DELIVERY_STANDARDS_REF }}
     steps:
       - name: Check out exact caller source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -98,6 +98,11 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Require the Delivery authority
+        shell: bash
+        run: |
+          [[ "$STANDARDS_REF" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::KOMBIFY_DELIVERY_STANDARDS_REF is not set on this repository; run mise run delivery:authority -- --advance"; exit 1; }
 
       - name: Check out immutable delivery compiler
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
