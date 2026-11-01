@@ -113,11 +113,26 @@ jobs:
           process.exit(bad);
           JS
 
+      # A run that GITHUB_TOKEN dispatches never fires workflow_run when it ends, so known-error.yml would stay silent:
+      # the CI App token (org secret, actions: write on this repository only) dispatches instead; GITHUB_TOKEN is the fallback.
+      - name: Mint the dispatch token
+        id: app
+        if: steps.gate.outputs.run == 'true'
+        continue-on-error: true
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.KOMBIFY_CI_APP_ID }}
+          private-key: ${{ secrets.KOMBIFY_CI_APP_PRIVATE_KEY }}
+          owner: KombiverseLabs
+          repositories: mintlify-docs
+          permission-actions: write
+
       - name: Dispatch the Early Access workflows for the accumulated range
         id: dispatch
         if: steps.gate.outputs.run == 'true'
         shell: bash
         env:
+          GH_TOKEN: ${{ steps.app.outputs.token || github.token }}
           LAST: ${{ steps.gate.outputs.last }}
           HEAD: ${{ github.sha }}
           LANE: '[{"workflow":"delivery.yml","paths":[]},{"workflow":"public-safety.yml","paths":["**/*.mdx","docs.json","public-safety-policy.json","schemas/public-safety-policy.schema.json","scripts/**","mise.toml",".github/workflows/public-safety.yml"]}]'
