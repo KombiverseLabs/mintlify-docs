@@ -133,7 +133,7 @@ jobs:
             try { changed = gh('api', `repos/${repo}/compare/${LAST}...${HEAD}`, '--paginate', '--jq', '.files[].filename').split('\n').filter(Boolean); } catch { changed = null; }
           }
           const regex = glob => new RegExp(`^${glob
-            .replace(/[.+^${}()|[\]\]/g, '\$&').replace(/\*\*\//g, '\u0001').replace(/\*\*/g, '\u0002').replace(/\*/g, '[^/]*')
+            .replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*\*\//g, '\u0001').replace(/\*\*/g, '\u0002').replace(/\*/g, '[^/]*')
             .replace(/\u0001/g, '(?:.*/)?').replace(/\u0002/g, '.*')}$`);
           const affected = paths => changed === null || paths.length === 0 || changed.some(file =>
             paths.filter(p => !p.startsWith('!')).some(p => regex(p).test(file)) &&
