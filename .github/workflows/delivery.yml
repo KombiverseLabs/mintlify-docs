@@ -5,46 +5,6 @@
 name: Delivery v2
 
 on:
-  push:
-    branches: [main]
-    # Repository, tracker and agent maintenance does not publish docs. A mixed
-    # product change still follows the existing commit Delivery route. The list
-    # names whole maintenance families, not single files, so a new file inside a
-    # family cannot re-open the gap. Every path that can change the published
-    # site, its gates or the delivery contract (.mdx, docs.json,
-    # public-safety-policy.json, schemas/**, mise.toml, .kombify/**, data/**,
-    # localization/**, every other script and every other workflow) stays
-    # outside this list and therefore still starts a delivery. A family is only
-    # listed when Mintlify does not serve it: the site publishes its pages, its
-    # assets and its served data files, so a family that can change the
-    # published site starts a delivery instead.
-    paths-ignore:
-      # Repository and agent policy documents.
-      - AGENTS.md
-      - CLAUDE.md
-      - CONTRIBUTING.md
-      - README.md
-      - ROADMAP.md
-      - STATUS.md
-      # Tracker, session and agent state.
-      - .beads/**
-      - .claude/**
-      - .github/workflows/beads-*.yml
-      # Contributor standards and the agent wiki.
-      - docs-guidelines/**
-      - openwiki/**
-      # Bootstrap, session, vendor and tracker maintenance scripts.
-      - scripts/beads-*.mjs
-      - scripts/install-beads-*.ps1
-      - scripts/kombify-*.mjs
-      - scripts/lib/beads-*.mjs
-      - scripts/lib/github-*.mjs
-      - scripts/lib/*bootstrap*.mjs
-      - scripts/*bootstrap*.mjs
-      - scripts/repo-context*.mjs
-      # This delivery definition.
-      - .github/workflows/delivery.yml
-  # Delivery-definition pull requests retain their compile-only qualification.
   workflow_dispatch:
     inputs:
       execute:
