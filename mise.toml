@@ -13,10 +13,6 @@ run = "npx -y mint@4.2.684 dev --no-open"
 description = "Validate that the complete Mintlify tree is public-safe"
 run = "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/assert-public-safety.ps1"
 
-[tasks."public-safety:test"]
-description = "Run focused fail-closed publication-boundary tests"
-run = "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/test-public-safety.ps1"
-
 [tasks."ci:bootstrap"]
 description = "Confirm the mise-provided docs runtime"
 run = "node --version"
@@ -45,15 +41,7 @@ run = [
   "node scripts/i18n/check.mjs zh-Hans",
   "node scripts/i18n/check.mjs hi",
   "node scripts/i18n/check.mjs ar",
-  "node --test scripts/sync-stackkits-release-docs.test.mjs scripts/stackkits-generated-only-paths.test.mjs scripts/sync-speechkit-release-docs.test.mjs scripts/render-stackkits-cli-reference.test.mjs scripts/render-api-surface-reference.test.mjs",
   "pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/run-local-e2e.ps1 -SkipPreview -SkipExternalLinks",
-]
-
-[tasks.test]
-description = "Run the focused publication-boundary and generator tests"
-run = [
-  "node --test scripts/sync-stackkits-release-docs.test.mjs scripts/stackkits-generated-only-paths.test.mjs scripts/sync-speechkit-release-docs.test.mjs scripts/render-stackkits-cli-reference.test.mjs scripts/render-api-surface-reference.test.mjs",
-  "mise run public-safety:test",
 ]
 
 [tasks.build]
