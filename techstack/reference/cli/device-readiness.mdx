@@ -1,0 +1,56 @@
+---
+title: "techstack api device-readiness"
+description: "Generated reference for the techstack api device-readiness commands"
+sidebarTitle: "device-readiness"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.45.6"
+content_hash: "sha256:5146ef3016e0368303a45dba107e10f5863608bc43fcea1a8cadd5c295039602"
+source_hash: "7c6fb0fb654e2278953736834edf45d8d7e49fcb"
+---
+<Note>Generated from the Techstack v0.45.6 release (source `7c6fb0fb654e`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api device-readiness prepare
+
+Apply catalog fixes to a not-yet-enrolled device over SSH.
+
+Connects to the named machine over SSH, runs the named catalog resolutions in order (only catalog ids are accepted), optionally opens a temporary egress path while they run, and probes again to report the result. Requires the signed techstack.device.prepare entitlement, and techstack.device.egress when egress is true. Registered only on a local (non-SaaS) control plane. The login comes from the Wallet item connection.wallet_item_id, resolved inside Techstack for this request only. A failing resolution stops the run with 409 and the receipts collected so far.
+
+```bash
+techstack api device-readiness prepare [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/device-readiness/prepare` |
+| Changes state | Yes |
+| MCP tool | `prepare_device_readiness` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--connection` | object | **Required.** |
+| `--egress` | boolean | Open a temporary way out for the machine while the fixes run. |
+| `--interface` | string | Interface a fix should act on, when one asks for it. |
+| `--resolutions` | string\[\] | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api device-readiness probe
+
+Look at a not-yet-enrolled device over SSH and report whether it is ready.
+
+Opens one SSH session to the named machine, reads its facts (network, proxy, virtualization, enrollment reachability) and answers a readiness report; nothing on the device changes. The login comes from the Wallet item connection.wallet_item_id, resolved inside Techstack for this request only and never answered or stored. Registered only on a local (non-SaaS) control plane and requires the signed techstack.device.prepare entitlement. Unknown body fields are refused. The first request may omit host_key_fingerprint; the answer then carries the key the device presented so it can be pinned on the next call.
+
+```bash
+techstack api device-readiness probe [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/device-readiness/probe` |
+| Changes state | Yes |
+| MCP tool | `probe_device_readiness` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--connection` | object | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |

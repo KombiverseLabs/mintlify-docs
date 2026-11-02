@@ -1,0 +1,61 @@
+---
+title: "techstack api ril"
+description: "Generated reference for the techstack api ril commands"
+sidebarTitle: "ril"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.45.6"
+content_hash: "sha256:5146ef3016e0368303a45dba107e10f5863608bc43fcea1a8cadd5c295039602"
+source_hash: "7c6fb0fb654e2278953736834edf45d8d7e49fcb"
+---
+<Note>Generated from the Techstack v0.45.6 release (source `7c6fb0fb654e`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api ril action-cards create
+
+Create a governed action card for one owned server.
+
+Stores a card that describes one approved-action primitive, its target and its evidence sink for the authenticated owner. The card starts as `awaiting_grant` (no `grant` given) or `awaiting_approval` and runs nothing until it is approved and executed. The body is decoded strictly and must stay under 64 KiB.
+
+```bash
+techstack api ril action-cards create [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /v1/ril/action-cards` |
+| Changes state | Yes |
+| MCP tool | `create_action_card` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--action` | object | **Required.** |
+| `--id` | string | Optional card id; generated when omitted. |
+| `--server-id` | string | **Required.** |
+| `--severity` | string | Default `"info"`. |
+| `--title` | string | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api ril action-cards execute
+
+Run one approved governed action card on its server.
+
+Starts the durable workflow of a card that the owner approved and that holds a live grant, after checking that the caller may operate the card's server. `execution_id`, `trace_id` and `idempotency_key` bind one execution; repeating them returns the stored result. A card of operation class `drift-correction` also needs `compensation_card_id`, any other card must not send it. A missing approval or grant, an expired grant and a connector binding that does not match answer 403 or 409 with a stable `reason_code`.
+
+```bash
+techstack api ril action-cards execute <card-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /v1/ril/action-cards/{cardId}/execute` |
+| Changes state | Yes |
+| MCP tool | `execute_action_card` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<card-id>` | string | **Required.** |
+| `--compensation-card-id` | string | Required for drift-correction cards; forbidden for others. |
+| `--execution-id` | string | **Required.** |
+| `--execution-idempotency-key` | string | **Required.** |
+| `--trace-id` | string | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |

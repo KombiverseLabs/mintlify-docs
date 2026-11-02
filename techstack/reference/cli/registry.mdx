@@ -4,11 +4,86 @@ description: "Generated reference for the techstack api registry commands"
 sidebarTitle: "registry"
 generated: true
 generated_by: "render-api-surface-reference"
-release: "v0.43.5"
-content_hash: "sha256:e52553305854fbc269be110a0577183cde0787903b53eb0fb00ea15e6404dbde"
-source_hash: "20de7539f431df6bec4472a741f6397bdb4f16f8"
+release: "v0.45.6"
+content_hash: "sha256:5146ef3016e0368303a45dba107e10f5863608bc43fcea1a8cadd5c295039602"
+source_hash: "7c6fb0fb654e2278953736834edf45d8d7e49fcb"
 ---
-<Note>Generated from the Techstack v0.43.5 release (source `20de7539f431`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+<Note>Generated from the Techstack v0.45.6 release (source `7c6fb0fb654e`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api registry services delete
+
+Delete an archived service copy from the Registry.
+
+Removes the registry row of a service copy that a finished move left in the archived state. Any other status is refused with 409; no workload or server is touched. The canonical inventory store currently answers 503 `service_control_server_fence_unavailable`.
+
+```bash
+techstack api registry services delete <service-id> [flags]
+```
+
+<Warning>Requires confirmation: This operation removes the archived service copy from the Registry; the record cannot be restored. Pass `--yes` or answer the prompt; a non-interactive run without `--yes` stops before any request with exit code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/registry/services/{id}` |
+| Changes state | Yes |
+| MCP tool | `delete_registry_service` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<service-id>` | string | **Required.** Canonical service runtime ID. |
+
+## techstack api registry services import
+
+Record an unmanaged service that already runs on an owned server.
+
+Adds an observed (unmanaged) service row for a server of an owned stack. The row is keyed by stack, server and service name, so repeating the call updates the same row. Nothing is deployed or probed. Either `name` or `service_id` is required and is normalized to a lower-case key. A stack the caller does not own is refused with 403 and an unknown stack or server with 404.
+
+```bash
+techstack api registry services import [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/registry/services/import` |
+| Changes state | Yes |
+| MCP tool | `import_registry_service` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--display-name` | string | — |
+| `--name` | string | Service name; used when `service_id` is not set. |
+| `--port` | integer | — |
+| `--server-id` | string | **Required.** Registry server (node) id of the stack. |
+| `--service-id` | string | Service key; used only when `name` is not set. |
+| `--stack-id` | string | **Required.** |
+| `--type` | string | Service type, for example `media`; defaults to `custom`. |
+| `--url` | string | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api registry services import-home-assistant
+
+Link an existing Home Assistant instance read-only.
+
+Probes a Home Assistant instance from a local executor with the long-lived access token held in the Wallet item `token_wallet_item_id` (a kombify Wallet item assigned to Techstack, or a built-in wallet API key or OAuth token item whose URL names this instance; resolved inside Techstack, never answered) and records a read-only observed service. This contract accepts no token. The token is used for this probe only and is never stored in the registry row. Self-hosted installs only (503 `lan_executor_unavailable` otherwise). The call is idempotent: an already linked instance returns `existing: true` without a new probe.
+
+```bash
+techstack api registry services import-home-assistant [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/registry/services/home-assistant/import` |
+| Changes state | Yes |
+| MCP tool | `import_home_assistant_service` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--installation-method` | string | **Required.** One of `haos`, `container`. |
+| `--server-id` | string | **Required.** |
+| `--stack-id` | string | **Required.** |
+| `--token-wallet-item-id` | string | **Required.** Wallet item holding the Home Assistant long-lived access token. |
+| `--url` | string | **Required.** Local Home Assistant endpoint. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
 
 ## techstack api registry services list
 
@@ -25,3 +100,46 @@ techstack api registry services list [flags]
 | HTTP | `GET /api/v1/registry/services` |
 | Changes state | No |
 | MCP tool | `list_registry_services` |
+
+## techstack api registry services migrate
+
+Start moving a service to another server of the same stack.
+
+Marks the source service as migrating, creates the target copy pending verification and starts a migration job. The target server must belong to the same stack and differ from the source, and the service must be movable. Today every call answers 501 `Runtime service migration is unavailable` (`migration_available` is false in the registry) until a runtime executor exists; the canonical inventory store additionally answers 503 `service_control_server_fence_unavailable`.
+
+```bash
+techstack api registry services migrate [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/registry/services/migrate` |
+| Changes state | Yes |
+| MCP tool | `move_registry_service` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** |
+| `--target-server-id` | string | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api registry services verify
+
+Finish a service move by accepting the target copy.
+
+Accepts a service copy that is pending verification as running and archives the migrating source copy. Answers 409 when the service is not pending verification. Today every call answers 501 until a runtime executor exists, and the canonical inventory store answers 503 `service_control_server_fence_unavailable`.
+
+```bash
+techstack api registry services verify [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/registry/services/verify` |
+| Changes state | Yes |
+| MCP tool | `verify_registry_service` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |

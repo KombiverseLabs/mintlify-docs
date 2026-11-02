@@ -1,0 +1,54 @@
+---
+title: "techstack api provider-operations"
+description: "Generated reference for the techstack api provider-operations commands"
+sidebarTitle: "provider-operations"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.45.6"
+content_hash: "sha256:5146ef3016e0368303a45dba107e10f5863608bc43fcea1a8cadd5c295039602"
+source_hash: "7c6fb0fb654e2278953736834edf45d8d7e49fcb"
+---
+<Note>Generated from the Techstack v0.45.6 release (source `7c6fb0fb654e`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api provider-operations provision-discovery
+
+Observe what the provider holds for one parked provision operation.
+
+First step of operator resolution for a provision whose outcome is unknown. Reads the provider (read-only) and appends the immutable discovery evidence; it never creates or retries anything at the provider. A replay re-verifies the same observation. The answer names the confirmation string the second step requires. Administrator-only: a non-administrator caller is refused with 403, and the operation must belong to the caller's tenant.
+
+```bash
+techstack api provider-operations provision-discovery <operation-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/provider-operations/{operationId}/provision-discovery` |
+| Changes state | Yes |
+| MCP tool | `discover_provider_provision` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<operation-id>` | string | **Required.** Provider operation id (non-empty, at most 256 characters, no whitespace or control characters). |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api provider-operations provision-resolution
+
+Record the operator decision for one parked provision operation.
+
+Second step of operator resolution. With the exact confirmation from the discovery step it appends one decision against the persisted observation: no candidate, adopt the single exact candidate, or quarantine several. The decision is local custody state and never starts or retries provider creation. Replays return the original decision. Administrator-only; a stale or mismatching observation answers 409.
+
+```bash
+techstack api provider-operations provision-resolution <operation-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/provider-operations/{operationId}/provision-resolution` |
+| Changes state | Yes |
+| MCP tool | `resolve_provider_provision` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<operation-id>` | string | **Required.** Provider operation id (non-empty, at most 256 characters, no whitespace or control characters). |
+| `--confirmation` | string | **Required.** Must equal required_confirmation from the discovery step (adopt-provision:&lt;operationId&gt;). |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
