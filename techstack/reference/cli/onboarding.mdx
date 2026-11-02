@@ -1,0 +1,56 @@
+---
+title: "techstack api onboarding"
+description: "Generated reference for the techstack api onboarding commands"
+sidebarTitle: "onboarding"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.45.6"
+content_hash: "sha256:5146ef3016e0368303a45dba107e10f5863608bc43fcea1a8cadd5c295039602"
+source_hash: "7c6fb0fb654e2278953736834edf45d8d7e49fcb"
+---
+<Note>Generated from the Techstack v0.45.6 release (source `7c6fb0fb654e`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api onboarding apply
+
+Apply one action to the caller's onboarding journey.
+
+Applies one closed action (complete, skip, dismiss, resume or coach_seen) to the authenticated owner's progress in a journey and answers the resolved journey, state, step availability and revision. Steps that spend money complete only from server facts: a reported completion of such a step is refused with 403 `onboarding_derived_only`. A repeated action is a no-op, and a stale `If-Match` revision answers 412.
+
+```bash
+techstack api onboarding apply <journey-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/onboarding/{journeyId}` |
+| Changes state | Yes |
+| MCP tool | `apply_onboarding_action` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<journey-id>` | string | **Required.** Journey id, for example `techstack.platform`. |
+| `--if-match` | string | Optional compare-and-swap revision read from the journey state, for example `"3"`. |
+| `--action` | string | **Required.** One of `complete`, `skip`, `dismiss`, `resume`, `coach_seen`. |
+| `--source` | string | Who asserts the completion; empty means reported for complete and manual for skip. One of `reported`, `manual`. |
+| `--step-id` | string | Required for complete, skip and coach_seen, for example `techstack.add_server`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api onboarding reset
+
+Restart the caller's onboarding journey.
+
+Clears the authenticated owner's completed and seen steps in a journey and reactivates it so the tour is shown again. Only the owner's own progress changes; no infrastructure is touched. Answers the resolved journey like the action route.
+
+```bash
+techstack api onboarding reset <journey-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/onboarding/{journeyId}/reset` |
+| Changes state | Yes |
+| MCP tool | `reset_onboarding` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<journey-id>` | string | **Required.** Journey id, for example `techstack.platform`. |
