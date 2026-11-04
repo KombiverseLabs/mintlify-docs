@@ -122,6 +122,8 @@ mise run local:e2e
 | `scripts/check-code-example-relevance.ps1` | Executable and structured examples only on pages with a topic-specific workflow or configuration. |
 | `scripts/render-api-surface-reference.mjs` | Render a release's OpenAPI and `api-surface.json` into the API and CLI reference; `--check` reports drift. |
 
+The Techstack reference workflow reads published releases from `kombifyio/TechStack`. Its generated `source_hash` identifies the public mirror commit at the release tag; it is not the private StackKits source commit. Dispatch-provided artifact digests must describe the public mirror files and are checked against the downloaded files when present.
+
 ## Telemetry regression journey
 
 Use a deployed PR preview with production analytics initialization in a fresh

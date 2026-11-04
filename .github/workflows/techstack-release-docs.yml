@@ -32,8 +32,8 @@ jobs:
     runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'ubuntu-24.04' }}
     timeout-minutes: 6
     env:
-      SOURCE_REPO: KombiverseLabs/kombify-Techstack
-      AUTH_GUIDANCE: "Check that KOMBIFY_CI_APP_ID and KOMBIFY_CI_APP_PRIVATE_KEY are visible to this repository and that the kombify-ci App can read the source repository."
+      SOURCE_REPO: kombifyio/TechStack
+      AUTH_GUIDANCE: "Check GitHub access to the public Techstack mirror and the kombify-ci App credentials for this repository."
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -43,29 +43,19 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24.22.1
-      # The Techstack source repository is internal, so the workflow token
-      # cannot read it. The kombify-ci App token is minted per job and limited
-      # to Contents read on that one repository.
-      - name: Mint the CI App source read token
-        id: source-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        with:
-          app-id: ${{ vars.KOMBIFY_CI_APP_ID }}
-          private-key: ${{ secrets.KOMBIFY_CI_APP_PRIVATE_KEY }}
-          owner: KombiverseLabs
-          repositories: kombify-Techstack
-          permission-contents: read
+      # The public mirror release contains the exported API artifacts. Its tag
+      # resolves to the mirror commit, not the private StackKits source commit.
       - name: Resolve the published release
         id: release
         env:
-          GH_TOKEN: ${{ steps.source-token.outputs.token }}
+          GH_TOKEN: ${{ github.token }}
           DISPATCH_TAG: ${{ github.event.client_payload.tag }}
           INPUT_TAG: ${{ inputs.tag }}
         shell: bash
         run: |
           set -euo pipefail
           if [ -z "${GH_TOKEN:-}" ] || ! gh api "repos/$SOURCE_REPO" --jq .full_name >/dev/null 2>&1; then
-            echo "::error::The CI App token cannot read $SOURCE_REPO. $AUTH_GUIDANCE"
+            echo "::error::The workflow token cannot read $SOURCE_REPO. $AUTH_GUIDANCE"
             exit 1
           fi
           tag="${DISPATCH_TAG:-${INPUT_TAG:-}}"
@@ -94,7 +84,7 @@ jobs:
           [[ "$source_sha" =~ ^[0-9a-f]{40}$ ]]
           available=true
           for artifact in api/surface/api-surface.json api/surface/openapi.public.yaml; do
-            gh api "repos/$SOURCE_REPO/contents/$artifact?ref=$source_sha" --jq .sha >/dev/null 2>&1 || available=false
+            gh api -H "Accept: application/vnd.github.object+json" "repos/$SOURCE_REPO/contents/$artifact?ref=$source_sha" --jq .sha >/dev/null 2>&1 || available=false
           done
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "source_sha=$source_sha" >> "$GITHUB_OUTPUT"
@@ -106,7 +96,7 @@ jobs:
       - name: Download, validate and render
         if: steps.release.outputs.available == 'true'
         env:
-          GH_TOKEN: ${{ steps.source-token.outputs.token }}
+          GH_TOKEN: ${{ github.token }}
           TAG: ${{ steps.release.outputs.tag }}
           SOURCE_SHA: ${{ steps.release.outputs.source_sha }}
           EXPECTED_SURFACE_DIGEST: ${{ github.event.client_payload.surface_digest }}
@@ -121,10 +111,10 @@ jobs:
               "repos/$SOURCE_REPO/contents/api/surface/$artifact?ref=$SOURCE_SHA" > "$dir/$artifact"
           done
           if [ -n "${EXPECTED_SURFACE_DIGEST:-}" ]; then
-            [ "sha256:$(sha256sum "$dir/api-surface.json" | cut -d' ' -f1)" = "$EXPECTED_SURFACE_DIGEST" ]
+            [ "sha256:$(sha256sum "$dir/api-surface.json" | cut -d' ' -f1)" = "$EXPECTED_SURFACE_DIGEST" ] || { echo "::error::Public API surface digest does not match the dispatch."; exit 1; }
           fi
           if [ -n "${EXPECTED_OPENAPI_DIGEST:-}" ]; then
-            [ "sha256:$(sha256sum "$dir/openapi.public.yaml" | cut -d' ' -f1)" = "$EXPECTED_OPENAPI_DIGEST" ]
+            [ "sha256:$(sha256sum "$dir/openapi.public.yaml" | cut -d' ' -f1)" = "$EXPECTED_OPENAPI_DIGEST" ] || { echo "::error::Public OpenAPI digest does not match the dispatch."; exit 1; }
           fi
           # The renderer refuses artifacts that expose an internal operation.
           args=(--product techstack --surface "$dir/api-surface.json" --openapi "$dir/openapi.public.yaml" --release "$TAG" --source-sha "$SOURCE_SHA")
@@ -184,6 +174,6 @@ jobs:
           if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq length)" = "0" ]; then
             gh pr create --base main --head "$BRANCH" \
               --title "docs(techstack): sync $TAG API and CLI reference" \
-              --body "Automated projection of api/surface/openapi.public.yaml and api/surface/api-surface.json from the published Techstack $TAG release (source $SOURCE_SHA)."
+              --body "Automated projection of api/surface/openapi.public.yaml and api/surface/api-surface.json from the published Techstack $TAG release (public mirror commit $SOURCE_SHA)."
           fi
           GH_TOKEN="$PUSH_TOKEN" gh pr merge "$BRANCH" --auto --squash
