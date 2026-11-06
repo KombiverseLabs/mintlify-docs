@@ -7,6 +7,43 @@ mode: "center"
 
 Product updates, organized newest first. For deeper details on each release, see the [StackKits](https://github.com/kombifyio/stackKits/releases), [SpeechKit](https://github.com/kombifyio/SpeechKit/releases), and [Techstack](https://github.com/kombifyio/TechStack/releases) release notes on GitHub.
 
+<Update label="2026-11-06" description="Oct 30 to Nov 6">
+
+## StackKits adds a VPN add-on, Dokploy, and passkey device enrollment; SpeechKit adds LFM3 as a local model
+
+StackKits shipped [v0.54.13](https://github.com/kombifyio/stackKits/releases/tag/v0.54.13) through [v0.56.1](https://github.com/kombifyio/stackKits/releases/tag/v0.56.1): an optional VPN add-on, Dokploy as a platform, device enrollment with each person's own passkey, and safer upgrades. SpeechKit rolled from [v0.78.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.78.0) to [v0.78.18](https://github.com/kombifyio/SpeechKit/releases/tag/v0.78.18). Techstack published 0.44.6 through 0.46.13.
+
+### New features
+
+- **Optional VPN add-on.** [StackKits v0.55.14](https://github.com/kombifyio/stackKits/releases/tag/v0.55.14) adds `stackkit vpn` with WireGuard, Headscale, Tailscale, or Pangolin. It is never on by default. Enrolled devices get their peer automatically, and revoking a device removes its peer within seconds.
+- **Dokploy as a platform.** [v0.55.6](https://github.com/kombifyio/stackKits/releases/tag/v0.55.6) lets you install Files, Photos, or Vault through Dokploy with `--platform dokploy`. The Dokploy UI sits behind your Kit router and Pocket ID sign-in. Backup, restore, drift detection, and removal work on its workloads.
+- **Homelab Hub for your devices.** [v0.55.13](https://github.com/kombifyio/stackKits/releases/tag/v0.55.13) and [v0.55.15](https://github.com/kombifyio/stackKits/releases/tag/v0.55.15) add an installable web app at `base.<domain>/device/`. Everyone without the kombify app can connect a device with their passkey, list and revoke their devices, and approve sign-ins from away. See [`stackkit device`](/stackkits/reference/cli/device).
+- **Approve agent writes with a passkey.** [v0.55.0](https://github.com/kombifyio/stackKits/releases/tag/v0.55.0) adds an Owner page to approve or deny an agent's write request with your passkey. See [`stackkit agent`](/stackkits/reference/cli/agent).
+- **LFM3-1.7B as a local model.** [SpeechKit v0.78.9](https://github.com/kombifyio/SpeechKit/releases/tag/v0.78.9) adds Liquid AI's compact LFM3-1.7B (about 1.1 GB) for Assist and the Voice Agent. It suits computers with little memory. See [Work offline](/speechkit/work-offline).
+
+### Updates
+
+- **Each person enrolls their own devices.** [StackKits v0.55.12](https://github.com/kombifyio/stackKits/releases/tag/v0.55.12) replaces the Owner pairing code with each person's own passkey. A device connected on your home network is enrolled at once, with a 24-hour undo. Elsewhere, another of your devices or the Owner confirms it.
+- **Recovery sets replace the break-glass token.** Owner recovery now uses a recovery key and a recovery code that StackKits shows once. Scheduled backups write a fresh recovery set after each snapshot. See [`stackkit break-glass`](/stackkits/reference/cli/break-glass).
+- **More Runtipi and Coolify operations.** [v0.55.6](https://github.com/kombifyio/stackKits/releases/tag/v0.55.6) backs up, restores, and removes Runtipi workloads. [v0.55.3](https://github.com/kombifyio/stackKits/releases/tag/v0.55.3) adds Files on Runtipi and Coolify restore activation, removal, and drift detection. See [Coolify](/stackkits/apps/coolify).
+- **Photos moves to Immich v3.** [v0.55.0](https://github.com/kombifyio/stackKits/releases/tag/v0.55.0) installs Immich v3.3.4 on new installs. Immich v3 cannot be downgraded, so an existing v2 install keeps running and Apply stops before changing it. See [Immich](/stackkits/apps/immich).
+- **Private AI on Windows GPUs.** [v0.55.0](https://github.com/kombifyio/stackKits/releases/tag/v0.55.0) runs Local AI on Windows with your GPU through WSL2.
+- **Techstack manages StackKits updates.** With [v0.55.12](https://github.com/kombifyio/stackKits/releases/tag/v0.55.12), Techstack proposes StackKits updates with highlights and applies security patches without asking. See the [Techstack changelog](/changelog/techstack).
+- **Quicker model switch.** [SpeechKit v0.78.13](https://github.com/kombifyio/SpeechKit/releases/tag/v0.78.13) makes the overlay model button cycle through your active Dictation models.
+
+### Bug fixes
+
+- **Interrupted upgrades recover.** [StackKits v0.55.2](https://github.com/kombifyio/stackKits/releases/tag/v0.55.2) through [v0.55.4](https://github.com/kombifyio/stackKits/releases/tag/v0.55.4) finish or release an upgrade that stopped partway, including with a newer verified release. See [`stackkit upgrade`](/stackkits/reference/cli/upgrade).
+- **Marketplace failures show up at once.** [v0.55.6](https://github.com/kombifyio/stackKits/releases/tag/v0.55.6) fails workloads right away when Coolify or Runtipi fails during Apply, instead of after about 14 minutes with an unclear error.
+- **Pocket ID survives backups.** [v0.54.19](https://github.com/kombifyio/stackKits/releases/tag/v0.54.19) and [v0.55.0](https://github.com/kombifyio/stackKits/releases/tag/v0.55.0) keep household sign-in and member adds working after a backup restarts Pocket ID. See [Pocket ID](/stackkits/apps/pocketid).
+- **Coolify restores on Docker 29.** [v0.54.14](https://github.com/kombifyio/stackKits/releases/tag/v0.54.14) lets restore activation of Coolify workloads, such as Files, reach its data copy again.
+- **Removing a Techstack-managed homelab completes.** [v0.55.14](https://github.com/kombifyio/stackKits/releases/tag/v0.55.14) no longer stops at the second workload. See [`stackkit remove`](/stackkits/reference/cli/remove).
+- **Dokploy UI opens after sign-in.** [v0.55.10](https://github.com/kombifyio/stackKits/releases/tag/v0.55.10) stops sending the owner back to the sign-in page, and backups of Dokploy workloads complete.
+- **Fresh Immich and Jellyfin installs.** [v0.54.13](https://github.com/kombifyio/stackKits/releases/tag/v0.54.13) accepts fresh Immich and Jellyfin installs on new nodes.
+- **Long vocabularies with Deepgram.** [SpeechKit v0.78.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.78.10) keeps a long dictionary from making every Deepgram dictation fail.
+
+</Update>
+
 <Update label="2026-10-30" description="Oct 23 – Oct 30">
 
 ## SpeechKit adds fast offline models on desktop and Android; StackKits adds Runtipi and Qdrant
