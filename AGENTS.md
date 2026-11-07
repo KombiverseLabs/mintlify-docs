@@ -32,7 +32,7 @@ navigation source of truth; pages are MDX files.
 
 ## Planning System Policy
 
-- Beads epics own cross-repo priorities, milestones (labels `milestone` and `central:C<n>`), phase gates and blockers; the central `ROADMAP.md` states the phase order, each product `ROADMAP.md` its milestones, and Beads the executable work. GitHub Projects is read-only history (owner decision 2026-10-15). Detail: workspace `ISSUE-FLOW-STANDARD.md`.
+- For overall progress or the next implementation package, read the relevant M milestone and primary AP in workspace `OVERALL-ROADMAP.md`, then its current owning Beads issue, parent and actual dependencies. Product `ROADMAP.md` files own capability commitments; Beads owns executable status and claims. Workspace `ROADMAP.md` and `central:C<n>` labels are historical phase references, not the current execution order or progress measure (D-2026-11-07-01). Detail: `ISSUE-FLOW-STANDARD.md` "Task context and completion".
 
 ## Beads Remote Write Policy
 
