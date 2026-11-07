@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 import { spawn } from "node:child_process";
-import { appendFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { appendFileSync, readFileSync, realpathSync } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
@@ -53,6 +54,45 @@ function normalizeSteps(spec, profile, label) {
   return steps;
 }
 
+// This is an operation observation, not publication authority. The shared
+// workflow binds it to its already validated plan before composing a receipt.
+export function readDeliveryOperationResult(serialized, expected) {
+  if (!serialized) return { status: "pending", evidence: [] };
+  const result = JSON.parse(serialized);
+  const fields = ["schema_version", "status", "workflows", "deferred", ...Object.keys(expected)];
+  if (
+    !result || Array.isArray(result) || result.schema_version !== 1 ||
+    Object.keys(result).some((key) => !fields.includes(key)) ||
+    Object.entries(expected).some(([key, value]) =>
+      typeof value !== "string" || value === "" || result[key] !== value) ||
+    !["pending", "passed"].includes(result.status) ||
+    !Array.isArray(result.workflows) || !Array.isArray(result.deferred) ||
+    result.deferred.some((value) => typeof value !== "string" || !value.trim())
+  ) fail("operation result does not match the admitted plan and operation");
+  const evidence = [];
+  for (const run of result.workflows) {
+    if (
+      !run || Array.isArray(run) ||
+      Object.keys(run).some((key) => !["repository", "run_id", "head_sha", "status", "conclusion"].includes(key)) ||
+      !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(run.repository ?? "") ||
+      !Number.isSafeInteger(run.run_id) || run.run_id <= 0 ||
+      !/^[0-9a-f]{40}$/.test(run.head_sha ?? "") ||
+      !["queued", "in_progress", "waiting", "pending", "requested", "completed"].includes(run.status) ||
+      !(run.conclusion === null || /^[a-z_]+$/.test(run.conclusion ?? "")) ||
+      (result.status === "passed" && (run.status !== "completed" || run.conclusion !== "success"))
+    ) fail("operation result contains invalid workflow evidence");
+    evidence.push({
+      kind: run.status === "completed" && run.conclusion === "success"
+        ? "github-workflow-completed" : "github-workflow-acknowledged",
+      uri: `https://github.com/${run.repository}/actions/runs/${run.run_id}`,
+    });
+  }
+  if (result.status === "passed" && result.deferred.length > 0) {
+    fail("delegated operation evidence cannot be passed");
+  }
+  return { status: result.status, evidence };
+}
+
 async function resolveRunnerCustody(config) {
   const custody = config.runner_custody;
   let runner = process.env.DELIVERY_RUNNER ?? "";
@@ -81,17 +121,17 @@ async function resolveRunnerCustody(config) {
   return { runner, contract };
 }
 
-function verifyStableCandidateReceipt(variables, operation) {
-  if (
-    variables.DELIVERY_PROFILE !== "stable-1.0-plus" ||
-    !["publish", "promote"].includes(operation)
-  ) {
+// Fast pre-1.0 publish and promote carry no Candidate receipt: the rollout
+// path deploys and confirms activation only, and product-delivery.yml requests
+// the Candidate E2E after activation (D-2026-10-27-05). Stable 1.0+ keeps its
+// clean, exact-source receipt before publication.
+function verifyCandidateReceipt(variables, operation) {
+  if (!["publish", "promote"].includes(operation)) return;
+  if (variables.DELIVERY_PROFILE !== "stable-1.0-plus") {
+    process.stdout.write(`Candidate E2E: not_required for fast ${operation}; it runs after activation.\n`);
     return;
   }
-  const encoded = requireString(
-    variables.CANDIDATE_RECEIPT_B64,
-    "CANDIDATE_RECEIPT_B64 for stable publish/promote",
-  );
+  const encoded = requireString(variables.CANDIDATE_RECEIPT_B64, "CANDIDATE_RECEIPT_B64 for stable publish/promote");
   let receipt;
   try {
     const decoded = Buffer.from(encoded, "base64");
@@ -109,37 +149,50 @@ function verifyStableCandidateReceipt(variables, operation) {
     receipt?.exit_code !== 0 ||
     receipt?.dirty !== false
   ) {
-    fail("stable Candidate receipt must be a clean Candidate E2E v1 PASS");
+    fail("stable clean Candidate receipt must be a Candidate E2E v1 PASS");
   }
-  assertCandidateFeatureAcceptance(receipt);
+  assertCandidateFeatureAcceptance(receipt, {});
   if (
     String(receipt.repo ?? "").toLowerCase() !== variables.SOURCE_REPOSITORY.toLowerCase() ||
     receipt.sha !== variables.SOURCE_SHA
   ) {
     fail(
-      `stable Candidate receipt identity does not match ${variables.SOURCE_REPOSITORY}@${variables.SOURCE_SHA}`,
+      `Candidate receipt identity does not match ${variables.SOURCE_REPOSITORY}@${variables.SOURCE_SHA}`,
     );
   }
   const finishedAt = Date.parse(receipt.finished_at ?? "");
   const ageMs = Date.now() - finishedAt;
   if (!Number.isFinite(finishedAt) || ageMs < -5 * 60 * 1000 || ageMs > 24 * 60 * 60 * 1000) {
-    fail("stable Candidate receipt must be fresh within 24 hours");
+    fail("Candidate receipt must be fresh within 24 hours");
   }
 }
 
 // Kept in the standalone runtime so the existing fleet copy/sync path carries
 // the same admission check without another runtime dependency.
-export function assertCandidateFeatureAcceptance(receipt) {
+export function assertCandidateFeatureAcceptance(receipt, { required = false, bundleRoot } = {}) {
   const nonempty = (value) => typeof value === "string" && value.trim().length > 0;
   const hash = (value) => typeof value === "string" && /^[0-9a-f]{64}$/.test(value);
   const portable = (value) => nonempty(value) && !/^[\\/]|^[A-Za-z]:/.test(value) && !value.includes("\\") && !value.split("/").some((part) => ["", ".", ".."].includes(part));
   const deny = (message) => { throw new Error(`Candidate feature acceptance: ${message}`); };
+  let acceptedScopes = 0;
+  const root = bundleRoot ? realpathSync(bundleRoot) : null;
   const check = (acceptance) => {
     if (!acceptance || acceptance.status !== "passed") deny("declared acceptance is not closed");
+    acceptedScopes += 1;
     if (acceptance.source_sha !== receipt.sha || !nonempty(acceptance.scope)) deny("source/scope mismatch");
     if (!portable(acceptance.producer?.path) || !hash(acceptance.producer?.sha256)) deny("producer binding missing");
     if (!Array.isArray(acceptance.artifacts) || acceptance.artifacts.length === 0 ||
         acceptance.artifacts.some((item) => !portable(item.path) || !hash(item.sha256))) deny("artifact bindings missing");
+    if (root) {
+      for (const artifact of [acceptance.producer, ...acceptance.artifacts]) {
+        const file = realpathSync(path.resolve(root, artifact.path));
+        const relative = path.relative(root, file);
+        if (relative === ".." || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative) ||
+            createHash("sha256").update(readFileSync(file)).digest("hex") !== artifact.sha256) {
+          deny(`bundle evidence digest mismatch: ${artifact.path}`);
+        }
+      }
+    }
     const proofPaths = new Set([acceptance.producer.path, ...acceptance.artifacts.map((item) => item.path)]);
     for (const name of ["functional", "cleanup"]) {
       const section = acceptance[name];
@@ -173,6 +226,7 @@ export function assertCandidateFeatureAcceptance(receipt) {
     for (const phase of entry.phases ?? []) visit(phase);
   };
   visit(receipt);
+  if (required && acceptedScopes === 0) deny("affected runtime effect proof is missing");
 }
 
 async function runProcess(command, args, cwd) {
@@ -205,6 +259,7 @@ const conditionalReads = new Map();
 // executed, so waiting for the reset and repeating it is safe. Anything else
 // (including an unreadable reset) fails as before.
 const RATE_LIMIT_MAX_WAIT_MS = 15 * 60 * 1000;
+const TRANSIENT_READ_RETRIES = 5;
 
 function rateLimitWaitMs(response, body, attempt) {
   const header = (name) => response.headers?.get?.(name) ?? null;
@@ -220,32 +275,49 @@ function rateLimitWaitMs(response, body, attempt) {
   return 60_000 * 2 ** (attempt - 1);
 }
 
-async function githubRequest(token, url, options = {}) {
+async function githubRequest(token, url, options = {}, notFoundDeadline = 0) {
   const method = options.method ?? "GET";
   const cached = method === "GET" ? conditionalReads.get(url) : undefined;
   let waited = 0;
   for (let attempt = 1; ; attempt += 1) {
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        accept: "application/vnd.github+json",
-        authorization: `Bearer ${token}`,
-        "content-type": "application/json",
-        "user-agent": "kombify-delivery-v2",
-        "x-github-api-version": "2022-11-28",
-        ...(cached ? { "if-none-match": cached.etag } : {}),
-        ...options.headers,
-      },
-    });
+    let response;
+    let bodyText = "";
+    try {
+      response = await fetch(url, {
+        ...options,
+        headers: {
+          accept: "application/vnd.github+json",
+          authorization: `Bearer ${token}`,
+          "content-type": "application/json",
+          "user-agent": "kombify-delivery-v2",
+          "x-github-api-version": "2022-11-28",
+          ...(cached ? { "if-none-match": cached.etag } : {}),
+          ...options.headers,
+        },
+      });
+      // The body is part of the transport: a connection that drops while it is
+      // read is as transient as one that fails to open. Parsing stays outside.
+      if (response.status !== 304 && response.status !== 204) bodyText = await response.text();
+    } catch (error) {
+      // A thrown network error on an idempotent read is transient; writes stay
+      // single-attempt because the request may already have taken effect.
+      if (method !== "GET") throw error;
+      if (attempt > TRANSIENT_READ_RETRIES) throw Object.assign(error, { transientRead: true });
+      process.stdout.write(
+        `GitHub API ${method} ${url} failed on the network (${error?.message ?? error}); reading again instead of failing the delivery.\n`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, 5_000 * attempt));
+      continue;
+    }
     if (response.status === 304 && cached) return cached.body;
     if (response.ok) {
       if (response.status === 204) return null;
-      const body = await response.json();
+      const body = JSON.parse(bodyText);
       const etag = method === "GET" ? response.headers?.get?.("etag") : null;
       if (etag) conditionalReads.set(url, { etag, body });
       return body;
     }
-    const text = await response.text();
+    const text = bodyText;
     const waitMs = rateLimitWaitMs(response, text, attempt);
     if (waitMs !== null && Number.isFinite(waitMs) && waited + waitMs <= RATE_LIMIT_MAX_WAIT_MS) {
       process.stdout.write(
@@ -255,13 +327,59 @@ async function githubRequest(token, url, options = {}) {
       await new Promise((resolve) => setTimeout(resolve, waitMs));
       continue;
     }
-    throw new Error(
+    // A server or gateway error on a read says nothing about the run it reads;
+    // writes stay single-attempt.
+    const retryDelay = 5_000 * attempt;
+    const acknowledgedRunNotVisible = response.status === 404 && Date.now() + retryDelay <= notFoundDeadline;
+    if (method === "GET" && ([500, 502, 503, 504].includes(response.status) || acknowledgedRunNotVisible) && attempt <= TRANSIENT_READ_RETRIES) {
+      process.stdout.write(
+        `GitHub API ${method} ${url} answered ${response.status}; reading again instead of failing the delivery.\n`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      continue;
+    }
+    throw Object.assign(new Error(
       `GitHub API ${method} ${url} failed (${response.status}${waitMs !== null ? ", rate limited beyond the wait budget" : ""}): ${text.slice(0, 500)}`,
-    );
+    ), method === "GET" && [500, 502, 503, 504].includes(response.status) ? { transientRead: true } : {});
   }
 }
 
-export async function dispatchWorkflow(step, variables) {
+const ACTIVE_RUN_STATUSES = ["queued", "in_progress", "waiting", "pending", "requested"];
+
+async function waitForIdleWorkflows(token, owner, repository, workflows, startedAt, timeoutSeconds) {
+  if (workflows === undefined) return;
+  if (!Array.isArray(workflows) || workflows.length === 0 || workflows.some((name) => typeof name !== "string" || name === "")) {
+    fail("step.wait_for_idle_workflows must be a non-empty array of workflow file names");
+  }
+  const deadline = startedAt + timeoutSeconds * 1000;
+  for (;;) {
+    let busy = null;
+    for (const name of workflows) {
+      for (const status of ACTIVE_RUN_STATUSES) {
+        const runs = await githubRequest(
+          token,
+          `https://api.github.com/repos/${owner}/${repository}/actions/workflows/${encodeURIComponent(name)}/runs?status=${status}&per_page=1`,
+        );
+        if ((runs?.workflow_runs ?? []).length > 0) {
+          busy = `${name} (${status})`;
+          break;
+        }
+      }
+      if (busy) break;
+    }
+    if (!busy) return;
+    if (Date.now() + 20_000 > deadline) {
+      fail(`${owner}/${repository} workflow ${busy} stayed active until the step deadline; dispatch was not sent`);
+    }
+    process.stdout.write(`Waiting for ${busy} to finish before dispatching\n`);
+    await new Promise((resolve) => setTimeout(resolve, 15_000));
+  }
+}
+
+export async function dispatchWorkflow(step, variables, { onAcknowledged, acknowledgedRunId } = {}) {
+  if (!onAcknowledged && acknowledgedRunId === undefined) {
+    fail("workflow dispatch requires the shared exact-child binding uploader");
+  }
   const token = requireString(process.env.GH_TOKEN, "GH_TOKEN");
   const repository = substitute(step.repository ?? variables.SOURCE_REPOSITORY, variables);
   const owner = substitute(step.owner ?? "KombiverseLabs", variables);
@@ -326,18 +444,20 @@ export async function dispatchWorkflow(step, variables) {
   }
   const startedAt = Date.now();
   const workflowUrl = `https://api.github.com/repos/${owner}/${repository}/actions/workflows/${encodeURIComponent(workflow)}`;
-  process.stdout.write(
-    `Dispatching ${owner}/${repository}/${workflow} at ${ref} with input keys [${Object.keys(inputs).join(", ")}]\n`,
-  );
-  const dispatched = await githubRequest(token, `${workflowUrl}/dispatches`, {
-    method: "POST",
-    body: JSON.stringify({ ref, inputs, return_run_details: true }),
-  });
-  const runId = dispatched?.workflow_run_id;
-  if (!Number.isSafeInteger(runId) || runId <= 0) {
-    fail(
-      "workflow dispatch acknowledgement has no valid workflow_run_id; dispatch will not be repeated",
+  let runId = acknowledgedRunId;
+  if (runId === undefined) {
+    await waitForIdleWorkflows(token, owner, repository, step.wait_for_idle_workflows, startedAt, timeoutSeconds);
+    process.stdout.write(
+      `Dispatching ${owner}/${repository}/${workflow} at ${ref} with input keys [${Object.keys(inputs).join(", ")}]\n`,
     );
+    const dispatched = await githubRequest(token, `${workflowUrl}/dispatches`, {
+      method: "POST",
+      body: JSON.stringify({ ref, inputs, return_run_details: true }),
+    });
+    runId = dispatched?.workflow_run_id;
+  }
+  if (!Number.isSafeInteger(runId) || runId <= 0) {
+    fail("workflow dispatch acknowledgement has no valid workflow_run_id; dispatch will not be repeated");
   }
 
   // The acknowledgement owns run identity. Never follow response URLs or infer
@@ -345,6 +465,9 @@ export async function dispatchWorkflow(step, variables) {
   const runUrl = `https://api.github.com/repos/${owner}/${repository}/actions/runs/${runId}`;
   const observationStartedAt = waitsForCompletion ? startedAt : Date.now();
   const deadline = observationStartedAt + timeoutSeconds * 1000;
+  // A dispatch ACK can precede REST visibility. Only this exact acknowledged
+  // run's initial read gets the bounded grace; never repeat the dispatch.
+  const visibilityDeadline = Math.min(deadline, Date.now() + 90_000);
   let observed = { status: "unknown", conclusion: null, head_sha: null };
   let observedAt = null;
   function report(event) {
@@ -395,9 +518,12 @@ export async function dispatchWorkflow(step, variables) {
     }
   }
   report("acknowledged");
+  // The native Actions helper must finalize and independently authenticate this
+  // exact binding before this runtime observes or waits for the child.
+  if (onAcknowledged) await onAcknowledged({ runId, repository: `${owner}/${repository}`, workflow, ref });
   const progress = setInterval(() => report("progress"), 30000);
   async function findRun() {
-    const run = await githubRequest(token, runUrl);
+    const run = await githubRequest(token, runUrl, {}, observedAt === null ? visibilityDeadline : 0);
     if (run?.id !== runId) {
       fail(`workflow run response does not match acknowledged run ${runId}`);
     }
@@ -471,7 +597,20 @@ export async function dispatchWorkflow(step, variables) {
     // renewed authority, automatic resume or synthetic successful receipt.
     let run = null;
     while (Date.now() < deadline) {
-      run = await findRun();
+      try {
+        run = await findRun();
+      } catch (error) {
+        // An outage of our own reads says nothing about the acknowledged child
+        // (0.42.5, 2026-10-20: a 75 s network failure ended the leg while the
+        // child kept running). Once the run has been read, observe it again
+        // until the step deadline; an unseen run and a refusal still fail.
+        if (!error?.transientRead || observedAt === null) throw error;
+        process.stdout.write(
+          `Delivery observation could not read run ${runId} (${error.message}); observing it again until the step deadline.\n`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, Math.max(0, Math.min(30_000, deadline - Date.now()))));
+        continue;
+      }
       if (run?.status === "completed") {
         process.stdout.write(
           `Workflow ${workflow} completed as ${run.conclusion}: ${runEvidence(run)}\n`,
@@ -531,7 +670,7 @@ async function runHttpSmoke(step, variables) {
   );
 }
 
-async function executeStep(step, variables, cwd) {
+async function executeStep(step, variables, cwd, workflowDispatcher) {
   if (!step || typeof step !== "object" || Array.isArray(step)) {
     fail("every operation step must be an object");
   }
@@ -566,14 +705,22 @@ async function executeStep(step, variables, cwd) {
   }
 
   if ("workflow" in step) {
-    await dispatchWorkflow(
+    const run = await workflowDispatcher(
       {
         ...step,
         workflow: step.workflow,
       },
       variables,
     );
-    return;
+    return {
+      workflow: {
+        repository: `${substitute(step.owner ?? "KombiverseLabs", variables)}/${substitute(step.repository ?? variables.SOURCE_REPOSITORY, variables)}`,
+        run_id: run.id,
+        head_sha: run.head_sha,
+        status: run.status,
+        conclusion: run.conclusion,
+      },
+    };
   }
 
   if ("http" in step) {
@@ -603,11 +750,12 @@ async function executeStep(step, variables, cwd) {
   }
   const by = substitute(requireString(satisfied.by, "step.satisfied.by"), variables);
   const reason = substitute(requireString(satisfied.reason, "step.satisfied.reason"), variables);
-  process.stdout.write(`Satisfied by ${by}: ${reason}\n`);
+  process.stdout.write(`Delegated to ${by}; evidence remains pending: ${reason}\n`);
+  return { deferred: by };
 }
 
-export async function runDeliveryOperation() {
-  const operation = process.argv[2] ?? process.env.DELIVERY_OPERATION ?? "";
+export async function runDeliveryOperation({ operation: selectedOperation, workflowDispatcher = dispatchWorkflow } = {}) {
+  const operation = selectedOperation ?? process.argv[2] ?? process.env.DELIVERY_OPERATION ?? "";
   if (!OPERATIONS.has(operation)) {
     fail(`operation must be one of ${[...OPERATIONS].join(", ")}`);
   }
@@ -619,6 +767,7 @@ export async function runDeliveryOperation() {
 
   const variables = {
     CANDIDATE_RECEIPT_B64: process.env.CANDIDATE_RECEIPT_B64 ?? "",
+    CANDIDATE_BUNDLE_ROOT: process.env.CANDIDATE_BUNDLE_ROOT ?? "",
     REVIEW_RECEIPT_B64: process.env.REVIEW_RECEIPT_B64 ?? "",
     RELEASE_CONFIRM: process.env.RELEASE_CONFIRM ?? "",
     DELIVERY_ARTIFACT: requireString(process.env.DELIVERY_ARTIFACT, "DELIVERY_ARTIFACT"),
@@ -663,7 +812,7 @@ export async function runDeliveryOperation() {
     );
     return;
   }
-  verifyStableCandidateReceipt(variables, operation);
+  verifyCandidateReceipt(variables, operation);
   const steps = normalizeSteps(
     group.operations?.[operation],
     variables.DELIVERY_PROFILE,
@@ -672,9 +821,35 @@ export async function runDeliveryOperation() {
   if (steps.length === 0) {
     fail(`group ${group.id} operation ${operation} may not be empty`);
   }
-  for (const step of steps) {
-    await executeStep(step, variables, cwd);
+  const workflows = [];
+  const deferred = [];
+  for (const [index, step] of steps.entries()) {
+    variables.DELIVERY_STEP_INDEX = index;
+    const result = await executeStep(step, variables, cwd, workflowDispatcher);
+    if (result?.workflow) workflows.push(result.workflow);
+    if (result?.deferred) deferred.push(result.deferred);
   }
+  const result = {
+    schema_version: 1,
+    source_repository: variables.SOURCE_REPOSITORY,
+    source_sha: variables.SOURCE_SHA,
+    plan_digest: variables.DELIVERY_PLAN_DIGEST,
+    release_id: variables.DELIVERY_RELEASE_ID,
+    profile: variables.DELIVERY_PROFILE,
+    group: variables.DELIVERY_GROUP,
+    artifact: variables.DELIVERY_ARTIFACT,
+    operation,
+    plan_run_id: variables.DELIVERY_PLAN_RUN_ID,
+    plan_artifact_name: variables.DELIVERY_PLAN_ARTIFACT_NAME,
+    status: deferred.length > 0 || workflows.some((run) => run.status !== "completed" || run.conclusion !== "success")
+      ? "pending" : "passed",
+    workflows,
+    deferred,
+  };
+  if (process.env.GITHUB_OUTPUT) {
+    appendFileSync(process.env.GITHUB_OUTPUT, `operation-result=${JSON.stringify(result)}\n`);
+  }
+  return result;
 }
 
 // Cutover copies this file to .kombify/delivery.mjs; its existing mise task

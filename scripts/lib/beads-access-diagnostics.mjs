@@ -10,6 +10,8 @@ const GUIDANCE = {
   TRACKER_FORBIDDEN: ['context', 'The identity cannot access this tracker. Check the repository policy and granted scopes.'],
   TRACKER_THROTTLED: ['context', 'The tracker rate-limited access. Retain the sign-in and wait for the reset.'],
   TRACKER_UNAVAILABLE: ['context', 'Inspect store health and network reachability; keep the existing credential.'],
+  TRACKER_CONTEXT_INVALID: ['context', 'The authenticated context response is invalid; preserve the credential and inspect the store response contract.'],
+  TRACKER_IDENTITY_UNVERIFIED: ['context', 'The authenticated context has no verified principal; inspect store identity admission. A worker name cannot supply identity.'],
   CREDENTIAL_CACHE_INVALID: ['cache', 'Check credential-file format and owner-only permissions. Never print or copy its values.'],
   BINDING_INVALID: ['binding', 'Restore the non-secret binding from its manifest owner. No tracker operation was sent.'],
   ACCESS_UNAVAILABLE: ['access', 'Inspect the host bootstrap, repository policy, protected credential cache, and store reachability.'],
@@ -32,6 +34,7 @@ export function accessFailureDiagnostic(error) {
   const fields = [`class=${code}`, `stage=${stage}`];
   if (new Set(['cache', 'github', 'github-host', 'broker', 'oauth', 'app-reader', 'admission-reader', 'machine-key']).has(error?.route)) fields.push(`route=${error.route}`);
   if (Number.isInteger(error?.status) && error.status >= 100 && error.status <= 599) fields.push(`http=${error.status}`);
+  if (new Set(['timeout', 'network', 'redirect', 'bad_response']).has(error?.failureClass)) fields.push(`transport=${error.failureClass}`);
   if (/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(error?.reset ?? '')) fields.push(`retry_after=${error.reset}`);
   return `BEADS_CLOUDFLARE_ACCESS_FAILED ${fields.join(' ')}: ${advice}`;
 }
