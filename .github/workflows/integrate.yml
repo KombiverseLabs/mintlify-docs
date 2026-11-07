@@ -72,8 +72,7 @@ jobs:
           })();
           const { execFileSync } = require('node:child_process');
           const fs = require('node:fs');
-          const { HEAD_SHA: head, GITHUB_REPOSITORY: repo, GITHUB_RUN_ID: ownRun, GITHUB_OUTPUT: output, GITHUB_STEP_SUMMARY: summary } = process.env;
-          if (process.env.GITHUB_RUN_ATTEMPT !== '1') throw new Error('Integration attempts are not rerun; a new lane invocation reconciles original native evidence without replay.');
+          const { HEAD_SHA: head, GITHUB_REPOSITORY: repo, GITHUB_OUTPUT: output, GITHUB_STEP_SUMMARY: summary } = process.env;
           const gh = (...args) => execFileSync('gh', args, { encoding: 'utf8', maxBuffer: 1e8 });
           const api = endpoint => JSON.parse(gh('api', endpoint));
           const pages = (endpoint, field) => {
@@ -82,14 +81,16 @@ jobs:
             return result.flatMap(page => page[field]);
           };
           const note = line => fs.appendFileSync(summary, line + '\n');
-          const state = integrationJournal.empty(); let last = '';
+          const state = integrationJournal.empty(); let last = '', latest = '';
           const runs = pages(`repos/${repo}/actions/workflows/integrate.yml/runs?branch=main&per_page=100`, 'workflow_runs');
-          const candidates = runs.filter(run => String(run.id) !== ownRun && run.head_branch === 'main' && run.path === '.github/workflows/integrate.yml' && run.repository?.full_name === repo);
+          // The own run is a candidate too: its current attempt has not started its dispatch step yet,
+          // and an earlier attempt of a rerun supplies its ACKs.
+          const candidates = runs.filter(run => run.head_branch === 'main' && run.path === '.github/workflows/integrate.yml' && run.repository?.full_name === repo);
           let found = false;
           for (const run of candidates) {
             if (!Number.isSafeInteger(run.run_attempt) || run.run_attempt < 1) throw new Error('Native integration attempt unavailable; nothing dispatched.');
-            // A forbidden rerun can have no dispatch while attempt 1 already wrote intents.
-            // Inspect original attempts too, rather than losing their deduplication evidence.
+            // An attempt without a started dispatch step or a readable journal falls back to the earlier
+            // attempts of the same run, then to older runs.
             for (let attempt = run.run_attempt; attempt >= 1; attempt--) {
               const jobs = pages(`repos/${repo}/actions/runs/${run.id}/attempts/${attempt}/jobs?per_page=100`, 'jobs');
               const matches = jobs.filter(job => job.name === 'integrate');
@@ -102,7 +103,10 @@ jobs:
               const step = steps[0];
               if (!step?.started_at || step.status === 'queued' || step.conclusion === 'skipped') continue;
               let journal;
-              try { journal = integrationJournal.decode(gh('api', `repos/${repo}/actions/jobs/${job.id}/logs`)); } catch { journal = { records: [], complete: false }; }
+              try { journal = integrationJournal.decode(gh('api', `repos/${repo}/actions/jobs/${job.id}/logs`, '--allow-escape-sequences')); } catch {
+                journal = { records: [], complete: false };
+              }
+              if (!journal.records.length) { note(`No readable integration journal in job ${job.id}; an earlier journal is used.`); continue; }
               const first = journal.records[0], end = journal.records.at(-1);
               if (first && (first.type !== 'start' || first.run_id !== run.id || first.attempt !== attempt || first.repository !== repo || first.head !== run.head_sha)) {
                 throw new Error('Native integration journal identity mismatch; nothing dispatched.');
@@ -112,55 +116,58 @@ jobs:
                 Object.assign(state.covered, end.state.covered); Object.assign(state.held, end.state.held);
                 last = end.failed === 0 ? run.head_sha : first.last;
               } else {
-                // A partial log can still preserve exact ACKs. Without its end seal it
-                // proves no absence of other writes, so all remaining prior slots stay held.
-                const prior = JSON.parse(Buffer.from(gh('api', `repos/${repo}/contents/.kombify/integration-lane.json?ref=${run.head_sha}`, '--jq', '.content').replace(/\s/g, ''), 'base64').toString('utf8'));
-                if (!Array.isArray(prior.dispatch)) throw new Error('Prior immutable lane inventory unavailable; nothing dispatched.');
-                Object.assign(state.covered, first?.state?.covered); Object.assign(state.held, first?.state?.held);
-                last = first?.last ?? '';
-                for (const entry of prior.dispatch) {
-                  state.held[entry.workflow] = { reason: 'incomplete-native-journal', original_run_id: run.id, head: run.head_sha };
-                  delete state.covered[entry.workflow];
-                }
+                // A truncated journal keeps the state it started from and its exact ACKs. An entry it recorded
+                // without a settled ACK is not covered and is dispatched again when its paths changed since its
+                // last acknowledged source: an Early Access deploy of an immutable source is idempotent and
+                // schema publication is ledger-guarded.
+                Object.assign(state.covered, first.state?.covered); Object.assign(state.held, first.state?.held);
+                last = first.last ?? '';
                 for (const record of journal.records.slice(1)) {
                   if (!['intent', 'ack-received', 'ack'].includes(record.type) || typeof record.workflow !== 'string') continue;
                   const { type, workflow, ...value } = record;
-                  state.held[workflow] = { ...value, reason: type === 'intent' ? 'unacknowledged-native-intent' : 'ack-native-readback-pending' };
+                  state.held[workflow] = value;
                   delete state.covered[workflow];
                 }
               }
-              found = true; break;
+              found = true; latest = run.head_sha; break;
             }
             if (found) break;
           }
           // Never search by SHA/name for a substitute child. Only the ID returned by the
           // original native dispatch can settle its ACK, including a failed readback.
+          // The child runs on main and builds the source input, so main may have moved past the source.
+          const onMain = (source, main) => {
+            try { return source === main || ['identical', 'ahead'].includes(gh('api', `repos/${repo}/compare/${source}...${main}`, '--jq', '.status').trim()); } catch { return false; }
+          };
           const reconcile = (workflow, value) => {
             let native;
             try { native = api(`repos/${repo}/actions/runs/${value.child_run_id}`); } catch { native = null; }
             if (!native || native.id !== value.child_run_id || native.repository?.full_name !== repo || native.head_repository?.full_name !== repo || native.head_branch !== 'main' || native.path !== `.github/workflows/${workflow}` || native.event !== 'workflow_dispatch') return 'ack-native-readback-unavailable';
-            if (value.expect_source && native.head_sha !== value.head) return 'ack-native-source-mismatch';
+            if (value.expect_source && !onMain(value.head, native.head_sha)) return 'ack-native-source-mismatch';
             return native.status === 'completed' ? '' : 'ack-child-active';
           };
-          for (const [workflow, covered] of Object.entries(state.covered)) {
-            if (state.held[workflow]) { delete state.covered[workflow]; continue; }
-            const reason = reconcile(workflow, covered);
-            if (reason) { state.held[workflow] = { ...covered, reason }; delete state.covered[workflow]; }
-          }
-          for (const [workflow, held] of Object.entries(state.held)) {
-            if (!Number.isSafeInteger(held.child_run_id) || held.child_run_id < 1) continue;
-            const reason = reconcile(workflow, held);
-            if (reason) state.held[workflow] = { ...held, reason };
+          // Only an acknowledged child that is still running stays held, so its source is not dispatched twice.
+          // Every other unsettled entry (an intent without ACK, an unreadable or mismatching child) is simply
+          // not covered and is dispatched again when affected.
+          for (const workflow of new Set([...Object.keys(state.held), ...Object.keys(state.covered)])) {
+            const value = state.held[workflow] ?? state.covered[workflow];
+            delete state.held[workflow]; delete state.covered[workflow];
+            const reason = Number.isSafeInteger(value.child_run_id) && value.child_run_id > 0 ? reconcile(workflow, value) : 'unacknowledged-native-intent';
+            if (reason === 'ack-child-active') state.held[workflow] = { ...value, reason };
+            else if (reason) note(`${workflow} is not covered (${reason}); it is dispatched again when affected.`);
             else {
-              const { key, head, expect_source, child_run_id } = held;
-              state.covered[workflow] = { key, head, expect_source, child_run_id }; delete state.held[workflow];
+              const { key, head, expect_source, child_run_id } = value;
+              state.covered[workflow] = { key, head, expect_source, child_run_id };
             }
           }
           fs.appendFileSync(output, `last=${last}\nstate=${Buffer.from(JSON.stringify(state)).toString('base64')}\n`);
-          if (last === head && process.env.FORCE !== 'true' && !Object.keys(state.held).length) {
+          if (last === head && process.env.FORCE !== 'true') {
             note(`${head} was integrated already; nothing to do.`); fs.appendFileSync(output, 'run=false\n');
+          } else if (latest && latest !== head && onMain(head, latest)) {
+            // A rerun of an older lane never dispatches a source older than the newest lane's.
+            note(`${head} is older than ${latest}, which a newer lane already handled; nothing to do.`); fs.appendFileSync(output, 'run=false\n');
           } else {
-            for (const [workflow, held] of Object.entries(state.held)) note(`held ${workflow}: ${held.reason}; original lane ${held.original_run_id ?? 'recorded ACK'}, no replay`);
+            for (const [workflow, held] of Object.entries(state.held)) note(`${workflow}: child run ${held.child_run_id} for ${held.head} is still active`);
             fs.appendFileSync(output, 'run=true\n');
           }
           JS
@@ -222,6 +229,7 @@ jobs:
           JS
 
       # A run that GITHUB_TOKEN dispatches never fires workflow_run when it ends, so known-error.yml would stay silent:
+      # contents read serves the compare reads of the changed paths and the dispatched child's source.
       # require the CI App token for every dispatch, including lanes without source_input; never silently lose error recording.
       - name: Mint the dispatch token
         id: app
@@ -233,6 +241,7 @@ jobs:
           owner: KombiverseLabs
           repositories: mintlify-docs
           permission-actions: write
+          permission-contents: read
 
       - name: Require the CI App dispatch token
         if: always() && steps.gate.outputs.run == 'true'
@@ -301,20 +310,24 @@ jobs:
           const changedSince = last => {
             if (!last) return null;
             if (last === HEAD) return [];
-            try { return gh('api', `repos/${repo}/compare/${last}...${HEAD}`, '--paginate', '--jq', '.files[].filename').split('\n').filter(Boolean); } catch { return null; }
+            try { return gh('api', `repos/${repo}/compare/${last}...${HEAD}`, '--paginate', '--jq', '.files[].filename').split('\n').filter(Boolean); } catch {
+              note(`changed files since ${last} unavailable; every entry counts as affected`); return null;
+            }
           };
+          // The child runs on main and builds the source input, so main may have moved past the source.
+          const onMain = main => main === HEAD || ['identical', 'ahead'].includes(gh('api', `repos/${repo}/compare/${HEAD}...${main}`, '--jq', '.status').trim());
           const affected = (paths, changed) => changed === null || paths.length === 0 || changed.some(file => paths.filter(p => !p.startsWith('!')).some(p => regex(p).test(file)) && !paths.filter(p => p.startsWith('!')).some(p => regex(p.slice(1)).test(file)));
           let failed = 0;
           for (const entry of entries) {
             const { workflow, paths = [], inputs: authoredInputs = {}, source_input } = entry;
-            const key = integrationJournal.key(entry), prior = state.covered[workflow];
-            if (state.held[workflow]) { failed++; note(`held ${workflow}: ${state.held[workflow].reason}; original native request is not replayed`); continue; }
+            const key = integrationJournal.key(entry), prior = state.covered[workflow], active = state.held[workflow];
+            if (active?.head === HEAD) { note(`skip ${workflow} (child run ${active.child_run_id} for this source is still active)`); continue; }
             if (prior?.key === key && prior.head === HEAD) { note(`skip ${workflow} (exact range already acknowledged as run ${prior.child_run_id})`); continue; }
             const changed = changedSince(prior?.key === key ? prior.head : LAST);
             if (!affected(paths, changed)) { note(`skip ${workflow} (no matching path since its last acknowledged source)`); continue; }
             const inputs = { ...authoredInputs, ...(source_input ? { [source_input]: HEAD } : {}) };
-            // The native log records the intent before POST. A missing ACK is held across
-            // later invocations; another same-source child is never discovered as a substitute.
+            // The native log records the intent before POST. A missing ACK leaves the entry uncovered, so the
+            // next invocation dispatches it again; another same-source child is never discovered as a substitute.
             const intent = { key, head: HEAD, original_run_id: Number(process.env.GITHUB_RUN_ID), expect_source: Boolean(source_input), reason: 'unacknowledged-native-intent' };
             state.held[workflow] = intent; delete state.covered[workflow];
             write({ type: 'intent', workflow, ...intent });
@@ -327,15 +340,15 @@ jobs:
               write({ type: 'ack-received', workflow, ...state.held[workflow] });
               const child = JSON.parse(gh('api', `repos/${repo}/actions/runs/${ack.workflow_run_id}`));
               if (child.id !== ack.workflow_run_id || child.head_branch !== 'main' || child.event !== 'workflow_dispatch' || child.path !== `.github/workflows/${workflow}` ||
-                  child.repository?.full_name !== repo || child.head_repository?.full_name !== repo || source_input && child.head_sha !== HEAD) throw new Error('Native acknowledged child source mismatch');
+                  child.repository?.full_name !== repo || child.head_repository?.full_name !== repo || source_input && !onMain(child.head_sha)) throw new Error('Native acknowledged child source mismatch');
               const covered = { key, head: HEAD, expect_source: Boolean(source_input), child_run_id: child.id };
               state.covered[workflow] = covered; delete state.held[workflow];
               write({ type: 'ack', workflow, ...covered }); note(`dispatched ${workflow} run=${child.id} source=${HEAD}`);
             } catch {
-              failed++; console.error(`::error::dispatch of ${workflow} is held; inspect original lane ${process.env.GITHUB_RUN_ID} without replay`);
-              note(`dispatch of ${workflow} is held; original lane ${process.env.GITHUB_RUN_ID}, no replay`);
+              failed++; console.error(`::error::dispatch of ${workflow} is not confirmed; the next lane settles its ACK or dispatches it again`);
+              note(`dispatch of ${workflow} is not confirmed; the next lane settles its ACK or dispatches it again`);
             }
           }
           write({ type: 'end', failed, state });
-          if (failed) throw new Error(`Integration has ${failed} failed or held workflow(s); independent entries were attempted once.`);
+          if (failed) throw new Error(`Integration has ${failed} unconfirmed dispatch(es); independent entries were attempted once.`);
           JS
