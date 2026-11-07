@@ -14,7 +14,8 @@ import { ensureSessionTools } from './beads-session-tools.mjs';
 import { admissionReaderCredential, appReaderCredential, trackerReaderMode } from './lib/beads-app-reader-auth.mjs';
 import { brokerAvailable, brokerCredential } from './lib/beads-session-broker.mjs';
 import { heldOauthCredential, oauthCredential } from './lib/beads-oauth-route.mjs';
-import { accessFailureDiagnostic, trackerAccessCode } from './lib/beads-access-diagnostics.mjs';
+import { accessFailureDiagnostic } from './lib/beads-access-diagnostics.mjs';
+import { readTrackerContext } from './lib/beads-tracker-context.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 // This adapter is part of the trusted Kombify bootstrap, not an arbitrary URL
@@ -81,14 +82,9 @@ export async function access(config, { allowStatic = false, env = process.env, f
     else throw Object.assign(new Error('No usable cached tracker credential; run bootstrap to repair'), { code: 'READ_ONLY_CREDENTIAL_PENDING' });
   } else entry = appReader ? { ...(await (readerMode === 'admission-reader' ? admissionReaderCredential : appReaderCredential)(config, { env, fetchImpl })), route: readerMode }
     : machineKey ? { token: machineKey, expires_at: null, static: true, route: 'machine-key' } : await viaGithub();
-  const response = await fetchImpl(`${config.base}/t/${config.tracker}/v0/beads/context`, {
-    headers: { Authorization: `Bearer ${entry.token}` }, redirect: 'error', signal: AbortSignal.timeout(10_000),
-  });
-  if (!response.ok) {
-    await response.body?.cancel();
-    throw Object.assign(new Error('Tracker context refused'), { code: trackerAccessCode(response.status), route: entry.route, status: response.status });
-  }
-  const context = await response.json();
+  let context;
+  try { context = await readTrackerContext({ ...config, token: entry.token }, { fetchImpl }); }
+  catch (error) { error.route = entry.route; throw error; }
   // OAuth custody stays in its own namespace; it is never a repository exchange key.
   if (!readOnly && !appReader && entry.route !== 'oauth' && file && (!entry.cached || credentials[config.base]?.github_trusted !== true)) await updateCredentialFile(file, doc => {
     doc[config.base] = { ...doc[config.base], github_trusted: true, ...(!entry.static ? { github: { ...doc[config.base]?.github,
