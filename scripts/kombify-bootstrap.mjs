@@ -40,7 +40,7 @@
 //                                                 # renews this device's token
 //   node scripts/kombify-bootstrap.mjs packages -- <cmd...>  # cmd with NODE_AUTH_TOKEN
 //   node scripts/kombify-bootstrap.mjs rules     # the owner's rules (also printed by --hook)
-//   node scripts/kombify-bootstrap.mjs mcp --mcp-host codex --install # repair + prove selected native staff MCP
+//   node scripts/kombify-bootstrap.mjs mcp --mcp-host codex --install # repair + prove the kombify /mcp connector on the staff-machine identity
 //   node scripts/kombify-bootstrap.mjs context   # obtain/refresh and install Agent Home
 //   node scripts/kombify-bootstrap.mjs context --check  # inspect without installation
 //
@@ -60,9 +60,8 @@ import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } 
 import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { prepareAgentHome } from './lib/agent-home-bootstrap.mjs';
+import { prepareAgentHome, personalAppOperation } from './lib/agent-home-bootstrap.mjs';
 import { prepareStaffMcp } from './lib/staff-mcp-bootstrap.mjs';
-import { ENV_GIT_HELPER, hostGithubTokens } from './lib/github-host-identity.mjs';
 import { DOPPLER_API, REQUIRED_ROUTES, deviceTokenState, disabledRoutes, hostType, probeToken, readDeviceToken, renewDeviceToken } from './lib/doppler-routes.mjs';
 
 const SELF = fileURLToPath(import.meta.url);
@@ -176,39 +175,15 @@ const AGENT_HOME_REPO = 'Soulcreek/agent-home';
 const OWNER_RULES_PATH = 'standards/rules.md';
 const OWNER_RULES_CACHE = join(homedir(), '.kombify', 'owner-rules.md');
 
-const authFailure = (result) => /auth|credential|Invalid username|could not read Username|Bad credentials|\b40[13]\b|denied/i.test(String(result.stderr ?? ''));
-
-// Non-interactive fast-forward (A4, 2026-10-16): each host identity in order
-// (env token, gh login, Doppler custody PAT) through an env-only credential
-// helper, so a stale credential-manager entry or a revoked gh login neither
-// fails the session start nor opens a sign-in prompt. Fetch then merge the
-// tracking ref: `git pull` merges FETCH_HEAD, which a concurrent session's
-// fetch can leave holding several branches ("multiple branches").
 export function fastForwardAgentHome(root, { run = spawnSync, env = process.env } = {}) {
-  const base = { ...env, GIT_TERMINAL_PROMPT: '0', GCM_INTERACTIVE: 'never', GH_PROMPT_DISABLED: '1' };
-  const git = (config, args, extra = {}) => run('git', ['-C', root, ...config, ...args], { encoding: 'utf8', timeout: 30_000, windowsHide: true, env: { ...base, ...extra } });
-  const pull = (config, extra = {}) => {
-    const fetched = git(config, ['fetch', '--quiet', 'origin', 'main'], extra);
-    return fetched.status === 0 ? git([], ['merge', '--ff-only', '--quiet', 'origin/main']) : fetched;
-  };
-  let last;
-  for (const identity of hostGithubTokens({ env, run })) {
-    last = pull(['-c', 'credential.helper=', '-c', `credential.helper=${ENV_GIT_HELPER}`], { KOMBIFY_GIT_TOKEN: identity.token });
-    if (last.status === 0) return { ok: true, source: identity.source };
-    if (!authFailure(last)) break;
-  }
-  last ??= pull([]);
-  return { ok: last.status === 0, source: 'git-default', reason: String(last.stderr ?? '').trim().split('\n')[0] };
+  const fetched = run(process.execPath, [SELF, '--personal-app', 'fetch', root], { encoding: 'utf8', timeout: 240_000, windowsHide: true, env });
+  if (fetched.status !== 0) return { ok: false, source: 'personal-app', reason: String(fetched.stderr ?? '').trim() };
+  const merged = run('git', ['-C', root, 'merge', '--ff-only', '--quiet', 'origin/main'], { encoding: 'utf8', timeout: 30_000, windowsHide: true, env });
+  return { ok: merged.status === 0, source: 'personal-app', reason: String(merged.stderr ?? '').trim() };
 }
 
-// gh with the first host identity GitHub accepts; a revoked gh login is skipped.
-function ghWithHostIdentity(args, { run, env }) {
-  let last;
-  for (const identity of hostGithubTokens({ env, run })) {
-    last = run('gh', args, { encoding: 'utf8', timeout: 20_000, env: { ...env, GH_TOKEN: identity.token, GH_PROMPT_DISABLED: '1' } });
-    if (last.status === 0 || !authFailure(last)) return last;
-  }
-  return last ?? run('gh', args, { encoding: 'utf8', timeout: 20_000 });
+function readRulesWithPersonalApp({ run, env }) {
+  return run(process.execPath, [SELF, '--personal-app', 'rules'], { encoding: 'utf8', timeout: 240_000, windowsHide: true, env });
 }
 
 // The owner's cross-project rules (AGENTS.md "Owner Rules") for every session
@@ -237,14 +212,14 @@ export function ownerRules({ home = homedir(), run = spawnSync, env = process.en
       notes.push(`agent-home ${root} is ${branch === 'main' ? 'modified' : `on ${branch}`}: save that work to its own branch and return the checkout to main`);
     }
   }
-  const fetched = ghWithHostIdentity(['api', `repos/${AGENT_HOME_REPO}/contents/${OWNER_RULES_PATH}`, '-H', 'Accept: application/vnd.github.raw'], { run, env });
+  const fetched = readRulesWithPersonalApp({ run, env });
   if (fetched.status === 0 && String(fetched.stdout).startsWith('# Owner rules')) {
     mkdirSync(dirname(OWNER_RULES_CACHE), { recursive: true, mode: 0o700 });
     writeFileSync(OWNER_RULES_CACHE, fetched.stdout, { mode: 0o600 });
-    return { text: fetched.stdout, source: `github:${AGENT_HOME_REPO}`, notes };
+    return { text: fetched.stdout, source: `github-app:${AGENT_HOME_REPO}`, notes };
   }
   if (existsSync(OWNER_RULES_CACHE)) return { text: readFileSync(OWNER_RULES_CACHE, 'utf8'), source: `cache:${OWNER_RULES_CACHE}`, notes };
-  notes.push(`owner rules unreachable: gh cannot read ${AGENT_HOME_REPO}; follow AGENTS.md and say once that they were not read`);
+  notes.push(`owner rules unreachable: personal App cannot read ${AGENT_HOME_REPO}; follow AGENTS.md and say once that they were not read`);
   return { text: '', source: 'none', notes };
 }
 
@@ -290,7 +265,7 @@ export async function resolveDoppler({ env = process.env, root = ROOT, dispatch 
     return false;
   };
   const explicit = env.DOPPLER_TOKEN;
-  const remote = env.CLAUDE_CODE_REMOTE === 'true';
+  const remote = hostType(env) === 'cloud';
   // In a Claude cloud session DOPPLER_TOKEN is the placeholder of the
   // environment's api.doppler.com credential, which the proxy swaps for the
   // value: the network route, proven like any token so a dead one falls through.
@@ -351,8 +326,9 @@ export async function resolveDoppler({ env = process.env, root = ROOT, dispatch 
 
 // Every route of this host with its state, for `doppler-routes`, the session
 // check and the daily credential health. `live` proves the broker with a fresh
-// grant (one workflow run); without it a valid cached grant or an owner gh
-// identity (on demand) counts. `repair` mints or renews the device token.
+// grant (one workflow run); without it only a valid cached grant is proven.
+// An owner gh identity is reported as on-demand, not as a ready route.
+// `repair` mints or renews the device token.
 export async function checkRoutes({ env = process.env, root = ROOT, live = false, repair = false, cli = cliToken, broker = loadBroker, gh = ghLogin, probe = probeToken, deviceState = deviceTokenState, renew = renewDeviceToken } = {}) {
   const host = hostType(env);
   const required = REQUIRED_ROUTES[host] ?? [];
@@ -408,7 +384,7 @@ export async function checkRoutes({ env = process.env, root = ROOT, live = false
       item('broker', 'failed', error.message);
     }
   }
-  const usable = new Set(['ready', 'repaired', 'expiring', 'on-demand']);
+  const usable = new Set(['ready', 'repaired', 'expiring']);
   const ready = required.every((route) => routes.some((r) => r.route === route && usable.has(r.status)));
   return { host, required, routes, ready };
 }
@@ -521,6 +497,7 @@ function installCommand() {
 }
 
 export async function main(argv, env = process.env) {
+  if (argv[0] === '--personal-app') return personalAppOperation(argv.slice(1));
   if (env.KOMBIFY_BOOTSTRAP_SKIP === '1') return 0;
   const sep = argv.indexOf('--');
   const [command] = argv;
@@ -550,7 +527,7 @@ export async function main(argv, env = process.env) {
     try { return { ...prepareAgentHome({ ...options, bundle }), route: 'github-broker', run: bundle.run }; } finally { rmSync(bundle.path, { force: true }); }
   };
 
-  const staffMcp = install => prepareStaffMcp({ root: ROOT, host: option('--mcp-host'), surface: option('--mcp-surface') ?? 'staff', checkout: option('--plugins-source'), credentialSource: own.includes('--mcp-credential-source') ? option('--mcp-credential-source') ?? '' : undefined, githubSession: () => loadBroker({ qualified: true, readOnly: check }), install: install && !own.includes('--hook'), inspectOnly: check, env });
+  const staffMcp = install => prepareStaffMcp({ root: ROOT, host: option('--mcp-host'), surface: option('--mcp-surface') ?? 'connect', checkout: option('--plugins-source'), credentialSource: own.includes('--mcp-credential-source') ? option('--mcp-credential-source') ?? '' : undefined, githubSession: () => loadBroker({ qualified: true, readOnly: check }), install: install && !own.includes('--hook'), inspectOnly: check, env });
   if (command === 'mcp') {
     const capability = await staffMcp(own.includes('--install'));
     console.log(`KOMBIFY_BOOTSTRAP_CAPABILITY ${JSON.stringify({ name: 'staff-mcp', ...capability })}`);
@@ -576,8 +553,8 @@ export async function main(argv, env = process.env) {
     else for (const route of result.routes) console.log(`KOMBIFY_DOPPLER_ROUTE ${JSON.stringify(route)}`);
     const names = (statuses) => result.routes.filter((r) => statuses.includes(r.status)).map((r) => r.route).join(',') || 'none';
     console.log(result.ready
-      ? `KOMBIFY_DOPPLER_ROUTES_OK host=${result.host} required=${result.required.join(',') || 'none'} ready=${names(['ready', 'repaired', 'expiring', 'on-demand'])}`
-      : `KOMBIFY_DOPPLER_ROUTES_GAP host=${result.host} required=${result.required.join(',')} not-ready=${result.routes.filter((r) => r.role === 'required' && !['ready', 'repaired', 'expiring', 'on-demand'].includes(r.status)).map((r) => r.route).join(',')}`);
+      ? `KOMBIFY_DOPPLER_ROUTES_OK host=${result.host} required=${result.required.join(',') || 'none'} ready=${names(['ready', 'repaired', 'expiring'])}`
+      : `KOMBIFY_DOPPLER_ROUTES_GAP host=${result.host} required=${result.required.join(',')} not-ready=${result.routes.filter((r) => r.role === 'required' && !['ready', 'repaired', 'expiring'].includes(r.status)).map((r) => r.route).join(',')}`);
     return result.ready ? 0 : 1;
   }
   if (command === 'rules') {

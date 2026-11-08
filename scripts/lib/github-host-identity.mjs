@@ -1,17 +1,11 @@
-// GitHub identity of an owner device (A4, 2026-10-16). One order everywhere:
-// the environment token, the gh login, then the Doppler custody PAT. A dead gh
-// login (GitHub keeps ten OAuth tokens per user, app and scope set, so a login
-// elsewhere revokes the oldest) is never a reason to prompt the owner: callers
-// fall through to the next identity. A throttled identity is reported with its
-// reset, never as invalid. Nothing here prints or persists a value, except
-// installGhToken, which writes the gh credential store on purpose.
+// Passive GitHub identity lookup: environment tokens, then the host's gh login.
+// Repair is explicit through kombify-up or credential-health, which install the
+// company App session. Lookup never reads personal-token custody or mints tokens.
 import { spawnSync } from 'node:child_process';
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
-// Soulcreek's classic build PAT (repo, read:packages); SECRETS-ACCESS-STANDARD §4b, credential-health `github-build-pat`.
-export const CUSTODY_GITHUB_TOKEN = { project: 'kombination', config: 'prd', name: 'GITHUB_PAT' };
 // Env-only Git credential helper: answers `get` from KOMBIFY_GIT_TOKEN, ignores store/erase.
 export const ENV_GIT_HELPER = '!f() { test "$1" = get || exit 0; echo username=x-access-token; echo "password=$KOMBIFY_GIT_TOKEN"; }; f';
 
@@ -31,18 +25,8 @@ export function ghStoredToken({ env = process.env, run = spawnSync } = {}) {
   return shape(token) ? token : '';
 }
 
-/** Reads the custody PAT through the signed-in Doppler CLI; never prompts. */
-export function custodyToken({ env = process.env, run = spawnSync, custody = CUSTODY_GITHUB_TOKEN } = {}) {
-  if (env.GITHUB_ACTIONS === 'true' || env.KOMBIFY_GITHUB_CUSTODY === 'off') return '';
-  const result = run('doppler', ['secrets', 'get', custody.name, '-p', custody.project, '-c', custody.config, '--plain'], { ...quiet, env, timeout: 20_000 });
-  const token = !result.error && result.status === 0 ? String(result.stdout ?? '').trim() : '';
-  return shape(token) ? token : '';
-}
-
-export const custodySource = (custody = CUSTODY_GITHUB_TOKEN) => `doppler:${custody.project}/${custody.config}:${custody.name}`;
-
-/** Candidate identities in order; custody is read only when a caller asks for it. */
-export function* hostGithubTokens({ env = process.env, run = spawnSync, custody = CUSTODY_GITHUB_TOKEN } = {}) {
+/** Held identities only, in order. No custody or issuance side effects. */
+export function* hostGithubTokens({ env = process.env, run = spawnSync } = {}) {
   const seen = new Set();
   const fresh = (token) => token && !seen.has(token) && seen.add(token);
   for (const name of ['GH_TOKEN', 'GITHUB_TOKEN']) {
@@ -51,8 +35,6 @@ export function* hostGithubTokens({ env = process.env, run = spawnSync, custody 
   }
   const gh = ghStoredToken({ env, run });
   if (fresh(gh)) yield { source: 'gh', token: gh };
-  const kept = custodyToken({ env, run, custody });
-  if (fresh(kept)) yield { source: custodySource(custody), token: kept };
 }
 
 /**
@@ -84,19 +66,19 @@ export async function classifyGithubToken(token, { fetchImpl = fetch } = {}) {
 
 /**
  * First usable identity. A throttled one is returned as such (the same user's
- * other tokens share its budget, so falling through would not help); invalid
- * and refused ones are skipped and listed in `tried` (sources and states only).
+ * other tokens share its budget, so falling through would not help). Only an
+ * invalid (401) identity is skipped; a refusal or transport failure stops lookup.
  */
-export async function resolveHostGithubToken({ env = process.env, run = spawnSync, fetchImpl = fetch, custody = CUSTODY_GITHUB_TOKEN, skip = [] } = {}) {
+export async function resolveHostGithubToken({ env = process.env, run = spawnSync, fetchImpl = fetch, skip = [] } = {}) {
   const tried = [];
-  for (const candidate of hostGithubTokens({ env, run, custody })) {
+  for (const candidate of hostGithubTokens({ env, run })) {
     if (skip.includes(candidate.token)) { tried.push({ source: candidate.source, state: 'invalid' }); continue; }
     const verdict = await classifyGithubToken(candidate.token, { fetchImpl });
     if (verdict.state === 'valid' || verdict.state === 'throttled') return { ...candidate, ...verdict, tried };
     tried.push({ source: candidate.source, state: verdict.state, ...(verdict.status ? { status: verdict.status } : {}) });
-    if (verdict.state === 'transport') return { state: 'transport', tried };
+    if (verdict.state !== 'invalid') return { state: verdict.state, ...(verdict.status ? { status: verdict.status } : {}), tried };
   }
-  return { state: tried.length ? 'invalid' : 'missing', tried };
+  return { state: tried.length ? 'invalid' : 'missing', tried, repair: 'node scripts/kombify-up.mjs --only github-identity' };
 }
 
 export const describeTried = (tried) => tried.map((t) => `${t.source}=${t.state}${t.status ? `(${t.status})` : ''}`).join(', ');
@@ -139,8 +121,8 @@ const hostsYaml = (login, token) => `github.com:\n    users:\n        ${login}:$
 
 /**
  * Installs a validated token as this host's gh login without a browser. gh's own
- * `auth login --with-token` comes first; it refuses tokens without `read:org`
- * (the custody PAT), so the store is then written the way gh writes it: the
+ * `auth login --with-token` comes first; if its scope checks refuse the token,
+ * the store is then written the way gh writes it: the
  * Windows keyring when hosts.yml holds no plaintext token, else hosts.yml
  * (gh's insecure storage, the default on hosts without a keyring).
  * `insecureStorage` (the short-lived kombify-ci session token of a cloud

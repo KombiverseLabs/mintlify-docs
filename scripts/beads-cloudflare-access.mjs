@@ -42,7 +42,8 @@ export async function access(config, { allowStatic = false, env = process.env, f
     env: { ...identityEnv, BEADS_CLOUDFLARE_TRUSTED_ORIGINS: trustedOrigin }, fetchImpl });
   // A revoked gh login or GH_TOKEN (GitHub keeps ten OAuth tokens per user, so a
   // login elsewhere revokes the oldest) falls through to the next valid host
-  // identity: env token, gh login, then the Doppler custody PAT (A4, 2026-10-16).
+  // identity: environment token, then the held gh login. Company App repair is
+  // explicit; a refused tracker grant stays with its existing admission route.
   // A throttled identity is reported with its reset; nothing prompts for a login.
   const viaHost = async (error) => {
     if (!['GITHUB_IDENTITY_INVALID', 'GITHUB_IDENTITY_MISSING'].includes(error.code) || env.ACTIONS_ID_TOKEN_REQUEST_URL) throw error;
