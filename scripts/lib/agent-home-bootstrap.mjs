@@ -2,6 +2,10 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createSign, randomUUID } from 'node:crypto';
+import { ENV_GIT_HELPER, withoutTokenEnv } from './github-host-identity.mjs';
+const appHelper = fileURLToPath(new URL('../kombify-bootstrap.mjs', import.meta.url));
 
 const repository = 'Soulcreek/agent-home';
 const sourceUrl = `https://github.com/${repository}.git`;
@@ -43,22 +47,17 @@ export function prepareAgentHome({ home = homedir(), checkout, agents, device, i
     env: { ...process.env, GIT_TERMINAL_PROMPT: '0', GCM_INTERACTIVE: 'never', GH_PROMPT_DISABLED: '1' },
     maxBuffer: 4 * 1024 * 1024,
   });
-  // Resolve Git authentication from the host's admitted gh identity per command.
-  // No helper config, token, URL or repository-API lookup is persisted/required.
-  const githubAuthentication = ['-c', 'credential.https://github.com.helper=',
-    '-c', 'credential.https://github.com.helper=!gh auth git-credential',
-    '-c', 'url.https://github.com/.insteadOf=git@github.com:'];
   const failed = (step, result) => ({
     status: 'failed', code: /rate limit|rate_limit|API rate/i.test(String(result.stderr)) ? 'github_rate_limited' : step,
     source, exitCode: result.status ?? null, errorCode: result.error?.code,
-    reason: String(result.stderr || '').match(/^Refused: .+$/m)?.[0].slice(0, 600),
+    reason: String(result.stderr || '').match(/^(?:Refused: |agent-home-app: ).+$/m)?.[0].slice(0, 600),
   });
   if (!existsSync(source)) {
     if (!install) return { status: 'pending', code: 'agent_home_not_installed', source };
     mkdirSync(dirname(source), { recursive: true });
     const clone = bundle
       ? invoke('git', ['clone', '--quiet', '--branch', 'main', '--single-branch', bundle.path, source], 120_000)
-      : invoke('git', [...githubAuthentication, 'clone', '--branch', 'main', '--single-branch', sourceUrl, source], 120_000);
+      : invoke(process.execPath, [appHelper, '--personal-app', 'clone', source], 240_000);
     if (clone.error || clone.status !== 0) return failed('agent_home_source_access_failed', clone);
     if (bundle) {
       const named = invoke('git', ['-C', source, 'remote', 'set-url', 'origin', sourceUrl]);
@@ -78,7 +77,7 @@ export function prepareAgentHome({ home = homedir(), checkout, agents, device, i
   if (refresh) {
     const fetched = bundle
       ? git(['fetch', '--quiet', bundle.path, '+refs/heads/main:refs/remotes/origin/main'])
-      : git([...githubAuthentication, 'fetch', '--quiet', 'origin', 'main']);
+      : invoke(process.execPath, [appHelper, '--personal-app', 'fetch', source], 240_000);
     if (fetched.error || fetched.status !== 0) return failed('agent_home_source_refresh_failed', fetched);
     const merged = git(['merge', '--ff-only', '--quiet', 'origin/main']);
     if (merged.error || merged.status !== 0) return failed('agent_home_source_diverged', merged);
@@ -122,4 +121,74 @@ export function prepareAgentHome({ home = homedir(), checkout, agents, device, i
   try { installed = JSON.parse(readFileSync(receiptPath, 'utf8')); } catch { return { status: 'failed', code: 'agent_home_receipt_invalid', source }; }
   if (!installed.repo_root || canonical(installed.repo_root) !== canonical(source)) return { status: 'failed', code: 'agent_home_receipt_binding_changed', source };
   return { status: 'ready', source: installed.repo_root, revision: installed.source_revision, agents: installed.agents.join(','), device: installed.device, receipt: receiptPath };
+}
+
+// Invoked only by the bootstrap child after all modules have initialized.
+export async function personalAppOperation(args) {
+  // Personal App: the key stays in scoped Doppler custody; the installation
+  // token exists only in this process and the child environment for one operation.
+  const scope = { project: 'kombination', config: 'dev_personal' };
+  const names = ['SOULCREEK_AGENT_HOME_APP_ID', 'SOULCREEK_AGENT_HOME_INSTALLATION_ID', 'SOULCREEK_AGENT_HOME_APP_PRIVATE_KEY'];
+  const [operation, path] = args;
+  const origin = 'https://github.com/Soulcreek/agent-home.git';
+  const started = performance.now();
+  const issuanceStartLimitMs = 60_000;
+  let token = '';
+  let outcome = 1;
+  try {
+    if (!['clone', 'fetch', 'rules'].includes(operation) || (operation !== 'rules' && !path) || args.length !== (operation === 'rules' ? 1 : 2)) throw new Error('invalid Agent Home operation');
+    const { dopplerSecret } = await import('../kombify-bootstrap.mjs');
+    const [appId, installationId, privateKey] = await Promise.all(names.map(async name => (await dopplerSecret({ ...scope, name })).value));
+    if (appId !== '5569861' || installationId !== '177595171') throw new Error('personal App custody identity mismatch');
+    // Do not begin an issuance too late for the parent to reserve time for
+    // the bounded operation and mandatory token revocation.
+    if (performance.now() - started > issuanceStartLimitMs) throw new Error('personal App custody lookup timed out before issuance');
+    const clock = await fetch(`https://api.github.com/rate_limit?app-clock=${randomUUID()}`, { redirect: 'error', headers: { accept: 'application/vnd.github+json', 'cache-control': 'no-cache' }, signal: AbortSignal.timeout(20_000) });
+    const clockDate = clock.headers.get('date');
+    const clockMs = Date.parse(clockDate ?? '');
+    if (clock.status !== 200 || !Number.isFinite(clockMs) || new Date(clockMs).toUTCString() !== clockDate) throw new Error('GitHub signing clock is unproven');
+    const now = Math.floor(clockMs / 1000);
+    const encode = value => Buffer.from(JSON.stringify(value)).toString('base64url');
+    const unsigned = `${encode({ alg: 'RS256', typ: 'JWT' })}.${encode({ iat: now - 60, exp: now + 540, iss: appId })}`;
+    const jwt = `${unsigned}.${createSign('RSA-SHA256').update(unsigned).sign(privateKey.replace(/\\n/g, '\n')).toString('base64url')}`;
+    const issued = await fetch(`https://api.github.com/app/installations/${installationId}/access_tokens`, { method: 'POST', headers: { authorization: `Bearer ${jwt}`, accept: 'application/vnd.github+json', 'content-type': 'application/json', 'user-agent': 'kombify-agent-home' }, body: JSON.stringify({ repositories: ['agent-home'], permissions: { contents: 'read' } }), redirect: 'error', signal: AbortSignal.timeout(20_000) });
+    const minted = await issued.json();
+    minted.status = issued.status;
+    token = typeof minted.token === 'string' ? minted.token : '';
+    if (minted.status !== 201 || !token) throw new Error(`personal App token request failed (HTTP ${minted.status})`);
+    const grants = minted.permissions;
+    if (grants.contents !== 'read' || Object.entries(grants).some(([name, level]) => !(['contents', 'metadata'].includes(name) && level === 'read')) || !Number.isFinite(Date.parse(minted.expires_at)) || Date.parse(minted.expires_at) <= Date.now()) throw new Error('personal App token grants invalid');
+    const inventory = await fetch('https://api.github.com/installation/repositories?per_page=100', { headers: { authorization: `Bearer ${token}`, accept: 'application/vnd.github+json', 'user-agent': 'kombify-agent-home' }, redirect: 'error', signal: AbortSignal.timeout(20_000) });
+    const repos = await inventory.json();
+    if (!inventory.ok || repos.total_count !== 1 || repos.repositories?.length !== 1 || repos.repositories[0].id !== 1390567452 || repos.repositories[0].full_name !== 'Soulcreek/agent-home' || repos.repositories[0].owner?.id !== 66470179) throw new Error('personal App repository grant mismatch');
+    const env = { ...withoutTokenEnv(process.env), KOMBIFY_GIT_TOKEN: token, GIT_TERMINAL_PROMPT: '0', GCM_INTERACTIVE: 'never', GH_PROMPT_DISABLED: '1' };
+    const git = (args, timeout = 45_000) => spawnSync('git', args, { encoding: 'utf8', env, timeout, windowsHide: true });
+    const auth = ['-c', 'credential.helper=', '-c', 'credential.https://github.com.helper=', '-c', `credential.https://github.com.helper=${ENV_GIT_HELPER}`, '-c', 'url.https://github.com/.insteadOf=git@github.com:'];
+    let result;
+    if (operation === 'rules') {
+      const response = await fetch('https://api.github.com/repos/Soulcreek/agent-home/contents/standards/rules.md', { headers: { authorization: `Bearer ${token}`, accept: 'application/vnd.github.raw', 'user-agent': 'kombify-agent-home' }, redirect: 'error', signal: AbortSignal.timeout(20_000) });
+      if (!response.ok) throw new Error(`personal App rules read failed (HTTP ${response.status})`);
+      process.stdout.write(await response.text());
+      outcome = 0;
+    } else {
+      if (operation === 'fetch') {
+        const remote = git(['-C', path, 'remote', 'get-url', 'origin'], 5_000);
+        const allowed = new Set([origin.toLowerCase(), origin.slice(0, -4).toLowerCase(), 'git@github.com:soulcreek/agent-home.git']);
+        if (remote.status !== 0 || !allowed.has(String(remote.stdout).trim().toLowerCase())) throw new Error('Agent Home origin mismatch');
+      }
+      result = operation === 'clone' ? git([...auth, 'clone', '--branch', 'main', '--single-branch', origin, path]) : git(['-C', path, ...auth, 'fetch', '--quiet', 'origin', 'main']);
+      if (result.error || result.status !== 0) throw new Error(`personal App ${operation} failed (exit ${result.status ?? 'unknown'})`);
+      outcome = 0;
+    }
+} catch (error) {
+  process.stderr.write(`agent-home-app: ${error.message}\n`);
+} finally {
+  if (token) {
+    try {
+      const response = await fetch('https://api.github.com/installation/token', { method: 'DELETE', headers: { authorization: `Bearer ${token}`, accept: 'application/vnd.github+json', 'user-agent': 'kombify-agent-home' }, redirect: 'error', signal: AbortSignal.timeout(20_000) });
+      if (response.status !== 204) { process.stderr.write(`agent-home-app: token revocation unconfirmed (HTTP ${response.status})\n`); outcome = 1; }
+    } catch { process.stderr.write('agent-home-app: token revocation unconfirmed\n'); outcome = 1; }
+  }
+}
+return outcome;
 }
