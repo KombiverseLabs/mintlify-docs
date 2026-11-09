@@ -13,14 +13,14 @@ Coolify is a control panel for running applications on your own server. It can s
 
 ## Which kits and use cases include it
 
-It is optional in every kit and is never part of the default workspace. In the use-case catalog it is the primary application of the Marketplace use case, described there as your own app store for applications you run on your homelab. Marketplace is planned as an optional use case on Coolify, and Coolify is an application of that use case, not a native runtime target. As a workload adapter it is listed for `files`, `photos`, `media`, `smart-home` and `vault` in the compatibility table.
+It is optional in every kit and is never part of the default workspace. In the use-case catalog it is the primary application of the Marketplace use case, described there as your own app store for applications you run on your homelab. The v0.54.8 catalog declares Marketplace as an optional use case with Coolify as its default application; lifecycle verification remains separate. As a workload adapter it is listed for `files`, `photos`, `media`, `smart-home` and `vault` in the compatibility table.
 
 | Role | Released catalog behavior |
 | --- | --- |
 | Selection | Optional explicit integration; standalone Compose needs no application platform |
-| Workload adapter | Supported for `files`, `photos`, and `vault` |
-| Route and TLS evidence | Supported |
-| Workload backup and restore | Not supplied by the Coolify adapter |
+| Workload adapter | v0.54.8 declares `files`, `photos`, `media`, `smart-home`, and `vault`; lifecycle runs for these Coolify paths are not projected as tested |
+| Route and TLS | Declared by v0.54.8; this is not lifecycle evidence |
+| Workload backup and restore | Declared for `files`, `photos`, and `vault`; not declared for `media` or `smart-home` |
 
 ## How to open it
 
@@ -43,7 +43,7 @@ Open the generated Coolify address from the Node Hub or the StackKits output. Th
 
 ## What is backed up
 
-The Coolify adapter does not supply workload backup and restore. The standalone Compose adapter does, for the workloads that declare it. See [Back up and restore](/guides/stackkits/back-up-and-restore) and practice a restore before you trust any workload with data you cannot recreate.
+The v0.54.8 compatibility matrix declares backup and restore for the Coolify adapter for files, photos, and vault, but not media or smart-home. These declarations are not verified lifecycle runs. See [Back up and restore](/guides/stackkits/back-up-and-restore) and practice a restore before you trust any workload with data you cannot recreate.
 
 ## Verify
 
@@ -55,6 +55,6 @@ The Coolify adapter does not supply workload backup and restore. The standalone 
 
 - The address does not open: compare it with the rollout output, confirm that the name resolves from your device and see [Troubleshooting](/guides/stackkits/troubleshooting).
 - The same application appears twice or routes conflict: you have two delivery paths for one workload. Keep one, change the StackSpec and regenerate; do not add routes or labels by hand.
-- Backups are missing for a workload: that is expected on this adapter. Use the standalone Compose path if you need StackKits backup for that workload.
+- Backups are missing for a workload: check the selected adapter, release and workload in the compatibility matrix, and verify the backup and restore path before relying on it.
 
 For the beta alternative, see [Komodo](/stackkits/apps/komodo). For the complete adapter matrix, see [Application delivery](/guides/stackkits/application-delivery).

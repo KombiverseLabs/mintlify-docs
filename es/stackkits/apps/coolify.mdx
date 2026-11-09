@@ -13,14 +13,14 @@ Coolify es un panel de control para ejecutar aplicaciones en tu propio servidor.
 
 ## Qué kits y casos de uso lo incluyen
 
-Es opcional en cada kit y nunca forma parte del espacio de trabajo predeterminado. En el catálogo de casos de uso es la aplicación principal del caso de uso Marketplace, descrito allí como tu propia tienda de aplicaciones para las aplicaciones que ejecutas en tu homelab. Marketplace está planificado como un caso de uso opcional sobre Coolify, y Coolify es una aplicación de ese caso de uso, no un destino de runtime nativo. Como adaptador de cargas de trabajo figura para `files`, `photos`, `media`, `smart-home` y `vault` en la tabla de compatibilidad.
+Es opcional en cada kit y nunca forma parte del espacio de trabajo predeterminado. En el catálogo de casos de uso es la aplicación principal del caso de uso Marketplace, descrito allí como tu propia tienda de aplicaciones para las aplicaciones que ejecutas en tu homelab. El catálogo v0.54.8 declara Marketplace como caso de uso opcional con Coolify como aplicación predeterminada; la verificación del ciclo de vida es independiente. Como adaptador de cargas de trabajo figura para `files`, `photos`, `media`, `smart-home` y `vault` en la tabla de compatibilidad.
 
 | Función | Comportamiento del catálogo publicado |
 | --- | --- |
 | Selección | Integración explícita opcional; Compose independiente no necesita una plataforma de aplicaciones |
-| Adaptador de cargas de trabajo | Compatible con `files`, `photos` y `vault` |
-| Evidencia de ruta y TLS | Compatible |
-| Copia de seguridad y restauración de cargas de trabajo | No la proporciona el adaptador de Coolify |
+| Adaptador de cargas de trabajo | v0.54.8 declara `files`, `photos`, `media`, `smart-home` y `vault`; los ciclos de vida de estas rutas Coolify no figuran como probados |
+| Ruta y TLS | Declarados en v0.54.8; no son evidencia del ciclo de vida |
+| Copia de seguridad y restauración de cargas de trabajo | Declaradas para `files`, `photos` y `vault`; no para `media` ni `smart-home` |
 
 ## Cómo abrirlo
 
@@ -43,7 +43,7 @@ Abre la dirección de Coolify generada desde el Node Hub o desde la salida de St
 
 ## Qué se respalda
 
-El adaptador de Coolify no proporciona copia de seguridad ni restauración de cargas de trabajo. El adaptador de Compose independiente sí lo hace, para las cargas de trabajo que lo declaran. Consulta [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore) y practica una restauración antes de confiar a cualquier carga de trabajo datos que no puedas recrear.
+La matriz de compatibilidad v0.54.8 declara copia y restauración con el adaptador Coolify para files, photos y vault, pero no para media ni smart-home. Estas declaraciones no son pruebas verificadas del ciclo de vida. Consulta [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore) y practica una restauración antes de confiar a cualquier carga de trabajo datos que no puedas recrear.
 
 ## Verifica
 
@@ -55,6 +55,6 @@ El adaptador de Coolify no proporciona copia de seguridad ni restauración de ca
 
 - La dirección no se abre: compárala con la salida del despliegue, confirma que el nombre se resuelve desde tu dispositivo y consulta [Solución de problemas](/es/guides/stackkits/troubleshooting).
 - La misma aplicación aparece dos veces o las rutas entran en conflicto: tienes dos rutas de entrega para una carga de trabajo. Conserva una, cambia la StackSpec y regenera; no añadas rutas ni etiquetas a mano.
-- Faltan copias de seguridad de una carga de trabajo: es lo esperado con este adaptador. Usa la ruta de Compose independiente si necesitas la copia de seguridad de StackKits para esa carga de trabajo.
+- Faltan copias de seguridad: comprueba el adaptador, la versión y la carga de trabajo en la matriz y verifica la copia y restauración antes de confiar en ellas.
 
 Para la alternativa en beta, consulta [Komodo](/es/stackkits/apps/komodo). Para la matriz completa de adaptadores, consulta [Entrega de aplicaciones](/es/guides/stackkits/application-delivery).

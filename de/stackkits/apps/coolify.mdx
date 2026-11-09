@@ -13,14 +13,14 @@ Coolify ist ein Kontrollpanel zum Betreiben von Anwendungen auf deinem eigenen S
 
 ## Welche Kits und Anwendungsfälle es enthalten
 
-Es ist in jedem Kit optional und nie Teil des Standard-Workspaces. Im Anwendungsfall-Katalog ist es die primäre Anwendung des Anwendungsfalls Marketplace, dort beschrieben als dein eigener App-Store für Anwendungen, die du in deinem Homelab betreibst. Marketplace ist als optionaler Anwendungsfall auf Coolify geplant, und Coolify ist eine Anwendung dieses Anwendungsfalls, kein natives Runtime-Ziel. Als Workload-Adapter ist es in der Kompatibilitätstabelle für `files`, `photos`, `media`, `smart-home` und `vault` aufgeführt.
+Es ist in jedem Kit optional und nie Teil des Standard-Workspaces. Im Anwendungsfall-Katalog ist es die primäre Anwendung des Anwendungsfalls Marketplace, dort beschrieben als dein eigener App-Store für Anwendungen, die du in deinem Homelab betreibst. Der Katalog v0.54.8 deklariert Marketplace als optionalen Anwendungsfall mit Coolify als Standardanwendung; die Lifecycle-Verifizierung ist davon getrennt. Als Workload-Adapter ist es in der Kompatibilitätstabelle für `files`, `photos`, `media`, `smart-home` und `vault` aufgeführt.
 
 | Rolle | Verhalten im veröffentlichten Katalog |
 | --- | --- |
 | Auswahl | Optionale ausdrückliche Integration; eigenständiges Compose braucht keine Anwendungsplattform |
-| Workload-Adapter | Unterstützt für `files`, `photos` und `vault` |
-| Nachweis für Route und TLS | Unterstützt |
-| Workload-Backup und -Wiederherstellung | Wird vom Coolify-Adapter nicht bereitgestellt |
+| Workload-Adapter | v0.54.8 deklariert `files`, `photos`, `media`, `smart-home` und `vault`; Lifecycle-Läufe für diese Coolify-Pfade sind nicht als getestet ausgewiesen |
+| Route und TLS | In v0.54.8 deklariert; dies ist kein Lifecycle-Nachweis |
+| Workload-Backup und -Wiederherstellung | Für `files`, `photos` und `vault` deklariert; nicht für `media` oder `smart-home` |
 
 ## Wie du es öffnest
 
@@ -43,7 +43,7 @@ Es ist in jedem Kit optional und nie Teil des Standard-Workspaces. Im Anwendungs
 
 ## Was gesichert wird
 
-Der Coolify-Adapter stellt kein Workload-Backup und keine -Wiederherstellung bereit. Der eigenständige Compose-Adapter tut das für die Workloads, die es deklarieren. Siehe [Sichern und Wiederherstellen](/de/guides/stackkits/back-up-and-restore) und übe eine Wiederherstellung, bevor du einem Workload Daten anvertraust, die du nicht neu erstellen kannst.
+Die Kompatibilitätsmatrix v0.54.8 deklariert Backup und Wiederherstellung mit dem Coolify-Adapter für files, photos und vault, nicht aber für media oder smart-home. Diese Deklarationen sind keine verifizierten Lifecycle-Läufe. Siehe [Sichern und Wiederherstellen](/de/guides/stackkits/back-up-and-restore) und übe eine Wiederherstellung, bevor du einem Workload Daten anvertraust, die du nicht neu erstellen kannst.
 
 ## Verifizieren
 
@@ -55,6 +55,6 @@ Der Coolify-Adapter stellt kein Workload-Backup und keine -Wiederherstellung ber
 
 - Die Adresse öffnet sich nicht: Vergleiche sie mit der Rollout-Ausgabe, bestätige, dass sich der Name von deinem Gerät aus auflösen lässt, und siehe [Fehlerbehebung](/de/guides/stackkits/troubleshooting).
 - Dieselbe Anwendung erscheint doppelt oder Routen kollidieren: Du hast zwei Auslieferungspfade für einen Workload. Behalte einen, ändere die StackSpec und generiere neu; füge keine Routen oder Labels von Hand hinzu.
-- Für einen Workload fehlen Backups: Das ist bei diesem Adapter zu erwarten. Nutze den eigenständigen Compose-Pfad, wenn du für diesen Workload ein StackKits-Backup brauchst.
+- Für einen Workload fehlen Backups: Prüfe Adapter, Release und Workload in der Kompatibilitätsmatrix und verifiziere Backup und Wiederherstellung, bevor du dich darauf verlässt.
 
 Zur Beta-Alternative siehe [Komodo](/de/stackkits/apps/komodo). Die vollständige Adaptermatrix findest du unter [Anwendungsauslieferung](/de/guides/stackkits/application-delivery).
