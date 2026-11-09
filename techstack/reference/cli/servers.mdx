@@ -4,11 +4,36 @@ description: "Generated reference for the techstack api servers commands"
 sidebarTitle: "servers"
 generated: true
 generated_by: "render-api-surface-reference"
-release: "v0.43.5"
-content_hash: "sha256:e52553305854fbc269be110a0577183cde0787903b53eb0fb00ea15e6404dbde"
-source_hash: "20de7539f431df6bec4472a741f6397bdb4f16f8"
+release: "v0.46.13"
+content_hash: "sha256:635e8b6fdc6436ba6cd34c0a00bf8d6909bd1a8e4dc117ed3fe5350d136c7a00"
+source_hash: "16276f767b0825d51873e5a4b2fffc5bdc043c77"
 ---
-<Note>Generated from the Techstack v0.43.5 release (source `20de7539f431`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+<Note>Generated from the Techstack v0.46.13 release (source `16276f767b08`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api servers access authorize-key
+
+Install one Wallet SSH public key on a managed server for direct owner SSH.
+
+Installs the public key of a Wallet SSH item on a connected managed server and records the owner SSH grant. The body names the Wallet item (`wallet_item_id`, never key material) and must carry `confirm: true`. A fresh server-access re-authentication is required, supplied by the signed-in session or as `reauth_timestamp` and `reauth_signature`; without it the answer is 403 `server_access_step_up_required`. Refused on the demo account, when owner SSH access is disabled for the server (409) and when the Wallet is unavailable (503).
+
+```bash
+techstack api servers access authorize-key <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/access/authorized-key` |
+| Changes state | Yes |
+| MCP tool | None |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `--confirm` | boolean | **Required.** One of `true`. |
+| `--reauth-signature` | string | — |
+| `--reauth-timestamp` | string | — |
+| `--wallet-item-id` | string | **Required.** Wallet item that holds the SSH key. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
 
 ## techstack api servers availability get
 
@@ -44,7 +69,7 @@ techstack api servers availability set <server-id> [flags]
 | --- | --- |
 | HTTP | `PUT /api/v1/servers/{serverId}/availability` |
 | Changes state | Yes |
-| MCP tool | None |
+| MCP tool | `set_server_availability` |
 
 | Argument | Type | Description |
 | --- | --- | --- |
@@ -119,7 +144,7 @@ techstack api servers list [flags]
 
 Cancel an owned maintenance job before execution starts.
 
-Uses the same tenant, entitlement, server and requesting-owner scope as the job read. Cancellation and execution claim use the same queued-state compare-and-set. Repeating a successful cancellation returns its receipt; a claimed or finished job returns maintenance_not_cancellable. Cancelling never claims to stop a command that has already reached the server.
+Uses the same tenant, entitlement, server and requesting-owner scope as the job read: the authority to withdraw a queued job is the person who owns the server and requested the job, and the person's agent acts with it. No delegated maintenance origin is needed, since cancelling only withdraws work that has not reached the server. Cancellation and execution claim use the same queued-state compare-and-set. Repeating a successful cancellation returns its receipt; a claimed or finished job returns maintenance_not_cancellable. Cancelling never claims to stop a command that has already reached the server.
 
 ```bash
 techstack api servers maintenance cancel <server-id> <job-id> [flags]
@@ -129,7 +154,7 @@ techstack api servers maintenance cancel <server-id> <job-id> [flags]
 | --- | --- |
 | HTTP | `POST /api/v1/servers/{serverId}/actions/{jobId}/cancel` |
 | Changes state | Yes |
-| MCP tool | None |
+| MCP tool | `cancel_server_maintenance_job` |
 
 | Argument | Type | Description |
 | --- | --- | --- |
@@ -292,6 +317,26 @@ techstack api servers reach set <server-id> [flags]
 | `--target-port` | integer | Required when enabling. The port the service listens on, on the Guard host's loopback (the host is fixed). |
 | `--target-scheme` | string | One of `http`, `https`. Default `"http"`. |
 | `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api servers repair-server-binding
+
+Prepare the pairing command that re-pairs this server.
+
+Issues a one-time install command for a server whose Guard pinned no binding signing key. The token is returned once. Mutating commands stay refused until the server is paired again.
+
+```bash
+techstack api servers repair-server-binding [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/binding-repair` |
+| Changes state | Yes |
+| MCP tool | `repair_server_binding` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--server-id` | string | **Required.** Canonical server runtime ID. |
 
 ## techstack api servers security auto-repair get
 

@@ -4,11 +4,11 @@ description: "Generated reference for the techstack api unifier commands"
 sidebarTitle: "unifier"
 generated: true
 generated_by: "render-api-surface-reference"
-release: "v0.43.5"
-content_hash: "sha256:e52553305854fbc269be110a0577183cde0787903b53eb0fb00ea15e6404dbde"
-source_hash: "20de7539f431df6bec4472a741f6397bdb4f16f8"
+release: "v0.46.13"
+content_hash: "sha256:635e8b6fdc6436ba6cd34c0a00bf8d6909bd1a8e4dc117ed3fe5350d136c7a00"
+source_hash: "16276f767b0825d51873e5a4b2fffc5bdc043c77"
 ---
-<Note>Generated from the Techstack v0.43.5 release (source `20de7539f431`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+<Note>Generated from the Techstack v0.46.13 release (source `16276f767b08`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
 
 ## techstack api unifier analyze
 
@@ -29,6 +29,75 @@ techstack api unifier analyze [flags]
 | Argument | Type | Description |
 | --- | --- | --- |
 | `--body` | json | **Required.** JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api unifier layout recommend
+
+Compute and record a verified workload layout for a planned change.
+
+Plans where the selected goals run across the nodes of one owned StackKit deployment for an add-server or add-use-case change, verifies the option with the pinned StackKits feasibility check and, when it is feasible, records it as an open recommendation the owner can accept inside a wizard run, reject or snooze. An option that is not verified is returned with state `unverified` and no id. Records the proposal but changes no infrastructure.
+
+```bash
+techstack api unifier layout recommend [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/layout/recommendations` |
+| Changes state | Yes |
+| MCP tool | `recommend_layout` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--compute-profile` | string | — |
+| `--flow` | string | **Required.** One of `add-server`, `add-use-case`. |
+| `--goals` | string\[\] | **Required.** |
+| `--planned-node` | object | The node an add-server run brings, when its size is known before it enrolls. |
+| `--stack-id` | string | **Required.** |
+| `--use-case-capabilities` | object | — |
+| `--use-case-settings` | object | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api unifier layout reject
+
+Reject one layout recommendation.
+
+Marks an open or snoozed layout recommendation of the authenticated owner as rejected so it is no longer offered, and answers its updated view. A recommendation in any other state answers 409 `layout_recommendation_changed`.
+
+```bash
+techstack api unifier layout reject <recommendation-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/layout/recommendations/{id}/reject` |
+| Changes state | Yes |
+| MCP tool | `reject_layout_recommendation` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<recommendation-id>` | string | **Required.** Layout recommendation id. |
+
+## techstack api unifier layout snooze
+
+Snooze one layout recommendation until a later time.
+
+Hides an open or snoozed layout recommendation of the authenticated owner until `until`, which must lie in the future and within 90 days, and answers its updated view. A recommendation in any other state answers 409 `layout_recommendation_changed`.
+
+```bash
+techstack api unifier layout snooze <recommendation-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/layout/recommendations/{id}/snooze` |
+| Changes state | Yes |
+| MCP tool | `snooze_layout_recommendation` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<recommendation-id>` | string | **Required.** Layout recommendation id. |
+| `--until` | string | **Required.** End of the snooze, at most 90 days ahead. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
 
 ## techstack api unifier pipeline preview
 
@@ -87,6 +156,38 @@ techstack api unifier pipeline validate [flags]
 | Argument | Type | Description |
 | --- | --- | --- |
 | `--body` | json | **Required.** JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api unifier recommendations
+
+Rank StackKits for the goals and services of a wizard selection.
+
+Computes ranked StackKit recommendations from the selected goals, the deployment lane and surface, and the authenticated owner's worker inventory and self-disclosure. Safe and idempotent: nothing is stored. A non-ready status (`incomplete`, `stale`, `degraded`) is still a useful answer that names the evidence to supply.
+
+```bash
+techstack api unifier recommendations [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/recommendations` |
+| Changes state | No |
+| MCP tool | `recommend_stackkits` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--available-goals` | string\[\] | Use cases the released catalog offers. |
+| `--compute-profile` | string | — |
+| `--deployment-lane` | string | **Required.** One of `saas`, `self-hosted`. |
+| `--goals` | string\[\] | — |
+| `--provider-id` | string | — |
+| `--selection-intent` | string | all asks which of available_goals the full-homelab template should preselect. One of `all`. |
+| `--services` | string\[\] | — |
+| `--smart-home-context` | object | — |
+| `--smart-home-settings` | object | Smart-home setting decisions by id. |
+| `--surface` | string | **Required.** One of `easy`, `techie`. |
+| `--use-case-capabilities` | object | — |
+| `--use-case-settings` | object | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
 
 ## techstack api unifier unify
 

@@ -4,11 +4,11 @@ description: "Generated reference for the techstack api stacks commands"
 sidebarTitle: "stacks"
 generated: true
 generated_by: "render-api-surface-reference"
-release: "v0.43.5"
-content_hash: "sha256:e52553305854fbc269be110a0577183cde0787903b53eb0fb00ea15e6404dbde"
-source_hash: "20de7539f431df6bec4472a741f6397bdb4f16f8"
+release: "v0.46.13"
+content_hash: "sha256:635e8b6fdc6436ba6cd34c0a00bf8d6909bd1a8e4dc117ed3fe5350d136c7a00"
+source_hash: "16276f767b0825d51873e5a4b2fffc5bdc043c77"
 ---
-<Note>Generated from the Techstack v0.43.5 release (source `20de7539f431`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+<Note>Generated from the Techstack v0.46.13 release (source `16276f767b08`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
 
 ## techstack api stacks create
 
@@ -193,6 +193,54 @@ techstack api stacks export <stack-id> [flags]
 | --- | --- | --- |
 | `<stack-id>` | string | **Required.** Stack ID. |
 
+## techstack api stacks identity activate-owner
+
+Issue the activation link for the owner account of a stack's identity service.
+
+Asks the StackKits identity runtime of the owned stack for a link that activates the owner's own account on the stack. The body must carry `owner_approved: true`; any other body is 400 `owner_approval_required`. The response includes the activation URL, which is a one-time sign-in link: hand it to the owner and do not log it. Answers 409 when the pinned StackKits runtime cannot issue activations or issuing fails.
+
+```bash
+techstack api stacks identity activate-owner <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/identity/owner-activation` |
+| Changes state | Yes |
+| MCP tool | `issue_stack_owner_activation` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<stack-id>` | string | **Required.** Stack ID. |
+| `--owner-approved` | boolean | **Required.** One of `true`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api stacks identity invite-household
+
+Invite one planned household member to a stack's identity service.
+
+Invites one person of the household plan to the owned stack. The person must match the persisted Wizard intent (`client_ref`, e-mail and display name), the owner must already be active on the stack, and the body must carry `owner_approved: true`. The body is decoded strictly. The response includes the member's activation URL when one exists.
+
+```bash
+techstack api stacks identity invite-household <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/identity/household-invitations` |
+| Changes state | Yes |
+| MCP tool | `invite_stack_household_member` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<stack-id>` | string | **Required.** Stack ID. |
+| `--client-ref` | string | **Required.** Reference of the planned person in the Wizard household intent. |
+| `--display-name` | string | — |
+| `--email` | string | **Required.** |
+| `--owner-approved` | boolean | **Required.** One of `true`. |
+| `--username` | string | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
 ## techstack api stacks import
 
 Import stack-spec.yaml as a StackKit deployment.
@@ -230,6 +278,27 @@ techstack api stacks intent <stack-id> [flags]
 | Argument | Type | Description |
 | --- | --- | --- |
 | `<stack-id>` | string | **Required.** Stack ID. |
+
+## techstack api stacks jobs abandon
+
+Retire a rollout that is still marked running but has stopped reporting.
+
+Releases the execution claim of one stale rollout job of an owned stack so that the stack can be retried with `retry-rollout`. Only a job that stopped reporting can be abandoned; any other job answers 409 `abandon_job_conflict` with the guard that refused. The body is empty and no command is sent to a server.
+
+```bash
+techstack api stacks jobs abandon <stack-id> <job-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/jobs/{jobId}/abandon` |
+| Changes state | Yes |
+| MCP tool | `abandon_stale_stack_job` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<stack-id>` | string | **Required.** Stack ID. |
+| `<job-id>` | string | **Required.** |
 
 ## techstack api stacks list
 
@@ -414,6 +483,79 @@ techstack api stacks prune-orphans [flags]
 | `--stack-id` | string | Optional exact deployment scope used by E2E cleanup. |
 | `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
 
+## techstack api stacks relocations abort
+
+Abort a workload relocation and resume the source.
+
+Stops a relocation that has not finished and resumes the workloads on the source server, whose data was kept. The body must carry `owner_approved: true`. A relocation that already moved cannot be aborted (409), and an abort stays fenced until the nodes verify the state.
+
+```bash
+techstack api stacks relocations abort <stack-id> <job-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/relocations/{jobId}/abort` |
+| Changes state | Yes |
+| MCP tool | `abort_workload_relocation` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<stack-id>` | string | **Required.** Stack ID. |
+| `<job-id>` | string | **Required.** |
+| `--owner-approved` | boolean | **Required.** One of `true`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api stacks relocations resolve
+
+Verify both nodes of an interrupted move and settle its outcome.
+
+Re-reads the transfer proof from the source and destination nodes of one relocation and records the verified outcome (`moved` or `aborted`). It is used when a move stopped between transfer and verification. The body is empty. While the nodes cannot both prove the exact transfer the answer is 409 and the relocation stays fenced.
+
+```bash
+techstack api stacks relocations resolve <stack-id> <job-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/relocations/{jobId}/resolve` |
+| Changes state | Yes |
+| MCP tool | `resolve_workload_relocation` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<stack-id>` | string | **Required.** Stack ID. |
+| `<job-id>` | string | **Required.** |
+
+## techstack api stacks relocations start
+
+Move Coolify projects or resources from one owned stack's server to another.
+
+Starts a verified move of workloads from the source server (this stack, `source_agent_id`) to a destination server of another owned stack. The workloads stop on the source while they transfer and the source is kept until both nodes verify the transfer; it can be resumed with the abort operation. Select either whole `projects` or individual `resource_uuids`. The transfer secret stays in Wallet custody (`wallet_item_id`) and domain switches go only to test domains. Needs exactly one Idempotency-Key; a replay returns the same job. Refused with 409 when a target holds locked services or server maintenance runs.
+
+```bash
+techstack api stacks relocations start <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/relocations` |
+| Changes state | Yes |
+| MCP tool | `start_workload_relocation` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<stack-id>` | string | **Required.** Stack ID. |
+| `--destination-agent-id` | string | **Required.** Guard agent of the destination server; must differ from the source. |
+| `--destination-stack-id` | string | **Required.** |
+| `--domain-switches` | string\[\] | — |
+| `--owner-approved` | boolean | **Required.** One of `true`. |
+| `--projects` | string\[\] | Whole Coolify projects to move. Mutually exclusive with resource_uuids. |
+| `--resource-uuids` | string\[\] | Individual Coolify resources to move. Mutually exclusive with projects. |
+| `--source-agent-id` | string | **Required.** Guard agent of the source server in this stack. |
+| `--wallet-item-id` | string | **Required.** Wallet item id (itm_...) of the transfer secret; never the secret itself. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
 ## techstack api stacks repair
 
 Repair one degraded component of a completed rollout on its existing server.
@@ -497,6 +639,28 @@ techstack api stacks resume-enrollment <stack-id> [flags]
 | `<stack-id>` | string | **Required.** Stack ID. |
 | `--job-id` | string | **Required.** Persisted source job currently projected as waiting_enrollment. |
 | `--lease-id` | string | **Required.** Exact managed foundation lease already bound to the source job. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api stacks resume-remote-enrollment
+
+Retry SSH enrollment of a connect-remote StackKit deployment.
+
+Re-runs the Guard enrollment over the SSH connection persisted for a connect-remote deployment without rerunning the StackKit rollout. The deployment must belong to the authenticated owner and use the connect-remote transport; the credential comes from the Wallet node access item already bound to it, or from `ssh_wallet_item_id` when the connection should be rebound first. A plaintext password is never accepted by this contract.
+
+```bash
+techstack api stacks resume-remote-enrollment <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/resume-remote-enrollment` |
+| Changes state | Yes |
+| MCP tool | `resume_remote_enrollment` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<stack-id>` | string | **Required.** Stack ID. |
+| `--ssh-wallet-item-id` | string | Wallet node access item to rebind the stack's persisted SSH connection to before the retry. |
 | `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
 
 ## techstack api stacks retry-rollout
@@ -660,6 +824,58 @@ techstack api stacks unified <stack-id> [flags]
 | --- | --- | --- |
 | `<stack-id>` | string | **Required.** Stack ID. |
 
+## techstack api stacks use-cases configure
+
+Change the configuration of one installed use-case workload.
+
+Authors a native configuration change for one installed catalog workload (compute, storage and accelerator profiles, public settings, secret references) against the baseline named by `expected_spec_hash`, saves the candidate and queues the StackKit lifecycle jobs that apply it. The `Idempotency-Key` makes a retry replay the original acceptance. Refused with 409 while the stack is busy, a service is locked, a server is in maintenance, or the baseline changed.
+
+```bash
+techstack api stacks use-cases configure <stack-id> <workload> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/use-cases/{workload}/configure` |
+| Changes state | Yes |
+| MCP tool | `configure_use_case` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<stack-id>` | string | **Required.** Stack ID. |
+| `<workload>` | string | **Required.** Installed catalog workload slug. |
+| `--accelerator-profile` | string | — |
+| `--compute-profile` | string | — |
+| `--expected-spec-hash` | string | **Required.** Native baseline hash read from the use-case configuration view. |
+| `--secret-refs` | object | Existing secret references by catalog key. Values are `secret://` references, never secret material. |
+| `--settings` | object | Public catalog settings by key; each value is a string, boolean or number. |
+| `--storage-profile` | string | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api stacks use-cases remove
+
+Remove one workload or a whole use case from a StackKit deployment.
+
+Retires an installed workload, or every installed workload of a catalog use case, through the native resolver against the baseline named by `expected_spec_hash`, and queues the StackKit lifecycle jobs. The workload stops running but its data is retained (`data_disposition: retain`). The `Idempotency-Key` makes a retry replay the original acceptance; refused with 409 while the stack is busy, a service is locked or a server is in maintenance.
+
+```bash
+techstack api stacks use-cases remove <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/use-cases/remove` |
+| Changes state | Yes |
+| MCP tool | `remove_use_case` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<stack-id>` | string | **Required.** Stack ID. |
+| `--expected-spec-hash` | string | **Required.** Native baseline hash read from the use-case configuration view. |
+| `--selector-kind` | string | **Required.** One of `workload`, `use_case`. |
+| `--selector-ref` | string | **Required.** Workload slug or catalog use-case id; no surrounding whitespace. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
 ## techstack api stacks validate-import
 
 Validate spec without importing.
@@ -695,3 +911,24 @@ techstack api stacks verify-chain <stack-id> [flags]
 | Argument | Type | Description |
 | --- | --- | --- |
 | `<stack-id>` | string | **Required.** Stack ID. |
+
+## techstack api stacks workers assign
+
+Assign an approved worker server to an owned stack.
+
+Binds one approved, connected worker of the owner to one owned stack through the canonical server runtime. A worker that is not approved yet, or that already belongs to another stack, answers 409; assigning it to the stack it already belongs to is a no-op. The body is empty.
+
+```bash
+techstack api stacks workers assign <stack-id> <worker-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/stacks/{id}/workers/{workerId}/assign` |
+| Changes state | Yes |
+| MCP tool | `assign_worker_to_stack` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<stack-id>` | string | **Required.** Stack ID. |
+| `<worker-id>` | string | **Required.** |

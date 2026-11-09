@@ -4,11 +4,11 @@ description: "Generated reference for the techstack api workers commands"
 sidebarTitle: "workers"
 generated: true
 generated_by: "render-api-surface-reference"
-release: "v0.43.5"
-content_hash: "sha256:e52553305854fbc269be110a0577183cde0787903b53eb0fb00ea15e6404dbde"
-source_hash: "20de7539f431df6bec4472a741f6397bdb4f16f8"
+release: "v0.46.13"
+content_hash: "sha256:635e8b6fdc6436ba6cd34c0a00bf8d6909bd1a8e4dc117ed3fe5350d136c7a00"
+source_hash: "16276f767b0825d51873e5a4b2fffc5bdc043c77"
 ---
-<Note>Generated from the Techstack v0.43.5 release (source `20de7539f431`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+<Note>Generated from the Techstack v0.46.13 release (source `16276f767b08`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
 
 ## techstack api workers approve
 
@@ -172,4 +172,26 @@ techstack api workers outcomes resolve <id> <command-id> [flags]
 | `--disposition` | string | **Required.** One of `verified_applied`, `verified_not_applied`, `accept_unknown`. |
 | `--expected-revision` | integer | **Required.** |
 | `--note` | string | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api workers tenant-handoff confirm
+
+Confirm the handoff of a retired server's command evidence.
+
+The owner, as custodian of a detached or retired server, confirms that the command evidence its Guard still holds (journal entries, outcomes and identity state) may leave the server by `export` (an archive the operator takes off the server) or `quarantine` (a root-only directory outside the Guard state). The response shows a one-time `confirmation` exactly once and is valid for 72 hours. It is bound to the host key the worker used. The operator passes it to `techstack agent handoff `--server` --confirmation-file`, which has the control plane verify it for this server's key, then moves and securely removes the evidence and records a receipt. Pairing a server whose host key served another tenant, or that declares another tenant's evidence, is refused (409 `tenant_handoff_required`) until a receipt of that tenant is consumed. A receipt is consumed once, by the pairing that proves the confirmed key, before expiry; only that pairing may repeat it within 15 minutes (409 `tenant_handoff_invalid` otherwise). Requires the owner and a fresh multi-factor sign-in (at most 300 seconds old). 409 `tenant_handoff_worker_active` while the worker is not revoked or rejected, 409 `tenant_handoff_unbindable` for a worker that never bound a host key. A worker of another tenant or owner is 404.
+
+```bash
+techstack api workers tenant-handoff confirm <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/tenant-handoff` |
+| Changes state | Yes |
+| MCP tool | None |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<id>` | string | **Required.** Resource ID. |
+| `--disposition` | string | **Required.** One of `export`, `quarantine`. |
 | `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |

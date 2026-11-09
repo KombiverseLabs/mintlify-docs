@@ -1,0 +1,89 @@
+---
+title: "techstack api notifications"
+description: "Generated reference for the techstack api notifications commands"
+sidebarTitle: "notifications"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.46.13"
+content_hash: "sha256:635e8b6fdc6436ba6cd34c0a00bf8d6909bd1a8e4dc117ed3fe5350d136c7a00"
+source_hash: "16276f767b0825d51873e5a4b2fffc5bdc043c77"
+---
+<Note>Generated from the Techstack v0.46.13 release (source `16276f767b08`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api notifications dismiss
+
+Dismiss one notification of the signed-in user.
+
+Removes one item from the authenticated user's notification feed. Techstack signs the call to the notifications engine for the authenticated user, so only that user's own items can be dismissed; an unknown item answers 404. The engine's answer is passed through unchanged and is not wrapped in the `data` envelope.
+
+```bash
+techstack api notifications dismiss <item-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/notifications/feed/{id}/dismiss` |
+| Changes state | Yes |
+| MCP tool | `dismiss_notification` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<item-id>` | string | **Required.** Feed item ID. |
+
+## techstack api notifications preferences set
+
+Set which channels the signed-in user receives each notification topic on.
+
+Writes the topic-by-channel preference matrix of the authenticated user. Techstack forwards the body (at most 1 MiB) to the notifications engine unchanged; the engine rejects unknown topics and channels with 400 and silently ignores channels that are locked for a topic. The answer is the fresh matrix, not wrapped in the `data` envelope. Quiet hours and the Telegram link are read-only here.
+
+```bash
+techstack api notifications preferences set [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/notifications/preferences` |
+| Changes state | Yes |
+| MCP tool | `set_notification_preferences` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--only-if-unset` | boolean | When true, a channel the user already set is left as it is. |
+| `--topics` | object\[\] | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api notifications read
+
+Mark one notification of the signed-in user as read.
+
+Marks one item of the authenticated user's notification feed as read. Techstack signs the call to the notifications engine for the authenticated user, so only that user's own items can be changed; an unknown item answers 404. The engine's answer is passed through unchanged and is not wrapped in the `data` envelope.
+
+```bash
+techstack api notifications read <item-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/notifications/feed/{id}/read` |
+| Changes state | Yes |
+| MCP tool | `mark_notification_read` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<item-id>` | string | **Required.** Feed item ID. |
+
+## techstack api notifications read-all
+
+Mark every notification of the signed-in user as read.
+
+Marks all unread items of the authenticated user's notification feed as read, across every section. The body is empty. The engine's answer is passed through unchanged and is not wrapped in the `data` envelope.
+
+```bash
+techstack api notifications read-all [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/notifications/feed/read-all` |
+| Changes state | Yes |
+| MCP tool | `mark_all_notifications_read` |

@@ -4,15 +4,17 @@ description: "Generated reference for the techstack api tunnel commands"
 sidebarTitle: "tunnel"
 generated: true
 generated_by: "render-api-surface-reference"
-release: "v0.43.5"
-content_hash: "sha256:e52553305854fbc269be110a0577183cde0787903b53eb0fb00ea15e6404dbde"
-source_hash: "20de7539f431df6bec4472a741f6397bdb4f16f8"
+release: "v0.46.13"
+content_hash: "sha256:635e8b6fdc6436ba6cd34c0a00bf8d6909bd1a8e4dc117ed3fe5350d136c7a00"
+source_hash: "16276f767b0825d51873e5a4b2fffc5bdc043c77"
 ---
-<Note>Generated from the Techstack v0.43.5 release (source `20de7539f431`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+<Note>Generated from the Techstack v0.46.13 release (source `16276f767b08`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
 
 ## techstack api tunnel install-command
 
 Generate worker install command with tunnel URL.
+
+Answers the Linux (and, outside the LAN bridge, Windows) command that installs and enrolls a new server through the current registry URL. Techstack mints the one-time pairing token the command carries (15 minutes) and answers its id and expiry; the token is never an argument. With mode reinstall-guard it answers the Linux command for a server whose Guard update state is reinstall_required: run as root on that server, it installs the current Guard in place and keeps the enrollment and identity key unchanged. The token then only downloads the Guard and is never redeemed.
 
 ```bash
 techstack api tunnel install-command [flags]
@@ -22,11 +24,11 @@ techstack api tunnel install-command [flags]
 | --- | --- |
 | HTTP | `POST /api/v1/tunnel/install-command` |
 | Changes state | Yes |
-| MCP tool | None |
+| MCP tool | `create_install_command` |
 
 | Argument | Type | Description |
 | --- | --- | --- |
-| `--token` | string | **Required.** |
+| `--mode` | string | One of `install`, `reinstall-guard`. Default `"install"`. |
 | `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
 
 ## techstack api tunnel registry-url

@@ -4,11 +4,65 @@ description: "Generated reference for the techstack api wallet commands"
 sidebarTitle: "wallet"
 generated: true
 generated_by: "render-api-surface-reference"
-release: "v0.43.5"
-content_hash: "sha256:e52553305854fbc269be110a0577183cde0787903b53eb0fb00ea15e6404dbde"
-source_hash: "20de7539f431df6bec4472a741f6397bdb4f16f8"
+release: "v0.46.13"
+content_hash: "sha256:635e8b6fdc6436ba6cd34c0a00bf8d6909bd1a8e4dc117ed3fe5350d136c7a00"
+source_hash: "16276f767b0825d51873e5a4b2fffc5bdc043c77"
 ---
-<Note>Generated from the Techstack v0.43.5 release (source `20de7539f431`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+<Note>Generated from the Techstack v0.46.13 release (source `16276f767b08`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api wallet create
+
+Create a wallet item without secret values.
+
+Creates a wallet item owned by the caller in the resolved tenant and returns it redacted. The server assigns the id. `secret` and `totp` values are entered by the person in the Wallet and are not part of this contract; an item created here has no secret until the person adds one, and a secret can never be read back through this API without the person's fresh re-authentication. Only deployments that keep credentials in Techstack's own Wallet serve this route; elsewhere it answers 409 `self_hosted_only`.
+
+```bash
+techstack api wallet create [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/wallet` |
+| Changes state | Yes |
+| MCP tool | `create_wallet_item` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--access-mode` | string | One of `open`, `reveal`, `manage`. |
+| `--expires-at` | string | — |
+| `--item-class` | string | One of `launch`, `user_account`, `credential`, `recovery`, `machine_secret_ref`, `manual`. |
+| `--kind` | string | Defaults to `other`. Cannot be changed later. One of `password`, `api_key`, `ssh_key`, `oauth_token`, `certificate`, `other`. |
+| `--name` | string | **Required.** |
+| `--notes` | string | Free text; never put credentials here. |
+| `--service-id` | string | — |
+| `--source-ref` | string | — |
+| `--source-type` | string | — |
+| `--stack-id` | string | Stack (kit deployment) the item belongs to. |
+| `--url` | string | — |
+| `--username` | string | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api wallet delete
+
+Delete a wallet item.
+
+Deletes an item the caller owns, including its encrypted secret and TOTP. An item owned by someone else answers 404. Only deployments that keep credentials in Techstack's own Wallet serve this route; elsewhere it answers 409 `self_hosted_only`.
+
+```bash
+techstack api wallet delete <id> [flags]
+```
+
+<Warning>Requires confirmation: This operation permanently deletes the wallet item with any secret and TOTP stored in it; if the person has no other copy of those credentials they are lost. Pass `--yes` or answer the prompt; a non-interactive run without `--yes` stops before any request with exit code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/wallet/{id}` |
+| Changes state | Yes |
+| MCP tool | `delete_wallet_item` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<id>` | string | **Required.** Resource ID. |
 
 ## techstack api wallet list
 
@@ -88,4 +142,36 @@ techstack api wallet reveal <id> [flags]
 | `--reauth-assertion` | string | — |
 | `--reauth-signature` | string | **Required.** |
 | `--reauth-timestamp` | string | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api wallet update
+
+Update the metadata of a wallet item.
+
+Merges the supplied fields into an item the caller owns and returns it redacted. Fields that are not supplied keep their value, including the stored secret and TOTP, which this contract can neither read nor change: the person sets those in the Wallet. The item kind and owner are immutable. An item owned by someone else answers 404. Only deployments that keep credentials in Techstack's own Wallet serve this route; elsewhere it answers 409 `self_hosted_only`.
+
+```bash
+techstack api wallet update <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PATCH /api/v1/wallet/{id}` |
+| Changes state | Yes |
+| MCP tool | `update_wallet_item` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<id>` | string | **Required.** Resource ID. |
+| `--access-mode` | string | One of `open`, `reveal`, `manage`. |
+| `--expires-at` | string | — |
+| `--item-class` | string | One of `launch`, `user_account`, `credential`, `recovery`, `machine_secret_ref`, `manual`. |
+| `--name` | string | — |
+| `--notes` | string | Free text; never put credentials here. |
+| `--service-id` | string | — |
+| `--source-ref` | string | — |
+| `--source-type` | string | — |
+| `--stack-id` | string | — |
+| `--url` | string | — |
+| `--username` | string | — |
 | `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |

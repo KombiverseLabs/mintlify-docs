@@ -1,0 +1,177 @@
+---
+title: "techstack api home-assistant"
+description: "Generated reference for the techstack api home-assistant commands"
+sidebarTitle: "home-assistant"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.46.13"
+content_hash: "sha256:635e8b6fdc6436ba6cd34c0a00bf8d6909bd1a8e4dc117ed3fe5350d136c7a00"
+source_hash: "16276f767b0825d51873e5a4b2fffc5bdc043c77"
+---
+<Note>Generated from the Techstack v0.46.13 release (source `16276f767b08`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api home-assistant instances backup
+
+Create an encrypted off-instance backup of an owned Home Assistant instance.
+
+Runs a native full backup through the instance binding, stores it encrypted off the instance and retains the recovery key in custody. Requires an owned instance binding with the backup grant. `operation_id` is a stable identity: repeating it returns the retained result instead of a second backup. A pending operation answers 202.
+
+```bash
+techstack api home-assistant instances backup <binding-ref> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/home-assistant/instances/{binding}/backup` |
+| Changes state | Yes |
+| MCP tool | `backup_home_assistant` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<binding-ref>` | string | **Required.** Instance binding reference. |
+| `--operation-id` | string | **Required.** Stable operation identity. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api home-assistant instances restore
+
+Restore a retained backup into the owned isolated recovery instance.
+
+Restores a completed retained backup into the isolated recovery binding that belongs to the instance and verifies the result; the running instance itself is not overwritten. Requires the restore grant and an owned recovery binding (403 `recovery_not_authorized` otherwise). `operation_id` is a stable identity. A pending operation answers 202.
+
+```bash
+techstack api home-assistant instances restore <binding-ref> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/home-assistant/instances/{binding}/restore` |
+| Changes state | Yes |
+| MCP tool | `restore_home_assistant` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<binding-ref>` | string | **Required.** Instance binding reference. |
+| `--backup-operation-id` | string | **Required.** The completed backup to restore. |
+| `--operation-id` | string | **Required.** Stable operation identity. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api home-assistant instances update
+
+Update Home Assistant Core or OS to a pinned version after a verified backup.
+
+Updates the instance to the exact `version`. It requires a completed backup (`backup_operation_id`) whose archive passed an isolated restore, the update grant on the binding and a pinned version (core `YYYY.M.P`, os `M.N` or `M.N.P`). `operation_id` is a stable identity and an uncertain submission is never repeated. A pending operation answers 202.
+
+```bash
+techstack api home-assistant instances update <binding-ref> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/home-assistant/instances/{binding}/update` |
+| Changes state | Yes |
+| MCP tool | `update_home_assistant` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<binding-ref>` | string | **Required.** Instance binding reference. |
+| `--backup-operation-id` | string | **Required.** The verified backup taken before the update. |
+| `--operation-id` | string | **Required.** Stable operation identity. |
+| `--target` | string | One of `core`, `os`. Default `"core"`. |
+| `--version` | string | **Required.** Exact target version: core `YYYY.M.P`, os `M.N\[.P\]`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api home-assistant migrations confirm
+
+Confirm the cutover of a verified Home Assistant migration.
+
+Delivers the explicit cutover confirmation to a migration run that is waiting for it. The run then stops the source, moves the exclusive attachments to the target and starts it; the original and its archive are retained and the migration can be returned with the rollback call. Answers 400 when the run is not awaiting confirmation and 404 for a run the caller does not own.
+
+```bash
+techstack api home-assistant migrations confirm <migration-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/home-assistant/migrations/{id}/confirm` |
+| Changes state | Yes |
+| MCP tool | `confirm_home_assistant_cutover` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<migration-id>` | string | **Required.** Migration run id. |
+| `--confirmed` | boolean | **Required.** Must be true. One of `true`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api home-assistant migrations rollback
+
+Return a completed or failed Home Assistant migration to the original instance.
+
+Starts the return run for an owned migration that completed or failed and kept its source archive: archive the target, stop it, return the exclusive attachments and start and verify the original. The return run id is the migration run id with `:rollback`, so repeating the call resumes it. Answers 400 when the migration is not in a returnable state and 404 for a run the caller does not own.
+
+```bash
+techstack api home-assistant migrations rollback <migration-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/home-assistant/migrations/{id}/rollback` |
+| Changes state | Yes |
+| MCP tool | `roll_back_home_assistant_migration` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<migration-id>` | string | **Required.** Migration run id. |
+
+## techstack api home-assistant migrations start
+
+Start a native Home Assistant migration to an isolated target.
+
+Starts (or resumes) the durable migration run for an authorized local binding: archive the source, provision an isolated target on the owner's own substrate, restore and verify it, then wait for the cutover confirmation. The run id is derived from tenant, owner and target, so repeating the call resumes the same run. The request must match the binding's source service and authorization reference exactly (403 otherwise). Self-hosted installs with a configured local binding only (503 `migration_executor_unavailable` otherwise).
+
+```bash
+techstack api home-assistant migrations start [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/home-assistant/migrations` |
+| Changes state | Yes |
+| MCP tool | `start_home_assistant_migration` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--authorization-ref` | string | **Required.** Opaque reference of the binding's authorization; not a secret. |
+| `--source-service-id` | string | **Required.** |
+| `--target-binding-ref` | string | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api home-assistant owners attach
+
+Attach an owned Home Assistant instance to a pending owner enrollment.
+
+Binds the instance's endpoint and the long-lived access token held in the Wallet item `token_wallet_item_id` (a kombify Wallet item assigned to Techstack, or a built-in wallet API key or OAuth token item whose URL names this instance; resolved inside Techstack, never answered; this contract accepts no token) to a pending owner enrollment of an owned stack, with the lifecycle grants and baseline settings the owner chooses. The token is stored encrypted and an existing attachment is never overwritten (409 `attachment_rejected`). Self-hosted installs only (503 otherwise).
+
+```bash
+techstack api home-assistant owners attach [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/home-assistant/owners/attach` |
+| Changes state | Yes |
+| MCP tool | `attach_home_assistant_owner` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--binding-ref` | string | **Required.** |
+| `--configure-granted` | boolean | — |
+| `--dependency-assessment-ref` | string | — |
+| `--lease-id` | string | Managed guest lease; required for a new instance. |
+| `--lifecycle-grants` | object | — |
+| `--recovery-backup-operation-id` | string | — |
+| `--recovery-binding-ref` | string | — |
+| `--settings` | object | — |
+| `--stack-id` | string | **Required.** |
+| `--token-wallet-item-id` | string | **Required.** Wallet item holding the Home Assistant long-lived access token. |
+| `--url` | string | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |

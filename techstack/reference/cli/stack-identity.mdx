@@ -4,11 +4,11 @@ description: "Generated reference for the techstack api stack-identity commands"
 sidebarTitle: "stack-identity"
 generated: true
 generated_by: "render-api-surface-reference"
-release: "v0.43.5"
-content_hash: "sha256:e52553305854fbc269be110a0577183cde0787903b53eb0fb00ea15e6404dbde"
-source_hash: "20de7539f431df6bec4472a741f6397bdb4f16f8"
+release: "v0.46.13"
+content_hash: "sha256:635e8b6fdc6436ba6cd34c0a00bf8d6909bd1a8e4dc117ed3fe5350d136c7a00"
+source_hash: "16276f767b0825d51873e5a4b2fffc5bdc043c77"
 ---
-<Note>Generated from the Techstack v0.43.5 release (source `20de7539f431`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+<Note>Generated from the Techstack v0.46.13 release (source `16276f767b08`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
 
 ## techstack api stack-identity get
 
@@ -23,6 +23,27 @@ techstack api stack-identity get [flags]
 | HTTP | `GET /api/v1/auth/stack-identity` |
 | Changes state | No |
 | MCP tool | `get_stack_identity` |
+
+## techstack api stack-identity sync
+
+Apply one kombify Cloud sync step to the local stack identity.
+
+Takes the kombify Cloud stack identity record (read by the caller through the Gateway with the user's own token; `null` when Cloud has none) and applies the sync rules to the local copy: adopt the Cloud record, confirm an identical one, or answer the body to push to Cloud with the `If-Match` revision. The call itself never writes to Cloud. When no local stack identity exists yet it only reports `homelab_missing`.
+
+```bash
+techstack api stack-identity sync [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/auth/stack-identity/sync` |
+| Changes state | Yes |
+| MCP tool | `sync_stack_identity` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--cloud` | string | **Required.** The Cloud record, or null when Cloud has no stack identity. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
 
 ## techstack api stack-identity update
 
@@ -41,3 +62,30 @@ techstack api stack-identity update [flags]
 | Argument | Type | Description |
 | --- | --- | --- |
 | `--body` | json | **Required.** JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api stack-identity update-conditional
+
+Update the stack identity only when its local revision still matches.
+
+Revision-checked variant of the stack identity update. `If-Match` carries the `local_revision` read from the stack identity, in double quotes (for example `"3"`); a stale revision answers 412 and a reused `Idempotency-Key` with different content answers 409. The edit is stored locally and marked pending until it is synced with kombify Cloud. The body is limited to 4096 bytes. Requires the Postgres control plane (503 `stack_identity_store_unavailable` otherwise).
+
+```bash
+techstack api stack-identity update-conditional [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/auth/stack-identity/conditional` |
+| Changes state | Yes |
+| MCP tool | `update_stack_identity_if_unchanged` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--if-match` | string | **Required.** Strong local revision in double quotes, for example `"3"`. |
+| `--animation-enabled` | boolean | — |
+| `--animation-style` | string | — |
+| `--character-id` | string | — |
+| `--glow-color-override` | string | — |
+| `--icon-style` | string | One of `filled`, `glass`, `gradient`, `outlined`. |
+| `--name` | string | **Required.** Trimmed, without control characters. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |

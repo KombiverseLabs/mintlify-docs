@@ -1,0 +1,50 @@
+---
+title: "techstack api operator"
+description: "Generated reference for the techstack api operator commands"
+sidebarTitle: "operator"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.46.13"
+content_hash: "sha256:635e8b6fdc6436ba6cd34c0a00bf8d6909bd1a8e4dc117ed3fe5350d136c7a00"
+source_hash: "16276f767b0825d51873e5a4b2fffc5bdc043c77"
+---
+<Note>Generated from the Techstack v0.46.13 release (source `16276f767b08`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api operator self-disclosure get
+
+Read the operator's own answers about experience, goals, placement and household.
+
+Returns the signed-in operator's stored self-disclosure, its source and the capability profile the Unifier derives from it. An operator who never answered gets an empty `disclosure`. Pass the returned `source` and `disclosure` as `if_unchanged` to replace it safely.
+
+```bash
+techstack api operator self-disclosure get [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/operator/self-disclosure` |
+| Changes state | No |
+| MCP tool | `get_operator_self_disclosure` |
+
+## techstack api operator self-disclosure set
+
+Store the operator's own answers about experience, goals, placement and household.
+
+Replaces the signed-in operator's whole self-disclosure; an unanswered question means "not told". The body is decoded strictly and every answer must come from the closed vocabulary below. The capability profile in the answer is derived by the Unifier, never stored from the request. With `if_unchanged` the replacement is applied only when the stored value still equals it, otherwise the answer is 412 `self_disclosure_changed`.
+
+```bash
+techstack api operator self-disclosure set [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/operator/self-disclosure` |
+| Changes state | Yes |
+| MCP tool | `set_operator_self_disclosure` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--disclosure` | object | **Required.** |
+| `--if-unchanged` | object | The stored value this replacement must still match. |
+| `--source` | string | **Required.** link when the answers arrived as URL state and the operator confirmed them; techstack when typed in a Techstack surface. One of `link`, `techstack`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |

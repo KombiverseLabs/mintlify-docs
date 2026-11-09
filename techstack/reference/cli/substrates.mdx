@@ -1,0 +1,58 @@
+---
+title: "techstack api substrates"
+description: "Generated reference for the techstack api substrates commands"
+sidebarTitle: "substrates"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.46.13"
+content_hash: "sha256:635e8b6fdc6436ba6cd34c0a00bf8d6909bd1a8e4dc117ed3fe5350d136c7a00"
+source_hash: "16276f767b0825d51873e5a4b2fffc5bdc043c77"
+---
+<Note>Generated from the Techstack v0.46.13 release (source `16276f767b08`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api substrates appliances create
+
+Admit a Home Assistant OS guest on the owner's own hypervisor.
+
+Reserves a guest on a bound substrate (the owner's own Proxmox host, customer custody, local billing, nothing billed by kombify) and submits its creation; the guest is not yet assessed as running (`application_status` is `authenticated_check_pending`). Only the `haos` profile and a placement on this substrate are accepted. The substrate binding must be enabled and its Guard inventory current, and the stack must be owned by the caller. Replaying the same intent with the same Idempotency-Key returns the same guest; a changed intent or a different key for the same stack and node answers 409 `appliance_not_admitted`.
+
+```bash
+techstack api substrates appliances create <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/substrates/{id}/appliances` |
+| Changes state | Yes |
+| MCP tool | `create_substrate_appliance` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Substrate server id. |
+| `--node-id` | string | **Required.** Node the appliance becomes in that stack; one appliance per stack node. |
+| `--placement` | object | **Required.** |
+| `--stack-id` | string | **Required.** Stack that owns the appliance; must belong to the caller. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api substrates binding set
+
+Enable or disable guest placement on one substrate.
+
+Binds the substrate to the Guard's current authenticated inventory (node, guest-id range, image pins) and turns guest placement on or off. Optimistic concurrency: `revision` must equal the current binding revision (0 when none exists) and the answer carries the next one. Refused with 409 while the substrate has no current inventory, no node-local configuration, a revision mismatch, or non-decommissioned guests that still hold custody.
+
+```bash
+techstack api substrates binding set <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/substrates/{id}/binding` |
+| Changes state | Yes |
+| MCP tool | `set_substrate_binding` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Substrate server id. |
+| `--enabled` | boolean | **Required.** |
+| `--revision` | integer | **Required.** Current binding revision; 0 creates the binding. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |

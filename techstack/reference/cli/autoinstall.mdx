@@ -4,15 +4,17 @@ description: "Generated reference for the techstack api autoinstall commands"
 sidebarTitle: "autoinstall"
 generated: true
 generated_by: "render-api-surface-reference"
-release: "v0.43.5"
-content_hash: "sha256:e52553305854fbc269be110a0577183cde0787903b53eb0fb00ea15e6404dbde"
-source_hash: "20de7539f431df6bec4472a741f6397bdb4f16f8"
+release: "v0.46.13"
+content_hash: "sha256:635e8b6fdc6436ba6cd34c0a00bf8d6909bd1a8e4dc117ed3fe5350d136c7a00"
+source_hash: "16276f767b0825d51873e5a4b2fffc5bdc043c77"
 ---
-<Note>Generated from the Techstack v0.43.5 release (source `20de7539f431`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+<Note>Generated from the Techstack v0.46.13 release (source `16276f767b08`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
 
 ## techstack api autoinstall run
 
 Install missing dependencies.
+
+Installs the missing host dependencies (OpenTofu, cloudflared, Docker) on the machine a self-hosted Techstack runs on, all of them or the named ones. Only the owner of a self-hosted Techstack may call it, and an agent acts with the owner's reach there; hosted Techstack refuses every caller with 403 `host_install_unavailable` (reason_code `hosted_control_plane`) before anything is detected.
 
 ```bash
 techstack api autoinstall run [flags]
@@ -22,7 +24,12 @@ techstack api autoinstall run [flags]
 | --- | --- |
 | HTTP | `POST /api/v1/autoinstall/install` |
 | Changes state | Yes |
-| MCP tool | None |
+| MCP tool | `install_host_dependencies` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--dependencies` | string\[\] | Names of the missing dependencies to install; all when omitted. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
 
 ## techstack api autoinstall status
 

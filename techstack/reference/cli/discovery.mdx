@@ -4,11 +4,11 @@ description: "Generated reference for the techstack api discovery commands"
 sidebarTitle: "discovery"
 generated: true
 generated_by: "render-api-surface-reference"
-release: "v0.43.5"
-content_hash: "sha256:e52553305854fbc269be110a0577183cde0787903b53eb0fb00ea15e6404dbde"
-source_hash: "20de7539f431df6bec4472a741f6397bdb4f16f8"
+release: "v0.46.13"
+content_hash: "sha256:635e8b6fdc6436ba6cd34c0a00bf8d6909bd1a8e4dc117ed3fe5350d136c7a00"
+source_hash: "16276f767b0825d51873e5a4b2fffc5bdc043c77"
 ---
-<Note>Generated from the Techstack v0.43.5 release (source `20de7539f431`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+<Note>Generated from the Techstack v0.46.13 release (source `16276f767b08`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
 
 ## techstack api discovery cache clear
 
@@ -64,7 +64,7 @@ techstack api discovery devices list [flags]
 
 Deep probe a caller-owned device.
 
-Non-admin callers may only probe IPs from their own discovery results; admins may probe arbitrary IPs.
+Logs in to the device over SSH with the login held in the Wallet item `ssh_wallet_item_id` (a kombify Wallet node access item assigned to Techstack and bound to this IP or to no host, or an SSH key or password item of the built-in wallet whose URL names this IP) and reads its system facts. The login is resolved inside Techstack for this probe only and never answered. This contract accepts no password or private key. Non-admin callers may only probe IPs from their own discovery results; admins may probe arbitrary IPs. Local control planes only (409 `lan_executor_required` on a hosted one).
 
 ```bash
 techstack api discovery devices probe [flags]
@@ -74,13 +74,15 @@ techstack api discovery devices probe [flags]
 | --- | --- |
 | HTTP | `POST /api/v1/discovery/probe` |
 | Changes state | Yes |
-| MCP tool | None |
+| MCP tool | `probe_discovered_device` |
 
 | Argument | Type | Description |
 | --- | --- | --- |
 | `--ip` | string | **Required.** |
-| `--ssh-key` | string | — |
-| `--ssh-user` | string | — |
+| `--ssh-port` | integer | Default `22`. |
+| `--ssh-user` | string | **Required.** |
+| `--ssh-wallet-item-id` | string | **Required.** Wallet item holding the SSH key or password. |
+| `--timeout-seconds` | integer | Default `30`. |
 | `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
 
 ## techstack api discovery networks
@@ -193,7 +195,7 @@ techstack api discovery stats [flags]
 
 Test SSH connectivity to a device.
 
-Non-admin callers may only test IPs from their own discovery results; admins may test arbitrary IPs.
+Opens one SSH connection with the login held in the Wallet item `ssh_wallet_item_id` (its key when it holds one, otherwise its password; a built-in wallet item must name this IP as its URL), resolved inside Techstack and never answered; nothing is stored. This contract accepts no password. A failed connection answers 200 with `success: false`. Non-admin callers may only test IPs from their own discovery results; admins may test arbitrary IPs. Local control planes only.
 
 ```bash
 techstack api discovery test-ssh [flags]
@@ -203,12 +205,12 @@ techstack api discovery test-ssh [flags]
 | --- | --- |
 | HTTP | `POST /api/v1/discovery/test-ssh` |
 | Changes state | Yes |
-| MCP tool | None |
+| MCP tool | `test_discovered_device_ssh` |
 
 | Argument | Type | Description |
 | --- | --- | --- |
 | `--ip` | string | **Required.** |
-| `--password` | string | — |
 | `--port` | integer | Default `22`. |
-| `--user` | string | — |
+| `--ssh-wallet-item-id` | string | **Required.** Wallet item holding the SSH key or password. |
+| `--user` | string | **Required.** |
 | `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |

@@ -1,0 +1,109 @@
+---
+title: "techstack api wizard"
+description: "Generated reference for the techstack api wizard commands"
+sidebarTitle: "wizard"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.46.13"
+content_hash: "sha256:635e8b6fdc6436ba6cd34c0a00bf8d6909bd1a8e4dc117ed3fe5350d136c7a00"
+source_hash: "16276f767b0825d51873e5a4b2fffc5bdc043c77"
+---
+<Note>Generated from the Techstack v0.46.13 release (source `16276f767b08`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api wizard preview
+
+Preview the StackKit spec a wizard intent would produce.
+
+Projects a wizard intent onto the pinned kit seed and validates the result with the pinned StackKits CLI. Safe and idempotent: nothing is persisted. An invalid projection answers 200 with `valid: false` and `validate_error`; join previews need `base_spec`. Requires the `native_v2_wizard` feature for the caller (403 `feature_not_enabled` otherwise).
+
+```bash
+techstack api wizard preview [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/wizard/preview` |
+| Changes state | No |
+| MCP tool | `preview_wizard` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--base-spec` | object | Current spec of the deployment being joined; required for join previews. |
+| `--intent` | object | **Required.** Closed wizard intent (techstack.wizard-intent/v1). The backend projects it onto the pinned StackKits kit seed; owner identity never travels here. |
+| `--smart-home-context` | object | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api wizard remote test-ssh
+
+Test an SSH connection to a machine before connecting it.
+
+Opens one SSH connection to the given host with a credential held in the Wallet and reports whether it succeeded; nothing is stored. The credential is a Wallet node access item (`ssh_wallet_item_id`, bound to the host) or, on deployments that read the built-in wallet, the label of a stored SSH key. This contract accepts no password or private key. A failed connection answers 200 with `success: false` and the error. Requires the `native_v2_wizard` feature for the caller.
+
+```bash
+techstack api wizard remote test-ssh [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/wizard/remote/test-ssh` |
+| Changes state | Yes |
+| MCP tool | `test_remote_ssh` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--auth-method` | string | One of `ssh-key`, `password`. Default `"ssh-key"`. |
+| `--host` | string | **Required.** |
+| `--port` | integer | Default `22`. |
+| `--ssh-key-label` | string | Label of a stored SSH key; only on deployments that read the built-in wallet. |
+| `--ssh-wallet-item-id` | string | Wallet node access item holding the SSH key or password. |
+| `--user` | string | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api wizard runs create
+
+Run the creation wizard to found, join or extend a StackKit deployment.
+
+Persists one wizard run for the authenticated owner. A found run creates the deployment and its first server, a join run adds a Node and an extend run adds use cases; the first run in a Homelab founds it and later first-run requests are coerced to expansions. The kombify-cloud transport orders a billed managed server, the hypervisor transport creates a guest on the owner's hypervisor and connect-remote enrolls over SSH. Join, extend, managed and hypervisor runs require `X-Idempotency-Key`; a replay with the same key and request returns the original outcome. Requires the `native_v2_wizard` feature for the caller.
+
+```bash
+techstack api wizard runs create [flags]
+```
+
+<Warning>Requires confirmation: This operation starts a wizard run that creates or extends the StackKit deployment and, on the kombify-cloud transport, orders a billed managed server. Pass `--yes` or answer the prompt; a non-interactive run without `--yes` stops before any request with exit code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/wizard/runs` |
+| Changes state | Yes |
+| MCP tool | `create_wizard_run` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--x-idempotency-key` | string | **Required.** Stable attempt key, at most 256 characters. The handler accepts a missing key only for found runs on the install-command or connect-remote transport. |
+| `--intent` | object | **Required.** Closed wizard intent (techstack.wizard-intent/v1). The backend projects it onto the pinned StackKits kit seed; owner identity never travels here. |
+| `--managed` | object | Managed provider selection for the kombify-cloud transport. |
+| `--owner` | object | Owner bootstrap options for a first run; ignored on expansion runs. |
+| `--remote` | object | SSH target for the connect-remote transport. The credential is a Wallet node access item; this contract accepts no plaintext password. |
+| `--services` | string\[\] | — |
+| `--substrate` | object | Guest placement on the owner's connected hypervisor; required for, and only valid with, the hypervisor transport. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api wizard runs dismiss
+
+Hide one wizard run's dashboard notice.
+
+Hides the dashboard notice of one of the authenticated owner's wizard runs on every device. The run's job is not touched; cancelling is a separate operation. An unknown or foreign run answers 404.
+
+```bash
+techstack api wizard runs dismiss <run-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/wizard/runs/{runId}/dismiss` |
+| Changes state | Yes |
+| MCP tool | `dismiss_wizard_run` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<run-id>` | string | **Required.** Wizard run id, as returned by the wizard run. |

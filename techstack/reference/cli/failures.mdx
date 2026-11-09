@@ -1,0 +1,92 @@
+---
+title: "techstack api failures"
+description: "Generated reference for the techstack api failures commands"
+sidebarTitle: "failures"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.46.13"
+content_hash: "sha256:635e8b6fdc6436ba6cd34c0a00bf8d6909bd1a8e4dc117ed3fe5350d136c7a00"
+source_hash: "16276f767b0825d51873e5a4b2fffc5bdc043c77"
+---
+<Note>Generated from the Techstack v0.46.13 release (source `16276f767b08`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api failures outcome record
+
+Record the outcome of an applied failure resolution.
+
+Attributes a finished procedure job of the caller tenant to the
+failure resolution it applied and the failure signature it was
+applied to. The outcome is the job's terminal state (completed is
+succeeded, failed is failed), never a value the caller sends; a job
+that is still running or was canceled is refused. The context is the
+one of the tenant's own latest occurrence of that signature. The
+record stays in the tenant; repeating the call for the same
+resolution and job returns the stored record.
+
+```bash
+techstack api failures outcome record [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/failures/outcomes` |
+| Changes state | Yes |
+| MCP tool | `record_failure_outcome` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--job-id` | string | **Required.** The tenant's job that ran the procedure. |
+| `--procedure` | string | **Required.** Product procedure reference of the applied fix step. |
+| `--resolution-id` | string | **Required.** Id of the failure resolution that was applied (find_similar_failures). |
+| `--signature` | string | **Required.** Failure signature the resolution was applied to; the tenant must have an occurrence of it. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api failures outcomes
+
+List the tenant's failure resolution outcomes.
+
+Returns the caller tenant's own recorded resolution outcomes, newest
+first, and the succeeded and failed counts per resolution and
+signature. Another tenant's outcomes are never visible.
+
+```bash
+techstack api failures outcomes [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/failures/outcomes` |
+| Changes state | No |
+| MCP tool | `list_failure_outcomes` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--resolution-id` | string | — |
+| `--limit` | integer | Default `50`. |
+
+## techstack api failures signatures
+
+List the tenant's failure signatures.
+
+Returns the caller tenant's own failed operations normalized into
+failure signatures, most recently seen first. A signature is the
+SHA-256 over the normalizer version, component, phase, error code and
+a template in which every variable token (timestamps, IDs, addresses,
+host names, paths, user names, quoted values, numbers) is replaced.
+No raw error text is stored or returned, and another tenant's
+occurrences are never visible.
+
+```bash
+techstack api failures signatures [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/failures/signatures` |
+| Changes state | No |
+| MCP tool | `list_failure_signatures` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--limit` | integer | Default `50`. |
+| `--window-days` | integer | Length of the growth window; recent_occurrences counts the last window, previous_occurrences the one before it. Default `7`. |
