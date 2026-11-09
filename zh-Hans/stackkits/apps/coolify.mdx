@@ -13,14 +13,14 @@ Coolify 是用于在你自己的服务器上运行应用的控制面板。它可
 
 ## 哪些 kit 和使用场景包含它
 
-它在每个 kit 中都是可选的，绝不是默认工作区的一部分。在使用场景目录中，它是 Marketplace 使用场景的主要应用，那里把它描述为你在 homelab 上运行的应用的专属应用商店。Marketplace 计划作为基于 Coolify 的可选使用场景，而 Coolify 是该使用场景的一个应用，而不是原生运行时目标。作为工作负载适配器，它在兼容性表中被列为适用于 `files`、`photos`、`media`、`smart-home` 和 `vault`。
+它在每个 kit 中都是可选的，绝不是默认工作区的一部分。在使用场景目录中，它是 Marketplace 使用场景的主要应用，那里把它描述为你在 homelab 上运行的应用的专属应用商店。v0.54.8 目录将 Marketplace 声明为可选使用场景，Coolify 是默认应用；生命周期验证是独立的。作为工作负载适配器，它在兼容性表中被列为适用于 `files`、`photos`、`media`、`smart-home` 和 `vault`。
 
 | 角色 | 已发布目录中的行为 |
 | --- | --- |
 | 选择 | 可选的显式集成；独立 Compose 不需要应用平台 |
-| 工作负载适配器 | 支持 `files`、`photos` 和 `vault` |
-| 路由和 TLS 证据 | 支持 |
-| 工作负载备份与恢复 | Coolify 适配器不提供 |
+| 工作负载适配器 | v0.54.8 声明了 `files`、`photos` 和 `vault`；这些 Coolify 路径的生命周期运行未显示为已测试 |
+| 路由和 TLS | v0.54.8 已声明；这不是生命周期证据 |
+| 工作负载备份与恢复 | 已为 `files`、`photos` 和 `vault` 声明，未为 `media` 或 `smart-home` 声明 |
 
 ## 如何打开
 
@@ -43,7 +43,7 @@ Coolify 是用于在你自己的服务器上运行应用的控制面板。它可
 
 ## 备份了什么
 
-Coolify 适配器不提供工作负载备份与恢复。独立 Compose 适配器则对声明了该能力的工作负载提供。请参阅[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)，并在你把无法重建的数据交给任何工作负载之前，先演练一次恢复。
+v0.54.8 兼容性矩阵声明 Coolify 适配器为 files、photos 和 vault 提供备份与恢复，但未为 media 或 smart-home 声明。这些声明不是经过验证的生命周期运行。请参阅[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)，并在你把无法重建的数据交给任何工作负载之前，先演练一次恢复。
 
 ## 验证
 
@@ -55,6 +55,6 @@ Coolify 适配器不提供工作负载备份与恢复。独立 Compose 适配器
 
 - 地址打不开：将其与部署输出进行比较，确认该名称可以从你的设备解析，并参阅[故障排查](/zh-Hans/guides/stackkits/troubleshooting)。
 - 同一个应用出现两次，或路由冲突：同一个工作负载有两条交付路径。保留一条，修改 StackSpec 并重新生成；不要手动添加路由或标签。
-- 某个工作负载缺少备份：在此适配器上这是预期的。如果你需要该工作负载的 StackKits 备份，请使用独立 Compose 路径。
+- 工作负载缺少备份：请在兼容性矩阵中检查适配器、版本和工作负载，并在依赖之前验证备份与恢复路径。
 
 关于测试版备选项，请参阅 [Komodo](/zh-Hans/stackkits/apps/komodo)。关于完整的适配器矩阵，请参阅[应用交付](/zh-Hans/guides/stackkits/application-delivery)。
