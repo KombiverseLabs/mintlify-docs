@@ -1,0 +1,74 @@
+---
+title: "Home Assistant on kombify"
+description: "Two ways to run Home Assistant with kombify: as an appliance guest on Proxmox VE or as a container from the StackKits catalog"
+sidebarTitle: "Home Assistant"
+icon: "house-signal"
+---
+
+kombify offers two ways to run Home Assistant. Both belong to the Smart Home
+use case. The [Smart Home guide](/guides/stackkits/use-cases/smart-home)
+describes setup and daily use.
+
+<Warning>
+Both paths are in development. Single sign-on is implemented, and a real Home
+Assistant start-up with browser and app sign-in has not been completed. Treat
+the details below as preview scope.
+</Warning>
+
+## Option 1: Home Assistant OS as an appliance guest
+
+Home Assistant OS runs in its own virtual machine on a Proxmox VE node you
+already own. Techstack creates the VM, and StackKits is never installed inside
+Home Assistant OS. A mixed homelab can have an Ubuntu guest for the core
+services and a separate Home Assistant OS guest.
+
+| Item | Value |
+| --- | --- |
+| Pinned Home Assistant OS version | 18.2 (official KVM image, checksum-verified) |
+| Architecture | amd64 |
+| Minimum size | 2 CPU cores, 4 GiB memory, 32 GiB disk |
+| Storage on the node | Active, allows images, imports and container templates |
+
+The wizard offers this guest when you select Smart Home and choose Home
+Assistant OS, and the instance is new. Updating the pinned version in a
+release never changes a guest that already exists.
+
+Read [Run kombify on Proxmox VE](/techstack/proxmox) first. It covers the
+connection, authorization and what is not verified yet.
+
+## Option 2: Home Assistant as a container
+
+The StackKits catalog has an optional `home-assistant` module. It runs Home
+Assistant Container, without Supervisor or apps, next to the other services of
+your kit. The catalog pins Home Assistant 2026.9.4 and the `auth_oidc`
+extension 1.2.1 for sign-in. Apply installs no extension from the network.
+
+This path runs on a host you operate, with or without Techstack. A USB radio
+for Zigbee or Z-Wave can be passed through to the workload.
+
+## What works and what is pending
+
+- Implemented: sign-in through Pocket ID, restricted to the owner, admin and
+  household groups. Local Home Assistant login stays available. The owner
+  account is bound to its Pocket ID identity, and no account is created
+  silently.
+- Implemented: adoption of an existing supported Home Assistant container,
+  without recreating it or changing its accounts. An existing instance is
+  registered as observed first.
+- Not yet completed: a real Home Assistant start-up with browser and native app
+  sign-in, trust of a private certificate authority, and restore
+  qualification.
+- Not yet completed: a full live run of the appliance guest on a current release.
+
+Restoring a backup does not re-pair physical devices. Check device bindings
+before you resume physical actions. See
+[Back up and restore](/guides/stackkits/back-up-and-restore).
+
+## Choosing between them
+
+Home Assistant OS gives you the complete Home Assistant system with its own
+update and app model. The container is lighter and shares the host with the
+rest of your homelab. Both are alternatives. You can choose either in the
+wizard or in your StackSpec.
+
+Last reviewed: 2026-11-10

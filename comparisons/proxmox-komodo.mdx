@@ -1,0 +1,74 @@
+---
+title: "kombify and Proxmox VE with Komodo, Dockge or Portainer"
+description: "How kombify relates to a hypervisor and to container managers, and how they can be used together"
+sidebarTitle: "Proxmox with Komodo, Dockge, Portainer"
+icon: "server"
+---
+
+This page covers a common setup. [Proxmox VE](https://www.proxmox.com) runs
+virtual machines. A container manager such as [Komodo](https://komo.do),
+[Dockge](https://github.com/louislam/dockge) or
+[Portainer](https://www.portainer.io) runs inside a VM and manages Docker
+containers and Compose projects.
+
+## What these tools do well
+
+- **Proxmox VE** is an open-source virtualization platform. It runs full
+  virtual machines and containers, with storage, networking and backup
+  features for them. If you need a hypervisor, it is a standard choice.
+- **Dockge** is a manager for Compose stacks with a simple web editor.
+- **Portainer** gives a web interface for Docker environments and teams.
+- **Komodo** builds and deploys containers, Compose stacks and Swarm services
+  across servers, with an API and a CLI.
+
+These tools give you control and flexibility. You decide how every part fits
+together.
+
+## What kombify adds
+
+kombify defines identity, access policy, routing, backup and updates for the
+whole homelab and applies them from one definition. It does not replace a
+hypervisor or a container manager.
+
+- On Proxmox, kombify uses your installation as a substrate. Techstack creates
+  a guest VM, and the StackKit runs inside the guest. See
+  [Run kombify on Proxmox VE](/techstack/proxmox). This path is in
+  development and has no verified lifecycle run at the current release.
+- Komodo is an optional application platform in StackKits, selected
+  explicitly. Its adapter is beta, and full lifecycle acceptance is pending. See
+  [Komodo](/stackkits/apps/komodo).
+- Portainer is not part of the kombify catalog, and Dockge is experimental
+  only. You can run either next to a kombify host. They would manage
+  containers that kombify does not own.
+
+## Limits of kombify today
+
+- kombify is before 1.0 and releases often.
+- Compatibility is still being verified. See
+  [OS compatibility](/stackkits/reference/os-compatibility) for the current rows.
+- It does not create or manage hypervisor storage, disks or RAID.
+- Bringing an existing Compose project under the homelab's sign-in, routing
+  and backup is not implemented, so such a project stays outside kombify's
+  definition.
+
+## What kombify does today
+
+- Passkey sign-in through Pocket ID, no default passwords.
+- An explicit access policy per service.
+- Restore into an isolated staging copy.
+- Updates that take a snapshot first.
+- Plan, apply and verify from one definition.
+- A local MCP server on every install.
+
+## Use them together
+
+A reasonable setup is Proxmox VE on the hardware and a kombify-defined guest
+VM for the services you want defined and repeatable. Keep other VMs and
+containers on Proxmox with the tool you prefer. If you want a manager with a
+web interface for Docker, run Portainer or Komodo as you do today. kombify does
+not require you to give them up.
+
+Choose a Proxmox-only setup with a container manager if you want full manual
+control and are comfortable assembling sign-in, backup and updates yourself.
+
+Last reviewed: 2026-11-10

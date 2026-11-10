@@ -1,0 +1,90 @@
+---
+title: "Run kombify on Proxmox VE"
+description: "Use an existing Proxmox VE installation as the place where Techstack creates guest VMs for your homelab"
+sidebarTitle: "Proxmox VE"
+icon: "server"
+---
+
+<Warning>
+Proxmox VE support is in development. The
+[OS compatibility](/stackkits/reference/os-compatibility) page points to the
+hypervisor rollouts and their evidence per release. At the current release the
+Proxmox rollout has no verified lifecycle run, so treat this path as preview
+scope.
+</Warning>
+
+Proxmox VE is a hypervisor you already own. kombify does not rent, bill or
+manage it. Techstack uses it as a place to create guest virtual machines, and
+the StackKit runs inside a guest.
+
+## How it fits together
+
+- Techstack creates guests through the Proxmox API.
+- The StackKit runs inside the guest. It never runs on the Proxmox host.
+- [kombify Guard](/techstack/guard/overview) runs on the Proxmox node and
+  reaches your homelab through an outbound connection. No inbound access to the
+  node is needed.
+- A guest that Techstack created can be decommissioned again. Guests that
+  already existed on the node stay outside this deletion scope.
+
+## Supported guests
+
+| Guest | Status |
+| --- | --- |
+| Ubuntu 26.04 (default) and Ubuntu 24.04 cloud images | First delivery |
+| Home Assistant OS appliance guest | First delivery, see [Home Assistant](/techstack/home-assistant-os) |
+| LXC containers | Later, not available |
+| Installing Proxmox VE itself | Later, not available |
+| Other hypervisors | Later, not available |
+
+Ubuntu guests need at least 2 CPU cores, 2 GiB of memory and 32 GiB of disk.
+Techstack uses pinned, checksum-verified vendor images and never changes the
+image of a guest that already exists.
+
+## What you need
+
+- A Proxmox VE installation you can administer.
+- Storage on the node that is active and allows images, imports and snippets.
+- An active LAN bridge for the guest.
+- An API token for the node. It is stored on the node in a protected file, and
+  the Guard reads it locally. Techstack does not store your Proxmox credentials.
+
+## The steps in the wizard
+
+1. In the server step of the creation wizard, choose the **Proxmox
+   hypervisor** system. The standard Linux setup stays the default for every
+   other device.
+2. Generate the connection command and run it in the Proxmox host shell as an
+   administrator. The Guard starts on the node and reports to your homelab.
+3. Configure the Guard's local Proxmox connection with the API token, then
+   choose **Enable guest management** in the wizard and authorize the
+   connection.
+4. In the **Hypervisor** step, pick the connected Proxmox server, its storage
+   and its LAN bridge, and set CPU, memory and disk for the new server.
+5. Finish the wizard. Techstack prepares the guest, enrolls it and runs the
+   selected StackKit inside it. Progress resumes with the same operation if it
+   is interrupted.
+
+**Find Proxmox on my network** is an optional shortcut. It works only with a
+local Techstack client on the same network. Without one, you connect the node
+manually. A detected node still needs your authorization before Techstack can
+manage guests on it.
+
+If a selected use case needs a GPU, the wizard proposes a GPU the node
+reports and asks you to enter nothing. If the node reports none, the step
+tells you what is missing.
+
+## What is still open
+
+Proxmox support is implemented, and a full live run on a current release has
+not been completed. Check
+[OS compatibility](/stackkits/reference/os-compatibility) for the current
+status before you rely on it.
+
+## Next steps
+
+- [Techstack operating modes](/techstack/operating-modes)
+- [Node roles](/techstack/node-roles)
+- [Images](/stackkits/images)
+
+Last reviewed: 2026-11-10

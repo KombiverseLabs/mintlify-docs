@@ -1,0 +1,71 @@
+---
+title: "Let kombify AI operate your homelab"
+description: "What kombify AI can read and change on a connected server, how approval works and how to use your own AI agent instead"
+sidebarTitle: "AI operation"
+icon: "wand-magic-sparkles"
+---
+
+kombify AI can look after a connected server for you. AI operation is in
+preview, and the list of actions below can change.
+
+## What you need first
+
+- A server connected to your account. See
+  [Connect a server](/apps/cloud/connect-a-server).
+- A kombify account. How much AI you can use depends on your plan.
+
+## What kombify AI can read
+
+Reading changes nothing on your server. kombify AI can look at:
+
+- the status and health of your servers and the services on them;
+- the processes and containers that run on a server;
+- the state of your backup jobs and whether the newest backup is current;
+- the updates that are available for the system and for your services.
+
+With this it can tell you why a server looks offline, which service is using
+the processor or why a backup failed.
+
+## What kombify AI can change
+
+Each change is a typed action that your homelab runs itself. kombify AI cannot
+run a free-form command.
+
+| Action | What happens |
+| --- | --- |
+| Start, stop or restart a service | The service of your StackKit changes state. |
+| Update a service | Techstack keeps a restore point, verifies the target live and automatically returns to the previous release when that verification fails. |
+| Run or check a backup | A backup runs, or kombify AI reads whether the repository is ready and a verified snapshot exists. |
+| Verify the state | Your homelab is checked against its StackKit. |
+| Start, stop or restart a container or system service | Applies to ones that your StackKit does not manage. Containers and units that StackKits manages or protects are refused. |
+
+Anything not on this list is not something kombify AI can do on your server.
+
+## How approval works
+
+kombify AI acts with your own rights, never with more. Some actions need your
+approval first, and then one click is enough. Every action is checked before it
+runs, is logged and leaves a receipt. You can deny an action, and a denied
+action has no effect.
+
+## What it uses
+
+AI use draws on the monthly AI credits of your plan. When the credits are used
+up, the free models stay available.
+
+## Use your own AI agent instead
+
+You can connect an agent you already use, such as Claude Code, Codex or
+Cursor. It runs the local `stackkit` MCP server on the computer that holds your
+homelab workspace. By default it can read, and it can change something only
+after you turn on a write gate. See
+[Connect your own AI agent](/guides/stackkits/connect-your-ai-agent).
+
+## If something goes wrong
+
+- If kombify AI says it cannot reach a server, check the server in Monitoring.
+  A server that is offline or limited cannot take an action.
+- If an update returned to the previous release, the job result names the
+  outcome and the step that failed. Ask kombify AI to read it.
+- For anything else, write to [info@kombify.io](mailto:info@kombify.io). Never
+  send a password.

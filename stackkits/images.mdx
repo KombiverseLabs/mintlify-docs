@@ -1,0 +1,69 @@
+---
+title: "Images"
+description: "Golden images: a server that starts already prepared and enrolls on first boot, and what is available today"
+sidebarTitle: "Images"
+icon: "compact-disc"
+---
+
+A golden image is a machine image that already contains the StackKits release,
+its tools and the container images of the core services. A server started from
+it does not download them first. Each clone enrolls on its own at first boot
+and gets its own identity.
+
+<Note>
+Golden images are qualified but not published as a download yet. There is no
+bootable installer image for bare metal. Planned parts are marked as planned
+below.
+</Note>
+
+## What the `stackkit image` commands do
+
+Three commands prepare the neutral part of an image. The flags are in the
+[`stackkit image` reference](/stackkits/reference/cli/image).
+
+- **`stackkit image plan`** prints the profile: which core container images the
+  cache contains. The profiles are `cloud-core-compose` (default),
+  `basement-core-compose` and `basement-core-lite-compose`.
+- **`stackkit image prepare`** stores the exact running release and pulls the
+  core images. It creates no owner, starts no services and creates no volumes.
+- **`stackkit image verify`** checks the release bytes, the empty target
+  directory, the host and the image cache again.
+
+Run them on a dedicated Ubuntu host with a local Docker daemon, no containers
+and no unrelated images. StackKits does not delete state to make an image
+neutral, and it refuses a host that holds an owner or service data.
+
+Ubuntu 26.04 is the default target. Ubuntu 24.04 is also targeted.
+
+## What happens on first boot
+
+The manifest `prepare` writes is cache metadata. It grants no identity and no
+permission to change anything. On first boot each clone re-checks the release,
+the installed files, the host and the cache, then runs the usual `init`,
+`generate`, `apply` and `verify` steps. Network access is still needed for
+first-boot service integrations and optional workloads.
+
+## Who does what
+
+StackKits owns the neutral cache. Techstack owns building the machine image,
+removing machine identity and enrolling each clone with
+[kombify Guard](/techstack/guard/overview).
+
+## Current state
+
+- Images for Ubuntu 26.04 and Ubuntu 24.04 were qualified on 2026-10-02
+  against StackKits v0.50.3. The checks covered two clone boots with distinct
+  machine and SSH identities and two independent enrollments.
+- The qualification covers the `cloud-core-compose` profile on Linux amd64.
+  Other profiles and architectures need their own evidence.
+- Images are not published as a download yet.
+- Planned: a bootable installer image for bare metal. It does not exist yet.
+- Managed servers are currently set up with cloud-init and the install
+  script, not from the image. See [Managed servers](/techstack/managed-servers).
+
+To install on your own hardware today, use a prepared Linux host and the
+installer from [Install in 10 minutes](/stackkits/install-in-10-minutes).
+Check [OS compatibility](/stackkits/reference/os-compatibility) for the current
+status of each system.
+
+Last reviewed: 2026-11-10
