@@ -4,7 +4,7 @@
 //
 // Usage: node scripts/render-stackkits-cli-reference.mjs --from <cli-reference.json> --source-sha <sha> --write
 import { createHash } from 'node:crypto'
-import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -12,7 +12,41 @@ import { fileURLToPath } from 'node:url'
 export const CLI_GENERATOR = 'stackkit docs emit-cli-reference'
 export const CLI_PAGE_DIR = 'stackkits/reference/cli'
 const SCHEMA = 'stackkits-cli-reference/v1'
-const CLI_INSTALL = 'curl -sSL https://install.stackkit.cc | STACKKIT_CLI_ONLY=1 sh'
+
+// The published install path comes from the StackKits release (stackkit docs
+// emit-cli-reference, source internal/publicpath/public-path.json); no page
+// types its own copy of an install or init command.
+export const PUBLIC_PATH_PAGES = ['', 'ar', 'de', 'es', 'hi', 'zh-Hans'].flatMap((language) => ['quickstart', 'install-in-10-minutes'].map((page) => (language ? language + '/' : '') + 'stackkits/' + page + '.mdx'))
+
+export function validatePublicPath(publicPath) {
+  assert(publicPath && typeof publicPath === 'object', 'CLI reference needs publicPath; release a StackKits version that emits it')
+  for (const key of ['installCommand', 'cliOnlyInstallCommand', 'connectCommand', 'accessEvidence']) assert(typeof publicPath[key] === 'string' && publicPath[key].length > 0, `publicPath.${key} is missing`)
+  for (const key of ['installerResult', 'quickStart']) assert(Array.isArray(publicPath[key]) && publicPath[key].length > 0 && publicPath[key].every((line) => typeof line === 'string' && line.length > 0), `publicPath.${key} is missing`)
+  return publicPath
+}
+
+// Blocks a page may carry between {/* public-path:begin NAME */} markers: the install command alone,
+// or the install command followed by the commands that show its result.
+const PUBLIC_PATH_BLOCKS = {
+  'install-command': (publicPath) => [publicPath.installCommand],
+  connect: (publicPath) => [publicPath.connectCommand],
+  install: (publicPath) => [publicPath.installCommand, ...publicPath.installerResult],
+}
+
+// Rewrites every marked block of a page; a page without markers is returned unchanged.
+export function applyPublicPath(page, publicPath) {
+  let result = page
+  for (const [name, lines] of Object.entries(PUBLIC_PATH_BLOCKS)) {
+    const begin = `{/* public-path:begin ${name} */}`
+    const end = `{/* public-path:end ${name} */}`
+    const from = result.indexOf(begin)
+    const to = result.indexOf(end)
+    if (from < 0 && to < 0) continue
+    assert(from >= 0 && to > from, `a page has an unbalanced public-path ${name} marker`)
+    result = `${result.slice(0, from + begin.length)}\n${['\`\`\`bash', ...lines(publicPath), '\`\`\`'].join('\n')}\n${result.slice(to)}`
+  }
+  return result
+}
 
 function assert(condition, message) {
   if (!condition) throw new Error(message)
@@ -160,6 +194,7 @@ function frontmatter({ title, description: summary, sidebarTitle, icon, contentH
 
 export function renderCliReference(reference, { sourceSha, contentHash }) {
   validateCliReference(reference)
+  const publicPath = validatePublicPath(reference.publicPath)
   assert(/^[0-9a-f]{40}$/.test(sourceSha), 'source SHA must be a full 40-character commit SHA')
   const byPath = new Map(reference.commands.map((command) => [command.path, command]))
   const current = (command) => !command.legacy && !command.deprecated
@@ -169,7 +204,7 @@ export function renderCliReference(reference, { sourceSha, contentHash }) {
 
   let overview = frontmatter({ title: 'CLI reference', description: 'Every stackkit command with its flags and examples', sidebarTitle: 'Overview', icon: 'square-terminal', contentHash, sourceSha })
   overview += `${text(reference.short)}. These pages list every \`stackkit\` command with its flags and examples. They are generated from the StackKits command definitions; if your installed version is older, \`stackkit <command> --help\` is authoritative for it.\n\n`
-  overview += '## Install the CLI\n\n```bash\n' + CLI_INSTALL + '\n```\n\n'
+  overview += '## Install the CLI\n\n```bash\n' + publicPath.cliOnlyInstallCommand + '\n```\n\n'
   overview += `With \`STACKKIT_CLI_ONLY=1\` the installer puts \`stackkit\`, \`stackkit-server\`, \`stackkit-mcp\`, packaged OpenTofu and the public kit catalog into \`~/.stackkits\` without installing a StackKit. Without it, the installer detects the host and continues into Basement Kit or Cloud Kit.\n\n`
   overview += '## Global flags\n\nThese flags work with every command.\n\n'
   overview += '| Flag | Type | Default | Description |\n| --- | --- | --- | --- |\n' + flagRows(reference.globalFlags).join('\n') + '\n\n'
@@ -246,6 +281,13 @@ export function writeCliReference({ repoRoot, reference, referenceBytes, sourceS
   for (const [relative, content] of pages) {
     mkdirSync(path.dirname(path.join(repoRoot, relative)), { recursive: true })
     writeFileSync(path.join(repoRoot, relative), content)
+  }
+  for (const relative of PUBLIC_PATH_PAGES) {
+    const file = path.join(repoRoot, relative)
+    if (!existsSync(file)) continue
+    const page = readFileSync(file, 'utf8')
+    const updated = applyPublicPath(page, reference.publicPath)
+    if (updated !== page) writeFileSync(file, updated)
   }
   const docsPath = path.join(repoRoot, 'docs.json')
   const docs = applyNavigation(JSON.parse(readFileSync(docsPath, 'utf8')), navigation)
