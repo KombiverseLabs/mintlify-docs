@@ -43,6 +43,15 @@ $executableExamplePages = [System.Collections.Generic.HashSet[string]]::new(
 ) | ForEach-Object { $executableExamplePages.Add($_) | Out-Null }
 
 $allowedInlineCommands = @{
+    "apps/cloud/household.mdx" = @(
+        "stackkit user"
+    )
+    "stackkits/images.mdx" = @(
+        "stackkit image",
+        "stackkit image plan",
+        "stackkit image prepare",
+        "stackkit image verify"
+    )
     "guides/stackkits/cli-walkthrough.mdx" = @(
         "stackkit init --help",
         "stackkit setup --help"

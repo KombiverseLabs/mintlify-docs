@@ -1,0 +1,85 @@
+---
+title: "Connect a server to kombify Cloud"
+description: "Bind your own server to your kombify account, see how it runs and keep it working if the connection ends"
+sidebarTitle: "Connect a server"
+icon: "plug"
+---
+
+<Note>
+Connected operation is in preview, and the hosted Techstack that carries it can
+have limited access. See [Techstack availability](/techstack/availability).
+</Note>
+
+Connecting binds a server you own to your kombify account. This is the
+Connected mode: the server stays yours, and kombify Cloud shows how it runs.
+
+## In plain words
+
+You sign in, open Techstack from the dashboard, add a server you already have
+and run one command on it. When the server reports in, it appears in your
+dashboard. You do not need a paid plan for this. An account without a plan can
+sign up, run the Techstack setup and bind a server.
+
+## What you need first
+
+- A kombify account. See [Create an account](/apps/cloud/get-started).
+- A Linux server with systemd, ideally Ubuntu, and administrator rights on it.
+- A way to open a terminal on that server, directly or over SSH.
+
+## Steps
+
+<Steps>
+  <Step title="Open Techstack">
+    Sign in at `kombify.io`, then open **Techstack** under **Tools** in the
+    left rail of the dashboard.
+  </Step>
+  <Step title="Add a Node">
+    Start the **Add Node** wizard and choose **I already have a device**. Pick
+    **Give me a 1-liner**, or **Connect my device** if you prefer to give
+    Techstack an SSH key. See [Add a Node](/techstack/add-node).
+  </Step>
+  <Step title="Run the pairing command">
+    Copy the command from the progress page and paste it into the terminal of
+    your server. It works once and expires after 15 minutes. See
+    [Pairing command](/techstack/pairing-command).
+  </Step>
+  <Step title="Wait for the connection">
+    The server shows **Not connected yet** until its first report arrives.
+    Then it shows as connected, and Techstack continues with the setup of your
+    StackKit.
+  </Step>
+</Steps>
+
+## What a connected server gives you in Cloud
+
+- **Status.** Monitoring lists your servers as online, limited or offline,
+  with the apps that answer and the disk that is fullest.
+- **Backups.** The Backups card shows the last run and whether a copy outside
+  your home is set up.
+- **Addresses.** It lists what is reachable from the internet and links to
+  [your own domain](/apps/cloud/domains).
+- **Feed.** Notices about your homelab reach your
+  [Feed](/apps/cloud/notifications).
+- **Help from kombify AI.** A connected account can ask kombify AI to read and
+  diagnose the server. See [Let kombify AI operate your homelab](/apps/cloud/ai-operation).
+
+Cloud keeps no logs. To read the log of a service, open it in Techstack.
+
+## If the connection ends
+
+Your homelab keeps working on its own. When Techstack cannot be reached,
+Monitoring says that the status is unknown, which does not mean your apps are
+down. The sign-in on the homelab itself is separate from your kombify account,
+so removing the connection never removes your local access.
+
+To end the connection yourself, detach the server. Its containers and data are
+not touched. See [Revoke, detach and uninstall Guard](/techstack/guard/revoke-and-uninstall).
+
+## If something goes wrong
+
+- The server stays on **Not connected yet**. Check that the server can open the
+  Techstack address shown on the progress page, and generate a new command if
+  15 minutes have passed.
+- The pairing steps are described in [Pair a server with Guard](/techstack/guard/pairing).
+- For anything else, write to [info@kombify.io](mailto:info@kombify.io). Never
+  send a password or a pairing command.
