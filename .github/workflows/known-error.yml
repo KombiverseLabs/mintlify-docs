@@ -7,7 +7,7 @@ name: Record known error
 # (scripts/ci-failure-backlog.mjs) files the Beads task for the same red run.
 on:
   workflow_run:
-    workflows: ["Delivery v2", "Public Safety Gate"]
+    workflows: ["Delivery v2"]
     types: [completed]
     branches: [main]
 
@@ -40,7 +40,7 @@ jobs:
           const gh = (...args) => execFileSync('gh', args, { encoding: 'utf8', maxBuffer: 1e8, stdio: ['ignore', 'pipe', 'pipe'] });
           const note = line => fs.appendFileSync(summary, `${line}\n`);
           
-          // A red dispatched workflow is a known error (D-2026-11-01-08): recorded once per fingerprint, never a block, never a retry.
+          // A red dispatched workflow is a known error (D-2026-11-01-08): recorded once per fingerprint, never a block; the next lane retries it once.
           let job = 'run', step = CONCLUSION;
           try {
             const failed = JSON.parse(gh('api', `repos/${repo}/actions/runs/${RUN_ID}/jobs`, '--jq', '[.jobs[] | select(.conclusion == "failure")][0] // {}') || '{}');
@@ -48,7 +48,7 @@ jobs:
             step = (failed.steps || []).find(item => item.conclusion === 'failure')?.name || step;
           } catch { /* the run page still names the failure */ }
           const fingerprint = crypto.createHash('sha1').update(`${WORKFLOW}|${job}|${step}`).digest('hex').slice(0, 12);
-          const body = `known-error-fingerprint: ${fingerprint}\n\n- First seen at ${HEAD_SHA}\n- Workflow: ${WORKFLOW}\n- Job: ${job}\n- Step: ${step}\n- Conclusion: ${CONCLUSION}\n- Run: ${RUN_URL}\n\nKnown error of the batched integration lane (D-2026-11-01-08). It blocks no push, merge or release; fix it in a new change. The workspace CI backlog (scripts/ci-failure-backlog.mjs, every two hours) files the Beads task for this red run (label ci-failure:<hash>) and closes it once the workflow is green again.`;
+          const body = `known-error-fingerprint: ${fingerprint}\n\n- First seen at ${HEAD_SHA}\n- Workflow: ${WORKFLOW}\n- Job: ${job}\n- Step: ${step}\n- Conclusion: ${CONCLUSION}\n- Run: ${RUN_URL}\n\nKnown error of the batched integration lane (D-2026-11-01-08). It blocks no push, merge or release; the next integration lane dispatches the failed workflow once more at its head, and a repeated failure is fixed in a new change. The workspace CI backlog (scripts/ci-failure-backlog.mjs, every two hours) files the Beads task for this red run (label ci-failure:<hash>) and closes it once the workflow is green again.`;
           try { gh('label', 'create', 'known-error', '--repo', repo, '--color', 'B60205', '--description', 'Recorded integration-lane failure; blocks nothing'); } catch { /* exists */ }
           const open = gh('issue', 'list', '--repo', repo, '--label', 'known-error', '--state', 'open', '--search', `${fingerprint} in:body`, '--json', 'number', '--jq', '.[0].number // empty').trim();
           if (open) {

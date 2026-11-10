@@ -2,7 +2,7 @@
 param(
     [string]$Repository = "KombiverseLabs/mintlify-docs",
     [string]$CommitSha = $env:SOURCE_SHA,
-    [string]$ExpectedRef = "main",
+    [string]$ExpectedRef = "published",
     [uri]$ExpectedUrl = "https://docs.kombify.io",
     [ValidateRange(1, 300)][int]$TimeoutSeconds = 240
 )
@@ -76,7 +76,7 @@ do {
         exit 0
     }
 
-    Start-Sleep -Seconds 5
+    Start-Sleep -Seconds 60
 } while ((Get-Date) -lt $deadline)
 
 throw "No successful exact Mintlify deployment reached $expectedOrigin within $TimeoutSeconds seconds; last=$lastState"

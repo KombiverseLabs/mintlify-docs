@@ -42,9 +42,40 @@ Truth sources, never the retired legacy documentation repository:
 - A StackKits page needs the current public release as evidence; presence in the
   repository, draft metadata or preview status is not evidence.
 - SpeechKit instructions are pinned to its exact public release and assets.
-- Pull requests run the trusted public safety workflow without private
-  credentials or a shared writable tool cache; the validator and the exact-head
-  check must succeed.
+- Source PRs use the existing session publisher; batch admission requires the
+  adopted publication boundary. The publisher
+  checks its exact constructed commit before exposing it in this public repo.
+- In the existing Delivery workflow, the immutable workspace authority checks
+  the entire candidate as Git data, then advances the protected `published`
+  branch. Mintlify builds that branch natively; merging `main` does not publish.
+  No candidate script, mise task or MDX component receives publication authority.
+- Validator code comes from the full `KOMBIFY_DELIVERY_STANDARDS_REF` pin; policy
+  data comes from reviewed source. Pre-push uses the current merged `main` policy,
+  so merge a scope change before pages that require it. Publication uses policy
+  from its exact merged source. Delivery uploads an authenticated receipt binding
+  source, tree, policy, validator, authority and exact published SHA. A local batch
+  scan cannot authorize a different final merge tree.
+- Gateway, StackKits, SpeechKit, Techstack and mise generators have separate fresh
+  runners from their credentialed publishers. Only bounded patch/manifest data
+  crosses jobs; the trusted publisher rejects out-of-scope or executable entries
+  and validates the complete resulting candidate before writing a source branch.
+- Local `scripts/assert-public-safety.ps1` and its helper are digest-checked
+  projections, refreshed with workspace `scripts/mintlify-public-safety-sync.mjs`.
+  The publication workflow executes the workspace originals.
+
+Adoption and removal of the old required workflow follow workspace
+[CI-CD-PLATFORM-STANDARD.md §4.0](https://github.com/KombiverseLabs/kombify-workspace/blob/main/CI-CD-PLATFORM-STANDARD.md#mintlify-publication-safety).
+The replacement is not active merely because these files merged. That sequence
+requires an exact-head reviewed provider evidence record covering automatic PR,
+fork PR, manual/dashboard and API previews, effective current consumer digests,
+and independently authenticated validated publication/initialization receipts.
+The initial null adoption/bootstrap retains the old live requirement. The
+governed workspace lane initializes a validated protected ref and quarantines
+old automation before qualified workflow retirement; only then can the exact
+reviewed consumer PR merge. Delivery is enabled first, and the remaining
+automation resumes only after final normal adoption; no provider controls or hosted
+acceptance are claimed by this source change.
+The M13 owner retains hosted acceptance.
 
 ## Localization
 
@@ -111,9 +142,9 @@ mise run local:e2e
 | --- | --- |
 | `mise run dev` | Pinned local Mintlify preview. |
 | `mise run check` | Locale checks, positive scope, navigation, content and local links. |
-| `mise run local:e2e` | `mint validate` plus allowed and forbidden routes over real local HTTP; must pass before publication. |
+| `mise run local:e2e` | `mint validate` plus allowed and forbidden routes over real local HTTP for scoped acceptance. |
 | `mise run remote:public-safety` | Deployed route and projection matrix. |
-| `mise run postlive:wait-exact-live` | Wait for a successful `docs.kombify.io` deployment at exact `SOURCE_SHA`. |
+| `mise run postlive:wait-exact-live` | Wait for a successful native `published` deployment at exact `SOURCE_SHA`. |
 | `scripts/check-stackkits-release-truth.ps1` | Installer commands on the current public release, no stale lifecycle wording. |
 | `scripts/check-stackkits-external-links.ps1` | Optional registered StackKits destinations actually offered as publishable literals. |
 | `scripts/check-speechkit-release-truth.ps1` | Validate offered SpeechKit claims and mutable download links; check existing generated release blocks. |

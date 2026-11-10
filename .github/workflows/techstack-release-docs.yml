@@ -1,179 +1,199 @@
+# Generation and publication use separate fresh GitHub-hosted jobs. Only data crosses the boundary.
 name: Techstack Release Docs
-
-# Projects the public API contract of one published Techstack release into the
-# Techstack API reference and the `techstack api` CLI reference
-# (DOCUMENTATION-STANDARD.md §Current Publication Scope; API-FIRST-STANDARD.md
-# §9). Only a published, non-draft release is accepted; a release without both
-# api/surface artifacts leaves the committed reference unchanged.
-
-on:
+'on':
   repository_dispatch:
-    types: [techstack-docs-release]
+    types:
+    - techstack-docs-release
   schedule:
-    - cron: "29 6 * * 1"
+  - cron: 29 6 * * 1
   workflow_dispatch:
     inputs:
       tag:
-        description: "Published Techstack tag; empty reconciles the newest published release"
+        description: Published Techstack tag; empty reconciles the newest published release
         required: false
         type: string
-
 concurrency:
   group: techstack-release-docs
   cancel-in-progress: false
-
 permissions:
-  contents: write
-  pull-requests: write
-
+  contents: read
 jobs:
-  reconcile:
-    if: github.repository == 'KombiverseLabs/mintlify-docs'
-    runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'ubuntu-24.04' }}
+  generate:
+    name: Generate data without a publication identity
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     timeout-minutes: 6
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        fetch-depth: 0
+        token: ${{ github.token }}
+        persist-credentials: false
+        ref: ${{ github.sha }}
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      with:
+        node-version: 24.22.1
+    - name: Resolve the published release
+      id: release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        DISPATCH_TAG: ${{ github.event.client_payload.tag }}
+        INPUT_TAG: ${{ inputs.tag }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [ -z "${GH_TOKEN:-}" ] || ! gh api "repos/$SOURCE_REPO" --jq .full_name >/dev/null 2>&1; then
+          echo "::error::The workflow token cannot read $SOURCE_REPO. $AUTH_GUIDANCE"
+          exit 1
+        fi
+        tag="${DISPATCH_TAG:-${INPUT_TAG:-}}"
+        if [ -z "$tag" ]; then
+          # Techstack publishes Alpha builds as prereleases, so "latest" is the
+          # newest non-draft release rather than the releases/latest endpoint.
+          # The repository also publishes component releases (for example
+          # guard-v0.41.3); only the product's own vX.Y.Z tags count.
+          tag="$(gh api "repos/$SOURCE_REPO/releases?per_page=100" --jq '[.[] | select(.draft == false and (.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")))][0].tag_name')"
+        fi
+        if ! [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "::error::'$tag' is not a Techstack release tag."
+          exit 1
+        fi
+        # Drafts are not addressable by tag, so a draft or an unreleased tag
+        # fails here as well as on the explicit check below.
+        if ! release="$(gh api "repos/$SOURCE_REPO/releases/tags/$tag" 2>/dev/null)"; then
+          echo "::error::$tag is not a published Techstack release."
+          exit 1
+        fi
+        if [ "$(jq -r '.draft == false and .published_at != null' <<<"$release")" != true ]; then
+          echo "::error::$tag is not a published Techstack release."
+          exit 1
+        fi
+        source_sha="$(gh api "repos/$SOURCE_REPO/commits/$tag" --jq .sha)"
+        [[ "$source_sha" =~ ^[0-9a-f]{40}$ ]]
+        available=true
+        for artifact in api/surface/api-surface.json api/surface/openapi.public.yaml; do
+          gh api -H "Accept: application/vnd.github.object+json" "repos/$SOURCE_REPO/contents/$artifact?ref=$source_sha" --jq .sha >/dev/null 2>&1 || available=false
+        done
+        echo "tag=$tag" >> "$GITHUB_OUTPUT"
+        echo "source_sha=$source_sha" >> "$GITHUB_OUTPUT"
+        echo "available=$available" >> "$GITHUB_OUTPUT"
+        if [ "$available" != true ]; then
+          echo "## TechstackReferencePending" >> "$GITHUB_STEP_SUMMARY"
+          echo "$tag does not contain both api/surface/api-surface.json and api/surface/openapi.public.yaml; the committed reference stays unchanged." >> "$GITHUB_STEP_SUMMARY"
+        fi
+    - name: Download, validate and render
+      if: steps.release.outputs.available == 'true'
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ steps.release.outputs.tag }}
+        SOURCE_SHA: ${{ steps.release.outputs.source_sha }}
+        EXPECTED_SURFACE_DIGEST: ${{ github.event.client_payload.surface_digest }}
+        EXPECTED_OPENAPI_DIGEST: ${{ github.event.client_payload.openapi_digest }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        dir=.tmp/techstack-docs
+        mkdir -p "$dir"
+        for artifact in api-surface.json openapi.public.yaml; do
+          gh api -H "Accept: application/vnd.github.raw" \
+            "repos/$SOURCE_REPO/contents/api/surface/$artifact?ref=$SOURCE_SHA" > "$dir/$artifact"
+        done
+        if [ -n "${EXPECTED_SURFACE_DIGEST:-}" ]; then
+          [ "sha256:$(sha256sum "$dir/api-surface.json" | cut -d' ' -f1)" = "$EXPECTED_SURFACE_DIGEST" ] || { echo "::error::Public API surface digest does not match the dispatch."; exit 1; }
+        fi
+        if [ -n "${EXPECTED_OPENAPI_DIGEST:-}" ]; then
+          [ "sha256:$(sha256sum "$dir/openapi.public.yaml" | cut -d' ' -f1)" = "$EXPECTED_OPENAPI_DIGEST" ] || { echo "::error::Public OpenAPI digest does not match the dispatch."; exit 1; }
+        fi
+        # The renderer refuses artifacts that expose an internal operation.
+        args=(--product techstack --surface "$dir/api-surface.json" --openapi "$dir/openapi.public.yaml" --release "$TAG" --source-sha "$SOURCE_SHA")
+        node scripts/render-api-surface-reference.mjs "${args[@]}" --write
+        node scripts/render-api-surface-reference.mjs "${args[@]}" --check
+    - name: Export only the generated patch as untrusted data
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/generated"
+        GIT_INDEX_FILE="$RUNNER_TEMP/generated-index" git read-tree HEAD
+        GIT_INDEX_FILE="$RUNNER_TEMP/generated-index" git add -A -- techstack/reference docs.json
+        GIT_INDEX_FILE="$RUNNER_TEMP/generated-index" git diff --cached --no-ext-diff --no-textconv --binary HEAD -- techstack/reference docs.json > "$RUNNER_TEMP/generated/candidate.patch"
+        node - <<'JS'
+        const fs = require('node:fs'), crypto = require('node:crypto');
+        const patch = fs.readFileSync(process.env.RUNNER_TEMP + '/generated/candidate.patch');
+        fs.writeFileSync(process.env.RUNNER_TEMP + '/generated/manifest.json', JSON.stringify({
+         schema: 'kombify.mintlify-generated.v1', producer: 'techstack', source_sha: process.env.GITHUB_SHA,
+         run_id: process.env.GITHUB_RUN_ID, run_attempt: process.env.GITHUB_RUN_ATTEMPT,
+         patch_sha256: crypto.createHash('sha256').update(patch).digest('hex')
+        }) + '\n');
+        JS
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+      with:
+        name: mintlify-generated-techstack-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/generated/
+        if-no-files-found: error
+        retention-days: 1
     env:
       SOURCE_REPO: kombifyio/TechStack
-      AUTH_GUIDANCE: "Check GitHub access to the public Techstack mirror and the kombify-ci App credentials for this repository."
+      AUTH_GUIDANCE: Check GitHub access to the public Techstack mirror and the kombify-ci App credentials for this
+        repository.
+    if: github.repository == 'KombiverseLabs/mintlify-docs' && github.ref == 'refs/heads/main'
+  publish:
+    name: Validate data and publish on a fresh GitHub runner
+    needs: generate
+    if: needs.generate.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          token: ${{ github.token }}
-          persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24.22.1
-      # The public mirror release contains the exported API artifacts. Its tag
-      # resolves to the mirror commit, not the private StackKits source commit.
-      - name: Resolve the published release
-        id: release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          DISPATCH_TAG: ${{ github.event.client_payload.tag }}
-          INPUT_TAG: ${{ inputs.tag }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ -z "${GH_TOKEN:-}" ] || ! gh api "repos/$SOURCE_REPO" --jq .full_name >/dev/null 2>&1; then
-            echo "::error::The workflow token cannot read $SOURCE_REPO. $AUTH_GUIDANCE"
-            exit 1
-          fi
-          tag="${DISPATCH_TAG:-${INPUT_TAG:-}}"
-          if [ -z "$tag" ]; then
-            # Techstack publishes Alpha builds as prereleases, so "latest" is the
-            # newest non-draft release rather than the releases/latest endpoint.
-            # The repository also publishes component releases (for example
-            # guard-v0.41.3); only the product's own vX.Y.Z tags count.
-            tag="$(gh api "repos/$SOURCE_REPO/releases?per_page=100" --jq '[.[] | select(.draft == false and (.tag_name | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")))][0].tag_name')"
-          fi
-          if ! [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::error::'$tag' is not a Techstack release tag."
-            exit 1
-          fi
-          # Drafts are not addressable by tag, so a draft or an unreleased tag
-          # fails here as well as on the explicit check below.
-          if ! release="$(gh api "repos/$SOURCE_REPO/releases/tags/$tag" 2>/dev/null)"; then
-            echo "::error::$tag is not a published Techstack release."
-            exit 1
-          fi
-          if [ "$(jq -r '.draft == false and .published_at != null' <<<"$release")" != true ]; then
-            echo "::error::$tag is not a published Techstack release."
-            exit 1
-          fi
-          source_sha="$(gh api "repos/$SOURCE_REPO/commits/$tag" --jq .sha)"
-          [[ "$source_sha" =~ ^[0-9a-f]{40}$ ]]
-          available=true
-          for artifact in api/surface/api-surface.json api/surface/openapi.public.yaml; do
-            gh api -H "Accept: application/vnd.github.object+json" "repos/$SOURCE_REPO/contents/$artifact?ref=$source_sha" --jq .sha >/dev/null 2>&1 || available=false
-          done
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          echo "source_sha=$source_sha" >> "$GITHUB_OUTPUT"
-          echo "available=$available" >> "$GITHUB_OUTPUT"
-          if [ "$available" != true ]; then
-            echo "## TechstackReferencePending" >> "$GITHUB_STEP_SUMMARY"
-            echo "$tag does not contain both api/surface/api-surface.json and api/surface/openapi.public.yaml; the committed reference stays unchanged." >> "$GITHUB_STEP_SUMMARY"
-          fi
-      - name: Download, validate and render
-        if: steps.release.outputs.available == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ steps.release.outputs.tag }}
-          SOURCE_SHA: ${{ steps.release.outputs.source_sha }}
-          EXPECTED_SURFACE_DIGEST: ${{ github.event.client_payload.surface_digest }}
-          EXPECTED_OPENAPI_DIGEST: ${{ github.event.client_payload.openapi_digest }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          dir=.tmp/techstack-docs
-          mkdir -p "$dir"
-          for artifact in api-surface.json openapi.public.yaml; do
-            gh api -H "Accept: application/vnd.github.raw" \
-              "repos/$SOURCE_REPO/contents/api/surface/$artifact?ref=$SOURCE_SHA" > "$dir/$artifact"
-          done
-          if [ -n "${EXPECTED_SURFACE_DIGEST:-}" ]; then
-            [ "sha256:$(sha256sum "$dir/api-surface.json" | cut -d' ' -f1)" = "$EXPECTED_SURFACE_DIGEST" ] || { echo "::error::Public API surface digest does not match the dispatch."; exit 1; }
-          fi
-          if [ -n "${EXPECTED_OPENAPI_DIGEST:-}" ]; then
-            [ "sha256:$(sha256sum "$dir/openapi.public.yaml" | cut -d' ' -f1)" = "$EXPECTED_OPENAPI_DIGEST" ] || { echo "::error::Public OpenAPI digest does not match the dispatch."; exit 1; }
-          fi
-          # The renderer refuses artifacts that expose an internal operation.
-          args=(--product techstack --surface "$dir/api-surface.json" --openapi "$dir/openapi.public.yaml" --release "$TAG" --source-sha "$SOURCE_SHA")
-          node scripts/render-api-surface-reference.mjs "${args[@]}" --write
-          node scripts/render-api-surface-reference.mjs "${args[@]}" --check
-      # The pull request is opened by the kombify-ci App so that its pull_request
-      # events start the required Trusted Public Safety workflow; a pull request
-      # opened with the workflow token starts no workflows and auto-merge would
-      # wait for that check forever. The App holds Contents read only, so the
-      # generated branch is pushed and the squash merge is queued with the
-      # workflow token (contents: write on this repository).
-      - name: Mint the CI App pull request token
-        id: pr-token
-        if: steps.release.outputs.available == 'true'
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        with:
-          app-id: ${{ vars.KOMBIFY_CI_APP_ID }}
-          private-key: ${{ secrets.KOMBIFY_CI_APP_PRIVATE_KEY }}
-          owner: KombiverseLabs
-          repositories: mintlify-docs
-          permission-contents: read
-          permission-pull-requests: write
-      - name: Open or update generated-only PR
-        if: steps.release.outputs.available == 'true'
-        env:
-          GH_TOKEN: ${{ steps.pr-token.outputs.token }}
-          PUSH_TOKEN: ${{ github.token }}
-          BRANCH: bot/techstack-release-docs
-          TAG: ${{ steps.release.outputs.tag }}
-          SOURCE_SHA: ${{ steps.release.outputs.source_sha }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ -z "${GH_TOKEN:-}" ] || [ -z "${PUSH_TOKEN:-}" ]; then
-            echo "::error::A credential is missing (CI App pull request token or workflow token). $AUTH_GUIDANCE"
-            exit 1
-          fi
-          generated=(techstack/reference docs.json)
-          # Untracked files count: the first release and every new command group add pages.
-          if [ -z "$(git status --porcelain --untracked-files=all -- "${generated[@]}")" ]; then
-            echo "No public reference drift."
-            exit 0
-          fi
-          # Fails closed on any changed path outside the generated set.
-          unexpected="$(git status --porcelain --untracked-files=all | cut -c4- | grep -Ev '^(techstack/reference/api/openapi\.yaml|techstack/reference/cli/[a-z0-9-]+\.mdx|docs\.json)$' || true)"
-          [ -z "$unexpected" ] || { echo "::error::unexpected generated paths: $unexpected"; exit 1; }
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          gh auth setup-git --hostname github.com
-          git fetch origin "refs/heads/$BRANCH:refs/remotes/origin/$BRANCH" || true
-          git checkout -B "$BRANCH"
-          git add -A -- "${generated[@]}"
-          git commit -m "docs(techstack): sync $TAG API and CLI reference"
-          GH_TOKEN="$PUSH_TOKEN" git push --force-with-lease origin "$BRANCH"
-          # `gh pr view <branch>` also matches merged PRs of the reused bot
-          # branch, so only an open PR counts as already existing.
-          if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq length)" = "0" ]; then
-            gh pr create --base main --head "$BRANCH" \
-              --title "docs(techstack): sync $TAG API and CLI reference" \
-              --body "Automated projection of api/surface/openapi.public.yaml and api/surface/api-surface.json from the published Techstack $TAG release (public mirror commit $SOURCE_SHA)."
-          fi
-          GH_TOKEN="$PUSH_TOKEN" gh pr merge "$BRANCH" --auto --squash
+    - name: Require immutable authority
+      env:
+        AUTHORITY_REF: ${{ vars.KOMBIFY_DELIVERY_STANDARDS_REF }}
+      shell: bash
+      run: '[[ "$AUTHORITY_REF" =~ ^[a-f0-9]{40}$ ]]'
+    - name: Mint immutable publisher reader
+      id: authority-reader
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
+      with:
+        app-id: ${{ vars.KOMBIFY_CI_APP_ID }}
+        private-key: ${{ secrets.KOMBIFY_CI_APP_PRIVATE_KEY }}
+        owner: KombiverseLabs
+        repositories: kombify-workspace
+        permission-contents: read
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        repository: KombiverseLabs/kombify-workspace
+        ref: ${{ vars.KOMBIFY_DELIVERY_STANDARDS_REF }}
+        path: authority
+        token: ${{ steps.authority-reader.outputs.token }}
+        persist-credentials: false
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        path: candidate
+        persist-credentials: false
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      with:
+        node-version: 24.22.1
+    - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      with:
+        name: mintlify-generated-techstack-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/generated-data
+    - name: Mint publication identity only on the clean runner
+      id: publisher
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
+      with:
+        app-id: ${{ vars.KOMBIFY_CI_APP_ID }}
+        private-key: ${{ secrets.KOMBIFY_CI_APP_PRIVATE_KEY }}
+        owner: KombiverseLabs
+        repositories: mintlify-docs
+        permission-contents: write
+        permission-pull-requests: write
+    - name: Admit the generated data with the trusted publisher
+      env:
+        GH_TOKEN: ${{ steps.publisher.outputs.token }}
+      shell: bash
+      run: |
+        node authority/scripts/mintlify-generated-publication.mjs --producer techstack --repo "$GITHUB_WORKSPACE/candidate" --data "$RUNNER_TEMP/generated-data" --source "$GITHUB_SHA"
