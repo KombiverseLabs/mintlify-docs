@@ -1,4 +1,5 @@
 name: StackKits Release Docs
+run-name: StackKits Release Docs ${{ github.event_name == 'schedule' && 'weekly' || format('{0} {1} {2}', github.event.client_payload.tag || inputs.tag || 'latest', github.event_name == 'repository_dispatch' && 'release' || 'manual', github.event.client_payload.evidence_tag || github.event.client_payload.cli_reference_digest || '') }}
 
 on:
   repository_dispatch:
@@ -11,12 +12,17 @@ on:
         description: "Published StackKits tag; empty reconciles public latest"
         required: false
         type: string
+      retry_reason:
+        description: "Diagnosed cause, required when this tag already failed on this main commit"
+        required: false
+        type: string
 
 concurrency:
   group: stackkits-release-docs
   cancel-in-progress: false
 
 permissions:
+  actions: read
   contents: write
   pull-requests: write
 
@@ -26,6 +32,28 @@ jobs:
     runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'ubuntu-24.04' }}
     timeout-minutes: 6
     steps:
+      # A dispatch for a tag that already failed on this main commit is not sent again blind (the rule of
+      # KombiverseLabs/.github delivery-preflight.yml): state the diagnosed cause in retry_reason (workflow_dispatch
+      # input, or client_payload.retry_reason of the repository_dispatch). The weekly schedule is exempt.
+      - name: Refuse a blind repeat of a failed dispatch
+        if: github.event_name != 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ github.sha }}
+          RETRY_REASON: ${{ github.event.client_payload.retry_reason || inputs.retry_reason }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          title="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" --jq .display_title)"
+          failed="$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/stackkits-release-docs.yml/runs?head_sha=${HEAD_SHA}&status=failure&per_page=100" \
+            | jq -r --arg t "$title" '[.workflow_runs[] | select(.event != "schedule" and .display_title == $t) | .html_url] | join(" ")')"
+          if [ -n "$failed" ] && [ -z "${RETRY_REASON//[[:space:]]/}" ]; then
+            msg="'$title' already failed on ${HEAD_SHA}: $failed. This dispatch names no retry_reason."
+            echo "::error title=Blind repeat refused::$msg"
+            { echo "### Repeat dispatch refused"; echo; echo "$msg"; echo
+              echo "Repair: read the failed run and fix its cause, then dispatch again with retry_reason (workflow_dispatch input, or client_payload.retry_reason in the repository_dispatch) naming the diagnosed cause."; } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
@@ -44,12 +72,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          fail() {
+            echo "::error title=StackKits Release Docs::$1"
+            { echo "### StackKits Release Docs failed"; echo; echo "$1"; } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          }
           tag="${DISPATCH_TAG:-${INPUT_TAG:-}}"
           if [ -z "$tag" ]; then tag="$(gh api repos/kombifyio/StackKits/releases/latest --jq .tag_name)"; fi
-          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "Tag '$tag' is not a vMAJOR.MINOR.PATCH release tag."
           release="$(gh api "repos/kombifyio/StackKits/releases/tags/$tag")"
-          [ "$(jq -r .draft <<<"$release")" = false ]
-          [ "$(jq -r .prerelease <<<"$release")" = false ]
+          [ "$(jq -r .draft <<<"$release")" = false ] || fail "Release $tag is still a draft."
+          [ "$(jq -r .prerelease <<<"$release")" = false ] || fail "Release $tag is a prerelease; only published releases are synced."
           names="$(jq -r '.assets[].name' <<<"$release")"
           available=true
           for name in stackkits-use-case-catalog-v1.json stackkits-compatibility-v1.json; do
@@ -58,12 +91,11 @@ jobs:
           # Lifecycle evidence is attached to the release its runs cover, which
           # trails the synced tag until runs for that tag are projected.
           evidence_tag="${DISPATCH_EVIDENCE_TAG:-$tag}"
-          [[ "$evidence_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$evidence_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "Evidence tag '$evidence_tag' is not a vMAJOR.MINOR.PATCH release tag."
           if [ "$evidence_tag" != "$tag" ]; then
             evidence_release="$(gh api "repos/kombifyio/StackKits/releases/tags/$evidence_tag")"
             if [ "$(jq -r '.draft or .prerelease' <<<"$evidence_release")" != false ]; then
-              echo "::error::Lifecycle evidence release $evidence_tag is not a published release."
-              exit 1
+              fail "Lifecycle evidence release $evidence_tag is not a published release."
             fi
           fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
@@ -86,43 +118,54 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          fail() {
+            echo "::error title=StackKits Release Docs::$1"
+            { echo "### StackKits Release Docs failed"; echo; echo "$1"; } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          }
           mkdir -p .tmp/stackkits-docs
           gh release download "$TAG" --repo kombifyio/StackKits --dir .tmp/stackkits-docs \
-            --pattern stackkits-use-case-catalog-v1.json --pattern stackkits-compatibility-v1.json
+            --pattern stackkits-use-case-catalog-v1.json --pattern stackkits-compatibility-v1.json \
+            || fail "Release $TAG of kombifyio/StackKits: the two documentation manifests could not be downloaded."
           # The lifecycle evidence projection is optional and mutable. Without an
           # incoming asset the sync renders the newest stored projection.
           evidence=.tmp/stackkits-docs/stackkits-compatibility-evidence-v3.json
           if gh release download "$EVIDENCE_TAG" --repo kombifyio/StackKits --dir .tmp/stackkits-docs \
             --pattern stackkits-compatibility-evidence-v3.json 2>/dev/null; then
             if [ -n "${EXPECTED_EVIDENCE_DIGEST:-}" ]; then
-              [ "sha256:$(sha256sum "$evidence" | cut -d' ' -f1)" = "$EXPECTED_EVIDENCE_DIGEST" ]
+              [ "sha256:$(sha256sum "$evidence" | cut -d' ' -f1)" = "$EXPECTED_EVIDENCE_DIGEST" ] \
+                || fail "The evidence asset of $EVIDENCE_TAG does not match the digest named by the dispatch ($EXPECTED_EVIDENCE_DIGEST)."
             fi
             if [ "$(jq -r .stackkitsVersion "$evidence")" != "$EVIDENCE_TAG" ]; then
-              echo "::error::The lifecycle evidence attached to $EVIDENCE_TAG is bound to another release."
-              exit 1
+              fail "The lifecycle evidence attached to $EVIDENCE_TAG is bound to another release."
             fi
           elif [ -n "${EXPECTED_EVIDENCE_DIGEST:-}" ]; then
-            echo "::error::The dispatch names lifecycle evidence that $EVIDENCE_TAG does not contain."
-            exit 1
+            fail "The dispatch names lifecycle evidence that $EVIDENCE_TAG does not contain."
           fi
           catalog_digest="$(jq -r .contentDigest .tmp/stackkits-docs/stackkits-use-case-catalog-v1.json)"
           compatibility_digest="$(jq -r .contentDigest .tmp/stackkits-docs/stackkits-compatibility-v1.json)"
-          if [ -n "${EXPECTED_CATALOG_DIGEST:-}" ]; then [ "$catalog_digest" = "$EXPECTED_CATALOG_DIGEST" ]; fi
-          if [ -n "${EXPECTED_COMPATIBILITY_DIGEST:-}" ]; then [ "$compatibility_digest" = "$EXPECTED_COMPATIBILITY_DIGEST" ]; fi
-          node scripts/sync-stackkits-release-docs.mjs --from-dir .tmp/stackkits-docs --tag "$TAG" --write
+          if [ -n "${EXPECTED_CATALOG_DIGEST:-}" ]; then
+            [ "$catalog_digest" = "$EXPECTED_CATALOG_DIGEST" ] || fail "The use-case catalog digest $catalog_digest differs from the dispatched $EXPECTED_CATALOG_DIGEST."
+          fi
+          if [ -n "${EXPECTED_COMPATIBILITY_DIGEST:-}" ]; then
+            [ "$compatibility_digest" = "$EXPECTED_COMPATIBILITY_DIGEST" ] || fail "The compatibility digest $compatibility_digest differs from the dispatched $EXPECTED_COMPATIBILITY_DIGEST."
+          fi
+          node scripts/sync-stackkits-release-docs.mjs --from-dir .tmp/stackkits-docs --tag "$TAG" --write \
+            || fail "scripts/sync-stackkits-release-docs.mjs rejected the $TAG manifests; its message is in the step log above."
           # The CLI reference is immutable per tag and exists only for releases
           # whose command tree ships the emitter; older tags keep the committed pages.
           cli_reference=.tmp/stackkits-docs/stackkits-cli-reference-v1.json
           if gh release download "$TAG" --repo kombifyio/StackKits --dir .tmp/stackkits-docs \
             --pattern stackkits-cli-reference-v1.json 2>/dev/null; then
             if [ -n "${EXPECTED_CLI_REFERENCE_DIGEST:-}" ]; then
-              [ "sha256:$(sha256sum "$cli_reference" | cut -d' ' -f1)" = "$EXPECTED_CLI_REFERENCE_DIGEST" ]
+              [ "sha256:$(sha256sum "$cli_reference" | cut -d' ' -f1)" = "$EXPECTED_CLI_REFERENCE_DIGEST" ] \
+                || fail "The CLI reference of $TAG does not match the digest named by the dispatch ($EXPECTED_CLI_REFERENCE_DIGEST)."
             fi
             public_source_sha="$(jq -r .release.publicSourceSha .tmp/stackkits-docs/stackkits-use-case-catalog-v1.json)"
-            node scripts/render-stackkits-cli-reference.mjs --from "$cli_reference" --source-sha "$public_source_sha" --write
+            node scripts/render-stackkits-cli-reference.mjs --from "$cli_reference" --source-sha "$public_source_sha" --write \
+              || fail "scripts/render-stackkits-cli-reference.mjs rejected the $TAG CLI reference; its message is in the step log above."
           elif [ -n "${EXPECTED_CLI_REFERENCE_DIGEST:-}" ]; then
-            echo "::error::The dispatch names a CLI reference that $TAG does not contain."
-            exit 1
+            fail "The dispatch names a CLI reference that $TAG does not contain."
           fi
       # The pull request is opened by the kombify-ci App so that its pull_request
       # events start the required Trusted Public Safety workflow; a pull request
