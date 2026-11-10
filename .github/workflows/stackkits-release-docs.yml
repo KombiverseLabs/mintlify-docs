@@ -161,9 +161,15 @@ jobs:
               [ "sha256:$(sha256sum "$cli_reference" | cut -d' ' -f1)" = "$EXPECTED_CLI_REFERENCE_DIGEST" ] \
                 || fail "The CLI reference of $TAG does not match the digest named by the dispatch ($EXPECTED_CLI_REFERENCE_DIGEST)."
             fi
-            public_source_sha="$(jq -r .release.publicSourceSha .tmp/stackkits-docs/stackkits-use-case-catalog-v1.json)"
-            node scripts/render-stackkits-cli-reference.mjs --from "$cli_reference" --source-sha "$public_source_sha" --write \
-              || fail "scripts/render-stackkits-cli-reference.mjs rejected the $TAG CLI reference; its message is in the step log above."
+            has_public_path="$(jq -r 'has("publicPath")' "$cli_reference")" \
+              || fail "The CLI reference of $TAG is not a valid JSON object."
+            if [ "$has_public_path" = true ]; then
+              public_source_sha="$(jq -r .release.publicSourceSha .tmp/stackkits-docs/stackkits-use-case-catalog-v1.json)"
+              node scripts/render-stackkits-cli-reference.mjs --from "$cli_reference" --source-sha "$public_source_sha" --write \
+                || fail "scripts/render-stackkits-cli-reference.mjs rejected the $TAG CLI reference; its message is in the step log above."
+            else
+              echo "CLI reference for $TAG has no public path; keeping the committed CLI and first-screen pages." >> "$GITHUB_STEP_SUMMARY"
+            fi
           elif [ -n "${EXPECTED_CLI_REFERENCE_DIGEST:-}" ]; then
             fail "The dispatch names a CLI reference that $TAG does not contain."
           fi
@@ -198,7 +204,15 @@ jobs:
             echo "::error::A credential is missing (CI App pull request token or workflow token)."
             exit 1
           fi
-          generated=(data/stackkits stackkits/reference/use-case-catalog.mdx stackkits/reference/os-compatibility.mdx stackkits/reference/application-delivery-compatibility.mdx stackkits/reference/cli docs.json)
+          generated=(
+            data/stackkits stackkits/reference/use-case-catalog.mdx stackkits/reference/os-compatibility.mdx
+            stackkits/reference/application-delivery-compatibility.mdx stackkits/reference/cli docs.json
+            stackkits/quickstart.mdx ar/stackkits/quickstart.mdx de/stackkits/quickstart.mdx
+            es/stackkits/quickstart.mdx hi/stackkits/quickstart.mdx zh-Hans/stackkits/quickstart.mdx
+            stackkits/install-in-10-minutes.mdx ar/stackkits/install-in-10-minutes.mdx
+            de/stackkits/install-in-10-minutes.mdx es/stackkits/install-in-10-minutes.mdx
+            hi/stackkits/install-in-10-minutes.mdx zh-Hans/stackkits/install-in-10-minutes.mdx
+          )
           # Untracked files count: a new command adds a CLI reference page.
           if [ -z "$(git status --porcelain --untracked-files=all -- "${generated[@]}")" ]; then
             echo "No public snapshot drift."
