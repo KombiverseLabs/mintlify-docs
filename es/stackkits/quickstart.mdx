@@ -5,6 +5,8 @@ sidebarTitle: "Inicio rápido"
 icon: rocket
 ---
 
+StackKits configura un homelab protegido en un ordenador que ya tienes. Ejecutas un comando y terminas con servicios en marcha, un inicio de sesión de propietario y tus datos de acceso en un solo archivo.
+
 Este inicio rápido instala la versión pública actual de StackKits con un Basement
 Kit en un servidor que ya operas. Consulta [Compatibilidad de sistemas operativos](/es/stackkits/reference/os-compatibility)
 para ver la combinación de versión y host con evidencia de ciclo de vida
@@ -26,13 +28,15 @@ instala los artefactos publicados y el runtime necesario, inicializa la
 custodia local del propietario, arranca el acceso local de Admin/PocketID,
 valida la StackSpec generada y aplica los servicios Basement por defecto:
 
+{/* public-path:begin install */}
 ```bash
-curl -sSL https://base.stackkit.cc | sh
+curl -sSL https://install.stackkit.cc | sh
 cd ~/my-homelab
 stackkit version
 stackkit logs latest --json
 cat .stackkit/access.json
 ```
+{/* public-path:end install */}
 
 <Warning>
   No se requiere una cuenta alojada de kombify. StackKits sigue necesitando un
@@ -94,6 +98,18 @@ Tu configuración (`stack-spec.yaml`), los registros y el registro de acceso est
 - El plan no está en `ready`: cambia la StackSpec en lugar de los archivos generados y revísalo de nuevo.
 - La dirección de un servicio no se abre: consulta [Solución de problemas](/es/guides/stackkits/troubleshooting) y [Día a día](/es/guides/stackkits/daily-use).
 - A continuación, termina la protección en la [guía del Node Hub](/es/guides/stackkits/node-hub).
+
+## Deja que kombify AI lo opere
+
+Para que kombify AI cuide de este servidor, conéctalo a tu cuenta de kombify. Inicia la configuración de Techstack para tu propio servidor en [app.kombify.io](https://app.kombify.io); crea un emparejamiento de un solo uso. Después ejecuta en el servidor:
+
+{/* public-path:begin connect */}
+```bash
+sudo stackkit connect --server https://<control-plane-origin> --token-file /root/kombify-pairing
+```
+{/* public-path:end connect */}
+
+Basta una cuenta gratuita: el servidor muestra su estado en kombify Cloud y kombify AI le da soporte. Los cambios que kombify AI realiza por ti forman parte de los planes de pago.
 
 ## Continuar
 

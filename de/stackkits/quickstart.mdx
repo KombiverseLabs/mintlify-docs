@@ -5,6 +5,8 @@ sidebarTitle: "Quickstart"
 icon: rocket
 ---
 
+StackKits richtet auf einem Computer, den du schon hast, ein abgesichertes Homelab ein. Du führst einen Befehl aus und hast danach laufende Dienste, eine Anmeldung als Owner und deine Zugangsdaten in einer Datei.
+
 Dieser Quickstart installiert die aktuelle öffentliche StackKits-Version mit
 einem Basement Kit auf einem Server, den du bereits betreibst. Prüfe vor dem
 Start in der [OS-Kompatibilität](/de/stackkits/reference/os-compatibility) die
@@ -28,13 +30,15 @@ initialisiert die lokale Owner-Custody, richtet den lokalen Admin-/PocketID-Zuga
 ein, validiert die generierte StackSpec und wendet die
 Standarddienste des Basement an:
 
+{/* public-path:begin install */}
 ```bash
-curl -sSL https://base.stackkit.cc | sh
+curl -sSL https://install.stackkit.cc | sh
 cd ~/my-homelab
 stackkit version
 stackkit logs latest --json
 cat .stackkit/access.json
 ```
+{/* public-path:end install */}
 
 <Warning>
   Ein gehostetes kombify-Konto ist nicht erforderlich. StackKits selbst
@@ -94,6 +98,18 @@ Deine Konfiguration (`stack-spec.yaml`), Logs und das Zugriffsprotokoll liegen i
 - Der Plan ist nicht `ready`: Ändere die StackSpec statt der generierten Dateien und prüfe sie erneut.
 - Eine Dienstadresse öffnet sich nicht: Siehe [Fehlerbehebung](/de/guides/stackkits/troubleshooting) und [Im Alltag](/de/guides/stackkits/daily-use).
 - Schließe als Nächstes den Schutz im [Node-Hub-Leitfaden](/de/guides/stackkits/node-hub) ab.
+
+## kombify AI betreiben lassen
+
+Damit kombify AI diesen Server betreut, verbinde ihn mit deinem kombify-Konto. Starte auf [app.kombify.io](https://app.kombify.io) das Techstack-Setup für deinen eigenen Server; es erzeugt eine einmalige Kopplung. Führe dann auf dem Server aus:
+
+{/* public-path:begin connect */}
+```bash
+sudo stackkit connect --server https://<control-plane-origin> --token-file /root/kombify-pairing
+```
+{/* public-path:end connect */}
+
+Ein kostenloses Konto genügt: Der Server zeigt seinen Zustand in kombify Cloud und kombify AI unterstützt ihn. Änderungen, die kombify AI für dich ausführt, gehören zu den bezahlten Plänen.
 
 ## Weiter
 
