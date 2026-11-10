@@ -1,0 +1,180 @@
+---
+title: "Connect your own AI agent"
+description: "Let Claude Code, Codex or Cursor read your homelab through the local stackkit MCP server, and decide what it may change"
+sidebarTitle: "Connect your AI agent"
+icon: "robot"
+---
+
+The `stackkit-mcp` program is a local MCP server named `stackkit`. Your AI agent
+starts it on the computer that holds your homelab workspace. By default the
+agent can read: it can look up the docs and check status, verification, drift,
+logs and backups. It can change something only after you turn on a write gate,
+and then you still approve what it does.
+
+## Before you start
+
+- A homelab you installed with the StackKits installer, for example from
+  [Install in 10 minutes](/stackkits/install-in-10-minutes). The workspace
+  folder is `~/my-homelab` in this guide.
+- `stackkit-mcp` next to `stackkit` on your `PATH`. The installer places both
+  there. If you only need the tools, install them with the installer from
+  [Choose a kit](/guides/stackkits/choosing-a-kit):
+
+```bash
+curl -sSL https://install.stackkit.cc | sh
+command -v stackkit-mcp
+```
+
+The lifecycle tools (status, verify, drift, backup status, logs) only appear
+when `stackkit-mcp` sits next to a `stackkit` of the same release. Update both
+together.
+
+To print a ready-to-paste config for your host from the installed release:
+
+```bash
+stackkit agent mcp-config --client codex
+```
+
+Use `claude` or `cursor` instead of `codex` for those hosts.
+
+## Claude Code
+
+Add the server for the current project and check it:
+
+```bash
+claude mcp add --transport stdio stackkit -- stackkit-mcp --mode docs,local,server,actions
+claude mcp list
+```
+
+Inside Claude Code, the `/mcp` command shows the server status. The same entry
+in a project `.mcp.json` file:
+
+```json
+{
+  "mcpServers": {
+    "stackkit": {
+      "command": "stackkit-mcp",
+      "args": ["--mode", "docs,local,server,actions"]
+    }
+  }
+}
+```
+
+Source: [Claude Code MCP documentation](https://code.claude.com/docs/en/mcp).
+
+## Codex
+
+Add this block to `~/.codex/config.toml`, or to `.codex/config.toml` in a
+trusted project. The `cwd` key sets the workspace the tools act on:
+
+```toml
+[mcp_servers.stackkit]
+command = "stackkit-mcp"
+args = ["--mode", "docs,local,server,actions"]
+cwd = "/home/you/my-homelab"
+```
+
+Check it with `codex mcp list`, or open `/mcp` in the Codex terminal interface.
+Source: [Codex MCP documentation](https://learn.chatgpt.com/docs/extend/mcp).
+
+## Cursor
+
+Add this to `.cursor/mcp.json` in the project, or to `~/.cursor/mcp.json` for
+every project:
+
+```json
+{
+  "mcpServers": {
+    "stackkit": {
+      "type": "stdio",
+      "command": "stackkit-mcp",
+      "args": ["--mode", "docs,local,server,actions"]
+    }
+  }
+}
+```
+
+If the server does not start, open the Output panel and choose MCP Logs.
+Source: [Cursor MCP documentation](https://cursor.com/docs/context/mcp).
+
+## Name the workspace
+
+The tools act on the workspace in the folder where the server starts. Only
+Codex lets you set that folder in its config. For Claude Code and Cursor, name
+the folder in your first prompt. The lifecycle tools take a `base_dir` input for it.
+
+## ChatGPT
+
+ChatGPT adds a custom MCP server through a public HTTPS endpoint or through
+OpenAI's Secure MCP Tunnel, not by launching a local program. So `stackkit-mcp`
+cannot be added to ChatGPT directly the way it is added to the three hosts
+above. OpenAI documents that the tunnel client can reach a local stdio server. This guide does not cover either path and has not tested
+`stackkit-mcp` with them. Do not expose a StackKits MCP endpoint directly to the
+public internet. See the OpenAI pages
+[Connect and test your plugin](https://developers.openai.com/plugins/deploy/connect-chatgpt)
+and [Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels).
+
+## Try it
+
+Start your agent and send this prompt:
+
+```text
+Use the stackkit tools, read only. My workspace is ~/my-homelab. Tell me what is
+running on my server and what needs attention. Check status, verification,
+drift and backups, and list the problems first.
+```
+
+## Let the agent change something
+
+Without any setting, the agent cannot change your homelab. You have two ways to
+allow changes. Prefer the second.
+
+**Write gate for everything.** Set `STACKKIT_MCP_ALLOW_WRITE=true` in the
+environment of the server, for example with the Claude Code option `--env`, the
+Codex `[mcp_servers.stackkit.env]` table or the Cursor `env` object. The
+changing tools then appear. Each call must still name the exact operation and
+carry an explicit owner approval, so tell the agent to ask you before it makes
+that call. The server cannot tell your approval from the agent's own, which is
+why the second way is safer.
+
+**One credential per agent, with your approval for every change.** Create a
+credential for this agent from the workspace, then start the server with it:
+
+```bash
+mkdir -p ~/.config/stackkit
+stackkit -C ~/my-homelab agent credential mint --name my-agent --token-file ~/.config/stackkit/my-agent.token
+```
+
+Set `STACKKIT_MCP_AGENT_CREDENTIAL_FILE` to that file and add
+`--agent-workspace` with the workspace folder to the server arguments. In
+Codex:
+
+```toml
+[mcp_servers.stackkit]
+command = "stackkit-mcp"
+args = ["--mode", "docs,local,server,actions", "--agent-workspace", "/home/you/my-homelab"]
+cwd = "/home/you/my-homelab"
+
+[mcp_servers.stackkit.env]
+STACKKIT_MCP_AGENT_CREDENTIAL_FILE = "/home/you/.config/stackkit/my-agent.token"
+```
+
+With a credential, `STACKKIT_MCP_ALLOW_WRITE` is ignored. Every changing call
+is refused with an approval request until you approve that exact call in your
+own terminal:
+
+```bash
+stackkit -C ~/my-homelab agent approval list
+stackkit -C ~/my-homelab agent approval approve <approval-id>
+```
+
+An approval covers that agent, that operation and those exact arguments, once,
+for 15 minutes. The agent then repeats the identical call. The server refuses to
+start with a credential that is unknown or revoked, and a revoked credential is
+refused on the agent's next call. Manage credentials with the
+[agent commands](/stackkits/reference/cli/agent).
+
+## Related pages
+
+- [StackKits MCP connector](/stackkits/reference/mcp-connector)
+- [Operate a StackKit](/stackkits/reference/day-2-operations)
