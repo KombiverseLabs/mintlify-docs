@@ -157,6 +157,8 @@ jobs:
           cli_reference=.tmp/stackkits-docs/stackkits-cli-reference-v1.json
           if gh release download "$TAG" --repo kombifyio/StackKits --dir .tmp/stackkits-docs \
             --pattern stackkits-cli-reference-v1.json 2>/dev/null; then
+            jq -es 'length == 1 and (.[0] | type == "object")' "$cli_reference" >/dev/null \
+              || fail "The CLI reference of $TAG must be a single JSON object."
             if [ -n "${EXPECTED_CLI_REFERENCE_DIGEST:-}" ]; then
               [ "sha256:$(sha256sum "$cli_reference" | cut -d' ' -f1)" = "$EXPECTED_CLI_REFERENCE_DIGEST" ] \
                 || fail "The CLI reference of $TAG does not match the digest named by the dispatch ($EXPECTED_CLI_REFERENCE_DIGEST)."
@@ -225,7 +227,9 @@ jobs:
           gh auth setup-git --hostname github.com
           git fetch origin "refs/heads/$BRANCH:refs/remotes/origin/$BRANCH" || true
           git checkout -B "$BRANCH"
-          git add -- "${generated[@]}"
+          # Some locales do not have an install page. Include tracked deletions and new outputs.
+          git ls-files -z --cached --others --exclude-standard -- "${generated[@]}" \
+            | git --literal-pathspecs add --pathspec-from-file=- --pathspec-file-nul
           git commit -m "docs(stackkits): sync $TAG release manifests"
           GH_TOKEN="$PUSH_TOKEN" git push --force-with-lease origin "$BRANCH"
           # `gh pr view <branch>` also matches merged PRs of the reused bot
