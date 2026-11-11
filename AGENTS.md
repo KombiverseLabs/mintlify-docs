@@ -10,10 +10,9 @@ navigation source of truth; pages are MDX files.
 
 ## Kombify Development Standard
 
-- Finish a coherent implementation package, including its current producers and consumers, with source, docs and applicable cheap checks. Acceptance belongs to its later owner; a product run is not compulsory per task. Reuse evidence on unchanged scope. Detail: `DEVELOPMENT-THROUGHPUT-STANDARD.md` "Development feedback loop" (D-2026-11-07-03).
-- Until 1.0, current producers and consumers cut over together without compatibility shims, aliases, dual paths or trust in retired formats and keys. Fix errors forward. Only a production schema shared by two running channels uses expand then contract (`CONSTITUTION.md` rule 12, D-2026-11-02-01).
-- Binding: workspace `CONSTITUTION.md` rules 12 to 16, with the detail in workspace `DEVELOPMENT-THROUGHPUT-STANDARD.md` ("Development feedback loop", "Testing", "Development-probe admission") and skill `kombify-development:kombify-fast-development`. Downloads and artifact delivery apply the absolute [Render download prohibition](https://github.com/KombiverseLabs/kombify-workspace/blob/main/CI-CD-PLATFORM-STANDARD.md#render-download-prohibition) while coding and at deployment admission, in every product and environment.
-- Tests: acceptance journeys use shared test users against the running product when the later acceptance owner runs them, not as a per-task completion requirement (D-2026-11-07-03). No new unit or in-process tests except inside the repository's declared sensitive boundaries (`auth`, `billing`, `crypto`, `migration`, `compiler`, with their paths in `.kombify/test-boundaries.json`); a fixed bug gets a journey step, not a unit test.
+- Binding: `CONSTITUTION.md` rules 12 to 16, detail in `DEVELOPMENT-THROUGHPUT-STANDARD.md` ("Development feedback loop", "Testing", "Development-probe admission") and skill `kombify-development:kombify-fast-development`. Until 1.0 current producers and consumers cut over together without shims or dual paths; only a production schema shared by two running channels uses expand then contract (D-2026-11-02-01).
+- Tests: no new unit or in-process tests except inside the declared sensitive boundaries (`.kombify/test-boundaries.json`); journeys run when acceptance is in scope (rule 13, D-2026-11-07-03).
+- Downloads and artifact delivery apply the absolute [Render download prohibition](https://github.com/KombiverseLabs/kombify-workspace/blob/main/CI-CD-PLATFORM-STANDARD.md#render-download-prohibition) while coding and at deployment admission, in every product and environment.
 <!-- END GENERATED: elastic-development-throughput kombify-throughput-policy-sync -->
 
 <!-- BEGIN GENERATED: planning-policy kombify-agent-policy-sync -->
@@ -28,7 +27,6 @@ navigation source of truth; pages are MDX files.
 ## Owner Rules
 
 - Every session, on every host and in every project, reads the owner's cross-project rules (`standards/rules.md` in the private repository `Soulcreek/agent-home`) before its first action. The SessionStart hook prints them (`KOMBIFY_OWNER_RULES`); any other host runs `node scripts/kombify-bootstrap.mjs rules`. Only when that fails, follow this file and say once that the owner rules were not read.
-- The workspace `CONSTITUTION.md` binds in every repository; its rule 1 decides every conflict between documents.
 
 ## Planning System Policy
 
@@ -36,7 +34,7 @@ navigation source of truth; pages are MDX files.
 
 ## Beads Remote Write Policy
 
-- Cloudflare is the operational Beads authority (owner decision 2026-10-08). Mutate only through `mise --cd <workspace-root> run beads:write --repo <manifest-id> -- <bd args>` and require `BEADS_REMOTE_WRITE_OK ... tracker=cloudflare`; never fall back to Dolt or replay an uncertain write. Detail: workspace `BEADS-REMOTE-WRITE-STANDARD.md`.
+- Mutate Beads only through `mise --cd <workspace-root> run beads:write --repo <manifest-id> -- <bd args>` and require `BEADS_REMOTE_WRITE_OK ... tracker=cloudflare`. Detail: workspace `BEADS-REMOTE-WRITE-STANDARD.md`.
 
 ## Public Beta Drift Guard
 
@@ -44,8 +42,9 @@ navigation source of truth; pages are MDX files.
 
 ## Git And Completion
 
-- Work on the synced `main` (or your own worktree, constitution rule 5) and publish only your own paths or hunks with `node scripts/session-publish.mjs`; open the batch ready after one automated review and queue no auto-merge; the merge batch merges it and closes its bead with the merge SHA, and `session:sync` reconciles the checkout (D-2026-11-02-05). Detail: workspace `DEVELOPMENT-THROUGHPUT-STANDARD.md` "Sessions, checkouts and publishing" and workspace `AUTONOMOUS-MERGE-STANDARD.md`.
-- Stable ships through the product's release train and a merge is not live: workspace skill `.agents/skills/kombify-ship/SKILL.md` and workspace `CI-CD-PLATFORM-STANDARD.md` §4.6. Until 1.0 the twice-daily auto release ships every product (D-2026-10-31-02, D-2026-11-02-05); a session runs `mise run release:attended -- --go D-2026-10-31-02` only when the owner asks for that release. From 1.0 users get only what the owner releases (D-2026-10-20-07, D-2026-10-26-27): a change the owner said to release is shipped at once with `mise run release:attended -- --go <ref>`, with no daily cap, a product a passed test window tested is released with `--go D-2026-10-26-12 --passed-window <id>` (D-2026-10-26-12), and any other change is reported as on Early Access and waiting for the owner's go; a `RELEASE_BLOCKER` goes to the owner in the same turn (§4.6 "No silent wait"). Report committed, merged, deployed and live state separately, with evidence and any exact blocker.
+- Work on the synced `main` or your own worktree (rule 5, D-2026-10-26-26). Publishing and the merge route: Start 4.
+- Stable ships only through skill `.agents/skills/kombify-ship/SKILL.md` and `CI-CD-PLATFORM-STANDARD.md` §4.6. Pre-1.0 the slot ships every product (D-2026-10-31-02); a session runs `mise run release:attended -- --go D-2026-10-31-02` only when the owner asks. From 1.0 only the owner's go ships (D-2026-10-20-07, D-2026-10-26-27) or a passed test window for the products it tested (D-2026-10-26-12); a `RELEASE_BLOCKER` goes to the owner in the same turn.
+- Report committed, merged, deployed and live state separately, with evidence (rule 9).
 <!-- END GENERATED: planning-policy kombify-agent-policy-sync -->
 
 ## Sources
