@@ -165,12 +165,14 @@ jobs:
             fi
             has_public_path="$(jq -r 'has("publicPath")' "$cli_reference")" \
               || fail "The CLI reference of $TAG is not a valid JSON object."
-            if [ "$has_public_path" = true ]; then
-              public_source_sha="$(jq -r .release.publicSourceSha .tmp/stackkits-docs/stackkits-use-case-catalog-v1.json)"
-              node scripts/render-stackkits-cli-reference.mjs --from "$cli_reference" --source-sha "$public_source_sha" --write \
-                || fail "scripts/render-stackkits-cli-reference.mjs rejected the $TAG CLI reference; its message is in the step log above."
-            else
-              echo "CLI reference for $TAG has no public path; keeping the committed CLI and first-screen pages." >> "$GITHUB_STEP_SUMMARY"
+            # The CLI reference pages and docs.json are always rendered. Only the
+            # twelve first-screen pages need a publicPath; without one they stay
+            # as committed, and a present but invalid publicPath still fails.
+            public_source_sha="$(jq -r .release.publicSourceSha .tmp/stackkits-docs/stackkits-use-case-catalog-v1.json)"
+            node scripts/render-stackkits-cli-reference.mjs --from "$cli_reference" --source-sha "$public_source_sha" --write \
+              || fail "scripts/render-stackkits-cli-reference.mjs rejected the $TAG CLI reference; its message is in the step log above."
+            if [ "$has_public_path" != true ]; then
+              echo "CLI reference for $TAG has no public path; the CLI reference pages are rendered and the twelve first-screen pages stay as committed." >> "$GITHUB_STEP_SUMMARY"
             fi
           elif [ -n "${EXPECTED_CLI_REFERENCE_DIGEST:-}" ]; then
             fail "The dispatch names a CLI reference that $TAG does not contain."

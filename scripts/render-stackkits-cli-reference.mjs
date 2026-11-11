@@ -18,10 +18,17 @@ const SCHEMA = 'stackkits-cli-reference/v1'
 // types its own copy of an install or init command.
 export const PUBLIC_PATH_PAGES = ['', 'ar', 'de', 'es', 'hi', 'zh-Hans'].flatMap((language) => ['quickstart', 'install-in-10-minutes'].map((page) => (language ? language + '/' : '') + 'stackkits/' + page + '.mdx'))
 
+// Only the fields this renderer consumes are required. A release without a
+// publicPath at all still renders the CLI reference and navigation; its
+// first-screen pages stay as committed.
+export function hasPublicPath(reference) {
+  return Object.hasOwn(reference ?? {}, 'publicPath')
+}
+
 export function validatePublicPath(publicPath) {
-  assert(publicPath && typeof publicPath === 'object', 'CLI reference needs publicPath; release a StackKits version that emits it')
-  for (const key of ['installCommand', 'cliOnlyInstallCommand', 'connectCommand', 'accessEvidence']) assert(typeof publicPath[key] === 'string' && publicPath[key].length > 0, `publicPath.${key} is missing`)
-  for (const key of ['installerResult', 'quickStart']) assert(Array.isArray(publicPath[key]) && publicPath[key].length > 0 && publicPath[key].every((line) => typeof line === 'string' && line.length > 0), `publicPath.${key} is missing`)
+  assert(publicPath && typeof publicPath === 'object' && !Array.isArray(publicPath), 'publicPath must be an object')
+  for (const key of ['installCommand', 'connectCommand', 'cliOnlyInstallCommand']) assert(typeof publicPath[key] === 'string' && publicPath[key].length > 0, `publicPath.${key} is missing`)
+  assert(Array.isArray(publicPath.installerResult) && publicPath.installerResult.length > 0 && publicPath.installerResult.every((line) => typeof line === 'string' && line.length > 0), 'publicPath.installerResult is missing')
   return publicPath
 }
 
@@ -33,9 +40,11 @@ const PUBLIC_PATH_BLOCKS = {
   install: (publicPath) => [publicPath.installCommand, ...publicPath.installerResult],
 }
 
-// Rewrites every marked block of a page; a page without markers is returned unchanged.
-export function applyPublicPath(page, publicPath) {
+// Rewrites every marked block of a page; a page that exists but carries no
+// marker at all is an error, so a page never silently keeps a stale command.
+export function applyPublicPath(page, publicPath, pagePath) {
   let result = page
+  let blocks = 0
   for (const [name, lines] of Object.entries(PUBLIC_PATH_BLOCKS)) {
     const begin = `{/* public-path:begin ${name} */}`
     const end = `{/* public-path:end ${name} */}`
@@ -43,8 +52,10 @@ export function applyPublicPath(page, publicPath) {
     const to = result.indexOf(end)
     if (from < 0 && to < 0) continue
     assert(from >= 0 && to > from, `a page has an unbalanced public-path ${name} marker`)
+    blocks += 1
     result = `${result.slice(0, from + begin.length)}\n${['\`\`\`bash', ...lines(publicPath), '\`\`\`'].join('\n')}\n${result.slice(to)}`
   }
+  assert(blocks > 0, `${pagePath} has no public-path markers`)
   return result
 }
 
@@ -194,7 +205,7 @@ function frontmatter({ title, description: summary, sidebarTitle, icon, contentH
 
 export function renderCliReference(reference, { sourceSha, contentHash }) {
   validateCliReference(reference)
-  const publicPath = validatePublicPath(reference.publicPath)
+  const publicPath = hasPublicPath(reference) ? validatePublicPath(reference.publicPath) : null
   assert(/^[0-9a-f]{40}$/.test(sourceSha), 'source SHA must be a full 40-character commit SHA')
   const byPath = new Map(reference.commands.map((command) => [command.path, command]))
   const current = (command) => !command.legacy && !command.deprecated
@@ -204,8 +215,10 @@ export function renderCliReference(reference, { sourceSha, contentHash }) {
 
   let overview = frontmatter({ title: 'CLI reference', description: 'Every stackkit command with its flags and examples', sidebarTitle: 'Overview', icon: 'square-terminal', contentHash, sourceSha })
   overview += `${text(reference.short)}. These pages list every \`stackkit\` command with its flags and examples. They are generated from the StackKits command definitions; if your installed version is older, \`stackkit <command> --help\` is authoritative for it.\n\n`
-  overview += '## Install the CLI\n\n```bash\n' + publicPath.cliOnlyInstallCommand + '\n```\n\n'
-  overview += `With \`STACKKIT_CLI_ONLY=1\` the installer puts \`stackkit\`, \`stackkit-server\`, \`stackkit-mcp\`, packaged OpenTofu and the public kit catalog into \`~/.stackkits\` without installing a StackKit. Without it, the installer detects the host and continues into Basement Kit or Cloud Kit.\n\n`
+  if (publicPath) {
+    overview += '## Install the CLI\n\n```bash\n' + publicPath.cliOnlyInstallCommand + '\n```\n\n'
+    overview += `With \`STACKKIT_CLI_ONLY=1\` the installer puts \`stackkit\`, \`stackkit-server\`, \`stackkit-mcp\`, packaged OpenTofu and the public kit catalog into \`~/.stackkits\` without installing a StackKit. Without it, the installer detects the host and continues into Basement Kit or Cloud Kit.\n\n`
+  }
   overview += '## Global flags\n\nThese flags work with every command.\n\n'
   overview += '| Flag | Type | Default | Description |\n| --- | --- | --- | --- |\n' + flagRows(reference.globalFlags).join('\n') + '\n\n'
 
@@ -241,7 +254,7 @@ export function renderCliReference(reference, { sourceSha, contentHash }) {
     root: `${CLI_PAGE_DIR}/overview`,
     pages: [...groupPages, ...(retired.length ? [`${CLI_PAGE_DIR}/legacy`] : [])],
   }
-  return { pages, navigation }
+  return { pages, navigation, publicPath }
 }
 
 // The CLI group is found by its root page wherever docs.json places it, so the
@@ -275,24 +288,24 @@ export function applyNavigation(docs, navigation) {
 
 export function writeCliReference({ repoRoot, reference, referenceBytes, sourceSha }) {
   const contentHash = `sha256:${createHash('sha256').update(referenceBytes).digest('hex')}`
-  const { pages, navigation } = renderCliReference(reference, { sourceSha, contentHash })
+  const { pages, navigation, publicPath } = renderCliReference(reference, { sourceSha, contentHash })
   const directory = path.join(repoRoot, CLI_PAGE_DIR)
   rmSync(directory, { recursive: true, force: true })
   for (const [relative, content] of pages) {
     mkdirSync(path.dirname(path.join(repoRoot, relative)), { recursive: true })
     writeFileSync(path.join(repoRoot, relative), content)
   }
-  for (const relative of PUBLIC_PATH_PAGES) {
+  for (const relative of publicPath ? PUBLIC_PATH_PAGES : []) {
     const file = path.join(repoRoot, relative)
     if (!existsSync(file)) continue
     const page = readFileSync(file, 'utf8')
-    const updated = applyPublicPath(page, reference.publicPath)
+    const updated = applyPublicPath(page, publicPath, relative)
     if (updated !== page) writeFileSync(file, updated)
   }
   const docsPath = path.join(repoRoot, 'docs.json')
   const docs = applyNavigation(JSON.parse(readFileSync(docsPath, 'utf8')), navigation)
   writeFileSync(docsPath, `${JSON.stringify(docs, null, 2)}\n`)
-  return { pages: [...pages.keys()].sort(), written: readdirSync(directory).length }
+  return { pages: [...pages.keys()].sort(), written: readdirSync(directory).length, publicPath: Boolean(publicPath) }
 }
 
 function main() {
@@ -304,7 +317,7 @@ function main() {
   const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
   const referenceBytes = readFileSync(path.resolve(value('--from')))
   const result = writeCliReference({ repoRoot, reference: JSON.parse(referenceBytes.toString('utf8')), referenceBytes, sourceSha: value('--source-sha') })
-  process.stdout.write(`stackkits_cli_reference: ${result.pages.length} pages\n`)
+  process.stdout.write(`stackkits_cli_reference: ${result.pages.length} pages${result.publicPath ? '; first-screen pages rendered' : '; no publicPath, first-screen pages kept'}\n`)
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main()
