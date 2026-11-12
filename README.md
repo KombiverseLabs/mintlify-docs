@@ -48,6 +48,42 @@ Truth sources, never the retired legacy documentation repository:
 
 ## Localization
 
+### OpenAPI prose catalogs
+
+The optional `scripts/i18n/openapi_locale.py` producer binds a catalog to the
+exact bytes of the current Gateway or Techstack public OpenAPI projection. It
+does not modify either release sync producer, navigation, or the served tree.
+Use Python 3.13 in a dedicated virtual environment and install the complete,
+hash-locked dependencies with `python -m pip install --require-hashes --only-binary=:all: -r
+scripts/i18n/openapi-requirements.lock`. The direct requirements are in
+`scripts/i18n/openapi-requirements.txt`; refresh the lock with `uv pip compile
+scripts/i18n/openapi-requirements.txt --python-version 3.13 --universal
+--generate-hashes --no-header -o scripts/i18n/openapi-requirements.lock`, then
+revalidate the producer and its current contracts.
+Keep working catalogs and outputs outside this checkout; output files are
+created exclusively and never overwrite an existing file. For example:
+
+```text
+python scripts/i18n/openapi_locale.py extract gateway <outside-checkout>/gateway.json
+python scripts/i18n/openapi_locale.py reconstruct gateway <outside-checkout>/gateway.fr.json <outside-checkout>/gateway.fr.yaml
+```
+
+Use `techstack` for the other contract. Extraction creates empty translation
+slots; fill and review every entry against the exact source before reconstruction.
+Any source-byte change requires a new catalog and review. Duplicate keys or
+pointers, incomplete or extra entries, changed source text, empty translations,
+changed marked code, URLs, Markdown destinations, HTML tags or named braces,
+YAML anchors and aliases, external references, schema base or dynamic resolution
+keywords, unknown titles and nonempty
+OAuth scope descriptions fail closed. Examples, defaults, enums, extensions and
+all other nonselected values remain unchanged; reconstruction validates the
+specification and checks parsed parity after restoring the selected source prose.
+YAML formatting and comments are not preserved. Unmarked identifiers, commands,
+numbers and other placeholder forms still require human review; this check does
+not establish translation quality, rendering, release or authorization to
+publish a locale. Unsupported OpenAPI prose constructs require explicit support
+and review before use.
+
 English is the only language that is written and edited by hand. It is the
 source and keeps its URLs (`/stackkits/quickstart`). The other locales (`ar`,
 `de`, `es`, `zh-Hans`, `hi`; Traditional Chinese is `zh-Hant`, never mapped to
