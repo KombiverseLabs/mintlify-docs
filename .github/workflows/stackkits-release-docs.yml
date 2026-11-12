@@ -1,242 +1,281 @@
+# Generation and publication use separate fresh GitHub-hosted jobs. Only data crosses the boundary.
 name: StackKits Release Docs
-run-name: StackKits Release Docs ${{ github.event_name == 'schedule' && 'weekly' || format('{0} {1} {2}', github.event.client_payload.tag || inputs.tag || 'latest', github.event_name == 'repository_dispatch' && 'release' || 'manual', github.event.client_payload.evidence_tag || github.event.client_payload.cli_reference_digest || '') }}
-
-on:
+run-name: StackKits Release Docs ${{ github.event_name == 'schedule' && 'weekly' || format('{0} {1} {2}', github.event.client_payload.tag
+  || inputs.tag || 'latest', github.event_name == 'repository_dispatch' && 'release' || 'manual', github.event.client_payload.evidence_tag
+  || github.event.client_payload.cli_reference_digest || '') }}
+'on':
   repository_dispatch:
-    types: [stackkits-docs-release]
+    types:
+    - stackkits-docs-release
   schedule:
-    - cron: "17 6 * * 1"
+  - cron: 17 6 * * 1
   workflow_dispatch:
     inputs:
       tag:
-        description: "Published StackKits tag; empty reconciles public latest"
+        description: Published StackKits tag; empty reconciles public latest
         required: false
         type: string
       retry_reason:
-        description: "Diagnosed cause, required when this tag already failed on this main commit"
+        description: Diagnosed cause, required when this tag already failed on this main commit
         required: false
         type: string
-
 concurrency:
   group: stackkits-release-docs
   cancel-in-progress: false
-
 permissions:
-  actions: read
-  contents: write
-  pull-requests: write
-
+  contents: read
 jobs:
-  reconcile:
-    if: github.repository == 'KombiverseLabs/mintlify-docs'
-    runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'ubuntu-24.04' }}
+  generate:
+    name: Generate data without a publication identity
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     timeout-minutes: 6
     steps:
-      # A dispatch for a tag that already failed on this main commit is not sent again blind (the rule of
-      # KombiverseLabs/.github delivery-preflight.yml): state the diagnosed cause in retry_reason (workflow_dispatch
-      # input, or client_payload.retry_reason of the repository_dispatch). The weekly schedule is exempt.
-      - name: Refuse a blind repeat of a failed dispatch
-        if: github.event_name != 'schedule'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          HEAD_SHA: ${{ github.sha }}
-          RETRY_REASON: ${{ github.event.client_payload.retry_reason || inputs.retry_reason }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          title="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" --jq .display_title)"
-          failed="$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/stackkits-release-docs.yml/runs?head_sha=${HEAD_SHA}&status=failure&per_page=100" \
-            | jq -r --arg t "$title" '[.workflow_runs[] | select(.event != "schedule" and .display_title == $t) | .html_url] | join(" ")')"
-          if [ -n "$failed" ] && [ -z "${RETRY_REASON//[[:space:]]/}" ]; then
-            msg="'$title' already failed on ${HEAD_SHA}: $failed. This dispatch names no retry_reason."
-            echo "::error title=Blind repeat refused::$msg"
-            { echo "### Repeat dispatch refused"; echo; echo "$msg"; echo
-              echo "Repair: read the failed run and fix its cause, then dispatch again with retry_reason (workflow_dispatch input, or client_payload.retry_reason in the repository_dispatch) naming the diagnosed cause."; } >> "$GITHUB_STEP_SUMMARY"
-            exit 1
+    - name: Refuse a blind repeat of a failed dispatch
+      if: github.event_name != 'schedule'
+      env:
+        GH_TOKEN: ${{ github.token }}
+        HEAD_SHA: ${{ github.sha }}
+        RETRY_REASON: ${{ github.event.client_payload.retry_reason || inputs.retry_reason }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        title="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" --jq .display_title)"
+        failed="$(gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/stackkits-release-docs.yml/runs?head_sha=${HEAD_SHA}&status=failure&per_page=100" \
+          | jq -r --arg t "$title" '[.workflow_runs[] | select(.event != "schedule" and .display_title == $t) | .html_url] | join(" ")')"
+        if [ -n "$failed" ] && [ -z "${RETRY_REASON//[[:space:]]/}" ]; then
+          msg="'$title' already failed on ${HEAD_SHA}: $failed. This dispatch names no retry_reason."
+          echo "::error title=Blind repeat refused::$msg"
+          { echo "### Repeat dispatch refused"; echo; echo "$msg"; echo
+            echo "Repair: read the failed run and fix its cause, then dispatch again with retry_reason (workflow_dispatch input, or client_payload.retry_reason in the repository_dispatch) naming the diagnosed cause."; } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+        fi
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        fetch-depth: 0
+        token: ${{ github.token }}
+        persist-credentials: false
+        ref: ${{ github.sha }}
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      with:
+        node-version: 24.22.1
+    - name: Resolve published immutable assets
+      id: release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        DISPATCH_TAG: ${{ github.event.client_payload.tag }}
+        DISPATCH_EVIDENCE_TAG: ${{ github.event.client_payload.evidence_tag }}
+        INPUT_TAG: ${{ inputs.tag }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        fail() {
+          echo "::error title=StackKits Release Docs::$1"
+          { echo "### StackKits Release Docs failed"; echo; echo "$1"; } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+        }
+        tag="${DISPATCH_TAG:-${INPUT_TAG:-}}"
+        if [ -z "$tag" ]; then tag="$(gh api repos/kombifyio/StackKits/releases/latest --jq .tag_name)"; fi
+        [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "Tag '$tag' is not a vMAJOR.MINOR.PATCH release tag."
+        release="$(gh api "repos/kombifyio/StackKits/releases/tags/$tag")"
+        [ "$(jq -r .draft <<<"$release")" = false ] || fail "Release $tag is still a draft."
+        [ "$(jq -r .prerelease <<<"$release")" = false ] || fail "Release $tag is a prerelease; only published releases are synced."
+        names="$(jq -r '.assets[].name' <<<"$release")"
+        available=true
+        for name in stackkits-use-case-catalog-v1.json stackkits-compatibility-v1.json; do
+          grep -Fxq "$name" <<<"$names" || available=false
+        done
+        # Lifecycle evidence is attached to the release its runs cover, which
+        # trails the synced tag until runs for that tag are projected.
+        evidence_tag="${DISPATCH_EVIDENCE_TAG:-$tag}"
+        [[ "$evidence_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "Evidence tag '$evidence_tag' is not a vMAJOR.MINOR.PATCH release tag."
+        if [ "$evidence_tag" != "$tag" ]; then
+          evidence_release="$(gh api "repos/kombifyio/StackKits/releases/tags/$evidence_tag")"
+          if [ "$(jq -r '.draft or .prerelease' <<<"$evidence_release")" != false ]; then
+            fail "Lifecycle evidence release $evidence_tag is not a published release."
           fi
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-          token: ${{ github.token }}
-          persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24.22.1
-      - name: Resolve published immutable assets
-        id: release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          DISPATCH_TAG: ${{ github.event.client_payload.tag }}
-          DISPATCH_EVIDENCE_TAG: ${{ github.event.client_payload.evidence_tag }}
-          INPUT_TAG: ${{ inputs.tag }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          fail() {
-            echo "::error title=StackKits Release Docs::$1"
-            { echo "### StackKits Release Docs failed"; echo; echo "$1"; } >> "$GITHUB_STEP_SUMMARY"
-            exit 1
-          }
-          tag="${DISPATCH_TAG:-${INPUT_TAG:-}}"
-          if [ -z "$tag" ]; then tag="$(gh api repos/kombifyio/StackKits/releases/latest --jq .tag_name)"; fi
-          [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "Tag '$tag' is not a vMAJOR.MINOR.PATCH release tag."
-          release="$(gh api "repos/kombifyio/StackKits/releases/tags/$tag")"
-          [ "$(jq -r .draft <<<"$release")" = false ] || fail "Release $tag is still a draft."
-          [ "$(jq -r .prerelease <<<"$release")" = false ] || fail "Release $tag is a prerelease; only published releases are synced."
-          names="$(jq -r '.assets[].name' <<<"$release")"
-          available=true
-          for name in stackkits-use-case-catalog-v1.json stackkits-compatibility-v1.json; do
-            grep -Fxq "$name" <<<"$names" || available=false
-          done
-          # Lifecycle evidence is attached to the release its runs cover, which
-          # trails the synced tag until runs for that tag are projected.
-          evidence_tag="${DISPATCH_EVIDENCE_TAG:-$tag}"
-          [[ "$evidence_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || fail "Evidence tag '$evidence_tag' is not a vMAJOR.MINOR.PATCH release tag."
-          if [ "$evidence_tag" != "$tag" ]; then
-            evidence_release="$(gh api "repos/kombifyio/StackKits/releases/tags/$evidence_tag")"
-            if [ "$(jq -r '.draft or .prerelease' <<<"$evidence_release")" != false ]; then
-              fail "Lifecycle evidence release $evidence_tag is not a published release."
-            fi
+        fi
+        echo "tag=$tag" >> "$GITHUB_OUTPUT"
+        echo "evidence_tag=$evidence_tag" >> "$GITHUB_OUTPUT"
+        echo "available=$available" >> "$GITHUB_OUTPUT"
+        if [ "$available" != true ]; then
+          echo "## DocsSyncPending" >> "$GITHUB_STEP_SUMMARY"
+          echo "$tag does not yet contain both StackKits documentation manifests." >> "$GITHUB_STEP_SUMMARY"
+        fi
+    - name: Download, validate and render
+      if: steps.release.outputs.available == 'true'
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TAG: ${{ steps.release.outputs.tag }}
+        EVIDENCE_TAG: ${{ steps.release.outputs.evidence_tag }}
+        EXPECTED_CATALOG_DIGEST: ${{ github.event.client_payload.catalog_digest }}
+        EXPECTED_COMPATIBILITY_DIGEST: ${{ github.event.client_payload.compatibility_digest }}
+        EXPECTED_EVIDENCE_DIGEST: ${{ github.event.client_payload.evidence_digest }}
+        EXPECTED_CLI_REFERENCE_DIGEST: ${{ github.event.client_payload.cli_reference_digest }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        fail() {
+          echo "::error title=StackKits Release Docs::$1"
+          { echo "### StackKits Release Docs failed"; echo; echo "$1"; } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+        }
+        mkdir -p .tmp/stackkits-docs
+        gh release download "$TAG" --repo kombifyio/StackKits --dir .tmp/stackkits-docs \
+          --pattern stackkits-use-case-catalog-v1.json --pattern stackkits-compatibility-v1.json \
+          || fail "Release $TAG of kombifyio/StackKits: the two documentation manifests could not be downloaded."
+        # The lifecycle evidence projection is optional and mutable. Without an
+        # incoming asset the sync renders the newest stored projection.
+        evidence=.tmp/stackkits-docs/stackkits-compatibility-evidence-v3.json
+        if gh release download "$EVIDENCE_TAG" --repo kombifyio/StackKits --dir .tmp/stackkits-docs \
+          --pattern stackkits-compatibility-evidence-v3.json 2>/dev/null; then
+          if [ -n "${EXPECTED_EVIDENCE_DIGEST:-}" ]; then
+            [ "sha256:$(sha256sum "$evidence" | cut -d' ' -f1)" = "$EXPECTED_EVIDENCE_DIGEST" ] \
+              || fail "The evidence asset of $EVIDENCE_TAG does not match the digest named by the dispatch ($EXPECTED_EVIDENCE_DIGEST)."
           fi
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          echo "evidence_tag=$evidence_tag" >> "$GITHUB_OUTPUT"
-          echo "available=$available" >> "$GITHUB_OUTPUT"
-          if [ "$available" != true ]; then
-            echo "## DocsSyncPending" >> "$GITHUB_STEP_SUMMARY"
-            echo "$tag does not yet contain both StackKits documentation manifests." >> "$GITHUB_STEP_SUMMARY"
+          if [ "$(jq -r .stackkitsVersion "$evidence")" != "$EVIDENCE_TAG" ]; then
+            fail "The lifecycle evidence attached to $EVIDENCE_TAG is bound to another release."
           fi
-      - name: Download, validate and render
-        if: steps.release.outputs.available == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ steps.release.outputs.tag }}
-          EVIDENCE_TAG: ${{ steps.release.outputs.evidence_tag }}
-          EXPECTED_CATALOG_DIGEST: ${{ github.event.client_payload.catalog_digest }}
-          EXPECTED_COMPATIBILITY_DIGEST: ${{ github.event.client_payload.compatibility_digest }}
-          EXPECTED_EVIDENCE_DIGEST: ${{ github.event.client_payload.evidence_digest }}
-          EXPECTED_CLI_REFERENCE_DIGEST: ${{ github.event.client_payload.cli_reference_digest }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          fail() {
-            echo "::error title=StackKits Release Docs::$1"
-            { echo "### StackKits Release Docs failed"; echo; echo "$1"; } >> "$GITHUB_STEP_SUMMARY"
-            exit 1
-          }
-          mkdir -p .tmp/stackkits-docs
-          gh release download "$TAG" --repo kombifyio/StackKits --dir .tmp/stackkits-docs \
-            --pattern stackkits-use-case-catalog-v1.json --pattern stackkits-compatibility-v1.json \
-            || fail "Release $TAG of kombifyio/StackKits: the two documentation manifests could not be downloaded."
-          # The lifecycle evidence projection is optional and mutable. Without an
-          # incoming asset the sync renders the newest stored projection.
-          evidence=.tmp/stackkits-docs/stackkits-compatibility-evidence-v3.json
-          if gh release download "$EVIDENCE_TAG" --repo kombifyio/StackKits --dir .tmp/stackkits-docs \
-            --pattern stackkits-compatibility-evidence-v3.json 2>/dev/null; then
-            if [ -n "${EXPECTED_EVIDENCE_DIGEST:-}" ]; then
-              [ "sha256:$(sha256sum "$evidence" | cut -d' ' -f1)" = "$EXPECTED_EVIDENCE_DIGEST" ] \
-                || fail "The evidence asset of $EVIDENCE_TAG does not match the digest named by the dispatch ($EXPECTED_EVIDENCE_DIGEST)."
-            fi
-            if [ "$(jq -r .stackkitsVersion "$evidence")" != "$EVIDENCE_TAG" ]; then
-              fail "The lifecycle evidence attached to $EVIDENCE_TAG is bound to another release."
-            fi
-          elif [ -n "${EXPECTED_EVIDENCE_DIGEST:-}" ]; then
-            fail "The dispatch names lifecycle evidence that $EVIDENCE_TAG does not contain."
+        elif [ -n "${EXPECTED_EVIDENCE_DIGEST:-}" ]; then
+          fail "The dispatch names lifecycle evidence that $EVIDENCE_TAG does not contain."
+        fi
+        catalog_digest="$(jq -r .contentDigest .tmp/stackkits-docs/stackkits-use-case-catalog-v1.json)"
+        compatibility_digest="$(jq -r .contentDigest .tmp/stackkits-docs/stackkits-compatibility-v1.json)"
+        if [ -n "${EXPECTED_CATALOG_DIGEST:-}" ]; then
+          [ "$catalog_digest" = "$EXPECTED_CATALOG_DIGEST" ] || fail "The use-case catalog digest $catalog_digest differs from the dispatched $EXPECTED_CATALOG_DIGEST."
+        fi
+        if [ -n "${EXPECTED_COMPATIBILITY_DIGEST:-}" ]; then
+          [ "$compatibility_digest" = "$EXPECTED_COMPATIBILITY_DIGEST" ] || fail "The compatibility digest $compatibility_digest differs from the dispatched $EXPECTED_COMPATIBILITY_DIGEST."
+        fi
+        node scripts/sync-stackkits-release-docs.mjs --from-dir .tmp/stackkits-docs --tag "$TAG" --write \
+          || fail "scripts/sync-stackkits-release-docs.mjs rejected the $TAG manifests; its message is in the step log above."
+        # The CLI reference is immutable per tag and exists only for releases
+        # whose command tree ships the emitter; older tags keep the committed pages.
+        cli_reference=.tmp/stackkits-docs/stackkits-cli-reference-v1.json
+        if gh release download "$TAG" --repo kombifyio/StackKits --dir .tmp/stackkits-docs \
+          --pattern stackkits-cli-reference-v1.json 2>/dev/null; then
+          if [ -n "${EXPECTED_CLI_REFERENCE_DIGEST:-}" ]; then
+            [ "sha256:$(sha256sum "$cli_reference" | cut -d' ' -f1)" = "$EXPECTED_CLI_REFERENCE_DIGEST" ] \
+              || fail "The CLI reference of $TAG does not match the digest named by the dispatch ($EXPECTED_CLI_REFERENCE_DIGEST)."
           fi
-          catalog_digest="$(jq -r .contentDigest .tmp/stackkits-docs/stackkits-use-case-catalog-v1.json)"
-          compatibility_digest="$(jq -r .contentDigest .tmp/stackkits-docs/stackkits-compatibility-v1.json)"
-          if [ -n "${EXPECTED_CATALOG_DIGEST:-}" ]; then
-            [ "$catalog_digest" = "$EXPECTED_CATALOG_DIGEST" ] || fail "The use-case catalog digest $catalog_digest differs from the dispatched $EXPECTED_CATALOG_DIGEST."
+          jq -es 'length == 1 and (.[0] | type == "object")' "$cli_reference" >/dev/null \
+            || fail "The CLI reference of $TAG must be a single JSON object."
+          has_public_path="$(jq -r 'has("publicPath")' "$cli_reference")" \
+            || fail "The CLI reference of $TAG is not a valid JSON object."
+          # The CLI reference pages and docs.json are always rendered. Only the
+          # twelve first-screen pages need a publicPath; without one they stay
+          # as committed, and a present but invalid publicPath still fails.
+          public_source_sha="$(jq -r .release.publicSourceSha .tmp/stackkits-docs/stackkits-use-case-catalog-v1.json)"
+          node scripts/render-stackkits-cli-reference.mjs --from "$cli_reference" --source-sha "$public_source_sha" --write \
+            || fail "scripts/render-stackkits-cli-reference.mjs rejected the $TAG CLI reference; its message is in the step log above."
+          if [ "$has_public_path" != true ]; then
+            echo "CLI reference for $TAG has no public path; the CLI reference pages are rendered and the twelve first-screen pages stay as committed." >> "$GITHUB_STEP_SUMMARY"
           fi
-          if [ -n "${EXPECTED_COMPATIBILITY_DIGEST:-}" ]; then
-            [ "$compatibility_digest" = "$EXPECTED_COMPATIBILITY_DIGEST" ] || fail "The compatibility digest $compatibility_digest differs from the dispatched $EXPECTED_COMPATIBILITY_DIGEST."
-          fi
-          node scripts/sync-stackkits-release-docs.mjs --from-dir .tmp/stackkits-docs --tag "$TAG" --write \
-            || fail "scripts/sync-stackkits-release-docs.mjs rejected the $TAG manifests; its message is in the step log above."
-          # The CLI reference is immutable per tag and exists only for releases
-          # whose command tree ships the emitter; older tags keep the committed pages.
-          cli_reference=.tmp/stackkits-docs/stackkits-cli-reference-v1.json
-          if gh release download "$TAG" --repo kombifyio/StackKits --dir .tmp/stackkits-docs \
-            --pattern stackkits-cli-reference-v1.json 2>/dev/null; then
-            jq -es 'length == 1 and (.[0] | type == "object")' "$cli_reference" >/dev/null \
-              || fail "The CLI reference of $TAG must be a single JSON object."
-            if [ -n "${EXPECTED_CLI_REFERENCE_DIGEST:-}" ]; then
-              [ "sha256:$(sha256sum "$cli_reference" | cut -d' ' -f1)" = "$EXPECTED_CLI_REFERENCE_DIGEST" ] \
-                || fail "The CLI reference of $TAG does not match the digest named by the dispatch ($EXPECTED_CLI_REFERENCE_DIGEST)."
-            fi
-            has_public_path="$(jq -r 'has("publicPath")' "$cli_reference")" \
-              || fail "The CLI reference of $TAG is not a valid JSON object."
-            # The CLI reference pages and docs.json are always rendered. Only the
-            # twelve first-screen pages need a publicPath; without one they stay
-            # as committed, and a present but invalid publicPath still fails.
-            public_source_sha="$(jq -r .release.publicSourceSha .tmp/stackkits-docs/stackkits-use-case-catalog-v1.json)"
-            node scripts/render-stackkits-cli-reference.mjs --from "$cli_reference" --source-sha "$public_source_sha" --write \
-              || fail "scripts/render-stackkits-cli-reference.mjs rejected the $TAG CLI reference; its message is in the step log above."
-            if [ "$has_public_path" != true ]; then
-              echo "CLI reference for $TAG has no public path; the CLI reference pages are rendered and the twelve first-screen pages stay as committed." >> "$GITHUB_STEP_SUMMARY"
-            fi
-          elif [ -n "${EXPECTED_CLI_REFERENCE_DIGEST:-}" ]; then
-            fail "The dispatch names a CLI reference that $TAG does not contain."
-          fi
-      # The pull request is opened by the kombify-ci App so that its pull_request
-      # events start the required Trusted Public Safety workflow; a pull request
-      # opened with the workflow token starts no workflows and auto-merge would
-      # wait for that check forever. The App holds Contents read only, so the
-      # generated branch is pushed and the squash merge is queued with the
-      # workflow token (contents: write on this repository).
-      - name: Mint the CI App pull request token
-        id: pr-token
-        if: steps.release.outputs.available == 'true'
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        with:
-          app-id: ${{ vars.KOMBIFY_CI_APP_ID }}
-          private-key: ${{ secrets.KOMBIFY_CI_APP_PRIVATE_KEY }}
-          owner: KombiverseLabs
-          repositories: mintlify-docs
-          permission-contents: read
-          permission-pull-requests: write
-      - name: Open or update generated-only PR
-        if: steps.release.outputs.available == 'true'
-        env:
-          GH_TOKEN: ${{ steps.pr-token.outputs.token }}
-          PUSH_TOKEN: ${{ github.token }}
-          BRANCH: bot/stackkits-release-docs
-          TAG: ${{ steps.release.outputs.tag }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ -z "${GH_TOKEN:-}" ] || [ -z "${PUSH_TOKEN:-}" ]; then
-            echo "::error::A credential is missing (CI App pull request token or workflow token)."
-            exit 1
-          fi
-          generated=(
-            data/stackkits stackkits/reference/use-case-catalog.mdx stackkits/reference/os-compatibility.mdx
-            stackkits/reference/application-delivery-compatibility.mdx stackkits/reference/cli docs.json
-            stackkits/quickstart.mdx ar/stackkits/quickstart.mdx de/stackkits/quickstart.mdx
-            es/stackkits/quickstart.mdx hi/stackkits/quickstart.mdx zh-Hans/stackkits/quickstart.mdx
-            stackkits/install-in-10-minutes.mdx ar/stackkits/install-in-10-minutes.mdx
-            de/stackkits/install-in-10-minutes.mdx es/stackkits/install-in-10-minutes.mdx
-            hi/stackkits/install-in-10-minutes.mdx zh-Hans/stackkits/install-in-10-minutes.mdx
-          )
-          # Untracked files count: a new command adds a CLI reference page.
-          if [ -z "$(git status --porcelain --untracked-files=all -- "${generated[@]}")" ]; then
-            echo "No public snapshot drift."
-            exit 0
-          fi
-          # Fails closed on any changed path outside the generated set.
-          node scripts/stackkits-generated-only-paths.mjs
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          gh auth setup-git --hostname github.com
-          git fetch origin "refs/heads/$BRANCH:refs/remotes/origin/$BRANCH" || true
-          git checkout -B "$BRANCH"
-          # Some locales do not have an install page. Include tracked deletions and new outputs.
-          git ls-files -z --cached --others --exclude-standard -- "${generated[@]}" \
-            | git --literal-pathspecs add --pathspec-from-file=- --pathspec-file-nul
-          git commit -m "docs(stackkits): sync $TAG release manifests"
-          GH_TOKEN="$PUSH_TOKEN" git push --force-with-lease origin "$BRANCH"
-          # `gh pr view <branch>` also matches merged PRs of the reused bot
-          # branch, so only an open PR counts as already existing.
-          if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq length)" = "0" ]; then
-            gh pr create --base main --head "$BRANCH" --title "docs(stackkits): sync $TAG release manifests" --body "Automated projection from immutable public StackKits release assets."
-          fi
-          GH_TOKEN="$PUSH_TOKEN" gh pr merge "$BRANCH" --auto --squash
+        elif [ -n "${EXPECTED_CLI_REFERENCE_DIGEST:-}" ]; then
+          fail "The dispatch names a CLI reference that $TAG does not contain."
+        fi
+    - name: Check the generated-path boundary before publisher checkout
+      if: steps.release.outputs.available == 'true'
+      run: node scripts/stackkits-generated-only-paths.mjs
+    - name: Export only the generated patch as untrusted data
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/generated"
+        GIT_INDEX_FILE="$RUNNER_TEMP/generated-index" git read-tree HEAD
+        generated=(
+          data/stackkits stackkits/reference/use-case-catalog.mdx stackkits/reference/os-compatibility.mdx
+          stackkits/reference/application-delivery-compatibility.mdx stackkits/reference/cli docs.json
+          stackkits/quickstart.mdx ar/stackkits/quickstart.mdx de/stackkits/quickstart.mdx
+          es/stackkits/quickstart.mdx hi/stackkits/quickstart.mdx zh-Hans/stackkits/quickstart.mdx
+          stackkits/install-in-10-minutes.mdx ar/stackkits/install-in-10-minutes.mdx
+          de/stackkits/install-in-10-minutes.mdx es/stackkits/install-in-10-minutes.mdx
+          hi/stackkits/install-in-10-minutes.mdx zh-Hans/stackkits/install-in-10-minutes.mdx
+        )
+        # Some locales have no install page. Stage only existing outputs and tracked deletions.
+        git ls-files -z --cached --others --exclude-standard -- "${generated[@]}" \
+          | GIT_INDEX_FILE="$RUNNER_TEMP/generated-index" git --literal-pathspecs add --pathspec-from-file=- --pathspec-file-nul
+        GIT_INDEX_FILE="$RUNNER_TEMP/generated-index" git diff --cached --no-ext-diff --no-textconv --binary HEAD -- "${generated[@]}" > "$RUNNER_TEMP/generated/candidate.patch"
+        node - <<'JS'
+        const fs = require('node:fs'), crypto = require('node:crypto');
+        const patch = fs.readFileSync(process.env.RUNNER_TEMP + '/generated/candidate.patch');
+        fs.writeFileSync(process.env.RUNNER_TEMP + '/generated/manifest.json', JSON.stringify({
+         schema: 'kombify.mintlify-generated.v1', producer: 'stackkits', source_sha: process.env.GITHUB_SHA,
+         run_id: process.env.GITHUB_RUN_ID, run_attempt: process.env.GITHUB_RUN_ATTEMPT,
+         patch_sha256: crypto.createHash('sha256').update(patch).digest('hex')
+        }) + '\n');
+        JS
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+      with:
+        name: mintlify-generated-stackkits-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/generated/
+        if-no-files-found: error
+        retention-days: 1
+    if: github.repository == 'KombiverseLabs/mintlify-docs' && github.ref == 'refs/heads/main'
+  publish:
+    name: Validate data and publish on a fresh GitHub runner
+    needs: generate
+    if: needs.generate.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+    timeout-minutes: 10
+    steps:
+    - name: Require immutable authority
+      env:
+        AUTHORITY_REF: ${{ vars.KOMBIFY_DELIVERY_STANDARDS_REF }}
+      shell: bash
+      run: '[[ "$AUTHORITY_REF" =~ ^[a-f0-9]{40}$ ]]'
+    - name: Mint immutable publisher reader
+      id: authority-reader
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
+      with:
+        app-id: ${{ vars.KOMBIFY_CI_APP_ID }}
+        private-key: ${{ secrets.KOMBIFY_CI_APP_PRIVATE_KEY }}
+        owner: KombiverseLabs
+        repositories: kombify-workspace
+        permission-contents: read
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        repository: KombiverseLabs/kombify-workspace
+        ref: ${{ vars.KOMBIFY_DELIVERY_STANDARDS_REF }}
+        path: authority
+        token: ${{ steps.authority-reader.outputs.token }}
+        persist-credentials: false
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        path: candidate
+        persist-credentials: false
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      with:
+        node-version: 24.22.1
+    - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      with:
+        name: mintlify-generated-stackkits-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/generated-data
+    - name: Install the trusted publisher parser without lifecycle scripts
+      shell: bash
+      run: |
+        set -euo pipefail
+        npm install --prefix "$RUNNER_TEMP/publisher-parser" --no-save --ignore-scripts --no-audit --no-fund --package-lock=false yaml@2.9.1
+        ln -s "$RUNNER_TEMP/publisher-parser/node_modules" authority/node_modules
+    - name: Mint publication identity only on the clean runner
+      id: publisher
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
+      with:
+        app-id: ${{ vars.KOMBIFY_CI_APP_ID }}
+        private-key: ${{ secrets.KOMBIFY_CI_APP_PRIVATE_KEY }}
+        owner: KombiverseLabs
+        repositories: mintlify-docs
+        permission-contents: write
+        permission-pull-requests: write
+    - name: Admit the generated data with the trusted publisher
+      env:
+        GH_TOKEN: ${{ steps.publisher.outputs.token }}
+      shell: bash
+      run: |
+        node authority/scripts/mintlify-generated-publication.mjs --producer stackkits --repo "$GITHUB_WORKSPACE/candidate" --data "$RUNNER_TEMP/generated-data" --source "$GITHUB_SHA"

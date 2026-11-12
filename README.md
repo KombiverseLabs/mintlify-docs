@@ -42,9 +42,22 @@ Truth sources, never the retired legacy documentation repository:
 - A StackKits page needs the current public release as evidence; presence in the
   repository, draft metadata or preview status is not evidence.
 - SpeechKit instructions are pinned to its exact public release and assets.
-- Pull requests run the trusted public safety workflow without private
-  credentials or a shared writable tool cache; the validator and the exact-head
-  check must succeed.
+- The trusted workspace session publisher checks the exact candidate before
+  pushing a PR branch, including its provider preview. The merge batch checks
+  the complete integration result and conditionally fast-forwards that exact
+  commit to `main`, which the native Mintlify integration already publishes.
+- Both boundaries read Git blobs and execute no candidate code. Generated
+  references and toolchain updates use a clean trusted publisher job with the
+  same full-tree validation; generation itself receives no branch-write token.
+- Generated AGENTS policy, engineering prose, source binding and test-boundary
+  checks remain. After a successful main push the batch reads the serving site back; a readback failure is a warning.
+- Delivery observes the native `main` deployment and checks public routes; it
+  writes no second deployment branch. Local safety scripts remain projections
+  of the workspace validator, refreshed by `scripts/mintlify-public-safety-sync.mjs`.
+
+The cutover and retirement of the old mandatory workflow follow workspace
+`CI-CD-PLATFORM-STANDARD.md` §4.0. The reviewed consumer follows #516; ordinary
+documentation changes use the same publisher and merge batch afterwards.
 
 ## Localization
 
@@ -147,9 +160,9 @@ mise run local:e2e
 | --- | --- |
 | `mise run dev` | Pinned local Mintlify preview. |
 | `mise run check` | Locale checks, positive scope, navigation, content and local links. |
-| `mise run local:e2e` | `mint validate` plus allowed and forbidden routes over real local HTTP; must pass before publication. |
+| `mise run local:e2e` | `mint validate` plus allowed and forbidden routes over real local HTTP for scoped acceptance. |
 | `mise run remote:public-safety` | Deployed route and projection matrix. |
-| `mise run postlive:wait-exact-live` | Wait for a successful `docs.kombify.io` deployment at exact `SOURCE_SHA`. |
+| `mise run postlive:wait-exact-live` | Wait for a successful native `main` deployment at exact `SOURCE_SHA`. |
 | `scripts/check-stackkits-release-truth.ps1` | Installer commands on the current public release, no stale lifecycle wording. |
 | `scripts/check-stackkits-external-links.ps1` | Optional registered StackKits destinations actually offered as publishable literals. |
 | `scripts/check-speechkit-release-truth.ps1` | Validate offered SpeechKit claims and mutable download links; check existing generated release blocks. |
