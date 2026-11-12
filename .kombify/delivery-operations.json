@@ -17,98 +17,163 @@
         "schemas/public-safety-policy.schema.json",
         "scripts/**",
         "mise.toml",
-        ".kombify/**"
+        ".kombify/VERSION"
       ],
       "operations": {
         "build": {
           "fast": [
             {
-              "task": "check"
+              "command": [
+                "node",
+                "standards/scripts/mintlify-publication.mjs",
+                "build",
+                "--repo",
+                ".",
+                "--source",
+                "${SOURCE_SHA}"
+              ]
             }
           ],
           "stable": [
             {
-              "task": "check"
+              "command": [
+                "node",
+                "standards/scripts/mintlify-publication.mjs",
+                "build",
+                "--repo",
+                ".",
+                "--source",
+                "${SOURCE_SHA}"
+              ]
             }
           ]
         },
         "validate": {
           "fast": [
             {
-              "task": "local:e2e"
+              "command": [
+                "node",
+                "standards/scripts/mintlify-publication.mjs",
+                "validate",
+                "--repo",
+                ".",
+                "--source",
+                "${SOURCE_SHA}"
+              ]
             }
           ],
           "stable": [
             {
-              "task": "local:e2e"
+              "command": [
+                "node",
+                "standards/scripts/mintlify-publication.mjs",
+                "validate",
+                "--repo",
+                ".",
+                "--source",
+                "${SOURCE_SHA}"
+              ]
             }
           ]
         },
         "publish": {
           "fast": [
             {
-              "satisfied": {
-                "by": "mintlify:KombiverseLabs/mintlify-docs",
-                "reason": "Mintlify's repository integration starts publication; promote independently verifies the exact merged main deployment."
-              }
+              "command": [
+                "node",
+                "standards/scripts/mintlify-publication.mjs",
+                "publish",
+                "--repo",
+                ".",
+                "--source",
+                "${SOURCE_SHA}"
+              ]
             }
           ],
           "stable": [
             {
-              "satisfied": {
-                "by": "mintlify:KombiverseLabs/mintlify-docs",
-                "reason": "Mintlify's repository integration starts publication; promote independently verifies the exact merged main deployment."
-              }
+              "command": [
+                "node",
+                "standards/scripts/mintlify-publication.mjs",
+                "publish",
+                "--repo",
+                ".",
+                "--source",
+                "${SOURCE_SHA}"
+              ]
             }
           ]
         },
         "promote": {
           "fast": [
             {
-              "task": "postlive:wait-exact-live"
-            },
-            {
-              "satisfied": {
-                "by": "public-docs/publish",
-                "reason": "The immutable artifact was activated by the group's authoritative publish adapter."
-              }
+              "command": [
+                "node",
+                "standards/scripts/mintlify-publication.mjs",
+                "promote",
+                "--repo",
+                ".",
+                "--source",
+                "${SOURCE_SHA}"
+              ]
             }
           ],
           "stable": [
             {
-              "task": "postlive:wait-exact-live"
-            },
-            {
-              "satisfied": {
-                "by": "public-docs/publish",
-                "reason": "The immutable artifact was activated by the group's authoritative publish adapter."
-              }
+              "command": [
+                "node",
+                "standards/scripts/mintlify-publication.mjs",
+                "promote",
+                "--repo",
+                ".",
+                "--source",
+                "${SOURCE_SHA}"
+              ]
             }
           ]
         },
         "smoke": {
           "fast": [
             {
-              "task": "remote:public-safety"
+              "command": [
+                "node",
+                "standards/scripts/mintlify-publication.mjs",
+                "smoke",
+                "--repo",
+                ".",
+                "--source",
+                "${SOURCE_SHA}"
+              ]
             }
           ],
           "stable": [
             {
-              "task": "remote:public-safety"
+              "command": [
+                "node",
+                "standards/scripts/mintlify-publication.mjs",
+                "smoke",
+                "--repo",
+                ".",
+                "--source",
+                "${SOURCE_SHA}"
+              ]
             }
           ]
         },
         "async": {
           "fast": [
             {
-              "task": "ci:async"
+              "satisfied": {
+                "by": "docs-quality",
+                "reason": "Quality checks and M13 hosted acceptance run outside publication."
+              }
             }
           ],
           "stable": [
             {
               "satisfied": {
-                "by": "public-docs/validate",
-                "reason": "Stable validation owns the complete local docs gate; no duplicate asynchronous validation is required."
+                "by": "docs-quality",
+                "reason": "Quality checks and M13 hosted acceptance run outside publication."
               }
             }
           ]

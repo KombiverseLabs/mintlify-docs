@@ -76,7 +76,7 @@ do {
         exit 0
     }
 
-    Start-Sleep -Seconds 5
+    Start-Sleep -Seconds 60
 } while ((Get-Date) -lt $deadline)
 
 throw "No successful exact Mintlify deployment reached $expectedOrigin within $TimeoutSeconds seconds; last=$lastState"

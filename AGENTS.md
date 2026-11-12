@@ -52,8 +52,9 @@ navigation source of truth; pages are MDX files.
 - Workspace `DOCUMENTATION-STANDARD.md` (tier model, Tier-1 rules, Brand bind)
   and `PLATFORM-STRATEGY.md` (product naming, public/internal boundaries);
   its "Repository Documentation" section for root metadata.
-- Repository gates: `.github/workflows/public-safety.yml` (public allowlist)
-  and `.github/workflows/parity-gate.yml` (generated-MDX frontmatter).
+- Publication: workspace `CI-CD-PLATFORM-STANDARD.md` §4.0, executed by
+  the workspace publisher before a branch is pushed and the batch before `main` moves.
+  Local safety scripts are projected by workspace `scripts/mintlify-public-safety-sync.mjs`.
 
 ## Working Rules
 
@@ -72,8 +73,10 @@ navigation source of truth; pages are MDX files.
 
 ## Verification
 
-Run `mise run check` for config and path validation, and `mise run local:e2e`
-before claiming the docs are ready to publish.
+Run applicable cheap checks for the changed source. Hosted acceptance belongs
+to M13; use `mise run local:e2e` only when that acceptance is in scope. Publish
+through the workspace session publisher; the merge batch handles source PRs,
+and the trusted validator checks the exact tree before native `main` advances.
 
 <!-- BEGIN GENERATED: beads-cloudflare-access -->
 ## Cloudflare Beads access
