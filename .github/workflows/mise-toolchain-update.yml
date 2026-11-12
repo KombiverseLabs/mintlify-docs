@@ -1,86 +1,130 @@
-# Public-repository adapter synchronized from KombiverseLabs/.github@fedaa2443f9b0615e4459936ce699e000b8ab1c1.
-# The kombify-ci App token (org secret KOMBIFY_CI_APP_PRIVATE_KEY, variable KOMBIFY_CI_APP_ID) writes the update PR; no personal token.
+# Generation and publication use separate fresh GitHub-hosted jobs. Only data crosses the boundary.
 name: Mise Toolchain Update
-
-on:
+'on':
   schedule:
-    - cron: '17 5 * * 1'
-  workflow_dispatch:
-
+  - cron: 17 5 * * 1
+  workflow_dispatch: null
 permissions:
   contents: read
-
 jobs:
-  update:
-    name: Propose current mise toolchain
-    runs-on: ${{ vars.GHA_HOSTED_RUNNER || 'depot-ubuntu-24.04' }}
+  generate:
+    name: Generate data without a publication identity
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     timeout-minutes: 10
-    env:
-      CI: "true"
-      MISE_YES: "1"
-      UPDATE_BRANCH: automation/mise-toolchain-update
     steps:
-      - name: Check out default branch
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          ref: main
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Install pinned mise updater
-        uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
-        with:
-          version: "2026.9.16"
-          sha256: b6f8757201f6a2ee799f45f3f52ef7ca0b4071523637dc3b0b24264dd3333518
-          install: false
-          env: false
-      - name: Update declared versions and lock metadata
-        shell: bash
-        run: |
-          set -euo pipefail
-          mise trust "$PWD/mise.toml"
-          mise upgrade --bump --yes
-          mise lock --yes
-      - name: Mint the CI App token for the automation pull request
-        id: app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
-        with:
-          app-id: ${{ vars.KOMBIFY_CI_APP_ID }}
-          private-key: ${{ secrets.KOMBIFY_CI_APP_PRIVATE_KEY }}
-          permission-contents: write
-          permission-pull-requests: write
-      - name: Open or refresh the automation pull request
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          if git diff --quiet; then
-            echo "Toolchain is current."
-            exit 0
-          fi
-          if [[ -z "${GH_TOKEN:-}" ]]; then
-            echo "::error::The kombify-ci App token is required when a mise update must write the automation PR."
-            exit 1
-          fi
-          gh auth setup-git
-          git config user.name "kombify-automation"
-          git config user.email "automation@kombify.dev"
-          git switch -C "$UPDATE_BRANCH"
-          git add -A
-          git commit -m "chore(toolchain): update mise versions and lock"
-          remote_sha="$(git ls-remote --heads origin "refs/heads/$UPDATE_BRANCH" | awk '{print $1}')"
-          if [[ -n "$remote_sha" ]]; then
-            git push --force-with-lease="refs/heads/$UPDATE_BRANCH:$remote_sha" origin "$UPDATE_BRANCH"
-          else
-            git push origin "$UPDATE_BRANCH"
-          fi
-          existing="$(gh pr list --head "$UPDATE_BRANCH" --base main --state open --json url --jq '.[0].url // empty')"
-          if [[ -z "$existing" ]]; then
-            gh pr create \
-              --base main \
-              --head "$UPDATE_BRANCH" \
-              --title "chore(toolchain): update mise versions and lock" \
-              --body "Automated mise toolchain refresh. Sensitive or major changes remain review-required; repository gates decide merge eligibility."
-          else
-            echo "Refreshed $existing"
-          fi
+    - name: Check out default branch
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - name: Install pinned mise updater
+      uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c
+      with:
+        version: 2026.9.16
+        sha256: b6f8757201f6a2ee799f45f3f52ef7ca0b4071523637dc3b0b24264dd3333518
+        install: false
+        env: false
+    - name: Update declared versions and lock metadata
+      shell: bash
+      run: |
+        set -euo pipefail
+        mise trust "$PWD/mise.toml"
+        mise upgrade --bump --yes
+        mise lock --yes
+    - name: Export only the generated patch as untrusted data
+      shell: bash
+      run: |
+        set -euo pipefail
+        mkdir -p "$RUNNER_TEMP/generated"
+        GIT_INDEX_FILE="$RUNNER_TEMP/generated-index" git read-tree HEAD
+        GIT_INDEX_FILE="$RUNNER_TEMP/generated-index" git add -A -- mise.toml mise.lock
+        GIT_INDEX_FILE="$RUNNER_TEMP/generated-index" git diff --cached --no-ext-diff --no-textconv --binary HEAD -- mise.toml mise.lock > "$RUNNER_TEMP/generated/candidate.patch"
+        node - <<'JS'
+        const fs = require('node:fs'), crypto = require('node:crypto');
+        const patch = fs.readFileSync(process.env.RUNNER_TEMP + '/generated/candidate.patch');
+        fs.writeFileSync(process.env.RUNNER_TEMP + '/generated/manifest.json', JSON.stringify({
+         schema: 'kombify.mintlify-generated.v1', producer: 'mise', source_sha: process.env.GITHUB_SHA,
+         run_id: process.env.GITHUB_RUN_ID, run_attempt: process.env.GITHUB_RUN_ATTEMPT,
+         patch_sha256: crypto.createHash('sha256').update(patch).digest('hex')
+        }) + '\n');
+        JS
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+      with:
+        name: mintlify-generated-mise-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/generated/
+        if-no-files-found: error
+        retention-days: 1
+    env:
+      CI: 'true'
+      MISE_YES: '1'
+      UPDATE_BRANCH: session/mise-toolchain-update
+    if: github.repository == 'KombiverseLabs/mintlify-docs' && github.ref == 'refs/heads/main'
+  publish:
+    name: Validate data and publish on a fresh GitHub runner
+    needs: generate
+    if: needs.generate.result == 'success' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+    timeout-minutes: 10
+    steps:
+    - name: Require immutable authority
+      env:
+        AUTHORITY_REF: ${{ vars.KOMBIFY_DELIVERY_STANDARDS_REF }}
+      shell: bash
+      run: '[[ "$AUTHORITY_REF" =~ ^[a-f0-9]{40}$ ]]'
+    - name: Mint immutable publisher reader
+      id: authority-reader
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
+      with:
+        app-id: ${{ vars.KOMBIFY_CI_APP_ID }}
+        private-key: ${{ secrets.KOMBIFY_CI_APP_PRIVATE_KEY }}
+        owner: KombiverseLabs
+        repositories: kombify-workspace
+        permission-contents: read
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        repository: KombiverseLabs/kombify-workspace
+        ref: ${{ vars.KOMBIFY_DELIVERY_STANDARDS_REF }}
+        path: authority
+        token: ${{ steps.authority-reader.outputs.token }}
+        persist-credentials: false
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        path: candidate
+        persist-credentials: false
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+      with:
+        node-version: 24.22.1
+    - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+      with:
+        name: mintlify-generated-mise-${{ github.run_id }}-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/generated-data
+    - name: Install the trusted publisher parser without lifecycle scripts
+      shell: bash
+      run: |
+        set -euo pipefail
+        npm install --prefix "$RUNNER_TEMP/publisher-parser" --no-save --ignore-scripts --no-audit --no-fund --package-lock=false yaml@2.9.1
+        ln -s "$RUNNER_TEMP/publisher-parser/node_modules" authority/node_modules
+    - name: Mint publication identity only on the clean runner
+      id: publisher
+      uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
+      with:
+        app-id: ${{ vars.KOMBIFY_CI_APP_ID }}
+        private-key: ${{ secrets.KOMBIFY_CI_APP_PRIVATE_KEY }}
+        owner: KombiverseLabs
+        repositories: mintlify-docs
+        permission-contents: write
+        permission-pull-requests: write
+    - name: Admit the generated data with the trusted publisher
+      env:
+        GH_TOKEN: ${{ steps.publisher.outputs.token }}
+      shell: bash
+      run: |
+        node authority/scripts/mintlify-generated-publication.mjs --producer mise --repo "$GITHUB_WORKSPACE/candidate" --data "$RUNNER_TEMP/generated-data" --source "$GITHUB_SHA"
