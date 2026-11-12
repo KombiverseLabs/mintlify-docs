@@ -5,6 +5,8 @@ sidebarTitle: "快速入门"
 icon: rocket
 ---
 
+StackKits 会在你已有的电脑上搭建一个受保护的家庭实验室。你只需运行一条命令，最终得到运行中的服务、所有者登录，以及集中在一个文件里的访问详情。
+
 本快速入门会在你已经运营的服务器上，使用 Basement Kit 安装当前的公开 StackKits 版本。开始之前，请在[操作系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)中查看具有已发布生命周期证据的版本与主机组合。CLI 仍然是本地执行的权威。
 
 ## 你需要先准备什么
@@ -20,13 +22,15 @@ icon: rocket
 
 在受支持的服务器上，Basement 安装程序会创建 `~/my-homelab`，安装已发布的产物和所需的运行时，初始化本地所有者托管，引导本地 Admin/PocketID 访问，验证生成的 StackSpec，并应用默认的 Basement 服务：
 
+{/* public-path:begin install */}
 ```bash
-curl -sSL https://base.stackkit.cc | sh
+curl -sSL https://install.stackkit.cc | sh
 cd ~/my-homelab
 stackkit version
 stackkit logs latest --json
 cat .stackkit/access.json
 ```
+{/* public-path:end install */}
 
 <Warning>
   不需要托管的 kombify 账户。StackKits 自身仍然需要一个本地 Owner/Admin，
@@ -72,6 +76,18 @@ Basement 的一行命令已经执行了初始应用。只有在你有意修改�
 - 计划不是 `ready`：请修改 StackSpec 而不是生成的文件，然后重新审查。
 - 服务地址打不开：参见[故障排查](/zh-Hans/guides/stackkits/troubleshooting)和[日常使用](/zh-Hans/guides/stackkits/daily-use)。
 - 接下来，请在 [Node Hub 指南](/zh-Hans/guides/stackkits/node-hub)中完成保护。
+
+## 让 kombify AI 来运维
+
+要让 kombify AI 照看这台服务器，请把它连接到你的 kombify 账户。在 [app.kombify.io](https://app.kombify.io) 为你自己的服务器启动 Techstack 设置，它会创建一次性配对。然后在服务器上运行：
+
+{/* public-path:begin connect */}
+```bash
+sudo stackkit connect --server https://techstack.kombify.io
+```
+{/* public-path:end connect */}
+
+免费账户即可：服务器会在 kombify Cloud 中显示其状态，kombify AI 提供支持。kombify AI 代你执行的更改包含在付费方案中。
 
 ## 继续
 

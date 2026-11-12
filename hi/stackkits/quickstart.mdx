@@ -5,6 +5,8 @@ sidebarTitle: "क्विकस्टार्ट"
 icon: rocket
 ---
 
+StackKits आपके पास पहले से मौजूद कंप्यूटर पर एक सुरक्षित होमलैब सेट अप करता है। आप एक कमांड चलाते हैं और अंत में चालू सेवाएँ, ओनर साइन-इन और एक ही फ़ाइल में आपके एक्सेस विवरण मिलते हैं।
+
 यह क्विकस्टार्ट वर्तमान सार्वजनिक StackKits रिलीज़ को ऐसे सर्वर पर Basement Kit के साथ इंस्टॉल करता है जिसे आप पहले से संचालित करते हैं। शुरू करने से पहले प्रकाशित लाइफ़साइकिल प्रमाण वाले रिलीज़ और होस्ट संयोजन के लिए [OS संगतता](/hi/stackkits/reference/os-compatibility) देखें। CLI ही स्थानीय निष्पादन का अधिकार बना रहता है।
 
 ## पहले आपको क्या चाहिए
@@ -20,13 +22,15 @@ icon: rocket
 
 समर्थित सर्वर पर, Basement इंस्टॉलर `~/my-homelab` बनाता है, जारी किए गए आर्टिफ़ैक्ट और आवश्यक रनटाइम इंस्टॉल करता है, स्थानीय ओनर कस्टडी इनिशियलाइज़ करता है, स्थानीय Admin/PocketID एक्सेस बूटस्ट्रैप करता है, जनरेट किए गए StackSpec को वैलिडेट करता है और डिफ़ॉल्ट Basement सेवाएँ लागू करता है:
 
+{/* public-path:begin install */}
 ```bash
-curl -sSL https://base.stackkit.cc | sh
+curl -sSL https://install.stackkit.cc | sh
 cd ~/my-homelab
 stackkit version
 stackkit logs latest --json
 cat .stackkit/access.json
 ```
+{/* public-path:end install */}
 
 <Warning>
   होस्ट किए गए kombify खाते की आवश्यकता नहीं है। StackKits को फिर भी स्थानीय
@@ -73,6 +77,18 @@ Basement वन-लाइनर पहले ही प्रारंभिक 
 - प्लान `ready` नहीं है: जनरेट की गई फ़ाइलों के बजाय StackSpec बदलें और उसकी फिर से समीक्षा करें।
 - कोई सेवा पता नहीं खुलता: [समस्या निवारण](/hi/guides/stackkits/troubleshooting) और [रोज़मर्रा का उपयोग](/hi/guides/stackkits/daily-use) देखें।
 - आगे, [Node Hub गाइड](/hi/guides/stackkits/node-hub) में सुरक्षा पूरी करें।
+
+## kombify AI को इसे संचालित करने दें
+
+kombify AI इस सर्वर की देखभाल करे, इसके लिए इसे अपने kombify अकाउंट से जोड़ें। [app.kombify.io](https://app.kombify.io) पर अपने सर्वर के लिए Techstack सेटअप शुरू करें; यह एक बार की पेयरिंग बनाता है। फिर सर्वर पर चलाएँ:
+
+{/* public-path:begin connect */}
+```bash
+sudo stackkit connect --server https://techstack.kombify.io
+```
+{/* public-path:end connect */}
+
+मुफ़्त अकाउंट काफ़ी है: सर्वर अपनी स्थिति kombify Cloud में दिखाता है और kombify AI उसकी सहायता करता है। kombify AI आपके लिए जो बदलाव करता है, वे सशुल्क प्लान के साथ आते हैं।
 
 ## आगे बढ़ें
 

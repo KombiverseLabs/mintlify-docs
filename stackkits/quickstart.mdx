@@ -5,6 +5,8 @@ sidebarTitle: "Quickstart"
 icon: rocket
 ---
 
+StackKits sets up a secured homelab on a computer you already have. You run one command and end with running services, an owner sign-in and your access details in one file.
+
 This quickstart installs the current public StackKits release with a Basement
 Kit on a server you already operate. Check [OS compatibility](/stackkits/reference/os-compatibility)
 for the release and host combination with published lifecycle evidence before
@@ -21,18 +23,24 @@ New to servers? [Before you start](/guides/stackkits/before-you-start) explains 
 
 ## Bootstrap a Basement Kit
 
-On a supported server, the Basement installer creates `~/my-homelab`,
-installs the released artifacts and required runtime, initializes local owner
-custody, bootstraps the local Admin/PocketID access, validates the generated
-StackSpec, and applies the default Basement services:
+The installer asks for your email address, which becomes your owner login, and
+for the use cases to install; every other value is a default that it prints. On
+a home server it installs Basement Kit, and on a public server it continues with
+Cloud Kit. It creates its workspace folder (`~/my-homelab`, or
+`~/my-cloud-homelab` with Cloud Kit), installs the released artifacts and
+required runtime, initializes local owner custody, bootstraps the local
+Admin/PocketID access, validates the generated StackSpec, and applies the kit's
+default services:
 
+{/* public-path:begin install */}
 ```bash
-curl -sSL https://base.stackkit.cc | sh
+curl -sSL https://install.stackkit.cc | sh
 cd ~/my-homelab
 stackkit version
 stackkit logs latest --json
 cat .stackkit/access.json
 ```
+{/* public-path:end install */}
 
 <Warning>
   A hosted kombify account is not required. StackKits itself still requires a
@@ -91,6 +99,18 @@ Your configuration (`stack-spec.yaml`), logs and access record are in the worksp
 - The plan is not `ready`: change the StackSpec rather than the generated files and review it again.
 - A service address does not open: see [Troubleshooting](/guides/stackkits/troubleshooting) and [Day to day](/guides/stackkits/daily-use).
 - Next, finish protection in the [Node Hub guide](/guides/stackkits/node-hub).
+
+## Let kombify AI operate it
+
+To have kombify AI look after this server, connect it to your kombify account. Start the Techstack setup for your own server at [app.kombify.io](https://app.kombify.io); it creates a one-time pairing. The command downloads the control plane's installer and runs it as root to install the kombify Guard service. Then run on the server:
+
+{/* public-path:begin connect */}
+```bash
+sudo stackkit connect --server https://techstack.kombify.io
+```
+{/* public-path:end connect */}
+
+A free account is enough: the server shows its state in kombify Cloud and kombify AI supports it. Changes that kombify AI makes for you come with the paid plans.
 
 ## Continue
 
