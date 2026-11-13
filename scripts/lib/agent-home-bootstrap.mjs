@@ -136,7 +136,8 @@ export async function personalAppOperation(args) {
   let token = '';
   let outcome = 1;
   try {
-    if (!['clone', 'fetch', 'rules'].includes(operation) || (operation !== 'rules' && !path) || args.length !== (operation === 'rules' ? 1 : 2)) throw new Error('invalid Agent Home operation');
+    const READABLE = { rules: 'standards/rules.md', routes: 'skills/routes.md' };
+    if (!['clone', 'fetch', ...Object.keys(READABLE)].includes(operation) || (!READABLE[operation] && !path) || args.length !== (READABLE[operation] ? 1 : 2)) throw new Error('invalid Agent Home operation');
     const { dopplerSecret } = await import('../kombify-bootstrap.mjs');
     const [appId, installationId, privateKey] = await Promise.all(names.map(async name => (await dopplerSecret({ ...scope, name })).value));
     if (appId !== '5569861' || installationId !== '177595171') throw new Error('personal App custody identity mismatch');
@@ -165,9 +166,9 @@ export async function personalAppOperation(args) {
     const git = (args, timeout = 45_000) => spawnSync('git', args, { encoding: 'utf8', env, timeout, windowsHide: true });
     const auth = ['-c', 'credential.helper=', '-c', 'credential.https://github.com.helper=', '-c', `credential.https://github.com.helper=${ENV_GIT_HELPER}`, '-c', 'url.https://github.com/.insteadOf=git@github.com:'];
     let result;
-    if (operation === 'rules') {
-      const response = await fetch('https://api.github.com/repos/Soulcreek/agent-home/contents/standards/rules.md', { headers: { authorization: `Bearer ${token}`, accept: 'application/vnd.github.raw', 'user-agent': 'kombify-agent-home' }, redirect: 'error', signal: AbortSignal.timeout(20_000) });
-      if (!response.ok) throw new Error(`personal App rules read failed (HTTP ${response.status})`);
+    if (READABLE[operation]) {
+      const response = await fetch(`https://api.github.com/repos/Soulcreek/agent-home/contents/${READABLE[operation]}`, { headers: { authorization: `Bearer ${token}`, accept: 'application/vnd.github.raw', 'user-agent': 'kombify-agent-home' }, redirect: 'error', signal: AbortSignal.timeout(20_000) });
+      if (!response.ok) throw new Error(`personal App ${operation} read failed (HTTP ${response.status})`);
       process.stdout.write(await response.text());
       outcome = 0;
     } else {

@@ -37,9 +37,15 @@
 //   node scripts/kombify-bootstrap.mjs doppler-routes [--live] [--repair] [--json]
 //                                                 # both routes of this host; --live proves the
 //                                                 # broker with a fresh grant, --repair mints or
-//                                                 # renews this device's token
+//                                                 # renews this device's token (Owner account only
+//                                                 # on an admin device, lib/doppler-routes.mjs)
+//   node scripts/kombify-bootstrap.mjs doppler-routes --issue-for HOST -- <cmd...>
+//                                                 # admin device: mint HOST's worker token, hand it
+//                                                 # to cmd on stdin (cmd runs --receive on HOST)
+//   node scripts/kombify-bootstrap.mjs doppler-routes --receive  # worker: store the token from stdin
 //   node scripts/kombify-bootstrap.mjs packages -- <cmd...>  # cmd with NODE_AUTH_TOKEN
 //   node scripts/kombify-bootstrap.mjs rules     # the owner's rules (also printed by --hook)
+//   node scripts/kombify-bootstrap.mjs skills    # the skill routes: which skill a task step uses
 //   node scripts/kombify-bootstrap.mjs mcp --mcp-host codex --install # repair + prove the kombify /mcp connector on the staff-machine identity
 //   node scripts/kombify-bootstrap.mjs context   # obtain/refresh and install Agent Home
 //   node scripts/kombify-bootstrap.mjs context --check  # inspect without installation
@@ -62,7 +68,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { prepareAgentHome, personalAppOperation } from './lib/agent-home-bootstrap.mjs';
 import { prepareStaffMcp } from './lib/staff-mcp-bootstrap.mjs';
-import { DOPPLER_API, REQUIRED_ROUTES, deviceTokenState, disabledRoutes, hostType, probeToken, readDeviceToken, renewDeviceToken } from './lib/doppler-routes.mjs';
+import { DOPPLER_API, REQUIRED_ROUTES, deviceTokenState, disabledRoutes, hostType, issueWorkerToken, probeToken, readDeviceToken, receiveDeviceToken, renewDeviceToken } from './lib/doppler-routes.mjs';
 
 const SELF = fileURLToPath(import.meta.url);
 export const ROOT = resolve(dirname(SELF), '..');
@@ -229,6 +235,61 @@ function printOwnerRules() {
   if (rules.text) console.log(`\nKOMBIFY_OWNER_RULES source=${rules.source} (binding for this session):\n\n${rules.text.trim()}\n`);
 }
 
+const SKILL_ROUTES_PATH = 'skills/routes.md';
+const SKILL_ROUTES_CACHE = join(homedir(), '.kombify', 'skill-routes.md');
+const SKILL_ROUTES_OVERLAY = 'platform/plugins/packages/kombify-development/skills/kombify-fast-development/references/development-skills.md';
+// The table and the on-request list are what a step needs; the usage notes stay in the file.
+const routeTable = (text) => String(text).split(/\r?\n## Using a routed skill/)[0];
+
+// Which skill a task step uses (AGENT-PLUGINS-STANDARD.md §11). Same sources as the owner rules: this
+// device's Agent Home checkout on a clean main, else GitHub, else the last cached copy. It never moves
+// the checkout (the owner rules step fast-forwards it; hooks of one event run in parallel, so the table
+// can be one session behind). Its own hook command, because one hook's output is cut at 10,000
+// characters and the owner rules take most of that.
+export function skillRoutes({ home = homedir(), run = spawnSync, env = process.env } = {}) {
+  const notes = [];
+  let root = '';
+  try { root = JSON.parse(readFileSync(join(home, '.agents', 'agent-home', 'state.json'), 'utf8')).repo_root ?? ''; } catch { /* no local install */ }
+  if (!root && env.CLAUDE_CODE_REMOTE === 'true' && existsSync(join(home, '.agent-home', '.git'))) root = join(home, '.agent-home');
+  if (root && existsSync(join(root, '.git'))) {
+    const git = (...args) => run('git', ['-C', root, ...args], { encoding: 'utf8', timeout: 20_000 });
+    const branch = git('rev-parse', '--abbrev-ref', 'HEAD').stdout?.trim();
+    const dirty = git('status', '--porcelain', '--untracked-files=no').stdout?.trim();
+    const local = join(root, SKILL_ROUTES_PATH);
+    if (branch === 'main' && !dirty) {
+      if (existsSync(local)) return { text: routeTable(readFileSync(local, 'utf8')), source: `${root}@${git('rev-parse', '--short', 'HEAD').stdout?.trim()}`, notes };
+    } else {
+      notes.push(`agent-home ${root} is ${branch === 'main' ? 'modified' : `on ${branch}`}: its skill routes are not read from there`);
+    }
+  } else {
+    notes.push('Agent Home is not installed on this device (node scripts/kombify-bootstrap.mjs context installs it)');
+  }
+  const fetched = run(process.execPath, [SELF, '--personal-app', 'routes'], { encoding: 'utf8', timeout: 45_000, windowsHide: true, env });
+  if (fetched.status === 0 && String(fetched.stdout).startsWith('# Skill routes')) {
+    mkdirSync(dirname(SKILL_ROUTES_CACHE), { recursive: true, mode: 0o700 });
+    writeFileSync(SKILL_ROUTES_CACHE, fetched.stdout, { mode: 0o600 });
+    return { text: routeTable(fetched.stdout), source: `github-app:${AGENT_HOME_REPO}`, notes };
+  }
+  if (existsSync(SKILL_ROUTES_CACHE)) return { text: routeTable(readFileSync(SKILL_ROUTES_CACHE, 'utf8')), source: `cache:${SKILL_ROUTES_CACHE}`, notes };
+  notes.push(`skill routes unreachable (${SKILL_ROUTES_PATH} of ${AGENT_HOME_REPO}): work without a routed skill and say once that the routes were not read`);
+  return { text: '', source: 'none', notes };
+}
+
+// What Kombify replaces in a routed skill: the section of the overlay between its two markers, so the
+// printed table never sends a session to a step this workspace forbids.
+export function kombifyRouteOverrides(file = join(dirname(SELF), '..', SKILL_ROUTES_OVERLAY)) {
+  if (!existsSync(file)) return '';
+  return /<!-- routes-overrides:start -->\r?\n([\s\S]*?)\r?\n<!-- routes-overrides:end -->/.exec(readFileSync(file, 'utf8'))?.[1]?.trim() ?? '';
+}
+
+function printSkillRoutes() {
+  const routes = skillRoutes();
+  for (const note of routes.notes) console.log(`KOMBIFY_SKILL_ROUTES_GAP ${note}`);
+  if (!routes.text) return;
+  const overrides = kombifyRouteOverrides();
+  console.log(`\nKOMBIFY_SKILL_ROUTES source=${routes.source} (the step decides the skill; how each row is met in Kombify: skill kombify-development:kombify-fast-development, references/development-skills.md; relative links resolve under Agent Home skills/):\n\n${overrides ? `${overrides}\n\n` : ''}${routes.text.trim()}\n`);
+}
+
 // GitHub identities the broker workflow accepts (cloud-session-doppler.yml):
 // marcel490 is the Claude cloud proxy, Soulcreek is gh on the owner's devices.
 export const BROKER_ACTORS = ['marcel490', 'Soulcreek'];
@@ -343,12 +404,14 @@ export async function checkRoutes({ env = process.env, root = ROOT, live = false
     const cliStatus = cliValue ? await probe(cliValue) : null;
     item('cli', cliStatus === 200 ? 'ready' : cliValue ? 'rejected' : 'missing', cliStatus === 200 ? 'signed-in Doppler CLI' : cliValue ? `CLI login rejected (${http(cliStatus)}); doppler login renews it` : fromCli.missing ? 'Doppler CLI not installed' : 'Doppler CLI not signed in');
     let state = await deviceState();
-    if (repair && state.status !== 'ready') {
-      // The expiring token mints its own successor; a missing or dead one needs the CLI login.
-      const mintWith = state.status === 'expiring' ? state.token : cliStatus === 200 ? cliValue : env.DOPPLER_TOKEN;
+    // A throttled or failed identity read (`unknown`) is retried later, never re-minted on.
+    if (repair && !['ready', 'unknown'].includes(state.status)) {
+      // An administering token mints its own successor (on a worker: in the worker
+      // account); a worker token, a missing or a dead one needs the CLI login.
+      const mintWith = state.administers ? state.token : cliStatus === 200 ? cliValue : env.DOPPLER_TOKEN;
       try {
         const renewed = await renew({ mintWith });
-        state = { status: 'repaired', detail: `${renewed.name} stored in ${renewed.store}, expires ${renewed.expiresAt}${renewed.revoked.length ? `; ${renewed.revoked.join(', ')}` : ''}` };
+        state = { status: 'repaired', detail: `${renewed.account}/${renewed.name} stored in ${renewed.store}, expires ${renewed.expiresAt}${renewed.revoked.length ? `; ${renewed.revoked.join(', ')}` : ''}` };
       } catch (error) {
         state = { ...state, detail: `${state.status}${state.name ? ` ${state.name}` : ''}; renewal failed: ${error.message}` };
       }
@@ -356,7 +419,7 @@ export async function checkRoutes({ env = process.env, root = ROOT, live = false
     const days = Number.isInteger(state.daysLeft) ? `, ${state.daysLeft} days left` : '';
     item('device', state.status, state.detail && state.status !== 'rejected' ? state.detail : state.status === 'missing'
       ? `no device token in ${state.store}; repair: node scripts/kombify-bootstrap.mjs doppler-routes --repair`
-      : `${state.name} in ${state.store}${days}${state.status === 'rejected' ? ` rejected (${state.detail})` : ''}`);
+      : `${state.account ? `${state.account}/` : ''}${state.name} in ${state.store}${days}${state.status === 'rejected' ? ` rejected (${state.detail})` : ''}`);
   }
   if (host === 'cloud') {
     const placeholder = env.DOPPLER_TOKEN ?? '';
@@ -498,7 +561,13 @@ function installCommand() {
 
 export async function main(argv, env = process.env) {
   if (argv[0] === '--personal-app') return personalAppOperation(argv.slice(1));
-  if (env.KOMBIFY_BOOTSTRAP_SKIP === '1') return 0;
+  if (env.KOMBIFY_BOOTSTRAP_SKIP === '1') {
+    if (['run', 'packages'].includes(argv[0])) {
+      console.error(`KOMBIFY_BOOTSTRAP_ERROR KOMBIFY_BOOTSTRAP_SKIP=1 cannot skip the ${argv[0]} command`);
+      return 1;
+    }
+    return 0;
+  }
   const sep = argv.indexOf('--');
   const [command] = argv;
   const cmd = sep >= 0 ? argv.slice(sep + 1) : [];
@@ -547,6 +616,29 @@ export async function main(argv, env = process.env) {
     const passOn = access.token ? { DOPPLER_TOKEN: access.token } : {};
     return runWith(cmd, { ...secrets, ...passOn, DOPPLER_PROJECT: scope.project, DOPPLER_CONFIG: scope.config, KOMBIFY_DOPPLER_ROUTE: access.source });
   }
+  if (command === 'doppler-routes' && own.includes('--receive')) {
+    const chunks = [];
+    for await (const chunk of process.stdin) chunks.push(chunk);
+    const received = await receiveDeviceToken({ input: Buffer.concat(chunks).toString('utf8') });
+    console.log(`KOMBIFY_DOPPLER_DEVICE_RECEIVED name=${received.name} store=${received.store}`);
+    return 0;
+  }
+  if (command === 'doppler-routes' && own.includes('--issue-for')) {
+    if (!cmd.length) throw new Error('--issue-for needs the delivery command after --');
+    let mintWith;
+    for (const candidate of [readDeviceToken().token, cliToken(ROOT).token, env.DOPPLER_TOKEN]) {
+      if (candidate && await probeToken(candidate) === 200) { mintWith = candidate; break; }
+    }
+    // The token reaches only the child's stdin; only its receipt line is relayed.
+    const deliver = (input, name) => {
+      const child = spawnSync(cmd[0], cmd.slice(1), { input, encoding: 'utf8', stdio: ['pipe', 'pipe', 'inherit'], timeout: 120_000 });
+      const receipt = String(child.stdout ?? '').split('\n').find((line) => line.startsWith(`KOMBIFY_DOPPLER_DEVICE_RECEIVED name=${name} `));
+      return { ok: child.status === 0 && Boolean(receipt), detail: receipt ?? `exit ${child.status ?? child.error?.code}` };
+    };
+    const issued = await issueWorkerToken({ mintWith, host: option('--issue-for'), deliver });
+    console.log(`KOMBIFY_DOPPLER_DEVICE_ISSUED ${JSON.stringify(issued)}`);
+    return 0;
+  }
   if (command === 'doppler-routes') {
     const result = await checkRoutes({ env, live: own.includes('--live'), repair: own.includes('--repair') });
     if (own.includes('--json')) console.log(JSON.stringify(result, null, 2));
@@ -559,6 +651,10 @@ export async function main(argv, env = process.env) {
   }
   if (command === 'rules') {
     printOwnerRules();
+    return 0;
+  }
+  if (command === 'skills') {
+    printSkillRoutes();
     return 0;
   }
   if (command === 'packages') {
