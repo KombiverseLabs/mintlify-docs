@@ -58,11 +58,15 @@ function validateEnvelope(document, schema, tag) {
 
 export function validateCatalog(document, tag) {
   validateEnvelope(document, CATALOG_SCHEMA, tag)
-  keys(document.catalog, ['useCases', 'kitCores'], 'catalog')
+  keys(document.catalog, ['authoring', 'useCases', 'kitCores'], 'catalog')
+  if (document.catalog.authoring !== undefined) {
+    keys(document.catalog.authoring, ['retainedRemovalCandidates'], 'catalog.authoring')
+    if (typeof document.catalog.authoring.retainedRemovalCandidates !== 'boolean') throw new Error('catalog.authoring.retainedRemovalCandidates must be boolean')
+  }
   if (!Array.isArray(document.catalog.useCases)) throw new Error('catalog.useCases must be an array')
   sortedUnique(document.catalog.useCases.map(item => item.id), 'catalog use-case IDs')
   for (const useCase of document.catalog.useCases) {
-    keys(useCase, ['id', 'title', 'description', 'components', 'computeTiers', 'settings', 'capabilities', 'docs', 'defaultAlternative', 'alternatives', 'addOns', 'bundles', 'mainUseCase'], `useCase ${useCase.id ?? '?'}`)
+    keys(useCase, ['id', 'title', 'description', 'components', 'computeTiers', 'settings', 'capabilities', 'docs', 'workloadRef', 'defaultAlternative', 'alternatives', 'addOns', 'bundles', 'mainUseCase'], `useCase ${useCase.id ?? '?'}`)
     string(useCase.id, 'useCase.id', /^[a-z][a-z0-9-]+$/)
     string(useCase.title, `${useCase.id}.title`)
     string(useCase.description, `${useCase.id}.description`)
@@ -82,6 +86,7 @@ export function validateCatalog(document, tag) {
     if (useCase.addOns !== undefined) validateAddOns(useCase)
     if (useCase.bundles !== undefined) validateBundles(useCase)
     if (useCase.docs !== undefined) string(useCase.docs, `${useCase.id}.docs`, /^\/[a-z0-9/-]+$/)
+    if (useCase.workloadRef !== undefined) string(useCase.workloadRef, `${useCase.id}.workloadRef`, CONTRACT_ID)
     if (useCase.defaultAlternative !== undefined || useCase.alternatives !== undefined) validateAlternatives(useCase, `useCase ${useCase.id}`)
     if (useCase.mainUseCase !== undefined) validateMainUseCase(useCase.mainUseCase, `${useCase.id}.mainUseCase`)
   }
@@ -111,22 +116,41 @@ function validateAlternatives(owner, label) {
   if (!Array.isArray(owner.alternatives) || owner.alternatives.length === 0) throw new Error(`${label}.alternatives must be non-empty`)
   sortedUnique(owner.alternatives.map(alternative => alternative.id), `${label} alternative IDs`)
   for (const alternative of owner.alternatives) {
-    keys(alternative, ['id', 'name', 'modules', 'providesRuntimeAdapterRef'], `${label}.alternatives`)
+    keys(alternative, ['id', 'name', 'modules', 'providesRuntimeAdapterRef', 'configuration'], `${label}.alternatives`)
     string(alternative.id, `${label}.alternatives.id`, CONTRACT_ID)
     string(alternative.name, `${label}.alternatives.name`)
     // Optional install internal (the runtime adapter an alternative provides); never rendered.
     if (alternative.providesRuntimeAdapterRef !== undefined) string(alternative.providesRuntimeAdapterRef, `${label}.alternatives.providesRuntimeAdapterRef`, CONTRACT_ID)
+    if (alternative.configuration !== undefined) validateConfiguration(alternative.configuration, `${label}.alternatives.configuration`)
     if (!Array.isArray(alternative.modules) || alternative.modules.length === 0) throw new Error(`${label}.alternatives.modules must be non-empty`)
     for (const module of alternative.modules) {
-      keys(module, ['id', 'computeProfiles', 'computeProfileFacts', 'acceleratorProfileFacts'], `${label}.alternatives.modules`)
+      keys(module, ['id', 'computeProfiles', 'storageProfiles', 'acceleratorProfiles', 'computeProfileFacts', 'acceleratorProfileFacts'], `${label}.alternatives.modules`)
       string(module.id, `${label}.alternatives.modules.id`, CONTRACT_ID)
       if (!Array.isArray(module.computeProfiles) || module.computeProfiles.length === 0) throw new Error(`${label}.alternatives.modules.computeProfiles must be non-empty`)
       for (const profile of module.computeProfiles) string(profile, `${label}.alternatives.modules.computeProfiles entry`, CONTRACT_ID)
       sortedUnique(module.computeProfiles, `${label}.alternatives.modules.computeProfiles`)
+      for (const field of ['storageProfiles', 'acceleratorProfiles']) {
+        if (module[field] === undefined) continue
+        if (!Array.isArray(module[field]) || new Set(module[field]).size !== module[field].length) throw new Error(`${label}.alternatives.modules.${field} must be a unique array`)
+        for (const profile of module[field]) string(profile, `${label}.alternatives.modules.${field} entry`, CONTRACT_ID)
+      }
       validateProfileFacts(module, `${label}.alternatives.modules`)
     }
   }
   if (!owner.alternatives.some(alternative => alternative.id === owner.defaultAlternative)) throw new Error(`${label}.defaultAlternative is not a declared alternative`)
+}
+
+function validateConfiguration(value, label) {
+  keys(value, ['settings', 'secretRefs'], label)
+  if (!Array.isArray(value.settings) || !Array.isArray(value.secretRefs)) throw new Error(`${label}.settings and secretRefs must be arrays`)
+  if (new Set(value.secretRefs).size !== value.secretRefs.length || value.secretRefs.some(ref => typeof ref !== 'string')) throw new Error(`${label}.secretRefs must be unique strings`)
+  for (const setting of value.settings) {
+    keys(setting, ['key', 'type', 'label', 'options'], `${label}.settings`)
+    if (typeof setting.key !== 'string') throw new Error(`${label}.settings.key must be a string`)
+    string(setting.label, `${label}.settings.label`)
+    if (!['string', 'number', 'boolean'].includes(setting.type)) throw new Error(`${label}.settings.type is invalid`)
+    if (setting.options !== undefined && (!Array.isArray(setting.options) || setting.options.length === 0 || setting.options.some(option => !['string', 'number', 'boolean'].includes(typeof option)))) throw new Error(`${label}.settings.options must be non-empty scalar values`)
+  }
 }
 
 // Groups the use-case page: `id` matches one of the fixed MAIN_USE_CASE_ORDER
@@ -160,7 +184,12 @@ function validateProfileFacts(module, label) {
       string(fact.maturity, `${factLabel}.maturity`, CONTRACT_ID)
       if (typeof fact.executable !== 'boolean') throw new Error(`${factLabel}.executable must be a boolean`)
       if (fact.realization !== undefined) string(fact.realization, `${factLabel}.realization`, CONTRACT_ID)
-      if (fact.hostFloor !== undefined) validateBudget(fact.hostFloor, `${factLabel}.hostFloor`, ['minCpuCores', 'minRamGB', 'minStorageGB', 'minAMD64MicroarchitectureLevel'])
+      if (fact.hostFloor !== undefined) {
+        keys(fact.hostFloor, ['minCpuCores', 'minRamGB', 'minStorageGB', 'minAMD64MicroarchitectureLevel', 'allowedArchitectures'], `${factLabel}.hostFloor`)
+        const { allowedArchitectures, ...budget } = fact.hostFloor
+        validateBudget(budget, `${factLabel}.hostFloor`, ['minCpuCores', 'minRamGB', 'minStorageGB', 'minAMD64MicroarchitectureLevel'])
+        if (allowedArchitectures !== undefined && (!Array.isArray(allowedArchitectures) || allowedArchitectures.length === 0 || allowedArchitectures.some(arch => !['amd64', 'arm64'].includes(arch)))) throw new Error(`${factLabel}.hostFloor.allowedArchitectures must name supported architectures`)
+      }
       for (const field of ['reservation', 'recommended', 'headroom']) {
         if (fact[field] !== undefined) validateBudget(fact[field], `${factLabel}.${field}`, ['cpuCores', 'ramGB', 'storageGB'])
       }
@@ -684,9 +713,16 @@ function pendingProjection(release, evidence) {
 }
 
 function renderOperatingSystems(release, compatibility, evidence) {
-  if (!evidence) {
-    let page = provenance('OS compatibility', 'Lifecycle evidence for StackKits operating systems', 'server', compatibility.contentDigest, release.publicSourceSha)
-    page += 'Lifecycle evidence for StackKits is not published yet, so this page lists no operating systems. [stackkit.cc/compatibility](https://stackkit.cc/compatibility) shows the automated lifecycle runs as soon as they are projected. Run `stackkit compat` on a host for non-destructive diagnostics.\n'
+  if (!evidence || evidence.stackkitsVersion !== release.tag) {
+    let page = provenance('OS compatibility', `Lifecycle evidence for StackKits ${release.tag}`, 'server', compatibility.contentDigest, release.publicSourceSha)
+    page += `These operating systems are declared targets of ${releaseLink(release.tag)}. Lifecycle evidence for this release has not been projected yet, so every row is \`unverified\` and no system is advertised as supported.\n\n`
+    if (evidence) page += `The newest stored lifecycle projection covers ${releaseLink(evidence.stackkitsVersion)}. Its results do not establish support for ${release.tag}.\n\n`
+    page += '| Operating system | Version | Tested architecture | Status | Evidence |\n| --- | --- | --- | --- | --- |\n'
+    for (const row of compatibility.compatibility.os) {
+      page += `| ${md(row.name)} | ${md(row.version)} | — | \`unverified\` | No lifecycle projection for ${md(release.tag)} |\n`
+    }
+    page += '\n[stackkit.cc/compatibility](https://stackkit.cc/compatibility) shows the automated lifecycle runs as they are projected. Run `stackkit compat` on a host for non-destructive diagnostics; a diagnostic result alone does not establish lifecycle support.\n'
+    if (evidence) page += runtimeObservationsMarkdown(release, evidence)
     return page
   }
   let page = provenance('OS compatibility', `Lifecycle evidence for StackKits ${evidence.stackkitsVersion}`, 'server', canonicalDigest(evidence), release.publicSourceSha)
@@ -809,7 +845,7 @@ export function renderPages(catalog, compatibility, evidence = null, redirects =
       const tested = evidence.applications.find(candidate => candidate.useCase === row.useCaseRef && candidate.adapter === row.adapterRef)
       let cell = 'not tested'
       if (tested && !withoutLane(tested)) {
-        cell = `\`${md(tested.grade)}\``
+        cell = `\`${md(tested.grade)}\` (${md(evidence.stackkitsVersion)})`
         if (tested.grade !== 'supported') cell += ` ${md(evidenceNote(tested))}${tested.lastVerifiedRelease ? `; last verified ${md(tested.lastVerifiedRelease)}` : ''}`
       }
       line += ` ${cell} |`

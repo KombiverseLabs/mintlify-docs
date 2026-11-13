@@ -10,7 +10,7 @@ navigation source of truth; pages are MDX files.
 
 ## Kombify Development Standard
 
-- Binding: `CONSTITUTION.md` rules 12 to 16, detail in `DEVELOPMENT-THROUGHPUT-STANDARD.md` ("Development feedback loop", "Testing", "Development-probe admission") and skill `kombify-development:kombify-fast-development`. Until 1.0 current producers and consumers cut over together without shims or dual paths; only a production schema shared by two running channels uses expand then contract (D-2026-11-02-01).
+- Binding: `CONSTITUTION.md` rules 12 to 16, detail in `DEVELOPMENT-THROUGHPUT-STANDARD.md` ("Development feedback loop", "Testing", "Development-probe admission") and skill `kombify-development:kombify-fast-development`. Until 1.0 current producers and consumers cut over together without shims or dual paths; only a production schema shared by running revisions uses expand then contract (D-2026-11-02-01).
 - Tests: no new unit or in-process tests except inside the declared sensitive boundaries (`.kombify/test-boundaries.json`); journeys run when acceptance is in scope (rule 13, D-2026-11-07-03).
 - Downloads and artifact delivery apply the absolute [Render download prohibition](https://github.com/KombiverseLabs/kombify-workspace/blob/main/CI-CD-PLATFORM-STANDARD.md#render-download-prohibition) while coding and at deployment admission, in every product and environment.
 <!-- END GENERATED: elastic-development-throughput kombify-throughput-policy-sync -->
@@ -43,7 +43,7 @@ navigation source of truth; pages are MDX files.
 ## Git And Completion
 
 - Work on the synced `main` or your own worktree (rule 5, D-2026-10-26-26). Publishing and the merge route: Start 4.
-- Stable ships only through skill `.agents/skills/kombify-ship/SKILL.md` and `CI-CD-PLATFORM-STANDARD.md` §4.6. Pre-1.0 the slot ships every product (D-2026-10-31-02); a session runs `mise run release:attended -- --go D-2026-10-31-02` only when the owner asks. From 1.0 only the owner's go ships (D-2026-10-20-07, D-2026-10-26-27) or a passed test window for the products it tested (D-2026-10-26-12); a `RELEASE_BLOCKER` goes to the owner in the same turn.
+- Stable ships only through skill `.agents/skills/kombify-ship/SKILL.md` and `CI-CD-PLATFORM-STANDARD.md` §4.6. Pre-1.0 the slot ships every product (D-2026-10-31-02); a session runs `mise run release:attended -- --go D-2026-10-31-02` only when the owner asks. An urgent release (`mise run release:urgent`, D-2026-11-11-14) starts the same way: only on a release decision. From 1.0 only the owner's go ships (D-2026-10-20-07, D-2026-10-26-27) or a passed test window for the products it tested (D-2026-10-26-12); a `RELEASE_BLOCKER` goes to the owner in the same turn.
 - Report committed, merged, deployed and live state separately, with evidence (rule 9).
 <!-- END GENERATED: planning-policy kombify-agent-policy-sync -->
 
