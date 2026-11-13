@@ -41,6 +41,24 @@ cat .stackkit/access.json
 
 需要其他安装程序？仅工具链的路径请使用[选择套件](/zh-Hans/guides/stackkits/choosing-a-kit)，你已在运营的 VPS 请使用 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)，而独立的配置、审查、应用和验证步骤请使用 [CLI 演练](/zh-Hans/guides/stackkits/cli-walkthrough)。
 
+## 打开第一个应用
+
+在同一家庭网络中的手机或笔记本上，打开安装程序打印的 **Second device**
+地址，例如 `http://<server-LAN-IP>/device/setup`。请复制实际地址；它也在
+`.stackkit/access.json` 的 `secondDevice.setupUrl` 字段中。在设备还不能解析
+私有家庭实验室名称时，此设置页面即可通过 IP 打开。
+
+1. 在页面上选择设备类型，按说明完成 DNS 和证书设置。
+2. 批准家庭实验室的公开 CA 证书前，将其 SHA-256 指纹与安装终端进行比较。
+   Linux 用户还必须将下载的整个适配器文件的 SHA-256 与终端打印的
+   **Linux adapter SHA-256** 比较，然后才可用 `sudo` 执行。任何值不匹配都应停止。
+3. 打开页面提供的 HTTPS Hub 链接。新家庭实验室需先通过设置链接创建
+   Pocket ID 所有者通行密钥，再登录并打开应用。
+
+每台新设备都需重复此设置。批准 DNS 和 CA 不会建立任何服务会话。此私有家庭
+模式无需修改路由器或拥有 kombify 账户。使用公共域名或 kombify.me 时，直接打开
+打印的 HTTPS Hub 地址；这些模式需要各自的域名注册和访问设置。
+
 ## 审查或更改生成的意图
 
 在生成输出之前，请检查 `stack-spec.yaml`。尤其要审查绝对存储根目录、本地域名（Basement 安装程序使用 `home`，因此在设备注册之后，服务会解析为 `*.lab.home`）、站点和节点身份，以及为空的可选工作负载选择。

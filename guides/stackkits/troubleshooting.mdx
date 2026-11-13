@@ -11,11 +11,15 @@ Start with the problem you see, then follow the checks in order.
 
 1. Compare the address you typed with the address printed by the CLI or shown
    in the Node Hub. Copy it rather than typing it from memory.
-2. Make sure the device uses the name resolution of your homelab. StackKits
-   does not silently change every router or device. The default local domain is
-   `lab.home`; names below it must resolve on the device you are using.
-3. Open the same address from another device in your home network. If it works
-   there, the problem is the first device, not the homelab.
+2. On this device, open the **Second device** address printed by the installer
+   (`secondDevice.setupUrl` in the server's `.stackkit/access.json`). It looks
+   like `http://<server-LAN-IP>/device/setup` and opens before private DNS or CA
+   trust is configured. Join the same home network and follow that page's steps
+   for your device; no router change is needed.
+3. Compare the public CA fingerprint with the install terminal before approving
+   it. On Linux, also compare the whole downloaded adapter file's SHA-256 with
+   the terminal's **Linux adapter SHA-256** before running it with `sudo`. Stop
+   on a mismatch. Restart the browser, then open the HTTPS Hub from the page.
 4. From the workspace folder, run `stackkit verify --json` and look for
    findings.
 
@@ -28,9 +32,11 @@ generated Node Hub or router files. See [Node Hub](/guides/stackkits/node-hub).
 
 ## The browser warns about the connection
 
-Do not click through a warning you do not understand. Ask the person who set
-up the homelab and compare the address with the one in the Node Hub. Do not turn off protection on a route to make a
-warning go away.
+Open the **Second device** setup page described above. Compare the public
+homelab CA's SHA-256 fingerprint with the install terminal, then approve that
+certificate using the instructions for your device. Stop if the fingerprints
+differ. If your browser has its own certificate store, follow the setup page's
+browser instructions too. Never bypass the warning or turn off TLS protection.
 
 ## I cannot sign in to a service
 
@@ -44,6 +50,17 @@ that the owner created for you. It is not your kombify Cloud account.
 3. Check that your operating system is listed in [OS compatibility](/stackkits/reference/os-compatibility).
 4. If you cannot find the cause, send the log text, but not the file
    `.stackkit/access.json`, to [support@kombify.io](mailto:support@kombify.io).
+
+## Setup reports a blocked kernel setting
+
+Basement configures host security, including `fs.protected_fifos=2`. A container
+can prevent this even when its user is root. If apply reports
+`fs.protected_fifos=1 (want >= 2)` and the host refuses the change, use a dedicated
+Linux machine or full virtual machine where you control these settings. Keep
+the security requirement; repeating apply or disabling the check does not fix
+this host restriction. Check the current release's
+[OS compatibility](/stackkits/reference/os-compatibility) before starting on
+the replacement host. An unverified row is not a successful lifecycle test.
 
 ## I applied a change and something broke
 

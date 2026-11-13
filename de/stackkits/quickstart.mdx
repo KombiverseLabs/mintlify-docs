@@ -53,6 +53,28 @@ für den Pfad nur mit Toolchain, das [Cloud Kit](/de/stackkits/kits/cloud-kit) f
 den du bereits betreibst, oder die [CLI-Anleitung](/de/guides/stackkits/cli-walkthrough)
 für die getrennten Schritte Konfiguration, Prüfung, Anwenden und Verifikation.
 
+## Die erste App öffnen
+
+Öffne auf einem Handy oder Laptop im selben Heimnetz die vom Installer gedruckte
+Adresse **Second device**, etwa `http://<Server-LAN-IP>/device/setup`. Kopiere die
+tatsächliche Adresse; sie steht auch als `secondDevice.setupUrl` in
+`.stackkit/access.json`. Diese Seite öffnet sich per IP, bevor private Namen auf
+dem Gerät funktionieren.
+
+1. Wähle deinen Gerätetyp und folge den DNS- und Zertifikatsschritten der Seite.
+2. Vergleiche vor der Freigabe den SHA-256-Fingerabdruck der öffentlichen
+   Homelab-CA mit dem Installations-Terminal. Vergleiche unter Linux zusätzlich
+   den SHA-256 der gesamten heruntergeladenen Adapterdatei mit **Linux adapter
+   SHA-256** im Terminal, bevor du sie mit `sudo` ausführst. Bei Abweichung stoppen.
+3. Öffne den verlinkten HTTPS-Hub. Erstelle bei einem neuen Homelab deinen
+   Pocket-ID-Owner-Passkey über den Setup-Link, melde dich an und öffne eine App.
+
+Wiederhole das auf jedem neuen Gerät. DNS und CA-Freigabe erteilen keine Sitzung
+bei einem Dienst. Für diesen privaten Heimmodus brauchst du weder eine
+Routeränderung noch ein kombify-Konto. Bei eigener öffentlicher Domain oder
+kombify.me öffnest du den gedruckten HTTPS-Hub direkt; diese Modi benötigen ihre
+eigene Domainregistrierung und Erreichbarkeit.
+
 ## Den generierten Intent prüfen oder ändern
 
 Prüfe `stack-spec.yaml`, bevor du die Ausgabe generierst. Prüfe insbesondere

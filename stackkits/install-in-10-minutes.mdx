@@ -1,13 +1,14 @@
 ---
-title: "Install a homelab in 10 minutes"
+title: "Install your first homelab"
 description: "One linear path from a spare computer to a running Basement Kit, with checks after each step"
-sidebarTitle: "Install in 10 minutes"
+sidebarTitle: "First homelab"
 icon: stopwatch
 ---
 
 This page takes you from one spare computer to a running Basement Kit on one
 straight path. Follow the steps in order. Each step says what you should see
-and roughly how long it takes.
+what to do next. The time to a first working app has not yet been verified for
+the current public release.
 
 <Note>
   StackKits is in Beta. Beta is a test with real
@@ -16,7 +17,7 @@ and roughly how long it takes.
   before you start, and tell us what happened afterwards.
 </Note>
 
-## Step 1: Pre-check (about 1 minute)
+## Step 1: Pre-check
 
 Go through this list before you run anything. If one item is a "no", stop here
 and read [Before you start](/guides/stackkits/before-you-start) first.
@@ -34,6 +35,9 @@ and read [Before you start](/guides/stackkits/before-you-start) first.
   [OS compatibility](/stackkits/reference/os-compatibility). Read the status
   column there. A row marked `unverified` has no completed test run on the
   current release yet.
+- **Control of the host.** Use a dedicated Linux machine or full virtual machine
+  where the installer can manage the kernel settings and firewall. A container
+  whose host blocks those settings cannot finish this path, even as root.
 - **Your home network.** The computer has internet access for the downloads.
   Your phone or laptop is on the same network as the computer.
 - **An email address.** The installer asks for it to create your owner login.
@@ -41,7 +45,7 @@ and read [Before you start](/guides/stackkits/before-you-start) first.
   `.stackkit/access.json`. Decide now where you keep them, for example a
   password manager.
 
-## Step 2: Run the installer (usually several minutes)
+## Step 2: Run the installer
 
 Open a terminal on the computer and run:
 
@@ -84,7 +88,7 @@ address, the core services and the next steps.
   below.
 </Warning>
 
-## Step 3: Verify the install (about 1 minute)
+## Step 3: Verify the install
 
 Run these commands in the same terminal:
 
@@ -99,15 +103,26 @@ What you should see:
 - `stackkit version` prints the installed version.
 - `stackkit logs latest --json` reports the result of the setup.
 
-Then open the first service. Copy the **Dashboard** address from the end of the
-installer output into a browser on the computer, or on a phone or laptop in the
-same network. Copy it rather than typing it from memory.
+On a phone or laptop on the same home network, open the **Second device** address
+printed by the installer, such as `http://<server-LAN-IP>/device/setup`. Copy the
+actual address; it is also `secondDevice.setupUrl` in `.stackkit/access.json`.
+This setup page opens by IP before your device can resolve private homelab names.
 
-If the address does not open on another device, that device probably cannot
-resolve the local names of your homelab yet. See
-[Troubleshooting](/guides/stackkits/troubleshooting).
+1. Choose your device type on the page and follow its DNS and certificate steps.
+2. Compare the public homelab CA's SHA-256 fingerprint with the install terminal
+   before approving it. On Linux, also compare the whole downloaded adapter
+   file's SHA-256 with the **Linux adapter SHA-256** in the terminal before
+   running it with `sudo`. Stop on a mismatch.
+3. Open the HTTPS Hub linked by the page. On a new homelab, create your Pocket ID
+   owner passkey at the linked setup address, then sign in and open an app.
 
-## Step 4: Create your owner login (a few minutes)
+Repeat this setup on each new device. DNS and CA approval grant no service session.
+No router change or kombify account is needed for this private home mode.
+Public-domain and kombify.me setups use their printed HTTPS Hub directly and
+require their own domain registration and reach setup.
+
+
+## Step 4: Create your owner login
 
 Follow the next steps that the installer printed:
 

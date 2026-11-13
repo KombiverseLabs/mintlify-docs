@@ -1,13 +1,14 @@
 ---
-title: "Ein Homelab in 10 Minuten installieren"
+title: "Das erste Homelab installieren"
 description: "Ein gerader Weg vom freien Computer zum laufenden Basement Kit, mit einer Prüfung nach jedem Schritt"
-sidebarTitle: "In 10 Minuten installieren"
+sidebarTitle: "Erstes Homelab"
 icon: stopwatch
 ---
 
 Diese Seite bringt dich auf einem geraden Weg von einem freien Computer zu
 einem laufenden Basement Kit. Folge den Schritten der Reihe nach. Jeder Schritt
-sagt dir, was du sehen solltest und wie lange er ungefähr dauert.
+sagt dir, was du sehen solltest. Die Zeit bis zur ersten funktionierenden App
+ist für die aktuelle öffentliche Version noch nicht nachgewiesen.
 
 <Note>
   StackKits befindet sich in der Beta. Die Beta ist ein Test
@@ -17,7 +18,7 @@ sagt dir, was du sehen solltest und wie lange er ungefähr dauert.
   danach, wie es gelaufen ist.
 </Note>
 
-## Schritt 1: Vorabprüfung (etwa 1 Minute)
+## Schritt 1: Vorabprüfung
 
 Geh diese Liste durch, bevor du etwas ausführst. Wenn ein Punkt ein „Nein“ ist,
 halte hier an und lies zuerst [Bevor du startest](/de/guides/stackkits/before-you-start).
@@ -91,7 +92,7 @@ Dashboard-Adresse, die Kerndienste und die nächsten Schritte.
   „Du hängst fest? Hol dir Hilfe“ weiter unten.
 </Warning>
 
-## Schritt 3: Die Installation prüfen (etwa 1 Minute)
+## Schritt 3: Die Installation prüfen
 
 Führe diese Befehle im selben Terminal aus:
 
@@ -106,16 +107,29 @@ Was du sehen solltest:
 - `stackkit version` gibt die installierte Version aus.
 - `stackkit logs latest --json` meldet das Ergebnis der Einrichtung.
 
-Öffne dann den ersten Dienst. Kopiere die **Dashboard**-Adresse vom Ende der
-Installer-Ausgabe in einen Browser auf dem Computer oder auf einem Smartphone
-oder Laptop im selben Netz. Kopiere sie, statt sie aus dem Gedächtnis zu
-tippen.
+## Die erste App öffnen
 
-Wenn sich die Adresse auf einem anderen Gerät nicht öffnet, kann dieses Gerät
-die lokalen Namen deines Homelabs wahrscheinlich noch nicht auflösen. Siehe
-[Fehlerbehebung](/de/guides/stackkits/troubleshooting).
+Öffne auf einem Handy oder Laptop im selben Heimnetz die vom Installer gedruckte
+Adresse **Second device**, etwa `http://<Server-LAN-IP>/device/setup`. Kopiere die
+tatsächliche Adresse; sie steht auch als `secondDevice.setupUrl` in
+`.stackkit/access.json`. Diese Seite öffnet sich per IP, bevor private Namen auf
+dem Gerät funktionieren.
 
-## Schritt 4: Deinen Owner-Login anlegen (ein paar Minuten)
+1. Wähle deinen Gerätetyp und folge den DNS- und Zertifikatsschritten der Seite.
+2. Vergleiche vor der Freigabe den SHA-256-Fingerabdruck der öffentlichen
+   Homelab-CA mit dem Installations-Terminal. Vergleiche unter Linux zusätzlich
+   den SHA-256 der gesamten heruntergeladenen Adapterdatei mit **Linux adapter
+   SHA-256** im Terminal, bevor du sie mit `sudo` ausführst. Bei Abweichung stoppen.
+3. Öffne den verlinkten HTTPS-Hub. Erstelle bei einem neuen Homelab deinen
+   Pocket-ID-Owner-Passkey über den Setup-Link, melde dich an und öffne eine App.
+
+Wiederhole das auf jedem neuen Gerät. DNS und CA-Freigabe erteilen keine Sitzung
+bei einem Dienst. Für diesen privaten Heimmodus brauchst du weder eine
+Routeränderung noch ein kombify-Konto. Bei eigener öffentlicher Domain oder
+kombify.me öffnest du den gedruckten HTTPS-Hub direkt; diese Modi benötigen ihre
+eigene Domainregistrierung und Erreichbarkeit.
+
+## Schritt 4: Deinen Owner-Login anlegen
 
 Folge den nächsten Schritten, die der Installer ausgegeben hat:
 
