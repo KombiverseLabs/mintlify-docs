@@ -701,6 +701,35 @@ function releaseLink(tag) {
   return `[${tag}](https://github.com/kombifyio/StackKits/releases/tag/${tag})`
 }
 
+// The recommended release (D-2026-11-10-18): the newest release on which every
+// declared test lane passed. The installer installs it, the CLI prints it and
+// the site names it; the docs name the same document, so no page names a
+// release the install command would not install.
+const RECOMMENDED_RELEASE_SCHEMA = 'stackkits.recommended-release/v1'
+const RELEASE_TAG = /^v\d+\.\d+\.\d+$/
+
+export function validateRecommendedRelease(document) {
+  if (!document || typeof document !== 'object' || Array.isArray(document)) throw new Error('the recommended release document is not an object')
+  if (document.schemaVersion !== RECOMMENDED_RELEASE_SCHEMA) throw new Error(`unexpected recommended release schema ${document.schemaVersion}`)
+  const tag = document.recommended_tag ?? null
+  if (tag !== null && !RELEASE_TAG.test(tag)) throw new Error(`invalid recommended tag ${tag}`)
+  const newest = document.newest_tag ?? null
+  if (newest !== null && !RELEASE_TAG.test(newest)) throw new Error(`invalid newest tag ${newest}`)
+  return { tag, newest }
+}
+
+// A null recommendation is a fact, not a gap: no release has passed every
+// declared lane yet, so the page says that the install command installs the
+// newest release and names no release as recommended.
+function recommendedReleaseMarkdown(recommendation) {
+  if (!recommendation) return 'The recommended release could not be read when this page was generated; the public install command asks the release mirror itself and prints the release it installs.\n\n'
+  if (!recommendation.tag) {
+    const newest = recommendation.newest ? releaseLink(recommendation.newest) : 'the newest release'
+    return `No release has passed every declared test lane yet, so no release is recommended: the public install command installs ${newest} and says that no release is recommended.\n\n`
+  }
+  return `The recommended release is ${releaseLink(recommendation.tag)}: the newest release on which every declared test lane passed. The public install command installs it. [stackkit.cc/compatibility](https://stackkit.cc/compatibility) shows the live value with the lane results behind it.\n\n`
+}
+
 function gradeMeanings() {
   return GRADE_MEANINGS.map(([grade, meaning]) => `- \`${grade}\`: ${meaning}\n`).join('')
 }
@@ -712,10 +741,11 @@ function pendingProjection(release, evidence) {
   return `<Note>\nLifecycle runs for ${release.tag} are not projected yet; rows show ${evidence.stackkitsVersion}, the newest projected release.\n</Note>\n\n`
 }
 
-function renderOperatingSystems(release, compatibility, evidence) {
+function renderOperatingSystems(release, compatibility, evidence, recommended = null) {
   if (!evidence || evidence.stackkitsVersion !== release.tag) {
     let page = provenance('OS compatibility', `Lifecycle evidence for StackKits ${release.tag}`, 'server', compatibility.contentDigest, release.publicSourceSha)
     page += `These operating systems are declared targets of ${releaseLink(release.tag)}. Lifecycle evidence for this release has not been projected yet, so every row is \`unverified\` and no system is advertised as supported.\n\n`
+    page += recommendedReleaseMarkdown(recommended)
     if (evidence) page += `The newest stored lifecycle projection covers ${releaseLink(evidence.stackkitsVersion)}. Its results do not establish support for ${release.tag}.\n\n`
     page += '| Operating system | Version | Tested architecture | Status | Evidence |\n| --- | --- | --- | --- | --- |\n'
     for (const row of compatibility.compatibility.os) {
@@ -727,6 +757,7 @@ function renderOperatingSystems(release, compatibility, evidence) {
   }
   let page = provenance('OS compatibility', `Lifecycle evidence for StackKits ${evidence.stackkitsVersion}`, 'server', canonicalDigest(evidence), release.publicSourceSha)
   page += pendingProjection(release, evidence)
+  page += recommendedReleaseMarkdown(recommended)
   page += `Rows are projected from the automated lifecycle runs of StackKits ${releaseLink(evidence.stackkitsVersion)} on fresh virtual machines: install, init, generate, apply, verify, backup and restore. Last lifecycle run: ${evidence.generatedAt.slice(0, 10)}.\n\n`
   page += `${gradeMeanings()}\n${BEST_ENVIRONMENT}\n\n`
   page += '| Operating system | Version | Tested architecture | Status | Evidence | Last verified |\n| --- | --- | --- | --- | --- | --- |\n'
@@ -810,7 +841,7 @@ function renderUseCase(useCase, redirects) {
   return section
 }
 
-export function renderPages(catalog, compatibility, evidence = null, redirects = new Map()) {
+export function renderPages(catalog, compatibility, evidence = null, redirects = new Map(), recommended = null) {
   const release = catalog.release
   let useCases = provenance('Use-case catalog', `Use cases and components declared by StackKits ${release.tag}`, 'diagram-project', catalog.contentDigest, release.publicSourceSha)
   useCases += `This page is generated from the published [${release.tag} release](${release.releaseUrl}). It lists every use case that release declares, grouped by main use case, with its purpose, components and default app. A declared component is not evidence of an installation or a verified run on a host; [OS compatibility](/stackkits/reference/os-compatibility) has the verified lifecycle grades. [Use cases](/guides/stackkits/use-cases/overview) has the setup guides overview.\n\n`
@@ -825,7 +856,7 @@ export function renderPages(catalog, compatibility, evidence = null, redirects =
     }
   }
 
-  const os = renderOperatingSystems(release, compatibility, evidence)
+  const os = renderOperatingSystems(release, compatibility, evidence, recommended)
 
   let delivery = provenance('Application delivery compatibility', `Declared workload adapter capabilities in StackKits ${release.tag}`, 'route', compatibility.contentDigest, release.publicSourceSha)
   const yes = value => value ? 'yes' : 'no'
@@ -913,9 +944,15 @@ function docsRedirects(repoRoot) {
   return new Map(redirects.map(redirect => [redirect.source, redirect.destination]))
 }
 
-export function syncRelease({ repoRoot, inputDir, tag }) {
+export function syncRelease({ repoRoot, inputDir, tag, recommendedFile = null }) {
   string(tag, 'tag', /^v\d+\.\d+\.\d+$/)
   const synced = readManifests(inputDir, tag)
+  // The recommended release is read from the release mirror, the same document
+  // the installer, the CLI and the site read. It is optional here: without it
+  // the page says that it could not be read instead of naming a release.
+  const recommended = recommendedFile && existsSync(recommendedFile)
+    ? validateRecommendedRelease(JSON.parse(readFileSync(recommendedFile, 'utf8')))
+    : null
   const incomingPath = path.join(inputDir, EVIDENCE_ASSET)
   const incomingBytes = existsSync(incomingPath) ? readFileSync(incomingPath, 'utf8') : null
   const incoming = incomingBytes ? validateEvidence(JSON.parse(incomingBytes), tag, synced) : null
@@ -951,7 +988,7 @@ export function syncRelease({ repoRoot, inputDir, tag }) {
   // means a sync for an older tag that updates that projection re-renders the
   // pages, and an older incoming projection never displaces a newer stored one.
   const evidence = storedEvidence(releases, shown.catalog.release.tag, shown)
-  const pages = renderPages(shown.catalog, shown.compatibility, evidence, docsRedirects(repoRoot))
+  const pages = renderPages(shown.catalog, shown.compatibility, evidence, docsRedirects(repoRoot), recommended)
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'use-case-catalog.mdx'), pages.useCases)
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'os-compatibility.mdx'), pages.os)
   writeExact(path.join(repoRoot, 'stackkits', 'reference', 'application-delivery-compatibility.mdx'), pages.delivery)
@@ -962,9 +999,10 @@ export function syncRelease({ repoRoot, inputDir, tag }) {
 function main() {
   const args = process.argv.slice(2)
   const value = name => args[args.indexOf(name) + 1]
-  if (!args.includes('--write') || !value('--from-dir') || !value('--tag')) throw new Error('usage: node sync-stackkits-release-docs.mjs --from-dir <dir> --tag <vX.Y.Z> --write')
+  if (!args.includes('--write') || !value('--from-dir') || !value('--tag')) throw new Error('usage: node sync-stackkits-release-docs.mjs --from-dir <dir> --tag <vX.Y.Z> [--recommended <file>] --write')
   const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-  const result = syncRelease({ repoRoot, inputDir: path.resolve(value('--from-dir')), tag: value('--tag') })
+  const recommendedArg = args.includes('--recommended') ? value('--recommended') : null
+  const result = syncRelease({ repoRoot, inputDir: path.resolve(value('--from-dir')), tag: value('--tag'), recommendedFile: recommendedArg ? path.resolve(recommendedArg) : null })
   process.stdout.write(`stackkits_docs_sync: ${result.promoted ? 'promoted' : 'stored'} ${result.catalog.release.tag}; pages show ${result.shownTag}, lifecycle evidence ${result.evidence?.stackkitsVersion ?? 'not published'}\n`)
 }
 

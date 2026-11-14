@@ -148,7 +148,16 @@ jobs:
         if [ -n "${EXPECTED_COMPATIBILITY_DIGEST:-}" ]; then
           [ "$compatibility_digest" = "$EXPECTED_COMPATIBILITY_DIGEST" ] || fail "The compatibility digest $compatibility_digest differs from the dispatched $EXPECTED_COMPATIBILITY_DIGEST."
         fi
-        node scripts/sync-stackkits-release-docs.mjs --from-dir .tmp/stackkits-docs --tag "$TAG" --write \
+        # The recommended release is the live document the installer, the CLI
+        # and the site read. The page names the same one, so the docs never
+        # name a release the install command would not install. Without it the
+        # sync fails: a page that cannot name the recommendation must not be
+        # published as if it did.
+        recommended=.tmp/stackkits-docs/recommended.json
+        curl -fsS --retry 3 --retry-delay 2 --max-time 30 -o "$recommended" \
+          https://assets.kombify.io/stackkits/releases/recommended.json \
+          || fail "The recommended release document could not be read from the release mirror."
+        node scripts/sync-stackkits-release-docs.mjs --from-dir .tmp/stackkits-docs --tag "$TAG" --recommended "$recommended" --write \
           || fail "scripts/sync-stackkits-release-docs.mjs rejected the $TAG manifests; its message is in the step log above."
         # The CLI reference is immutable per tag and exists only for releases
         # whose command tree ships the emitter; older tags keep the committed pages.
