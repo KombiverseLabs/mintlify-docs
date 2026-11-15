@@ -4,8 +4,8 @@ description: "Uninstall the local StackKits deployment"
 sidebarTitle: "remove"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:95c3ff1fa3ce5716fe20ea99d7a4b694a4f951a303423dad213bbde9bf547e22"
-source_hash: "4049a888362a11795582ef0a63fba7d7a7df4942"
+content_hash: "sha256:ca552278db6ce214303c44848fb22b80d7f266fe7363c16b9640f39a5d0feab1"
+source_hash: "6bd476a8330b8b2eb61dc5c323d8cca5165038aa"
 ---
 Uninstall the local StackKits deployment.
 
@@ -13,7 +13,7 @@ Uninstall the StackKits runtime on this machine.
 
 With no `--workload`, this is the product uninstall: it stops and deletes every Compose project named stackkit-\* (Basement core, Cloud core, and selected use cases), including their networks, while retaining named data volumes. Add `--delete-data` to delete those volumes intentionally. `--purge` also deletes the selected workspace's state, deploy directory and cached images. It looks in the current directory, then ~/my-homelab or ~/my-cloud-homelab.
 
-`--workload` removes one exact Architecture v2 workload through its applied runtime owner. That path keeps application volumes unless `--delete-data` is set.
+`--workload` removes one exact Architecture v2 workload through its applied runtime owner. That path keeps application volumes unless `--delete-data` is set. For an optional Standard application, verified removal also retires its desired selection by the current spec hash, so a later Apply does not reinstall it. Run generate and apply after retirement before another runtime lifecycle command, or remove a complete composition together with `--use-case`. `--candidate-output` writes an optional-workload deletion candidate only, retaining the active baseline for Advanced change-set dispatch; it changes no runtime.
 
 ```bash
 stackkit remove [flags]
@@ -23,7 +23,11 @@ stackkit remove [flags]
 | --- | --- | --- | --- |
 | `--artifact-manifest` | string | — | Architecture v2 generation manifest |
 | `--auto-approve` | bool | — | Skip interactive approval |
+| `--candidate-output` | string | — | Author an optional-workload deletion candidate only; no runtime mutation |
+| `--decision-principal` | string | — | Acting principal the receipt is bound to, as &lt;person\|agent_instance&gt;:&lt;id&gt; |
+| `--decision-receipt` | string | — | Compact decision receipt (JWS) that carries the person's confirmation of this exact operation, or @file to read it from a file |
 | `--delete-data` | bool | — | Delete named volumes in the selected removal scope (default keeps application data) |
+| `--expected-spec-hash` | string | — | Require the current native spec hash when authoring a retained-data candidate |
 | `--force` | bool | — | Legacy compatibility flag; incomplete removal still fails and retains recovery state |
 | `--generation-receipt` | string | — | Architecture v2 generation receipt |
 | `--inventory` | string | — | Architecture v2 observed Inventory (otherwise one conventional inventory file is selected) |
@@ -34,6 +38,7 @@ stackkit remove [flags]
 | `--purge` | bool | — | Delete named runtime volumes, selected workspace state and deploy directory, and cached StackKit images |
 | `--resolved-plan` | string | — | Architecture v2 canonical ResolvedPlan |
 | `--terminal-evidence-json` | bool | — | Emit bounded canonical Architecture v2 terminal evidence as JSON |
+| `--use-case` | string | — | Remove all currently selected catalog workloads of one product use case |
 | `--workload` | string | — | Exact Architecture v2 ResolvedPlan workload ref to remove |
 
 **Examples**

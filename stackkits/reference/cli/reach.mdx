@@ -1,0 +1,199 @@
+---
+title: "stackkit reach"
+description: "Remote reach of this home server: kombify.me tunnel mode, the Owner's own Cloudflare Tunnel and the LAN-name certificate"
+sidebarTitle: "reach"
+generated: true
+generated_by: "stackkit docs emit-cli-reference"
+content_hash: "sha256:ca552278db6ce214303c44848fb22b80d7f266fe7363c16b9640f39a5d0feab1"
+source_hash: "6bd476a8330b8b2eb61dc5c323d8cca5165038aa"
+---
+Remote reach of this home server: kombify.me tunnel mode, the Owner's own Cloudflare Tunnel and the LAN-name certificate.
+
+Runs the Cloudflare Tunnel connector of this home server in its own network, which reaches only the remote listener (stackkit-remote-listener.internal:8000): every request through it passes the Access Gate's remote checks and is never home. TLS ends at the Cloudflare edge, which can read the traffic; device proof and session are verified here. A local-only homelab (lab.home) has no reach path.
+
+```bash
+stackkit reach [flags]
+```
+
+Subcommands: [`stackkit reach disable`](#stackkit-reach-disable), [`stackkit reach enable`](#stackkit-reach-enable), [`stackkit reach lan-certificate`](#stackkit-reach-lan-certificate), [`stackkit reach public-certificate`](#stackkit-reach-public-certificate), [`stackkit reach registration`](#stackkit-reach-registration), [`stackkit reach status`](#stackkit-reach-status)
+
+## stackkit reach disable
+
+Stop the reach connector and, in kombify.me tunnel mode, remove the tunnel and its DNS records at Me.
+
+```bash
+stackkit reach disable [flags]
+```
+
+## stackkit reach enable
+
+Start the reach connector (requires root on the home server).
+
+```text
+Exactly one source of the tunnel token:
+  --kombify-me                  tunnel mode of this homelab's kombify.me base with its Me registration; the token is
+                                rotated and sealed to a fresh key of this node's local custody
+  --wallet-item <tenant>/<item> a token the kombify Wallet delivered to this node (kombify-account tunnel mode, or a
+                                tunnel Techstack provisioned in the Owner's Cloudflare account)
+  --owner-token-file <file>     a tunnel token of the Owner's own Cloudflare account (Standard Mode); its ingress stays
+                                in the Owner's dashboard and must lead every public hostname to http://stackkit-remote-listener.internal:8000
+```
+
+```bash
+stackkit reach enable [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--kombify-me` | bool | — | kombify.me tunnel mode with this homelab's Me registration |
+| `--owner-token-file` | string | — | file holding a tunnel token of the Owner's own Cloudflare account |
+| `--wallet-item` | string | — | Wallet item in this node's custody holding the tunnel token, as &lt;tenant-ref&gt;/&lt;item-ref&gt; |
+
+## stackkit reach lan-certificate
+
+The publicly trusted certificate of this homelab's LAN names (lan.&lt;domain&gt;).
+
+kombify Me publishes lan.&lt;domain&gt; as one DNS-only record holding this node's private site address; a router that refuses private answers (DNS rebind protection) leaves the Hub on the away flow. A local-only homelab (lab.home) reaches the Authority through the OS trust profile instead ('stackkit verify client-trust `--export`').
+
+```bash
+stackkit reach lan-certificate [flags]
+```
+
+Subcommands: [`stackkit reach lan-certificate issue`](#stackkit-reach-lan-certificate-issue), [`stackkit reach lan-certificate remove`](#stackkit-reach-lan-certificate-remove), [`stackkit reach lan-certificate status`](#stackkit-reach-lan-certificate-status)
+
+### stackkit reach lan-certificate issue
+
+Obtain or renew the LAN certificate through kombify Me's DNS-01 responder (requires root).
+
+First publishes this node's site address (RFC 1918 or IPv6 ULA, never a public address) for lan.&lt;domain&gt; at kombify Me and orders nothing unless Me reads it back DNS-only with that address. Issuers: zerossl and gts need external account binding (`--eab-kid` and `--eab-hmac-file`) for a new ACME account; letsencrypt-staging serves tests only. The key never leaves this node.
+
+```bash
+stackkit reach lan-certificate issue [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--eab-hmac-file` | string | — | file holding the external account binding HMAC key (base64url) |
+| `--eab-kid` | string | — | external account binding key id (zerossl, gts) |
+| `--email` | string | — | ACME account contact address (Google Trust Services and ZeroSSL refuse an account without one) |
+| `--issuer` | string | `zerossl` | ACME issuer: zerossl, gts or letsencrypt-staging (tests only) |
+
+### stackkit reach lan-certificate remove
+
+Delete the LAN certificate, its key and the ACME account key, and have kombify Me remove the LAN address.
+
+```bash
+stackkit reach lan-certificate remove [flags]
+```
+
+### stackkit reach lan-certificate status
+
+Show the installed LAN certificate (names, issuer, expiry; never the key).
+
+```bash
+stackkit reach lan-certificate status [flags]
+```
+
+## stackkit reach public-certificate
+
+The publicly trusted certificate of a public identity origin (\*.&lt;name&gt;) the router serves.
+
+Without it, the router of a public identity origin serves certificates of the node's own step-ca, which only a device with the Owner root trusts. With it, id.&lt;name&gt;, base.&lt;name&gt; and every other host are served with a publicly trusted certificate, so a browser on the LAN needs no installed root. The identity signer renews it. A local-only homelab (lab.home) keeps step-ca.
+
+```bash
+stackkit reach public-certificate [flags]
+```
+
+Subcommands: [`stackkit reach public-certificate issue`](#stackkit-reach-public-certificate-issue), [`stackkit reach public-certificate remove`](#stackkit-reach-public-certificate-remove), [`stackkit reach public-certificate status`](#stackkit-reach-public-certificate-status)
+
+### stackkit reach public-certificate issue
+
+Obtain or renew the public-names certificate through ACME DNS-01 (requires root).
+
+kombify.me names use kombify Me's responder (the Me registration is in custody). An own domain uses Cloudflare with a token limited to the domain's zone, Zone:Read and DNS:Edit (Zone:Read finds the zone): `--dns-token-file` copies it into Owner custody, `--dns-wallet-item` copies a Wallet item already delivered to this node (stackkit wallet-item import) the same way. A later issue without a token flag reuses the recorded provider. Issuers: zerossl and gts need external account binding (`--eab-kid` and `--eab-hmac-file`) for a new ACME account; letsencrypt-staging serves tests only (its chain is not trusted). The key stays on this node.
+
+```bash
+stackkit reach public-certificate issue [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--dns-provider` | string | — | DNS-01 provider: kombify-me (the default for a kombify.me name) or cloudflare (the default for an own domain) |
+| `--dns-token-file` | string | — | file holding the Cloudflare API token (Zone:Read and DNS:Edit on the zone); copied into Owner custody |
+| `--dns-wallet-item` | string | — | Wallet item in this node's custody holding the Cloudflare API token, as &lt;tenant-ref&gt;/&lt;item-ref&gt;; copied into Owner custody |
+| `--eab-hmac-file` | string | — | file holding the external account binding HMAC key (base64url) |
+| `--eab-kid` | string | — | external account binding key id (zerossl, gts) |
+| `--email` | string | — | ACME account contact address (Google Trust Services and ZeroSSL refuse an account without one) |
+| `--issuer` | string | `zerossl` | ACME issuer: zerossl, gts or letsencrypt-staging (tests only) |
+
+**Examples**
+
+```bash
+sudo stackkit reach public-certificate issue --issuer gts --email owner@example.org --eab-kid KID --eab-hmac-file eab.key
+sudo stackkit reach public-certificate issue --dns-token-file cf-dns.token --issuer zerossl --eab-kid KID --eab-hmac-file eab.key
+```
+
+### stackkit reach public-certificate remove
+
+Delete the public certificate, its key, the ACME account and the DNS token copy (requires root).
+
+The routes the certificate covered fall back to the router's step-ca certificates at once, without an apply. A Wallet item holding the DNS token stays in the node's Wallet custody.
+
+```bash
+stackkit reach public-certificate remove [flags]
+```
+
+### stackkit reach public-certificate status
+
+Show the installed public-names certificate (names, issuer, expiry; never the key).
+
+```bash
+stackkit reach public-certificate status [flags]
+```
+
+## stackkit reach registration
+
+The homelab's own kombify Me registration (no kombify account needed).
+
+```bash
+stackkit reach registration [flags]
+```
+
+Subcommands: [`stackkit reach registration remove`](#stackkit-reach-registration-remove), [`stackkit reach registration set`](#stackkit-reach-registration-set)
+
+### stackkit reach registration remove
+
+Delete the Me registration key from Owner custody.
+
+```bash
+stackkit reach registration remove [flags]
+```
+
+### stackkit reach registration set
+
+Store the Me registration key of this homelab's base in Owner custody.
+
+Reads the kbi_ registration key Me answered once from a file (never an argument) and keeps it 0600 in Owner custody. The base is the label of this homelab's name &lt;base&gt;.kombify.me.
+
+```bash
+stackkit reach registration set [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--api` | string | `https://kombify.me/_kombify/api/v1` | kombify Me API root |
+| `--base` | string | — | **Required.** the base label of &lt;base&gt;.kombify.me |
+| `--key-file` | string | — | **Required.** file holding the kbi_ registration key |
+
+## stackkit reach status
+
+Show the reach connector and, in kombify.me tunnel mode, Me's Cloudflare read-back.
+
+```bash
+stackkit reach status [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit JSON |
+

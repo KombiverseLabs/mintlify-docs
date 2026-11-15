@@ -1,24 +1,19 @@
 ---
 title: "stackkit break-glass"
-description: "Manage break-glass recovery accounts and bundles"
+description: "Owner recovery: recovery set, recovery key and recovery code"
 sidebarTitle: "break-glass"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:95c3ff1fa3ce5716fe20ea99d7a4b694a4f951a303423dad213bbde9bf547e22"
-source_hash: "4049a888362a11795582ef0a63fba7d7a7df4942"
+content_hash: "sha256:ca552278db6ce214303c44848fb22b80d7f266fe7363c16b9640f39a5d0feab1"
+source_hash: "6bd476a8330b8b2eb61dc5c323d8cca5165038aa"
 ---
-Manage break-glass recovery accounts and bundles.
+Owner recovery: recovery set, recovery key and recovery code.
 
-Manage per-node break-glass recovery accounts and the encrypted bundles that hold their credentials.
+Owner recovery at the Authority.
 
-Bundles are written by 'stackkit apply' (Phase 1) into /var/lib/stackkit/recovery/. They are encrypted with the recovery passphrase you set during init.
+The recovery set (the break-glass bundle) holds the Authority's identity custody: Owner key, CA keys, Pocket ID keys and database, step-ca database, device registry and device credential issuer key. It is encrypted to the Owner's recovery key, which is shown once at setup and never stored here. The separate recovery code registers a new Owner passkey once: at this console at once (redeem), or from an enrolled Owner device after 24 hours with notices to every Owner device.
 
-```text
-To recover a node, decrypt the bundle:
-    age -d -o break-glass.txt break-glass-<node>.age
-```
-
-Then follow the RESTORE INSTRUCTIONS section inside the decrypted YAML.
+Restoring the set onto a replacement Authority keeps the identity origin, so existing passkeys keep working.
 
 ```bash
 stackkit break-glass [flags]
@@ -28,7 +23,58 @@ stackkit break-glass [flags]
 | --- | --- | --- | --- |
 | `--dir` | string | — | Override the bundle directory (default: /var/lib/stackkit/recovery) |
 
-Subcommands: [`stackkit break-glass list`](#stackkit-break-glass-list), [`stackkit break-glass show-bundle`](#stackkit-break-glass-show-bundle)
+Subcommands: [`stackkit break-glass cancel`](#stackkit-break-glass-cancel), [`stackkit break-glass code`](#stackkit-break-glass-code), [`stackkit break-glass list`](#stackkit-break-glass-list), [`stackkit break-glass notices`](#stackkit-break-glass-notices), [`stackkit break-glass redeem`](#stackkit-break-glass-redeem), [`stackkit break-glass restore`](#stackkit-break-glass-restore), [`stackkit break-glass setup`](#stackkit-break-glass-setup), [`stackkit break-glass show-bundle`](#stackkit-break-glass-show-bundle), [`stackkit break-glass status`](#stackkit-break-glass-status), [`stackkit break-glass write`](#stackkit-break-glass-write)
+
+## stackkit break-glass cancel
+
+Cancel a pending Owner device recovery.
+
+```bash
+stackkit break-glass cancel [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Authorize cancelling the pending recovery |
+
+Inherited from `stackkit break-glass`:
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--dir` | string | — | Override the bundle directory (default: /var/lib/stackkit/recovery) |
+
+**Examples**
+
+```bash
+stackkit break-glass cancel --owner-approve
+```
+
+## stackkit break-glass code
+
+Replace the recovery code and show the new one once.
+
+Replace the recovery code and show the new one once. A custody change: the Owner approves it with a passkey step-up on an enrolled Owner device in the Hub before the code changes.
+
+```bash
+stackkit break-glass code [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Print a JSON result that contains the new code |
+| `--owner-approve` | bool | — | Authorize replacing the recovery code |
+
+Inherited from `stackkit break-glass`:
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--dir` | string | — | Override the bundle directory (default: /var/lib/stackkit/recovery) |
+
+**Examples**
+
+```bash
+stackkit break-glass code --owner-approve
+```
 
 ## stackkit break-glass list
 
@@ -47,11 +93,130 @@ Inherited from `stackkit break-glass`:
 **Examples**
 
 ```bash
-# List the encrypted recovery bundles in /var/lib/stackkit/recovery
+# List the encrypted recovery sets in /var/lib/stackkit/recovery
 stackkit break-glass list
 
-# List bundles copied to another directory
+# List sets copied to another directory
 stackkit break-glass list --dir ./recovery-copy
+```
+
+## stackkit break-glass notices
+
+List the recovery notices addressed to the Owner devices.
+
+```bash
+stackkit break-glass notices [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Print a JSON result |
+
+Inherited from `stackkit break-glass`:
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--dir` | string | — | Override the bundle directory (default: /var/lib/stackkit/recovery) |
+
+**Examples**
+
+```bash
+stackkit break-glass notices --json
+```
+
+## stackkit break-glass redeem
+
+Redeem the recovery code at this console for a new Owner passkey.
+
+Redeem the recovery code at the Authority's console. It yields a Pocket ID link, valid for 20 minutes, that registers a new passkey for the Owner account; the code is then used up (replace it with 'stackkit break-glass code'). A pending Owner device recovery ends. The code is read from `--code-file` or standard input, never from an argument.
+
+```bash
+stackkit break-glass redeem [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--code-file` | string | — | Read the recovery code from this file instead of standard input |
+| `--json` | bool | — | Print a JSON result |
+| `--owner-approve` | bool | — | Authorize redeeming the recovery code |
+
+Inherited from `stackkit break-glass`:
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--dir` | string | — | Override the bundle directory (default: /var/lib/stackkit/recovery) |
+
+**Examples**
+
+```bash
+stackkit break-glass redeem --owner-approve
+```
+
+## stackkit break-glass restore
+
+Restore a recovery set onto a replacement Authority.
+
+Restore a recovery set onto a replacement Authority. Run it in the workspace directory of the new host before generate and apply: it verifies the whole set with the recovery key, fills fresh Docker volumes for the Pocket ID and step-ca databases, and installs the identity custody. The identity origin stays the same (the Pocket ID host is the passkey relying party), so existing passkeys keep working. The key is read from `--key-file` or standard input, never from an argument.
+
+```bash
+stackkit break-glass restore [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--from` | string | — | Path of the recovery set (break-glass-&lt;node&gt;.age) |
+| `--json` | bool | — | Print a JSON result |
+| `--key-file` | string | — | Read the recovery key from this file instead of standard input |
+| `--owner-approve` | bool | — | Authorize installing the restored identity custody |
+
+Inherited from `stackkit break-glass`:
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--dir` | string | — | Override the bundle directory (default: /var/lib/stackkit/recovery) |
+
+**Examples**
+
+```bash
+# Restore, then roll the Authority out again from the same StackSpec
+stackkit break-glass restore --from break-glass-main.age --owner-approve
+stackkit generate && stackkit apply
+```
+
+## stackkit break-glass setup
+
+Create the recovery key and code, show both once and write the first recovery set.
+
+Create the Owner's recovery key and recovery code on the Authority, print both exactly once, and write the first recovery set.
+
+Store the recovery key offline and apart from the recovery set: whoever holds both holds the Authority's identity. StackKits keeps only the public half of the key, so it can write new sets but never read one. kombify never receives the key. `--rotate` replaces an existing key and code; it asks for the Owner's passkey step-up on an enrolled Owner device in the Hub first.
+
+```bash
+stackkit break-glass setup [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--backup-target` | bool | — | Also upload the set to the S3 backup target bound with 'stackkit backup target import' |
+| `--json` | bool | — | Print a JSON result that contains the recovery key and code |
+| `--owner-approve` | bool | — | Authorize creating (or with `--rotate` replacing) the recovery key and code |
+| `--rotate` | bool | — | Replace an existing recovery key and code |
+| `--target` | string | — | Also copy the set into this directory of the Owner's backup target (mounted disk, NAS) |
+
+Inherited from `stackkit break-glass`:
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--dir` | string | — | Override the bundle directory (default: /var/lib/stackkit/recovery) |
+
+**Examples**
+
+```bash
+# First setup, with a copy of the set on a mounted backup disk
+stackkit break-glass setup --owner-approve --target /mnt/backup
+
+# Machine-readable, for the setup flow that shows key and code once
+stackkit break-glass setup --owner-approve --backup-target --json
 ```
 
 ## stackkit break-glass show-bundle
@@ -73,5 +238,58 @@ Inherited from `stackkit break-glass`:
 ```bash
 # Print the bundle path of a node that stackkit break-glass list showed
 stackkit break-glass show-bundle <node>
+```
+
+## stackkit break-glass status
+
+Show the recovery state without secrets.
+
+```bash
+stackkit break-glass status [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Print a JSON result |
+
+Inherited from `stackkit break-glass`:
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--dir` | string | — | Override the bundle directory (default: /var/lib/stackkit/recovery) |
+
+**Examples**
+
+```bash
+stackkit break-glass status --json
+```
+
+## stackkit break-glass write
+
+Write a new recovery set of the Authority's identity custody.
+
+Write a new recovery set: the local copy in the bundle directory and, when given, a copy in a backup target directory and an upload to the bound S3 backup target (object StackKitsRecoverySet/&lt;site&gt;/&lt;node&gt;.age below its prefix). Pocket ID and step-ca are paused for the few seconds the databases are read, so the set is crash-consistent. Write a new set after identity changes such as new members or devices.
+
+```bash
+stackkit break-glass write [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--backup-target` | bool | — | Also upload the set to the S3 backup target bound with 'stackkit backup target import' |
+| `--json` | bool | — | Print a JSON result |
+| `--target` | string | — | Also copy the set into this directory of the Owner's backup target (mounted disk, NAS) |
+
+Inherited from `stackkit break-glass`:
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--dir` | string | — | Override the bundle directory (default: /var/lib/stackkit/recovery) |
+
+**Examples**
+
+```bash
+# Write the set and upload it to the bound S3 backup target
+stackkit break-glass write --backup-target
 ```
 

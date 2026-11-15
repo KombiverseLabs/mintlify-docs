@@ -4,8 +4,8 @@ description: "Manage backups (Kopia engine)"
 sidebarTitle: "backup"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:95c3ff1fa3ce5716fe20ea99d7a4b694a4f951a303423dad213bbde9bf547e22"
-source_hash: "4049a888362a11795582ef0a63fba7d7a7df4942"
+content_hash: "sha256:ca552278db6ce214303c44848fb22b80d7f266fe7363c16b9640f39a5d0feab1"
+source_hash: "6bd476a8330b8b2eb61dc5c323d8cca5165038aa"
 ---
 Manage backups (Kopia engine).
 
@@ -33,7 +33,7 @@ stackkit backup status
 stackkit backup restore sha256:<snapshot-anchor-id> --owner-approve
 ```
 
-Subcommands: [`stackkit backup configure`](#stackkit-backup-configure), [`stackkit backup emergency-export`](#stackkit-backup-emergency-export), [`stackkit backup emergency-restore`](#stackkit-backup-emergency-restore), [`stackkit backup init`](#stackkit-backup-init), [`stackkit backup restore`](#stackkit-backup-restore), [`stackkit backup run`](#stackkit-backup-run), [`stackkit backup schedule`](#stackkit-backup-schedule), [`stackkit backup status`](#stackkit-backup-status), [`stackkit backup target`](#stackkit-backup-target)
+Subcommands: [`stackkit backup configure`](#stackkit-backup-configure), [`stackkit backup emergency-export`](#stackkit-backup-emergency-export), [`stackkit backup emergency-restore`](#stackkit-backup-emergency-restore), [`stackkit backup init`](#stackkit-backup-init), [`stackkit backup restore`](#stackkit-backup-restore), [`stackkit backup run`](#stackkit-backup-run), [`stackkit backup schedule`](#stackkit-backup-schedule), [`stackkit backup status`](#stackkit-backup-status), [`stackkit backup target`](#stackkit-backup-target), [`stackkit backup transfer-abort`](#stackkit-backup-transfer-abort), [`stackkit backup transfer-candidate`](#stackkit-backup-transfer-candidate), [`stackkit backup transfer-configuration`](#stackkit-backup-transfer-configuration), [`stackkit backup transfer-export`](#stackkit-backup-transfer-export), [`stackkit backup transfer-fetch`](#stackkit-backup-transfer-fetch), [`stackkit backup transfer-finish`](#stackkit-backup-transfer-finish), [`stackkit backup transfer-import`](#stackkit-backup-transfer-import), [`stackkit backup transfer-prepare`](#stackkit-backup-transfer-prepare), [`stackkit backup transfer-recover`](#stackkit-backup-transfer-recover), [`stackkit backup transfer-resume`](#stackkit-backup-transfer-resume), [`stackkit backup transfer-serve`](#stackkit-backup-transfer-serve), [`stackkit backup transfer-target`](#stackkit-backup-transfer-target), [`stackkit backup transfer-withdraw`](#stackkit-backup-transfer-withdraw)
 
 ## stackkit backup configure
 
@@ -183,6 +183,8 @@ stackkit backup restore activate <restore-result-id> [flags]
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
+| `--decision-principal` | string | — | Acting principal the receipt is bound to, as &lt;person\|agent_instance&gt;:&lt;id&gt; |
+| `--decision-receipt` | string | — | Compact decision receipt (JWS) that carries the person's confirmation of this exact operation, or @file to read it from a file |
 | `--expected-plan-hash` | string | — | Require this admitted sha256 ResolvedPlan before the safety snapshot or live activation |
 | `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
 | `--marketplace-service` | string | — | Activate only the explicitly selected upstream filesystem service |
@@ -238,6 +240,7 @@ stackkit backup run [flags]
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
+| `--expected-ril-primitive-hash` | string | — | Require the verified embedded contract hash of the run-backup RIL primitive |
 | `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
 | `--operation-id` | string | — | Stable idempotency key for this snapshot operation |
 | `--scheduled` | bool | — | Execute only through the current signed local schedule authorization |
@@ -350,6 +353,7 @@ stackkit backup status [flags]
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
+| `--expected-ril-primitive-hash` | string | — | Require the verified embedded contract hash of the check-backup RIL primitive |
 | `--json` | bool | — | Emit stackkit.command-result/v1 JSON |
 | `--marketplace-component` | string | — | Exact upstream service application UUID |
 | `--marketplace-data-class` | string | `config` | Selected filesystem data class: config or user-content |
@@ -437,4 +441,236 @@ stackkit backup target status [flags]
 # Confirm the imported target custody is intact
 stackkit backup target status
 ```
+
+## stackkit backup transfer-abort
+
+Hold the receiving application stopped and issue signed abort evidence.
+
+```bash
+stackkit backup transfer-abort [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--archive-sha256` | string | — | Exact admitted transfer/target authority |
+| `--candidate-output` | string | — | New candidate path for Advanced target abort retirement |
+| `--capability` | string | — | Techstack capability for the exact Advanced held target retirement |
+| `--expected-plan-hash` | string | — | Exact admitted transfer/target authority |
+| `--inventory` | string | — | Existing local inventory for selected target intent retirement |
+| `--owner-approve` | bool | — | Stop and hold only the receiving application closure |
+| `--source-fingerprint` | string | — | Exact admitted transfer/target authority |
+| `--source-owner` | string | — | Exact admitted transfer/target authority |
+| `--source-receipt` | string | — | Exact admitted transfer/target authority |
+| `--transfer-id` | string | — | Exact admitted transfer/target authority |
+
+## stackkit backup transfer-candidate
+
+Author the receiving candidate of one native application transfer from the source configuration.
+
+```bash
+stackkit backup transfer-candidate [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--output` | string | — | New receiving candidate StackSpec path |
+| `--portable-configuration` | string | — | Source portable application configuration document |
+
+## stackkit backup transfer-configuration
+
+Project one selected application's portable public configuration for a receiving candidate.
+
+```bash
+stackkit backup transfer-configuration [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--use-case` | string | — | Project every currently selected member of this catalog use case |
+| `--workload` | stringArray | — | Exact selected application to project; repeat |
+
+## stackkit backup transfer-export
+
+Export selected native applications to one receiving node.
+
+```bash
+stackkit backup transfer-export [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--destination` | string | — | Receiving node admission JSON |
+| `--destination-fingerprint` | string | — | Independently pinned full receiving signing-key SHA-256 |
+| `--destination-owner` | string | — | Independently admitted receiving Owner |
+| `--expected-plan-hash` | string | — | Exact source Plan hash |
+| `--json` | bool | — | Output transfer receipt |
+| `--mode` | string | `copy` | copy resumes source; migrate holds selected source until authenticated destination outcome |
+| `--operation-id` | string | — | Resumable source snapshot operation |
+| `--target` | string | — | New encrypted export directory |
+| `--use-case` | string | — | Transfer every currently selected member of this catalog use case |
+| `--workload` | stringArray | — | Exact workload closure to transfer; repeat for a use case |
+
+## stackkit backup transfer-fetch
+
+Download one transfer archive from the source node and keep it only when its digest matches.
+
+```bash
+stackkit backup transfer-fetch [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--archive-sha256` | string | — | Exact ciphertext digest from the source's signed receipt |
+| `--from` | string | — | Source HOST:PORT that transfer-serve shares on |
+| `--max-bytes` | int | `549755813888` | Maximum ciphertext bytes |
+| `--wait` | duration | `2m0s` | Wait this long for the source share to come up |
+
+## stackkit backup transfer-finish
+
+Retire selected source intent after signed destination activation and retain all source data.
+
+```bash
+stackkit backup transfer-finish [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--candidate-output` | string | — | Exact existing transfer/source retirement input |
+| `--capability` | string | — | Techstack capability for the exact Advanced held transfer retirement |
+| `--inventory` | string | — | Exact existing transfer/source retirement input |
+| `--owner-approve` | bool | — | Approve source intent retirement while preserving data |
+| `--source-receipt` | string | — | Exact existing transfer/source retirement input |
+| `--target-fingerprint` | string | — | Exact existing transfer/source retirement input |
+| `--target-outcome` | string | — | Exact existing transfer/source retirement input |
+
+## stackkit backup transfer-import
+
+Import an authenticated selected application transfer using destination authority.
+
+```bash
+stackkit backup transfer-import [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--archive` | string | — | Required exact transfer admission value |
+| `--archive-sha256` | string | — | Required exact transfer admission value |
+| `--capability` | string | — | Managed node: Techstack capability for this exact receiving import |
+| `--expected-plan-hash` | string | — | Required exact transfer admission value |
+| `--identity-file` | string | — | Required exact transfer admission value |
+| `--json` | bool | — | Output destination activation receipt |
+| `--max-bytes` | int | `549755813888` | Maximum decompressed bytes |
+| `--owner-approve` | bool | — | Approve selected destination application replacement |
+| `--recover` | bool | — | Recover the original signed transfer activation journal |
+| `--source-fingerprint` | string | — | Required exact transfer admission value |
+| `--source-owner` | string | — | Required exact transfer admission value |
+| `--source-receipt` | string | — | Required exact transfer admission value |
+| `--transfer-id` | string | — | Required exact transfer admission value |
+
+## stackkit backup transfer-prepare
+
+Adopt transferred application credentials before the receiving application's first Apply.
+
+```bash
+stackkit backup transfer-prepare [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--archive` | string | — | Required exact transfer admission value |
+| `--archive-sha256` | string | — | Required exact transfer admission value |
+| `--capability` | string | — | Managed node: Techstack capability for this exact receiving preparation |
+| `--expected-plan-hash` | string | — | Required exact transfer admission value |
+| `--identity-file` | string | — | Required exact transfer admission value |
+| `--max-bytes` | int | `549755813888` | Maximum decompressed bytes |
+| `--owner-approve` | bool | — | Approve selected new application credential adoption |
+| `--source-fingerprint` | string | — | Required exact transfer admission value |
+| `--source-owner` | string | — | Required exact transfer admission value |
+| `--source-receipt` | string | — | Required exact transfer admission value |
+| `--transfer-id` | string | — | Required exact transfer admission value |
+
+## stackkit backup transfer-recover
+
+Recover the original typed transfer activation through its existing journal.
+
+```bash
+stackkit backup transfer-recover [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--archive` | string | — | Exact original transfer admission |
+| `--archive-sha256` | string | — | Exact original transfer admission |
+| `--capability` | string | — | Managed node: Techstack capability for this exact receiving import |
+| `--expected-plan-hash` | string | — | Exact original transfer admission |
+| `--identity-file` | string | — | Exact original transfer admission |
+| `--json` | bool | — | Output recovery outcome |
+| `--max-bytes` | int | `549755813888` | Maximum decompressed archive bytes |
+| `--owner-approve` | bool | — | Authorize original selected activation recovery |
+| `--source-fingerprint` | string | — | Exact original transfer admission |
+| `--source-owner` | string | — | Exact original transfer admission |
+| `--source-receipt` | string | — | Exact original transfer admission |
+| `--transfer-id` | string | — | Exact original transfer admission |
+
+## stackkit backup transfer-resume
+
+Resume held source only after independently verified stopped-destination evidence.
+
+```bash
+stackkit backup transfer-resume [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--owner-approve` | bool | — | Resume the retained original application after verified target stop |
+| `--source-receipt` | string | — | Exact original transfer and stopped-target proof |
+| `--target-fingerprint` | string | — | Exact original transfer and stopped-target proof |
+| `--target-outcome` | string | — | Exact original transfer and stopped-target proof |
+
+## stackkit backup transfer-serve
+
+Serve one exported transfer archive once to the admitted receiving node.
+
+```bash
+stackkit backup transfer-serve [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--open-firewall` | bool | — | Admit the peer on the port in the host firewall while sharing |
+| `--peer` | string | — | Address of the receiving node; no other client is served |
+| `--port` | int | `8124` | TCP port of the one-shot share |
+| `--target` | string | — | Export directory transfer-export wrote |
+| `--ttl` | duration | `30m0s` | Stop sharing after this long without a complete download |
+
+## stackkit backup transfer-target
+
+Issue a signed receiving-node admission for a private age identity.
+
+```bash
+stackkit backup transfer-target [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--candidate-spec` | string | — | Managed node: the Techstack-approved receiving candidate StackSpec to persist and generate |
+| `--capability` | string | — | Managed node: Techstack capability for this exact receiving admission |
+| `--expected-plan-hash` | string | — | Exact receiving candidate Plan hash |
+| `--expected-spec-hash` | string | — | Managed node: the exact current intent the receiving candidate was authored from |
+| `--identity-file` | string | — | Existing private receiving age identity (default: a new node-held identity) |
+| `--portable-configuration-digest` | string | — | Managed node: the canonical digest of the portable application configuration the receiving candidate carries |
+| `--source-owner` | string | — | Managed node: the source Owner the Techstack receive capability names |
+
+## stackkit backup transfer-withdraw
+
+Withdraw an unused receiving admission and restore the intent its admit replaced.
+
+```bash
+stackkit backup transfer-withdraw [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--nonce` | string | — | Nonce of the receiving admission |
+| `--owner-approve` | bool | — | Approve withdrawing the receiving admission |
 
