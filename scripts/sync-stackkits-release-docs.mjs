@@ -749,7 +749,7 @@ function renderOperatingSystems(release, compatibility, evidence, recommended = 
     if (evidence) page += `The newest stored lifecycle projection covers ${releaseLink(evidence.stackkitsVersion)}. Its results do not establish support for ${release.tag}.\n\n`
     page += '| Operating system | Version | Tested architecture | Status | Evidence |\n| --- | --- | --- | --- | --- |\n'
     for (const row of compatibility.compatibility.os) {
-      page += `| ${md(row.name)} | ${md(row.version)} | — | \`unverified\` | No lifecycle projection for ${md(release.tag)} |\n`
+      page += `| ${md(row.name)} | ${md(row.version)} | — | \`unverified\` | Not projected |\n`
     }
     page += '\n[stackkit.cc/compatibility](https://stackkit.cc/compatibility) shows the automated lifecycle runs as they are projected. Run `stackkit compat` on a host for non-destructive diagnostics; a diagnostic result alone does not establish lifecycle support.\n'
     if (evidence) page += runtimeObservationsMarkdown(release, evidence)
