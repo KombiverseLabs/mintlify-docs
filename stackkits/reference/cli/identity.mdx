@@ -4,8 +4,8 @@ description: "Manage the standalone local identity plane"
 sidebarTitle: "identity"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:95c3ff1fa3ce5716fe20ea99d7a4b694a4f951a303423dad213bbde9bf547e22"
-source_hash: "4049a888362a11795582ef0a63fba7d7a7df4942"
+content_hash: "sha256:ca552278db6ce214303c44848fb22b80d7f266fe7363c16b9640f39a5d0feab1"
+source_hash: "6bd476a8330b8b2eb61dc5c323d8cca5165038aa"
 ---
 Manage the standalone local identity plane.
 
@@ -13,7 +13,214 @@ Manage the standalone local identity plane.
 stackkit identity [flags]
 ```
 
-Subcommands: [`stackkit identity projection`](#stackkit-identity-projection), [`stackkit identity workload-peer`](#stackkit-identity-workload-peer)
+Subcommands: [`stackkit identity agent-link`](#stackkit-identity-agent-link), [`stackkit identity join`](#stackkit-identity-join), [`stackkit identity projection`](#stackkit-identity-projection), [`stackkit identity workload-peer`](#stackkit-identity-workload-peer)
+
+## stackkit identity agent-link
+
+Pin, show or remove the Gateway key that kombify agent envelopes are verified against.
+
+A kombify agent reaches this node's /mcp with a Gateway-signed envelope that the Access Gate verifies against the key pinned here at linking and maps through the D10 reference to a Homelab account. Techstack delivers the link over the Guard when the server is registered as a Connect node and whenever the key or the linked members change. install pins the key document for this node's own Guard enrollment and maps the owner's kombify subject to the Owner of this node's custody and each linked member to their account. Pinning a key, re-keying and changing the owner need the Owner's passkey step-up in the Hub (the request waits up to `--wait` and stays open for five minutes; a later dispatch picks up the approval); a change of the linked members under the pinned key does not. A higher binding generation or a new Gateway key id replaces the pin; an unchanged request changes nothing. remove deletes the pin when the node is unlinked, status shows what is pinned.
+
+```bash
+stackkit identity agent-link [flags]
+```
+
+Subcommands: [`stackkit identity agent-link install`](#stackkit-identity-agent-link-install), [`stackkit identity agent-link remove`](#stackkit-identity-agent-link-remove), [`stackkit identity agent-link status`](#stackkit-identity-agent-link-status)
+
+### stackkit identity agent-link install
+
+Pin the Gateway agent envelope key and the D10 references of this node.
+
+```bash
+stackkit identity agent-link install [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--expect-sha256` | string | — | Required: the sha256:&lt;hex&gt; digest of the file's exact bytes (the request Techstack dispatched) |
+| `--file` | string | — | Workspace-relative stackkit.home-agent-link-request/v1 JSON (no secret: the public key, the owner's kombify subject and the linked members' kombify subjects and Pocket ID usernames) |
+| `--json` | bool | — | Emit the pinned link as a command result |
+| `--owner-approve` | bool | — | Approve pinning this key for agent access to this node (a new key or owner also needs the Owner's passkey step-up) |
+| `--wait` | duration | `5m0s` | How long to wait for the Owner's passkey step-up when one is needed; the request stays open after a shorter wait |
+
+### stackkit identity agent-link remove
+
+Delete the pinned Gateway key; every agent envelope is refused afterwards.
+
+```bash
+stackkit identity agent-link remove [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit the result as a command result |
+| `--owner-approve` | bool | — | Approve removing agent access to this node |
+
+### stackkit identity agent-link status
+
+Show the pinned node, server, key thumbprint, generation and mapped accounts.
+
+```bash
+stackkit identity agent-link status [flags]
+```
+
+## stackkit identity join
+
+Join this server to the homelab's Authority, or approve and manage joined servers at the Authority.
+
+Several servers of one homelab share one Authority, the server that runs Pocket ID. A further server prepares a join request, the Owner approves it with a passkey step-up at the Authority, which signs a trust bundle and an intermediate CA for the server's hostnames, and the joining server installs the bundle after the Owner confirmed its root fingerprint there. Techstack only carries the request and the bundle.
+
+```bash
+stackkit identity join [flags]
+```
+
+Subcommands: [`stackkit identity join approve`](#stackkit-identity-join-approve), [`stackkit identity join client`](#stackkit-identity-join-client), [`stackkit identity join install`](#stackkit-identity-join-install), [`stackkit identity join leave`](#stackkit-identity-join-leave), [`stackkit identity join remove`](#stackkit-identity-join-remove), [`stackkit identity join request`](#stackkit-identity-join-request), [`stackkit identity join status`](#stackkit-identity-join-status), [`stackkit identity join zone`](#stackkit-identity-join-zone)
+
+### stackkit identity join approve
+
+At the Authority: approve a join request with the Owner's passkey and write the trust bundle.
+
+Raise an Owner step-up of class join for exactly this request; the Hub shows the server, every hostname and the request code the joining server printed, and the Owner approves it there with a passkey on an enrolled Owner device within five minutes. Then the root signs the server's intermediate CA (its hostnames only, server authentication only, every IP range and the identity names excluded, path length 0, 90 days) and the Owner key signs the trust bundle the joining server installs.
+
+```bash
+stackkit identity join approve [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--out` | string | — | Write the trust bundle to this file instead of standard output |
+| `--request` | string | — | **Required.** The join request file the joining server wrote |
+
+### stackkit identity join client
+
+Register a joined server's sign-in client at the Authority and bind it on the joined server.
+
+A joined server's TinyAuth signs in against the Authority's Pocket ID. The Authority registers its OIDC client under an Owner step-up and seals the secret to a key the carrier generated; the secret then reaches the joined server only as a Wallet item by host delivery (stackkit wallet-item import), and client bind points TinyAuth at it.
+
+```bash
+stackkit identity join client [flags]
+```
+
+Subcommands: [`stackkit identity join client bind`](#stackkit-identity-join-client-bind), [`stackkit identity join client register`](#stackkit-identity-join-client-register)
+
+#### stackkit identity join client bind
+
+On a joined server: bind TinyAuth to the Authority's client with the secret of an imported Wallet item.
+
+The binding names the client, the Authority's Pocket ID issuer and the Wallet item this server imported (stackkit wallet-item import). TinyAuth's private environment is written from the item in encrypted custody; the record keeps only an Owner-signed reference.
+
+```bash
+stackkit identity join client bind [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--binding` | string | — | **Required.** The client binding (stackkit.homelab-oidc-client-binding/v1) |
+
+#### stackkit identity join client register
+
+At the Authority: register a joined server's TinyAuth client with the Owner's passkey; the secret leaves sealed only.
+
+Raise an Owner step-up of class client-registration for exactly this server, TinyAuth host and carrier key. After the Owner approved it in the Hub, the Authority's Pocket ID registers (or converges) the server's confidential PKCE client, restricted to the household groups, sets a fresh secret and writes it sealed with HPKE to the carrier key. The document holds no readable secret.
+
+```bash
+stackkit identity join client register [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--out` | string | — | Write the sealed client to this file instead of standard output |
+| `--request` | string | — | **Required.** The client request (stackkit.homelab-oidc-client-request/v1) the carrier wrote |
+
+### stackkit identity join install
+
+On the joining server: install the Authority's trust bundle under the root pinned at request.
+
+Install the bundle only when it answers this server's pending request, carries the root the Owner pinned with join request, is signed by the Owner of that root and its intermediate CA has exactly the requested scope. Then read the Authority's verification state once.
+
+```bash
+stackkit identity join install [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--bundle` | string | — | **Required.** The trust bundle file the Authority wrote |
+
+### stackkit identity join leave
+
+On a joined server: remove the Authority's trust; its credentials stop verifying here at once.
+
+```bash
+stackkit identity join leave [flags]
+```
+
+### stackkit identity join remove
+
+At the Authority: end a joined server's trust.
+
+Refuse the server's verification-state reads at once: it opens no new browser session, and every credential it still accepts expires within the one hour credential lifetime.
+
+```bash
+stackkit identity join remove <server-ref> [flags]
+```
+
+### stackkit identity join request
+
+On the joining server: pin the Authority's root and create the join request (public keys only).
+
+Enter the Authority's root fingerprint as the Authority shows it (stackkit device bootstrap there, or the Hub): only a trust bundle under that root ever installs here. Generate this server's intermediate CA key (kept in host custody) and its verification-state key, and write the join request: this server's owner, site and node references, the hostnames it serves, the pinned root and the two public keys. The request holds no secret. The request code it prints is the one the Owner sees again in the Hub before approving.
+
+```bash
+stackkit identity join request [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--authority-root` | string | — | **Required.** The Authority's root fingerprint (SHA-256, hex) the Owner read at the Authority |
+| `--hostname` | strings | — | **Required.** A hostname this server serves inside the homelab domain (repeatable); its intermediate CA may name only these DNS subtrees |
+| `--out` | string | — | Write the request to this file instead of standard output |
+
+### stackkit identity join status
+
+Show the joined Authority (on a joined server) or the joined servers (at the Authority).
+
+```bash
+stackkit identity join status [flags]
+```
+
+### stackkit identity join zone
+
+Report this server's place in the homelab DNS zone, or install the zone Techstack assembled.
+
+Techstack assembles the homelab zone from every server's zone site and carries it to each server. A server installs only what its join trust vouches for: the Authority the names the Owner approved for each joined server, a joined server the Authority at its bundle's LAN address and other servers as the Authority's signed verification state lists them. DNS answers are never identity: TLS verifies each name under the root.
+
+```bash
+stackkit identity join zone [flags]
+```
+
+Subcommands: [`stackkit identity join zone install`](#stackkit-identity-join-zone-install), [`stackkit identity join zone site`](#stackkit-identity-join-zone-site)
+
+#### stackkit identity join zone install
+
+Install the homelab zone into this server's LAN resolver, as far as its join trust vouches for it.
+
+Refuses a zone that names another homelab domain or Authority address, names for a server the Owner did not approve, or an identity name. The LAN resolver restarts when it already runs.
+
+```bash
+stackkit identity join zone install [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--zone` | string | — | **Required.** The homelab zone (stackkit.homelab-dns-zone/v1) Techstack assembled |
+
+#### stackkit identity join zone site
+
+Show this server's role, domain and LAN address for the homelab zone.
+
+```bash
+stackkit identity join zone site [flags]
+```
 
 ## stackkit identity projection
 

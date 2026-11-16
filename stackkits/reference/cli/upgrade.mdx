@@ -4,14 +4,14 @@ description: "Resolve and install a verified StackKit release"
 sidebarTitle: "upgrade"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:95c3ff1fa3ce5716fe20ea99d7a4b694a4f951a303423dad213bbde9bf547e22"
-source_hash: "4049a888362a11795582ef0a63fba7d7a7df4942"
+content_hash: "sha256:ca552278db6ce214303c44848fb22b80d7f266fe7363c16b9640f39a5d0feab1"
+source_hash: "6bd476a8330b8b2eb61dc5c323d8cca5165038aa"
 ---
 Resolve and install a verified StackKit release.
 
 Resolve a public StackKit release from GitHub, verify its archive, SPDX SBOM, GitHub OIDC/Sigstore attestation, and cached trusted root, then atomically install it under .stackkit/releases/.
 
-With `--dry-run` it generates the verified target only in a bounded shadow workspace and reports a canonical plan/artifact diff. Without `--dry-run` it first inspects that target, creates a native Kopia snapshot plus an owner-signed executor-state recovery checkpoint, stages and verifies the rollback data without activating it, and only then installs and executes the exact target generate/apply/verify transaction. A failed target transaction can restore and verify the prior executor only before target Apply is admitted. After Apply, prior-runtime restart is blocked until verified prior-data activation exists; isolated Kopia staging alone does not authorize it. A completed target commit keeps its success proof for explicit finalization. Fresh upgrades require support in the embedded CUE Kit policy; recovery of an existing operation follows its signed journal and checkpoint.
+With `--dry-run` it generates the verified target only in a bounded shadow workspace and reports a canonical plan/artifact diff. Without `--dry-run` it first inspects that target, creates a native Kopia snapshot plus an owner-signed executor-state recovery checkpoint, stages and verifies the rollback data without activating it, and only then installs and executes the exact target generate/apply/verify transaction. A failed target transaction can restore and verify the prior executor only before target Apply is admitted. After Apply, prior-runtime restart is blocked until verified prior-data activation exists; isolated Kopia staging alone does not authorize it. `--recover` with `--forward` is the owner's approval to finish such an operation forward: it reruns the exact signed target Apply and Verify, then commits. Add `--to` with a newer release when the signed target cannot finish: that verified release becomes the target and regenerates, applies and verifies. A completed target commit keeps its success proof for explicit finalization. Fresh upgrades require support in the embedded CUE Kit policy, and a kit whose policy requires Owner approval upgrades only with `--owner-approve` (`--dry-run` needs none); recovery of an existing operation follows its signed journal and checkpoint.
 
 ```bash
 stackkit upgrade [flags]
@@ -20,9 +20,12 @@ stackkit upgrade [flags]
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
 | `--dry-run` | bool | — | Verify and inspect target generation in a bounded shadow workspace without applying it. |
+| `--expected-ril-primitive-hash` | string | — | Require the verified embedded contract hash of the update-service RIL primitive |
+| `--forward` | bool | — | With `--recover`: approve finishing an operation interrupted after target Apply by rerunning its exact target Apply and Verify. |
 | `--json` | bool | — | Emit stackkit.command-result/v1 JSON. |
+| `--owner-approve` | bool | — | Approve this fresh upgrade; required when the kit's upgrade policy requires Owner approval. |
 | `--recover` | string | — | Explicitly recover one exact interrupted lifecycle operation ID. |
-| `--to` | string | `latest` | Target: latest, vX.Y.Z, or channel:stable\|beta\|edge. |
+| `--to` | string | `latest` | Target: latest, vX.Y.Z, or channel:stable\|beta\|edge. With `--recover` `--forward`: a newer release that finishes the operation. |
 
 **Examples**
 
@@ -31,12 +34,18 @@ stackkit upgrade [flags]
 stackkit upgrade --dry-run
 
 # Upgrade to the newest stable release
-stackkit upgrade
+stackkit upgrade --owner-approve
 
 # Upgrade to the newest beta prerelease
-stackkit upgrade --to channel:beta
+stackkit upgrade --to channel:beta --owner-approve
 
 # Recover an interrupted upgrade by its lifecycle operation ID
 stackkit upgrade --recover <operation-id>
+
+# Finish an upgrade interrupted after target Apply with its exact target release
+stackkit upgrade --recover <operation-id> --forward
+
+# Finish it with a newer verified release instead
+stackkit upgrade --recover <operation-id> --forward --to vX.Y.Z
 ```
 

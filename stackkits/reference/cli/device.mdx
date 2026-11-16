@@ -1,50 +1,53 @@
 ---
 title: "stackkit device"
-description: "Enroll, list and revoke household devices (CLI token fallback of the State Console ceremony)"
+description: "Enrollment bootstrap, devices, notices and revocation at the Authority (the Owner's local console)"
 sidebarTitle: "device"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:95c3ff1fa3ce5716fe20ea99d7a4b694a4f951a303423dad213bbde9bf547e22"
-source_hash: "4049a888362a11795582ef0a63fba7d7a7df4942"
+content_hash: "sha256:ca552278db6ce214303c44848fb22b80d7f266fe7363c16b9640f39a5d0feab1"
+source_hash: "6bd476a8330b8b2eb61dc5c323d8cca5165038aa"
 ---
-Enroll, list and revoke household devices (CLI token fallback of the State Console ceremony).
+Enrollment bootstrap, devices, notices and revocation at the Authority (the Owner's local console).
+
+Each person enrolls their own devices: the device client signs them in with their own passkey and enrolls its own key, automatically at home through the LAN enrollment listener and confirmed away by their own enrolled device or the Owner. These commands are the Owner's console at the Authority: show the enrollment bootstrap, bind the Home trust, list devices and notices, undo an enrollment and revoke any device.
 
 ```bash
 stackkit device [flags]
 ```
 
-Subcommands: [`stackkit device enroll`](#stackkit-device-enroll), [`stackkit device list`](#stackkit-device-list), [`stackkit device overlay`](#stackkit-device-overlay), [`stackkit device revoke`](#stackkit-device-revoke)
+Subcommands: [`stackkit device bootstrap`](#stackkit-device-bootstrap), [`stackkit device list`](#stackkit-device-list), [`stackkit device notices`](#stackkit-device-notices), [`stackkit device overlay`](#stackkit-device-overlay), [`stackkit device revoke`](#stackkit-device-revoke), [`stackkit device signer`](#stackkit-device-signer), [`stackkit device trust`](#stackkit-device-trust), [`stackkit device undo`](#stackkit-device-undo)
 
-## stackkit device enroll
+## stackkit device bootstrap
 
-Issue a single-use pairing token after Owner step-up, or redeem one with a device CSR.
+Print the LAN enrollment bootstrap a device client scans (listener URL, TLS name, root fingerprint).
 
-With `--owner-session-file`, issue a single-use 300-second pairing token; the file holds a PocketID Owner session authenticated within the last 60 seconds ('-' reads stdin). With `--code` and `--csr`, redeem the token for the device-generated key in the CSR and receive a client certificate from the node-local step-ca device provisioner. Both steps also combine in one call. Enrollment is refused from outside the LAN.
+Print where the LAN enrollment listener is, which server name its certificate carries and the step-ca root fingerprint a device pins, as JSON and as the stackkit-enroll URI, and the Companion enrollment address: the Hub origin with the Owner key fingerprint (#okf=), which a person enters in the Companion so it trusts the Owner-signed listener and root even when the Hub is reached through an edge. It contains no secret: a device enrolls only with its person's own passkey sign-in.
 
 ```bash
-stackkit device enroll [flags]
+stackkit device bootstrap [flags]
 ```
-
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--code` | string | — | single-use pairing token to redeem |
-| `--csr` | string | — | PEM certificate request generated on the device |
-| `--out` | string | — | write the issued certificate chain to this file instead of stdout |
-| `--owner-session-file` | string | — | file with a fresh PocketID Owner session token ('-' for stdin); issues a pairing token |
 
 ## stackkit device list
 
-List enrolled and revoked household devices.
+List every device of every Homelab account: enrolled, pending and revoked.
 
 ```bash
 stackkit device list [flags]
 ```
 
+## stackkit device notices
+
+List enrollment notices: at-home enrollments with their 24 hour undo and pending away enrollments.
+
+```bash
+stackkit device notices [flags]
+```
+
 ## stackkit device overlay
 
-Join enrolled devices to the kit-owned WireGuard overlay for remote-private access.
+Join enrolled devices to the optional WireGuard VPN add-on.
 
-The node generates its WireGuard private key into local custody; it is never printed or rendered. Each device generates its own key pair and registers only its public key. Revoked or expired devices drop out of the rendered interface configuration. No kombify account is involved.
+The VPN add-on is never the default: the Owner switches it on in addition to the standard reach paths, and every request through it still carries the sign-in and device proof its route asks for. The node generates its WireGuard private key into local custody; it is never printed or rendered. Each device generates its own key pair and registers only its public key. Revoked or expired devices drop out of the rendered interface configuration. No kombify account is involved.
 
 ```bash
 stackkit device overlay [flags]
@@ -88,9 +91,44 @@ stackkit device overlay up [flags]
 
 ## stackkit device revoke
 
-Permanently revoke a household device key.
+Permanently revoke any device key and everything it holds.
+
+Revoke a device key as the Owner: its renewals stop at once, verifiers refuse its credentials within the revocation refresh, its VPN add-on peer is removed (and a running overlay resynced) and the output lists each revocation-registry artifact. The key can never enroll again.
 
 ```bash
 stackkit device revoke <device-id> [flags]
+```
+
+## stackkit device signer
+
+Run the Authority's host-side identity signer for the Basement core (Apply installs it as a systemd service).
+
+The Basement core's identity workspace holds verification custody only. This process keeps the Owner custody, the step-ca root and the Pocket ID admin key on the host: it keeps the Owner-signed Home trust, the public Authority record, the household groups and the recovery notices current, and answers the core over a Unix socket that only the core server's account may use: a certificate for the LAN enrollment listener's own names, and the Owner device recovery routes. stackkit apply installs and starts it as stackkit-identity-signer.service.
+
+```bash
+stackkit device signer [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--peer-uid` | int | `-1` | The only account besides root that may call the signer (default: the core stackkit-server's uid) |
+| `--socket` | string | — | Unix socket path (default: .stackkit/identity-signer/signer.sock in the workspace) |
+
+## stackkit device trust
+
+Bind the Owner-signed Home trust to the live PocketID and register the device sign-in client.
+
+Register the stackkit-home-device PocketID client on first use (a public PKCE client for the Homelab groups that requires a passkey on every sign-in), read the live issuer, signing keys and Owner subject, and bind them as the Owner-signed Home trust for 24 hours, keeping every revoked and removed account revoked. The LAN enrollment listener refreshes it every hour; run this once after setup or to repair it.
+
+```bash
+stackkit device trust [flags]
+```
+
+## stackkit device undo
+
+Undo an at-home enrollment within 24 hours, or decline a pending one, by revoking its device.
+
+```bash
+stackkit device undo <notice-id> [flags]
 ```
 

@@ -4,8 +4,8 @@ description: "Select optional kit use cases"
 sidebarTitle: "use-cases"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:95c3ff1fa3ce5716fe20ea99d7a4b694a4f951a303423dad213bbde9bf547e22"
-source_hash: "4049a888362a11795582ef0a63fba7d7a7df4942"
+content_hash: "sha256:ca552278db6ce214303c44848fb22b80d7f266fe7363c16b9640f39a5d0feab1"
+source_hash: "6bd476a8330b8b2eb61dc5c323d8cca5165038aa"
 ---
 Select optional kit use cases.
 
@@ -13,13 +13,13 @@ Select optional kit use cases.
 stackkit use-cases [flags]
 ```
 
-Subcommands: [`stackkit use-cases add`](#stackkit-use-cases-add), [`stackkit use-cases pick`](#stackkit-use-cases-pick)
+Subcommands: [`stackkit use-cases add`](#stackkit-use-cases-add), [`stackkit use-cases configure`](#stackkit-use-cases-configure), [`stackkit use-cases pick`](#stackkit-use-cases-pick), [`stackkit use-cases upgrade`](#stackkit-use-cases-upgrade)
 
 ## stackkit use-cases add
 
-Add a catalog use case to an existing standalone installation.
+Add one catalog use case while retaining the Foundation and applications.
 
-Add a use case using the installed kit's CUE-owned alternative and module profile defaults. Preserve existing workloads, routes, placement and storage. Persist the candidate by the current spec hash and materialize only the selected use case's local secret slots. Existing custody is reused. No services are deployed; generate and apply the updated intent through the normal lifecycle. Native stackkit/v2alpha2 and a single standalone node/site are required.
+Add one use case using CUE-owned defaults or explicit alternatives and profiles. Existing workloads, routes, placement, storage and custody are retained. Standard Mode persists by current spec hash and prepares only this workload's local secret slots. Advanced intent requires `--output`: submit that candidate through the existing capability-gated Advanced change-set lifecycle. No services are deployed; use the normal plan/apply lifecycle.
 
 ```bash
 stackkit use-cases add <slug> [flags]
@@ -27,14 +27,43 @@ stackkit use-cases add <slug> [flags]
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
-| `--expected-spec-hash` | string | — | Require this canonical current spec hash; omitted uses the hash read before authoring |
+| `--accelerator-profile` | string | — | Catalog module accelerator profile; omission retains selection |
+| `--alternative` | string | — | Catalog alternative for a new use case; existing alternatives require migration |
+| `--compute-profile` | string | — | Module-local low, standard or high; omission retains selection |
+| `--expected-spec-hash` | string | — | Require the current canonical spec hash |
+| `--json` | bool | — | Emit versioned authoring result; execution remains pending |
+| `--node` | string | — | Existing enabled node; required for additions when multiple nodes exist |
+| `--output` | string | — | Write a new candidate file, retaining the active baseline; required for Advanced/multi-node intent |
+| `--platform` | string | — | Runtime adapter for a new use case; existing delivery identity is retained |
+| `--secret-ref` | stringArray | — | Input key=secret://reference; never supply secret material |
+| `--setting` | stringArray | — | Public setting key=JSON; repeat to merge named settings |
+| `--storage-profile` | string | — | Catalog module storage profile; omission retains selection |
 
-**Examples**
+## stackkit use-cases configure
+
+Update one selected application's settings and module profiles.
+
+Aliases: `update`
+
+Merge named public settings, secret references and module profiles into one selected application. Omitted settings, data, routes, placement, adapter and unrelated applications are retained. Application swaps and relocation require explicit migration. Use normal generate/plan/apply, or `--output` and Advanced change-set dispatch. This command authors intent only.
 
 ```bash
-stackkit use-cases add mail
-stackkit use-cases add mail --expected-spec-hash sha256:<current-hash>
+stackkit use-cases configure <slug> [flags]
 ```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--accelerator-profile` | string | — | Catalog module accelerator profile; omission retains selection |
+| `--alternative` | string | — | Catalog alternative for a new use case; existing alternatives require migration |
+| `--compute-profile` | string | — | Module-local low, standard or high; omission retains selection |
+| `--expected-spec-hash` | string | — | Require the current canonical spec hash |
+| `--json` | bool | — | Emit versioned authoring result; execution remains pending |
+| `--node` | string | — | Existing enabled node; required for additions when multiple nodes exist |
+| `--output` | string | — | Write a new candidate file, retaining the active baseline; required for Advanced/multi-node intent |
+| `--platform` | string | — | Runtime adapter for a new use case; existing delivery identity is retained |
+| `--secret-ref` | stringArray | — | Input key=secret://reference; never supply secret material |
+| `--setting` | stringArray | — | Public setting key=JSON; repeat to merge named settings |
+| `--storage-profile` | string | — | Catalog module storage profile; omission retains selection |
 
 ## stackkit use-cases pick
 
@@ -73,5 +102,60 @@ stackkit use-cases pick --kit basement-kit --print
 
 # Preview one explicitly selected Inventory node
 stackkit use-cases pick --kit cloud-kit --inventory inventory.yaml --node cloud-node --print
+```
+
+## stackkit use-cases upgrade
+
+Move one application to a newer release of its entry image, keeping its prior data for a rollback.
+
+Move one selected application to a newer release of its entry image, without touching unrelated applications or the StackKits release. `--to` names a tested release the catalog admits; `--to` with `--digest` sha256:... names an untested stable upstream release of the same image inside the module's release track (same major; a "patch" track also keeps the minor), which needs `--accept-untested`. A major release moves only with a StackKits release. An untested tag is re-resolved from its registry for this node's platform and refused when it no longer names that digest. The selection is stored as the workload's release override &#123;version, ref, digest, tested&#125;. A later StackKits release whose default is at or above the override supersedes it; a newer in-track override is kept (`--overrides` reports which).
+
+The command stops only that application, copies each of its governed volumes into a retained volume, reads the copy back as a file-tree digest, records an owner-signed checkpoint and selects the target release. The application stays stopped until generate and apply start the target release.
+
+`--apply` runs the whole update on this node: checkpoint, generate, apply and live verify. When generate, apply or verify fails, it rolls back to the prior release and data, applies again and finalizes that rollback. With `--json` the result names update_outcome (updated, rolled_back, rollback_failed or refused), reason_code and the prior and target version and digest.
+
+`--rollback` &lt;operation-id&gt; stops the application again, verifies the retained copy, copies it back, proves the live data equals the checkpoint and selects the prior release; the next apply starts the prior release on exactly that data, and data written since the checkpoint is discarded. Rolling back a checkpoint that never completed releases it and restarts the unchanged application. While an operation is open, apply starts only the release it expects (or a later StackKits default that supersedes it); without one, apply refuses every move to an earlier release. `--finalize` &lt;operation-id&gt; removes the retained data once the change is accepted (or after the rollback was applied). `--status` reads a record.
+
+On a node Techstack manages, a forward change also needs `--capability`: the exact Techstack-signed application-release.update capability for this use case, release, digest and tested or untested kind, verified offline against the Owner-approved Advanced trust before the application is stopped. The record keeps that authority, and the result reports the prior and target StackSpec hashes so Techstack's desired state follows the override. A standalone node takes no capability.
+
+```bash
+stackkit use-cases upgrade [slug] [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--accept-untested` | bool | — | Accept a release the catalog has not tested (inside the module's release track only) |
+| `--apply` | bool | — | Run checkpoint, generate, apply and live verify, rolling back automatically on failure |
+| `--capability` | string | — | Techstack application-release.update capability file; required on a Techstack-managed node |
+| `--digest` | string | — | Exact sha256 manifest digest of the `--to` release; required for a release outside the catalog |
+| `--expected-spec-hash` | string | — | Require the current canonical spec hash |
+| `--finalize` | string | — | Remove the retained data of this release operation |
+| `--json` | bool | — | Emit the release operation result as JSON |
+| `--operation-id` | string | — | Resume this interrupted release checkpoint instead of starting a new one |
+| `--overrides` | bool | — | Report every application release override and whether this release keeps it |
+| `--owner-approve` | bool | — | Approve stopping the application while its data is copied |
+| `--rollback` | string | — | Return the application of this release operation to its prior release and data |
+| `--status` | string | — | Read one release operation record |
+| `--to` | string | — | Release (image tag) to move the selected application to |
+
+**Examples**
+
+```bash
+# Move Vaultwarden to a tested catalog release, then apply it
+stackkit use-cases upgrade vault --to 1.37.5 --owner-approve
+stackkit generate && stackkit apply
+
+# Move to an untested in-track release in one step, rolling back on failure
+stackkit use-cases upgrade vault --to 1.37.6 --digest sha256:<manifest digest> --accept-untested --owner-approve --apply --json
+
+# Return to the prior release and its data, then apply it
+stackkit use-cases upgrade --rollback release.vault.20261101T120000Z --owner-approve
+stackkit generate && stackkit apply
+
+# Accept the result and remove the retained data
+stackkit use-cases upgrade --finalize release.vault.20261101T120000Z --owner-approve
+
+# Report every release override and whether this release keeps it
+stackkit use-cases upgrade --overrides --json
 ```
 
