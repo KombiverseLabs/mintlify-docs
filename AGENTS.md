@@ -104,6 +104,12 @@ files with `scripts/repo-context-sync.mjs --repo mintlify-docs --beads-only`.
 <!-- BEGIN GENERATED: kombify-bootstrap -->
 ## Repository bootstrap
 
+Locate Agent Home at `repo_root` in `~/.agents/agent-home/state.json`
+(bootstrap fallback: `~/.agent-home`). Read `standards/rules.md` every session,
+`standards/core.md` for substantive coding, `START.md` for coding, device or
+longer project work, and `skills/routes.md` for the current task step. Kombify
+`CONSTITUTION.md` and workspace instructions take precedence in Kombify.
+
 `scripts/kombify-bootstrap.mjs` (workspace `SECRETS-ACCESS-STANDARD.md`
 §6c) sets up private Go modules, GitHub Packages, Agent Home and Doppler access.
 `node scripts/kombify-bootstrap.mjs --install` obtains or refreshes the private
