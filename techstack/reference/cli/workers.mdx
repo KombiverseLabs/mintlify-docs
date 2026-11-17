@@ -4,11 +4,11 @@ description: "Generated reference for the techstack api workers commands"
 sidebarTitle: "workers"
 generated: true
 generated_by: "render-api-surface-reference"
-release: "v0.43.5"
-content_hash: "sha256:e52553305854fbc269be110a0577183cde0787903b53eb0fb00ea15e6404dbde"
-source_hash: "20de7539f431df6bec4472a741f6397bdb4f16f8"
+release: "v0.49.2"
+content_hash: "sha256:16adb9eda64db29656ee84714b9bc71b814dadfb07fbbf8a52e89200b968f6c3"
+source_hash: "2614eaba28d89093eab7aca7ba7268dde5a823e8"
 ---
-<Note>Generated from the Techstack v0.43.5 release (source `20de7539f431`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+<Note>Generated from the Techstack v0.49.2 release (source `2614eaba28d8`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
 
 ## techstack api workers approve
 
@@ -151,7 +151,7 @@ techstack api workers outcomes list <id> [flags]
 
 Release an unresolved kombify Guard operation outcome.
 
-Commits an append-only operator resolution revision for an operation whose outcome is unknown and releases the worker's fence. `disposition` is `verified_applied` (the effect is in place), `verified_not_applied` (nothing happened) or `accept_unknown` (release without a verified outcome); `note` records what was verified. The actor is the authenticated subject and is recorded with the revision; a Guard cannot commit these dispositions. A fresh multi-factor sign-in (at most 300 seconds old) is required. `expected_revision` must be the revision the list returned, otherwise 409 `outcome_revision_stale`. The body is decoded strictly: exact keys, no unknown fields.
+Commits an append-only operator resolution revision for an operation whose outcome is unknown and releases the worker's fence. `disposition` is `verified_applied` (the effect is in place), `verified_not_applied` (nothing happened) or `accept_unknown` (release without a verified outcome); `note` records what was verified. The actor is the authenticated subject and is recorded with the revision; a Guard cannot commit these dispositions. The person's own session needs a fresh multi-factor sign-in (at most 300 seconds old); an agent acting for the person needs none. `expected_revision` must be the revision the list returned, otherwise 409 `outcome_revision_stale`. The body is decoded strictly: exact keys, no unknown fields.
 
 ```bash
 techstack api workers outcomes resolve <id> <command-id> [flags]
@@ -163,7 +163,7 @@ techstack api workers outcomes resolve <id> <command-id> [flags]
 | --- | --- |
 | HTTP | `POST /api/v1/workers/{id}/outcomes/{command_id}/resolve` |
 | Changes state | Yes |
-| MCP tool | None |
+| MCP tool | `resolve_guard_unresolved_outcome` |
 
 | Argument | Type | Description |
 | --- | --- | --- |
@@ -173,3 +173,67 @@ techstack api workers outcomes resolve <id> <command-id> [flags]
 | `--expected-revision` | integer | **Required.** |
 | `--note` | string | **Required.** |
 | `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api workers tenant-handoff confirm
+
+Confirm the handoff of a retired server's command evidence.
+
+The owner, as custodian of a detached or retired server, confirms that the command evidence its Guard still holds (journal entries, outcomes and identity state) may leave the server by `export` (an archive the operator takes off the server) or `quarantine` (a root-only directory outside the Guard state). The response shows a one-time `confirmation` exactly once and is valid for 72 hours. It is bound to the host key the worker used. The operator passes it to `techstack agent handoff `--server` --confirmation-file`, which has the control plane verify it for this server's key, then moves and securely removes the evidence and records a receipt. Pairing a server whose host key served another tenant, or that declares another tenant's evidence, is refused (409 `tenant_handoff_required`) until a receipt of that tenant is consumed. A receipt is consumed once, by the pairing that proves the confirmed key, before expiry; only that pairing may repeat it within 15 minutes (409 `tenant_handoff_invalid` otherwise). Requires the owner and a fresh multi-factor sign-in (at most 300 seconds old). 409 `tenant_handoff_worker_active` while the worker is not revoked or rejected, 409 `tenant_handoff_unbindable` for a worker that never bound a host key. A worker of another tenant or owner is 404.
+
+```bash
+techstack api workers tenant-handoff confirm <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/workers/{id}/tenant-handoff` |
+| Changes state | Yes |
+| MCP tool | None |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<id>` | string | **Required.** Resource ID. |
+| `--disposition` | string | **Required.** One of `export`, `quarantine`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api workers updates set
+
+Set a server's update setting.
+
+Stores the server's update setting (`ask`, `automatic` or `with_stackkits_releases`) for the owner of the worker and records the change with its actor in the audit log. Reversible.
+
+```bash
+techstack api workers updates set <id> <behavior> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/workers/{id}/stackkits-update/behavior` |
+| Changes state | Yes |
+| MCP tool | `set_server_update_setting` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<id>` | string | **Required.** Resource ID. |
+| `<behavior>` | string | **Required.** One of `ask`, `automatic`, `with_stackkits_releases`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api workers updates show
+
+Read a server's update setting and pending StackKits release.
+
+For the owner of the worker. `behavior` is the server's one update setting for its StackKits release and the applications it manages (D-2026-11-12-06): `ask` (default; checked application versions are offered with one click), `automatic` (StackKits releases start without a click; checked application versions apply in the maintenance window once that action exists) or `with_stackkits_releases` (applications change only with a StackKits release). Security fixes are offered in every setting. The per-application facts are on the service `version`.
+
+```bash
+techstack api workers updates show <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/workers/{id}/stackkits-update` |
+| Changes state | No |
+| MCP tool | `get_server_update_setting` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<id>` | string | **Required.** Resource ID. |
