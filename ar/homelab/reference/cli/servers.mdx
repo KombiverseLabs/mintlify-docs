@@ -1,0 +1,413 @@
+---
+title: "techstack api servers"
+description: "مرجع مولَّد لأوامر techstack api servers"
+sidebarTitle: "servers"
+release: "v0.41.15"
+---
+<Note>Generated from the kombify Homelab v0.41.15 release (source `b5b268760b34`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api servers detach
+
+إبطال وفصل خادم BYO واحد محدد يشغّله العميل.
+
+يحتفظ بإيصال الخادم القياسي النهائي ولا يجري أي استدعاء لـ API المزوّد.
+
+```bash
+techstack api servers detach <server-id> [flags]
+```
+
+<Warning>يتطلب تأكيداً: تبطل هذه العملية بيانات اعتماد الخادم وتزيله من الإدارة دون المساس بالجهاز. مرّر `--yes` أو أجب عن المطالبة؛ فالتشغيل غير التفاعلي دون `--yes` يتوقف قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/detach` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `detach_self_owned_server` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف وقت تشغيل الخادم القياسي. |
+| `--confirm-server-id` | string | **مطلوب.** يجب أن يساوي تماماً معامل المسار serverId. |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api servers get
+
+جلب دورة حياة الخادم القياسي واتصاله وحالته الصحية وقنواته.
+
+```bash
+techstack api servers get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_server_runtime` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف وقت تشغيل الخادم القياسي. |
+
+## techstack api servers list
+
+عرض حالة وقت التشغيل القياسية للعقد.
+
+يُرجع العقد المحصورة بالمالك مع الهويتين القياسيتين `node_id` و`kit_deployment_id`.
+
+```bash
+techstack api servers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_server_runtimes` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--kit-deployment-id` | string | — |
+
+## techstack api servers maintenance cancel
+
+Cancel an owned maintenance job before execution starts.
+
+Uses the same tenant, entitlement, server and requesting-owner scope as the job read. Cancellation and execution claim use the same queued-state compare-and-set. Repeating a successful cancellation returns its receipt; a claimed or finished job returns maintenance_not_cancellable. Cancelling never claims to stop a command that has already reached the server.
+
+```bash
+techstack api servers maintenance cancel <server-id> <job-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/actions/{jobId}/cancel` |
+| Changes state | Yes |
+| MCP tool | None |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `<job-id>` | string | **Required.** |
+
+## techstack api servers maintenance get
+
+قراءة مهمة صيانة واحدة لخادم مملوك.
+
+محصورة مثل POST: استحقاق `techstack.servers.maintenance` الموقَّع من Edge، والمستأجر، وملكية الخادم، ومهمة تخص هذا الخادم وطلبها المستدعي. وأي شيء آخر يُرجع 404. لمهام الصيانة دفتر خاص بها ولا تُقدَّم عبر `/api/v1/jobs/&#123;id&#125;`. لا توجد نقطة نهاية للسجلات: تحمل المهمة نتيجتها، ويحمل الفشل رمزه الثابت مع إرشادات للمستخدم.
+
+```bash
+techstack api servers maintenance get <server-id> <job-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/actions/{jobId}` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_server_maintenance_job` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف وقت تشغيل الخادم القياسي. |
+| `<job-id>` | string | **مطلوب.** |
+
+## techstack api servers maintenance impact
+
+Preview service and stack impact before confirming OS maintenance.
+
+Requires the signed maintenance entitlement and ownership of the server. Lists canonical service placement and stack membership, with reasons and inventory freshness and completeness. An empty services array means no affected services only when inventory.status is current. An incomplete, stale or unavailable inventory cannot authorize maintenance. The digest binds the server, operation and material dependency snapshot; ordinary observation timestamps do not invalidate unchanged impact. Responses are private and must not be cached.
+
+```bash
+techstack api servers maintenance impact <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/maintenance-impact` |
+| Changes state | No |
+| MCP tool | `get_server_maintenance_impact` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `--action` | string | **Required.** One of `os_update`, `reboot`. |
+
+## techstack api servers maintenance run
+
+ضع خطة تحديث نظام التشغيل أو تحديثه أو إعادة تشغيل خادم مملوك في قائمة الانتظار.
+
+Requires the Edge-signed `techstack.servers.maintenance` entitlement, ownership of the server in the tenant, and current server-bound standing authority for delegated native MCP calls. These three ordinary actions require no fresh MFA or separate owner_approved assertion. Reboot and os_update require expected_impact_digest from the preview the user confirmed. Impact is compared atomically at admission and again at execution claim; changed or incomplete evidence sends no command and requires a refreshed preview and renewed confirmation with a new request key. The body is decoded strictly: exact lowercase keys, no duplicates, no unknown fields. A replay with the same Idempotency-Key returns the stored receipt before target validation. One reboot or OS update and, separately, one update plan may be active per server; a job not finished by its deadline fails with `deadline_exceeded` and frees its slot. The action is offered in `allowed_actions` only when the server agent advertises `stackkit.host-maintenance.v1`, and `reboot` only when the server also reports `host_boot_id`. Refusals are client-error-envelope/v1 documents; 409 `reason_code` is one of control_plane_host, substrate_node, protected_demo_server, service_locked, maintenance_active, node_operation_active, plan_stale, agent_capability_missing, boot_id_unknown, agent_not_connected, heartbeat_stale, inventory_revision_stale, idempotency_key_reused, impact_confirmation_required, impact_changed or impact_unavailable; 403 carries entitlement_required or maintenance_origin_authority_denied.
+
+```bash
+techstack api servers maintenance run <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/actions` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `run_server_maintenance_action` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف وقت تشغيل الخادم القياسي. |
+| `--action` | string | **مطلوب.** إحدى القيم: `os_update_plan`، `os_update`، `reboot`. |
+| `--expected-impact-digest` | string | Required for os_update and reboot, forbidden for os_update_plan. snapshot_digest of the current impact preview confirmed for this exact server and action. Changing it under an existing Idempotency-Key is a conflict; a renewed confirmation uses a new key. |
+| `--expected-inventory-revision` | integer | **مطلوب.** |
+| `--expected-plan-digest` | string | لـ os_update فقط: قيمة plan_digest لخطة os_update_plan مكتملة لهذا الخادم لا يزيد عمرها عن 15 دقيقة. |
+| `--owner-approved` | boolean | حقل قديم اختياري؛ لا يمنح صلاحية الصيانة. |
+| `--body` | json | جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## techstack api servers network get
+
+اقرأ حقائق شبكة الخادم وأي انتقال مسجّل للشبكة المنزلية.
+
+يشمل ذلك الشبكة التي رصدها kombify Guard الخاص بالخادم آخر مرة، بما فيها العنوان والبوابة والشبكة الفرعية والواجهة وشبكة WiFi، وسجل `network_move` الذي كتبه kombify عند ظهور الخادم على شبكة أخرى، وحالة إعادة الربط اللاحقة. يعيد الخادم المنقول ربط نفسه تلقائيًا؛ وتبيّن `can_rebind` ما إذا كان المالك يستطيع بدء إعادة ربط الآن.
+
+```bash
+techstack api servers network get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/network` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_server_network` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف تشغيل الخادم المعتمد. |
+
+## techstack api servers network rebind
+
+أعِد ربط الخادم المنقول بالشبكة الموجودة عليه الآن.
+
+يشغّل `stackkit network rebind` على الخادم عبر kombify Guard الخاص به: تعيد العقدة اكتشاف عنوان LAN، وتعيد إصدار سجل حفظ LAN DNS الموقّع، وتعيد توليد مساحة العمل وتطبيقها. لا يحمل الطلب جسمًا. يلزم المالك ومنحة operate من Inventory واستحقاق `techstack.servers.maintenance` وGuard متصل، وإلا تُرجع 409 `server_network_not_ready`. إذا كانت إعادة الربط في الانتظار أو قيد التشغيل، يُرجع طلبها القائم بدلًا من إدراج طلب آخر.
+
+```bash
+techstack api servers network rebind <server-id> [flags]
+```
+
+<Warning>يتطلب تأكيدًا: تعيد هذه العملية اكتشاف عنوان الخادم على شبكته الحالية، وتعيد إصدار سجل DNS المحلي الموقّع وتطبيق مساحة عمله. مرّر `--yes` أو أجب عن السؤال؛ يتوقف التشغيل غير التفاعلي دون `--yes` قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/network/rebind` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `rebind_server_network` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف تشغيل الخادم المعتمد. |
+
+## techstack api servers ports
+
+جلب جرد المنافذ للمالك المصادَق عليه لخادم قياسي واحد.
+
+إسقاط واجهة تفاصيل الخادم فوق سلطة المنافذ المركزية نفسها التي يستخدمها سطح Inventory/MCP، مع تفويض عبر حد القراءة القياسي للخوادم المحصور بالمالك.
+
+```bash
+techstack api servers ports <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/ports` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_server_runtime_ports` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف وقت تشغيل الخادم القياسي. |
+
+## techstack api servers reach set
+
+انشر الخادم على عنوان kombify.me أو أوقف نشره.
+
+لا يُنشر شيء افتراضيًا: لا يملك الخادم المقترن مسارًا عامًا، ولا ينقل المرحّل حركة مرور. يفعّله المالك لكل خادم باسم `service` صريح و`target_port`، ويمكنه سحبه في أي وقت؛ ويكون المصدر دائمًا عنوان loopback لمضيف Guard، لا جهازًا آخر. يصادق المرحّل على Guard لا على الزائر، لذا يجب أن تحمي الخدمة التي تجيب على ذلك المنفذ نفسها. يتطلب التفعيل المالك واستحقاق `techstack.servers.maintenance` وتسجيل دخول حديثًا متعدد العوامل، بسبب `server_reach_step_up_required`؛ أما السحب فلا يخضع لهذا الشرط. تتضمن الاستجابة قسم reach من نموذج قراءة الخادم؛ ثم ينشئ المُوفّق المسار أو يسحبه.
+
+```bash
+techstack api servers reach set <server-id> [flags]
+```
+
+<Warning>يتطلب تأكيدًا: تنشر هذه العملية خدمة للخادم على عنوان kombify.me عام يستطيع أي شخص على الإنترنت فتحه. مرّر `--yes` أو أجب عن السؤال؛ يتوقف التشغيل غير التفاعلي دون `--yes` قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/servers/{serverId}/reach` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا توجد |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف تشغيل الخادم المعتمد. |
+| `--enabled` | boolean | **مطلوب.** |
+| `--service` | string | مطلوب عند التفعيل. تسمية المسار؛ مسار kombify.me هو &lt;base&gt;-&lt;service&gt;-&lt;server suffix&gt;. |
+| `--target-port` | integer | مطلوب عند التفعيل. المنفذ الذي تستمع عليه الخدمة على loopback لمضيف Guard الثابت. |
+| `--target-scheme` | string | إحدى القيم: `http`, `https`. الافتراضي `"http"`. |
+| `--body` | json | جسم طلب JSON بصيغة `application/json`، كقيمة حرفية أو `@path` أو `-` للقراءة من stdin. |
+
+## techstack api servers security auto-repair get
+
+اقرأ موافقة المالك على الإصلاح الأمني التلقائي.
+
+الخادم الذي لا يملك موافقة، أو انتهت موافقته، يظل للمراقبة فقط.
+
+```bash
+techstack api servers security auto-repair get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/security/auto-repair` |
+| يغيّر الحالة | لا |
+| أداة MCP | `get_server_security_auto_repair` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف تشغيل الخادم المعتمد. |
+
+## techstack api servers security auto-repair set
+
+وافق على الإصلاح التلقائي لمجموعة صغيرة آمنة من الضوابط أو اسحب الموافقة.
+
+معطّل افتراضيًا. تسمّي الموافقة ضوابط من المجموعة الآمنة، `allowed_controls`: الحماية من التخمين المتكرر وسياسة الجدار الناري ومعلمات النواة والتحديثات الأمنية التلقائية، دون ضوابط ssh مطلقًا. تنتهي خلال 90 يومًا ولا تجدّد نفسها. أثناء سريانها يصلح مستوى التحكم الضابط المسمّى الذي تُظهر أدلة حديثة انحرافه، ضمن حدود الإصلاح الذي يطلبه المشغّل. يلزم المالك واستحقاق `techstack.servers.maintenance` وتسجيل دخول حديث متعدد العوامل. تسحب `enabled: false` الموافقة.
+
+```bash
+techstack api servers security auto-repair set <server-id> [flags]
+```
+
+<Warning>يتطلب تأكيدًا: تسمح هذه العملية لـ kombify Guard بإصلاح ضوابط أمن المضيف المسمّاة دون السؤال في كل مرة، حتى تنتهي الموافقة. مرّر `--yes` أو أجب عن السؤال؛ يتوقف التشغيل غير التفاعلي دون `--yes` قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/servers/{serverId}/security/auto-repair` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا توجد |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف تشغيل الخادم المعتمد. |
+| `--controls` | string\[\] | — |
+| `--enabled` | boolean | **مطلوب.** |
+| `--expires-at` | string | — |
+| `--body` | json | جسم طلب JSON بصيغة `application/json`، كقيمة حرفية أو `@path` أو `-` للقراءة من stdin. |
+
+## techstack api servers security findings
+
+اعرض النتائج المفتوحة وسجل النتائج الحديث لخادم واحد.
+
+هذا سجل النتائج وراء `security` و`recovery` وتنبيهات Guard الخاصة بالخادم. تمثل كل نتيجة حادثة واحدة: تُفتح عند أول رصد لحقيقة غير صحيحة وتُحل عند رصدها صحيحة مجددًا، مع تنبيه واحد كحد أقصى، `alerted_at`، وحل واحد. يُحتفَظ بالسجل 90 يومًا.
+
+```bash
+techstack api servers security findings <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/security/findings` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_server_security_findings` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف تشغيل الخادم المعتمد. |
+
+## techstack api servers security repairs list
+
+اعرض الإصلاحات الأمنية الحديثة لخادم واحد.
+
+```bash
+techstack api servers security repairs list <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/security/repairs` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_server_security_repairs` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف تشغيل الخادم المعتمد. |
+
+## techstack api servers security repairs request
+
+أصلح ضوابط أمن المضيف المسمّاة والمنحرفة.
+
+يطلب إصلاحًا محدودًا لضوابط تُظهر أدلة أمن مضيف حديثة أنها منحرفة وقابلة للإصلاح التلقائي. يلزم مالك الخادم واستحقاق `techstack.servers.maintenance` الموقّع من Edge وتسجيل دخول حديث متعدد العوامل، لا يتجاوز عمره 300 ثانية. يصل الإصلاح كأمر Guard ذي نوع محدد ومسجّل، يشغّل `stackkit host security repair --apply` للضوابط المسمّاة وحدها؛ ويرفض StackKits، قبل أي تغيير، تغييرًا يقطع مسار الإدارة أو يمنع المالك من الدخول. الحدود: إصلاح واحد لكل خادم في المرة، 409 `repair_in_progress`؛ وفترة تهدئة لكل ضابط، 429 `repair_cooldown`؛ وميزانية محاولات يومية لكل ضابط، 429 `repair_attempts_exhausted`؛ وقاطع بعد إخفاقات متتالية، 429 `repair_circuit_open`. تحمل استجابات 429 قيمة `retry_after`. يُرفض الضابط المتوافق، 409 `control_not_drifted`، أو المشمول باستثناء معتمد، `control_has_exception`، أو اليدوي، `control_not_repairable`، أو المنتظر لمفتاح SSH معتمد، `needs_authorized_key`، أو غير المرصود. يُفك ترميز الجسم بصرامة.
+
+```bash
+techstack api servers security repairs request <server-id> [flags]
+```
+
+<Warning>يتطلب تأكيدًا: تعيد هذه العملية ضوابط أمن المضيف المسمّاة، مثل الجدار الناري وssh والحماية من التخمين والتحديثات التلقائية، عبر kombify Guard على الخادم. مرّر `--yes` أو أجب عن السؤال؛ يتوقف التشغيل غير التفاعلي دون `--yes` قبل أي طلب برمز الخروج 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/security/repairs` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا توجد |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف تشغيل الخادم المعتمد. |
+| `--controls` | string\[\] | **مطلوب.** |
+| `--body` | json | جسم طلب JSON بصيغة `application/json`، كقيمة حرفية أو `@path` أو `-` للقراءة من stdin. |
+
+## techstack api servers security verify
+
+اطلب من kombify Guard رصدًا حديثًا لأمن المضيف.
+
+يسجّل طلب رصد حديث لخط أساس المضيف. يجيب Guard في اتصاله الدوري التالي، خلال نحو دقيقة، بتقرير جديد؛ ولا يتغير شيء على المضيف. يُحدَّث نموذج قراءة `security` للخادم بهذا التقرير فقط، لا بهذا الطلب مطلقًا. يُرجع خادم مستأجر أو مالك آخر 404، والخادم الذي بلا Guard يعيد 409 `guard_not_connected`.
+
+```bash
+techstack api servers security verify <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/security/verify` |
+| يغيّر الحالة | نعم |
+| أداة MCP | لا توجد |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف تشغيل الخادم المعتمد. |
+
+## techstack api servers summary
+
+قراءة ملخص وجود الخوادم للمالك المصادَق عليه.
+
+يُرجع فقط عدداً وعلامة وجود ضمن نطاق سياسة المستأجر والمالك نفسه الخاص بقائمة الجرد القياسية. يوجد استعلام tenant الاختياري للتوافق مع Gateway ويجب أن يطابق تماماً المستأجر في الهوية المصادَق عليها؛ ويُرفض عدم التطابق قبل أي قراءة من المخزن. ولا تُرجَع أي معرّفات للخوادم أو المستأجرين أو الكيانات.
+
+```bash
+techstack api servers summary [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/summary` |
+| يغيّر الحالة | لا |
+| أداة MCP | لا شيء |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--tenant` | string | — |
+
+## techstack api servers transitions
+
+عرض الخط الزمني المحفوظ لحالة الخادم.
+
+```bash
+techstack api servers transitions <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/transitions` |
+| يغيّر الحالة | لا |
+| أداة MCP | `list_server_runtime_transitions` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `<server-id>` | string | **مطلوب.** معرّف وقت تشغيل الخادم القياسي. |

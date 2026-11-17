@@ -1,6 +1,6 @@
 ---
 title: "Run kombify on Proxmox VE"
-description: "Use an existing Proxmox VE installation as the place where Techstack creates guest VMs for your homelab"
+description: "Use an existing Proxmox VE installation as the place where kombify Homelab creates guest VMs for your homelab"
 sidebarTitle: "Proxmox VE"
 icon: "server"
 ---
@@ -14,17 +14,17 @@ scope.
 </Warning>
 
 Proxmox VE is a hypervisor you already own. kombify does not rent, bill or
-manage it. Techstack uses it as a place to create guest virtual machines, and
+manage it. kombify Homelab uses it as a place to create guest virtual machines, and
 the StackKit runs inside a guest.
 
 ## How it fits together
 
-- Techstack creates guests through the Proxmox API.
+- kombify Homelab creates guests through the Proxmox API.
 - The StackKit runs inside the guest. It never runs on the Proxmox host.
-- [kombify Guard](/techstack/guard/overview) runs on the Proxmox node and
+- [kombify Guard](/homelab/guard/overview) runs on the Proxmox node and
   reaches your homelab through an outbound connection. No inbound access to the
   node is needed.
-- A guest that Techstack created can be decommissioned again. Guests that
+- A guest that kombify Homelab created can be decommissioned again. Guests that
   already existed on the node stay outside this deletion scope.
 
 ## Supported guests
@@ -38,7 +38,7 @@ the StackKit runs inside a guest.
 | Other hypervisors | Later, not available |
 
 Ubuntu guests need at least 2 CPU cores, 2 GiB of memory and 32 GiB of disk.
-Techstack uses pinned, checksum-verified vendor images and never changes the
+kombify Homelab uses pinned, checksum-verified vendor images and never changes the
 image of a guest that already exists.
 
 ## What you need
@@ -47,7 +47,7 @@ image of a guest that already exists.
 - Storage on the node that is active and allows images, imports and snippets.
 - An active LAN bridge for the guest.
 - An API token for the node. It is stored on the node in a protected file, and
-  the Guard reads it locally. Techstack does not store your Proxmox credentials.
+  the Guard reads it locally. kombify Homelab does not store your Proxmox credentials.
 
 ## The steps in the wizard
 
@@ -61,13 +61,13 @@ image of a guest that already exists.
    connection.
 4. In the **Hypervisor** step, pick the connected Proxmox server, its storage
    and its LAN bridge, and set CPU, memory and disk for the new server.
-5. Finish the wizard. Techstack prepares the guest, enrolls it and runs the
+5. Finish the wizard. kombify Homelab prepares the guest, enrolls it and runs the
    selected StackKit inside it. Progress resumes with the same operation if it
    is interrupted.
 
 **Find Proxmox on my network** is an optional shortcut. It works only with a
-local Techstack client on the same network. Without one, you connect the node
-manually. A detected node still needs your authorization before Techstack can
+local kombify Homelab client on the same network. Without one, you connect the node
+manually. A detected node still needs your authorization before kombify Homelab can
 manage guests on it.
 
 If a selected use case needs a GPU, the wizard proposes a GPU the node
@@ -83,8 +83,8 @@ status before you rely on it.
 
 ## Next steps
 
-- [Techstack operating modes](/techstack/operating-modes)
-- [Node roles](/techstack/node-roles)
+- [kombify Homelab operating modes](/homelab/operating-modes)
+- [Node roles](/homelab/node-roles)
 - [Images](/stackkits/images)
 
 Last reviewed: 2026-11-10

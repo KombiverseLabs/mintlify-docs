@@ -42,7 +42,7 @@ stackkit host conformance [flags]
 
 أدر مستلم التسليم المختوم للمضيف الخاص بهذه العقدة.
 
-يوصل التسليم المختوم للمضيف عناصر Wallet وأهداف النسخ الاحتياطي ووصول SSH إلى هذه العقدة. تختم جهة التسليم كل قيمة بمفتاح المستلم الخاص بهذه العقدة (HPKE، pkg/hostdelivery)؛ ولا تفتحها إلا هذه العقدة في عهدتها. ولا ينقل Techstack وGuard إلا النص المشفّر والمراجع.
+يوصل التسليم المختوم للمضيف عناصر Wallet وأهداف النسخ الاحتياطي ووصول SSH إلى هذه العقدة. تختم جهة التسليم كل قيمة بمفتاح المستلم الخاص بهذه العقدة (HPKE، pkg/hostdelivery)؛ ولا تفتحها إلا هذه العقدة في عهدتها. ولا ينقل kombify Homelab وGuard إلا النص المشفّر والمراجع.
 
 ```bash
 stackkit host delivery [flags]
@@ -236,7 +236,7 @@ stackkit host prepare
 
 جدولة إعادة تشغيل هذه العقدة بعد تأخير قصير والعودة فورًا.
 
-يحدد boot_id_before الإقلاع الحالي، فيستطيع المستدعي معرفة أن العقدة عادت بقراءة معرّف إقلاع مختلف. يرفض الأمر عقدة تشغّل مستوى التحكم في Techstack، وعقدة يحتفظ فيها apt أو dpkg بقفله أو يجري فيها تحديث للمضيف، وعقدة لا تستطيع الإقلاع دون تدخل (وحدات تخزين في /etc/crypttab تحتاج إلى عبارة مرور، أو غياب apt).
+يحدد boot_id_before الإقلاع الحالي، فيستطيع المستدعي معرفة أن العقدة عادت بقراءة معرّف إقلاع مختلف. يرفض الأمر عقدة تشغّل مستوى التحكم في kombify Homelab، وعقدة يحتفظ فيها apt أو dpkg بقفله أو يجري فيها تحديث للمضيف، وعقدة لا تستطيع الإقلاع دون تدخل (وحدات تخزين في /etc/crypttab تحتاج إلى عبارة مرور، أو غياب apt).
 
 عند انتهاء التأخير يفحص حارس الحالة مرة أخرى، وينتظر حتى 15 دقيقة لانتهاء أي عملية حزم، ثم يطلب إعادة التشغيل وهو يمسك أقفال dpkg. لا يُعاد تشغيل العقدة التي تبقى مشغولة؛ ويبقى معرّف إقلاعها كما هو.
 
@@ -303,7 +303,7 @@ stackkit host remediate --auto-reversible --yes
 
 لا يغيّر 'verify' المضيف أبدًا. فهو ينتج stackkit.host-security-evidence/v1 لجدار الحماية وsshd والحماية من القوة الغاشمة وتحديثات الأمان التلقائية والمعلّقة وحالة إعادة التشغيل ومعلمات النواة والمنافذ المستمعة المكشوفة وانتهاء صلاحية الشهادات، ولثقة SSH CA وشهادة المضيف المسلَّمتين إلى هذه العقدة ('host ssh apply') بمجرد تسجيلهما. تكون كل أداة تحكم compliant أو drifted أو unknown أو استثناءً معتمدًا من المالك، وتنتهي صلاحية الدليل: يصبح الرصد القديم unknown، ولا تُعد أداة تحكم unknown متوافقة أبدًا.
 
-يعمل مستقلًا (Standard Mode، دون حساب) ومن خلال CLI المقيّد بالإصدار المحدد عندما يدير Techstack النشر (`--mode` advanced).
+يعمل مستقلًا (Standard Mode، دون حساب) ومن خلال CLI المقيّد بالإصدار المحدد عندما يدير kombify Homelab النشر (`--mode` advanced).
 
 ```bash
 stackkit host security [flags]
@@ -349,7 +349,7 @@ stackkit host security repair [flags]
 | `--kit` | string | — | slug الـ Kit المطلوب تسجيله (الافتراضي: Kit في StackSpec لمساحة العمل) |
 | `--local-node` | string | — | الـ Node المحلية المحددة بدقة في ResolvedPlan المقدمة |
 | `--management-source` | stringArray | — | الشبكة التي يجب أن تصل دائمًا إلى ssh، بصيغة CIDR (قابلة للتكرار) |
-| `--mode` | string | `standard` | وضع دورة الحياة المطلوب تسجيله: standard، أو advanced عندما يدير Techstack هذا النشر |
+| `--mode` | string | `standard` | وضع دورة الحياة المطلوب تسجيله: standard، أو advanced عندما يدير kombify Homelab هذا النشر |
 | `--no-record` | bool | — | عدم كتابة دليل ما بعد الإصلاح ضمن .stackkit/ |
 | `--resolved-plan` | string | — | ResolvedPlan قياسية متحقق منها للحكم على الانكشاف وفق المنافذ المستمعة المعلنة فيها |
 | `--site-kind` | string | — | نوع Site لهذا المضيف: home أو cloud (الافتراضي: يُستنتج من الـ Kit؛ يحتاجه modern-homelab) |
@@ -404,7 +404,7 @@ stackkit host security verify [flags]
 | `--kit` | string | — | slug الـ Kit المطلوب تسجيله (الافتراضي: Kit في StackSpec لمساحة العمل) |
 | `--local-node` | string | — | الـ Node المحلية المحددة بدقة في ResolvedPlan المقدمة |
 | `--management-source` | stringArray | — | الشبكة التي يجب أن تصل دائمًا إلى ssh، بصيغة CIDR (قابلة للتكرار) |
-| `--mode` | string | `standard` | وضع دورة الحياة المطلوب تسجيله: standard، أو advanced عندما يدير Techstack هذا النشر |
+| `--mode` | string | `standard` | وضع دورة الحياة المطلوب تسجيله: standard، أو advanced عندما يدير kombify Homelab هذا النشر |
 | `--no-record` | bool | — | عدم كتابة الدليل ضمن .stackkit/ |
 | `--resolved-plan` | string | — | ResolvedPlan قياسية متحقق منها للحكم على الانكشاف وفق المنافذ المستمعة المعلنة فيها |
 | `--site-kind` | string | — | نوع Site لهذا المضيف: home أو cloud (الافتراضي: يُستنتج من الـ Kit؛ يحتاجه modern-homelab) |

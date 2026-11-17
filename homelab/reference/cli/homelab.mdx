@@ -1,0 +1,72 @@
+---
+title: "techstack api homelab"
+description: "Generated reference for the techstack api homelab commands"
+sidebarTitle: "homelab"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.49.2"
+content_hash: "sha256:16adb9eda64db29656ee84714b9bc71b814dadfb07fbbf8a52e89200b968f6c3"
+source_hash: "2614eaba28d89093eab7aca7ba7268dde5a823e8"
+---
+<Note>Generated from the kombify Homelab v0.49.2 release (source `2614eaba28d8`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api homelab get
+
+Get the caller's homelab and its StackKit deployments.
+
+Resolves the authenticated owner's canonical Homelab umbrella together with its StackKit deployments. `homelab` is null while a backfill has deployments but no Homelab row yet; with neither, the route is 404. `homelab.identity_authority` names the identity Authority (the server that runs Pocket ID) and the identity origin.
+
+```bash
+techstack api homelab get [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/homelab` |
+| Changes state | No |
+| MCP tool | `get_homelab` |
+
+## techstack api homelab identity-join
+
+Join one kit deployment of the homelab to the homelab's identity Authority.
+
+Joins this kit deployment's server to the server that runs the homelab's Pocket ID (the homelab's authority pointer, never a client choice). The job runs the pinned StackKits CLI on each server: the join request pinned to `authority_root` (the root fingerprint the Owner reads at the Authority's console or Hub), the Owner's passkey approval in the Authority's Hub (the job waits up to five minutes), the install of the Authority-signed trust bundle, the joined server's sign-in client registered at the Authority (a second passkey approval) with its secret delivered only through the homelab's Wallet, and the homelab DNS zone on every server. The server joins after its StackKit init and before its first apply; its own domain is always one of the hostnames. kombify Homelab carries the documents and signs none of them. Needs exactly one Idempotency-Key; a replay returns the same job and never asks for approval again.
+
+```bash
+techstack api homelab identity-join <stack-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/homelab/kit-deployments/{id}/identity-join` |
+| Changes state | Yes |
+| MCP tool | `start_homelab_identity_join` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<stack-id>` | string | **Required.** Stack ID. |
+| `--authority-root` | string | **Required.** SHA-256 fingerprint of the Authority's root as the Authority shows it; only a trust bundle under it installs. |
+| `--hostnames` | string\[\] | Further names the server serves inside the homelab domain; its own domain is always added. |
+| `--owner-approved` | boolean | **Required.** One of `true`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api homelab rename
+
+Rename the caller's homelab.
+
+Renames the authenticated owner's homelab. The homelab name is the Stack Identity name and syncs to kombify Cloud when connected. Reversible; the homelab is resolved from the authenticated owner, never from an argument.
+
+```bash
+techstack api homelab rename <name> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PATCH /api/v1/homelab` |
+| Changes state | Yes |
+| MCP tool | `rename_homelab` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<name>` | string | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |

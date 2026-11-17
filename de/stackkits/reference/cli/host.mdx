@@ -42,7 +42,7 @@ stackkit host conformance [flags]
 
 Den versiegelten Host-Delivery-Empfänger dieses Nodes verwalten.
 
-Versiegelte Host-Delivery bringt Wallet-Einträge, Backup-Ziele und SSH-Zugriff auf diesen Node. Eine liefernde Instanz versiegelt jeden Wert mit dem Empfängerschlüssel dieses Nodes (HPKE, pkg/hostdelivery); nur dieser Node öffnet ihn in seine eigene Verwahrung. Techstack und Guard transportieren ausschließlich Chiffretext und Referenzen.
+Versiegelte Host-Delivery bringt Wallet-Einträge, Backup-Ziele und SSH-Zugriff auf diesen Node. Eine liefernde Instanz versiegelt jeden Wert mit dem Empfängerschlüssel dieses Nodes (HPKE, pkg/hostdelivery); nur dieser Node öffnet ihn in seine eigene Verwahrung. kombify Homelab und Guard transportieren ausschließlich Chiffretext und Referenzen.
 
 ```bash
 stackkit host delivery [flags]
@@ -236,7 +236,7 @@ Einen Neustart dieses Nodes planen.
 
 Einen Neustart dieses Nodes nach kurzer Verzögerung planen und sofort zurückkehren.
 
-Die zurückgegebene boot_id_before identifiziert den aktuellen Boot, sodass ein Aufrufer am geänderten Boot-ID-Wert erkennt, dass der Node zurückgekehrt ist. Der Befehl verweigert sich bei einem Node, auf dem die Techstack-Control-Plane läuft, bei einem Node, auf dem apt oder dpkg seine Sperre hält oder ein Host-Update läuft, und bei einem Node, der nicht unbeaufsichtigt booten kann (Volumes in /etc/crypttab, die eine Passphrase brauchen, oder kein apt).
+Die zurückgegebene boot_id_before identifiziert den aktuellen Boot, sodass ein Aufrufer am geänderten Boot-ID-Wert erkennt, dass der Node zurückgekehrt ist. Der Befehl verweigert sich bei einem Node, auf dem die kombify Homelab-Control-Plane läuft, bei einem Node, auf dem apt oder dpkg seine Sperre hält oder ein Host-Update läuft, und bei einem Node, der nicht unbeaufsichtigt booten kann (Volumes in /etc/crypttab, die eine Passphrase brauchen, oder kein apt).
 
 Wenn die Verzögerung endet, prüft ein Guard erneut, wartet bis zu 15 Minuten, bis jede Paketoperation beendet ist, und fordert den Neustart an, während er die dpkg-Sperren hält. Ein Node, der beschäftigt bleibt, wird nicht neu gestartet; seine Boot-ID bleibt gleich.
 
@@ -303,7 +303,7 @@ Diesen Knoten anhand der StackKits-Host-Sicherheitsbaseline beobachten und Abwei
 
 `verify` ändert niemals den Host. Es erzeugt stackkit.host-security-evidence/v1 für Firewall, sshd, Brute-Force-Schutz, automatische und ausstehende Sicherheitsupdates, Neustartstatus, Kernelparameter, exponierte Listener und Zertifikatsablauf sowie für die SSH-CA-Vertrauensstellung und das Host-Zertifikat, die an diesen Node geliefert wurden ('host ssh apply'), sobald sie aufgezeichnet sind. Jedes Kontrollelement ist konform, abweichend, unbekannt oder eine vom Besitzer genehmigte Ausnahme, und der Nachweis läuft ab: Eine veraltete Beobachtung ist unbekannt, und ein unbekanntes Kontrollelement gilt niemals als konform.
 
-Es funktioniert eigenständig (Standard Mode, ohne Konto) und über die festgelegte CLI, wenn Techstack die Bereitstellung verwaltet (`--mode` advanced).
+Es funktioniert eigenständig (Standard Mode, ohne Konto) und über die festgelegte CLI, wenn kombify Homelab die Bereitstellung verwaltet (`--mode` advanced).
 
 ```bash
 stackkit host security [flags]
@@ -349,7 +349,7 @@ stackkit host security repair [flags]
 | `--kit` | string | — | Aufzuzeichnender Kit-Slug (Standard: das Kit der StackSpec im Workspace) |
 | `--local-node` | string | — | Exakter lokaler Node im angegebenen ResolvedPlan |
 | `--management-source` | stringArray | — | Netzwerk, das SSH immer erreichen können muss, als CIDR (wiederholbar) |
-| `--mode` | string | `standard` | Aufzuzeichnender Lebenszyklusmodus: standard oder advanced, wenn Techstack diese Bereitstellung verwaltet |
+| `--mode` | string | `standard` | Aufzuzeichnender Lebenszyklusmodus: standard oder advanced, wenn kombify Homelab diese Bereitstellung verwaltet |
 | `--no-record` | bool | — | Den Nachweis nach der Reparatur nicht unter .stackkit/ schreiben |
 | `--resolved-plan` | string | — | Verifizierter kanonischer ResolvedPlan, gegen dessen deklarierte Listener die Exposition bewertet wird |
 | `--site-kind` | string | — | Art des Site dieses Hosts: home oder cloud (Standard: aus dem Kit abgeleitet; modern-homelab erfordert den Wert) |
@@ -404,7 +404,7 @@ stackkit host security verify [flags]
 | `--kit` | string | — | Aufzuzeichnender Kit-Slug (Standard: das Kit der StackSpec im Workspace) |
 | `--local-node` | string | — | Exakter lokaler Node im angegebenen ResolvedPlan |
 | `--management-source` | stringArray | — | Netzwerk, das SSH immer erreichen können muss, als CIDR (wiederholbar) |
-| `--mode` | string | `standard` | Aufzuzeichnender Lebenszyklusmodus: standard oder advanced, wenn Techstack diese Bereitstellung verwaltet |
+| `--mode` | string | `standard` | Aufzuzeichnender Lebenszyklusmodus: standard oder advanced, wenn kombify Homelab diese Bereitstellung verwaltet |
 | `--no-record` | bool | — | Den Nachweis nicht unter .stackkit/ schreiben |
 | `--resolved-plan` | string | — | Verifizierter kanonischer ResolvedPlan, gegen dessen deklarierte Listener die Exposition bewertet wird |
 | `--site-kind` | string | — | Art des Site dieses Hosts: home oder cloud (Standard: aus dem Kit abgeleitet; modern-homelab erfordert den Wert) |

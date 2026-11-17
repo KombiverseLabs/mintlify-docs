@@ -1,0 +1,394 @@
+---
+title: "techstack api services"
+description: "Generated reference for the techstack api services commands"
+sidebarTitle: "services"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.49.2"
+content_hash: "sha256:16adb9eda64db29656ee84714b9bc71b814dadfb07fbbf8a52e89200b968f6c3"
+source_hash: "2614eaba28d89093eab7aca7ba7268dde5a823e8"
+---
+<Note>Generated from the kombify Homelab v0.49.2 release (source `2614eaba28d8`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api services execute-application-adoption
+
+Execute the exact reviewed source plan with explicit Owner approval.
+
+Revalidates the retained digest, source identity, revision and release. Only an authenticated pinned-CLI custody receipt establishes membership. Accounts, configuration and persistent data are preserved; no new runtime is created for adopt_in_place. Mode stack_it executes the reviewed own-application plan digest. Moving to another Node is not supported.
+
+```bash
+techstack api services execute-application-adoption [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/adoption-plans/{planId}/execute` |
+| Changes state | Yes |
+| MCP tool | `execute_application_adoption` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+| `--plan-id` | string | **Required.** |
+| `--expected-inventory-revision` | integer | **Required.** |
+| `--mode` | string | One of `adopt_in_place`, `stack_it`, `restore_original`, `release_original`. |
+| `--owner-approved` | boolean | Default `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api services execute-own-application-operation
+
+Approve one reviewed own application change.
+
+Runs exactly the step a completed dry run reviewed, at most 15 minutes after it completed and only once per review (start, stop, restart, rollback, tag update, checkpoint rollback or checkpoint discard) with its review digest. kombify Homelab issues the own-application.lifecycle capability for this application, action, operation and review digest (at most 15 minutes); the node refuses any other. A tag update re-resolves the tag, checkpoints the data, verifies and rolls image and data back on failure. Requires Owner approval.
+
+```bash
+techstack api services execute-own-application-operation [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/own-application/operations/{jobId}/execute` |
+| Changes state | Yes |
+| MCP tool | `execute_own_application_operation` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+| `--job-id` | string | **Required.** |
+| `--expected-inventory-revision` | integer | **Required.** |
+| `--owner-approved` | boolean | **Required.** |
+| `--review-digest` | string | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api services get
+
+Get desired, observed, health, access, and action capabilities for one service.
+
+```bash
+techstack api services get <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}` |
+| Changes state | No |
+| MCP tool | `get_service_runtime` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<service-id>` | string | **Required.** Canonical service runtime ID. |
+
+## techstack api services get-own-application-operation
+
+Read one own application operation and its node answer.
+
+Returns the job status and the projected node answer: outcome and reason code, review digest, the prior and target image of a tag update (target_check is always not_checked_by_kombify), the data checkpoint with its retained size and, for logs, the redacted tail.
+
+```bash
+techstack api services get-own-application-operation [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/own-application/operations/{jobId}` |
+| Changes state | No |
+| MCP tool | `get_own_application_operation` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+| `--job-id` | string | **Required.** |
+
+## techstack api services list
+
+List canonical measured service runtime state.
+
+```bash
+techstack api services list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services` |
+| Changes state | No |
+| MCP tool | `list_service_runtimes` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--stack-id` | string | — |
+| `--server-id` | string | — |
+
+## techstack api services logs
+
+Read the latest bounded, redacted StackKits service log page.
+
+Returns the newest page that `request_service_logs` collected for this service and cursor: `queued` or `running` while the node is still collecting it, `completed` with redacted entries and `next_cursor`, or `empty` when no page was requested yet. Reading never contacts the node.
+
+```bash
+techstack api services logs <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/registry/services/{serviceId}/logs` |
+| Changes state | No |
+| MCP tool | `get_service_logs` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<service-id>` | string | **Required.** Canonical service runtime ID. |
+| `--limit` | integer | Default `100`. |
+| `--cursor` | string | — |
+
+## techstack api services metrics
+
+Read measured resource metrics for an owned service.
+
+Uses the existing Guard telemetry query backend and fixes the tenant, canonical server and container selectors from authorized service inventory. An empty vector means no resource metric was measured.
+
+```bash
+techstack api services metrics [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/metrics` |
+| Changes state | No |
+| MCP tool | `get_service_metrics` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** |
+
+## techstack api services prepare-application-adoption
+
+Plan Stack it for one exact unmanaged container, or assess Home Assistant in place.
+
+Mode stack_it plans the rebuild of any unmanaged single container as an own application (recreated as a new container; the original is stopped and kept). Mode adopt_in_place assesses Home Assistant Container in place. Retains the source-bound assessment in the existing durable job store. Requires a connected Guard and the exact capable published CLI release. This read-only operation does not establish Stacked membership.
+
+```bash
+techstack api services prepare-application-adoption [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/adoption-plans` |
+| Changes state | Yes |
+| MCP tool | `prepare_application_adoption` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+| `--expected-inventory-revision` | integer | **Required.** |
+| `--mode` | string | One of `adopt_in_place`, `stack_it`, `restore_original`, `release_original`. |
+| `--owner-approved` | boolean | Default `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api services read-application-adoption-plan
+
+Read the retained application assessment and durable progress.
+
+```bash
+techstack api services read-application-adoption-plan [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/adoption-plans/{planId}` |
+| Changes state | No |
+| MCP tool | `read_application_adoption_plan` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+| `--plan-id` | string | **Required.** |
+
+## techstack api services read-application-connector
+
+Read node-owned connector status and current published transport admission.
+
+Returns a secret-free projection. An unavailable supporting catalog remains nondispatchable SourcePreview; stale evidence on a supporting pin requires current read-only verification. Dispatchability additionally requires current canonical host-key, node and lease authority.
+
+```bash
+techstack api services read-application-connector [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/connector` |
+| Changes state | No |
+| MCP tool | `read_application_connector` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+
+## techstack api services release-application-lifecycle
+
+Release an adopted lifecycle binding without deleting or stopping its runtime.
+
+```bash
+techstack api services release-application-lifecycle [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/release` |
+| Changes state | Yes |
+| MCP tool | `release_application_lifecycle` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+| `--expected-inventory-revision` | integer | **Required.** |
+| `--mode` | string | One of `adopt_in_place`, `stack_it`, `restore_original`, `release_original`. |
+| `--owner-approved` | boolean | Default `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api services request-logs
+
+Request a fresh bounded, redacted StackKits service log page.
+
+Asks the service's agent for its latest log lines, bound to a fresh inventory revision of the service's server. The node collects one bounded page into a durable read job; read the page with `GET` on the same path (`get_service_logs`) or follow `job_id` with `get_job`. It changes nothing and stays open on a frozen service. The service must advertise `logs` in `allowed_actions`. Exact replays under the same Idempotency-Key converge on the same job and a different body under the same key is 409; the raw Idempotency-Key is never persisted.
+
+```bash
+techstack api services request-logs <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/registry/services/{serviceId}/logs` |
+| Changes state | No |
+| MCP tool | `request_service_logs` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<service-id>` | string | **Required.** Canonical service runtime ID. |
+| `--cursor` | string | Opaque StackKits cursor from the prior page. |
+| `--expected-inventory-revision` | integer | **Required.** |
+| `--limit` | integer | Defaults to 100. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api services resolve-stacked-original
+
+Restore or remove the original container a Stack it kept.
+
+Mode restore_original (within the 7-day retention) removes the rebuilt own application, keeping its volume, and starts the original again. Mode release_original removes the stopped original; its data stays. Both require Owner approval.
+
+```bash
+techstack api services resolve-stacked-original [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/stack-it/original` |
+| Changes state | Yes |
+| MCP tool | `resolve_stacked_original` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+| `--expected-inventory-revision` | integer | **Required.** |
+| `--mode` | string | One of `adopt_in_place`, `stack_it`, `restore_original`, `release_original`. |
+| `--owner-approved` | boolean | Default `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api services run-action
+
+Run a governed StackKits service action.
+
+Derives stack, server, agent, kit and service authority from fresh canonical inventory. Every agent-executed mutation (`start`, `stop`, `restart`, `update`, `backup`, adopted applications included) runs as one governed RIL action card, its only write path: the card is derived from the service, its server and worker (an adopted application by its exact container, `update` with the pinned release, `backup` with the stack's backup contract), its one Gateway Decision is answered by the acting agent's equipment (no per-call approval flag), and the executor-bound primitive (`start-service`, `stop-service`, `restart-service`, `update-service` or `run-backup`) runs through the same lease, one-use claim, node proof, dispatcher and evidence as `/v1/ril/action-cards`. The response names the card in `action_card_id` and its execution in `job_id`; read it back with `get_action_card` for its status and evidence. `freeze` and `unfreeze` set the owner guardrail in the control plane without reaching the node. This operation only changes a service: a log page is requested with `POST /api/v1/registry/services/&#123;serviceId&#125;/logs` and read with `GET` on the same path. Exact replays converge on the same card receipt and a different body under the same key is 409; the raw Idempotency-Key is never persisted. A start or restart is followed by StackKits verify before measured state changes. Agent-executed actions refuse with 409 `maintenance_active` while the server is being rebooted or updated, a kit whose backups are managed refuses `backup` with 403 `managed_backup_custody`, and a locked service, application group or (for `update`) stack refuses on both entries.
+
+```bash
+techstack api services run-action <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/registry/services/{serviceId}/actions` |
+| Changes state | Yes |
+| MCP tool | `run_managed_service_action` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<service-id>` | string | **Required.** Canonical service runtime ID. |
+| `--body` | json | **Required.** JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api services setup-application-connector
+
+Ensure or revoke one declared owned Home Assistant connector on its node.
+
+Requires fresh backend ownership, positive operate authority, exact current inventory and Owner approval. Transports only closed correlation metadata through Guard to the published pinned CLI, whose local signedApply and Owner setup authority remain mandatory. Stores pre-send durable intent; unknown acknowledgement only reconciles the original operation read-only. Current v0.51.8 lacks the supporting catalog and returns nondispatchable SourcePreview. Credentials stay in node custody.
+
+```bash
+techstack api services setup-application-connector [flags]
+```
+
+<Warning>Requires confirmation: This operation issues or revokes the reviewed node-owned Home Assistant connector credential for this exact service. Pass `--yes` or answer the prompt; a non-interactive run without `--yes` stops before any request with exit code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/connector` |
+| Changes state | Yes |
+| MCP tool | `setup_application_connector` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+| `--action` | string | **Required.** One of `ensure`, `revoke`. |
+| `--expected-inventory-revision` | integer | **Required.** |
+| `--owner-approved` | boolean | **Required.** One of `true`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api services start-own-application-operation
+
+Read, review or back up an own application adopted with Stack it.
+
+Queues one StackKits own-application step for an application StackKits runs as an own application and Stack it adopted: status or logs (reads), backup (Owner approved, a node snapshot holding every own application volume), or the dry run of a mutation: review (start, stop, restart or rollback), update_review (a newer version tag of its own image, optionally allow_major), checkpoint_rollback_review or checkpoint_discard_review (the data checkpoint of a tag update). A dry run changes nothing and returns the review digest the execution binds.
+
+```bash
+techstack api services start-own-application-operation [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/own-application/operations` |
+| Changes state | Yes |
+| MCP tool | `start_own_application_operation` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+| `--action` | string | review only. One of `start`, `stop`, `restart`, `rollback`. |
+| `--allow-major` | boolean | update_review only; admits another major version or an unversioned running image. Default `false`. |
+| `--checkpoint` | string | Checkpoint reviews only; the operation ID of the tag update that took it. |
+| `--expected-inventory-revision` | integer | **Required.** |
+| `--image-tag` | string | update_review only; a newer version tag of the application's own image. |
+| `--operation` | string | **Required.** One of `status`, `logs`, `backup`, `review`, `update_review`, `checkpoint_rollback_review`, `checkpoint_discard_review`. |
+| `--owner-approved` | boolean | backup only. Default `false`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api services verify-application-connector
+
+Refresh the current node-owned connector through a distinct read-only job.
+
+Retains the original signed setup operation and exact receipt, requires current published catalog and positive backend node/resource authority, and never reissues setup. Ordinary authenticated inventory reconciliation uses the same consumer for stale projections. Current v0.51.8 remains nondispatchable SourcePreview.
+
+```bash
+techstack api services verify-application-connector [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/connector/verify` |
+| Changes state | No |
+| MCP tool | `verify_application_connector` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+| `--body` | json | **Required.** JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |

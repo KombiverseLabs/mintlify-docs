@@ -116,7 +116,7 @@ The command stops only that application, copies each of its governed volumes int
 
 `--rollback` &lt;operation-id&gt; stops the application again, verifies the retained copy, copies it back, proves the live data equals the checkpoint and selects the prior release; the next apply starts the prior release on exactly that data, and data written since the checkpoint is discarded. Rolling back a checkpoint that never completed releases it and restarts the unchanged application. While an operation is open, apply starts only the release it expects (or a later StackKits default that supersedes it); without one, apply refuses every move to an earlier release. `--finalize` &lt;operation-id&gt; removes the retained data once the change is accepted (or after the rollback was applied). `--status` reads a record.
 
-On a node Techstack manages, a forward change also needs `--capability`: the exact Techstack-signed application-release.update capability for this use case, release, digest and tested or untested kind, verified offline against the Owner-approved Advanced trust before the application is stopped. The record keeps that authority, and the result reports the prior and target StackSpec hashes so Techstack's desired state follows the override. A standalone node takes no capability.
+On a node kombify Homelab manages, a forward change also needs `--capability`: the exact kombify Homelab-signed application-release.update capability for this use case, release, digest and tested or untested kind, verified offline against the Owner-approved Advanced trust before the application is stopped. The record keeps that authority, and the result reports the prior and target StackSpec hashes so kombify Homelab's desired state follows the override. A standalone node takes no capability.
 
 ```bash
 stackkit use-cases upgrade [slug] [flags]
@@ -126,7 +126,7 @@ stackkit use-cases upgrade [slug] [flags]
 | --- | --- | --- | --- |
 | `--accept-untested` | bool | — | Accept a release the catalog has not tested (inside the module's release track only) |
 | `--apply` | bool | — | Run checkpoint, generate, apply and live verify, rolling back automatically on failure |
-| `--capability` | string | — | Techstack application-release.update capability file; required on a Techstack-managed node |
+| `--capability` | string | — | kombify Homelab application-release.update capability file; required on a kombify Homelab-managed node |
 | `--digest` | string | — | Exact sha256 manifest digest of the `--to` release; required for a release outside the catalog |
 | `--expected-spec-hash` | string | — | Require the current canonical spec hash |
 | `--finalize` | string | — | Remove the retained data of this release operation |

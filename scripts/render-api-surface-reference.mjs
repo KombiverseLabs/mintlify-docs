@@ -21,12 +21,12 @@ const SCHEMA = 'kombify.api-surface/v1'
 // where `<binary> api` sends requests and which credentials it reads.
 export const PRODUCTS = {
   techstack: {
-    name: 'Techstack',
-    tab: 'Techstack',
+    name: 'kombify Homelab',
+    tab: 'Homelab',
     binary: 'techstack',
-    referenceDir: 'techstack/reference',
+    referenceDir: 'homelab/reference',
     environment: [
-      ['TECHSTACK_API_URL', 'API base URL. Defaults to `https://api.kombify.io/v1/techstack`; set it to the address of your own Techstack instance to call that instance directly.'],
+      ['TECHSTACK_API_URL', 'API base URL. Defaults to `https://api.kombify.io/v1/techstack`; set it to the address of your own kombify Homelab instance to call that instance directly.'],
       ['TECHSTACK_API_TOKEN', 'Bearer token sent with every request. Without it the CLI uses the session stored by `techstack login`, and fails with exit code 3 when there is none or it has expired.'],
     ],
   },

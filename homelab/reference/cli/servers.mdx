@@ -1,0 +1,593 @@
+---
+title: "techstack api servers"
+description: "Generated reference for the techstack api servers commands"
+sidebarTitle: "servers"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.49.2"
+content_hash: "sha256:16adb9eda64db29656ee84714b9bc71b814dadfb07fbbf8a52e89200b968f6c3"
+source_hash: "2614eaba28d89093eab7aca7ba7268dde5a823e8"
+---
+<Note>Generated from the kombify Homelab v0.49.2 release (source `2614eaba28d8`). For an installed version, `techstack api <command> --help` is authoritative.</Note>
+
+## techstack api servers access authorize-key
+
+Install one Wallet SSH public key on a managed server for direct owner SSH.
+
+Installs the public key of a Wallet SSH item on a connected managed server and records the owner SSH grant. The body names the Wallet item (`wallet_item_id`, never key material) and must carry `confirm: true`. A fresh server-access re-authentication is required, supplied by the signed-in session or as `reauth_timestamp` and `reauth_signature`; without it the answer is 403 `server_access_step_up_required`. Refused on the demo account, when owner SSH access is disabled for the server (409) and when the Wallet is unavailable (503).
+
+```bash
+techstack api servers access authorize-key <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/access/authorized-key` |
+| Changes state | Yes |
+| MCP tool | None |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `--confirm` | boolean | **Required.** One of `true`. |
+| `--reauth-signature` | string | — |
+| `--reauth-timestamp` | string | — |
+| `--wallet-item-id` | string | **Required.** Wallet item that holds the SSH key. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api servers availability get
+
+How available the server is, observed and as the owner confirmed it.
+
+The class the Layout Planner reads for this machine (`always-on`, `part-time` or `unknown`) and where it came from. The observed class folds the server's connection transitions over 14 days: `always-on` at 97 % uptime or more, `part-time` below 90 %, `unknown` in between and whenever fewer than three days were observed. The owner's confirmation, when there is one, is the class; the observed class stays next to it. Owner only.
+
+```bash
+techstack api servers availability get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/availability` |
+| Changes state | No |
+| MCP tool | None |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+
+## techstack api servers availability set
+
+Confirm or correct how available the server is.
+
+The owner says whether the machine is on all the time (`always-on`) or switched off at times (`part-time`). The statement is stored next to what the Guard observed and replaces the observed class for planning. `unknown` or `null` withdraws it. Owner only; any other caller gets 404.
+
+```bash
+techstack api servers availability set <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/servers/{serverId}/availability` |
+| Changes state | Yes |
+| MCP tool | `set_server_availability` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `--class` | string | **Required.** always-on or part-time confirms; unknown or null withdraws the confirmation. One of `always-on`, `part-time`, `unknown`, `null`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api servers detach
+
+Revoke and detach one exact customer-operated BYO server.
+
+Retains the terminal canonical server receipt and performs no provider API call.
+
+```bash
+techstack api servers detach <server-id> [flags]
+```
+
+<Warning>Requires confirmation: This operation revokes the server's credentials and removes it from management without touching the machine. Pass `--yes` or answer the prompt; a non-interactive run without `--yes` stops before any request with exit code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/detach` |
+| Changes state | Yes |
+| MCP tool | `detach_self_owned_server` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `--confirm-server-id` | string | **Required.** Must exactly equal the serverId path parameter. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api servers get
+
+Get canonical server lifecycle, connection, health, and channels.
+
+```bash
+techstack api servers get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}` |
+| Changes state | No |
+| MCP tool | `get_server_runtime` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+
+## techstack api servers host container-action
+
+Start, stop or restart one unmanaged container through the server's kombify Guard.
+
+Requires the Edge-signed `techstack.servers.maintenance` entitlement, ownership of the server in the tenant, the Inventory operate grant on the server and a connected, current Guard that advertises `stackkit.host-operate.v1`. The body is decoded strictly: exact lowercase keys `container` (a container name or id) and `action` (start, stop or restart), no duplicates, no unknown fields, no approval flag. The action is one governed RIL action card, its only write path: the primitive `start-host-container`, `stop-host-container` or `restart-host-container` binds exactly this verb and this container (`host-container-ref`) on the server's node, its one Gateway Decision is answered by the acting agent's equipment (D-2026-10-23-06), and it runs through the same lease, one-use claim, node proof, dispatcher and evidence as `/v1/ril/action-cards`. The server's stack must have an applied plan (409 `host_action_plan_unavailable`). The response names the card in `action_card_id` and its execution in `job_id`; read it back with `get_action_card`: the evidence carries the Guard's verdict. The Guard resolves the container to its full id, refuses a StackKits-managed container, one carrying any StackKits label (`container_managed`, use the managed service actions), a container that is removed when it stops (`container_autoremove`, that would be a deletion) and the platform's own agents (`container_protected`), acts on that id and reads the state again; an action that does not reach its target state fails with `state_not_reached`. Nothing is deleted: removing a container or its data is not an action. A retry with the same Idempotency-Key converges on the same card instead of running the action twice, and a different body under the same key is 409. There is no free-form shell path. Refusals are client-error-envelope/v1 documents; 409 `reason_code` is one of node_protected, agent_not_connected, heartbeat_stale, agent_capability_missing, container_protected, host_action_stack_unavailable or host_action_plan_unavailable at the route, or a governed-action reason (entitlement, a running stack mutation, maintenance, a stale target) when the card is created or begins. The Guard's own refusals and failures (container_managed, container_autoremove, container_not_found, engine_unavailable, precheck_failed, action_failed, state_not_reached, readback_failed) are the card's evidence summary codes `guard-refused-&lt;code&gt;` and `guard-failed-&lt;code&gt;` (code with hyphens). A host action no longer appears on the server timeline: the card is its record.
+
+```bash
+techstack api servers host container-action <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/host/container-actions` |
+| Changes state | Yes |
+| MCP tool | `run_server_container_action` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `--action` | string | **Required.** One of `start`, `stop`, `restart`. |
+| `--container` | string | **Required.** A container name or id from the container list. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api servers host containers
+
+Read every container of an owned server, managed or not, through its kombify Guard.
+
+Same authorization and refusals as the process list. The Guard runs one fixed `docker ps --all` and reports each container's id, name, image, state, status, published ports and Compose project. `managed` is true for a StackKits-managed container, which only the managed service actions may change; every other container, such as a hand-deployed application, is unmanaged. Labels other than those two are not reported. A node without a reachable Docker engine answers 409 `engine_unavailable`. Responses are private and must not be cached.
+
+```bash
+techstack api servers host containers <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/host/containers` |
+| Changes state | No |
+| MCP tool | `list_server_containers` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `--limit` | integer | — |
+
+## techstack api servers host processes
+
+Read the process table of an owned server through its kombify Guard.
+
+Requires the Edge-signed `techstack.servers.maintenance` entitlement, ownership of the server in the tenant and a connected, current Guard that advertises `stackkit.host-inspect.v1`. The Guard runs one fixed `ps` and returns the busiest processes first with their user, CPU and memory share, age, systemd unit and executable name. The command line is never reported, because arguments routinely carry secrets. Refusals are client-error-envelope/v1 documents whose 409 `reason_code` is one of node_protected, agent_not_connected, heartbeat_stale or agent_capability_missing. Responses are private and must not be cached.
+
+```bash
+techstack api servers host processes <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/host/processes` |
+| Changes state | No |
+| MCP tool | `list_server_processes` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `--limit` | integer | — |
+
+## techstack api servers host systemd-action
+
+Start, stop or restart one service unit through the server's kombify Guard.
+
+Same authorization and admission as the container action. The body takes the exact lowercase keys `unit` (one `.service` unit name), `action` (start, stop or restart), no approval flag. The action is the governed primitive `start-host-unit`, `stop-host-unit` or `restart-host-unit` (unit in `host-unit-ref`), the same card path as the container action. Units of the management path (the Guard, kombify and StackKits services, sshd, Docker, containerd, systemd itself, D-Bus, the network, firewall, VPN and clock stack and the like) are refused here and again by the Guard (`unit_protected`), also when an alias of the unit or a unit that requires it is protected; an unknown unit answers `unit_not_found` and a template instance that is not running `unit_instance_unknown`. The Guard reads the unit state after the action; the card's evidence carries its verdict. Retry and refusal behavior are those of the container action.
+
+```bash
+techstack api servers host systemd-action <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/host/systemd-actions` |
+| Changes state | Yes |
+| MCP tool | `run_server_systemd_action` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `--action` | string | **Required.** One of `start`, `stop`, `restart`. |
+| `--unit` | string | **Required.** One service unit name, for example the unit a process reports. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api servers list
+
+List canonical Node runtime state.
+
+Returns owner-scoped Nodes with canonical `node_id` and
+`kit_deployment_id` identities.
+
+```bash
+techstack api servers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers` |
+| Changes state | No |
+| MCP tool | `list_server_runtimes` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--kit-deployment-id` | string | — |
+
+## techstack api servers maintenance cancel
+
+Cancel an owned maintenance job before execution starts.
+
+Uses the same tenant, entitlement, server and requesting-owner scope as the job read: the authority to withdraw a queued job is the person who owns the server and requested the job, and the person's agent acts with it. No delegated maintenance origin is needed, since cancelling only withdraws work that has not reached the server. Cancellation and execution claim use the same queued-state compare-and-set. Repeating a successful cancellation returns its receipt; a claimed or finished job returns maintenance_not_cancellable. Cancelling never claims to stop a command that has already reached the server.
+
+```bash
+techstack api servers maintenance cancel <server-id> <job-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/actions/{jobId}/cancel` |
+| Changes state | Yes |
+| MCP tool | `cancel_server_maintenance_job` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `<job-id>` | string | **Required.** |
+
+## techstack api servers maintenance get
+
+Read one maintenance job of an owned server.
+
+Scoped like the POST: the Edge-signed `techstack.servers.maintenance` entitlement, the tenant, ownership of the server, and a job that belongs to this server and was requested by the caller. Anything else is 404. Maintenance jobs have their own ledger and are not served by `/api/v1/jobs/&#123;id&#125;`. There is no log endpoint: the job carries its outcome, and a failure carries its stable code with user guidance.
+
+```bash
+techstack api servers maintenance get <server-id> <job-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/actions/{jobId}` |
+| Changes state | No |
+| MCP tool | `get_server_maintenance_job` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `<job-id>` | string | **Required.** |
+
+## techstack api servers maintenance impact
+
+Preview service and stack impact before confirming OS maintenance.
+
+Requires the signed maintenance entitlement and ownership of the server. Lists canonical service placement and stack membership, with reasons and inventory freshness and completeness. An empty services array means no affected services only when inventory.status is current. An incomplete, stale or unavailable inventory cannot authorize maintenance. The digest binds the server, operation and material dependency snapshot; ordinary observation timestamps do not invalidate unchanged impact. Responses are private and must not be cached.
+
+```bash
+techstack api servers maintenance impact <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/maintenance-impact` |
+| Changes state | No |
+| MCP tool | `get_server_maintenance_impact` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `--action` | string | **Required.** One of `os_update`, `reboot`. |
+
+## techstack api servers maintenance run
+
+Queue an owned server OS update plan, OS update or reboot.
+
+Requires the Edge-signed `techstack.servers.maintenance` entitlement, ownership of the server in the tenant, and current server-bound standing authority for delegated native MCP calls. These three ordinary actions require no fresh MFA or separate owner_approved assertion. Reboot and os_update require expected_impact_digest from the preview the user confirmed. Impact is compared atomically at admission and again at execution claim; changed or incomplete evidence sends no command and requires a refreshed preview and renewed confirmation with a new request key. The body is decoded strictly: exact lowercase keys, no duplicates, no unknown fields. A replay with the same Idempotency-Key returns the stored receipt before target validation. One reboot or OS update and, separately, one update plan may be active per server; a job not finished by its deadline fails with `deadline_exceeded` and frees its slot. The action is offered in `allowed_actions` only when the server agent advertises `stackkit.host-maintenance.v1`, and `reboot` only when the server also reports `host_boot_id`. Refusals are client-error-envelope/v1 documents; 409 `reason_code` is one of control_plane_host, substrate_node, protected_demo_server, service_locked, maintenance_active, node_operation_active, plan_stale, agent_capability_missing, boot_id_unknown, agent_not_connected, heartbeat_stale, inventory_revision_stale, idempotency_key_reused, impact_confirmation_required, impact_changed or impact_unavailable; 403 carries entitlement_required or maintenance_origin_authority_denied.
+
+```bash
+techstack api servers maintenance run <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/actions` |
+| Changes state | Yes |
+| MCP tool | `run_server_maintenance_action` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `--action` | string | **Required.** One of `os_update_plan`, `os_update`, `reboot`. |
+| `--expected-impact-digest` | string | Required for os_update and reboot, forbidden for os_update_plan. snapshot_digest of the current impact preview confirmed for this exact server and action. Changing it under an existing Idempotency-Key is a conflict; a renewed confirmation uses a new key. |
+| `--expected-inventory-revision` | integer | **Required.** |
+| `--expected-plan-digest` | string | os_update only: the plan_digest of a completed os_update_plan for this server that is at most 15 minutes old. |
+| `--owner-approved` | boolean | Optional legacy field; it does not grant maintenance authority. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api servers network get
+
+Read the server's network facts and any recorded home network move.
+
+The network the server's kombify Guard last observed (address, gateway, subnet, interface, WiFi network), the `network_move` record kombify wrote when the server turned up on a different network, and the state of the re-bind that followed. A moved server re-binds itself automatically; `can_rebind` says whether the owner can start one now.
+
+```bash
+techstack api servers network get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/network` |
+| Changes state | No |
+| MCP tool | `get_server_network` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+
+## techstack api servers network rebind
+
+Re-bind a moved server to the network it is on now.
+
+Runs `stackkit network rebind` on the server through its kombify Guard: the node re-detects its LAN address, re-issues the signed LAN DNS custody record and regenerates and re-applies the workspace. The request takes no body. Requires the owner, the Inventory operate grant and the `techstack.servers.maintenance` entitlement, and a connected Guard (409 `server_network_not_ready` otherwise). A rebind that is already queued or running answers with its job instead of queueing another.
+
+```bash
+techstack api servers network rebind <server-id> [flags]
+```
+
+<Warning>Requires confirmation: This operation re-detects the server's address on the network it is on now, re-issues its signed local DNS record and re-applies its workspace. Pass `--yes` or answer the prompt; a non-interactive run without `--yes` stops before any request with exit code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/network/rebind` |
+| Changes state | Yes |
+| MCP tool | `rebind_server_network` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+
+## techstack api servers ports
+
+Get the authenticated owner's port inventory for one canonical server.
+
+Server-detail UI projection over the same central port authority as the Inventory/MCP surface, authorized through the canonical owner-scoped server read boundary.
+
+```bash
+techstack api servers ports <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/ports` |
+| Changes state | No |
+| MCP tool | `get_server_runtime_ports` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+
+## techstack api servers reach set
+
+Publish the server at a kombify.me address, or stop publishing it.
+
+Nothing is published by default: a paired server has no public route and the relay carries no traffic. The owner enables it per server with an explicit `service` name and `target_port` (the origin is always the Guard host's loopback, never another machine) and may withdraw it at any time. The relay authenticates the Guard, not the visitor, so what answers on that port must protect itself. Enabling requires the owner, the `techstack.servers.maintenance` entitlement and, on the person's own session, a fresh multi-factor sign-in (reason `server_reach_step_up_required`); an agent acting for the person needs no step-up. Withdrawing is never gated. Responds with the reach section of the server read model; the reconciler then creates or withdraws the route.
+
+```bash
+techstack api servers reach set <server-id> [flags]
+```
+
+<Warning>Requires confirmation: This operation publishes a service of the server at a public kombify.me address that anyone on the internet can open. Pass `--yes` or answer the prompt; a non-interactive run without `--yes` stops before any request with exit code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/servers/{serverId}/reach` |
+| Changes state | Yes |
+| MCP tool | `set_server_public_reach` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `--enabled` | boolean | **Required.** |
+| `--service` | string | Required when enabling. The route label; the kombify.me route is &lt;base&gt;-&lt;service&gt;-&lt;server suffix&gt;. |
+| `--target-port` | integer | Required when enabling. The port the service listens on, on the Guard host's loopback (the host is fixed). |
+| `--target-scheme` | string | One of `http`, `https`. Default `"http"`. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api servers repair-server-binding
+
+Prepare the pairing command that re-pairs this server.
+
+Issues a one-time install command for a server whose Guard pinned no binding signing key. The token is returned once. Mutating commands stay refused until the server is paired again.
+
+```bash
+techstack api servers repair-server-binding [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/binding-repair` |
+| Changes state | Yes |
+| MCP tool | `repair_server_binding` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--server-id` | string | **Required.** Canonical server runtime ID. |
+
+## techstack api servers security auto-repair get
+
+Read the owner's approval of automatic security repair.
+
+A server without an approval, or with an expired one, is observe-only.
+
+```bash
+techstack api servers security auto-repair get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/security/auto-repair` |
+| Changes state | No |
+| MCP tool | `get_server_security_auto_repair` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+
+## techstack api servers security auto-repair set
+
+Approve or withdraw automatic repair of a small safe set of controls.
+
+Off by default. An approval names controls from the safe set (`allowed_controls`: brute-force protection, the firewall policy, kernel parameters and automatic security updates; never the ssh controls), expires within 90 days and never renews itself. While it is in force the control plane repairs a named control that fresh evidence reports drifted, inside the same bounds as an operator repair. Requires the owner, the `techstack.servers.maintenance` entitlement and, on the person's own session, a fresh multi-factor sign-in; an agent acting for the person needs no step-up. `enabled: false` withdraws the approval.
+
+```bash
+techstack api servers security auto-repair set <server-id> [flags]
+```
+
+<Warning>Requires confirmation: This operation lets the kombify Guard repair the named host security controls without asking each time, until the approval expires. Pass `--yes` or answer the prompt; a non-interactive run without `--yes` stops before any request with exit code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/servers/{serverId}/security/auto-repair` |
+| Changes state | Yes |
+| MCP tool | `set_server_security_auto_repair` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `--controls` | string\[\] | — |
+| `--enabled` | boolean | **Required.** |
+| `--expires-at` | string | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api servers security findings
+
+List the open findings and recent findings history of one server.
+
+The findings ledger behind the server's `security`, `recovery` and Guard alerts. One finding is one episode: opened when a fact is first observed wrong, resolved when it is observed right again, with at most one alert (`alerted_at`) and one resolution. History is kept 90 days.
+
+```bash
+techstack api servers security findings <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/security/findings` |
+| Changes state | No |
+| MCP tool | `list_server_security_findings` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+
+## techstack api servers security repairs list
+
+List the recent security repairs of one server.
+
+```bash
+techstack api servers security repairs list <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/security/repairs` |
+| Changes state | No |
+| MCP tool | `list_server_security_repairs` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+
+## techstack api servers security repairs request
+
+Repair named drifted host security controls.
+
+Requests a bounded repair of controls the fresh host security evidence reports as drifted and automatically repairable. Requires the server's owner, the Edge-signed `techstack.servers.maintenance` entitlement and, on the person's own session, a fresh multi-factor sign-in (at most 300 seconds old); an agent acting for the person needs no step-up. The repair travels as a typed, journaled Guard command that runs `stackkit host security repair --apply` for exactly the named controls; StackKits refuses, before changing anything, a change that would cut the management path or lock the owner out. Bounds: one repair per server at a time (409 `repair_in_progress`), a per-control cooldown (429 `repair_cooldown`), a daily attempt budget per control (429 `repair_attempts_exhausted`) and a circuit breaker after consecutive failures (429 `repair_circuit_open`); the 429 answers carry `retry_after`. A control that is compliant (409 `control_not_drifted`), under an approved exception (`control_has_exception`), manual (`control_not_repairable`), blocked on an authorized SSH key (`needs_authorized_key`) or not observed is refused. The body is decoded strictly.
+
+```bash
+techstack api servers security repairs request <server-id> [flags]
+```
+
+<Warning>Requires confirmation: This operation restores the named host security controls (firewall, ssh, brute-force protection, automatic updates) on the server through its kombify Guard. Pass `--yes` or answer the prompt; a non-interactive run without `--yes` stops before any request with exit code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/security/repairs` |
+| Changes state | Yes |
+| MCP tool | `repair_server_security` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `--controls` | string\[\] | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## techstack api servers security verify
+
+Ask the kombify Guard for a fresh host security observation.
+
+Records that a fresh observation of the host baseline is wanted. The Guard answers at its next check-in (within about a minute) with a new report; nothing on the host changes. The server's `security` read model is updated only by that report, never by this request. Another tenant's or owner's server is 404; a server without a Guard is 409 `guard_not_connected`.
+
+```bash
+techstack api servers security verify <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/security/verify` |
+| Changes state | Yes |
+| MCP tool | None |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+
+## techstack api servers summary
+
+Read the authenticated owner's server-presence summary.
+
+Returns only a count and presence flag under the same tenant and owner policy scope as the canonical inventory list. The optional tenant query exists for Gateway compatibility and must exactly match the tenant in the authenticated identity; a mismatch is rejected before any store read. No server, tenant, or subject identifiers are returned.
+
+```bash
+techstack api servers summary [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/summary` |
+| Changes state | No |
+| MCP tool | None |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--tenant` | string | — |
+
+## techstack api servers transitions
+
+List the persisted server state timeline.
+
+```bash
+techstack api servers transitions <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/transitions` |
+| Changes state | No |
+| MCP tool | `list_server_runtime_transitions` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |

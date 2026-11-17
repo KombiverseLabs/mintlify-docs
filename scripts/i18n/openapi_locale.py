@@ -13,7 +13,7 @@ from openapi_spec_validator import validate
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCES = {
-    'techstack': 'techstack/reference/api/openapi.yaml',
+    'techstack': 'homelab/reference/api/openapi.yaml',
     'gateway': 'identity/reference/api/openapi.yaml',
 }
 # These subtrees contain values/code, not OpenAPI documentation objects. Never
