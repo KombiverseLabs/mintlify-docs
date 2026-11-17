@@ -4,8 +4,8 @@ description: "Set up the owner account of an applied application"
 sidebarTitle: "setup"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:95c3ff1fa3ce5716fe20ea99d7a4b694a4f951a303423dad213bbde9bf547e22"
-source_hash: "4049a888362a11795582ef0a63fba7d7a7df4942"
+content_hash: "sha256:ca552278db6ce214303c44848fb22b80d7f266fe7363c16b9640f39a5d0feab1"
+source_hash: "6bd476a8330b8b2eb61dc5c323d8cca5165038aa"
 ---
 Set up the owner account of an applied application.
 
@@ -37,7 +37,7 @@ stackkit setup photos --owner-approve --complete-onboarding
 stackkit setup files --owner-approve --credentials-file private/files-owner.json
 ```
 
-Subcommands: [`stackkit setup ai-connect`](#stackkit-setup-ai-connect), [`stackkit setup ai-provider`](#stackkit-setup-ai-provider), [`stackkit setup connector`](#stackkit-setup-connector)
+Subcommands: [`stackkit setup ai-connect`](#stackkit-setup-ai-connect), [`stackkit setup ai-provider`](#stackkit-setup-ai-provider), [`stackkit setup connector`](#stackkit-setup-connector), [`stackkit setup home-graph`](#stackkit-setup-home-graph), [`stackkit setup home-graph-adopt`](#stackkit-setup-home-graph-adopt), [`stackkit setup identity`](#stackkit-setup-identity), [`stackkit setup loxone-import`](#stackkit-setup-loxone-import), [`stackkit setup workbench-host-release`](#stackkit-setup-workbench-host-release)
 
 ## stackkit setup ai-connect
 
@@ -114,6 +114,104 @@ stackkit setup connector [flags]
 | `--operation-id` | string | — | Exact stable connector setup operation identity |
 | `--owner-approve` | bool | — | Approve this exact connector ensure or revoke request |
 | `--request-file` | string | — | Workspace-relative private metadata-only connector request JSON; never contains credentials |
-| `--verify-only` | bool | — | Read and verify a retained receipt against current local binding without issuing or revoking |
+| `--verify-only` | bool | — | Read and verify a retained receipt against current local binding without issuing or revoking; an active credential is rotated at half-life |
 | `--workload` | string | — | Exact local workload; only smart-home is admitted |
+
+## stackkit setup home-graph
+
+Project the household home graph onto the exact local Home Assistant.
+
+```bash
+stackkit setup home-graph [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--graph-file` | string | — | Workspace-relative private stackkit.home-graph-sync-request/v1 JSON (at most 512 KiB) |
+| `--json` | bool | — | Emit the stackkit.home-graph-sync-result/v1 result |
+| `--operation-id` | string | — | Exact stable connector setup operation identity |
+| `--request-file` | string | — | Workspace-relative private metadata-only connector ensure request JSON; never contains credentials |
+| `--workload` | string | — | Exact local workload; only smart-home is admitted |
+
+## stackkit setup home-graph-adopt
+
+Inventory or apply the adoption of the exact local Home Assistant into the household home graph.
+
+```bash
+stackkit setup home-graph-adopt [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--adoption-file` | string | — | Workspace-relative private stackkit.home-graph-adoption-request/v1 JSON (at most 512 KiB) |
+| `--json` | bool | — | Emit the stackkit.home-graph-adoption-result/v1 result |
+| `--operation-id` | string | — | Exact stable connector setup operation identity |
+| `--request-file` | string | — | Workspace-relative private metadata-only connector ensure request JSON; never contains credentials |
+| `--workload` | string | — | Exact local workload; only smart-home is admitted |
+
+## stackkit setup identity
+
+Finish the identity bootstrap: Owner passkey, recovery key and code, first Owner device.
+
+Finish the homelab identity bootstrap on the applied Authority, in order:
+
+```text
+  1. the Owner passkey on the identity origin init fixed (the activation link
+     is printed and the command waits for the passkey);
+  2. the Owner-signed Home trust that every passkey and device check uses;
+  3. the recovery key and recovery code, shown exactly once, and the first
+     recovery set (local copy, --target directory, --backup-target upload);
+  4. the Owner's first device: open the printed Hub address on a phone or
+     laptop at home and connect it with the passkey; it is enrolled at once.
+```
+
+Every step that is already done is skipped, so the command can be run again after an interruption. The recovery key and code are never shown again.
+
+```bash
+stackkit setup identity [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--backup-target` | bool | — | Also upload the set to the S3 backup target bound with 'stackkit backup target import' |
+| `--json` | bool | — | Print a JSON result (it contains the recovery key and code when they are created) |
+| `--owner-approve` | bool | — | Authorize the identity bootstrap of this Authority |
+| `--target` | string | — | Also copy the set into this directory of the Owner's backup target (mounted disk, NAS) |
+| `--wait` | duration | `15m0s` | How long to wait for the Owner passkey and for the first Owner device |
+
+**Examples**
+
+```bash
+# After the first apply, with a copy of the recovery set on a backup disk
+stackkit setup identity --owner-approve --target /mnt/backup
+```
+
+## stackkit setup loxone-import
+
+Read the Loxone Miniserver structure file and merge its rooms and controls into the home graph (read-only).
+
+```bash
+stackkit setup loxone-import [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--credential-file` | string | — | Workspace-relative private stackkit.loxone-credential/v1 JSON with baseUrl, user, password and optional caPem; stays on the node |
+| `--graph-file` | string | — | Workspace-relative private kombify.home_graph.v1 JSON (at most 512 KiB) |
+| `--json` | bool | — | Emit the stackkit.loxone-import-result/v1 result |
+
+## stackkit setup workbench-host-release
+
+Import private Desktop release access for the selected Workbench host.
+
+Import an owner-custodied GitHub credential with contents:read access to the private Workbench Desktop repository (GitHub repository id 1347582990) before the first Workbench host apply. Read it from a private `--token-file`, or use `--token-file` - for standard input. The credential is encrypted in existing local owner custody, never written to the StackSpec or command result. Repeating this explicit command rotates it. Neither secrets materialization nor an Advanced change set invents this slot. Connect enrollment and installed-provider authentication are separate setup.
+
+```bash
+stackkit setup workbench-host-release [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | bool | — | Emit the secret-free setup result |
+| `--token-file` | string | — | **Required.** Private credential file, or - for standard input |
 

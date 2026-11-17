@@ -4,8 +4,8 @@ description: "Move PaaS workloads to another server: plan, check, drain, send, r
 sidebarTitle: "relocate"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:95c3ff1fa3ce5716fe20ea99d7a4b694a4f951a303423dad213bbde9bf547e22"
-source_hash: "4049a888362a11795582ef0a63fba7d7a7df4942"
+content_hash: "sha256:ca552278db6ce214303c44848fb22b80d7f266fe7363c16b9640f39a5d0feab1"
+source_hash: "6bd476a8330b8b2eb61dc5c323d8cca5165038aa"
 ---
 Move PaaS workloads to another server: plan, check, drain, send, receive.
 
@@ -13,7 +13,24 @@ Move PaaS workloads to another server: plan, check, drain, send, receive.
 stackkit relocate [flags]
 ```
 
-Subcommands: [`stackkit relocate check`](#stackkit-relocate-check), [`stackkit relocate drain`](#stackkit-relocate-drain), [`stackkit relocate plan`](#stackkit-relocate-plan), [`stackkit relocate receive`](#stackkit-relocate-receive), [`stackkit relocate send`](#stackkit-relocate-send)
+Subcommands: [`stackkit relocate abort`](#stackkit-relocate-abort), [`stackkit relocate check`](#stackkit-relocate-check), [`stackkit relocate drain`](#stackkit-relocate-drain), [`stackkit relocate plan`](#stackkit-relocate-plan), [`stackkit relocate receive`](#stackkit-relocate-receive), [`stackkit relocate send`](#stackkit-relocate-send), [`stackkit relocate status`](#stackkit-relocate-status)
+
+## stackkit relocate abort
+
+Permanently reject a transfer only when no destination restore effects could have begun.
+
+```bash
+stackkit relocate abort [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--engine` | string | — | Path to the pinned relocation engine (default: /usr/local/lib/stackkit/coolify-mirror, $STACKKIT_COOLIFY_MIRROR or PATH) |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON (engine progress goes to stderr) |
+| `--owner-approve` | bool | — | Confirm Owner-approved destination abort |
+| `--plan` | string | — | Exact source plan, or - |
+| `--platform` | string | `coolify` | PaaS platform to relocate (coolify) |
+| `--transfer-id` | string | — | Semantic move identity |
 
 ## stackkit relocate check
 
@@ -46,9 +63,11 @@ stackkit relocate drain [flags]
 | --- | --- | --- | --- |
 | `--engine` | string | — | Path to the pinned relocation engine (default: /usr/local/lib/stackkit/coolify-mirror, $STACKKIT_COOLIFY_MIRROR or PATH) |
 | `--json` | bool | — | Emit stackkit.command-result/v1 JSON (engine progress goes to stderr) |
+| `--managed-resume` | string | — | Managed current destination-abort observation envelope, or - for stdin |
 | `--owner-approve` | bool | — | Confirm the owner approved stopping these workloads |
 | `--plan` | string | — | Relocation plan made on this server, or - for stdin |
 | `--platform` | string | `coolify` | PaaS platform to relocate (coolify) |
+| `--transfer-id` | string | — | Semantic move identity bound to the source drain |
 | `--undo` | bool | — | Start again what the active drain stopped |
 
 ## stackkit relocate plan
@@ -79,7 +98,7 @@ stackkit relocate plan [flags]
 
 Download the shared backup from the source server and restore it here.
 
-Runs on the destination server while `stackkit relocate send` shares. Downloads over pinned HTTPS, verifies, and restores into this Coolify; a failed restore is rolled back by the engine. Run `stackkit relocate check` with the plan first.
+Runs on the destination server while `stackkit relocate send` shares. Downloads over pinned HTTPS, verifies, and restores into this Coolify. A failure after the import commits retains an uncertain destination outcome; use relocation status before choosing recovery. Run `stackkit relocate check` with the plan first.
 
 ```bash
 stackkit relocate receive [flags]
@@ -93,10 +112,12 @@ stackkit relocate receive [flags]
 | `--no-start` | bool | — | Restore without starting the resources |
 | `--on-conflict` | string | `copy` | A resource that already exists here: copy or skip |
 | `--owner-approve` | bool | — | Confirm the owner approved this move |
+| `--plan` | string | — | Checked source relocation plan, or - for stdin; binds the archive and emits verified resource observations |
 | `--platform` | string | `coolify` | PaaS platform to relocate (coolify) |
 | `--secret-ref` | string | — | Wallet item holding this move's transfer secret (delivered to both servers) |
 | `--set-domain` | stringArray | — | Replace a restored domain, OLD=NEW (repeatable) |
 | `--tenant-ref` | string | — | Wallet tenant of the transfer secret |
+| `--transfer-id` | string | — | One semantic move identity; isolates transfer keys even when a Wallet item is reused |
 | `--wait` | duration | — | Wait this long for the source's share to come up before downloading |
 
 ## stackkit relocate send
@@ -123,11 +144,29 @@ stackkit relocate send [flags]
 | `--open-firewall` | bool | — | Open the share port in ufw while sharing |
 | `--output, -o` | string | `/data/coolify-mirror/backups/kombify-relocate` | Directory for the new backup |
 | `--owner-approve` | bool | — | Confirm the owner approved this move |
+| `--plan` | string | — | Checked source plan, or - for stdin |
 | `--platform` | string | `coolify` | PaaS platform to relocate (coolify) |
 | `--port` | int | `8123` | HTTPS port of the share |
 | `--project` | strings | — | Whole projects (name, name/environment or a domain) |
 | `--secret-ref` | string | — | Wallet item holding this move's transfer secret (delivered to both servers) |
 | `--tenant-ref` | string | — | Wallet tenant of the transfer secret |
+| `--transfer-id` | string | — | One semantic move identity; isolates transfer keys even when a Wallet item is reused |
 | `--ttl` | string | `2h` | Stop sharing after this long without a complete download |
 | `--uuid` | strings | — | Resources by Coolify uuid |
+
+## stackkit relocate status
+
+Read one signed move receipt and verify its current local runtime without restoring again.
+
+```bash
+stackkit relocate status [flags]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--engine` | string | — | Path to the pinned relocation engine (default: /usr/local/lib/stackkit/coolify-mirror, $STACKKIT_COOLIFY_MIRROR or PATH) |
+| `--json` | bool | — | Emit stackkit.command-result/v1 JSON (engine progress goes to stderr) |
+| `--plan` | string | — | Exact checked source plan, or - for stdin |
+| `--platform` | string | `coolify` | PaaS platform to relocate (coolify) |
+| `--transfer-id` | string | — | Semantic move identity |
 

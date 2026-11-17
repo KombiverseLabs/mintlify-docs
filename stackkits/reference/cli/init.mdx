@@ -4,8 +4,8 @@ description: "Initialize a new deployment from a StackKit"
 sidebarTitle: "init"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:95c3ff1fa3ce5716fe20ea99d7a4b694a4f951a303423dad213bbde9bf547e22"
-source_hash: "4049a888362a11795582ef0a63fba7d7a7df4942"
+content_hash: "sha256:ca552278db6ce214303c44848fb22b80d7f266fe7363c16b9640f39a5d0feab1"
+source_hash: "6bd476a8330b8b2eb61dc5c323d8cca5165038aa"
 ---
 Initialize a new deployment from a StackKit.
 
@@ -52,8 +52,8 @@ stackkit init [stackkit] [flags]
 | `--output, -o` | string | `deploy` | v0.6 compatibility only: output directory for generated files |
 | `--owner-bootstrap-mode` | string | — | v0.6 compatibility only: owner bootstrap mode (auto\|custom\|none) |
 | `--owner-display-name` | string | — | Desired PocketID owner display name for `--owner-source=local` |
-| `--owner-email` | string | — | Desired PocketID owner email for `--owner-source=local` |
-| `--owner-source` | string | — | Owner custody source (native standalone: local; v0.6 compatibility: local\|cloud) |
+| `--owner-email` | string | — | Desired PocketID owner email for the standalone local owner (needed on first init; implies `--owner-source=local` on native init) |
+| `--owner-source` | string | — | Owner custody source (native standalone: local, implied by an --owner-\* flag or by a terminal that asks for the owner; v0.6 compatibility: local\|cloud) |
 | `--owner-username` | string | — | Desired PocketID owner username for `--owner-source=local` |
 | `--platform` | string | — | Native v2 only: explicit workload runtime adapter; otherwise reuse a compatible selected platform or the catalog default |
 | `--preinstalled-manifest` | string | — | Reverify a neutral image cache before fresh per-clone initialization |
@@ -86,5 +86,8 @@ stackkit init basement-kit --catalog-defaults --owner-source=local --owner-email
 
 # Pick the core alternative and module profile explicitly instead of catalog defaults
 stackkit init basement-kit --owner-source=local --owner-email you@example.com --use-case-alternative basement-core=standalone --module-compute-profile stackkits-basement-core-runtime=standard
+
+# Give an existing StackSpec its local owner (apply refuses a workspace without one)
+stackkit init --candidate-spec stack-spec.yaml --owner-source=local --owner-email <owner-email>
 ```
 
