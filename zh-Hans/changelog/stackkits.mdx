@@ -1,0 +1,236 @@
+---
+title: "StackKits 更新日志"
+description: "StackKits 版本与每周摘要，最新在前"
+icon: "newspaper"
+---
+
+StackKits 版本与每周摘要，最新在前。每个产品都有自己的更新日志；[更新日志总览](/zh-Hans/changelog/overview) 列出了全部。可安装资源在 [GitHub](https://github.com/kombifyio/StackKits/releases)。
+
+<Update label="2026-10-16" description="Oct 9 – Oct 16" tags={["Weekly digest"]}>
+
+## StackKits moves Coolify workloads between servers and adds an Early Access channel
+
+StackKits 发布了 [v0.53.1](https://github.com/kombifyio/stackKits/releases/tag/v0.53.1) 至 [v0.53.9](https://github.com/kombifyio/stackKits/releases/tag/v0.53.9) ，支持迁移 Coolify 工作负载，新增了现称 Early Access 的可选发布通道和私有 AI 套件，并在移除应用时保留数据。
+
+### New features
+
+- **Move Coolify workloads to another server.** [StackKits v0.53.9](https://github.com/kombifyio/stackKits/releases/tag/v0.53.9) adds `stackkit relocate plan`, `check`, `drain`, `send`, and `receive`. Drain stops your apps before the final send, so the backup is consistent, and `drain --undo` rolls the move back. See [`stackkit relocate` (English)](https://docs.kombify.io/stackkits/reference/cli/relocate).
+- **Early Access 发布通道。** [v0.53.9](https://github.com/kombifyio/stackKits/releases/tag/v0.53.9) 引入了可自行选择的发布通道。StackKits 此后已停用该通道，现在只发布 Stable 版本。
+- **Preview footprint and capacity before you install.** [v0.53.9](https://github.com/kombifyio/stackKits/releases/tag/v0.53.9) shows the footprint and capacity of your selected use cases on the target with `stackkit use-cases pick --kit`. See [`stackkit use-cases`](/zh-Hans/stackkits/reference/cli/use-cases).
+- **Private AI bundles by goal.** [v0.53.8](https://github.com/kombifyio/stackKits/releases/tag/v0.53.8) groups Private AI into bundles such as My private Chat and My local AI. It adds the LiteLLM model router for API access and a model manager setup action, and shows memory and GPU fit for each choice. See [Personal AI](/zh-Hans/guides/stackkits/use-cases/personal-ai).
+- **OpenCloud for Files and an MQTT add-on.** [v0.53.1](https://github.com/kombifyio/stackKits/releases/tag/v0.53.1) adds OpenCloud as a Files alternative and an MQTT add-on with authenticated messaging. See [Documents and files](/zh-Hans/guides/stackkits/use-cases/documents-and-files).
+- **Household access per app.** [v0.53.9](https://github.com/kombifyio/stackKits/releases/tag/v0.53.9) adds per-app household access groups on your node, and completes native owner setup for Navidrome and Audiobookshelf. See [Media](/zh-Hans/guides/stackkits/use-cases/media).
+
+### Updates
+
+- **Removing an app keeps its data.** [StackKits v0.53.1](https://github.com/kombifyio/stackKits/releases/tag/v0.53.1) retains application volumes on ordinary removal. Deletion is an explicit choice.
+- **Clearer install and upgrade guidance.** [v0.53.1](https://github.com/kombifyio/stackKits/releases/tag/v0.53.1) resumes interrupted installs and explains unsupported Cloud or Modern upgrades with a supported route before anything changes.
+- **Private DNS with AdGuard Home.** [v0.53.1](https://github.com/kombifyio/stackKits/releases/tag/v0.53.1) activates private-client DNS through AdGuard Home, and [v0.53.8](https://github.com/kombifyio/stackKits/releases/tag/v0.53.8) backs up its configuration. See [Network](/zh-Hans/guides/stackkits/use-cases/network).
+- **Smart Home notifications and MQTT.** [v0.53.1](https://github.com/kombifyio/stackKits/releases/tag/v0.53.1) connects Home Assistant to kombify notify, [v0.53.6](https://github.com/kombifyio/stackKits/releases/tag/v0.53.6) installs ntfy live notifications, and [v0.53.9](https://github.com/kombifyio/stackKits/releases/tag/v0.53.9) configures Home Assistant MQTT from your plan. See [Smart Home](/zh-Hans/guides/stackkits/use-cases/smart-home).
+- **Bring your own AI provider.** [v0.53.1](https://github.com/kombifyio/stackKits/releases/tag/v0.53.1) connects Private AI to an external OpenAI-compatible provider with a key from the kombify Wallet, and pulls selected model packs into Ollama during Apply.
+- **Coolify and Dokploy are back.** [v0.53.9](https://github.com/kombifyio/stackKits/releases/tag/v0.53.9) restores Coolify and Dokploy as optional application platforms. The default core still uses no PaaS. See [Coolify](/zh-Hans/stackkits/apps/coolify).
+
+### Bug fixes
+
+- **Coolify restores recover.** [StackKits v0.53.9](https://github.com/kombifyio/stackKits/releases/tag/v0.53.9) recovers interrupted Coolify application restores, and [v0.53.8](https://github.com/kombifyio/stackKits/releases/tag/v0.53.8) restores signed Coolify application data.
+- **Restores are checked.** [v0.53.6](https://github.com/kombifyio/stackKits/releases/tag/v0.53.6) reads back restored volume content during live restore. See [Back up and restore](/zh-Hans/guides/stackkits/back-up-and-restore).
+- **Friendlier install refusals.** [v0.53.6](https://github.com/kombifyio/stackKits/releases/tag/v0.53.6) fixes the non-root install path and explains a low-memory refusal. [v0.53.9](https://github.com/kombifyio/stackKits/releases/tag/v0.53.9) adds recovery guidance when a stored plan is rejected.
+- **Stable capacity on Windows.** [v0.53.1](https://github.com/kombifyio/stackKits/releases/tag/v0.53.1) keeps Windows host capacity stable across working drives.
+
+</Update>
+
+<Update label="2026-10-09" description="2–9 / 10 / 2026" tags={["Weekly digest"]}>
+
+## StackKits 支持选择游戏平台并就地添加使用场景
+
+StackKits v0.50.4–v0.52.6 带来游戏平台选择、现有安装中的场景添加和更安全的恢复。 [v0.50.4](https://github.com/kombifyio/stackKits/releases/tag/v0.50.4) [v0.52.6](https://github.com/kombifyio/stackKits/releases/tag/v0.52.6)
+
+### 新功能
+
+- 新建游戏安装默认使用 Calagopus，也可选 Pelican 或 Pterodactyl。所有者密钥仅允许读取、电源控制、控制台和文件编辑。stackkit setup game、game list、power 和 allow 在三种平台上保持一致；现有安装保留原平台。 [StackKits v0.52.0](https://github.com/kombifyio/stackKits/releases/tag/v0.52.0) [参考文档](/zh-Hans/guides/stackkits/use-cases/game)
+- 通过 stackkit use-cases add（例如 mail）向运行中的安装添加场景，无需改变已有工作负载、路由或存储。StackKits MCP 也支持此操作。 [v0.51.0](https://github.com/kombifyio/stackKits/releases/tag/v0.51.0) [`stackkit use-cases`](/zh-Hans/stackkits/reference/cli/use-cases)
+- 服务器迁移到新网络后，stackkit network 重新绑定服务，使监听地址随之更新。 [v0.51.7](https://github.com/kombifyio/stackKits/releases/tag/v0.51.7) [`stackkit network`](/zh-Hans/stackkits/reference/cli/network)
+
+### 更新
+
+- Home Assistant 代理连接器通过 stackkit setup 签发、复用和撤销，仅存于节点本地的加密存储中。 [StackKits v0.52.0](https://github.com/kombifyio/stackKits/releases/tag/v0.52.0) [参考文档](/zh-Hans/guides/stackkits/use-cases/smart-home)
+- 支持经身份验证访问历史恢复点。 [v0.52.5](https://github.com/kombifyio/stackKits/releases/tag/v0.52.5) [参考文档](/zh-Hans/guides/stackkits/back-up-and-restore)
+- Paperless、Mosquitto、Stalwart、Zigbee2MQTT、SearXNG、Roundcube、Euro-Office、Navidrome、Audiobookshelf、ESPHome、Emby 等应用可直接通过 OpenTofu 执行，无需 Compose 包装；原生执行需逐个应用选择启用。 [v0.51.0](https://github.com/kombifyio/stackKits/releases/tag/v0.51.0)
+- 应用密钥以文件交付，不放入环境变量。Zigbee2MQTT 的 MQTT 密码和 Pterodactyl 的应用密钥也不再写入数据卷。 [v0.51.0](https://github.com/kombifyio/stackKits/releases/tag/v0.51.0)
+- Advanced 模式为托管的 kombify.me 源站签发 Origin CA 证书。 [v0.51.7](https://github.com/kombifyio/stackKits/releases/tag/v0.51.7) [`stackkit advanced`](/zh-Hans/stackkits/reference/cli/advanced)
+
+### 问题修复
+
+- 通过经过验证的原始版本恢复中断的恢复操作，并在恢复时保留容器文件所有权。 [StackKits v0.52.6](https://github.com/kombifyio/stackKits/releases/tag/v0.52.6) [v0.52.5](https://github.com/kombifyio/stackKits/releases/tag/v0.52.5)
+- 异地备份会在空存储桶中初始化备份仓库。 [v0.51.2](https://github.com/kombifyio/stackKits/releases/tag/v0.51.2)
+- 修复 Paperless-ngx 的 PocketID 登录以及 Mosquitto 消息代理重启。 [v0.50.6](https://github.com/kombifyio/stackKits/releases/tag/v0.50.6)
+
+</Update>
+
+<Update label="2026-10-02" description="9 月 17 日 – 10 月 2 日" tags={["Weekly digest"]}>
+
+## StackKits 带来私有 AI 实验室、游戏服务器和每次安装自带的 MCP
+
+StackKits 发布了从 [v0.33.0](https://github.com/kombifyio/stackKits/releases/tag/v0.33.0) 到 [v0.50.3](https://github.com/kombifyio/stackKits/releases/tag/v0.50.3) 的版本：完整的本地 AI 实验室、Game 用例、每个用例更多可选应用、Advanced 模式，以及每次安装自带的 StackKits MCP。
+
+### 新功能
+
+- **私有 AI 变成本地 AI 实验室。** [StackKits v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) 让你选择 Open WebUI 或 AnythingLLM 作为聊天界面，并可添加网页搜索、文档解析、Hermes 助手、在 gVisor 下运行的 OpenHands 智能体，以及用于图像和视频的 ComfyUI。它可在 CPU 或 NVIDIA、AMD GPU 上运行。可选连接器通过出站连接把你的 homelab 模型连接到 kombify AI，因此无需开放入站端口。参见[个人 AI](/zh-Hans/guides/stackkits/use-cases/personal-ai)。
+- **游戏服务器。** [v0.41.0](https://github.com/kombifyio/stackKits/releases/tag/v0.41.0) 新增带 Pterodactyl Panel 的可选 Game 用例。`stackkit setup game` 会以安全默认配置创建 Minecraft Java 和 Bedrock 服务器，[v0.43.0](https://github.com/kombifyio/stackKits/releases/tag/v0.43.0) 还加入了 Paper、Terraria 和 Valheim。设置过程会通过真实客户端加入来检查就绪状态，并拒绝创建主机内存无法承载的服务器。参见 [Game](/zh-Hans/guides/stackkits/use-cases/game)。
+- **每个用例有更多应用。** [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) 可安装 Nextcloud、Forgejo、Emby 和 Passbolt，作为默认应用的替代选择。附加组件会安装在用例旁边：Paperless-ngx、Euro-Office、Navidrome、Audiobookshelf 和 ESPHome。参见[用例目录](/zh-Hans/stackkits/reference/use-case-catalog)。
+- **按你的方式使用邮件。** [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) 为你已有的邮箱新增 Roundcube 网页邮件，并提供可选的 Stalwart 邮件服务器，可安装在专用节点上。参见[邮件](/zh-Hans/guides/stackkits/use-cases/mail)。
+- **面向托管家庭环境的 Advanced 模式。** [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) 通过 Terramate 和 OpenTofu 运行变更集、按栈检测并协调偏移、协同回滚和恢复演练。Basement 安装现在默认使用 OpenTofu，[v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) 还会加密其状态和计划。参见 [`stackkit advanced`](/zh-Hans/stackkits/reference/cli/advanced)。
+- **每次安装都自带 StackKits MCP。** [v0.46.0](https://github.com/kombifyio/stackKits/releases/tag/v0.46.0) 在每个 Core 上发布受令牌保护的 `/mcp` 端点，让 AI 智能体可以直接连接你的服务器。现在每个公共 CLI 命令要么对应一个 MCP 工具，要么列为明确的例外；可能暴露秘密的命令仍仅限 CLI。参见 [MCP 连接器](/zh-Hans/stackkits/reference/mcp-connector)。
+- **通过 CLI 更新操作系统。** [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) 可以规划并应用操作系统更新，还能安排节点重启。参见 [`stackkit host`](/zh-Hans/stackkits/reference/cli/host)。
+- **预制镜像。** [v0.50.0](https://github.com/kombifyio/stackKits/releases/tag/v0.50.0) 新增 `stackkit image plan`、`prepare` 和 `verify`，可提前缓存工具链和核心镜像。每次安装仍会在首次启动时获得自己的所有者密钥和秘密。参见 [`stackkit image`](/zh-Hans/stackkits/reference/cli/image)。
+
+### 更新
+
+- **更多应用支持登录。** [StackKits v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) 通过 PocketID 为 Paperless-ngx、Media 和 Smart Home 提供登录，并在 Files 中配置家庭账户。[v0.38.0](https://github.com/kombifyio/stackKits/releases/tag/v0.38.0) 新增 `stackkit user owner status` 和 `activate`，用于所有者通行密钥。参见 [PocketID](/zh-Hans/stackkits/apps/pocketid)。
+- **Smart Home 功能扩展。** [v0.47.1](https://github.com/kombifyio/stackKits/releases/tag/v0.47.1) 安装 Mosquitto 和 Zigbee2MQTT，并使用所有者选择的 LAN 监听地址和设备直通；[v0.50.0](https://github.com/kombifyio/stackKits/releases/tag/v0.50.0) 可以采用现有 Home Assistant，而不会替换其状态。参见 [Smart Home](/zh-Hans/guides/stackkits/use-cases/smart-home)。
+- **每个应用都有路由。** [v0.39.0](https://github.com/kombifyio/stackKits/releases/tag/v0.39.0) 为 Media、Smart Home、AI、Dev 和 Documents 提供与 Photos、Files 和 Vault 相同的 HTTPS 路由和数据绑定。
+- **按覆盖组备份。** [v0.37.0](https://github.com/kombifyio/stackKits/releases/tag/v0.37.0) 按 `config`、`content` 或 `media` 选择数据。未设置的覆盖范围会解析为 `content`，因此媒体始终需要明确选择。参见[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。
+- **默认使用 Ubuntu 26.04。** [v0.50.0](https://github.com/kombifyio/stackKits/releases/tag/v0.50.0) 将 Ubuntu 26.04 LTS 作为新安装的目标，并保持与 24.04 兼容。[v0.35.0](https://github.com/kombifyio/stackKits/releases/tag/v0.35.0) 新增 Debian 13 上的备份支持。参见[操作系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)。
+- **以真实运行结果判定兼容性。** [v0.33.0](https://github.com/kombifyio/stackKits/releases/tag/v0.33.0) 和 [v0.34.0](https://github.com/kombifyio/stackKits/releases/tag/v0.34.0) 根据自动化的安装到恢复运行，为每个环境中的 Kit 评定等级；[v0.41.0](https://github.com/kombifyio/stackKits/releases/tag/v0.41.0) 将公共 VPS 上的 Cloud Kit 评为受支持。
+- **记录每个命令。** [v0.33.0](https://github.com/kombifyio/stackKits/releases/tag/v0.33.0) 为 `stackkit <command> --help` 添加示例，并发布完整的 [CLI 参考](/zh-Hans/stackkits/reference/cli/overview)。安装器还会根据发行版校验和验证下载的归档文件。
+- **Basement 默认使用 `lab.home`。** [v0.47.5](https://github.com/kombifyio/stackKits/releases/tag/v0.47.5) 将 `lab.home` 用作默认域名，现有 Basement 域名会通过签名恢复完成迁移。
+
+### 错误修复
+
+- **4 GB 服务器满足 4 GB 最低要求。** [StackKits v0.45.0](https://github.com/kombifyio/stackKits/releases/tag/v0.45.0) 会把已安装内存四舍五入到最接近的 GiB，因此 Cloud Kit 不再拒绝 4 GB VPS。
+- **可以从早期版本升级。** [v0.39.0](https://github.com/kombifyio/stackKits/releases/tag/v0.39.0) 修复 `stackkit upgrade` 和 `stackkit kit list` 因 `unexpected EOF` 而失败的问题。升级前请先安装当前版本的 CLI。
+- **配置更改会应用到运行中的服务。** [v0.45.0](https://github.com/kombifyio/stackKits/releases/tag/v0.45.0) 会在生成的配置文件发生变化时重新创建服务，Game Panel 登录也不再加载 Google reCAPTCHA。
+- **恢复更安全。** [v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) 允许重试的 Apply 恢复中断的运行，并能从任意目录继续中断的 Cloud 安装。[v0.49.0](https://github.com/kombifyio/stackKits/releases/tag/v0.49.0) 会在更新运行期间拒绝更新规划，并要求明确批准带 JSON 输出的 `stackkit remove`。
+- **Cloud Kit 修复。** [v0.38.0](https://github.com/kombifyio/stackKits/releases/tag/v0.38.0) 让备份和所有者登录可在 Cloud Kit 上工作，并明确指出 Let's Encrypt 速率限制及其重试时间。[v0.48.3](https://github.com/kombifyio/stackKits/releases/tag/v0.48.3) 会在初始化时拒绝仅限本地使用的 Cloud Kit 域名。
+
+</Update>
+
+<Update label="2026-09-16" description="9 月 5 日 – 9 月 16 日" tags={["Weekly digest"]}>
+
+## 能自动选择 Kit 的 StackKits 安装器
+
+StackKits 发布了 [v0.25.1](https://github.com/kombifyio/stackKits/releases/tag/v0.25.1) 至 [v0.32.1](https://github.com/kombifyio/stackKits/releases/tag/v0.32.1) ：能检测主机并推荐 Kit 的安装器、Homelab 路由前的登录门禁，以及通过 PocketID 管理的家庭用户。
+
+### 新功能
+
+- **StackKits 安装器自动选择 Kit。** [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) 让 `install.stackkit.cc` 检测主机，在 Basement 和 Cloud 之间选择，每次安装前询问所有者和用例，并在 CLI 就绪后提供安装 StackKit 的选项。错误的安装器 URL 现在会自行恢复，而不是直接失败。参见 [CLI 演练](/zh-Hans/guides/stackkits/cli-walkthrough)。
+- **无需手动创建账户的家庭用户。** [v0.29.0](https://github.com/kombifyio/stackKits/releases/tag/v0.29.0) 通过 PocketID 组来配置家庭用户，[v0.30.0](https://github.com/kombifyio/stackKits/releases/tag/v0.30.0) 新增了 `stackkit user add`、`list` 和 `remove`。参见 [PocketID](/zh-Hans/stackkits/apps/pocketid)。
+
+### 更新
+
+- **Homelab 路由前的登录门禁。** [v0.31.0](https://github.com/kombifyio/stackKits/releases/tag/v0.31.0) 把 TinyAuth 放在照片、文件、密码库、媒体、智能家居、AI、开发者、文档和 Coolify 路由之前，验证会把登录重定向视为健康，而不是当作失败。参见 [TinyAuth](/zh-Hans/stackkits/apps/tinyauth)。
+- **Cloud Kit 不需要你自己的域名。** [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) 在没有提供自定义域名时，默认使用 kombify.me 名称，并在禁用 root 登录之前生成执行通道的 SSH 密钥。参见 [kombify.me](/zh-Hans/kombify-me/overview)。
+- **Apply 会等待证书。** [v0.31.5](https://github.com/kombifyio/stackKits/releases/tag/v0.31.5) 在验证公共 TLS 和内部 PKI 叶证书之前等待签发完成，[v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) 在 generate 和 apply 运行期间显示进度，而不是静默停顿。
+
+### 问题修复
+
+- **移除操作会清理原生栈。** [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) 让 `stackkit remove` 卸载原生 Compose 栈并找到安装器工作区，[v0.31.1](https://github.com/kombifyio/stackKits/releases/tag/v0.31.1) 把应用观察推迟到恢复激活时，因此恢复不再检查尚未运行的应用。
+
+</Update>
+
+<Update label="2026-09-04" description="8 月 29 日 – 9 月 4 日当周" tags={["Weekly digest"]}>
+
+## StackKits 智能家居与媒体
+
+StackKits 发布了 [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) 至 [v0.24.27](https://github.com/kombifyio/stackKits/releases/tag/v0.24.27) ：智能家居和媒体用例、位于 stackkit.cc/planner 的浏览器端规划器，以及模块本地的计算配置。
+
+### 新功能
+
+- **StackKits 中的智能家居用例。** [StackKits v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) 在 Basement、Cloud 和 Modern Kit 上新增 Home Assistant 工作负载。Generate 会写入反向代理基线和原生 MCP 客户端片段，设置过程会创建 Homelab 所有者账户。参见[用例目录](/zh-Hans/stackkits/reference/use-case-catalog)。
+- **使用 Jellyfin 的媒体用例。** [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) 在 `standard` 和 `high` 计算档位上新增 Jellyfin 工作负载。媒体库由所有者自行保管，并且有意不作为 StackKits 的备份来源。参见 [Jellyfin](/zh-Hans/stackkits/apps/jellyfin)。
+- **在浏览器中规划 Homelab。** [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) 在 stackkit.cc/planner 推出 StackKits 规划器：基于公共目录的只读、以 schema 优先的工具，会把 `init → validate → resolve → generate → plan` 序列交给 CLI。Apply 仍然是你在自己机器上执行的显式步骤。参见 [MCP 连接器](/zh-Hans/stackkits/reference/mcp-connector)。
+
+### 更新
+
+- **StackKits 中模块本地的计算配置。** [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) 至 [v0.24.27](https://github.com/kombifyio/stackKits/releases/tag/v0.24.27) 把计算、存储和加速器配置移到每个模块上，并为每个工作负载提供替代方案。所需的主机事实必须在 Apply 之前在清单中被观察到，而不是从声明的硬件推断。参见[选择 Kit](/zh-Hans/guides/stackkits/choosing-a-kit)。
+- **低档位获得真正的精简版本。** [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) 让 Basement 的 `low` generate 输出独立的 Compose 精简变体：不含 Coolify 的核心，以及不含机器学习的 Immich。在有精简替代之前，`low` 上不包含媒体，并在 init 时以拒绝方式失败，而不是部署一个规格不足的东西。
+
+### 问题修复
+
+- **StackKits 发布归档自带文档。** [v0.24.2](https://github.com/kombifyio/stackKits/releases/tag/v0.24.2) 在发布归档中包含公开的备份和应用就绪文档，并通过兼容适配器保持引导式 Basement 和 Cloud 方案显式可见。
+
+</Update>
+
+<Update label="2026-08-28" description="8 月 22 日 – 8 月 28 日当周" tags={["Weekly digest"]}>
+
+## StackKits 公共地址与计算档位
+
+StackKits 发布了 [v0.21.10](https://github.com/kombifyio/stackKits/releases/tag/v0.21.10) 至 [v0.22.0](https://github.com/kombifyio/stackKits/releases/tag/v0.22.0) ：Cloud Kit 上带自动 TLS 的托管公共服务地址，以及让 Kit 与你实际拥有的硬件相匹配的计算档位。
+
+### 新功能
+
+- **Cloud Kit 上带自动 TLS 的托管公共地址。** [StackKits v0.21.20](https://github.com/kombifyio/stackKits/releases/tag/v0.21.20) 至 [v0.21.24](https://github.com/kombifyio/stackKits/releases/tag/v0.21.24) 为 Cloud Kit 服务提供托管的 kombify.me 公共地址：不含密钥的地址计划、根据你已验证的子域名前缀渲染的路由，以及通过 ACME HTTP-01 签发的证书，使 Cloudflare 网关可以验证源站 TLS，同时服务流量保持 HTTPS。参见 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。
+- **计算档位让 Kit 匹配你的硬件。** [StackKits v0.22.0](https://github.com/kombifyio/stackKits/releases/tag/v0.22.0) 为每个 Kit 新增 `low`、`standard` 和 `high` 计算档位。Apply 在解析之前会证明本地 CPU、内存和磁盘，并在给出明确原因后阻止部署，而不是部署到规格不足的主机上。参见[选择 Kit](/zh-Hans/guides/stackkits/choosing-a-kit)和[审查、计划与应用](/zh-Hans/guides/stackkits/review-plan-and-apply)。
+- **为现有 Homelab 增加密钥保管。** [StackKits v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) 新增显式且幂等的 `stackkit secrets materialize` 命令，使独立 Homelab 在选择新工作负载后可以建立与所有者绑定的保管，而无需重新运行其初始 StackSpec。参见[第二天运维](/zh-Hans/stackkits/reference/day-2-operations)。
+
+### 更新
+
+- **所有者批准的移除只针对一个节点。** [StackKits v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) 至 [v0.21.13](https://github.com/kombifyio/stackKits/releases/tag/v0.21.13) 让所有者批准的工作负载移除可以从已验证的多节点 Apply 结果中选择一个确切的节点放置，缺失证据仍与同一次 Apply 相关联。
+- **更丰富的访问清单。** [v0.21.16](https://github.com/kombifyio/stackKits/releases/tag/v0.21.16) 把原生访问清单扩展到 v3，加入应用分组、显示名称、生命周期影响，以及运行中服务不含密钥的内部地址。
+
+### 问题修复
+
+- **Cloud 加固不会再把你锁在外面。** [StackKits v0.21.10](https://github.com/kombifyio/stackKits/releases/tag/v0.21.10) 在 Cloud 主机安全禁用 root 登录之前，保留一个使用密钥认证的非 root 账户；[v0.21.17](https://github.com/kombifyio/stackKits/releases/tag/v0.21.17) 让加固后的 sshd 策略优先于服务商和 cloud-init 的默认值，因此 root 密钥登录保持禁用。
+- **在 80 和 443 端口上重复运行 Apply 是安全的。** [v0.21.18](https://github.com/kombifyio/stackKits/releases/tag/v0.21.18) 仅当 Docker 证明 80 和 443 端口属于当前工作区的 Cloud 核心时，幂等的 Apply 才会复用它们。外来或过期的监听器仍会阻止。
+- **没有 placement 块的工作负载也能正常工作。** [v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) 在 StackSpec 作者选择了没有 `placement` 块的工作负载时，应用受管控的放置默认值。参见[配置 stack spec](/zh-Hans/guides/stackkits/configure-stack-spec)。
+- **失败的 Apply 会告诉你下一步怎么做。** [v0.22.0](https://github.com/kombifyio/stackKits/releases/tag/v0.22.0) 让失败的 Product Apply 以重试、`status` 和 `logs` 指引以及 Run-ID 结束，安装器会恢复现有工作区，而不是中途失败退出。
+
+</Update>
+
+<Update label="2026-08-21" description="8 月 15 日 – 8 月 21 日当周" tags={["Weekly digest"]}>
+
+## StackKits Cloud 核心
+
+StackKits [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) 补齐了十个一等用例，并落地了与服务商无关的 Cloud 核心运行时，随后直到 [v0.21.9](https://github.com/kombifyio/stackKits/releases/tag/v0.21.9) 又有一系列 Cloud Apply 和 Verify 修复。
+
+### 新功能
+
+- **StackKits 中的十个一等用例。** [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) 补全了全部十个用例的 CUE 权威定义，包括 Vault、Media，以及草案阶段的 AI/Dev/Remote，外加 1.0 之后的草案 Mail 和 Game。现有的 Basement 和 Cloud Kit 角色都已绑定到它们。参见[选择 Kit](/zh-Hans/guides/stackkits/choosing-a-kit)。
+- **与服务商无关的 Cloud 核心运行时。** [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) 实现了与服务商无关的 Cloud 核心运行时，包含受保护的本地 Product Apply、实时 Verify 观察，以及针对 `base`、`auth`、`id` 和 `coolify` 的确切 access-manifest v2 投影。服务商和凭据保管仍在 Techstack 中。参见 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。
+
+### 更新
+
+- **`foundation` 取代 `base` schema 包。** [StackKits v0.18.22](https://github.com/kombifyio/stackKits/releases/tag/v0.18.22) 把共享的 CUE schema 包从 `base` 重命名为 `foundation`，并要求已发布归档中包含 `foundation/stackkit.cue`。产品 Kit 不变，仍然扩展 `#FoundationStackKit`。
+- **退役 `base-kit` 安装器参数。** [v0.18.22](https://github.com/kombifyio/stackKits/releases/tag/v0.18.22) 拒绝已退役的 `base-kit` slug，而不是悄悄把它改写为 `basement-kit`。请使用 `basement-kit`。参见[选择 Kit](/zh-Hans/guides/stackkits/choosing-a-kit)。
+
+### 问题修复
+
+- **Cloud Apply 在标准 Ubuntu 主机上达到其声明的安全态势。** [StackKits v0.21.9](https://github.com/kombifyio/stackKits/releases/tag/v0.21.9) 会安装支撑 Cloud 主机安全单元及其规则集的软件包，而不是因缺少 `nft` 和 `fail2ban` 而失败，并且只重新加载正在运行的 `sshd`，同时在套接字激活的主机上确保权限分离目录存在。
+- **Cloud 主机安全失败现在会指出出错的单元。** [v0.21.8](https://github.com/kombifyio/stackKits/releases/tag/v0.21.8) 在 Cloud 主机安全协调失败时保留有界的命令和进程输出，因此线上目标会报告确切出错的单元。
+- **精确的 Cloud 核心 Verify 能处理套接字代理和带健康检查的服务。** [v0.21.6](https://github.com/kombifyio/stackKits/releases/tag/v0.21.6) 接受有意不带健康检查的套接字代理的 `not-configured` 观察结果，[v0.21.7](https://github.com/kombifyio/stackKits/releases/tag/v0.21.7) 在对照 Cloud 核心模块探针验证之后，保留运行时拥有的公共路由健康结果。
+- **Cloud Kit Apply 不再因调度器元数据而拒绝失败。** [v0.21.4](https://github.com/kombifyio/stackKits/releases/tag/v0.21.4) 在 Cloud Kit 所有者和主机准入上接受调度器的计划类元数据，使 Product Apply 不再以 `health:stackkits-host-admission=executor-failed` 失败。[v0.21.5](https://github.com/kombifyio/stackKits/releases/tag/v0.21.5) 通过确切的本地路由器执行全本地的 Cloud Kit 所有者。参见[审查、计划与应用](/zh-Hans/guides/stackkits/review-plan-and-apply)。
+- **Verify 和 Status 拒绝过期的 Cloud 服务投影。** [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) 在 Verify 和 Status 回读期间拒绝过期、外来或被篡改的 Cloud 服务投影。
+
+</Update>
+
+<Update label="2026-08-14" description="8 月 10 日 – 8 月 14 日当周" tags={["Weekly digest"]}>
+
+## StackKits v0.15.0 – v0.18.1：引导式安装器、可按服务控制的发布，以及与服务商无关的 Cloud 核心
+
+本周 StackKits 从 v0.14.28 升级到 [v0.18.1](https://github.com/kombifyio/stackKits/releases/tag/v0.18.1)。全新的引导式安装器以三种模式把一台未经准备的机器带到运行中的 Homelab。Cloud Kit 新增了与服务商无关的 Cloud 核心、公共 TLS 路由所有权，以及可选的异地备份。`apply`、`status`、`verify` 和 `logs` 在每种结果下都完全机器可读，新的 `stackkit service` 命令可以在完整 apply 之间控制单个服务。
+
+### 新功能
+
+- **通往运行中 Homelab 的引导式安装器。** [StackKits v0.17.0](https://github.com/kombifyio/stackKits/releases/tag/v0.17.0) 提供完整的引导式安装，含三种模式，以及接受 `--use-case`、`--platform` 和 `--enable` 的 `v2 init` 流程。安装器直接引导 Docker 和存储根目录，在 `sudo` 下安全运行，并打印真实的原生凭据。参见[快速开始](/zh-Hans/stackkits/quickstart)和[选择 Kit](/zh-Hans/guides/stackkits/choosing-a-kit)。
+- **带公共 TLS 路由的、与服务商无关的 Cloud 核心。** [StackKits v0.15.0](https://github.com/kombifyio/stackKits/releases/tag/v0.15.0) 为 `base`、`auth`、`id` 和 `coolify` 解析必需的 `cloud-core` 工作负载，渲染一个固定摘要的 Compose 项目，并通过封闭的本地运行时所有者在外部提供的主机上执行。[v0.18.0](https://github.com/kombifyio/stackKits/releases/tag/v0.18.0) 让 Cloud Kit 端到端地拥有并落实公共 TLS 路由。Cloud 运行时保管只存放限定到服务的 PocketID、TinyAuth 和 Coolify 材料。服务商凭据、服务器凭据、租约和清单都保留在 StackKits 之外。参见 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。
+- **用于发布后控制的 `stackkit service` 命令。** [v0.16.0](https://github.com/kombifyio/stackKits/releases/tag/v0.16.0) 为 StackKits 管理的 Cloud 核心服务新增 `stackkit service start|stop|restart <service-key>` 和 `stackkit service logs <service-key>`。变更操作需要 `--owner-approve`，`--json` 会返回带版本的动作结果。可用它在完整 apply 之间重启或检查单个服务。参见[第二天运维](/zh-Hans/stackkits/reference/day-2-operations)。
+
+```bash
+stackkit service restart coolify --owner-approve --json
+stackkit service logs auth --tail 100
+```
+
+- **apply、status、verify 和 logs 的完整机器可读输出。** [v0.15.8](https://github.com/kombifyio/stackKits/releases/tag/v0.15.8) 让 `stackkit apply --json`、`stackkit status --json` 和 `stackkit verify --json` 在成功、拒绝和失败时都可解析。`stackkit logs` 返回经过脱敏、有界的分页，带有与摘要绑定的游标和明确的截断元数据。MCP 连接器暴露同样的结构化证据。参见 [MCP 连接器](/zh-Hans/stackkits/reference/mcp-connector)和[运维 StackKit](/zh-Hans/stackkits/reference/day-2-operations)。
+- **面向产品自有应用交付的 Architecture v2 运行时监听器。** [v0.15.3](https://github.com/kombifyio/stackKits/releases/tag/v0.15.3) 在 Architecture v2 目录投影上暴露运行时监听器，使应用可以驱动自己的交付，而无需把生命周期权限移出 StackKits。参见[应用交付](/zh-Hans/guides/stackkits/application-delivery)。
+
+### 更新
+
+- **Cloud Kit 异地备份现在需主动开启。** [v0.16.1](https://github.com/kombifyio/stackKits/releases/tag/v0.16.1) 让异地备份成为 Cloud Kit 上的显式选择。参见[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。
+- **Cloud Kit 上的 Traefik 管理 API 仅限 localhost。** [v0.18.1](https://github.com/kombifyio/stackKits/releases/tag/v0.18.1) 在产品契约和公开发布契约中都让 Traefik 管理 API 保持绑定到 localhost。
+
+### 问题修复
+
+- **Apply 把变更绑定到预期的计划哈希。** [StackKits v0.17.0](https://github.com/kombifyio/stackKits/releases/tag/v0.17.0) 防止 apply 针对在其底层已发生变化的计划运行。参见[审查、计划与应用](/zh-Hans/guides/stackkits/review-plan-and-apply)。
+- **经过认证的公共运行时镜像拉取。** [v0.16.8](https://github.com/kombifyio/stackKits/releases/tag/v0.16.8) 对全新安装所执行的公共运行时镜像拉取进行认证。
+
+</Update>

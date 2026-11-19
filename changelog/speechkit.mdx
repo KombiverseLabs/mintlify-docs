@@ -1,0 +1,253 @@
+---
+title: "SpeechKit changelog"
+description: "SpeechKit releases and a weekly digest, newest first"
+icon: "newspaper"
+---
+
+SpeechKit releases and weekly digests, newest first. Filter by Stable, Early Access or Weekly digest on the right, or subscribe to this page's RSS feed at `/changelog/speechkit/rss.xml`. Every product keeps its own changelog; the [changelog overview](/changelog/overview) lists them all. Installable assets are on [GitHub](https://github.com/kombifyio/SpeechKit/releases).
+
+<Update label="2026-10-30" description="Oct 23 – Oct 30" tags={["Weekly digest"]}>
+
+## SpeechKit adds fast offline models on desktop and Android
+
+SpeechKit rolled from [v0.77.14](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.14) to [v0.77.19](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.19) : Parakeet, Bark 3.0, and Phonon-2.5 local models, offline dictation on Android, and a new Local Models page.
+
+### New features
+
+- **Parakeet for local transcription.** [SpeechKit v0.77.15](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.15) adds Parakeet Ultra and Parakeet TDT 0.6B v3 next to Whisper. They transcribe 25 European languages, including mixed German and English, many times faster than real time on the CPU. See [Work offline](/speechkit/work-offline).
+- **Bark 3.0 and Phonon-2.5 models.** [v0.77.17](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.17) adds English-only Bark 3.0 and Bark 3.0 Clean, which leaves out fillers and false starts. Phonon-2.5 covers the same 25 languages as Parakeet in less than half the memory, and shows your text live while you dictate.
+- **Offline dictation on Android.** [v0.77.15](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.15) and [v0.77.17](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.17) dictate fully on the phone without a server. Phonon-2.5 is a 163 MB download and runs on phones with 3 GB of memory. Choose it under **Settings > On-device transcription**.
+
+### Updates
+
+- **Local Models page and a simpler Model tab.** [SpeechKit v0.77.15](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.15) lists your local models in **Settings > Local Models**, with download progress. The Model tab of each mode is now one short list, and a choice that is not ready says why.
+- **Offline right after install on Windows.** [v0.77.18](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.18) includes Phonon-2.5 in the Windows installer, so Dictation works offline immediately. The Copilot runtime now downloads only when you turn on the Copilot integration.
+- **Faster Phonon on x86.** [v0.77.17](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.17) transcribes about twice as fast on AVX2 processors at the same accuracy.
+- **Parakeet in the server image.** [v0.77.15](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.15) adds Parakeet to the Linux server image and an optional Parakeet profile to the local-only Docker stack.
+
+### Bug fixes
+
+- **Android privacy.** [SpeechKit v0.77.15](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.15) removes the speech runtime's usage reporting to Microsoft, so on-device models send no data off the phone. Phones that cannot run Parakeet are no longer offered the download.
+
+</Update>
+
+<Update label="2026-10-16" description="Oct 9 – Oct 16" tags={["Weekly digest"]}>
+
+## SpeechKit adds Grok Voice
+
+SpeechKit rolled from [v0.76.6](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.6) to [v0.77.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.0) : Grok Voice, meeting exports to any note destination, and outbound Network Scope.
+
+### New features
+
+- **Grok Voice for the Voice Agent.** [SpeechKit v0.77.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.0) adds xAI Grok Voice 3.0 next to GPT-Live and Gemini Live. Registered agents can now speak natively through any of the three.
+- **Export meetings anywhere.** [v0.76.6](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.6) sends a finished meeting to a file, a note app, or your own target, as Markdown or XHTML. See [Meeting Mode](/speechkit/meeting).
+
+### Updates
+
+- **Outbound Network Scope.** [SpeechKit v0.76.6](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.6) applies Network Scope to outgoing traffic too: device-only, local network, or open. Model downloads and update checks run only when you allow them. See [Modes and data paths](/speechkit/modes).
+- **Provider allow lists and ephemeral retention.** [v0.76.6](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.6) lets hosts allow only named providers. Ephemeral retention keeps your typed notes and sweeps recordings.
+- **Complete releases.** [v0.77.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.77.0) publishes the self-hosted server image, Android libraries and app, and desktop bundle together.
+
+### Bug fixes
+
+- **Complete Deepgram dictation.** [SpeechKit v0.76.6](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.6) can transcribe the finished recording, so words at chunk boundaries and at the end are no longer lost.
+- **Hold-to-talk ends on release.** [v0.76.9](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.9) always ends a hold-to-talk conversation when you release the shortcut.
+- **Meeting and privacy fixes.** [v0.76.6](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.6) withdraws an unanswered meeting offer, lets you repeat onboarding safely, and erases wake-word audio on the server by default.
+
+</Update>
+
+<Update label="2026-10-09" description="Oct 2 – Oct 9" tags={["Weekly digest"]}>
+
+## SpeechKit Voice talks to your own model
+
+SpeechKit rolled from [v0.74.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.74.0) to [v0.76.4](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.4) : Voice with your own model, AssemblyAI and Deepgram conversations, and more reliable dictation.
+
+### New features
+
+- **Voice with your own model.** [SpeechKit v0.76.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.0) lets voice conversations use your own AI endpoint and model, and keeps the conversation you started in chat, including from the floating panel. See [Modes and data paths](/speechkit/modes).
+- **AssemblyAI and Deepgram conversations.** [v0.75.5](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.5) runs registered-agent Voice sessions on AssemblyAI or Deepgram. Your cloud-processing consent is checked throughout, and AssemblyAI asks separately for recording consent. [v0.76.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.0) adds balanced, lower-latency, and higher-accuracy AssemblyAI profiles.
+- **New live models.** [v0.74.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.74.0) refreshes the model catalog with GPT-Live on Microsoft Foundry and Gemini Transcribe Live dictation, and removes retired models.
+
+### Updates
+
+- **One dictation, one entry.** [SpeechKit v0.75.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.1) saves a live dictation as a single Library entry. Hold-to-talk inserts the text once when you release the hotkey.
+- **Keep the complete dictation.** [v0.76.4](https://github.com/kombifyio/SpeechKit/releases/tag/v0.76.4) starts recording while the provider connects and recovers missing stream audio from the recording. Your dictionary words apply in every dictation mode.
+- **Tabbed settings and a compact voice UI.** [v0.74.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.74.0) organizes settings into tabs. The web voice UI adds a recording indicator, a live transcript, and a microphone check before a session starts.
+- **Longer Voice sessions.** [v0.75.3](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.3) prefers managed speech providers and allows sessions of up to four hours.
+- **SDK migrations.** [v0.74.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.74.0) and [v0.75.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.0) include breaking changes for Go SDK and Android keyboard embedders. Read the release notes before you upgrade. See [Framework](/speechkit/framework).
+
+### Bug fixes
+
+- **Long Deepgram dictations stay whole.** [SpeechKit v0.75.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.0) keeps transcribing past the first pause and transcribes the rest from the local recording if the connection drops.
+- **Stop means stop.** [v0.75.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.75.0) cuts queued speech on cancel, and Android and web clients wait for the server before sending microphone audio.
+- **Cleaner voice output.** [v0.74.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.74.1) keeps spaces between streamed words, and [v0.74.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.74.0) removes the white frame behind transparent overlay windows.
+
+</Update>
+
+<Update label="2026-10-02" description="Sep 17 – Oct 2" tags={["Weekly digest"]}>
+
+## SpeechKit meets Microsoft 365
+
+SpeechKit rolled from [v0.71.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.71.0) to [v0.73.4](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.4) : Microsoft 365 meeting imports, bring-your-own-key Google voice, OpenAI-compatible audio endpoints, and an app in six languages.
+
+### New features
+
+- **Meetings meet Microsoft 365.** [SpeechKit v0.72.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.0) imports the Teams transcript or the Microsoft 365 Copilot recap after a Teams meeting, and lets you choose Microsoft Foundry for write-ups with transcript consent. A multi-tenant sign-in lets you switch companies without a new install. See [Meeting](/speechkit/meeting).
+- **Bring your own Google voice.** [v0.73.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.0) restores Google Cloud speech-to-text, text-to-speech, and Gemini Live as optional providers on your own key. See [Modes and data paths](/speechkit/modes).
+- **OpenAI-compatible audio on the SpeechKit server.** [v0.73.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.1) serves `POST /v1/audio/transcriptions` and `POST /v1/audio/speech`, so clients such as Open WebUI can use it directly. A local-only profile runs without cloud providers.
+- **SpeechKit in six languages.** [v0.73.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.1) and [v0.73.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.73.2) localize the Android app, the website, the desktop app, and the tray in English, German, Spanish, Simplified Chinese, Hindi, and Arabic.
+
+### Updates
+
+- **Meeting notes as timestamped bullets.** [SpeechKit v0.71.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.71.0) writes notes as timestamped bullets and adds a quick note from the meeting pill.
+
+### Bug fixes
+
+- **Updates relaunch on the first try.** [SpeechKit v0.72.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.1) makes the first Install and restart relaunch the app.
+- **Cleaner German dictation.** [v0.72.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.72.0) stops leftover commas after German filler words, says why a meeting screenshot was not saved, and lets write-ups fall through every model with its own budget.
+
+</Update>
+
+<Update label="2026-09-16" description="Sep 5 – Sep 16" tags={["Weekly digest"]}>
+
+## SpeechKit on macOS, Google AI retired
+
+SpeechKit rolled from [v0.68.24](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.24) to [v0.70.3](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.3) : a first macOS build, Microsoft Foundry as a single connection for voice and models, and the removal of every Google voice adapter.
+
+### New features
+
+- **SpeechKit runs on a Mac.** [v0.70.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.0) publishes `SpeechKit-macOS-arm64.zip` beside the Windows assets: an ad-hoc signed Dictation beta for macOS 14+ on Apple Silicon, with microphone capture, text injection, a menu-bar item, the bundled local model, and the cloud speech-to-text providers. One known hole ships with it: the global-hotkey listener installs and receives no key events, so hold-to-talk does not work yet and the menu-bar item is the way in. See [Install on macOS](/speechkit/install-macos).
+- **Microsoft Foundry, connected three ways.** [v0.69.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.69.0) adds a Connect dialog with a project endpoint and API key, the Azure CLI account already on your machine, or your organisation's own Microsoft app registration. One connection serves Dictation, speech output, Assist, and the Voice Agent; a Test lists the deployments and voices the project really has.
+- **A Library with one tab per mode.** [v0.70.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.0) gives Transcriptions, Quick Notes, and Voice Sessions their own tabs, loads further back through history a page at a time, expands any row in place, and lets you pin a transcription the way a quick note could already be pinned.
+
+### Updates
+
+- **Google voice adapters are gone.** [v0.70.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.2) removes Google speech-to-text, Google text-to-speech, and Gemini Live. A configuration that still names one fails closed instead of silently resolving to something else, and an empty device configuration defaults to AssemblyAI. See [Modes and data paths](/speechkit/modes).
+- **The wake word is `hey_kubi`.** [v0.70.2](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.2) makes it the default and keeps `hey_quby` as an alias, so an existing setup keeps working.
+- **These docs follow the current release.** SpeechKit download links now resolve to the newest published release rather than one frozen version, the macOS client and Meeting have their own pages, and the release line each page states is reconciled automatically against the public release.
+
+### Bug fixes
+
+- **A macOS first run starts.** [v0.70.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.0) fixes a fresh install writing a Windows audio backend into its configuration, refusing to open a microphone with it, and exiting with no message, no log, and no crash report.
+- **The Voice Agent no longer boots onto a retired provider.** [v0.70.3](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.3) fixes a server whose baked configuration still selected Gemini Live and therefore failed to start after the Google retirement.
+- **Dictation opens the microphone first.** [v0.70.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.70.1) opens the device before the live-stream handshake instead of after it, and installing an update relaunches the app exactly once.
+
+</Update>
+
+<Update label="2026-09-04" description="Week of Aug 29 – Sep 4" tags={["Weekly digest"]}>
+
+## SpeechKit Meeting Mode and network privacy scopes
+
+SpeechKit rolled from [v0.65.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.65.0) to [v0.68.24](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.24) : a full Meeting Mode with reviews in six languages, a privacy setting that draws a hard network boundary, and in-meeting screenshots that never leave the device.
+
+### New features
+
+- **Meeting Mode is a first-class mode.** [SpeechKit v0.67.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.67.0) puts Meeting Mode beside Dictation, Assist, and Voice Agent, with its own settings for capture, review generation, languages, and retention. A compact transparent overlay shows capture health and controls during the call, rolling summaries run without blocking capture, and finishing a meeting produces a durable Meeting Review, a five-sentence Executive Brief, and action items in English, German, Spanish, Chinese, Hindi, and Arabic. GitHub Copilot is an optional review-generation provider behind a separate, revocable transcript-processing grant; the local path needs no cloud credentials. See [SpeechKit modes](/speechkit/modes).
+- **Pick a network boundary and SpeechKit enforces it.** [v0.67.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.67.0) adds a Network Scope setting: all networks, local network only, or this device only. The backend enforces the boundary for speech providers, model downloads, updates, telemetry, server connections, and integrations. Switching to a stricter scope suspends incompatible settings instead of deleting them, and Settings explains what is disabled and why. See [SpeechKit overview](/speechkit/overview).
+- **Screenshots inside a meeting, kept on your machine.** [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) captures a chosen window or the monitor under the cursor with a configurable `Ctrl+Alt+S` shortcut. Snapshots appear as markers in the transcript timeline, are cited in generated Meeting Reviews, and the compact meeting pill briefly unfolds a preview so you know the right window was captured. No image ever leaves the device.
+- **Find and export any meeting.** The [v0.68 patch releases](https://github.com/kombifyio/SpeechKit/releases) group the meeting list by when a meeting happened, add search across titles, transcripts, notes, and write-ups, render notes as formatted Markdown, and add Copy Markdown and Save .md for the complete write-up.
+
+### Updates
+
+- **Meetings finish on their own.** [SpeechKit v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) stops a recording shortly after the calling app releases the microphone, and a notification says when the Meeting Review is ready or why it failed. Hand-started recordings are never auto-stopped.
+- **Integrations show their maturity.** [SpeechKit v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) marks each integration in Settings as Ready, Partial, Planned, or Unavailable, with per-mode tags. What this build cannot run is greyed out instead of failing when enabled.
+- **A leaner SpeechKit SDK.** [v0.65.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.65.0) removes the provider names deprecated in v0.64.0, so a Deepgram-only app compiles 49 external packages instead of 286. [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) splits the root package into contracts and implementations with a mechanical import rewrite. [v0.66.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.66.0) publishes all five Android modules as Apache-2.0 artifacts on JitPack, resolvable anonymously. See [SpeechKit framework](/speechkit/framework).
+- **The overlay settings are a designer.** The [v0.68 patch releases](https://github.com/kombifyio/SpeechKit/releases) redraw General settings as compact cards and preview the overlay live: style, position, and the quick buttons on the hover strip update in the preview at once.
+
+### Bug fixes
+
+- **Nothing fails quietly anymore.** [SpeechKit v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) reports dropped Voice Agent speech, overlay placement failures, silent screenshot errors, and stalled meeting summaries in the activity log with a reason instead of leaving you guessing.
+- **Meeting audio stays out of dictation.** [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) runs meeting transcription on its own pipeline. Call audio no longer flashes the dictation overlay, fills the dictation history, or becomes the "last transcription" that the copy and insert shortcuts reuse.
+- **Long meetings produce write-ups.** The [v0.68 patch releases](https://github.com/kombifyio/SpeechKit/releases) size summary batches for the bundled local model, split overlong transcript pieces at sentence boundaries, resume write-ups interrupted by a restart, and retry a temporarily unreachable local model instead of failing the review for good.
+- **Local dictation starts on non-ASCII install paths.** [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) fixes the bundled whisper-server failing on a fresh install when the model path contains an umlaut. If local speech-to-text still cannot start, the activity log names the cause and says whether dictation is offline or falling back to a named cloud provider.
+- **Multi-language reviews run one after another.** [v0.68.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.68.0) stops parallel review runs from starving the local model and missing their deadlines together, and progress follows the language actually running instead of a queued job stuck at 0%.
+- **The dashboard opens at a size that fits.** The [v0.68 patch releases](https://github.com/kombifyio/SpeechKit/releases) stop the window from opening taller than a scaled laptop screen, keep the minimum size within a 13-inch display, and preserve a size you choose.
+- **The Connect button tells the truth.** [v0.67.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.67.0) fixes the hosted connection claiming to be ready without ever obtaining a credential, and the Android app now says when a Companion pairing fails because the two installed apps do not match, instead of showing a general failure.
+
+</Update>
+
+<Update label="2026-08-28" description="Week of Aug 22 – Aug 28" tags={["Weekly digest"]}>
+
+## SpeechKit meeting notes and LAN discovery
+
+SpeechKit rolled from [v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) to [v0.64.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.64.0) : meeting notes that start from what you wrote down, LAN discovery so devices find your homelab server without typing an address, and tap-to-interrupt on every client.
+
+### New features
+
+- **Meeting notes that start from your own notes.** [SpeechKit v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) adds a meeting notepad: your notes lead, the transcript fills in the rest, and the write-up cites the words it came from. Microphone and system audio stay on separate tracks, so speaker labels come for free and the audio is never kept. SpeechKit notices when a calling app takes the microphone and offers to take notes; nothing is recorded until you accept. The write-up lands in the dashboard as soon as the meeting ends. See [SpeechKit modes](/speechkit/modes).
+- **Find your SpeechKit server on the home network.** [v0.60.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.60.0) lets a homelab server announce itself over mDNS/DNS-SD, so the desktop app, the Android app, and `speechkitctl discover` find it without typing an address. Discovery is opt-in and off by default, so a hosted instance stays silent, and the announcement only says where to knock: devices still sign in after they connect. See [SpeechKit overview](/speechkit/overview).
+- **Interrupt the assistant from any client.** [SpeechKit v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) brings tap-to-stop for a spoken answer to the web and Android clients, not only the desktop app. Transcripts on web and Android carry speaker labels when speaker recognition is on, and each client shows which speech backend is serving the session. See [SpeechKit modes](/speechkit/modes).
+- **Voice-note transcription and summaries on Android.** [v0.60.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.60.0) transcribes voice notes and summarizes WhatsApp and Telegram voice messages from the SpeechKit app.
+
+### Updates
+
+- **Words and Replacements are manageable.** [SpeechKit v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) makes custom Words and Replacements searchable, paged, and deletable in Settings. Several spoken forms can rewrite to one term, and aliases apply in Dictation, Assist, and Voice Agent.
+- **Pick your dictation engine in one control.** [v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) switches Deepgram Nova-3 and AssemblyAI Universal 3.5 in one Dictation setting, and AssemblyAI's LLM Gateway is a native backend using the same API key as speech-to-text.
+- **The overlay is the control strip.** [v0.59.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.59.0) lets you choose which actions sit on the Windows overlay, rotate the speech language, and start a meeting from it. See [SpeechKit framework](/speechkit/framework).
+- **One Go package per speech provider.** [v0.64.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.64.0) splits every speech and realtime voice provider into its own SDK package, so an app that talks to one backend stops compiling the rest. Old names still work through v0.64 with a migration table and are removed in v0.65.0. The model catalog is now single-sourced, and entries carry a `modality` field.
+
+### Bug fixes
+
+- **A refused voice session explains itself.** [SpeechKit v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) makes a refused Voice Agent session name the one thing to change, and every error carries the id support needs to find the request.
+- **Spoken numbers come out as digits.** [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) writes spoken numbers as digits and strips German filler words like äh and ähm, including when the language is set to all languages.
+- **The assistant stops interrupting itself.** [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) rejects the agent's own voice as barge-in, stops a hung provider close from leaving a session stuck ending, and plays the reply at the correct 24 kHz rate.
+- **Windows shows the real version after an update.** [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) makes Install and restart display the published version instead of the previous one.
+- **Full-capture Dictation respects your engine choice.** [v0.62.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.62.0) uses the selected speech engine instead of always trying Deepgram first.
+- **The keyboard behaves on Android.** [v0.60.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.60.0) puts SpeechKit on the Gboard suggestion strip and restores the provider buttons on the keyboard, and [v0.61.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.61.0) keeps a tester connection working until you explicitly switch to a hosted connection.
+
+</Update>
+
+<Update label="2026-08-21" description="Week of Aug 15 – Aug 21" tags={["Weekly digest"]}>
+
+## SpeechKit on the Android keyboard
+
+SpeechKit ships its own Android keyboard so dictation and the Voice Agent are one tap above the keys, with a choice of on-device, SpeechKit server, Deepgram, AssemblyAI, or GPT.
+
+### New features
+
+- **Dictation and Voice Agent, one tap above the keys.** [SpeechKit v0.58.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.58.0) adds a row above the Android keyboard to dictate on device or through your SpeechKit server, or talk to Deepgram, AssemblyAI, or GPT. Actions that need a server say so instead of failing when pressed. See [SpeechKit modes](/speechkit/modes).
+- **SpeechKit ships its own Android keyboard.** [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) replaces the borrowed IME with a SpeechKit-branded keyboard (a HeliBoard fork). Tap the voice key and the dictation panel opens inside the keyboard, where you were typing, without an app switch or a lost cursor. The complete corresponding source is published alongside the release.
+- **Configure a SpeechKit mode before you turn it on.** [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) keeps Transcribe, Assist, and Voice Agent settings open and editable while the mode is switched off, and no longer throws you out of the page when you toggle a mode off. See [SpeechKit framework](/speechkit/framework).
+
+### Updates
+
+- **Desktop shell branded "SpeechKit UI".** [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) gives the desktop window the SpeechKit mark and title so it no longer identifies itself as a generic shell.
+
+### Bug fixes
+
+- **No more duplicate SpeechKit launcher icons on Android.** [v0.58.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.58.0) stops the keyboard fork from adding a second launcher that opened the keyboard's settings instead of the app.
+- **The voice key is there when you install SpeechKit.** [v0.58.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.58.0) makes the voice key visible without enabling a second input method, and the dictation panel now opens over the keys instead of at the top of the screen.
+- **Voice Agent status is truthful on Android.** [v0.57.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.1) stops advertising the Voice Agent as unreleased and lets the SpeechKit keyboard actually appear, with the dictation panel mounted inside its input view.
+
+</Update>
+
+<Update label="2026-08-14" description="Week of Aug 10 – Aug 14" tags={["Weekly digest"]}>
+
+## SpeechKit v0.53.0 – v0.57.0: one voice assistant everywhere, Android Voice Agent, hosted web assistant
+
+SpeechKit shipped [v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0). The Android app now holds a real spoken conversation and reaches the assistant straight from the SpeechKit keyboard. Every SpeechKit server exposes a ready-to-use `/assistant` web page. The same animated assistant renders identically on Android, in the Windows overlay, and on the web, driven by a single shared library. Deepgram Flux v2 is now selectable across realtime, speech-to-text, and text-to-speech.
+
+### New features
+
+- **Android Voice Agent client.** [SpeechKit v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0) adds a real-time Voice Agent to the Android app. Press to talk, hear the answer, and watch the transcript build as you speak. The SpeechKit keyboard opens the assistant in place, so a conversation stays out of the text field while dictation still writes into it. See [SpeechKit modes](/speechkit/modes).
+- **Hosted `/assistant` web page on every SpeechKit server.** [v0.55.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.55.0) serves a ready-to-use Voice Assistant page. Open it in any browser, connect, and start talking. See [SpeechKit overview](/speechkit/overview).
+- **Voice Assistant appearance settings and one visual language everywhere.** [v0.55.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.55.0) adds Settings to pick the animation (Aura orb or Waveform), the centre logo, and whether the live transcript shows by default, with a live preview. [v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0) publishes the shared orb so the Android app, Windows overlay, and hosted web page draw the same assistant from a single source. See [SpeechKit framework](/speechkit/framework).
+- **Deepgram Flux v2 across all voice paths.** [v0.54.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.10) makes Deepgram Flux v2 available for realtime Voice Agent, speech-to-text, and text-to-speech.
+- **Local Box media lifecycle.** [v0.54.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.0) plays media through the local device agent on a paired Kombify Box, so the audio path stays on your own network.
+
+### Updates
+
+- **Rebuilt Windows Voice Agent overlay.** [SpeechKit v0.56.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.56.0) turns the overlay into one dark, readable panel centred on the animation and the conversation. Controls appear only when you reach for them. Quick Note moved to the overlay, and every overlay icon has a tooltip.
+- **Silent updater with a distinct verification phase.** [v0.52.11](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.11) installs updates silently, [v0.52.12](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.12) has SpeechKit relaunch itself after install, and [v0.54.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.10) shows a distinct verification phase instead of appearing to stall at 100%.
+- **Numeric pre-1.0 releases are back on the public surfaces.** [v0.52.9](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.9) publishes numeric `v0.x` releases as normal GitHub releases and advances the canonical `latest` alias so the website, installer mirror, and in-app updater agree on the newest build. [v0.52.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.52.10) restores the missing public release notes for v0.51.37 through v0.52.9.
+
+### Bug fixes
+
+- **Held-to-talk release ends the conversation.** [SpeechKit v0.56.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.56.0) closes the dialog when hold-to-talk is released. A short window still lets an immediate second press pick up where you left off.
+- **Launching SpeechKit opens SpeechKit.** [v0.56.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.56.0) brings up the window from the taskbar or Start menu and returns to the running app on a repeat click.
+- **Android keyboard setup detects our own keyboard.** [v0.57.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.57.0) stops the setup flow from claiming a step is done before it is.
+- **Transcripts keep their own language.** [v0.54.0](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.0) no longer labels transcripts as German regardless of what was spoken, so custom vocabulary and replacements apply to the language you actually used. Silent-recording drops also stop: when a recording produces no text because the spoken language did not match the configured one, SpeechKit says so instead of dropping it.
+- **Server keeps running through a transient probe failure.** [v0.54.1](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.1) stops a single failed probe from killing the SpeechKit server, and unlatches the local Whisper ready flag when it recovers.
+- **Model setup retries transient Whisper downloads.** [v0.54.10](https://github.com/kombifyio/SpeechKit/releases/tag/v0.54.10) retries instead of failing the install on a transient network error.
+
+</Update>

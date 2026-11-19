@@ -1,0 +1,236 @@
+---
+title: "Registro de cambios de StackKits"
+description: "Versiones de StackKits y digest semanal, lo más reciente primero"
+icon: "newspaper"
+---
+
+Versiones y digest semanales de StackKits, lo más reciente primero. Cada producto tiene su propio registro de cambios; el [registro de cambios](/es/changelog/overview) los lista todos. Los recursos instalables están en [GitHub](https://github.com/kombifyio/StackKits/releases).
+
+<Update label="2026-10-16" description="Oct 9 – Oct 16" tags={["Weekly digest"]}>
+
+## StackKits moves Coolify workloads between servers and adds an Early Access channel
+
+StackKits publicó las versiones [v0.53.1](https://github.com/kombifyio/stackKits/releases/tag/v0.53.1) a [v0.53.9](https://github.com/kombifyio/stackKits/releases/tag/v0.53.9) con traslado de cargas de Coolify, un canal de versiones opcional que ahora se llama Early Access, paquetes de IA privada y conservación de los datos al eliminar una aplicación.
+
+### New features
+
+- **Move Coolify workloads to another server.** [StackKits v0.53.9](https://github.com/kombifyio/stackKits/releases/tag/v0.53.9) adds `stackkit relocate plan`, `check`, `drain`, `send`, and `receive`. Drain stops your apps before the final send, so the backup is consistent, and `drain --undo` rolls the move back. See [`stackkit relocate` (English)](https://docs.kombify.io/stackkits/reference/cli/relocate).
+- **Canal Early Access.** [v0.53.9](https://github.com/kombifyio/stackKits/releases/tag/v0.53.9) incorporó un canal de versiones opcional. StackKits lo ha retirado desde entonces y se publica solo como Stable.
+- **Preview footprint and capacity before you install.** [v0.53.9](https://github.com/kombifyio/stackKits/releases/tag/v0.53.9) shows the footprint and capacity of your selected use cases on the target with `stackkit use-cases pick --kit`. See [`stackkit use-cases`](/es/stackkits/reference/cli/use-cases).
+- **Private AI bundles by goal.** [v0.53.8](https://github.com/kombifyio/stackKits/releases/tag/v0.53.8) groups Private AI into bundles such as My private Chat and My local AI. It adds the LiteLLM model router for API access and a model manager setup action, and shows memory and GPU fit for each choice. See [Personal AI](/es/guides/stackkits/use-cases/personal-ai).
+- **OpenCloud for Files and an MQTT add-on.** [v0.53.1](https://github.com/kombifyio/stackKits/releases/tag/v0.53.1) adds OpenCloud as a Files alternative and an MQTT add-on with authenticated messaging. See [Documents and files](/es/guides/stackkits/use-cases/documents-and-files).
+- **Household access per app.** [v0.53.9](https://github.com/kombifyio/stackKits/releases/tag/v0.53.9) adds per-app household access groups on your node, and completes native owner setup for Navidrome and Audiobookshelf. See [Media](/es/guides/stackkits/use-cases/media).
+
+### Updates
+
+- **Removing an app keeps its data.** [StackKits v0.53.1](https://github.com/kombifyio/stackKits/releases/tag/v0.53.1) retains application volumes on ordinary removal. Deletion is an explicit choice.
+- **Clearer install and upgrade guidance.** [v0.53.1](https://github.com/kombifyio/stackKits/releases/tag/v0.53.1) resumes interrupted installs and explains unsupported Cloud or Modern upgrades with a supported route before anything changes.
+- **Private DNS with AdGuard Home.** [v0.53.1](https://github.com/kombifyio/stackKits/releases/tag/v0.53.1) activates private-client DNS through AdGuard Home, and [v0.53.8](https://github.com/kombifyio/stackKits/releases/tag/v0.53.8) backs up its configuration. See [Network](/es/guides/stackkits/use-cases/network).
+- **Smart Home notifications and MQTT.** [v0.53.1](https://github.com/kombifyio/stackKits/releases/tag/v0.53.1) connects Home Assistant to kombify notify, [v0.53.6](https://github.com/kombifyio/stackKits/releases/tag/v0.53.6) installs ntfy live notifications, and [v0.53.9](https://github.com/kombifyio/stackKits/releases/tag/v0.53.9) configures Home Assistant MQTT from your plan. See [Smart Home](/es/guides/stackkits/use-cases/smart-home).
+- **Bring your own AI provider.** [v0.53.1](https://github.com/kombifyio/stackKits/releases/tag/v0.53.1) connects Private AI to an external OpenAI-compatible provider with a key from the kombify Wallet, and pulls selected model packs into Ollama during Apply.
+- **Coolify and Dokploy are back.** [v0.53.9](https://github.com/kombifyio/stackKits/releases/tag/v0.53.9) restores Coolify and Dokploy as optional application platforms. The default core still uses no PaaS. See [Coolify](/es/stackkits/apps/coolify).
+
+### Bug fixes
+
+- **Coolify restores recover.** [StackKits v0.53.9](https://github.com/kombifyio/stackKits/releases/tag/v0.53.9) recovers interrupted Coolify application restores, and [v0.53.8](https://github.com/kombifyio/stackKits/releases/tag/v0.53.8) restores signed Coolify application data.
+- **Restores are checked.** [v0.53.6](https://github.com/kombifyio/stackKits/releases/tag/v0.53.6) reads back restored volume content during live restore. See [Back up and restore](/es/guides/stackkits/back-up-and-restore).
+- **Friendlier install refusals.** [v0.53.6](https://github.com/kombifyio/stackKits/releases/tag/v0.53.6) fixes the non-root install path and explains a low-memory refusal. [v0.53.9](https://github.com/kombifyio/stackKits/releases/tag/v0.53.9) adds recovery guidance when a stored plan is rejected.
+- **Stable capacity on Windows.** [v0.53.1](https://github.com/kombifyio/stackKits/releases/tag/v0.53.1) keeps Windows host capacity stable across working drives.
+
+</Update>
+
+<Update label="2026-10-09" description="2–9 / 10 / 2026" tags={["Weekly digest"]}>
+
+## StackKits permite elegir la plataforma de juegos y añadir casos de uso
+
+StackKits v0.50.4–v0.52.6 añade plataformas de juegos, casos de uso en instalaciones existentes y restauraciones más seguras. [v0.50.4](https://github.com/kombifyio/stackKits/releases/tag/v0.50.4) [v0.52.6](https://github.com/kombifyio/stackKits/releases/tag/v0.52.6)
+
+### Novedades
+
+- Elige tu plataforma de juegos. Las instalaciones nuevas usan Calagopus, con Pelican y Pterodactyl como alternativas. La clave del propietario permite lectura, encendido, consola y edición de archivos. Los comandos stackkit setup game, game list, power y allow funcionan igual; las instalaciones existentes conservan su plataforma. [StackKits v0.52.0](https://github.com/kombifyio/stackKits/releases/tag/v0.52.0) [Documentación](/es/guides/stackkits/use-cases/game)
+- Añade un caso de uso a una instalación activa con stackkit use-cases add, por ejemplo mail, sin alterar cargas, rutas ni almacenamiento existentes. También está disponible mediante el MCP de StackKits. [v0.51.0](https://github.com/kombifyio/stackKits/releases/tag/v0.51.0) [`stackkit use-cases`](/es/stackkits/reference/cli/use-cases)
+- Al cambiar el servidor de red, stackkit network actualiza sus enlaces para que los servicios escuchen en la dirección nueva. [v0.51.7](https://github.com/kombifyio/stackKits/releases/tag/v0.51.7) [`stackkit network`](/es/stackkits/reference/cli/network)
+
+### Actualizaciones
+
+- El conector de Home Assistant se emite, reutiliza y revoca mediante stackkit setup y permanece en almacenamiento local cifrado. [StackKits v0.52.0](https://github.com/kombifyio/stackKits/releases/tag/v0.52.0) [Documentación](/es/guides/stackkits/use-cases/smart-home)
+- Accede a puntos históricos de recuperación con autenticación. [v0.52.5](https://github.com/kombifyio/stackKits/releases/tag/v0.52.5) [Documentación](/es/guides/stackkits/back-up-and-restore)
+- Paperless, Mosquitto, Stalwart, Zigbee2MQTT, SearXNG, Roundcube, Euro-Office, Navidrome, Audiobookshelf, ESPHome y Emby, entre otras aplicaciones, pueden ejecutarse directamente en OpenTofu. La ejecución nativa es opcional por aplicación. [v0.51.0](https://github.com/kombifyio/stackKits/releases/tag/v0.51.0)
+- Los secretos se entregan como archivos, fuera de variables de entorno. La contraseña MQTT de Zigbee2MQTT y la clave de Pterodactyl ya no se guardan en volúmenes de datos. [v0.51.0](https://github.com/kombifyio/stackKits/releases/tag/v0.51.0)
+- Advanced emite certificados Origin CA para los orígenes kombify.me administrados. [v0.51.7](https://github.com/kombifyio/stackKits/releases/tag/v0.51.7) [`stackkit advanced`](/es/stackkits/reference/cli/advanced)
+
+### Correcciones
+
+- Las restauraciones interrumpidas se recuperan mediante la versión original verificada. La restauración conserva la propiedad de los archivos de los contenedores. [StackKits v0.52.6](https://github.com/kombifyio/stackKits/releases/tag/v0.52.6) [v0.52.5](https://github.com/kombifyio/stackKits/releases/tag/v0.52.5)
+- La copia externa inicializa su repositorio en un bucket vacío. [v0.51.2](https://github.com/kombifyio/stackKits/releases/tag/v0.51.2)
+- Se corrige el inicio de sesión de Paperless-ngx mediante PocketID y el reinicio del broker Mosquitto. [v0.50.6](https://github.com/kombifyio/stackKits/releases/tag/v0.50.6)
+
+</Update>
+
+<Update label="2026-10-02" description="17 sep – 2 oct" tags={["Weekly digest"]}>
+
+## El laboratorio de IA privada de StackKits, servidores de juegos y un MCP en cada instalación
+
+StackKits publicó desde la [v0.33.0](https://github.com/kombifyio/stackKits/releases/tag/v0.33.0) hasta la [v0.50.3](https://github.com/kombifyio/stackKits/releases/tag/v0.50.3) : un laboratorio de IA local completo, un caso de uso Game, más aplicaciones por caso de uso, el Advanced mode y un MCP de StackKits en cada instalación.
+
+### Novedades
+
+- **Private AI se convierte en un laboratorio de IA local.** [StackKits v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) te permite elegir Open WebUI o AnythingLLM como chat y añadir búsqueda web, análisis de documentos, un asistente Hermes, un agente OpenHands bajo gVisor y ComfyUI para imágenes y vídeo. Se ejecuta en la CPU o en GPU de NVIDIA y AMD. Un conector opcional enlaza el modelo de tu homelab con kombify AI mediante una conexión saliente, de modo que no se abre ningún puerto entrante. Consulta [IA personal](/es/guides/stackkits/use-cases/personal-ai).
+- **Servidores de juegos.** La [v0.41.0](https://github.com/kombifyio/stackKits/releases/tag/v0.41.0) añade un caso de uso Game opcional con Pterodactyl Panel. `stackkit setup game` crea servidores de Minecraft Java y Bedrock con valores predeterminados seguros, y la [v0.43.0](https://github.com/kombifyio/stackKits/releases/tag/v0.43.0) añade Paper, Terraria y Valheim. La configuración comprueba que estén listos mediante la conexión de un cliente real y rechaza un servidor que no quepa en la memoria del host. Consulta [Game](/es/guides/stackkits/use-cases/game).
+- **Más aplicaciones por caso de uso.** La [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) instala Nextcloud, Forgejo, Emby y Passbolt como alternativas a las opciones predeterminadas. Los complementos se instalan junto a un caso de uso: Paperless-ngx, Euro-Office, Navidrome, Audiobookshelf y ESPHome. Consulta el [catálogo de casos de uso](/es/stackkits/reference/use-case-catalog).
+- **Correo a tu manera.** La [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) añade el correo web Roundcube para un buzón que ya tengas, además de un servidor de correo Stalwart opcional en un nodo dedicado. Consulta [Mail](/es/guides/stackkits/use-cases/mail).
+- **Advanced mode para hogares gestionados.** La [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) ejecuta conjuntos de cambios, detección y reconciliación de divergencias por stack, reversiones coordinadas y simulacros de restauración mediante Terramate sobre OpenTofu. Las instalaciones Basement ahora usan OpenTofu de forma predeterminada, y la [v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) cifra su estado y sus planes. Consulta [`stackkit advanced`](/es/stackkits/reference/cli/advanced).
+- **Un MCP de StackKits en cada instalación.** La [v0.46.0](https://github.com/kombifyio/stackKits/releases/tag/v0.46.0) publica un endpoint `/mcp` protegido por token en cada Core, para que un agente de IA pueda conectarse directamente a tu servidor. Cada comando público de la CLI es ahora una herramienta MCP o una excepción enumerada, y los comandos que expondrían un secreto permanecen solo en la CLI. Consulta [Conector MCP](/es/stackkits/reference/mcp-connector).
+- **Actualizaciones del sistema operativo desde la CLI.** La [v0.47.0](https://github.com/kombifyio/stackKits/releases/tag/v0.47.0) planifica y aplica actualizaciones del sistema operativo y programa reinicios en un nodo. Consulta [`stackkit host`](/es/stackkits/reference/cli/host).
+- **Imágenes preparadas.** La [v0.50.0](https://github.com/kombifyio/stackKits/releases/tag/v0.50.0) añade `stackkit image plan`, `prepare` y `verify` para almacenar de antemano en caché la cadena de herramientas y las imágenes Core. Cada instalación sigue recibiendo sus propias claves del propietario y sus secretos en el primer arranque. Consulta [`stackkit image`](/es/stackkits/reference/cli/image).
+
+### Actualizaciones
+
+- **Inicio de sesión para más aplicaciones.** [StackKits v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) inicia sesión en Paperless-ngx, Media y Smart Home mediante PocketID y aprovisiona cuentas del hogar en Files. La [v0.38.0](https://github.com/kombifyio/stackKits/releases/tag/v0.38.0) añade `stackkit user owner status` y `activate` para la passkey del propietario. Consulta [PocketID](/es/stackkits/apps/pocketid).
+- **Smart Home crece.** La [v0.47.1](https://github.com/kombifyio/stackKits/releases/tag/v0.47.1) instala Mosquitto y Zigbee2MQTT con listeners de LAN elegidos por el propietario y passthrough de dispositivos, y la [v0.50.0](https://github.com/kombifyio/stackKits/releases/tag/v0.50.0) adopta un Home Assistant existente sin sustituir su estado. Consulta [Smart Home](/es/guides/stackkits/use-cases/smart-home).
+- **Cada aplicación obtiene una ruta.** La [v0.39.0](https://github.com/kombifyio/stackKits/releases/tag/v0.39.0) proporciona a Media, Smart Home, AI, Dev y Documents la misma ruta HTTPS y vinculación de datos que a Photos, Files y Vault.
+- **Copias de seguridad por grupo de cobertura.** La [v0.37.0](https://github.com/kombifyio/stackKits/releases/tag/v0.37.0) selecciona los datos por `config`, `content` o `media`. Si no se indica la cobertura, se resuelve como `content`, por lo que los archivos multimedia siempre son una elección explícita. Consulta [Crear y restaurar copias de seguridad](/es/guides/stackkits/back-up-and-restore).
+- **Ubuntu 26.04 de forma predeterminada.** La [v0.50.0](https://github.com/kombifyio/stackKits/releases/tag/v0.50.0) usa Ubuntu 26.04 LTS para las instalaciones nuevas y mantiene la compatibilidad con 24.04. La [v0.35.0](https://github.com/kombifyio/stackKits/releases/tag/v0.35.0) añade copias de seguridad en Debian 13. Consulta [Compatibilidad del sistema operativo](/es/stackkits/reference/os-compatibility).
+- **Compatibilidad a partir de ejecuciones reales.** Las versiones [v0.33.0](https://github.com/kombifyio/stackKits/releases/tag/v0.33.0) y [v0.34.0](https://github.com/kombifyio/stackKits/releases/tag/v0.34.0) califican cada kit por entorno a partir de ejecuciones automatizadas desde la instalación hasta la restauración, y la [v0.41.0](https://github.com/kombifyio/stackKits/releases/tag/v0.41.0) califica Cloud Kit como compatible en un VPS público.
+- **Todos los comandos están documentados.** La [v0.33.0](https://github.com/kombifyio/stackKits/releases/tag/v0.33.0) añade ejemplos a `stackkit <command> --help` y publica la [referencia completa de la CLI](/es/stackkits/reference/cli/overview). El instalador también verifica el archivo descargado con las sumas de comprobación de la versión.
+- **Basement usa `lab.home` de forma predeterminada.** La [v0.47.5](https://github.com/kombifyio/stackKits/releases/tag/v0.47.5) usa `lab.home` como dominio predeterminado, y los dominios Basement existentes migran con recuperación firmada.
+
+### Correcciones de errores
+
+- **Los servidores de 4 GB cumplen el mínimo de 4 GB.** [StackKits v0.45.0](https://github.com/kombifyio/stackKits/releases/tag/v0.45.0) redondea la memoria instalada al GiB más cercano, por lo que Cloud Kit ya no rechaza un VPS de 4 GB.
+- **Las actualizaciones desde versiones anteriores funcionan.** La [v0.39.0](https://github.com/kombifyio/stackKits/releases/tag/v0.39.0) corrige los fallos de `stackkit upgrade` y `stackkit kit list` con `unexpected EOF`. Instala una CLI actual antes de actualizar.
+- **Los cambios de configuración llegan a los servicios en ejecución.** La [v0.45.0](https://github.com/kombifyio/stackKits/releases/tag/v0.45.0) vuelve a crear un servicio cuando cambia su archivo de configuración generado, y el inicio de sesión del Game Panel ya no carga Google reCAPTCHA.
+- **Recuperación más segura.** La [v0.48.0](https://github.com/kombifyio/stackKits/releases/tag/v0.48.0) permite que un nuevo intento de Apply recupere una ejecución interrumpida y reanuda una instalación Cloud interrumpida desde cualquier directorio. La [v0.49.0](https://github.com/kombifyio/stackKits/releases/tag/v0.49.0) rechaza la planificación de actualizaciones mientras hay una actualización en curso y exige aprobación explícita para `stackkit remove` con salida JSON.
+- **Correcciones de Cloud Kit.** La [v0.38.0](https://github.com/kombifyio/stackKits/releases/tag/v0.38.0) hace que las copias de seguridad y el inicio de sesión del propietario funcionen en Cloud Kit y nombra un límite de velocidad de Let's Encrypt con el momento del reintento. La [v0.48.3](https://github.com/kombifyio/stackKits/releases/tag/v0.48.3) rechaza en init los dominios de Cloud Kit solo locales.
+
+</Update>
+
+<Update label="2026-09-16" description="5 sep – 16 sep" tags={["Weekly digest"]}>
+
+## instalador de StackKits que elige el kit
+
+StackKits publicó desde la [v0.25.1](https://github.com/kombifyio/stackKits/releases/tag/v0.25.1) hasta la [v0.32.1](https://github.com/kombifyio/stackKits/releases/tag/v0.32.1) : un instalador que detecta el host y ofrece el kit, puertas de inicio de sesión delante de las rutas del homelab y usuarios del hogar a través de PocketID.
+
+### Novedades
+
+- **El instalador de StackKits elige el kit.** La [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) hace que `install.stackkit.cc` detecte el host, elija entre Basement y Cloud, pregunte por el propietario y los casos de uso antes de cada instalación y ofrezca instalar un StackKit una vez que la CLI está en su sitio. Una URL de instalador incorrecta se recupera en lugar de fallar. Consulta [Recorrido por la CLI](/es/guides/stackkits/cli-walkthrough).
+- **Usuarios del hogar sin cuentas creadas a mano.** La [v0.29.0](https://github.com/kombifyio/stackKits/releases/tag/v0.29.0) aprovisiona a los usuarios del hogar mediante grupos de PocketID, y la [v0.30.0](https://github.com/kombifyio/stackKits/releases/tag/v0.30.0) añade `stackkit user add`, `list` y `remove`. Consulta [PocketID](/es/stackkits/apps/pocketid).
+
+### Actualizaciones
+
+- **Puertas de inicio de sesión delante de las rutas del homelab.** La [v0.31.0](https://github.com/kombifyio/stackKits/releases/tag/v0.31.0) pone TinyAuth delante de las rutas de fotos, archivos, bóveda, multimedia, hogar inteligente, IA, desarrollo, documentos y Coolify, y la verificación acepta la redirección al inicio de sesión como saludable en lugar de interpretarla como un fallo. Consulta [TinyAuth](/es/stackkits/apps/tinyauth).
+- **Cloud Kit no necesita un dominio propio.** La [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) usa por defecto un nombre de kombify.me cuando no se indica un dominio personalizado, y genera una clave SSH del canal de ejecución antes de desactivar el inicio de sesión como root. Consulta [kombify.me](/es/kombify-me/overview).
+- **Apply espera al certificado.** La [v0.31.5](https://github.com/kombifyio/stackKits/releases/tag/v0.31.5) espera a la emisión antes de verificar el TLS público y las hojas de la PKI interna, y la [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) muestra el progreso mientras se ejecutan generate y apply en lugar de una pausa silenciosa.
+
+### Correcciones de errores
+
+- **La eliminación limpia los stacks nativos.** La [v0.32.0](https://github.com/kombifyio/stackKits/releases/tag/v0.32.0) hace que `stackkit remove` desinstale los stacks nativos de Compose y encuentre el workspace del instalador, y la [v0.31.1](https://github.com/kombifyio/stackKits/releases/tag/v0.31.1) aplaza la observación de las aplicaciones hasta la activación de la restauración, de modo que una restauración ya no comprueba aplicaciones que todavía no están en ejecución.
+
+</Update>
+
+<Update label="2026-09-04" description="Semana del 29 ago – 4 sep" tags={["Weekly digest"]}>
+
+## StackKits Smart Home y Media
+
+StackKits publicó desde la [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) hasta la [v0.24.27](https://github.com/kombifyio/stackKits/releases/tag/v0.24.27) : los casos de uso Smart Home y Media, un planificador en el navegador en stackkit.cc/planner y perfiles de cómputo locales a cada módulo.
+
+### Novedades
+
+- **Caso de uso Smart Home en StackKits.** [StackKits v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) añade un workload de Home Assistant en los kits Basement, Cloud y Modern. Generate escribe la base del proxy inverso y un fragmento de cliente MCP nativo, y la configuración crea la cuenta de propietario del Homelab. Consulta el [catálogo de casos de uso](/es/stackkits/reference/use-case-catalog).
+- **Caso de uso Media con Jellyfin.** La [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) añade un workload de Jellyfin en los niveles de cómputo `standard` y `high`. La biblioteca multimedia sigue bajo custodia del propietario y, deliberadamente, no es un origen de copia de seguridad de StackKits. Consulta [Jellyfin](/es/stackkits/apps/jellyfin).
+- **Planifica un homelab en el navegador.** La [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) lanza el planificador de StackKits en stackkit.cc/planner: herramientas de solo lectura y basadas en esquemas sobre el catálogo público que entregan a la CLI una secuencia `init → validate → resolve → generate → plan`. Apply sigue siendo un paso explícito en tu equipo. Consulta [Conector MCP](/es/stackkits/reference/mcp-connector).
+
+### Actualizaciones
+
+- **Perfiles de cómputo locales a cada módulo en StackKits.** Desde la [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) hasta la [v0.24.27](https://github.com/kombifyio/stackKits/releases/tag/v0.24.27), los perfiles de cómputo, almacenamiento y aceleradores pasan a cada módulo con alternativas por workload. Los datos de host necesarios deben observarse en el inventario antes de Apply, no deducirse del hardware declarado. Consulta [Elegir un kit](/es/guides/stackkits/choosing-a-kit).
+- **El nivel bajo recibe variantes lite reales.** La [v0.23.0](https://github.com/kombifyio/stackKits/releases/tag/v0.23.0) hace que un generate de Basement con `low` emita variantes independientes de Compose: el núcleo sin Coolify e Immich sin aprendizaje automático. Media se omite en `low` hasta que exista un sustituto lite, y falla de forma cerrada en init en lugar de desplegar algo de tamaño insuficiente.
+
+### Correcciones de errores
+
+- **Los archivos de versión de StackKits incluyen su propia documentación.** La [v0.24.2](https://github.com/kombifyio/stackKits/releases/tag/v0.24.2) incluye en los archivos de versión la documentación pública de copias de seguridad y de preparación de aplicaciones, y mantiene explícitas las recetas guiadas de Basement y Cloud a través del adaptador de compatibilidad.
+
+</Update>
+
+<Update label="2026-08-28" description="Semana del 22 ago – 28 ago" tags={["Weekly digest"]}>
+
+## StackKits con direcciones públicas y niveles de cómputo
+
+StackKits publicó desde la [v0.21.10](https://github.com/kombifyio/stackKits/releases/tag/v0.21.10) hasta la [v0.22.0](https://github.com/kombifyio/stackKits/releases/tag/v0.22.0) : direcciones de servicio públicas gestionadas con TLS automático en Cloud Kit y niveles de cómputo que adaptan un kit al hardware que realmente tienes.
+
+### Novedades
+
+- **Direcciones públicas gestionadas con TLS automático en Cloud Kit.** Desde [StackKits v0.21.20](https://github.com/kombifyio/stackKits/releases/tag/v0.21.20) hasta la [v0.21.24](https://github.com/kombifyio/stackKits/releases/tag/v0.21.24), los servicios de Cloud Kit reciben direcciones públicas gestionadas de kombify.me: un plan de direcciones sin secretos, rutas generadas a partir del prefijo de subdominio validado y certificados emitidos con ACME HTTP-01 para que la pasarela de Cloudflare pueda validar el TLS del origen mientras el tráfico del servicio sigue siendo HTTPS. Consulta [Cloud Kit](/es/stackkits/kits/cloud-kit).
+- **Los niveles de cómputo adaptan el kit a tu hardware.** [StackKits v0.22.0](https://github.com/kombifyio/stackKits/releases/tag/v0.22.0) añade los niveles de cómputo `low`, `standard` y `high` por kit. Apply certifica la CPU, la RAM y el disco locales antes de resolver, y se bloquea con un motivo claro en lugar de desplegar en un host de tamaño insuficiente. Consulta [Elegir un kit](/es/guides/stackkits/choosing-a-kit) y [Revisar, aplicar y verificar](/es/guides/stackkits/review-plan-and-apply).
+- **Añade la custodia de secretos a un homelab existente.** [StackKits v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) añade un comando explícito e idempotente `stackkit secrets materialize` para que un homelab independiente pueda establecer la custodia vinculada al propietario tras seleccionar un workload nuevo, sin volver a ejecutar su StackSpec inicial. Consulta [Operaciones del día 2](/es/stackkits/reference/day-2-operations).
+
+### Actualizaciones
+
+- **La eliminación aprobada por el propietario apunta a un solo nodo.** Desde [StackKits v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) hasta la [v0.21.13](https://github.com/kombifyio/stackKits/releases/tag/v0.21.13), la eliminación de un workload aprobada por el propietario puede seleccionar una ubicación exacta de un solo nodo a partir de un resultado de Apply multinodo verificado, con la evidencia de ausencia correlacionada aún con ese mismo Apply.
+- **Manifiesto de acceso más completo.** La [v0.21.16](https://github.com/kombifyio/stackKits/releases/tag/v0.21.16) amplía el manifiesto de acceso nativo a la v3 con agrupación de aplicaciones, nombres visibles, impacto en el ciclo de vida y direcciones internas sin secretos para los servicios en ejecución.
+
+### Correcciones de errores
+
+- **El endurecimiento de Cloud ya no puede dejarte fuera.** [StackKits v0.21.10](https://github.com/kombifyio/stackKits/releases/tag/v0.21.10) conserva una cuenta no root autenticada por clave antes de que la seguridad del host de Cloud desactive el inicio de sesión como root, y la [v0.21.17](https://github.com/kombifyio/stackKits/releases/tag/v0.21.17) hace que la política endurecida de sshd prevalezca sobre los valores por defecto del proveedor y de cloud-init, de modo que el inicio de sesión root con clave sigue desactivado.
+- **Volver a ejecutar Apply en los puertos 80 y 443 es seguro.** La [v0.21.18](https://github.com/kombifyio/stackKits/releases/tag/v0.21.18) permite que un Apply idempotente reutilice los puertos 80 y 443 solo cuando Docker demuestra que pertenecen al núcleo de Cloud del workspace actual. Los listeners ajenos u obsoletos siguen bloqueando.
+- **Los workloads sin bloque de ubicación funcionan sin más.** La [v0.21.11](https://github.com/kombifyio/stackKits/releases/tag/v0.21.11) aplica los valores por defecto gobernados de ubicación cuando el autor de un StackSpec selecciona un workload sin un bloque `placement`. Consulta [Configura un StackSpec](/es/guides/stackkits/configure-stack-spec).
+- **Un Apply fallido te dice qué hacer a continuación.** La [v0.22.0](https://github.com/kombifyio/stackKits/releases/tag/v0.22.0) termina un Product Apply fallido con indicaciones de reintento, `status` y `logs` más el Run-ID, y los instaladores retoman un workspace existente en lugar de morir.
+
+</Update>
+
+<Update label="2026-08-21" description="Semana del 15 ago – 21 ago" tags={["Weekly digest"]}>
+
+## núcleo de Cloud de StackKits
+
+StackKits [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) completa diez casos de uso de primera clase e incorpora el runtime del núcleo de Cloud independiente del proveedor, seguido de una serie de correcciones de Cloud Apply y Verify hasta la [v0.21.9](https://github.com/kombifyio/stackKits/releases/tag/v0.21.9) .
+
+### Novedades
+
+- **Diez casos de uso de primera clase en StackKits.** La [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) completa las autoridades CUE de los diez casos de uso, incluidos Vault, Media y los borradores de AI/Dev/Remote, además de los borradores posteriores a la 1.0 de Mail y Game. Los roles existentes de Basement y Cloud Kit quedan vinculados a ellos. Consulta [Elegir un kit](/es/guides/stackkits/choosing-a-kit).
+- **Runtime del núcleo de Cloud independiente del proveedor.** La [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) implementa el runtime del núcleo de Cloud independiente del proveedor con un Product Apply local protegido, observación de Verify en vivo y la proyección exacta del manifiesto de acceso v2 para `base`, `auth`, `id` y `coolify`. La custodia del proveedor y de las credenciales sigue en Techstack. Consulta [Cloud Kit](/es/stackkits/kits/cloud-kit).
+
+### Actualizaciones
+
+- **`foundation` sustituye al paquete de esquema `base`.** [StackKits v0.18.22](https://github.com/kombifyio/stackKits/releases/tag/v0.18.22) cambia el nombre del paquete de esquema CUE compartido de `base` a `foundation` y exige `foundation/stackkit.cue` en los archivos publicados. Los kits de producto no cambian y siguen extendiendo `#FoundationStackKit`.
+- **Se retiró el argumento de instalador `base-kit`.** La [v0.18.22](https://github.com/kombifyio/stackKits/releases/tag/v0.18.22) rechaza el slug retirado `base-kit` en lugar de reescribirlo en silencio a `basement-kit`. Usa `basement-kit`. Consulta [Elegir un kit](/es/guides/stackkits/choosing-a-kit).
+
+### Correcciones de errores
+
+- **Cloud Apply alcanza la postura que declara en un host Ubuntu estándar.** [StackKits v0.21.9](https://github.com/kombifyio/stackKits/releases/tag/v0.21.9) instala los paquetes que respaldan las unidades de seguridad del host de Cloud y su conjunto de reglas en lugar de fallar por la ausencia de `nft` y `fail2ban`, y solo recarga un `sshd` en ejecución mientras garantiza el directorio de separación de privilegios en hosts con activación por socket.
+- **Los fallos de seguridad del host de Cloud ahora nombran la unidad que falla.** La [v0.21.8](https://github.com/kombifyio/stackKits/releases/tag/v0.21.8) conserva la salida acotada del comando y del proceso cuando falla la reconciliación de la seguridad del host de Cloud, de modo que un destino en vivo informa de la unidad exacta que falla.
+- **El Verify exacto del núcleo de Cloud gestiona el proxy de socket y los servicios con comprobación de salud.** La [v0.21.6](https://github.com/kombifyio/stackKits/releases/tag/v0.21.6) acepta la observación `not-configured` para el proxy de socket, que intencionadamente no tiene healthcheck, y la [v0.21.7](https://github.com/kombifyio/stackKits/releases/tag/v0.21.7) conserva los resultados exactos de salud de las rutas públicas propiedad del runtime tras validarlos con las sondas de los módulos del núcleo de Cloud.
+- **Cloud Kit Apply deja de fallar de forma cerrada por los metadatos del despachador.** La [v0.21.4](https://github.com/kombifyio/stackKits/releases/tag/v0.21.4) acepta los metadatos de clase de plan del despachador en los propietarios de Cloud Kit y en la admisión del host, de modo que Product Apply ya no falla con `health:stackkits-host-admission=executor-failed`. La [v0.21.5](https://github.com/kombifyio/stackKits/releases/tag/v0.21.5) ejecuta los propietarios de Cloud Kit totalmente locales a través de su router local exacto. Consulta [Revisar, aplicar y verificar](/es/guides/stackkits/review-plan-and-apply).
+- **Verify y Status rechazan las proyecciones de servicio de Cloud obsoletas.** La [v0.21.1](https://github.com/kombifyio/stackKits/releases/tag/v0.21.1) rechaza las proyecciones de servicio de Cloud obsoletas, ajenas o mutadas durante la lectura de vuelta de Verify y Status.
+
+</Update>
+
+<Update label="2026-08-14" description="Semana del 10 ago – 14 ago" tags={["Weekly digest"]}>
+
+## StackKits v0.15.0 – v0.18.1: instalador guiado, despliegues controlables por servicio y un núcleo de Cloud independiente del proveedor
+
+StackKits pasó esta semana de la v0.14.28 a la [v0.18.1](https://github.com/kombifyio/stackKits/releases/tag/v0.18.1). Un nuevo instalador guiado lleva un equipo sin preparar a un homelab en funcionamiento en tres modos. Cloud Kit incorporó un núcleo de Cloud independiente del proveedor, la propiedad de las rutas TLS públicas y una copia de seguridad externa voluntaria. `apply`, `status`, `verify` y `logs` son totalmente legibles por máquina en todos los resultados, y un nuevo comando `stackkit service` controla servicios individuales entre aplicaciones completas.
+
+### Novedades
+
+- **Instalador guiado hasta un homelab en funcionamiento.** [StackKits v0.17.0](https://github.com/kombifyio/stackKits/releases/tag/v0.17.0) incluye una instalación guiada completa con tres modos y un flujo `v2 init` que acepta `--use-case`, `--platform` y `--enable`. El instalador prepara Docker y las raíces de almacenamiento directamente, funciona de forma segura con `sudo` e imprime credenciales nativas veraces. Consulta [Inicio rápido](/es/stackkits/quickstart) y [Elegir un kit](/es/guides/stackkits/choosing-a-kit).
+- **Núcleo de Cloud independiente del proveedor con rutas TLS públicas.** [StackKits v0.15.0](https://github.com/kombifyio/stackKits/releases/tag/v0.15.0) resuelve un workload `cloud-core` obligatorio para `base`, `auth`, `id` y `coolify`, genera un proyecto de Compose con digests fijados y lo ejecuta a través de un propietario de runtime local cerrado en un host suministrado externamente. La [v0.18.0](https://github.com/kombifyio/stackKits/releases/tag/v0.18.0) hace que Cloud Kit posea y materialice las rutas TLS públicas de extremo a extremo. La custodia del runtime de Cloud solo almacena material de PocketID, TinyAuth y Coolify con alcance de servicio. Las credenciales de proveedor, las credenciales de servidor, los arrendamientos y el inventario permanecen fuera de StackKits. Consulta [Cloud Kit](/es/stackkits/kits/cloud-kit).
+- **Comando `stackkit service` para el control posterior al despliegue.** La [v0.16.0](https://github.com/kombifyio/stackKits/releases/tag/v0.16.0) añade `stackkit service start|stop|restart <service-key>` y `stackkit service logs <service-key>` para los servicios del núcleo de Cloud gestionados por StackKits. Las mutaciones requieren `--owner-approve`, y `--json` devuelve un resultado de acción versionado. Úsalo para reiniciar o inspeccionar un servicio entre aplicaciones completas. Consulta [Operaciones del día 2](/es/stackkits/reference/day-2-operations).
+
+```bash
+stackkit service restart coolify --owner-approve --json
+stackkit service logs auth --tail 100
+```
+
+- **Salida completa legible por máquina en apply, status, verify y logs.** La [v0.15.8](https://github.com/kombifyio/stackKits/releases/tag/v0.15.8) mantiene analizables `stackkit apply --json`, `stackkit status --json` y `stackkit verify --json` en caso de éxito, denegación y fallo. `stackkit logs` devuelve páginas censuradas y acotadas con cursores vinculados a digests y metadatos explícitos de truncamiento. El conector MCP expone la misma evidencia estructurada. Consulta [Conector MCP](/es/stackkits/reference/mcp-connector) y [Operar un StackKit](/es/stackkits/reference/day-2-operations).
+- **Listeners de runtime de la Architecture v2 para la entrega de aplicaciones propiedad del producto.** La [v0.15.3](https://github.com/kombifyio/stackKits/releases/tag/v0.15.3) expone listeners de runtime en las proyecciones del catálogo de la Architecture v2 para que las aplicaciones puedan gestionar su propia entrega sin sacar la autoridad del ciclo de vida de StackKits. Consulta [Entrega de aplicaciones](/es/guides/stackkits/application-delivery).
+
+### Actualizaciones
+
+- **La copia de seguridad externa de Cloud Kit ahora es voluntaria.** La [v0.16.1](https://github.com/kombifyio/stackKits/releases/tag/v0.16.1) convierte la copia de seguridad externa en una elección explícita en Cloud Kit. Consulta [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).
+- **La API de administración de Traefik permanece solo en localhost en Cloud Kit.** La [v0.18.1](https://github.com/kombifyio/stackKits/releases/tag/v0.18.1) mantiene la API de administración de Traefik vinculada a localhost tanto en los contratos de producto como en los de versión pública.
+
+### Correcciones de errores
+
+- **Apply vincula la mutación al hash de plan esperado.** [StackKits v0.17.0](https://github.com/kombifyio/stackKits/releases/tag/v0.17.0) evita que apply se ejecute contra un plan que cambió por debajo. Consulta [Revisar, aplicar y verificar](/es/guides/stackkits/review-plan-and-apply).
+- **Descargas autenticadas de imágenes públicas de runtime.** La [v0.16.8](https://github.com/kombifyio/stackKits/releases/tag/v0.16.8) autentica las descargas de imágenes públicas de runtime que realiza una instalación nueva.
+
+</Update>
