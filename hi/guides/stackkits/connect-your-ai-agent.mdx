@@ -1,0 +1,186 @@
+---
+title: "अपने खुद के AI एजेंट को कनेक्ट करें"
+description: "Claude Code, Codex या Cursor को लोकल stackkit MCP सर्वर के माध्यम से अपना होमलैब पढ़ने दें, और तय करें कि वह क्या बदल सकता है"
+sidebarTitle: "AI एजेंट कनेक्ट करें"
+icon: "robot"
+---
+
+`stackkit-mcp` प्रोग्राम `stackkit` नाम का एक लोकल MCP सर्वर है। आपका AI
+एजेंट इसे उस कंप्यूटर पर शुरू करता है जहाँ आपका होमलैब वर्कस्पेस रखा है।
+डिफ़ॉल्ट रूप से एजेंट पढ़ सकता है: वह दस्तावेज़ देख सकता है और स्थिति, सत्यापन,
+ड्रिफ़्ट, लॉग तथा बैकअप की जाँच कर सकता है। यह कुछ तभी बदल सकता है जब आप राइट
+गेट चालू करें, और तब भी आप ही स्वीकृत करते हैं कि वह क्या करेगा।
+
+## शुरू करने से पहले
+
+- एक होमलैब जिसे आपने StackKits इंस्टॉलर से इंस्टॉल किया हो, उदाहरण के लिए
+  [10 मिनट में इंस्टॉल करें](/hi/stackkits/install-in-10-minutes) से। इस गाइड
+  में वर्कस्पेस फ़ोल्डर `~/my-homelab` है।
+- आपके `PATH` में `stackkit` के बगल में `stackkit-mcp`। इंस्टॉलर दोनों को
+  वहीं रखता है। यदि आपको केवल टूल्स चाहिए, तो उन्हें
+  [किट चुनें](/hi/guides/stackkits/choosing-a-kit) से इंस्टॉलर के साथ इंस्टॉल
+  करें:
+
+```bash
+curl -sSL https://install.stackkit.cc | sh
+command -v stackkit-mcp
+```
+
+लाइफ़साइकल टूल्स (स्थिति, सत्यापन, ड्रिफ़्ट, बैकअप स्थिति, लॉग) तभी दिखाई देते
+हैं जब `stackkit-mcp` उसी रिलीज़ के `stackkit` के बगल में हो। दोनों को एक
+साथ अपडेट करें।
+
+इंस्टॉल की गई रिलीज़ से अपने होस्ट के लिए तुरंत पेस्ट करने योग्य कॉन्फ़िग
+प्रिंट करने के लिए:
+
+```bash
+stackkit agent mcp-config --client codex
+```
+
+उन होस्ट्स के लिए `codex` के बजाय `claude` या `cursor` का उपयोग करें।
+
+## Claude Code
+
+वर्तमान प्रोजेक्ट के लिए सर्वर जोड़ें और उसकी जाँच करें:
+
+```bash
+claude mcp add --transport stdio stackkit -- stackkit-mcp --mode docs,local,server,actions
+claude mcp list
+```
+
+Claude Code के भीतर, `/mcp` कमांड सर्वर की स्थिति दिखाता है। प्रोजेक्ट की
+`.mcp.json` फ़ाइल में वही प्रविष्टि:
+
+```json
+{
+  "mcpServers": {
+    "stackkit": {
+      "command": "stackkit-mcp",
+      "args": ["--mode", "docs,local,server,actions"]
+    }
+  }
+}
+```
+
+स्रोत: [Claude Code MCP दस्तावेज़](https://code.claude.com/docs/en/mcp)।
+
+## Codex
+
+इस ब्लॉक को `~/.codex/config.toml` में, या किसी विश्वसनीय प्रोजेक्ट की
+`.codex/config.toml` में जोड़ें। `cwd` कुंजी वह वर्कस्पेस तय करती है जिस पर
+टूल्स काम करते हैं:
+
+```toml
+[mcp_servers.stackkit]
+command = "stackkit-mcp"
+args = ["--mode", "docs,local,server,actions"]
+cwd = "/home/you/my-homelab"
+```
+
+इसे `codex mcp list` से जाँचें, या Codex टर्मिनल इंटरफ़ेस में `/mcp` खोलें।
+स्रोत: [Codex MCP दस्तावेज़](https://learn.chatgpt.com/docs/extend/mcp)।
+
+## Cursor
+
+इसे प्रोजेक्ट में `.cursor/mcp.json` में, या हर प्रोजेक्ट के लिए
+`~/.cursor/mcp.json` में जोड़ें:
+
+```json
+{
+  "mcpServers": {
+    "stackkit": {
+      "type": "stdio",
+      "command": "stackkit-mcp",
+      "args": ["--mode", "docs,local,server,actions"]
+    }
+  }
+}
+```
+
+यदि सर्वर शुरू न हो, तो Output पैनल खोलें और MCP Logs चुनें। स्रोत:
+[Cursor MCP दस्तावेज़](https://cursor.com/docs/context/mcp)।
+
+## वर्कस्पेस का नाम दें
+
+टूल्स उस फ़ोल्डर में मौजूद वर्कस्पेस पर काम करते हैं जहाँ सर्वर शुरू होता है।
+केवल Codex आपको अपनी कॉन्फ़िग में वह फ़ोल्डर सेट करने देता है। Claude Code और
+Cursor के लिए, अपने पहले प्रॉम्प्ट में फ़ोल्डर का नाम लिखें। लाइफ़साइकल टूल्स
+इसके लिए `base_dir` इनपुट लेते हैं।
+
+## ChatGPT
+
+ChatGPT किसी लोकल प्रोग्राम को लॉन्च करके नहीं, बल्कि सार्वजनिक HTTPS एंडपॉइंट
+या OpenAI के Secure MCP Tunnel के माध्यम से कस्टम MCP सर्वर जोड़ता है। इसलिए
+`stackkit-mcp` को सीधे उसी तरह ChatGPT में नहीं जोड़ा जा सकता जैसे ऊपर दिए गए
+तीन होस्ट्स में जोड़ा जाता है। OpenAI के दस्तावेज़ बताते हैं कि टनल क्लाइंट
+लोकल stdio सर्वर तक पहुँच सकता है। यह गाइड इनमें से किसी भी रास्ते को कवर नहीं
+करती और न ही इनके साथ `stackkit-mcp` का परीक्षण किया गया है। किसी StackKits
+MCP एंडपॉइंट को सीधे सार्वजनिक इंटरनेट पर उजागर न करें। OpenAI के पेज
+[Connect and test your plugin](https://developers.openai.com/plugins/deploy/connect-chatgpt)
+और [Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
+देखें।
+
+## इसे आज़माएँ
+
+अपना एजेंट शुरू करें और यह प्रॉम्प्ट भेजें:
+
+```text
+Use the stackkit tools, read only. My workspace is ~/my-homelab. Tell me what is
+running on my server and what needs attention. Check status, verification,
+drift and backups, and list the problems first.
+```
+
+## एजेंट को कुछ बदलने दें
+
+बिना किसी सेटिंग के, एजेंट आपके होमलैब में कुछ बदल नहीं सकता। आपके पास बदलावों
+की अनुमति देने के दो तरीके हैं। दूसरे तरीके को प्राथमिकता दें।
+
+**हर चीज़ के लिए राइट गेट।** सर्वर के एनवायरनमेंट में
+`STACKKIT_MCP_ALLOW_WRITE=true` सेट करें, उदाहरण के लिए Claude Code के विकल्प
+`--env`, Codex की `[mcp_servers.stackkit.env]` तालिका या Cursor के `env`
+ऑब्जेक्ट के साथ। तब बदलाव करने वाले टूल्स दिखाई देते हैं। हर कॉल में फिर भी
+सटीक ऑपरेशन का नाम और स्पष्ट मालिक की स्वीकृति होनी चाहिए, इसलिए एजेंट से कहें
+कि वह वह कॉल करने से पहले आपसे पूछे। सर्वर आपकी स्वीकृति और एजेंट की अपनी
+स्वीकृति में अंतर नहीं कर सकता, इसलिए दूसरा तरीका अधिक सुरक्षित है।
+
+**प्रति एजेंट एक क्रेडेंशियल, हर बदलाव के लिए आपकी स्वीकृति के साथ।** वर्कस्पेस
+से इस एजेंट के लिए एक क्रेडेंशियल बनाएँ, फिर उसके साथ सर्वर शुरू करें:
+
+```bash
+mkdir -p ~/.config/stackkit
+stackkit -C ~/my-homelab agent credential mint --name my-agent --token-file ~/.config/stackkit/my-agent.token
+```
+
+`STACKKIT_MCP_AGENT_CREDENTIAL_FILE` को उस फ़ाइल पर सेट करें और सर्वर तर्कों
+में वर्कस्पेस फ़ोल्डर के साथ `--agent-workspace` जोड़ें। Codex में:
+
+```toml
+[mcp_servers.stackkit]
+command = "stackkit-mcp"
+args = ["--mode", "docs,local,server,actions", "--agent-workspace", "/home/you/my-homelab"]
+cwd = "/home/you/my-homelab"
+
+[mcp_servers.stackkit.env]
+STACKKIT_MCP_AGENT_CREDENTIAL_FILE = "/home/you/.config/stackkit/my-agent.token"
+```
+
+क्रेडेंशियल के साथ, `STACKKIT_MCP_ALLOW_WRITE` को अनदेखा कर दिया जाता है। बदलाव
+करने वाली हर कॉल को स्वीकृति अनुरोध के साथ तब तक अस्वीकार किया जाता है जब तक आप
+अपने टर्मिनल में उस सटीक कॉल को स्वीकृत नहीं करते:
+
+```bash
+stackkit -C ~/my-homelab agent approval list
+stackkit -C ~/my-homelab agent approval approve <approval-id>
+```
+
+एक स्वीकृति उस एजेंट, उस ऑपरेशन और उन सटीक तर्कों को एक बार के लिए, 15 मिनट तक
+कवर करती है। इसके बाद एजेंट वही समान कॉल दोहराता है। सर्वर अज्ञात या रिवोक किए
+गए क्रेडेंशियल के साथ शुरू होने से मना करता है, और रिवोक किए गए क्रेडेंशियल को
+एजेंट की अगली कॉल पर अस्वीकार कर दिया जाता है।
+[agent कमांड](/hi/stackkits/reference/cli/agent) से क्रेडेंशियल प्रबंधित
+करें।
+
+## संबंधित पेज
+
+- [StackKits MCP कनेक्टर](/hi/stackkits/reference/mcp-connector)
+- [StackKit संचालित करें](/hi/stackkits/reference/day-2-operations)

@@ -1,0 +1,120 @@
+---
+title: "Einen Server mit Guard koppeln"
+description: "Was passiert, wenn ein Server eingebunden wird, was du prüfst und freigibst und wie du eine unterbrochene oder widerrufene Kopplung wiederherstellst"
+sidebarTitle: "Einen Server koppeln"
+icon: "link"
+---
+
+Kopplung ist der Vorgang, mit dem ein Server in Homelab deiner wird. Diese
+Seite begleitet ihn von deiner Seite aus: was du startest, was der Server tut,
+was du bestätigst und wie du weitermachst, wenn etwas auf halbem Weg stoppt. Um
+den Befehl selbst auszuführen, nutze den
+[Pairing-Befehl](/de/homelab/pairing-command); um stattdessen über SSH zu
+verbinden, siehe
+[Einen Server über SSH verbinden](/de/homelab/ssh-connection). Beide
+installieren denselben Guard.
+
+<Note>
+Homelab steht vor 1.0 und der verbundene Betrieb ist Vorschau-Umfang; siehe
+[Homelab-Verfügbarkeit](/de/homelab/availability). Details wie der Schritt
+zur Schlüsselfreigabe hängen von der auf dem Server installierten Guard-Version
+ab.
+</Note>
+
+## Was der Reihe nach passiert
+
+<Steps>
+  <Step title="Du startest die Kopplung">
+    Im Assistenten Add Node erzeugt Homelab ein persönliches Kopplungs-Token.
+    Es funktioniert einmal und läuft nach 15 Minuten ab.
+  </Step>
+  <Step title="Der Server installiert Guard">
+    Der Befehl lädt Guard von deinem eigenen Homelab herunter, nicht von
+    einem öffentlichen Mirror, und prüft ihn anhand der Prüfsumme aus derselben
+    Antwort. Die Signaturprüfung beginnt mit dem ersten Update von Guard,
+    sodass die Erstinstallation der Verbindung zu deinem Homelab vertraut.
+  </Step>
+  <Step title="Der Server erzeugt seinen eigenen Schlüssel">
+    Guard erzeugt auf dem Server einen Identitätsschlüssel. Der Schlüssel
+    bleibt auf dem Server. Homelab bindet den öffentlichen Fingerabdruck
+    dieses Schlüssels an deinen Server.
+  </Step>
+  <Step title="Der Server löst das Token ein">
+    Das Token wird verbraucht und Guard erhält seine Zugangsdaten. Homelab
+    speichert davon nur einen Hash. Sobald die Kopplung bestätigt ist, löscht
+    Guard das gehaltene Token.
+  </Step>
+  <Step title="Guard verbindet sich">
+    Ab jetzt trägt jede Anfrage von Guard ein kurzlebiges Token und einen mit
+    dem Serverschlüssel signierten Nachweis, sodass eine bloß kopierte
+    Zugangsdatei abgewiesen wird.
+  </Step>
+</Steps>
+
+## Was du siehst
+
+Die Fortschrittsseite zeigt **Not connected yet**, bis Guards erste Meldung
+eintrifft. Danach listet das Guard-Panel für den Server Fakten auf, jeweils
+mit dem Zeitpunkt der Beobachtung:
+
+| Fakt | Was er für die Kopplung bedeutet |
+| --- | --- |
+| **Bound** | Der Server weist seine Identität bei jeder Verbindung mit seinem eigenen Schlüssel nach |
+| **Connected** | Guard hat über seine authentifizierte Verbindung auf einen Befehl geantwortet |
+
+**Connected** erfordert einen Befehlsumlauf, nicht nur einen Heartbeat. Ein
+frisch gekoppelter Server kann bereits eingehende Meldungen zeigen und trotzdem
+auf die erste Operation warten, um die Verbindung zu bestätigen. Ein Fakt ohne
+frischen Nachweis wird als nicht nachgewiesen angezeigt, niemals als in Ordnung.
+
+## Einen Schlüssel bei einem älteren Guard freigeben
+
+Ein Guard, der installiert wurde, bevor es Host-Schlüssel gab, weist sich nur
+mit seinen Zugangsdaten aus. Er meldet weiter, arbeitet aber nur beobachtend:
+Homelab sendet ihm keine Änderungen. Nachdem du Guard auf dem Server
+aktualisiert hast, schlägt er seinen Schlüssel vor, und das Panel zeigt einen
+Fingerabdruck unter **Approve this server's key**.
+
+1. Lies auf dem Server den Schlüssel-Fingerabdruck aus, den Guard in sein Log
+   schreibt (`sudo journalctl -u homelab-agent`).
+2. Vergleiche ihn mit dem Fingerabdruck im Panel. Gib ihn nur frei, wenn beide
+   übereinstimmen.
+3. Wähle **Approve key**. Dafür ist eine frische Anmeldung mit einem zweiten
+   Faktor aus den letzten fünf Minuten nötig. Der Vorschlag bleibt 24 Stunden
+   offen; wähle **Reject key**, um ihn abzulehnen.
+
+## Wenn die Kopplung unterbrochen wird
+
+- **Der Befehl wurde abgebrochen oder die Verbindung ist abgerissen.** Führe
+  denselben Befehl erneut aus, solange sein Token noch gültig ist. Guard setzt
+  dieselbe Einbindung fort, statt von vorn zu beginnen.
+- **Das Token ist abgelaufen.** Wähle **Generate new command** und führe den
+  neuen aus. Ein neues Token mit demselben Serverschlüssel ersetzt nicht
+  bestätigte Zugangsdaten, sodass keine zwei Einträge für eine Maschine
+  entstehen.
+- **Der Server war bereits bestätigt.** Ein bestätigter Server wird niemals
+  übernommen. Ein anderer Schlüssel bindet sich als zusätzliche Maschine ein.
+- **Guard meldet ein Uhrzeit-Problem.** Nachweise werden jeweils einmal innerhalb
+  einer Minute zur Serveruhr akzeptiert. Eine falsche Uhrzeit zeigt den Grund
+  `proof_clock_skew`; korrigiere die Zeit auf dem Server.
+- **Ein Token wurde versehentlich kopiert oder gezeigt.** Lösche es mit
+  `homelab api pairing-tokens delete <id>`; siehe die Referenz
+  [homelab api pairing-tokens](/de/homelab/reference/cli/pairing-tokens).
+
+## Einen widerrufenen Server erneut koppeln
+
+Nach einem [Trennen oder Widerrufen](/de/homelab/guard/revoke-and-uninstall)
+wird der Server als widerrufen angezeigt und Guard führt nichts mehr aus. Um die
+Maschine erneut zu verwalten, erzeuge einen neuen Kopplungsbefehl und führe ihn
+aus. Die neue Kopplung ist eine neue Bindung in einer höheren Generation; prüfe
+danach die Fernzugriff-Einstellung des Servers, statt davon auszugehen, dass die
+vorherige übernommen wurde.
+
+<CardGroup cols={2}>
+  <Card title="Pairing-Befehl" icon="terminal" href="/de/homelab/pairing-command">
+    Voraussetzungen und die Schritte zum Ausführen des Befehls.
+  </Card>
+  <Card title="Was Guard sendet (englisch)" icon="database">
+    Welche Daten ein gekoppelter Server meldet (*What Guard sends and keeps*).
+  </Card>
+</CardGroup>

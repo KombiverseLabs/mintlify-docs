@@ -1,0 +1,119 @@
+---
+title: "安装你的第一个 homelab"
+description: "从一台闲置电脑到运行中的 Basement Kit 的直线路径，每一步之后都有检查"
+sidebarTitle: "第一个 homelab"
+icon: stopwatch
+---
+
+本页带你沿一条直线路径，从一台闲置电脑搭建出一个运行中的 Basement Kit。按顺序执行以下步骤。每一步都会说明你应该看到什么以及接下来做什么。当前公开版本距离首个可用应用的耗时尚未经过验证。
+
+<Note>
+  StackKits 目前处于 Beta 阶段。Beta 是在真实 homelab 上进行的测试，并非成品承诺。开始前请在[操作系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)中检查你操作系统的当前状态，并在完成后告诉我们结果如何。
+</Note>
+
+## 步骤 1：预检查
+
+在运行任何命令之前先逐项检查此列表。只要有一项是否定的，请在此停下，先阅读[开始之前](/zh-Hans/guides/stackkits/before-you-start)。
+
+- **一台由你操作的服务器。** 这台电脑归你所有，或者你获准在其上运行管理员命令。你可以在上面使用 `sudo`，或者你就是 root。你不需要 kombify 账户、信用卡或租用的服务器。
+- **一台闲置电脑。** 使用可以昼夜开机的电脑，例如一台迷你主机。不要使用存有重要数据或服务的机器：安装程序会修改防火墙和 SSH 等宿主机设置。
+- **足够的硬件。** Basement Kit 至少需要 2 核 CPU、4 GB 内存和 20 GB 可用磁盘空间；建议 4 核 CPU。已发布的测试运行均使用 amd64（x86-64）电脑。
+- **列表中的操作系统。** 电脑运行[操作系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)中所列的 Linux 系统。请阅读那里的状态列。标为 `unverified` 的行尚未在当前版本上完成测试运行。
+- **对宿主机的控制权。** 使用安装程序能够管理内核设置和防火墙的专用 Linux 机器或完整虚拟机。如果容器的宿主机屏蔽了这些设置，即使以 root 身份也无法走完此路径。
+- **你的家庭网络。** 电脑可以连接互联网以下载软件。你的手机或笔记本电脑与该电脑处于同一网络中。
+- **一个电子邮箱地址。** 安装程序会询问它以创建你的所有者登录账户。
+- **保存访问凭据的私密位置。** 安装过程会将它们写入 `.stackkit/access.json` 文件。现在就决定把它们保存在哪里，例如密码管理器中。
+
+## 步骤 2：运行安装程序
+
+在该电脑上打开终端并运行：
+
+{/* public-path:begin install-command */}
+```bash
+curl -sSL https://install.stackkit.cc | sh
+```
+{/* public-path:end install-command */}
+
+你应该看到的内容：
+
+1. 安装程序会打印它采用的值：安装模式 `auto`（Quick Install）、工作区 `~/my-homelab` 以及私有家庭地址（`*.lab.home`）。如需其他安装类型，请在运行命令前设置 `STACKKIT_INSTALL_MODE=guided` 或 `expert`；如需其他域名，请设置 `DOMAIN`。如需在生成后停止，请设置 `STACKKIT_SKIP_APPLY=1`。
+2. 它会询问你的邮箱地址，并从中提取登录用户名，例如从 `alex@example.com` 提取 `alex`。
+3. 它会显示一个使用场景列表。Files、Photos 和 Vault 默认已勾选。使用方向键和空格键更改选择，然后按 Enter。
+4. 它会下载 StackKits 及其所需软件，创建文件夹 `~/my-homelab`（在公网服务器上为 `~/my-cloud-homelab`，并在那里继续安装 Cloud Kit），检查配置并启动服务。
+
+当 `KOMBIFY_LANG` 或终端区域设置指定为 en、de、es、fr、hi、ar、zh-Hans 之一时，安装程序的提问和提示会使用你的语言。
+
+下载和启动阶段是耗时最长的部分。安装程序本身也会提醒，这一步可能会在几乎没有输出的情况下持续几分钟。在连接普通家庭宽带的常见迷你主机上，请预留几分钟时间。让它继续运行，不要关闭终端。
+
+完成后，你会看到 **Your homelab is running!**，随后是仪表板地址、核心服务以及后续步骤。
+
+<Warning>
+  如果安装程序因错误停止，在阅读完错误信息之前，不要再次运行该单行命令。请前往下方的“卡住了？获取帮助”部分。
+</Warning>
+
+## 步骤 3：验证安装
+
+在同一个终端中运行以下命令：
+
+```bash
+cd ~/my-homelab
+stackkit version
+stackkit logs latest --json
+```
+
+你应该看到的内容：
+
+- `stackkit version` 打印已安装的版本。
+- `stackkit logs latest --json` 报告本次安装的结果。
+
+在处于同一家庭网络中的手机或笔记本电脑上，打开安装程序打印出的 **Second device** 地址，例如 `http://<server-LAN-IP>/device/setup`。请复制实际地址；它也保存在 `.stackkit/access.json` 的 `secondDevice.setupUrl` 中。该设置页面在你的设备能够解析私有 homelab 域名之前通过 IP 打开。
+
+1. 在页面上选择你的设备类型，并按照其 DNS 和证书步骤操作。
+2. 在批准前，将公共 homelab CA 的 SHA-256 指纹与安装终端中的输出进行比对。在 Linux 上，还要在使用 `sudo` 运行之前，将整个下载的适配器文件的 SHA-256 与终端中的 **Linux adapter SHA-256** 进行比对。若不一致请立即停止。
+3. 打开页面链接的 HTTPS Hub。在新的 homelab 上，在链接的设置地址创建你的 Pocket ID 所有者通行密钥（passkey），然后登录并打开一个应用。
+
+在每台新设备上重复此设置。批准 DNS 和 CA 不会授予任何服务会话。这种私有家庭模式不需要修改路由器，也不需要 kombify 账户。公网域名和 kombify.me 部署会直接使用打印出的 HTTPS Hub，并需要各自完成域名注册和可达性配置。
+
+## 步骤 4：创建你的所有者登录
+
+按照安装程序打印出的后续步骤操作：
+
+1. 在它显示的设置地址中，于 PocketID 里创建你的所有者通行密钥。
+2. 在认证地址登录。
+3. 打开仪表板并完成保护配置。
+
+[StackKits Node Hub 指南](/zh-Hans/guides/stackkits/node-hub)详细说明了这些步骤。
+
+## 你的访问详情保存在哪里
+
+安装程序会将你的服务地址和配置详情写入电脑上 `~/my-homelab` 文件夹中的 `.stackkit/access.json`。要读取它们：
+
+```bash
+cat .stackkit/access.json
+```
+
+请妥善保密：
+
+- 切勿将 `.stackkit/access.json` 的内容或任何密码粘贴到聊天、Issue 或电子邮件中。这也包括发给 kombify 支持团队的消息。
+- 同样妥善对待终端中的安装程序输出。它可能包含登录详情。
+- 妥善保管 `~/my-homelab` 文件夹。任何托管的 kombify 账户都不会保存它的副本。
+
+## 卡住了？获取帮助
+
+- 使用 `stackkit logs latest --json` 查看错误，然后查阅[故障排除](/zh-Hans/guides/stackkits/troubleshooting)。
+- 仍然卡住？英文指南 *Get help* 列出了支持渠道以及需要附上哪些信息以便我们快速回复。
+- 完成了，或者中途放弃了？[告诉我们进展如何](https://github.com/kombifyio/StackKits/issues/new?template=pilot_report.yml)。每一份反馈都有帮助，哪怕很简短。
+
+## 继续
+
+<CardGroup cols={3}>
+  <Card title="Node Hub" icon="shield-halved" href="/zh-Hans/guides/stackkits/node-hub">
+    完成你的 homelab 首次运行保护。
+  </Card>
+  <Card title="备份与恢复" icon="clock-rotate-left" href="/zh-Hans/guides/stackkits/back-up-and-restore">
+    设置备份并尝试一次恢复。
+  </Card>
+  <Card title="快速入门" icon="rocket" href="/zh-Hans/stackkits/quickstart">
+    同样的安装过程，更详细地说明每一步做了什么。
+  </Card>
+</CardGroup>

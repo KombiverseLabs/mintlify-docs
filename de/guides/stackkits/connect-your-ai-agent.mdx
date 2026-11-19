@@ -1,0 +1,191 @@
+---
+title: "Deinen eigenen KI-Agenten verbinden"
+description: "Lass Claude Code, Codex oder Cursor dein Homelab über den lokalen stackkit-MCP-Server lesen und entscheide selbst, was er ändern darf"
+sidebarTitle: "KI-Agenten verbinden"
+icon: "robot"
+---
+
+Das Programm `stackkit-mcp` ist ein lokaler MCP-Server namens `stackkit`. Dein
+KI-Agent startet ihn auf dem Computer, auf dem dein Homelab-Workspace liegt.
+Standardmäßig darf der Agent lesen: Er kann die Dokumentation nachschlagen sowie
+Status, Verifizierung, Drift, Logs und Backups prüfen. Etwas ändern kann er
+erst, nachdem du ein Schreib-Gate einschaltest, und auch dann bestätigst du
+noch, was er tut.
+
+## Bevor du startest
+
+- Ein Homelab, das du mit dem StackKits-Installer eingerichtet hast, zum
+  Beispiel über
+  [In 10 Minuten installieren](/de/stackkits/install-in-10-minutes). Der
+  Workspace-Ordner heißt in dieser Anleitung `~/my-homelab`.
+- `stackkit-mcp` neben `stackkit` in deinem `PATH`. Der Installer legt beide
+  dort ab. Wenn du nur die Werkzeuge brauchst, installiere sie mit dem
+  Installer aus [Ein Kit auswählen](/de/guides/stackkits/choosing-a-kit):
+
+```bash
+curl -sSL https://install.stackkit.cc | sh
+command -v stackkit-mcp
+```
+
+Die Lifecycle-Werkzeuge (Status, Verifizieren, Drift, Backup-Status, Logs)
+erscheinen nur, wenn `stackkit-mcp` neben einem `stackkit` derselben Version
+liegt. Aktualisiere beide gemeinsam.
+
+Um aus der installierten Version eine direkt einfügbare Konfiguration für deinen
+Host auszugeben:
+
+```bash
+stackkit agent mcp-config --client codex
+```
+
+Verwende für diese Hosts `claude` oder `cursor` statt `codex`.
+
+## Claude Code
+
+Füge den Server für das aktuelle Projekt hinzu und prüfe ihn:
+
+```bash
+claude mcp add --transport stdio stackkit -- stackkit-mcp --mode docs,local,server,actions
+claude mcp list
+```
+
+In Claude Code zeigt der Befehl `/mcp` den Serverstatus. Derselbe Eintrag in
+einer Projektdatei `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "stackkit": {
+      "command": "stackkit-mcp",
+      "args": ["--mode", "docs,local,server,actions"]
+    }
+  }
+}
+```
+
+Quelle: [Claude-Code-MCP-Dokumentation](https://code.claude.com/docs/en/mcp).
+
+## Codex
+
+Füge diesen Block zu `~/.codex/config.toml` hinzu oder zu `.codex/config.toml`
+in einem vertrauenswürdigen Projekt. Der Schlüssel `cwd` legt den Workspace
+fest, auf dem die Werkzeuge arbeiten:
+
+```toml
+[mcp_servers.stackkit]
+command = "stackkit-mcp"
+args = ["--mode", "docs,local,server,actions"]
+cwd = "/home/you/my-homelab"
+```
+
+Prüfe ihn mit `codex mcp list`, oder öffne `/mcp` in der
+Codex-Terminaloberfläche. Quelle:
+[Codex-MCP-Dokumentation](https://learn.chatgpt.com/docs/extend/mcp).
+
+## Cursor
+
+Füge dies zu `.cursor/mcp.json` im Projekt hinzu oder zu `~/.cursor/mcp.json`
+für jedes Projekt:
+
+```json
+{
+  "mcpServers": {
+    "stackkit": {
+      "type": "stdio",
+      "command": "stackkit-mcp",
+      "args": ["--mode", "docs,local,server,actions"]
+    }
+  }
+}
+```
+
+Wenn der Server nicht startet, öffne das Output-Panel und wähle MCP Logs.
+Quelle: [Cursor-MCP-Dokumentation](https://cursor.com/docs/context/mcp).
+
+## Den Workspace benennen
+
+Die Werkzeuge arbeiten auf dem Workspace in dem Ordner, in dem der Server
+startet. Nur bei Codex kannst du diesen Ordner in der Konfiguration festlegen.
+Bei Claude Code und Cursor nenne den Ordner in deinem ersten Prompt. Die
+Lifecycle-Werkzeuge nehmen dafür die Eingabe `base_dir`.
+
+## ChatGPT
+
+ChatGPT bindet einen benutzerdefinierten MCP-Server über einen öffentlichen
+HTTPS-Endpunkt oder über OpenAIs Secure MCP Tunnel ein, nicht durch Starten
+eines lokalen Programms. Daher kann `stackkit-mcp` nicht direkt auf dieselbe
+Weise wie bei den drei obigen Hosts zu ChatGPT hinzugefügt werden. OpenAI
+dokumentiert, dass der Tunnel-Client einen lokalen stdio-Server erreichen kann.
+Diese Anleitung deckt keinen der beiden Wege ab und hat `stackkit-mcp` nicht
+mit ihnen getestet. Gib keinen StackKits-MCP-Endpunkt direkt ins öffentliche
+Internet frei. Siehe die OpenAI-Seiten
+[Connect and test your plugin](https://developers.openai.com/plugins/deploy/connect-chatgpt)
+und [Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels).
+
+## Ausprobieren
+
+Starte deinen Agenten und sende diesen Prompt:
+
+```text
+Use the stackkit tools, read only. My workspace is ~/my-homelab. Tell me what is
+running on my server and what needs attention. Check status, verification,
+drift and backups, and list the problems first.
+```
+
+## Den Agenten etwas ändern lassen
+
+Ohne Einstellung kann der Agent dein Homelab nicht ändern. Du hast zwei
+Möglichkeiten, Änderungen zu erlauben. Bevorzuge die zweite.
+
+**Schreib-Gate für alles.** Setze `STACKKIT_MCP_ALLOW_WRITE=true` in der
+Umgebung des Servers, zum Beispiel mit der Claude-Code-Option `--env`, der
+Codex-Tabelle `[mcp_servers.stackkit.env]` oder dem Cursor-Objekt `env`. Dann
+erscheinen die verändernden Werkzeuge. Jeder Aufruf muss dennoch die exakte
+Operation nennen und eine ausdrückliche Owner-Bestätigung mitführen; sag dem
+Agenten also, dass er dich vor diesem Aufruf fragen soll. Der Server kann deine
+Bestätigung nicht von der des Agenten unterscheiden, weshalb der zweite Weg
+sicherer ist.
+
+**Ein Credential pro Agent, mit deiner Bestätigung für jede Änderung.** Erstelle
+ein Credential für diesen Agenten aus dem Workspace und starte dann den Server
+damit:
+
+```bash
+mkdir -p ~/.config/stackkit
+stackkit -C ~/my-homelab agent credential mint --name my-agent --token-file ~/.config/stackkit/my-agent.token
+```
+
+Setze `STACKKIT_MCP_AGENT_CREDENTIAL_FILE` auf diese Datei und füge
+`--agent-workspace` mit dem Workspace-Ordner zu den Server-Argumenten hinzu. In
+Codex:
+
+```toml
+[mcp_servers.stackkit]
+command = "stackkit-mcp"
+args = ["--mode", "docs,local,server,actions", "--agent-workspace", "/home/you/my-homelab"]
+cwd = "/home/you/my-homelab"
+
+[mcp_servers.stackkit.env]
+STACKKIT_MCP_AGENT_CREDENTIAL_FILE = "/home/you/.config/stackkit/my-agent.token"
+```
+
+Mit einem Credential wird `STACKKIT_MCP_ALLOW_WRITE` ignoriert. Jeder
+verändernde Aufruf wird mit einer Bestätigungsanfrage abgelehnt, bis du genau
+diesen Aufruf in deinem eigenen Terminal bestätigst:
+
+```bash
+stackkit -C ~/my-homelab agent approval list
+stackkit -C ~/my-homelab agent approval approve <approval-id>
+```
+
+Eine Bestätigung gilt einmalig für diesen Agenten, diese Operation und genau
+diese Argumente, 15 Minuten lang. Der Agent wiederholt dann den identischen
+Aufruf. Der Server verweigert den Start mit einem unbekannten oder widerrufenen
+Credential, und ein widerrufenes Credential wird beim nächsten Aufruf des
+Agenten abgelehnt. Verwalte Credentials mit den
+[Agent-Befehlen](/de/stackkits/reference/cli/agent).
+
+## Verwandte Seiten
+
+- [StackKits-MCP-Connector](/de/stackkits/reference/mcp-connector)
+- [Ein StackKit betreiben](/de/stackkits/reference/day-2-operations)

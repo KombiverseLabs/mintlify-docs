@@ -1,0 +1,99 @@
+---
+title: "kombify Guard"
+description: "Verstehe, wie Serveridentität, autorisierte Operationen und Schutznachweise zusammenspielen"
+sidebarTitle: "Warum Guard wichtig ist"
+icon: "shield-halved"
+mode: "explanation"
+---
+
+kombify Guard ist die serverseitige Zuverlässigkeits- und Sicherheitskomponente
+von Homelab. Er verbindet einen eingebundenen Server mit seinem Owner,
+überwacht autorisierte Operationen und meldet, was passiert ist. Sein Wert
+liegt in der Verbindung von Konfiguration, Ausführung und Nachweis: Du kannst
+einen erreichbaren Server von einer geschützten Anwendung und einen
+Backup-Lauf von einer nachgewiesenen Wiederherstellung unterscheiden.
+
+<Note>
+Diese Seiten erklären die Architektur von Guard und die Bedeutung seiner
+Nachweise. Homelab steht vor 1.0; der verbundene und verwaltete Betrieb
+bleibt im Vorschau-Umfang. Verfügbare Operationen hängen vom installierten
+Release und dem Serverprofil ab. Siehe
+[Homelab-Verfügbarkeit](/de/homelab/availability) und die release-gebundene
+[homelab api CLI-Referenz](/de/homelab/reference/cli/overview).
+</Note>
+
+## Was sich für den Owner ändert
+
+| Situation | Was Guard nachzuweisen hilft | Was weiterhin einen eigenen Nachweis braucht |
+| --- | --- | --- |
+| Ein Server verbindet sich nach einem Strom- oder Netzausfall wieder | Welcher Server zurückgekehrt ist und welche Operationsergebnisse erfasst wurden | Ob die Anwendung und ihre Abhängigkeiten sich erholt haben |
+| Eine Firewall- oder SSH-Einstellung ändert sich | Die beobachtete Ausgangslage, Abweichungen und die für eine Reparatur nötige Autorität | Ob jede Anwendung passende Erreichbarkeit und Berechtigungen hat |
+| Eine Verbindung bricht während einer Operation ab | Ob die ursprüngliche Operation abgeschlossen ist, fehlgeschlagen ist oder einen unklaren Ausgang hat | Eine unklare Auswirkung muss vor einer weiteren Änderung geklärt werden |
+| Ein Backup ist abgeschlossen | Die protokollierten Backup- und Wiederherstellungsnachweise | Ob die benötigten Anwendungsdaten tatsächlich wiederhergestellt werden können |
+| Eine neue Guard-Version wird installiert | Artefaktprüfung, Aktivierung und Wiederherstellungsnachweise für dieses Profil | Eine Signatur allein beweist noch keinen gesunden Betrieb |
+
+Beispielsweise kann ein Fotodienst einen gesunden Web-Container haben, während
+seine Datenbank nicht verfügbar ist. Sein Host kann auch eine
+Sicherheits-Baseline erfüllen, während dieser Dienst einen unbeabsichtigten
+Endpunkt freigibt. Guards Schutzmodell hält diese Fakten getrennt, damit ein
+scheinbar gesunder Server kein Anwendungsproblem verdeckt.
+
+## Ein Betriebsmodell über Zuhause und Cloud hinweg
+
+Ein Homelab kann eigene Hardware zu Hause und gemietete Server umfassen.
+Homelab koordiniert diese Server; jeder Guard ist an genau einen Server
+gebunden. Das Design hält dieselben Identitäts-, Autorisierungs- und
+Nachweisgrenzen über alle Standorte hinweg ein.
+
+Ein selbst betriebenes Homelab kann seine Guards ohne ein gehostetes
+kombify-Konto steuern. Das Verbinden einer Installation mit gehosteten Diensten
+überträgt die Autorität des lokalen Owners nicht stillschweigend. Guard ist
+Teil von Homelab, ohne separates Produkt oder eigene Sicherheitsstufe.
+Eigenständiges StackKits bleibt unabhängig von Guard und Homelab. Siehe
+[Homelab-Betriebsmodi](/de/homelab/operating-modes).
+
+## So greifen die Zuständigkeiten ineinander
+
+| Komponente | Zuständigkeit |
+| --- | --- |
+| Homelab | Serverinventar, Zulassung von Operationen und Koordination über Server hinweg |
+| Guard | Serveridentität, lokale Überwachung zugelassener Arbeiten und Operationsnachweise |
+| StackKits | Gewünschte Host- und Anwendungskonfiguration, Lifecycle-Ausführung und Verantwortung für Node-Backup und -Wiederherstellung |
+| Anwendung | Eigene Daten, Berechtigungen und anwendungsspezifische Gesundheitsanforderungen |
+
+Ein KI-Assistent kann einen Befund erklären oder eine Operation vorschlagen. Er
+nutzt dieselben Autorisierungs- und Ausführungsgrenzen; eine Erklärung ist
+keine Erlaubnis, den Server zu ändern.
+
+## Was das Vertrauenszeichen bedeutet
+
+Guard basiert auf überprüfbaren Bedingungen, nicht auf der bloßen Anwesenheit
+eines laufenden Agenten. Einbindung, ein authentifizierter Befehlsumlauf,
+dauerhafte Operationen, gesicherte Konfiguration, Update-Stand, getestete
+Wiederherstellung und geregelte Erreichbarkeit brauchen jeweils eigene
+Nachweise. Unbekannte oder veraltete Nachweise können keinen Schutz belegen.
+Ein einzelner Gesamtindikator reicht nicht aus, um ein gesamtes Deployment zu
+qualifizieren.
+
+Guard beweist nicht, dass ein Server vor Kompromittierung sicher ist, dass
+jede Anwendung verwaltet wird oder dass keine Daten verloren gehen können. Sein
+praktisches Versprechen ist beobachtbarer Schutz und kontrollierte
+Wiederherstellung innerhalb eines erklärten Umfangs.
+
+<CardGroup cols={2}>
+  <Card title="Architektur und Operationswahrheit (englisch)" icon="diagram-project">
+    Wie Identität, dauerhafte Ergebnisse und Ausführungsgrenzen mit Fehlern umgehen (*Architecture and operation truth*).
+  </Card>
+  <Card title="Schutz- und Wiederherstellungsnachweise (englisch)" icon="clipboard-check">
+    Host- und Anwendungsabdeckung, Reparaturen und Wiederherstellungsaussagen verstehen (*Protection and recovery evidence*).
+  </Card>
+  <Card title="Einen Server koppeln" icon="link" href="/de/homelab/guard/pairing">
+    Was passiert, wenn ein Server eingebunden wird, und wie man eine unterbrochene Kopplung fortsetzt.
+  </Card>
+  <Card title="Was Guard sendet und speichert (englisch)" icon="database">
+    Welche Daten Guard meldet, wohin sie gehen, wie lange sie bleiben und was er niemals sendet (*What Guard sends and keeps*).
+  </Card>
+  <Card title="Widerrufen, trennen und deinstallieren" icon="plug-circle-xmark" href="/de/homelab/guard/revoke-and-uninstall">
+    Den Zugriff eines Servers beenden und Guard vom Host entfernen.
+  </Card>
+</CardGroup>

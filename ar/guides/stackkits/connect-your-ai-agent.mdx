@@ -1,0 +1,177 @@
+---
+title: "وصّل وكيل الذكاء الاصطناعي الخاص بك"
+description: "دع Claude Code أو Codex أو Cursor يقرأ خادمك المنزلي عبر خادم stackkit MCP المحلي، وقرر ما يمكنه تغييره"
+sidebarTitle: "توصيل وكيل ذكاء اصطناعي"
+icon: "robot"
+---
+
+البرنامج `stackkit-mcp` هو خادم MCP محلي اسمه `stackkit`. يشغّله وكيل الذكاء
+الاصطناعي الخاص بك على الحاسوب الذي يحتفظ بمساحة عمل خادمك المنزلي. افتراضياً
+يستطيع الوكيل القراءة: يمكنه الرجوع إلى الوثائق والتحقق من الحالة والتثبّت
+والانحراف والسجلات والنسخ الاحتياطية. ولا يستطيع تغيير شيء إلا بعد تفعيل بوابة
+الكتابة، وحتى عندها تظل أنت من يوافق على ما يفعله.
+
+## قبل أن تبدأ
+
+- خادم منزلي ثبّتّه بمثبّت StackKits، مثلاً من
+  [التثبيت في 10 دقائق](/ar/stackkits/install-in-10-minutes). مجلد مساحة
+  العمل هو `~/my-homelab` في هذا الدليل.
+- `stackkit-mcp` بجانب `stackkit` في `PATH` لديك. يضع المثبّت كليهما هناك.
+  وإذا كنت تحتاج الأدوات فقط، فثبّتها بالمثبّت من
+  [اختيار حزمة](/ar/guides/stackkits/choosing-a-kit):
+
+```bash
+curl -sSL https://install.stackkit.cc | sh
+command -v stackkit-mcp
+```
+
+لا تظهر أدوات دورة الحياة (الحالة، التحقق، الانحراف، حالة النسخ الاحتياطي،
+السجلات) إلا عندما يكون `stackkit-mcp` بجانب `stackkit` من الإصدار نفسه. حدّث
+كليهما معاً.
+
+لطباعة تهيئة جاهزة للصق لمضيفك من الإصدار المثبّت:
+
+```bash
+stackkit agent mcp-config --client codex
+```
+
+استخدم `claude` أو `cursor` بدلاً من `codex` لتلك المضيفات.
+
+## Claude Code
+
+أضف الخادم للمشروع الحالي وتحقق منه:
+
+```bash
+claude mcp add --transport stdio stackkit -- stackkit-mcp --mode docs,local,server,actions
+claude mcp list
+```
+
+داخل Claude Code، يعرض الأمر `/mcp` حالة الخادم. الإدخال نفسه في ملف
+`.mcp.json` للمشروع:
+
+```json
+{
+  "mcpServers": {
+    "stackkit": {
+      "command": "stackkit-mcp",
+      "args": ["--mode", "docs,local,server,actions"]
+    }
+  }
+}
+```
+
+المصدر: [وثائق Claude Code MCP](https://code.claude.com/docs/en/mcp).
+
+## Codex
+
+أضف هذه الكتلة إلى `~/.codex/config.toml`، أو إلى `.codex/config.toml` في
+مشروع موثوق. يحدد المفتاح `cwd` مساحة العمل التي تعمل عليها الأدوات:
+
+```toml
+[mcp_servers.stackkit]
+command = "stackkit-mcp"
+args = ["--mode", "docs,local,server,actions"]
+cwd = "/home/you/my-homelab"
+```
+
+تحقق منه بالأمر `codex mcp list`، أو افتح `/mcp` في واجهة طرفية Codex.
+المصدر: [وثائق Codex MCP](https://learn.chatgpt.com/docs/extend/mcp).
+
+## Cursor
+
+أضف هذا إلى `.cursor/mcp.json` في المشروع، أو إلى `~/.cursor/mcp.json` لكل
+مشروع:
+
+```json
+{
+  "mcpServers": {
+    "stackkit": {
+      "type": "stdio",
+      "command": "stackkit-mcp",
+      "args": ["--mode", "docs,local,server,actions"]
+    }
+  }
+}
+```
+
+إذا لم يبدأ الخادم، افتح لوحة Output واختر MCP Logs. المصدر:
+[وثائق Cursor MCP](https://cursor.com/docs/context/mcp).
+
+## تسمية مساحة العمل
+
+تعمل الأدوات على مساحة العمل في المجلد الذي يبدأ منه الخادم. وحده Codex يتيح
+لك ضبط هذا المجلد في تهيئته. أما لـ Claude Code وCursor، فاذكر المجلد في
+أول موجه لك. وتأخذ أدوات دورة الحياة مدخل `base_dir` لذلك.
+
+## ChatGPT
+
+يضيف ChatGPT خادم MCP مخصصاً عبر نقطة نهاية HTTPS عامة أو عبر Secure MCP
+Tunnel من OpenAI، لا عبر تشغيل برنامج محلي. لذلك لا يمكن إضافة
+`stackkit-mcp` إلى ChatGPT مباشرةً بالطريقة التي يُضاف بها إلى المضيفات
+الثلاثة أعلاه. وتوثّق OpenAI أن عميل النفق يستطيع الوصول إلى خادم stdio
+محلي. لا يغطي هذا الدليل أياً من المسارين ولم يختبر `stackkit-mcp` معهما. لا
+تكشف نقطة نهاية StackKits MCP مباشرةً للإنترنت العام. راجع صفحتي OpenAI
+[Connect and test your plugin](https://developers.openai.com/plugins/deploy/connect-chatgpt)
+و[Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels).
+
+## جرّبه
+
+ابدأ وكيلك وأرسل هذا الموجه:
+
+```text
+Use the stackkit tools, read only. My workspace is ~/my-homelab. Tell me what is
+running on my server and what needs attention. Check status, verification,
+drift and backups, and list the problems first.
+```
+
+## السماح للوكيل بتغيير شيء
+
+من دون أي إعداد، لا يستطيع الوكيل تغيير خادمك المنزلي. لديك طريقتان للسماح
+بالتغييرات. فضّل الثانية.
+
+**بوابة كتابة لكل شيء.** اضبط `STACKKIT_MCP_ALLOW_WRITE=true` في بيئة
+الخادم، مثلاً عبر خيار `--env` في Claude Code أو جدول
+`[mcp_servers.stackkit.env]` في Codex أو كائن `env` في Cursor. عندها تظهر
+الأدوات المغيّرة. ولا يزال يجب على كل استدعاء تسمية العملية الدقيقة وحمل
+موافقة صريحة من المالك، لذا اطلب من الوكيل أن يسألك قبل إجراء ذلك الاستدعاء.
+لا يستطيع الخادم التمييز بين موافقتك وموافقة الوكيل نفسه، ولهذا فإن الطريقة
+الثانية أكثر أماناً.
+
+**اعتماد واحد لكل وكيل، مع موافقتك على كل تغيير.** أنشئ اعتماداً لهذا
+الوكيل من مساحة العمل، ثم شغّل الخادم به:
+
+```bash
+mkdir -p ~/.config/stackkit
+stackkit -C ~/my-homelab agent credential mint --name my-agent --token-file ~/.config/stackkit/my-agent.token
+```
+
+اضبط `STACKKIT_MCP_AGENT_CREDENTIAL_FILE` على ذلك الملف وأضف
+`--agent-workspace` مع مجلد مساحة العمل إلى وسائط الخادم. في Codex:
+
+```toml
+[mcp_servers.stackkit]
+command = "stackkit-mcp"
+args = ["--mode", "docs,local,server,actions", "--agent-workspace", "/home/you/my-homelab"]
+cwd = "/home/you/my-homelab"
+
+[mcp_servers.stackkit.env]
+STACKKIT_MCP_AGENT_CREDENTIAL_FILE = "/home/you/.config/stackkit/my-agent.token"
+```
+
+مع الاعتماد، يُتجاهل `STACKKIT_MCP_ALLOW_WRITE`. ويُرفض كل استدعاء مُغيّر
+بطلب موافقة حتى توافق على ذلك الاستدعاء الدقيق في طرفيتك أنت:
+
+```bash
+stackkit -C ~/my-homelab agent approval list
+stackkit -C ~/my-homelab agent approval approve <approval-id>
+```
+
+تغطي الموافقة ذلك الوكيل وتلك العملية وتلك الوسائط الدقيقة، مرة واحدة، لمدة
+15 دقيقة. ثم يكرر الوكيل الاستدعاء المطابق. ويرفض الخادم البدء باعتماد غير
+معروف أو ملغى، ويُرفض الاعتماد الملغى في استدعاء الوكيل التالي. أدر
+الاعتمادات باستخدام [أوامر agent](/ar/stackkits/reference/cli/agent).
+
+## صفحات ذات صلة
+
+- [موصّل StackKits MCP](/ar/stackkits/reference/mcp-connector)
+- [تشغيل StackKit](/ar/stackkits/reference/day-2-operations)

@@ -1,0 +1,190 @@
+---
+title: "Instala tu primer homelab"
+description: "Un camino lineal desde un ordenador libre hasta un Basement Kit en funcionamiento, con comprobaciones tras cada paso"
+sidebarTitle: "Primer homelab"
+icon: stopwatch
+---
+
+Esta página te lleva desde un ordenador libre hasta un Basement Kit en
+funcionamiento por un camino recto. Sigue los pasos en orden. Cada paso indica
+qué deberías ver y qué hacer a continuación. El tiempo hasta la primera
+aplicación en funcionamiento aún no se ha verificado para la versión pública
+actual.
+
+<Note>
+  StackKits está en Beta. La Beta es una prueba con homelabs reales, no la
+  promesa de un producto terminado. Comprueba el estado actual de tu sistema
+  operativo en [Compatibilidad de SO](/es/stackkits/reference/os-compatibility)
+  antes de empezar, y cuéntanos después qué ocurrió.
+</Note>
+
+## Paso 1: Comprobación previa
+
+Revisa esta lista antes de ejecutar nada. Si algún punto es un «no», detente
+aquí y lee primero
+[Antes de empezar](/es/guides/stackkits/before-you-start).
+
+- **Un servidor que operas tú.** El ordenador es tuyo o tienes permiso para
+  ejecutar comandos de administrador en él. Puedes usar `sudo` allí o eres root.
+  No necesitas una cuenta de kombify, ni tarjeta de crédito, ni un servidor
+  alquilado.
+- **Un ordenador libre.** Usa un ordenador que pueda permanecer encendido día y
+  noche, por ejemplo un mini PC. No uses una máquina con datos o servicios
+  importantes: la configuración cambia ajustes del host como el cortafuegos y
+  SSH.
+- **Suficiente hardware.** El Basement Kit necesita al menos 2 núcleos de CPU,
+  4 GB de memoria y 20 GB de espacio libre en disco; se recomiendan 4 núcleos
+  de CPU. Las pruebas publicadas usaron ordenadores amd64 (x86-64).
+- **Un sistema operativo de la lista.** El ordenador ejecuta Linux con un
+  sistema de [Compatibilidad de SO](/es/stackkits/reference/os-compatibility).
+  Lee allí la columna de estado. Una fila marcada como `unverified` aún no tiene
+  una prueba completada en la versión actual.
+- **Control del host.** Usa una máquina Linux dedicada o una máquina virtual
+  completa donde el instalador pueda gestionar los ajustes del kernel y el
+  cortafuegos. Un contenedor cuyo host bloquee esos ajustes no puede completar
+  este camino, ni siquiera como root.
+- **Tu red doméstica.** El ordenador tiene acceso a internet para las
+  descargas. Tu teléfono o portátil está en la misma red que el ordenador.
+- **Una dirección de correo electrónico.** El instalador la pide para crear tu
+  inicio de sesión de propietario.
+- **Un lugar privado para los datos de acceso.** La configuración los escribe
+  en el archivo `.stackkit/access.json`. Decide ahora dónde los guardarás, por
+  ejemplo en un gestor de contraseñas.
+
+## Paso 2: Ejecuta el instalador
+
+Abre una terminal en el ordenador y ejecuta:
+
+{/* public-path:begin install-command */}
+```bash
+curl -sSL https://install.stackkit.cc | sh
+```
+{/* public-path:end install-command */}
+
+Qué deberías ver:
+
+1. El instalador muestra los valores que toma: modo de instalación `auto`
+   (Quick Install), el espacio de trabajo `~/my-homelab` y las direcciones
+   privadas del hogar (`*.lab.home`). Para otro tipo de instalación, define
+   `STACKKIT_INSTALL_MODE=guided` o `expert` antes de ejecutar el comando; para
+   otro dominio, define `DOMAIN`. Para detenerte después de generate, define
+   `STACKKIT_SKIP_APPLY=1`.
+2. Pide tu dirección de correo electrónico y toma de ella el nombre de usuario
+   de inicio de sesión, por ejemplo `alex` de `alex@example.com`.
+3. Muestra una lista de casos de uso. Files, Photos y Vault vienen marcados por
+   defecto. Usa las flechas y la barra espaciadora para cambiar la selección, y
+   luego pulsa Enter.
+4. Descarga StackKits y el software que necesita, crea la carpeta
+   `~/my-homelab` (`~/my-cloud-homelab` en un servidor público, donde continúa
+   con Cloud Kit), comprueba la configuración e inicia los servicios.
+
+Las preguntas y avisos del instalador siguen tu idioma cuando `KOMBIFY_LANG` o
+la configuración regional de la terminal indican uno de en, de, es, fr, hi,
+ar, zh-Hans.
+
+La fase de descarga y arranque es la parte más larga. El propio instalador
+advierte de que puede tardar varios minutos con poca salida en pantalla. En un
+mini PC típico con una conexión doméstica normal, cuenta con unos minutos.
+Déjalo ejecutarse y no cierres la terminal.
+
+Cuando termina, ves **Your homelab is running!** seguido de una dirección del
+panel, los servicios principales y los siguientes pasos.
+
+<Warning>
+  Si el instalador se detiene con un error, no ejecutes el comando de una sola
+  línea una segunda vez antes de haber leído el error. Ve a la sección
+  «¿Atascado? Consigue ayuda» más abajo.
+</Warning>
+
+## Paso 3: Verifica la instalación
+
+Ejecuta estos comandos en la misma terminal:
+
+```bash
+cd ~/my-homelab
+stackkit version
+stackkit logs latest --json
+```
+
+Qué deberías ver:
+
+- `stackkit version` imprime la versión instalada.
+- `stackkit logs latest --json` informa del resultado de la configuración.
+
+En un teléfono o portátil en la misma red doméstica, abre la dirección
+**Second device** impresa por el instalador, como
+`http://<server-LAN-IP>/device/setup`. Copia la dirección real; también está
+en `secondDevice.setupUrl` dentro de `.stackkit/access.json`. Esta página de
+configuración se abre por IP antes de que tu dispositivo pueda resolver nombres
+privados del homelab.
+
+1. Elige tu tipo de dispositivo en la página y sigue sus pasos de DNS y
+   certificado.
+2. Compara la huella SHA-256 de la CA pública del homelab con la terminal de
+   instalación antes de aprobarla. En Linux, compara también el SHA-256 del
+   archivo adaptador completo descargado con **Linux adapter SHA-256** en la
+   terminal antes de ejecutarlo con `sudo`. Detente si no coincide.
+3. Abre el HTTPS Hub enlazado por la página. En un homelab nuevo, crea tu
+   passkey de propietario en Pocket ID en la dirección de configuración enlazada,
+   luego inicia sesión y abre una aplicación.
+
+Repite esta configuración en cada dispositivo nuevo. La aprobación de DNS y CA no
+otorga ninguna sesión de servicio. No hace falta ningún cambio en el router ni
+una cuenta de kombify para este modo privado doméstico. Las configuraciones con
+dominio público y kombify.me usan directamente su HTTPS Hub impreso y requieren
+su propio registro de dominio y configuración de alcance.
+
+## Paso 4: Crea tu inicio de sesión de propietario
+
+Sigue los próximos pasos que imprimió el instalador:
+
+1. Crea tu passkey de propietario en PocketID en la dirección de configuración
+   que muestra.
+2. Inicia sesión en la dirección de autenticación.
+3. Abre el panel y termina de protegerlo.
+
+La [guía de Node Hub](/es/guides/stackkits/node-hub) explica estos pasos en
+detalle.
+
+## Dónde están tus datos de acceso
+
+La configuración escribe las direcciones de tus servicios y los detalles de
+configuración en `.stackkit/access.json` dentro de la carpeta `~/my-homelab` en
+el ordenador. Para leerlos:
+
+```bash
+cat .stackkit/access.json
+```
+
+Mantenlos en privado:
+
+- Nunca pegues el contenido de `.stackkit/access.json` ni ninguna contraseña en
+  un chat, una incidencia o un correo electrónico. Eso incluye los mensajes al
+  soporte de kombify.
+- Trata del mismo modo la salida del instalador en tu terminal. Puede mostrar
+  datos de inicio de sesión.
+- Mantén privada la carpeta `~/my-homelab`. Ninguna cuenta alojada de kombify
+  guarda una copia de ella.
+
+## ¿Atascado? Consigue ayuda
+
+- Lee el error con `stackkit logs latest --json` y luego consulta
+  [Solución de problemas](/es/guides/stackkits/troubleshooting).
+- ¿Sigues atascado? La guía en inglés *Get help* enumera los canales de soporte
+  y qué incluir para que podamos responder rápidamente.
+- ¿Terminaste, o lo dejaste a mitad de camino? [Cuéntanos cómo fue](https://github.com/kombifyio/StackKits/issues/new?template=pilot_report.yml).
+  Cada informe ayuda, también uno breve.
+
+## Continuar
+
+<CardGroup cols={3}>
+  <Card title="Node Hub" icon="shield-halved" href="/es/guides/stackkits/node-hub">
+    Completa la protección inicial de tu homelab.
+  </Card>
+  <Card title="Copia de seguridad y restauración" icon="clock-rotate-left" href="/es/guides/stackkits/back-up-and-restore">
+    Configura una copia de seguridad y prueba una restauración.
+  </Card>
+  <Card title="Inicio rápido" icon="rocket" href="/es/stackkits/quickstart">
+    La misma instalación con más detalle sobre lo que hace.
+  </Card>
+</CardGroup>

@@ -1,0 +1,66 @@
+---
+title: "kombify Guard"
+description: "了解服务器身份、授权操作和保护证据如何协同工作"
+sidebarTitle: "为什么 Guard 很重要"
+icon: "shield-halved"
+mode: "explanation"
+---
+
+kombify Guard 是 Homelab 在服务器端的可靠性与安全组件。它将已纳管的服务器与其所有者连接起来，监督授权操作，并汇报执行结果。它的价值在于把配置、执行与证据联系起来：你可以区分一台可达的服务器与一个受保护的应用，也可以区分一次备份任务与一次经过验证的恢复。
+
+<Note>
+这些页面解释了 Guard 的架构及其证据的含义。Homelab 目前处于 1.0 之前；已连接和托管运行模式仍属于预览范围。可用操作取决于所安装的版本以及服务器配置文件。请参阅 [Homelab 可用性](/zh-Hans/homelab/availability)以及随版本绑定的 [homelab api CLI 参考](/zh-Hans/homelab/reference/cli/overview)。
+</Note>
+
+## 对所有者而言有何不同
+
+| 情况 | Guard 帮助确立什么 | 什么仍然需要独立验证 |
+| --- | --- | --- |
+| 服务器在断电或断网后重新连回 | 哪台服务器重新上线以及记录了哪些操作结果 | 应用及其依赖是否已恢复 |
+| 防火墙或 SSH 设置发生变更 | 观察到的基线、偏移以及执行修复所需的权限 | 每个应用是否具备恰当的暴露范围和权限 |
+| 连接在操作期间断开 | 原操作是否完成、失败或结果不确定 | 不确定的影响必须在下次变更前加以核对 |
+| 备份完成 | 已记录的备份与恢复证据 | 所需的应用数据是否确实可以恢复 |
+| 安装新的 Guard 版本 | 该配置文件的产物校验、激活和恢复证据 | 仅凭签名不能证明运行健康 |
+
+例如，一个照片服务可能拥有健康的 Web 容器，但其数据库却不可用；宿主机也可能符合安全基线，但该服务却暴露了一个非预期的端点。Guard 的保护模型将这些事实分开记录，避免一台看似健康的服务器掩盖应用问题。
+
+## 跨本地与云端的统一运行模型
+
+一个 homelab 可以横跨家中的本地硬件与租用的服务器。Homelab 协调这些服务器；每个 Guard 只绑定到一台服务器。该设计在所有部署位置上保持相同的身份、授权与证据边界。
+
+自托管的 Homelab 无需托管的 kombify 账户即可控制其 Guard。将安装实例连接到托管服务并不会隐式转移本地所有者的权限。Guard 是 Homelab 的一部分，没有单独的产品或单独的安全层级。独立的 StackKits 仍然独立于 Guard 和 Homelab。请参阅 [Homelab 运行模式](/zh-Hans/homelab/operating-modes)。
+
+## 职责如何衔接
+
+| 组件 | 职责 |
+| --- | --- |
+| Homelab | 服务器清单、操作准入以及跨服务器协调 |
+| Guard | 服务器身份、对已准入工作的本地监督以及操作证据 |
+| StackKits | 期望的主机与应用配置、生命周期执行以及节点备份与恢复托管 |
+| 应用 | 自身数据、权限以及特定于应用的健康要求 |
+
+AI 助手可以解释发现的问题或提议一项操作。它遵循相同的授权和执行边界；解释本身并不构成修改服务器的权限。
+
+## 信任标志的含义
+
+Guard 建立在可验证的条件之上，而不是仅仅看是否有一个代理正在运行。纳管注册、经过身份验证的命令往返、持久化操作、受保护的配置、更新态势、经过测试的恢复以及受治理的可达性，各自都需要自己的证据。未知或过期的证据不能确立保护状态。仅凭一个汇总指标不足以判定整个部署合格。
+
+Guard 并不证明服务器绝对不会被攻破、每个应用都受管，也不保证数据绝对不会丢失。它提供的实用承诺是在声明的范围内实现可观测的保护和可控的恢复。
+
+<CardGroup cols={2}>
+  <Card title="架构与操作事实（英文）" icon="diagram-project">
+    身份、持久化结果和执行边界如何处理故障（*Architecture and operation truth*）。
+  </Card>
+  <Card title="保护与恢复证据（英文）" icon="clipboard-check">
+    了解主机与应用覆盖范围、修复以及恢复声明（*Protection and recovery evidence*）。
+  </Card>
+  <Card title="配对服务器" icon="link" href="/zh-Hans/homelab/guard/pairing">
+    服务器纳管注册时发生什么，以及如何恢复中断的配对。
+  </Card>
+  <Card title="Guard 发送和保留的内容（英文）" icon="database">
+    Guard 汇报的数据、去向、保留时长以及它从不发送的内容（*What Guard sends and keeps*）。
+  </Card>
+  <Card title="撤销、分离与卸载" icon="plug-circle-xmark" href="/zh-Hans/homelab/guard/revoke-and-uninstall">
+    终止服务器的访问权限并将 Guard 从主机上移除。
+  </Card>
+</CardGroup>

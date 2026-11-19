@@ -1,0 +1,117 @@
+---
+title: "Emparejar un servidor con Guard"
+description: "Qué ocurre cuando se da de alta un servidor, qué revisas y apruebas, y cómo recuperar un emparejamiento interrumpido o revocado"
+sidebarTitle: "Emparejar un servidor"
+icon: "link"
+---
+
+El emparejamiento es la forma en que un servidor pasa a ser tuyo en Homelab.
+Esta página lo sigue desde tu lado: qué inicias, qué hace el servidor, qué
+confirmas y cómo recuperarte cuando algo se detiene a mitad de camino. Para
+ejecutar el comando en sí, usa el
+[Comando de emparejamiento](/es/homelab/pairing-command); para conectar por
+SSH en su lugar, consulta
+[Conectar un servidor por SSH](/es/homelab/ssh-connection). Ambos instalan el
+mismo Guard.
+
+<Note>
+Homelab es previo a la versión 1.0 y la operación conectada está en vista
+previa; consulta [Disponibilidad de Homelab](/es/homelab/availability).
+Detalles como el paso de aprobación de clave dependen de la versión de Guard
+instalada en el servidor.
+</Note>
+
+## Qué ocurre, en orden
+
+<Steps>
+  <Step title="Inicias el emparejamiento">
+    En el asistente Add Node, Homelab crea un token personal de
+    emparejamiento. Funciona una vez y caduca tras 15 minutos.
+  </Step>
+  <Step title="El servidor instala Guard">
+    El comando descarga Guard desde tu propio Homelab, no desde un espejo
+    público, y lo verifica contra la suma de comprobación servida en la misma
+    respuesta. La verificación de firma empieza con la primera actualización de
+    Guard, de modo que la primera instalación confía en la conexión a tu
+    Homelab.
+  </Step>
+  <Step title="El servidor crea su propia clave">
+    Guard genera una clave de identidad en el servidor. La clave permanece en el
+    servidor. Homelab vincula la huella pública de esa clave a tu servidor.
+  </Step>
+  <Step title="El servidor canjea el token">
+    El token se consume y Guard recibe su credencial. Homelab solo conserva un
+    hash de ella. Una vez confirmado el emparejamiento, Guard borra el token que
+    retenía.
+  </Step>
+  <Step title="Guard se conecta">
+    A partir de ahora cada petición que hace Guard lleva un token de corta
+    duración y una prueba firmada con la clave del servidor, de modo que una
+    credencial simplemente copiada es rechazada.
+  </Step>
+</Steps>
+
+## Qué ves
+
+La página de progreso muestra **Not connected yet** hasta que llega el primer
+informe de Guard. Después, el panel de Guard para el servidor enumera hechos,
+cada uno con el momento en que fue observado:
+
+| Hecho | Qué significa para el emparejamiento |
+| --- | --- |
+| **Bound** | El servidor demuestra su identidad con su propia clave en cada conexión |
+| **Connected** | Guard respondió a un comando sobre su conexión autenticada |
+
+**Connected** necesita un viaje de ida y vuelta de comando, no solo un latido.
+Un servidor recién emparejado puede mostrar informes entrando y aun así esperar
+la primera operación para confirmar la conexión. Un hecho sin evidencia reciente
+se muestra como sin evidencia, nunca como correcto.
+
+## Aprobar una clave en un Guard antiguo
+
+Un Guard instalado antes de que existieran las claves de host se identifica solo
+con su credencial. Sigue reportando, pero es de solo observación: Homelab no
+le envía cambios. Después de actualizar Guard en el servidor, propone su clave
+y el panel muestra una huella bajo **Approve this server's key**.
+
+1. En el servidor, lee la huella de la clave que Guard escribe en su registro
+   (`sudo journalctl -u homelab-agent`).
+2. Compárala con la huella en el panel. Aprueba solo si coinciden.
+3. Selecciona **Approve key**. Esto requiere un inicio de sesión reciente con
+   un segundo factor de los últimos cinco minutos. La propuesta permanece
+   abierta 24 horas; selecciona **Reject key** para rechazarla.
+
+## Si el emparejamiento se interrumpe
+
+- **El comando se cortó o la conexión cayó.** Ejecuta de nuevo el mismo comando
+  mientras su token siga siendo válido. Guard reanuda la misma alta en lugar de
+  empezar de cero.
+- **El token caducó.** Selecciona **Generate new command** y ejecuta el nuevo.
+  Un token nuevo con la misma clave de servidor sustituye una credencial que
+  nunca se confirmó, así que no acabas con dos entradas para una misma máquina.
+- **El servidor ya estaba confirmado.** Un servidor confirmado nunca se
+  sobrescribe. Una clave distinta se da de alta como una máquina adicional.
+- **Guard informa un problema de reloj.** Las pruebas se aceptan dentro de un
+  minuto del reloj del servidor, una vez cada una. Un reloj incorrecto muestra
+  el motivo `proof_clock_skew`; corrige la hora en el servidor.
+- **Un token se copió o mostró por error.** Bórralo con
+  `homelab api pairing-tokens delete <id>`; consulta la referencia de
+  [homelab api pairing-tokens](/es/homelab/reference/cli/pairing-tokens).
+
+## Volver a emparejar un servidor revocado
+
+Después de [desvincular o revocar](/es/homelab/guard/revoke-and-uninstall), el
+servidor aparece como revocado y Guard deja de ejecutar. Para volver a
+gestionar la máquina, crea un nuevo comando de emparejamiento y ejecútalo. El
+nuevo emparejamiento es un nuevo vínculo en una generación superior, así que
+revisa después el ajuste de alcance remoto del servidor en lugar de dar por
+sentado que el anterior se mantuvo.
+
+<CardGroup cols={2}>
+  <Card title="Comando de emparejamiento" icon="terminal" href="/es/homelab/pairing-command">
+    Requisitos previos y pasos para ejecutar el comando.
+  </Card>
+  <Card title="Qué envía Guard (en inglés)" icon="database">
+    Los datos que reporta un servidor emparejado (*What Guard sends and keeps*).
+  </Card>
+</CardGroup>

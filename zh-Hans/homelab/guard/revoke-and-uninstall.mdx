@@ -1,0 +1,110 @@
+---
+title: "撤销、分离与卸载 Guard"
+description: "终止服务器的访问权限、了解其 kombify.me 地址和 Connect 记录的变化，并将 Guard 从主机上移除"
+sidebarTitle: "撤销与卸载"
+icon: "plug-circle-xmark"
+---
+
+你可以无需触碰机器就终止 Guard 对你 homelab 的访问权限，也可以只停用已发布的地址，或者将 Guard 从主机上移除。本页分别说明每种方式、它会终止什么以及会保留什么。
+
+<Note>
+Homelab 处于 1.0 之前，已连接运行模式属于预览范围；请参阅 [Homelab 可用性](/zh-Hans/homelab/availability)。分离适用于你自己运营的服务器。由 kombify 为你准备的服务器（请参阅[托管服务器](/zh-Hans/homelab/managed-servers)）不能通过这种方式分离。
+</Note>
+
+## 选择你想终止的内容
+
+| 我想 | 使用 | 效果 |
+| --- | --- | --- |
+| 彻底停止管理某台服务器 | **Detach server** | 撤销 Guard 的凭据和主机密钥，并终止远程访问与 Connect 列表条目 |
+| 替换我认为已泄露的凭据 | **Rotate credential** | 旧凭据停止被接受；新凭据只显示一次 |
+| 下线已发布的地址但保留服务器 | **Stop publishing** | 仅撤回 kombify.me 路由 |
+| 取消尚未使用过的配对命令 | 删除配对令牌 | 该命令停止生效 |
+
+## 分离服务器
+
+打开该服务器的 Guard 面板并选择 **Detach server**，然后选择 **Detach and revoke**。或者运行 `homelab api servers detach <server-id>` 并带上 `--confirm-server-id <server-id>`。
+
+确认参数必须重复完全一致的服务器 ID；请参阅 [homelab api servers](/zh-Hans/homelab/reference/cli/servers) 命令参考。
+
+Homelab 会在一步中撤销：
+
+- Guard 的凭据；
+- 服务器的主机密钥身份；
+- 服务器的 kombify.me 地址及其 kombify Connect 列表条目。
+
+此操作不会在你的机器上运行任何内容。机器本身、其容器及其数据都不会被触碰，也不会调用任何托管商。服务器记录会作为已分离记录保留在 Homelab 中。
+
+此操作无法从面板撤销。如需重新管理该服务器，请重新配对（请参阅[配对服务器](/zh-Hans/homelab/guard/pairing)）。
+
+### 地址与列表条目的变化
+
+分离会终止服务器的可达性：其 kombify.me 路由会被撤销，并从你在 kombify Connect 的设备中移除。撤销会持续重试，直到两边都确认；在此之前，服务器会显示类似 “Ending access has not finished everywhere yet. It is retried.” 的原因。名称可能会短暂保留，但它不再能通往你的服务器，并将返回错误。从 kombify Connect 中撤销设备则具有相反的效果：它同样会终止 Guard 对 Homelab 的访问。
+
+### 服务器上发生的变化
+
+已分离的 Guard 下次联系 Homelab 时，会被以 `guard_identity_revoked` 拒绝，并结束其本地状态：
+
+- 销毁其身份密钥以及持有的凭据，包括仍保留的任何配对令牌；
+- 移除排队中的遥测数据；
+- 删除 Homelab 已确认的操作记录。
+
+Homelab 从未确认过的记录会被保留，因为它们无法重新生成。Guard 会记录还剩多少条。请保留或导出 Guard 状态目录（`/var/lib/homelab/guard`），然后再将其删除。不再持有任何密钥的 Guard 会保持空闲状态。新的配对命令会从头开始。
+
+## 轮换凭据
+
+**Rotate credential** 会签发一个替换凭据（仅显示一次），旧凭据随即停止被接受。请在关闭对话框之前将新凭据复制到服务器上的 Guard。
+
+## 发布或停止发布地址
+
+已配对的服务器默认没有公共路由。在你为该服务器开启之前，不会发布任何内容，中继服务在此之前也不会转发任何流量。
+
+1. 在 Guard 面板的 **Publish at a kombify.me address** 下，输入 **Service name** 和 **Port on this server**。
+2. 选择 **Publish**。这需要过去五分钟内使用第二因素完成的新鲜登录。
+
+该端口位于服务器自身的回环接口上。互联网上的任何人都可以打开该地址，且中继服务验证的是 Guard 而非访问者，因此请只发布自身具备保护机制的服务。随时选择 **Stop publishing** 即可撤回；撤回从不需要第二因素。此选项仅在已连接的安装实例中可用。有关地址的工作方式，请参阅 [kombify.me](/zh-Hans/kombify-me/overview)。
+
+## 从主机上移除 Guard
+
+当前版本在 Linux 上没有打包好的 Guard 卸载命令。请先执行分离，使 Homelab 不再信任该服务器，并让 Guard 销毁其密钥。随后移除软件是一个手动步骤。
+
+<Warning>
+请仅在分离服务器，并保留或导出 Guard 状态目录中所有未确认的操作记录之后，再执行此操作。这些步骤仅移除 Guard，不会移除 Docker、你的 StackKits 部署或你的应用。
+</Warning>
+
+Guard 会在主机上放置以下内容：
+
+| 内容 | 位置 |
+| --- | --- |
+| Guard 守护进程及其 unit | `/usr/local/bin/homelab`、`homelab-agent.service` |
+| 特权执行器及其 unit | `/usr/local/libexec/homelab-stackkit-operations`、`homelab-guard-executor.socket`、`homelab-guard-executor@.service` |
+| 凭据与配置 | `/etc/homelab` |
+| 状态、日志与缓存 | `/var/lib/homelab`、`/var/lib/homelab-guard-executor`、`/var/log/homelab` |
+| 系统用户 | `kombify-guard` |
+
+要移除 Guard，请以管理员身份按以下顺序执行步骤：
+
+1. 停止并禁用服务：
+   `sudo systemctl disable --now homelab-agent.service homelab-guard-executor.socket`。
+2. 从 `/etc/systemd/system` 删除 unit 文件 `homelab-agent.service`、`homelab-agent.service.legacy`、`homelab-guard-executor.socket` 和 `homelab-guard-executor@.service`，然后运行 `sudo systemctl daemon-reload`。
+3. 删除上面列出的两个可执行文件。
+4. 删除上面列出的凭据、状态和日志目录。
+5. 使用 `sudo userdel kombify-guard` 删除系统用户。
+
+从未切换到权限分离布局的主机只会有守护进程 unit，而没有 `kombify-guard` 用户，因此针对其他项目的步骤会提示不存在。这属于预期情况。
+
+### 保留下来的内容
+
+移除 Guard 不会移除 StackKits 或你通过它安装的内容：
+
+- Docker 以及你的容器、卷和应用数据；
+- StackKits 运行时与工作区。可使用 [stackkit remove](/zh-Hans/stackkits/reference/cli/remove) 命令移除 StackKits 部署；
+- 已发布的地址。仅移除 Guard 不会撤回它，因此请先选择 **Stop publishing** 或分离服务器。
+
+<CardGroup cols={2}>
+  <Card title="Guard 发送的内容（英文）" icon="database">
+    服务器配对期间汇报了什么，以及保留多长时间（*What Guard sends and keeps*）。
+  </Card>
+  <Card title="配对服务器" icon="link" href="/zh-Hans/homelab/guard/pairing">
+    将已分离的服务器重新纳入管理。
+  </Card>
+</CardGroup>

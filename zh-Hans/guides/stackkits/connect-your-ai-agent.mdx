@@ -1,0 +1,140 @@
+---
+title: "连接你自己的 AI 代理"
+description: "让 Claude Code、Codex 或 Cursor 通过本地 stackkit MCP 服务器读取你的 homelab，并由你决定它能更改什么"
+sidebarTitle: "连接 AI 代理"
+icon: "robot"
+---
+
+`stackkit-mcp` 程序是一个名为 `stackkit` 的本地 MCP 服务器。你的 AI 代理会在存放你 homelab 工作区的电脑上启动它。默认情况下代理可以读取：它可以查阅文档，并检查状态、验证结果、配置漂移、日志和备份。只有在你开启写入开关之后它才能更改内容，而且即便如此，它所做的操作仍然需要你的批准。
+
+## 开始之前
+
+- 一个你通过 StackKits 安装程序安装的 homelab，例如按照[10 分钟内安装](/zh-Hans/stackkits/install-in-10-minutes)搭建的实例。本指南中的工作区文件夹为 `~/my-homelab`。
+- 在你的 `PATH` 中，`stackkit-mcp` 位于 `stackkit` 旁边。安装程序会将两者都放在那里。如果你只需要这些工具，请使用[选择套件](/zh-Hans/guides/stackkits/choosing-a-kit)中的安装程序安装：
+
+```bash
+curl -sSL https://install.stackkit.cc | sh
+command -v stackkit-mcp
+```
+
+生命周期工具（状态、验证、漂移、备份状态、日志）只有在 `stackkit-mcp` 与同一版本的 `stackkit` 位于同一位置时才会出现。请将两者一起更新。
+
+要从已安装版本打印可直接粘贴到宿主机中的配置：
+
+```bash
+stackkit agent mcp-config --client codex
+```
+
+对于其他宿主机，请将 `codex` 替换为 `claude` 或 `cursor`。
+
+## Claude Code
+
+为当前项目添加服务器并检查它：
+
+```bash
+claude mcp add --transport stdio stackkit -- stackkit-mcp --mode docs,local,server,actions
+claude mcp list
+```
+
+在 Claude Code 中，`/mcp` 命令会显示服务器状态。在项目 `.mcp.json` 文件中的相同条目如下：
+
+```json
+{
+  "mcpServers": {
+    "stackkit": {
+      "command": "stackkit-mcp",
+      "args": ["--mode", "docs,local,server,actions"]
+    }
+  }
+}
+```
+
+来源：[Claude Code MCP 文档](https://code.claude.com/docs/en/mcp)。
+
+## Codex
+
+将此配置块添加到 `~/.codex/config.toml`，或添加到受信任项目中的 `.codex/config.toml`。`cwd` 键指定工具所作用的工作区：
+
+```toml
+[mcp_servers.stackkit]
+command = "stackkit-mcp"
+args = ["--mode", "docs,local,server,actions"]
+cwd = "/home/you/my-homelab"
+```
+
+使用 `codex mcp list` 检查它，或在 Codex 终端界面中打开 `/mcp`。来源：[Codex MCP 文档](https://learn.chatgpt.com/docs/extend/mcp)。
+
+## Cursor
+
+将此配置添加到项目中的 `.cursor/mcp.json`，或添加到 `~/.cursor/mcp.json` 以对所有项目生效：
+
+```json
+{
+  "mcpServers": {
+    "stackkit": {
+      "type": "stdio",
+      "command": "stackkit-mcp",
+      "args": ["--mode", "docs,local,server,actions"]
+    }
+  }
+}
+```
+
+如果服务器未启动，请打开 Output 面板并选择 MCP Logs。来源：[Cursor MCP 文档](https://cursor.com/docs/context/mcp)。
+
+## 指定工作区
+
+工具会作用于服务器启动所在文件夹中的工作区。只有 Codex 允许你在配置中设置该文件夹。对于 Claude Code 和 Cursor，请在第一条提示词中说明该文件夹。生命周期工具为此提供了一个 `base_dir` 输入参数。
+
+## ChatGPT
+
+ChatGPT 通过公网 HTTPS 端点或 OpenAI 的 Secure MCP Tunnel 添加自定义 MCP 服务器，而不是启动本地程序。因此 `stackkit-mcp` 无法像上述三个宿主机那样直接添加到 ChatGPT。OpenAI 文档说明其隧道客户端可以连接到本地 stdio 服务器。本指南不涵盖这两种路径，也未在它们上面测试过 `stackkit-mcp`。请勿将 StackKits MCP 端点直接暴露到公网互联网。请参阅 OpenAI 页面 [Connect and test your plugin](https://developers.openai.com/plugins/deploy/connect-chatgpt) 和 [Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)。
+
+## 试一试
+
+启动你的代理并发送这条提示词：
+
+```text
+Use the stackkit tools, read only. My workspace is ~/my-homelab. Tell me what is
+running on my server and what needs attention. Check status, verification,
+drift and backups, and list the problems first.
+```
+
+## 让代理更改内容
+
+不做任何设置时，代理无法更改你的 homelab。你有两种方式允许更改。优先使用第二种。
+
+**全局写入开关。** 在服务器环境变量中设置 `STACKKIT_MCP_ALLOW_WRITE=true`，例如使用 Claude Code 的 `--env` 选项、Codex 的 `[mcp_servers.stackkit.env]` 表或 Cursor 的 `env` 对象。随后便会出现执行更改的工具。每次调用仍必须指明具体操作并附带明确的所有者批准，因此请告诉代理在发起该调用前先向你请求确认。服务器无法区分你的批准与代理自身的确认，这就是第二种方式更安全的原因。
+
+**每个代理一个凭据，每次更改均需你批准。** 从工作区为该代理创建一个凭据，然后携带它启动服务器：
+
+```bash
+mkdir -p ~/.config/stackkit
+stackkit -C ~/my-homelab agent credential mint --name my-agent --token-file ~/.config/stackkit/my-agent.token
+```
+
+将 `STACKKIT_MCP_AGENT_CREDENTIAL_FILE` 设为该文件，并在服务器参数中添加 `--agent-workspace` 及工作区文件夹路径。在 Codex 中：
+
+```toml
+[mcp_servers.stackkit]
+command = "stackkit-mcp"
+args = ["--mode", "docs,local,server,actions", "--agent-workspace", "/home/you/my-homelab"]
+cwd = "/home/you/my-homelab"
+
+[mcp_servers.stackkit.env]
+STACKKIT_MCP_AGENT_CREDENTIAL_FILE = "/home/you/.config/stackkit/my-agent.token"
+```
+
+使用凭据时，`STACKKIT_MCP_ALLOW_WRITE` 会被忽略。每次会产生更改的调用都会被拒绝并生成一条批准请求，直到你在自己的终端中批准这一次具体调用：
+
+```bash
+stackkit -C ~/my-homelab agent approval list
+stackkit -C ~/my-homelab agent approval approve <approval-id>
+```
+
+每次批准仅针对该代理、该操作以及完全一致的参数生效一次，有效期 15 分钟。随后代理需重新发起完全相同的调用。服务器会拒绝使用未知或已撤销的凭据启动，而已撤销的凭据会在代理下一次调用时被拒绝。可使用 [agent 命令](/zh-Hans/stackkits/reference/cli/agent)管理凭据。
+
+## 相关页面
+
+- [StackKits MCP 连接器](/zh-Hans/stackkits/reference/mcp-connector)
+- [运维 StackKit](/zh-Hans/stackkits/reference/day-2-operations)

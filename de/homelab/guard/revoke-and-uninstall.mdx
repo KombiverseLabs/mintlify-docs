@@ -1,0 +1,165 @@
+---
+title: "Guard widerrufen, trennen und deinstallieren"
+description: "Den Zugriff eines Servers beenden, sehen, was mit seiner kombify.me-Adresse und dem Connect-Eintrag passiert, und Guard vom Host entfernen"
+sidebarTitle: "Widerrufen und deinstallieren"
+icon: "plug-circle-xmark"
+---
+
+Du kannst Guards Zugriff auf dein Homelab beenden, ohne die Maschine
+anzufassen, nur eine veröffentlichte Adresse abschalten oder Guard von einem
+Host entfernen. Diese Seite erklärt alle drei Wege, was sie beenden und was
+bestehen bleibt.
+
+<Note>
+Homelab steht vor 1.0 und der verbundene Betrieb ist Vorschau-Umfang; siehe
+[Homelab-Verfügbarkeit](/de/homelab/availability). Trennen gilt für Server,
+die du selbst betreibst. Ein Server, den kombify für dich vorbereitet hat
+(siehe [Verwaltete Server](/de/homelab/managed-servers)), kann auf diesem
+Weg nicht getrennt werden.
+</Note>
+
+## Wähle, was du beenden möchtest
+
+| Ich möchte | Verwende | Wirkung |
+| --- | --- | --- |
+| Einen Server dauerhaft nicht mehr verwalten | **Detach server** | Widerruft Guards Zugangsdaten und Host-Schlüssel und beendet den Fernzugriff sowie den Connect-Eintrag |
+| Zugangsdaten ersetzen, von denen ich vermute, dass sie offengelegt wurden | **Rotate credential** | Die alten Zugangsdaten werden nicht mehr akzeptiert; ein Ersatz wird einmalig angezeigt |
+| Eine veröffentlichte Adresse abschalten, den Server aber behalten | **Stop publishing** | Zieht nur die kombify.me-Route zurück |
+| Einen ungenutzten Kopplungsbefehl abbrechen | Das Kopplungs-Token löschen | Der Befehl funktioniert nicht mehr |
+
+## Einen Server trennen
+
+Öffne das Guard-Panel des Servers und wähle **Detach server**, dann **Detach
+and revoke**. Oder führe `homelab api servers detach <server-id>` mit
+`--confirm-server-id <server-id>` aus.
+
+Die Bestätigung muss exakt dieselbe Server-ID wiederholen; siehe die
+[Befehlsreferenz](/de/homelab/reference/cli/servers).
+
+In einem Schritt widerruft Homelab:
+
+- Guards Zugangsdaten;
+- die Host-Schlüssel-Identität des Servers;
+- die kombify.me-Adresse des Servers und seinen kombify-Connect-Eintrag.
+
+Dabei läuft nichts auf deiner Maschine. Die Maschine, ihre Container und ihre
+Daten bleiben unberührt, und es wird kein Anbieter aufgerufen. Der Datensatz
+des Servers bleibt in Homelab als getrennter Datensatz erhalten.
+
+Dies lässt sich im Panel nicht rückgängig machen. Um den Server erneut zu
+verwalten, kopple ihn erneut (siehe
+[Einen Server koppeln](/de/homelab/guard/pairing)).
+
+### Was mit der Adresse und dem Eintrag passiert
+
+Trennen beendet die Erreichbarkeit des Servers: Seine kombify.me-Route wird
+widerrufen und er wird aus deinen Geräten in kombify Connect entfernt. Der
+Widerruf wird wiederholt, bis beides bestätigt ist; bis dahin zeigt der Server
+einen Grund wie „Ending access has not finished everywhere yet. It is retried.“
+Der Name kann kurz bestehen bleiben, erreicht deinen Server aber nicht mehr und
+antwortet mit einem Fehler. Ein Gerät aus kombify Connect zu widerrufen hat die
+umgekehrte Wirkung: Es beendet auch Guards Zugriff auf Homelab.
+
+### Was auf dem Server passiert
+
+Wenn der getrennte Guard das nächste Mal Homelab kontaktiert, wird er mit
+`guard_identity_revoked` abgewiesen und beendet seinen lokalen Zustand:
+
+- er zerstört seinen Identitätsschlüssel und die gehaltenen Zugangsdaten,
+  einschließlich eines eventuell noch gespeicherten Kopplungs-Tokens;
+- er entfernt seine eingereihte Telemetrie;
+- er löscht Operationsdatensätze, die Homelab bestätigt hat.
+
+Datensätze, die Homelab nie bestätigt hat, bleiben erhalten, weil sie nicht
+neu erstellt werden können. Guard protokolliert, wie viele übrig sind. Bewahre
+das Guard-Zustandsverzeichnis (`/var/lib/homelab/guard`) auf oder exportiere
+es und lösche es dann. Ein Guard ohne verbleibende Secrets bleibt im Leerlauf.
+Ein neuer Kopplungsbefehl beginnt von vorn.
+
+## Zugangsdaten rotieren
+
+**Rotate credential** stellt neue Zugangsdaten aus, die einmalig angezeigt
+werden, und die alten werden nicht mehr akzeptiert. Kopiere den Ersatz zu
+Guard auf den Server, bevor du den Dialog schließt.
+
+## Eine Adresse veröffentlichen oder die Veröffentlichung beenden
+
+Ein gekoppelter Server hat keine öffentliche Route. Nichts wird
+veröffentlicht, bis du es für diesen Server einschaltest, und das Relay leitet
+bis dahin keinen Traffic weiter.
+
+1. Gib im Guard-Panel unter **Publish at a kombify.me address** einen
+   **Service name** und den **Port on this server** ein.
+2. Wähle **Publish**. Dafür ist eine frische Anmeldung mit einem zweiten Faktor
+   aus den letzten fünf Minuten nötig.
+
+Der Port liegt auf dem eigenen Loopback des Servers. Jeder im Internet kann die
+Adresse öffnen, und das Relay authentifiziert Guard, nicht den Besucher;
+veröffentliche daher nur einen Dienst, der sich selbst schützt. Wähle
+jederzeit **Stop publishing**, um die Adresse zurückzuziehen; das Zurückziehen
+braucht niemals den zweiten Faktor. Diese Option ist nur in einer verbundenen
+Installation verfügbar. Siehe [kombify.me](/de/kombify-me/overview) dazu, wie
+Adressen funktionieren.
+
+## Guard von einem Host entfernen
+
+Im aktuellen Release gibt es unter Linux keinen paketierten
+Deinstallationsbefehl für Guard. Trenne zuerst, damit Homelab dem Server
+nicht mehr vertraut und Guard seine Secrets zerstört. Das Entfernen der
+Software ist dann ein manueller Schritt.
+
+<Warning>
+Tu dies erst, nachdem du den Server getrennt und alle nicht bestätigten
+Operationsdatensätze im Guard-Zustandsverzeichnis gesichert oder exportiert
+hast. Diese Schritte entfernen nur Guard. Sie entfernen weder Docker noch dein
+StackKits-Deployment oder deine Anwendungen.
+</Warning>
+
+Guard legt Folgendes auf dem Host ab:
+
+| Was | Wo |
+| --- | --- |
+| Guard-Daemon und seine Unit | `/usr/local/bin/homelab`, `homelab-agent.service` |
+| Privilegierter Executor und seine Units | `/usr/local/libexec/homelab-stackkit-operations`, `homelab-guard-executor.socket`, `homelab-guard-executor@.service` |
+| Zugangsdaten und Konfiguration | `/etc/homelab` |
+| Zustand, Journal und Caches | `/var/lib/homelab`, `/var/lib/homelab-guard-executor`, `/var/log/homelab` |
+| Systembenutzer | `kombify-guard` |
+
+Um Guard zu entfernen, führe diese Schritte als Administrator in dieser
+Reihenfolge aus:
+
+1. Stoppe und deaktiviere die Dienste:
+   `sudo systemctl disable --now homelab-agent.service homelab-guard-executor.socket`.
+2. Lösche die Unit-Dateien `homelab-agent.service`,
+   `homelab-agent.service.legacy`, `homelab-guard-executor.socket` und
+   `homelab-guard-executor@.service` aus `/etc/systemd/system` und führe dann
+   `sudo systemctl daemon-reload` aus.
+3. Lösche die beiden oben aufgeführten ausführbaren Dateien.
+4. Lösche die oben aufgeführten Verzeichnisse für Zugangsdaten, Zustand und
+   Logs.
+5. Lösche den Systembenutzer mit `sudo userdel kombify-guard`.
+
+Ein Host, der nie auf das Layout mit getrennten Rechten umgestellt hat, hat
+nur die Daemon-Unit und keinen Benutzer `kombify-guard`, sodass die Schritte
+für die übrigen Elemente melden, dass sie nicht existieren. Das ist erwartet.
+
+### Was bestehen bleibt
+
+Das Entfernen von Guard entfernt nichts, was StackKits oder du damit
+installiert habt:
+
+- Docker sowie deine Container, Volumes und Anwendungsdaten;
+- die StackKits-Laufzeitumgebung und den Workspace. Entferne ein
+  StackKits-Deployment mit dem
+  [Befehl remove](/de/stackkits/reference/cli/remove);
+- eine veröffentlichte Adresse. Das Entfernen von Guard allein zieht sie nicht
+  zurück; wähle also vorher **Stop publishing** oder trenne den Server.
+
+<CardGroup cols={2}>
+  <Card title="Was Guard sendet (englisch)" icon="database">
+    Was gemeldet wurde, solange der Server gekoppelt war, und wie lange es gespeichert bleibt (*What Guard sends and keeps*).
+  </Card>
+  <Card title="Einen Server koppeln" icon="link" href="/de/homelab/guard/pairing">
+    Einen getrennten Server wieder in die Verwaltung aufnehmen.
+  </Card>
+</CardGroup>

@@ -1,0 +1,99 @@
+---
+title: "kombify Guard"
+description: "Comprende cómo encajan la identidad del servidor, las operaciones autorizadas y la evidencia de protección"
+sidebarTitle: "Por qué importa Guard"
+icon: "shield-halved"
+mode: "explanation"
+---
+
+kombify Guard es el componente de fiabilidad y seguridad en el lado del
+servidor de Homelab. Conecta un servidor dado de alta con su propietario,
+supervisa las operaciones autorizadas e informa de lo ocurrido. Su valor está
+en la conexión entre configuración, ejecución y evidencia: puedes distinguir un
+servidor alcanzable de una aplicación protegida, y una tarea de copia de
+seguridad de una recuperación demostrada.
+
+<Note>
+Estas páginas explican la arquitectura de Guard y el significado de su
+evidencia. Homelab es previo a la versión 1.0; la operación conectada y
+gestionada sigue en fase de vista previa. Las operaciones disponibles dependen
+de la versión instalada y del perfil del servidor. Consulta
+[Disponibilidad de Homelab](/es/homelab/availability) y la
+[Referencia de la CLI homelab api](/es/homelab/reference/cli/overview)
+ligada a cada versión.
+</Note>
+
+## Qué cambia para el propietario
+
+| Situación | Qué ayuda a establecer Guard | Qué sigue necesitando su propia prueba |
+| --- | --- | --- |
+| Un servidor vuelve a conectarse tras un corte de luz o red | Qué servidor regresó y qué resultados de operación quedaron registrados | Si la aplicación y sus dependencias se recuperaron |
+| Cambia un ajuste del cortafuegos o de SSH | La línea base observada, la desviación y la autoridad necesaria para reparar | Si cada aplicación tiene la exposición y los permisos adecuados |
+| Cae una conexión durante una operación | Si la operación original se completó, falló o tiene un resultado incierto | Un efecto incierto debe conciliarse antes de otro cambio |
+| Termina una copia de seguridad | La evidencia registrada de copia de seguridad y restauración | Si los datos necesarios de la aplicación pueden recuperarse realmente |
+| Se instala una nueva versión de Guard | Verificación del artefacto, activación y evidencia de recuperación para ese perfil | Una firma por sí sola no demuestra una operación saludable |
+
+Por ejemplo, un servicio de fotos puede tener un contenedor web sano mientras
+su base de datos no está disponible. Su host también puede cumplir una línea
+base de seguridad mientras ese servicio expone un endpoint no deseado. El
+modelo de protección de Guard mantiene esos hechos separados para que un
+servidor aparentemente sano no oculte un problema de la aplicación.
+
+## Un modelo operativo entre hogar y nube
+
+Un homelab puede abarcar hardware propio en casa y servidores alquilados.
+Homelab coordina esos servidores; cada Guard está vinculado a un único
+servidor. El diseño mantiene los mismos límites de identidad, autorización y
+evidencia en todas las ubicaciones.
+
+Un Homelab autogestionado puede controlar sus Guards sin una cuenta alojada
+de kombify. Conectar una instalación a servicios alojados no transfiere
+implícitamente la autoridad de su propietario local. Guard forma parte de
+Homelab, sin producto aparte ni nivel de seguridad separado. StackKits
+independiente sigue siendo autónomo respecto a Guard y Homelab. Consulta
+[Modos de operación de Homelab](/es/homelab/operating-modes).
+
+## Cómo encajan las responsabilidades
+
+| Componente | Responsabilidad |
+| --- | --- |
+| Homelab | Inventario de servidores, admisión de operaciones y coordinación entre servidores |
+| Guard | Identidad del servidor, supervisión local del trabajo admitido y evidencia de operación |
+| StackKits | Configuración deseada del host y las aplicaciones, ejecución del ciclo de vida y custodia de copias de seguridad y restauración del nodo |
+| Aplicación | Sus propios datos, permisos y requisitos de salud específicos de la aplicación |
+
+Un asistente de IA puede explicar un hallazgo o proponer una operación. Usa los
+mismos límites de autorización y ejecución; una explicación no es permiso para
+cambiar el servidor.
+
+## Qué significa la marca de confianza
+
+Guard se construye en torno a condiciones verificables, no a la presencia de un
+agente en ejecución. El alta, un ciclo completo de comando autenticado, las
+operaciones durables, la configuración asegurada, el estado de actualización, la
+recuperación probada y el alcance gobernado necesitan cada uno su propia
+evidencia. La evidencia desconocida o caducada no puede establecer protección.
+Un indicador agregado por sí solo no basta para calificar todo un despliegue.
+
+Guard no demuestra que un servidor sea inmune a ser comprometido, que toda
+aplicación esté gestionada o que no puedan perderse datos. Su promesa útil es
+la protección observable y la recuperación controlada dentro de un alcance
+declarado.
+
+<CardGroup cols={2}>
+  <Card title="Arquitectura y verdad operativa (en inglés)" icon="diagram-project">
+    Cómo la identidad, los resultados durables y los límites de ejecución gestionan los fallos (*Architecture and operation truth*).
+  </Card>
+  <Card title="Evidencia de protección y recuperación (en inglés)" icon="clipboard-check">
+    Comprende la cobertura de host y aplicaciones, las reparaciones y las garantías de recuperación (*Protection and recovery evidence*).
+  </Card>
+  <Card title="Emparejar un servidor" icon="link" href="/es/homelab/guard/pairing">
+    Qué ocurre cuando un servidor se da de alta y cómo recuperar un emparejamiento interrumpido.
+  </Card>
+  <Card title="Qué envía y conserva Guard (en inglés)" icon="database">
+    Los datos que Guard reporta, adónde van, cuánto tiempo se conservan y qué nunca envía (*What Guard sends and keeps*).
+  </Card>
+  <Card title="Revocar, desvincular y desinstalar" icon="plug-circle-xmark" href="/es/homelab/guard/revoke-and-uninstall">
+    Termina el acceso de un servidor y elimina Guard del host.
+  </Card>
+</CardGroup>
