@@ -1,0 +1,49 @@
+---
+title: "kombify 与 Runtipi"
+description: "kombify 与家用服务器应用管理器 Runtipi 之间的关系，以及各自适合的场景"
+sidebarTitle: "Runtipi"
+icon: "layer-group"
+---
+
+[Runtipi](https://runtipi.io) 是一款用于在家庭服务器上管理自托管应用的免费开源工具。它提供一个 Web 仪表板，让你在其中安装、更新、配置并备份应用，每个应用运行在各自的 Docker 容器中。你可以在 64 位 Linux 系统上用一条命令安装它。
+
+## Runtipi 擅长什么
+
+- 它在你已有的 Linux 宿主机上提供一个应用商店。
+- 根据其文档，安装、更新以及备份应用都在同一个仪表板中完成。
+- 不需要特殊硬件或镜像。
+- 它是一个目标明确的工具：只管理应用，把宿主机的其余部分留给你自己。
+
+## kombify 是什么
+
+kombify 将 homelab 定义为一个整体：登录、访问策略、路由、备份与更新全部写入同一个声明式文件。StackKits 负责规划、应用和验证。Homelab 是负责运行它的应用。
+
+## 它们如何关联
+
+kombify 和 Runtipi 都从一台 Linux 宿主机和一条命令起步。Runtipi 聚焦于应用目录，而 kombify 聚焦于围绕应用的整体定义。
+
+kombify 目录将 Runtipi 列为 Marketplace 使用场景（即你 homelab 上的应用商店）中规划中的备选引擎。该集成仍在开发中，其模块与生命周期验证证据尚不存在，kombify 目前不会安装 Runtipi。
+
+## kombify 目前的局限性
+
+- kombify 仍处于 1.0 之前阶段，发布频率较高。
+- 兼容性仍在验证中。请参阅[系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)查看当前支持情况。
+- 目录经过精选，列在[使用场景目录](/zh-Hans/stackkits/reference/use-case-catalog)中。它不包含 Plex，也不包含 Sonarr 或 Radarr 系列。如果你的环境依赖这些应用，Runtipi 的目录目前可能更适合你。
+- 将你自己的 Compose 项目纳入 homelab 的登录、路由与备份体系尚未实现。
+
+## kombify 目前能做什么
+
+- 通过 Pocket ID 使用通行密钥登录，没有默认密码。
+- 为每个服务设置明确的访问策略。
+- 恢复到隔离的暂存副本。
+- 更新前先拍摄快照。
+- 从同一份定义完成计划、应用与验证。
+- 每次安装都带有供你自己的 AI 代理使用的本地 MCP 服务器。
+
+## 何时选择哪一个
+
+- 如果你想在 Linux 宿主机上拥有包含大量应用的商店并用简单的仪表板管理它们，请选择 Runtipi。
+- 如果你想为整个 homelab 统一定义身份认证、访问策略与备份，并能在另一台服务器上重复部署，请选择 kombify。
+- 如果你已经在运行 Runtipi，可以继续保留它。kombify 不会接管或管理它的应用。
+
+最后审阅：2026-11-10

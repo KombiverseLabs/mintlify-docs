@@ -1,0 +1,79 @@
+---
+title: "kombify neben TrueNAS, Unraid und Synology"
+description: "Wie sich kombify zu NAS-Betriebssystemen verhält und wann ein NAS-System die bessere Wahl ist"
+sidebarTitle: "TrueNAS, Unraid, Synology"
+icon: "hard-drive"
+---
+
+[TrueNAS](https://www.truenas.com), [Unraid](https://unraid.net) und
+[Synology DSM](https://www.synology.com) sind Betriebssysteme rund um
+Speicher. Sie verwalten Festplatten, Pools oder Arrays, Freigaben, Snapshots
+und Datenschutz, und sie betreiben auch Apps und virtuelle Maschinen.
+
+## Was sie gut machen
+
+- **TrueNAS** basiert auf dem ZFS-Dateisystem. Es ist eine starke Wahl für
+  gepoolten Speicher mit Prüfsummen, Snapshots und Replikation.
+- **Unraid** lässt dich Festplatten unterschiedlicher Größe in einem Array
+  mischen und Container sowie virtuelle Maschinen auf derselben Maschine
+  betreiben. Es ist ein kommerzielles Produkt.
+- **Synology DSM** kommt mit Synology-Hardware. Es ist ein ausgereiftes System
+  mit einem breiten Angebot integrierter Pakete für Dateien, Fotos und Backup.
+
+Wenn du Festplatten-Pools und RAID brauchst, wähle eines dieser Systeme.
+kombify verwaltet keine Festplatten, kein RAID und keine Speicher-Pools und
+versucht es auch nicht.
+
+## Was kombify ist
+
+kombify definiert das Homelab in einer deklarativen Datei. StackKits plant,
+wendet an und verifiziert es auf einem Linux-Host. Anmeldung mit Passkeys über
+Pocket ID, eine Zugriffsrichtlinie pro Dienst, Routing, Backup und Updates
+kommen mit der Definition. Homelab betreibt es.
+
+## Wie sie zusammenhängen
+
+Ein NAS-System und kombify beantworten unterschiedliche Fragen. Das NAS-System
+beantwortet, wo deine Daten liegen und wie sie auf Festplattenebene geschützt
+sind. kombify beantwortet, wie die Dienste darüber definiert, angemeldet,
+erreicht und gesichert werden. kombify kann auf einem Linux-Host oder in einer
+VM laufen, die Speicher von einem NAS nutzt.
+
+## Heutige Grenzen von kombify
+
+- kombify steht vor 1.0 und veröffentlicht häufig neue Releases.
+- Die Kompatibilität wird noch verifiziert. Siehe
+  [OS-Kompatibilität](/de/stackkits/reference/os-compatibility) für die
+  aktuellen Zeilen.
+- Es gibt kein Boot-Image. Die Installation benötigt einen vorbereiteten
+  Linux-Host und einen Befehl.
+- Der Katalog ist kuratiert und im
+  [Anwendungsfall-Katalog](/de/stackkits/reference/use-case-catalog)
+  aufgelistet. Es gibt kein Plex und keine Sonarr- oder Radarr-Familie.
+- Ein eigenes Compose-Projekt unter Anmeldung, Routing und Backup des Homelabs
+  zu bringen ist nicht implementiert.
+- Verbunden und Von kombify verwaltet befinden sich in der Vorschau.
+
+## Was kombify heute kann
+
+- Passkey-Anmeldung über Pocket ID, ohne Standardpasswörter.
+- Eine explizite Zugriffsrichtlinie pro Dienst.
+- Wiederherstellung in eine isolierte Staging-Kopie.
+- Updates, die zuerst einen Snapshot anlegen.
+- Planen, Anwenden und Verifizieren aus einer Definition.
+- Ein lokaler MCP-Server auf jeder Installation für deinen eigenen KI-Agenten.
+- Dieselbe Definition für einen Server zu Hause und einen in der Cloud.
+
+## Wann man was wählt
+
+- Wähle TrueNAS, Unraid oder Synology, wenn Speicher dein Hauptbedarf ist oder
+  du ein einziges Gerät willst, das deine Daten hält und ein paar Apps
+  betreibt.
+- Wähle kombify, wenn du möchtest, dass die Dienste definiert, wiederholbar und
+  für deinen eigenen KI-Agenten lesbar sind.
+- Nutze sie zusammen, wenn du Daten auf einem NAS hältst und die Dienste auf
+  einem separaten, mit kombify definierten Host betreibst. Sichere wie in der
+  [Backup-Anleitung](/de/guides/stackkits/back-up-and-restore) beschrieben und
+  übe eine Wiederherstellung.
+
+Zuletzt geprüft: 2026-11-10

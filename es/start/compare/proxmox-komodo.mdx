@@ -1,0 +1,80 @@
+---
+title: "kombify y Proxmox VE con Komodo, Dockge o Portainer"
+description: "Cómo se relaciona kombify con un hipervisor y con gestores de contenedores, y cómo pueden usarse juntos"
+sidebarTitle: "Proxmox con Komodo, Dockge, Portainer"
+icon: "server"
+---
+
+Esta página trata una configuración habitual.
+[Proxmox VE](https://www.proxmox.com) ejecuta máquinas virtuales. Un gestor de
+contenedores como [Komodo](https://komo.do),
+[Dockge](https://github.com/louislam/dockge) o
+[Portainer](https://www.portainer.io) se ejecuta dentro de una VM y gestiona
+contenedores Docker y proyectos Compose.
+
+## Qué hacen bien estas herramientas
+
+- **Proxmox VE** es una plataforma de virtualización de código abierto. Ejecuta
+  máquinas virtuales completas y contenedores, con funciones de almacenamiento,
+  red y copia de seguridad para ellos. Si necesitas un hipervisor, es una
+  elección estándar.
+- **Dockge** es un gestor de stacks Compose con un editor web sencillo.
+- **Portainer** ofrece una interfaz web para entornos y equipos de Docker.
+- **Komodo** construye y despliega contenedores, stacks Compose y servicios
+  Swarm en varios servidores, con una API y una CLI.
+
+Estas herramientas te dan control y flexibilidad. Tú decides cómo encaja cada
+pieza.
+
+## Qué añade kombify
+
+kombify define identidad, política de acceso, enrutamiento, copias de seguridad
+y actualizaciones para todo el homelab y los aplica desde una definición. No
+sustituye a un hipervisor ni a un gestor de contenedores.
+
+- En Proxmox, kombify usa tu instalación como sustrato. Homelab crea una VM
+  invitada y el StackKit se ejecuta dentro del invitado. Consulta
+  [Ejecutar kombify en Proxmox VE](/es/guides/stackkits/proxmox). Esta vía está
+  en desarrollo y no tiene ninguna ejecución de ciclo de vida verificada en la
+  versión actual.
+- Komodo es una plataforma de aplicaciones opcional en StackKits, seleccionada
+  explícitamente. Su adaptador está en beta y la aceptación completa de ciclo
+  de vida está pendiente. Consulta [Komodo](/es/stackkits/apps/komodo).
+- Portainer no forma parte del catálogo de kombify y Dockge es solo
+  experimental. Puedes ejecutar cualquiera de los dos junto a un host de
+  kombify. Gestionarían contenedores que no pertenecen a kombify.
+
+## Límites de kombify hoy
+
+- kombify es anterior a 1.0 y publica versiones con frecuencia.
+- La compatibilidad sigue verificándose. Consulta la
+  [compatibilidad de SO](/es/stackkits/reference/os-compatibility) para ver las
+  filas actuales.
+- No crea ni gestiona almacenamiento de hipervisor, discos ni RAID.
+- Incorporar un proyecto Compose existente bajo el inicio de sesión, el
+  enrutamiento y la copia de seguridad del homelab no está implementado, por lo
+  que ese proyecto permanece fuera de la definición de kombify.
+
+## Qué hace kombify hoy
+
+- Inicio de sesión con passkeys mediante Pocket ID, sin contraseñas por
+  defecto.
+- Una política de acceso explícita por servicio.
+- Restauración en una copia de pruebas aislada.
+- Actualizaciones que toman primero una instantánea.
+- Planificar, aplicar y verificar desde una definición.
+- Un servidor MCP local en cada instalación.
+
+## Úsalos juntos
+
+Una configuración razonable es Proxmox VE en el hardware y una VM invitada
+definida con kombify para los servicios que quieres definidos y repetibles.
+Mantén otras VMs y contenedores en Proxmox con la herramienta que prefieras. Si
+quieres un gestor con interfaz web para Docker, sigue usando Portainer o Komodo
+como hoy. kombify no te exige renunciar a ellos.
+
+Elige una configuración solo con Proxmox y un gestor de contenedores si quieres
+control manual total y te sientes cómodo montando por tu cuenta el inicio de
+sesión, las copias de seguridad y las actualizaciones.
+
+Última revisión: 2026-11-10

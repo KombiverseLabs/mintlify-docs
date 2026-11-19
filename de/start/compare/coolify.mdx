@@ -1,0 +1,81 @@
+---
+title: "kombify mit Coolify"
+description: "Wie Coolify und kombify zusammenpassen: Coolify baut und deployt deine Apps, kombify definiert das Homelab darum herum"
+sidebarTitle: "Coolify"
+icon: "cloud-upload"
+---
+
+[Coolify](https://coolify.io) ist eine selbst hostbare Open-Source-Plattform,
+um Apps, Datenbanken und Dienste auf eigenen Servern bereitzustellen. Du
+verbindest einen Server per SSH, und Coolify baut, deployt und aktualisiert
+deine Anwendungen über eine Weboberfläche. Es bietet außerdem eine Bibliothek
+mit Ein-Klick-Diensten.
+
+## Wie sie zusammenpassen
+
+kombify und Coolify erledigen unterschiedliche Aufgaben. Coolify ist eine
+App-Plattform. kombify ist eine Schicht daneben und darüber. kombify definiert
+das Homelab: Identität, Zugriffsrichtlinie, Routing, Backup und Updates.
+Coolify ist ein Weg, deine eigenen Apps auf diesem Homelab zu bauen und
+bereitzustellen.
+
+## Aktueller Stand der Integration
+
+Die Integration befindet sich in der Entwicklung.
+
+- StackKits kann Coolify als optionale Plattform installieren, wenn es explizit
+  gewählt wird. Es ist niemals Teil des Standard-Workspace. Siehe
+  [Coolify](/de/stackkits/apps/coolify).
+- Der Anwendungsfall Marketplace, ein App-Store auf deinem Homelab mit Coolify
+  als Engine, ist ein Entwurf. Laufzeitnachweis, Backup und Wiederherstellung
+  sowie vollständige Abnahme im aktuellen Release stehen noch aus.
+- Workload-Backup und -Wiederherstellung liefert der Coolify-Adapter nicht für
+  jeden Workload. Siehe
+  [Kompatibilität der Anwendungsbereitstellung](/de/stackkits/reference/application-delivery-compatibility).
+- Apps, die du aus Coolifys eigenem Store installierst, gehören Coolify und dir.
+  kombify übernimmt sie nicht.
+
+Dies beschreibt das geplante Zusammenspiel. Lies es nicht als ausgeliefertes
+Produktfeature.
+
+## Was Coolify gut macht
+
+- Aus einem Git-Repository mit Build-Schritten deployen.
+- Datenbanken und Dienste neben deinen Apps betreiben.
+- Mehrere Server über eine Oberfläche verwalten.
+- Auf eine große Bibliothek fertiger Dienste zugreifen.
+
+Für das Bauen und Bereitstellen deiner eigenen Anwendungen ist Coolify heute das
+richtige Werkzeug.
+
+## Heutige Grenzen von kombify
+
+- kombify steht vor 1.0 und veröffentlicht häufig neue Releases.
+- Die Kompatibilität wird noch verifiziert. Siehe
+  [OS-Kompatibilität](/de/stackkits/reference/os-compatibility) für die
+  aktuellen Zeilen.
+- Die Installation benötigt einen vorbereiteten Linux-Host und einen Befehl.
+  Es gibt kein Boot-Image.
+- Ein eigenes Compose-Projekt unter Anmeldung, Routing und Backup des Homelabs
+  zu bringen ist nicht implementiert.
+- Der Katalog ist kuratiert und im
+  [Anwendungsfall-Katalog](/de/stackkits/reference/use-case-catalog)
+  aufgelistet.
+
+## Was kombify heute kann
+
+- Passkey-Anmeldung über Pocket ID, ohne Standardpasswörter.
+- Eine explizite Zugriffsrichtlinie pro Dienst.
+- Wiederherstellung in eine isolierte Staging-Kopie.
+- Updates, die zuerst einen Snapshot anlegen.
+- Planen, Anwenden und Verifizieren aus einer Definition.
+- Ein lokaler MCP-Server auf jeder Installation für deinen eigenen KI-Agenten.
+
+## Zusammen nutzen
+
+Definiere das Homelab mit kombify und nutze Coolify darauf für deine eigenen
+Apps. Verwende pro Workload genau einen Bereitstellungspfad, damit Coolify und
+kombify keine konkurrierenden Routen anlegen. Wenn du nur Anwendungen deployen
+musst und den Host bereits selbst verwaltest, reicht Coolify allein aus.
+
+Zuletzt geprüft: 2026-11-10

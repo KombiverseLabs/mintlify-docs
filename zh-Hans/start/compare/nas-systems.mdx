@@ -1,0 +1,51 @@
+---
+title: "kombify 与 TrueNAS、Unraid 和 Synology"
+description: "kombify 与 NAS 操作系统之间的关系，以及何时 NAS 系统是更好的选择"
+sidebarTitle: "TrueNAS、Unraid、Synology"
+icon: "hard-drive"
+---
+
+[TrueNAS](https://www.truenas.com)、[Unraid](https://unraid.net) 和 [Synology DSM](https://www.synology.com) 是围绕存储构建的操作系统。它们负责管理磁盘、存储池或阵列、共享文件夹、快照与数据保护，同时也能够运行应用和虚拟机。
+
+## 它们擅长什么
+
+- **TrueNAS** 基于 ZFS 文件系统构建，是带校验和、快照及复制功能的池化存储的强力选择。
+- **Unraid** 允许你在同一个阵列中混用不同容量的磁盘，并在同一台机器上运行容器和虚拟机。它是一款商业产品。
+- **Synology DSM** 随 Synology 硬件提供，是一个打磨成熟的系统，内置了涵盖文件、照片与备份的丰富套件。
+
+如果你需要磁盘池和 RAID，请选择其中之一。kombify 不管理磁盘、RAID 或存储池，也不打算这样做。
+
+## kombify 是什么
+
+kombify 在声明式文件中定义 homelab。StackKits 在一台 Linux 宿主机上对其规划、应用并验证。通过 Pocket ID 使用通行密钥登录、每个服务的访问策略、路由、备份和更新都随定义一起提供。Homelab 负责运行它。
+
+## 它们如何关联
+
+NAS 系统与 kombify 回答不同的问题。NAS 系统回答你的数据存放在哪里、在磁盘层面如何受保护。kombify 回答其上的服务如何被定义、如何登录、如何访问以及如何备份。kombify 可以运行在独立的 Linux 宿主机上，或运行在使用 NAS 存储的虚拟机中。
+
+## kombify 目前的局限性
+
+- kombify 仍处于 1.0 之前阶段，发布频率较高。
+- 兼容性仍在验证中。请参阅[系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)查看当前支持情况。
+- 没有引导镜像。安装需要一台准备好的 Linux 宿主机和一条命令。
+- 目录经过精选，列在[使用场景目录](/zh-Hans/stackkits/reference/use-case-catalog)中。它不包含 Plex，也不包含 Sonarr 或 Radarr 系列。
+- 将你自己的 Compose 项目纳入 homelab 的登录、路由与备份体系尚未实现。
+- “已连接”与“由 kombify 托管”目前处于预览阶段。
+
+## kombify 目前能做什么
+
+- 通过 Pocket ID 使用通行密钥登录，没有默认密码。
+- 为每个服务设置明确的访问策略。
+- 恢复到隔离的暂存副本。
+- 更新前先拍摄快照。
+- 从同一份定义完成计划、应用与验证。
+- 每次安装都带有供你自己的 AI 代理使用的本地 MCP 服务器。
+- 同一份定义既适用于家中的服务器，也适用于云上的服务器。
+
+## 何时选择哪一个
+
+- 如果存储是你的主要需求，或者你想用一台设备同时保存数据并运行少量应用，请选择 TrueNAS、Unraid 或 Synology。
+- 如果你希望服务具有明确定义、可重复部署，并且能被你自己的 AI 代理读取，请选择 kombify。
+- 如果你把数据存放在 NAS 上，而在一台单独的宿主机上运行由 kombify 定义的服务，则可以将两者结合使用。按照[备份指南](/zh-Hans/guides/stackkits/back-up-and-restore)所述进行备份，并演练恢复流程。
+
+最后审阅：2026-11-10

@@ -1,0 +1,44 @@
+---
+title: "镜像"
+description: "黄金镜像：开机即已就绪并在首次启动时自动注册的服务器，以及当前已可用的部分"
+sidebarTitle: "镜像"
+icon: "compact-disc"
+---
+
+黄金镜像（golden image）是已经包含 StackKits 发布版本、其工具以及核心服务容器镜像的机器镜像。由它启动的服务器无需先下载这些内容。每个克隆实例会在首次启动时自行注册纳管，并获得自己的独立身份。
+
+<Note>
+黄金镜像已通过资格验证，但尚未作为下载包公开发布。目前没有面向裸机的可引导安装镜像。已规划但尚未提供的内容在下方标为“规划中”。
+</Note>
+
+## `stackkit image` 命令的作用
+
+有三个命令用于准备镜像中的中性部分。各参数标记见 [`stackkit image` 参考](/zh-Hans/stackkits/reference/cli/image)。
+
+- **`stackkit image plan`** 输出配置文件：缓存中包含哪些核心容器镜像。配置文件包括 `cloud-core-compose`（默认）、`basement-core-compose` 和 `basement-core-lite-compose`。
+- **`stackkit image prepare`** 保存当前确切运行的版本并拉取核心镜像。它不会创建所有者、启动服务或创建卷。
+- **`stackkit image verify`** 再次核查发布字节、空目标目录、宿主机及镜像缓存。
+
+请在带有本地 Docker 守护进程、无容器且无无关镜像的专用 Ubuntu 宿主机上运行这些命令。StackKits 不会为了使镜像中性化而删除状态，并且会拒绝包含所有者或服务数据的宿主机。
+
+Ubuntu 26.04 是默认目标，Ubuntu 24.04 同样在支持目标内。
+
+## 首次启动时会发生什么
+
+`prepare` 写入的清单只是缓存元数据。它不授予任何身份，也不授予更改任何内容的权限。首次启动时，每个克隆实例都会重新核查发布版本、已安装文件、宿主机和缓存，然后运行常规的 `init`、`generate`、`apply` 和 `verify` 步骤。首次启动的服务集成与可选工作负载仍需要网络连接。
+
+## 职责分工
+
+StackKits 负责中性缓存。Homelab 负责构建机器镜像、清除机器身份，以及使用 [kombify Guard](/zh-Hans/homelab/guard/overview) 注册纳管每个克隆实例。
+
+## 当前状态
+
+- Ubuntu 26.04 和 Ubuntu 24.04 的镜像已于 2026-10-02 基于 StackKits v0.50.3 完成资格验证。检查内容包括两次具有不同机器与 SSH 身份的克隆启动，以及两次独立注册纳管。
+- 该资格验证覆盖 Linux amd64 上的 `cloud-core-compose` 配置文件。其他配置文件和架构需要各自独立的验证证据。
+- 镜像尚未公开发布供下载。
+- 规划中：面向裸机的可引导安装镜像。目前尚不存在。
+- 托管服务器目前通过 cloud-init 和安装脚本进行配置，而不是从该镜像启动。请参阅[托管服务器](/zh-Hans/homelab/managed-servers)。
+
+若要今天就在你自己的硬件上安装，请使用一台已准备好的 Linux 宿主机并按照[安装你的第一个 homelab](/zh-Hans/stackkits/install-in-10-minutes)（或[快速入门](/zh-Hans/stackkits/quickstart)）中的安装程序进行操作。请查看[系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)了解各系统的当前状态。
+
+最后审阅：2026-11-10

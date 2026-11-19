@@ -1,0 +1,78 @@
+---
+title: "Home Assistant en kombify"
+description: "Dos formas de ejecutar Home Assistant con kombify: como invitado appliance en Proxmox VE o como contenedor del catálogo de StackKits"
+sidebarTitle: "Home Assistant"
+icon: "house-signal"
+---
+
+kombify ofrece dos formas de ejecutar Home Assistant. Ambas pertenecen al caso
+de uso de Hogar inteligente. La
+[guía de Hogar inteligente](/es/guides/stackkits/use-cases/smart-home) describe
+la configuración y el uso diario.
+
+<Warning>
+Ambas vías están en desarrollo. El inicio de sesión único está implementado y
+aún no se ha completado un arranque real de Home Assistant con inicio de sesión
+en navegador y aplicación. Trata los detalles siguientes como alcance de vista
+previa.
+</Warning>
+
+## Opción 1: Home Assistant OS como invitado appliance
+
+Home Assistant OS se ejecuta en su propia máquina virtual en un nodo Proxmox VE
+que ya posees. Homelab crea la VM y StackKits nunca se instala dentro de
+Home Assistant OS. Un homelab mixto puede tener un invitado Ubuntu para los
+servicios centrales y un invitado Home Assistant OS separado.
+
+| Elemento | Valor |
+| --- | --- |
+| Versión fijada de Home Assistant OS | 18.2 (imagen KVM oficial, verificada por suma de comprobación) |
+| Arquitectura | amd64 |
+| Tamaño mínimo | 2 núcleos de CPU, 4 GiB de memoria, 32 GiB de disco |
+| Almacenamiento en el nodo | Activo, permite imágenes, importaciones y plantillas de contenedor |
+
+El asistente ofrece este invitado cuando seleccionas Smart Home y eliges Home
+Assistant OS, y la instancia es nueva. Actualizar la versión fijada en una
+nueva versión nunca cambia un invitado que ya existe.
+
+Lee primero [Ejecutar kombify en Proxmox VE](/es/guides/stackkits/proxmox).
+Cubre la conexión, la autorización y lo que aún no está verificado.
+
+## Opción 2: Home Assistant como contenedor
+
+El catálogo de StackKits tiene un módulo opcional `home-assistant`. Ejecuta
+Home Assistant Container, sin Supervisor ni aplicaciones, junto al resto de
+servicios de tu kit. El catálogo fija Home Assistant 2026.9.4 y la extensión
+`auth_oidc` 1.2.1 para el inicio de sesión. Apply no instala ninguna extensión
+desde la red.
+
+Esta vía se ejecuta en un host que tú operas, con o sin Homelab. Puede
+pasarse un adaptador USB de Zigbee o Z-Wave directamente a la carga de trabajo.
+
+## Qué funciona y qué está pendiente
+
+- Implementado: inicio de sesión mediante Pocket ID, restringido a los grupos
+  owner, admin y household. El inicio de sesión local de Home Assistant sigue
+  disponible. La cuenta de propietario queda vinculada a su identidad de
+  Pocket ID y no se crea ninguna cuenta en silencio.
+- Implementado: adopción de un contenedor de Home Assistant compatible ya
+  existente, sin volver a crearlo ni cambiar sus cuentas. Una instancia
+  existente se registra primero como observada.
+- Aún no completado: un arranque real de Home Assistant con inicio de sesión en
+  navegador y en la aplicación nativa, confianza en una autoridad de
+  certificación privada y cualificación de la restauración.
+- Aún no completado: una ejecución en vivo completa del invitado appliance en
+  una versión actual.
+
+Restaurar una copia de seguridad no vuelve a emparejar dispositivos físicos.
+Comprueba los vínculos de dispositivos antes de reanudar acciones físicas.
+Consulta [Copia de seguridad y restauración](/es/guides/stackkits/back-up-and-restore).
+
+## Elegir entre ambos
+
+Home Assistant OS te da el sistema completo de Home Assistant con su propio
+modelo de actualizaciones y aplicaciones. El contenedor es más ligero y
+comparte el host con el resto de tu homelab. Ambos son alternativas. Puedes
+elegir cualquiera de los dos en el asistente o en tu StackSpec.
+
+Última revisión: 2026-11-10

@@ -1,0 +1,77 @@
+---
+title: "Images"
+description: "Golden Images: ein Server, der bereits vorbereitet startet und sich beim ersten Start einbindet, und was heute verfügbar ist"
+sidebarTitle: "Images"
+icon: "compact-disc"
+---
+
+Ein Golden Image ist ein Maschinen-Image, das das StackKits-Release, seine
+Werkzeuge und die Container-Images der Kerndienste bereits enthält. Ein daraus
+gestarteter Server lädt sie nicht zuerst herunter. Jeder Klon bindet sich beim
+ersten Start selbst ein und erhält seine eigene Identität.
+
+<Note>
+Golden Images sind qualifiziert, aber noch nicht als Download veröffentlicht. Es
+gibt kein bootfähiges Installations-Image für Bare Metal. Geplante Teile sind
+unten als geplant markiert.
+</Note>
+
+## Was die `stackkit image`-Befehle tun
+
+Drei Befehle bereiten den neutralen Teil eines Images vor. Die Flags stehen in
+der [`stackkit image`-Referenz](/de/stackkits/reference/cli/image).
+
+- **`stackkit image plan`** gibt das Profil aus: welche
+  Kern-Container-Images der Cache enthält. Die Profile sind
+  `cloud-core-compose` (Standard), `basement-core-compose` und
+  `basement-core-lite-compose`.
+- **`stackkit image prepare`** speichert das exakt laufende Release und zieht
+  die Kern-Images. Es legt keinen Owner an, startet keine Dienste und erstellt
+  keine Volumes.
+- **`stackkit image verify`** prüft die Release-Bytes, das leere
+  Zielverzeichnis, den Host und den Image-Cache erneut.
+
+Führe sie auf einem dedizierten Ubuntu-Host mit lokalem Docker-Daemon, ohne
+Container und ohne fremde Images aus. StackKits löscht keinen Zustand, um ein
+Image neutral zu machen, und lehnt einen Host ab, der einen Owner oder
+Dienstdaten enthält.
+
+Ubuntu 26.04 ist das Standardziel. Ubuntu 24.04 ist ebenfalls vorgesehen.
+
+## Was beim ersten Start passiert
+
+Das Manifest, das `prepare` schreibt, ist Cache-Metadaten. Es verleiht keine
+Identität und keine Berechtigung, irgendetwas zu ändern. Beim ersten Start
+prüft jeder Klon das Release, die installierten Dateien, den Host und den Cache
+erneut und führt dann die üblichen Schritte `init`, `generate`, `apply` und
+`verify` aus. Netzwerkzugang wird weiterhin für Dienst-Integrationen beim
+ersten Start und optionale Workloads benötigt.
+
+## Wer was übernimmt
+
+StackKits verantwortet den neutralen Cache. Homelab verantwortet den Bau des
+Maschinen-Images, das Entfernen der Maschinenidentität und das Einbinden jedes
+Klons mit [kombify Guard](/de/homelab/guard/overview).
+
+## Aktueller Stand
+
+- Images für Ubuntu 26.04 und Ubuntu 24.04 wurden am 2026-10-02 gegen StackKits
+  v0.50.3 qualifiziert. Die Prüfungen umfassten zwei Klon-Starts mit
+  unterschiedlichen Maschinen- und SSH-Identitäten sowie zwei unabhängige
+  Einbindungen.
+- Die Qualifizierung deckt das Profil `cloud-core-compose` unter Linux amd64
+  ab. Andere Profile und Architekturen brauchen eigene Nachweise.
+- Images sind noch nicht als Download veröffentlicht.
+- Geplant: ein bootfähiges Installations-Image für Bare Metal. Es existiert noch
+  nicht.
+- Verwaltete Server werden derzeit mit cloud-init und dem Installationsskript
+  eingerichtet, nicht aus dem Image. Siehe
+  [Verwaltete Server](/de/homelab/managed-servers).
+
+Um heute auf deiner eigenen Hardware zu installieren, verwende einen
+vorbereiteten Linux-Host und den Installer aus
+[In 10 Minuten installieren](/de/stackkits/install-in-10-minutes). Prüfe die
+[OS-Kompatibilität](/de/stackkits/reference/os-compatibility) auf den aktuellen
+Status jedes Systems.
+
+Zuletzt geprüft: 2026-11-10

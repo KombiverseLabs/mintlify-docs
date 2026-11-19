@@ -1,0 +1,93 @@
+---
+title: "Conectar un servidor a kombify Cloud"
+description: "Vincula tu propio servidor a tu cuenta de kombify, observa cómo funciona y mantenlo operativo si la conexión termina"
+sidebarTitle: "Conecta un servidor"
+icon: "plug"
+---
+
+<Note>
+La operación conectada está en vista previa, y el Homelab alojado que la
+sostiene puede tener acceso limitado. Consulta
+[Disponibilidad de Homelab](/es/homelab/availability).
+</Note>
+
+Conectar vincula un servidor que posees a tu cuenta de kombify. Este es el modo
+Conectado: el servidor sigue siendo tuyo y kombify Cloud muestra cómo funciona.
+
+## En palabras sencillas
+
+Inicias sesión, abres Homelab desde el panel, añades un servidor que ya
+tienes y ejecutas un comando en él. Cuando el servidor se reporta, aparece en
+tu panel. No necesitas un plan de pago para esto. Una cuenta sin plan puede
+registrarse, ejecutar la configuración de Homelab y vincular un servidor.
+
+## Qué necesitas primero
+
+- Una cuenta de kombify. Consulta
+  [Crea una cuenta](/es/apps/cloud/get-started).
+- Un servidor Linux con systemd, idealmente Ubuntu, y permisos de administrador
+  en él.
+- Una forma de abrir una terminal en ese servidor, directamente o por SSH.
+
+## Pasos
+
+<Steps>
+  <Step title="Abre Homelab">
+    Inicia sesión en `kombify.io` y luego abre **Homelab** bajo **Tools** en el
+    rail izquierdo del panel.
+  </Step>
+  <Step title="Añade un nodo">
+    Inicia el asistente **Add Node** y elige **I already have a device**. Elige
+    **Give me a 1-liner**, o **Connect my device** si prefieres dar a Homelab
+    una clave SSH. Consulta [Añade un nodo](/es/homelab/add-node).
+  </Step>
+  <Step title="Ejecuta el comando de emparejamiento">
+    Copia el comando de la página de progreso y pégalo en la terminal de tu
+    servidor. Funciona una sola vez y caduca tras 15 minutos. Consulta
+    [Comando de emparejamiento](/es/homelab/pairing-command).
+  </Step>
+  <Step title="Espera la conexión">
+    El servidor muestra **Not connected yet** hasta que llega su primer informe.
+    Después aparece como conectado y Homelab continúa con la configuración de
+    tu StackKit.
+  </Step>
+</Steps>
+
+## Qué te da un servidor conectado en Cloud
+
+- **Estado.** Monitoring enumera tus servidores como en línea, limitados o
+  fuera de línea, junto con las aplicaciones que responden y el disco más
+  lleno.
+- **Copias de seguridad.** La tarjeta de copias de seguridad muestra la última
+  ejecución y si hay una copia configurada fuera de tu casa.
+- **Direcciones.** Enumera lo que es accesible desde internet y enlaza con
+  [tu propio dominio](/es/apps/cloud/domains).
+- **Feed.** Los avisos sobre tu homelab llegan a tu
+  [Feed](/es/apps/cloud/notifications).
+- **Ayuda de kombify AI.** Una cuenta conectada puede pedir a kombify AI que
+  lea y diagnostique el servidor. Consulta
+  [Deja que kombify AI opere tu homelab](/es/apps/cloud/ai-operation).
+
+Cloud no guarda registros. Para leer el registro de un servicio, ábrelo en
+Homelab.
+
+## Si la conexión termina
+
+Tu homelab sigue funcionando por su cuenta. Cuando no se puede alcanzar
+Homelab, Monitoring indica que el estado es desconocido, lo cual no significa
+que tus aplicaciones estén caídas. El inicio de sesión en el propio homelab es
+independiente de tu cuenta de kombify, así que quitar la conexión nunca quita
+tu acceso local.
+
+Para terminar la conexión tú mismo, desvincula el servidor. Sus contenedores y
+datos no se tocan (consulta [Revocar, desvincular y desinstalar Guard](/es/homelab/guard/revoke-and-uninstall)).
+
+## Si algo sale mal
+
+- El servidor se queda en **Not connected yet**. Comprueba que el servidor puede
+  abrir la dirección de Homelab mostrada en la página de progreso y genera un
+  comando nuevo si han pasado 15 minutos.
+- Los pasos de emparejamiento se describen en [Emparejar un servidor con Guard](/es/homelab/guard/pairing).
+- Para cualquier otra cosa, escribe a
+  [info@kombify.io](mailto:info@kombify.io). Nunca envíes una contraseña ni un
+  comando de emparejamiento.

@@ -1,0 +1,94 @@
+---
+title: "Einen Server mit kombify Cloud verbinden"
+description: "Binde deinen eigenen Server an dein kombify-Konto, sieh wie er läuft und behalte den Betrieb, falls die Verbindung endet"
+sidebarTitle: "Server verbinden"
+icon: "plug"
+---
+
+<Note>
+Der verbundene Betrieb befindet sich in der Vorschau, und das gehostete
+Homelab, das ihn bereitstellt, kann eingeschränkten Zugriff haben. Siehe
+[Homelab-Verfügbarkeit](/de/homelab/availability).
+</Note>
+
+Das Verbinden bindet einen Server, der dir gehört, an dein kombify-Konto. Das ist
+der verbundene Modus: Der Server bleibt deiner, und kombify Cloud zeigt, wie er
+läuft.
+
+## In einfachen Worten
+
+Du meldest dich an, öffnest Homelab über das Dashboard, fügst einen
+vorhandenen Server hinzu und führst darauf einen Befehl aus. Sobald sich der
+Server meldet, erscheint er in deinem Dashboard. Dafür brauchst du keinen
+kostenpflichtigen Tarif. Ein Konto ohne Tarif kann sich registrieren, die
+Homelab-Einrichtung ausführen und einen Server binden.
+
+## Was du zuerst brauchst
+
+- Ein kombify-Konto. Siehe [Konto erstellen](/de/apps/cloud/get-started).
+- Einen Linux-Server mit systemd, idealerweise Ubuntu, und Administratorrechte
+  darauf.
+- Eine Möglichkeit, auf diesem Server ein Terminal zu öffnen, direkt oder über
+  SSH.
+
+## Schritte
+
+<Steps>
+  <Step title="Homelab öffnen">
+    Melde dich unter `kombify.io` an und öffne dann **Homelab** unter
+    **Tools** in der linken Leiste des Dashboards.
+  </Step>
+  <Step title="Einen Node hinzufügen">
+    Starte den Assistenten **Add Node** und wähle **I already have a device**.
+    Wähle **Give me a 1-liner** oder **Connect my device**, wenn du Homelab
+    lieber einen SSH-Schlüssel gibst. Siehe
+    [Einen Node hinzufügen](/de/homelab/add-node).
+  </Step>
+  <Step title="Den Kopplungsbefehl ausführen">
+    Kopiere den Befehl von der Fortschrittsseite und füge ihn in das Terminal
+    deines Servers ein. Er funktioniert einmal und läuft nach 15 Minuten ab.
+    Siehe [Kopplungsbefehl](/de/homelab/pairing-command).
+  </Step>
+  <Step title="Auf die Verbindung warten">
+    Der Server zeigt **Not connected yet**, bis seine erste Meldung eintrifft.
+    Danach erscheint er als verbunden, und Homelab setzt die Einrichtung
+    deines StackKits fort.
+  </Step>
+</Steps>
+
+## Was dir ein verbundener Server in Cloud bringt
+
+- **Status.** Monitoring listet deine Server als online, eingeschränkt oder
+  offline, zusammen mit den antwortenden Apps und der vollsten Festplatte.
+- **Backups.** Die Backups-Karte zeigt den letzten Lauf und ob eine Kopie
+  außerhalb deines Zuhauses eingerichtet ist.
+- **Adressen.** Sie listet auf, was aus dem Internet erreichbar ist, und
+  verlinkt auf [deine eigene Domain](/de/apps/cloud/domains).
+- **Feed.** Hinweise zu deinem Homelab erreichen deinen
+  [Feed](/de/apps/cloud/notifications).
+- **Hilfe von kombify AI.** Ein verbundenes Konto kann kombify AI bitten, den
+  Server auszulesen und zu diagnostizieren. Siehe
+  [kombify AI dein Homelab betreiben lassen](/de/apps/cloud/ai-operation).
+
+Cloud speichert keine Logs. Um das Log eines Dienstes zu lesen, öffne ihn in
+Homelab.
+
+## Wenn die Verbindung endet
+
+Dein Homelab arbeitet selbstständig weiter. Wenn Homelab nicht erreichbar
+ist, zeigt Monitoring den Status als unbekannt an, was nicht bedeutet, dass
+deine Apps ausgefallen sind. Die Anmeldung auf dem Homelab selbst ist von
+deinem kombify-Konto getrennt, sodass das Entfernen der Verbindung niemals
+deinen lokalen Zugang entfernt.
+
+Um die Verbindung selbst zu beenden, trenne den Server. Seine Container und
+Daten bleiben unberührt (siehe [Guard widerrufen, trennen und deinstallieren](/de/homelab/guard/revoke-and-uninstall)).
+
+## Wenn etwas schiefgeht
+
+- Der Server bleibt auf **Not connected yet**. Prüfe, ob der Server die auf der
+  Fortschrittsseite angezeigte Homelab-Adresse öffnen kann, und erzeuge einen
+  neuen Befehl, wenn 15 Minuten vergangen sind.
+- Die Kopplungsschritte sind unter [Einen Server mit Guard koppeln](/de/homelab/guard/pairing) beschrieben.
+- Für alles Weitere schreibe an [info@kombify.io](mailto:info@kombify.io). Sende
+  niemals ein Passwort oder einen Kopplungsbefehl.

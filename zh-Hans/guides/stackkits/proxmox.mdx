@@ -1,0 +1,62 @@
+---
+title: "在 Proxmox VE 上运行 kombify"
+description: "使用现有的 Proxmox VE 安装作为 Homelab 为你的 homelab 创建来宾虚拟机的位置"
+sidebarTitle: "Proxmox VE"
+icon: "server"
+---
+
+<Warning>
+Proxmox VE 支持正在开发中。[系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)页面会指出各版本对应的虚拟化平台发布及验证证据。在当前版本中，Proxmox 发布尚无已验证的生命周期运行记录，因此请将此路径视为预览范围。
+</Warning>
+
+Proxmox VE 是你已经拥有的虚拟化管理程序。kombify 不对其出租、计费或管理。Homelab 将其用作创建来宾虚拟机的位置，而 StackKit 运行在来宾机内部。
+
+## 各部分如何配合
+
+- Homelab 通过 Proxmox API 创建来宾机。
+- StackKit 运行在来宾机内部，绝不运行在 Proxmox 宿主机上。
+- [kombify Guard](/zh-Hans/homelab/guard/overview) 运行在 Proxmox 节点上，并通过出站连接访问你的 homelab，无需对节点开放入站访问。
+- 由 Homelab 创建的来宾机可以再次退役删除。节点上原本已存在的来宾机不在此删除范围内。
+
+## 支持的来宾机
+
+| 来宾机 | 状态 |
+| --- | --- |
+| Ubuntu 26.04（默认）与 Ubuntu 24.04 云镜像 | 首批交付 |
+| Home Assistant OS 设备来宾机 | 首批交付，请参阅 [Home Assistant](/zh-Hans/guides/stackkits/home-assistant-os) |
+| LXC 容器 | 后续支持，暂不可用 |
+| 安装 Proxmox VE 本身 | 后续支持，暂不可用 |
+| 其他虚拟化管理程序 | 后续支持，暂不可用 |
+
+Ubuntu 来宾机至少需要 2 个 CPU 核心、2 GiB 内存和 32 GiB 磁盘空间。Homelab 使用固定版本且经过校验和验证的官方镜像，绝不会修改已存在来宾机的镜像。
+
+## 你需要准备的内容
+
+- 一套你可以管理的 Proxmox VE 安装。
+- 节点上处于活动状态且允许存放镜像、导入文件（imports）和片段（snippets）的存储。
+- 一个用于来宾机的活动局域网网桥（LAN bridge）。
+- 节点的 API 令牌。它会保存在节点上的受保护文件中，由 Guard 在本地读取。Homelab 不会存储你的 Proxmox 凭据。
+
+## 向导中的步骤
+
+1. 在创建向导的服务器步骤中，选择 **Proxmox hypervisor** 系统。其他设备仍默认采用标准 Linux 安装方式。
+2. 生成连接命令，并在 Proxmox 宿主机的 shell 中以管理员身份运行。Guard 会在节点上启动并向你的 homelab 汇报。
+3. 使用 API 令牌配置 Guard 的本地 Proxmox 连接，然后在向导中选择 **Enable guest management** 并授权连接。
+4. 在 **Hypervisor** 步骤中，选择已连接的 Proxmox 服务器、其存储和局域网网桥，并为新服务器设置 CPU、内存和磁盘空间。
+5. 完成向导。Homelab 会准备来宾机、将其注册纳管，并在其中运行所选的 StackKit。如果中途中断，进度会沿用同一操作继续恢复。
+
+**Find Proxmox on my network** 是一个可选快捷方式。它仅在同一网络中有本地 Homelab 客户端时才有效；否则你需要手动连接节点。即使被发现的节点，在 Homelab 能够管理其上的来宾机之前，仍需要你的授权。
+
+如果所选使用场景需要 GPU，向导会推荐节点上报的 GPU，无需你手动填写。如果节点未上报任何 GPU，该步骤会提示缺少什么。
+
+## 仍待完成的事项
+
+Proxmox 支持已经实现，但在当前版本上尚未完成完整的实时运行。依赖该路径前，请查看[系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)了解当前状态。
+
+## 后续步骤
+
+- [Homelab 运行模式](/zh-Hans/homelab/operating-modes)
+- [节点角色](/zh-Hans/homelab/node-roles)
+- [镜像](/zh-Hans/stackkits/images)
+
+最后审阅：2026-11-10

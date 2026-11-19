@@ -1,0 +1,81 @@
+---
+title: "Home Assistant auf kombify"
+description: "Zwei Wege, Home Assistant mit kombify zu betreiben: als Appliance-Gast auf Proxmox VE oder als Container aus dem StackKits-Katalog"
+sidebarTitle: "Home Assistant"
+icon: "house-signal"
+---
+
+kombify bietet zwei Wege, Home Assistant zu betreiben. Beide gehören zum
+Anwendungsfall Smart Home. Die
+[Smart-Home-Anleitung](/de/guides/stackkits/use-cases/smart-home) beschreibt
+Einrichtung und Alltag.
+
+<Warning>
+Beide Pfade befinden sich in der Entwicklung. Single Sign-On ist implementiert,
+und ein echter Home-Assistant-Start mit Anmeldung im Browser und per App ist
+noch nicht abgeschlossen. Betrachte die Angaben unten als Vorschau-Umfang.
+</Warning>
+
+## Option 1: Home Assistant OS als Appliance-Gast
+
+Home Assistant OS läuft in einer eigenen virtuellen Maschine auf einem
+Proxmox-VE-Node, den du bereits besitzt. Homelab erstellt die VM, und
+StackKits wird niemals innerhalb von Home Assistant OS installiert. Ein
+gemischtes Homelab kann einen Ubuntu-Gast für die Kerndienste und einen
+separaten Home-Assistant-OS-Gast haben.
+
+| Punkt | Wert |
+| --- | --- |
+| Gepinnte Home-Assistant-OS-Version | 18.2 (offizielles KVM-Image, prüfsummengeprüft) |
+| Architektur | amd64 |
+| Mindestgröße | 2 CPU-Kerne, 4 GiB Arbeitsspeicher, 32 GiB Speicherplatz |
+| Speicher auf dem Node | Aktiv, erlaubt Images, Imports und Container-Templates |
+
+Der Assistent bietet diesen Gast an, wenn du Smart Home wählst und Home
+Assistant OS auswählst und die Instanz neu ist. Eine Aktualisierung der
+gepinnten Version in einem Release verändert niemals einen bereits vorhandenen
+Gast.
+
+Lies zuerst [kombify auf Proxmox VE betreiben](/de/guides/stackkits/proxmox).
+Dort geht es um die Verbindung, Autorisierung und das, was noch nicht
+verifiziert ist.
+
+## Option 2: Home Assistant als Container
+
+Der StackKits-Katalog enthält ein optionales Modul `home-assistant`. Es betreibt
+Home Assistant Container ohne Supervisor oder Apps neben den anderen Diensten
+deines Kits. Der Katalog pinnt Home Assistant 2026.9.4 und die Erweiterung
+`auth_oidc` 1.2.1 für die Anmeldung. Apply installiert keine Erweiterung aus
+dem Netzwerk nach.
+
+Dieser Pfad läuft auf einem Host, den du selbst betreibst, mit oder ohne
+Homelab. Ein USB-Funkstick für Zigbee oder Z-Wave lässt sich an den Workload
+durchreichen.
+
+## Was funktioniert und was noch aussteht
+
+- Implementiert: Anmeldung über Pocket ID, beschränkt auf die Gruppen Owner,
+  Admin und Household. Die lokale Home-Assistant-Anmeldung bleibt verfügbar.
+  Das Owner-Konto ist an seine Pocket-ID-Identität gebunden, und es wird kein
+  Konto stillschweigend angelegt.
+- Implementiert: Übernahme eines bestehenden unterstützten
+  Home-Assistant-Containers, ohne ihn neu zu erstellen oder seine Konten zu
+  ändern. Eine bestehende Instanz wird zuerst als beobachtet registriert.
+- Noch nicht abgeschlossen: ein echter Home-Assistant-Start mit Anmeldung im
+  Browser und der nativen App, Vertrauen in eine private
+  Zertifizierungsstelle sowie die Qualifizierung der Wiederherstellung.
+- Noch nicht abgeschlossen: ein vollständiger Live-Lauf des Appliance-Gastes
+  auf einem aktuellen Release.
+
+Das Wiederherstellen eines Backups koppelt physische Geräte nicht neu. Prüfe
+Gerätebindungen, bevor du physische Aktionen wieder aufnimmst. Siehe
+[Sichern und wiederherstellen](/de/guides/stackkits/back-up-and-restore).
+
+## Zwischen beiden wählen
+
+Home Assistant OS gibt dir das vollständige Home-Assistant-System mit seinem
+eigenen Update- und App-Modell. Der Container ist schlanker und teilt sich den
+Host mit dem Rest deines Homelabs. Beide sind Alternativen. Du kannst eine der
+beiden im Assistenten oder in deiner StackSpec wählen.
+
+Zuletzt geprüft: 2026-11-10

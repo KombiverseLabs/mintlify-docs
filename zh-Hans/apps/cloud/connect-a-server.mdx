@@ -1,0 +1,61 @@
+---
+title: "将服务器连接到 kombify Cloud"
+description: "将你自己的服务器绑定到你的 kombify 账户，查看其运行状态，并在连接断开时保持正常运转"
+sidebarTitle: "连接服务器"
+icon: "plug"
+---
+
+<Note>
+已连接运行方式处于预览阶段，承载该功能的托管 Homelab 可能仅开放有限访问。请参阅[Homelab 可用性](/zh-Hans/homelab/availability)。
+</Note>
+
+连接会将一台归你所有的服务器绑定到你的 kombify 账户。这就是“已连接”模式：服务器始终属于你，kombify Cloud 则展示它的运行情况。
+
+## 简而言之
+
+你登录账户，在仪表板中打开 Homelab，添加一台你已有的服务器，并在其上执行一条命令。服务器完成汇报后，就会出现在你的仪表板中。这不需要付费套餐。没有付费套餐的账户也可以注册、完成 Homelab 设置并绑定服务器。
+
+## 准备工作
+
+- 一个 kombify 账户。请参阅[创建账户](/zh-Hans/apps/cloud/get-started)。
+- 一台带 systemd 的 Linux 服务器（建议使用 Ubuntu），并拥有其管理员权限。
+- 一种在该服务器上打开终端的方式，可以直接操作或通过 SSH 连接。
+
+## 步骤
+
+<Steps>
+  <Step title="打开 Homelab">
+    在 `kombify.io` 登录，然后在仪表板左侧导航栏的 **Tools** 下打开 **Homelab**。
+  </Step>
+  <Step title="添加节点">
+    启动 **Add Node** 向导并选择 **I already have a device**。选择 **Give me a 1-liner**，或者如果你更倾向于向 Homelab 提供 SSH 密钥，请选择 **Connect my device**。请参阅[添加节点](/zh-Hans/homelab/add-node)。
+  </Step>
+  <Step title="运行配对命令">
+    从进度页面复制该命令，并将其粘贴到你服务器的终端中。该命令仅可使用一次，且会在 15 分钟后过期。请参阅[配对命令](/zh-Hans/homelab/pairing-command)。
+  </Step>
+  <Step title="等待连接完成">
+    在收到首次汇报前，服务器会显示 **Not connected yet**。之后它会显示为已连接，Homelab 会继续完成你的 StackKit 设置。
+  </Step>
+</Steps>
+
+## 已连接服务器在 Cloud 中提供的内容
+
+- **状态。** Monitoring 会将你的服务器列为在线、受限或离线，并显示正在响应的应用以及占用率最高的磁盘。
+- **备份。** 备份卡片显示最近一次运行情况，以及是否已设置家庭网络之外的副本。
+- **地址。** 列出可从互联网访问的地址，并链接到[你自己的域名](/zh-Hans/apps/cloud/domains)。
+- **Feed。** 关于你 homelab 的通知会发送到你的 [Feed](/zh-Hans/apps/cloud/notifications)。
+- **kombify AI 协助。** 已连接账户可以请求 kombify AI 读取并诊断服务器。请参阅[让 kombify AI 操作你的 homelab](/zh-Hans/apps/cloud/ai-operation)。
+
+Cloud 不保存日志。要查看某个服务的日志，请在 Homelab 中打开它。
+
+## 如果连接断开
+
+你的 homelab 会继续独立运行。当无法访问 Homelab 时，Monitoring 会将状态显示为未知，这并不代表你的应用已停止运行。homelab 本身的登录方式独立于你的 kombify 账户，因此移除连接绝不会移除你的本地访问权限。
+
+如需自行结束连接，请分离该服务器。其容器和数据都不会受到影响（参见[撤销、分离与卸载 Guard](/zh-Hans/homelab/guard/revoke-and-uninstall)）。
+
+## 如果出了问题
+
+- 服务器一直停留在 **Not connected yet**。请确认服务器能够访问进度页面上显示的 Homelab 地址；如果已超过 15 分钟，请重新生成一条新命令。
+- 配对步骤详见[使用 Guard 配对服务器](/zh-Hans/homelab/guard/pairing)。
+- 如有其他问题，请写信至 [info@kombify.io](mailto:info@kombify.io)。切勿发送密码或配对命令。

@@ -1,0 +1,72 @@
+---
+title: "kombify und Runtipi"
+description: "Wie sich kombify zu Runtipi, einem App-Manager für Heimserver, verhält und wann was passt"
+sidebarTitle: "Runtipi"
+icon: "layer-group"
+---
+
+[Runtipi](https://runtipi.io) ist ein freies Open-Source-Werkzeug zur
+Verwaltung selbst gehosteter Apps auf einem Heimserver. Es bietet ein
+Web-Dashboard, in dem du Apps installierst, aktualisierst, konfigurierst und
+sicherst, und jede App läuft in ihrem eigenen Docker-Container. Du installierst
+es mit einem Befehl auf einem 64-Bit-Linux-System.
+
+## Was Runtipi gut macht
+
+- Es gibt dir einen App-Store auf einem Linux-Host, den du bereits hast.
+- Installieren, Aktualisieren und laut Dokumentation das Sichern einer App
+  geschehen in einem Dashboard.
+- Es braucht keine besondere Hardware und kein Image.
+- Es ist ein fokussiertes Werkzeug. Es verwaltet Apps und überlässt den Rest
+  des Hosts dir.
+
+## Was kombify ist
+
+kombify definiert das Homelab als Ganzes: Anmeldung, Zugriffsrichtlinie,
+Routing, Backup und Updates in einer deklarativen Datei. StackKits plant,
+wendet an und verifiziert es. Homelab ist die App, die es betreibt.
+
+## Wie sie zusammenhängen
+
+kombify und Runtipi starten beide von einem Linux-Host und einem Befehl.
+Runtipi stellt den App-Katalog in den Mittelpunkt. kombify stellt die Definition
+rund um die Apps in den Mittelpunkt.
+
+Der kombify-Katalog listet Runtipi als geplante alternative Engine für den
+Anwendungsfall Marketplace, einen App-Store auf deinem Homelab. Diese
+Integration befindet sich in der Entwicklung. Ihr Modul und ihr
+Lebenszyklus-Nachweis existieren noch nicht, und kombify installiert Runtipi
+heute nicht.
+
+## Heutige Grenzen von kombify
+
+- kombify steht vor 1.0 und veröffentlicht häufig neue Releases.
+- Die Kompatibilität wird noch verifiziert. Siehe
+  [OS-Kompatibilität](/de/stackkits/reference/os-compatibility) für die
+  aktuellen Zeilen.
+- Der Katalog ist kuratiert und im
+  [Anwendungsfall-Katalog](/de/stackkits/reference/use-case-catalog)
+  aufgelistet. Es gibt kein Plex und keine Sonarr- oder Radarr-Familie. Hängt
+  dein Setup von solchen Apps ab, passt Runtipis Katalog heute besser zu dir.
+- Ein eigenes Compose-Projekt unter Anmeldung, Routing und Backup des Homelabs
+  zu bringen ist nicht implementiert.
+
+## Was kombify heute kann
+
+- Passkey-Anmeldung über Pocket ID, ohne Standardpasswörter.
+- Eine explizite Zugriffsrichtlinie pro Dienst.
+- Wiederherstellung in eine isolierte Staging-Kopie.
+- Updates, die zuerst einen Snapshot anlegen.
+- Planen, Anwenden und Verifizieren aus einer Definition.
+- Ein lokaler MCP-Server auf jeder Installation für deinen eigenen KI-Agenten.
+
+## Wann man was wählt
+
+- Wähle Runtipi, wenn du einen Store mit vielen Apps auf einem Linux-Host und
+  ein einfaches Dashboard zu ihrer Verwaltung willst.
+- Wähle kombify, wenn Identität, Zugriffsrichtlinie und Backup für das gesamte
+  Homelab definiert und auf einem anderen Server wiederholbar sein sollen.
+- Wenn du Runtipi bereits betreibst, kannst du es behalten. kombify verwaltet
+  seine Apps nicht.
+
+Zuletzt geprüft: 2026-11-10

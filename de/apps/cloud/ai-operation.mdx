@@ -1,0 +1,73 @@
+---
+title: "kombify AI dein Homelab betreiben lassen"
+description: "Was kombify AI auf einem verbundenen Server lesen und ändern kann, wie die Freigabe funktioniert und wie du stattdessen deinen eigenen KI-Agenten nutzt"
+sidebarTitle: "KI-Betrieb"
+icon: "wand-magic-sparkles"
+---
+
+kombify AI kann für dich auf einen verbundenen Server aufpassen. Der KI-Betrieb
+befindet sich in der Vorschau, und die Liste der Aktionen unten kann sich noch
+ändern.
+
+## Was du zuerst brauchst
+
+- Einen mit deinem Konto verbundenen Server. Siehe
+  [Server verbinden](/de/apps/cloud/connect-a-server).
+- Ein kombify-Konto. Wie viel KI du nutzen kannst, hängt von deinem Tarif ab.
+
+## Was kombify AI lesen kann
+
+Lesen verändert nichts auf deinem Server. kombify AI kann einsehen:
+
+- den Status und Zustand deiner Server und der Dienste darauf;
+- die Prozesse und Container, die auf einem Server laufen;
+- den Stand deiner Backup-Jobs und ob das neueste Backup aktuell ist;
+- die verfügbaren Updates für das System und für deine Dienste.
+
+Damit kann sie dir sagen, warum ein Server offline wirkt, welcher Dienst den
+Prozessor auslastet oder warum ein Backup fehlgeschlagen ist.
+
+## Was kombify AI ändern kann
+
+Jede Änderung ist eine typisierte Aktion, die dein Homelab selbst ausführt.
+kombify AI kann keinen freien Befehl ausführen.
+
+| Aktion | Was passiert |
+| --- | --- |
+| Einen Dienst starten, stoppen oder neu starten | Der Dienst deines StackKits ändert seinen Zustand. |
+| Einen Dienst aktualisieren | Homelab behält einen Wiederherstellungspunkt, prüft das Ziel live und kehrt automatisch zum vorherigen Release zurück, wenn diese Prüfung fehlschlägt. |
+| Ein Backup ausführen oder prüfen | Ein Backup läuft, oder kombify AI liest aus, ob das Repository bereit ist und ein verifizierter Snapshot existiert. |
+| Den Zustand verifizieren | Dein Homelab wird gegen sein StackKit geprüft. |
+| Einen Container oder Systemdienst starten, stoppen oder neu starten | Gilt für solche, die dein StackKit nicht verwaltet. Container und Units, die StackKits verwaltet oder schützt, werden abgewiesen. |
+
+Alles, was nicht auf dieser Liste steht, kann kombify AI auf deinem Server nicht
+tun.
+
+## Wie die Freigabe funktioniert
+
+kombify AI handelt mit deinen eigenen Rechten, niemals mit mehr. Manche
+Aktionen brauchen zuerst deine Freigabe, und dann genügt ein Klick. Jede Aktion
+wird vor der Ausführung geprüft, protokolliert und hinterlässt eine Quittung.
+Du kannst eine Aktion ablehnen, und eine abgelehnte Aktion hat keine Wirkung.
+
+## Was verbraucht wird
+
+KI-Nutzung greift auf die monatlichen KI-Credits deines Tarifs zurück. Sind die
+Credits aufgebraucht, bleiben die kostenlosen Modelle weiter verfügbar.
+
+## Stattdessen deinen eigenen KI-Agenten nutzen
+
+Du kannst einen Agenten verbinden, den du bereits verwendest, etwa Claude Code,
+Codex oder Cursor. Er startet den lokalen `stackkit`-MCP-Server auf dem
+Rechner, auf dem dein Homelab-Workspace liegt. Standardmäßig kann er lesen, und
+ändern kann er erst etwas, nachdem du ein Schreib-Gate einschaltest (siehe [Deinen eigenen KI-Agenten verbinden](/de/guides/stackkits/connect-your-ai-agent)).
+
+## Wenn etwas schiefgeht
+
+- Meldet kombify AI, dass sie einen Server nicht erreichen kann, prüfe den
+  Server in Monitoring. Ein Server, der offline oder eingeschränkt ist, kann
+  keine Aktion ausführen.
+- Ist ein Update zum vorherigen Release zurückgekehrt, nennt das Job-Ergebnis
+  das Resultat und den fehlgeschlagenen Schritt. Bitte kombify AI, es zu lesen.
+- Für alles Weitere schreibe an [info@kombify.io](mailto:info@kombify.io). Sende
+  niemals ein Passwort.

@@ -1,0 +1,73 @@
+---
+title: "Deja que kombify AI opere tu homelab"
+description: "Qué puede leer y cambiar kombify AI en un servidor conectado, cómo funciona la aprobación y cómo usar tu propio agente de IA en su lugar"
+sidebarTitle: "Operación con IA"
+icon: "wand-magic-sparkles"
+---
+
+kombify AI puede cuidar de un servidor conectado por ti. La operación con IA
+está en vista previa, y la lista de acciones de abajo puede cambiar.
+
+## Qué necesitas primero
+
+- Un servidor conectado a tu cuenta. Consulta
+  [Conecta un servidor](/es/apps/cloud/connect-a-server).
+- Una cuenta de kombify. Cuánta IA puedes usar depende de tu plan.
+
+## Qué puede leer kombify AI
+
+Leer no cambia nada en tu servidor. kombify AI puede consultar:
+
+- el estado y la salud de tus servidores y de los servicios en ellos;
+- los procesos y contenedores que se ejecutan en un servidor;
+- el estado de tus tareas de copia de seguridad y si la copia más reciente está
+  al día;
+- las actualizaciones disponibles para el sistema y para tus servicios.
+
+Con esto puede decirte por qué un servidor parece fuera de línea, qué servicio
+está usando el procesador o por qué falló una copia de seguridad.
+
+## Qué puede cambiar kombify AI
+
+Cada cambio es una acción tipada que tu propio homelab ejecuta. kombify AI no
+puede ejecutar un comando libre.
+
+| Acción | Qué ocurre |
+| --- | --- |
+| Iniciar, detener o reiniciar un servicio | El servicio de tu StackKit cambia de estado. |
+| Actualizar un servicio | Homelab conserva un punto de restauración, verifica el destino en vivo y vuelve automáticamente a la versión anterior cuando esa verificación falla. |
+| Ejecutar o comprobar una copia de seguridad | Se ejecuta una copia de seguridad, o kombify AI lee si el repositorio está listo y existe una instantánea verificada. |
+| Verificar el estado | Tu homelab se comprueba frente a su StackKit. |
+| Iniciar, detener o reiniciar un contenedor o servicio del sistema | Se aplica a los que tu StackKit no gestiona. Los contenedores y unidades que StackKits gestiona o protege se rechazan. |
+
+Cualquier cosa que no esté en esta lista no es algo que kombify AI pueda hacer
+en tu servidor.
+
+## Cómo funciona la aprobación
+
+kombify AI actúa con tus propios permisos, nunca con más. Algunas acciones
+necesitan primero tu aprobación y luego basta un clic. Cada acción se
+comprueba antes de ejecutarse, queda registrada y deja un comprobante. Puedes
+denegar una acción, y una acción denegada no tiene ningún efecto.
+
+## Qué consume
+
+El uso de IA consume los créditos mensuales de IA de tu plan. Cuando se agotan
+los créditos, los modelos gratuitos siguen disponibles.
+
+## Usa tu propio agente de IA en su lugar
+
+Puedes conectar un agente que ya uses, como Claude Code, Codex o Cursor.
+Ejecuta el servidor MCP local `stackkit` en el ordenador que guarda el espacio
+de trabajo de tu homelab. Por defecto puede leer, y solo puede cambiar algo
+después de activar una puerta de escritura (consulta [Conecta tu propio agente de IA](/es/guides/stackkits/connect-your-ai-agent)).
+
+## Si algo sale mal
+
+- Si kombify AI dice que no puede alcanzar un servidor, comprueba el servidor en
+  Monitoring. Un servidor fuera de línea o limitado no puede recibir una
+  acción.
+- Si una actualización volvió a la versión anterior, el resultado de la tarea
+  indica el desenlace y el paso que falló. Pide a kombify AI que lo lea.
+- Para cualquier otra cosa, escribe a
+  [info@kombify.io](mailto:info@kombify.io). Nunca envíes una contraseña.

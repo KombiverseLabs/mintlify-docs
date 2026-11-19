@@ -1,0 +1,55 @@
+---
+title: "kombify 与 Coolify"
+description: "Coolify 与 kombify 如何配合：Coolify 构建并部署你的应用，kombify 定义其周围的 homelab"
+sidebarTitle: "Coolify"
+icon: "cloud-upload"
+---
+
+[Coolify](https://coolify.io) 是一个开源、可自托管的平台，用于将应用、数据库和服务部署到你自己的服务器。你通过 SSH 连接服务器，Coolify 就会从 Web 界面构建、部署并更新你的应用。它还提供一键部署服务库。
+
+## 它们如何配合
+
+kombify 和 Coolify 承担不同的职责。Coolify 是应用平台，而 kombify 是位于其旁与之上的一层。kombify 定义 homelab：身份认证、访问策略、路由、备份与更新。Coolify 则是在这个 homelab 上构建与部署你自有应用的一种方式。
+
+## 集成的当前状态
+
+该集成正在开发中。
+
+- StackKits 可以将 Coolify 作为可选平台安装，但必须显式选择。它绝不会出现在默认工作区中。请参阅 [Coolify](/zh-Hans/stackkits/apps/coolify)。
+- Marketplace 使用场景（即在你的 homelab 上以 Coolify 作为引擎的应用商店）目前仍为草案。运行时证明、备份与恢复以及当前版本的完整验收均待完成。
+- Coolify 适配器并不为所有工作负载提供工作负载备份与恢复。请参阅[应用交付兼容性](/zh-Hans/stackkits/reference/application-delivery-compatibility)。
+- 你从 Coolify 自带商店安装的应用归属于 Coolify 与你本人。kombify 并不接管它们。
+
+以上描述的是计划中的配合方式，请勿将其理解为已正式发布的产品功能。
+
+## Coolify 擅长什么
+
+- 结合构建步骤从 Git 仓库进行部署。
+- 在你的应用旁运行数据库与各类服务。
+- 从同一界面管理多台服务器。
+- 使用丰富的开箱即用服务库。
+
+对于构建和部署你自己的应用程序，Coolify 在今天就是合适的工具。
+
+## kombify 目前的局限性
+
+- kombify 仍处于 1.0 之前阶段，发布频率较高。
+- 兼容性仍在验证中。请参阅[系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)查看当前支持情况。
+- 安装需要一台准备好的 Linux 宿主机和一条命令。目前没有引导镜像。
+- 将你自己的 Compose 项目纳入 homelab 的登录、路由与备份体系尚未实现。
+- 目录经过精选，列在[使用场景目录](/zh-Hans/stackkits/reference/use-case-catalog)中。
+
+## kombify 目前能做什么
+
+- 通过 Pocket ID 使用通行密钥登录，没有默认密码。
+- 为每个服务设置明确的访问策略。
+- 恢复到隔离的暂存副本。
+- 更新前先拍摄快照。
+- 从同一份定义完成计划、应用与验证。
+- 每次安装都带有供你自己的 AI 代理使用的本地 MCP 服务器。
+
+## 结合使用
+
+使用 kombify 定义 homelab，并在其上用 Coolify 部署你自己的应用。请确保每个工作负载只走一条交付路径，避免 Coolify 与 kombify 创建相互冲突的路由。如果你只需要部署应用并且已经自己管理宿主机，那么单独使用 Coolify 就足够了。
+
+最后审阅：2026-11-10

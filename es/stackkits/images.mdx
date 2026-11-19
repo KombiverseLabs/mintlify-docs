@@ -1,0 +1,74 @@
+---
+title: "Imágenes"
+description: "Imágenes doradas: un servidor que arranca ya preparado y se da de alta en el primer arranque, y qué hay disponible hoy"
+sidebarTitle: "Imágenes"
+icon: "compact-disc"
+---
+
+Una imagen dorada es una imagen de máquina que ya contiene la versión de
+StackKits, sus herramientas y las imágenes de contenedor de los servicios
+centrales. Un servidor arrancado desde ella no las descarga primero. Cada clon
+se da de alta por su cuenta en el primer arranque y obtiene su propia
+identidad.
+
+<Note>
+Las imágenes doradas están cualificadas, pero aún no se publican como
+descarga. No hay imagen de instalación arrancable para bare metal. Las partes
+planificadas se indican abajo como planificadas.
+</Note>
+
+## Qué hacen los comandos `stackkit image`
+
+Tres comandos preparan la parte neutra de una imagen. Las opciones están en la
+[referencia de `stackkit image`](/es/stackkits/reference/cli/image).
+
+- **`stackkit image plan`** imprime el perfil: qué imágenes de contenedor
+  centrales contiene la caché. Los perfiles son `cloud-core-compose`
+  (predeterminado), `basement-core-compose` y `basement-core-lite-compose`.
+- **`stackkit image prepare`** guarda la versión exacta en ejecución y descarga
+  las imágenes centrales. No crea ningún propietario, no inicia servicios y no
+  crea volúmenes.
+- **`stackkit image verify`** vuelve a comprobar los bytes de la versión, el
+  directorio de destino vacío, el host y la caché de imágenes.
+
+Ejecútalos en un host Ubuntu dedicado con un demonio de Docker local, sin
+contenedores y sin imágenes ajenas. StackKits no borra estado para hacer neutra
+una imagen y rechaza un host que contenga un propietario o datos de servicio.
+
+Ubuntu 26.04 es el objetivo predeterminado. Ubuntu 24.04 también está previsto.
+
+## Qué ocurre en el primer arranque
+
+El manifiesto que escribe `prepare` son metadatos de caché. No otorga ninguna
+identidad ni permiso para cambiar nada. En el primer arranque, cada clon vuelve
+a comprobar la versión, los archivos instalados, el host y la caché, y luego
+ejecuta los pasos habituales `init`, `generate`, `apply` y `verify`. Sigue
+siendo necesario acceso a la red para las integraciones de servicio del primer
+arranque y las cargas de trabajo opcionales.
+
+## Quién hace qué
+
+StackKits es responsable de la caché neutra. Homelab es responsable de
+construir la imagen de máquina, eliminar la identidad de máquina y dar de alta
+cada clon con [kombify Guard](/es/homelab/guard/overview).
+
+## Estado actual
+
+- Las imágenes para Ubuntu 26.04 y Ubuntu 24.04 se cualificaron el 2026-10-02
+  frente a StackKits v0.50.3. Las comprobaciones cubrieron dos arranques de
+  clon con identidades de máquina y SSH distintas y dos altas independientes.
+- La cualificación cubre el perfil `cloud-core-compose` en Linux amd64. Otros
+  perfiles y arquitecturas necesitan su propia evidencia.
+- Las imágenes aún no se publican como descarga.
+- Planificado: una imagen de instalación arrancable para bare metal. Todavía no
+  existe.
+- Los servidores gestionados se configuran actualmente con cloud-init y el
+  script de instalación, no desde la imagen. Consulta
+  [Servidores gestionados](/es/homelab/managed-servers).
+
+Para instalar hoy en tu propio hardware, usa un host Linux preparado y el instalador de [Instala tu primer homelab](/es/stackkits/install-in-10-minutes) (o sigue la
+[Guía rápida](/es/stackkits/quickstart)). Consulta la
+[compatibilidad de SO](/es/stackkits/reference/os-compatibility) para conocer
+el estado actual de cada sistema.
+
+Última revisión: 2026-11-10

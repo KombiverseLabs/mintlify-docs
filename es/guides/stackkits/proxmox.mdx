@@ -1,0 +1,93 @@
+---
+title: "Ejecutar kombify en Proxmox VE"
+description: "Usa una instalación existente de Proxmox VE como el lugar donde Homelab crea máquinas virtuales invitadas para tu homelab"
+sidebarTitle: "Proxmox VE"
+icon: "server"
+---
+
+<Warning>
+El soporte para Proxmox VE está en desarrollo. La página de
+[compatibilidad de SO](/es/stackkits/reference/os-compatibility) apunta a los
+despliegues de hipervisor y a sus evidencias por versión. En la versión actual,
+el despliegue de Proxmox no tiene ninguna ejecución de ciclo de vida
+verificada, así que trata esta vía como alcance de vista previa.
+</Warning>
+
+Proxmox VE es un hipervisor que ya posees. kombify no lo alquila, factura ni
+gestiona. Homelab lo usa como lugar para crear máquinas virtuales invitadas,
+y el StackKit se ejecuta dentro de un invitado.
+
+## Cómo encaja todo
+
+- Homelab crea invitados mediante la API de Proxmox.
+- El StackKit se ejecuta dentro del invitado. Nunca se ejecuta en el host de
+  Proxmox.
+- [kombify Guard](/es/homelab/guard/overview) se ejecuta en el nodo de Proxmox y alcanza tu homelab
+  mediante una conexión saliente. No se necesita acceso entrante al nodo.
+- Un invitado creado por Homelab puede darse de baja de nuevo. Los invitados
+  que ya existían en el nodo quedan fuera de este alcance de eliminación.
+
+## Invitados compatibles
+
+| Invitado | Estado |
+| --- | --- |
+| Imágenes cloud de Ubuntu 26.04 (predeterminada) y Ubuntu 24.04 | Primera entrega |
+| Invitado appliance de Home Assistant OS | Primera entrega, consulta [Home Assistant](/es/guides/stackkits/home-assistant-os) |
+| Contenedores LXC | Más adelante, no disponible |
+| Instalar el propio Proxmox VE | Más adelante, no disponible |
+| Otros hipervisores | Más adelante, no disponible |
+
+Los invitados Ubuntu necesitan al menos 2 núcleos de CPU, 2 GiB de memoria y
+32 GiB de disco. Homelab usa imágenes del fabricante fijadas y verificadas por
+suma de comprobación, y nunca cambia la imagen de un invitado que ya existe.
+
+## Qué necesitas
+
+- Una instalación de Proxmox VE que puedas administrar.
+- Almacenamiento en el nodo que esté activo y permita imágenes, importaciones y
+  snippets.
+- Un puente LAN activo para el invitado.
+- Un token de API para el nodo. Se guarda en el nodo en un archivo protegido y
+  Guard lo lee de forma local. Homelab no almacena tus credenciales de
+  Proxmox.
+
+## Los pasos en el asistente
+
+1. En el paso del servidor del asistente de creación, elige el sistema
+   **Proxmox hypervisor**. La configuración estándar de Linux sigue siendo la
+   predeterminada para cualquier otro dispositivo.
+2. Genera el comando de conexión y ejecútalo en el shell del host de Proxmox
+   como administrador. Guard arranca en el nodo y se reporta a tu homelab.
+3. Configura la conexión local de Guard con Proxmox usando el token de API,
+   luego elige **Enable guest management** en el asistente y autoriza la
+   conexión.
+4. En el paso **Hypervisor**, elige el servidor Proxmox conectado, su
+   almacenamiento y su puente LAN, y establece CPU, memoria y disco para el
+   nuevo servidor.
+5. Termina el asistente. Homelab prepara el invitado, lo da de alta y ejecuta
+   el StackKit seleccionado dentro de él. El progreso se reanuda con la misma
+   operación si se interrumpe.
+
+**Find Proxmox on my network** es un atajo opcional. Solo funciona con un
+cliente local de Homelab en la misma red. Sin uno, conectas el nodo
+manualmente. Un nodo detectado sigue necesitando tu autorización antes de que
+Homelab pueda gestionar invitados en él.
+
+Si un caso de uso seleccionado necesita una GPU, el asistente propone una GPU
+que el nodo reporte y no te pide introducir nada. Si el nodo no reporta
+ninguna, el paso te indica qué falta.
+
+## Qué sigue pendiente
+
+El soporte de Proxmox está implementado y aún no se ha completado una ejecución
+en vivo completa en una versión actual. Consulta la
+[compatibilidad de SO](/es/stackkits/reference/os-compatibility) para ver el
+estado actual antes de depender de él.
+
+## Próximos pasos
+
+- [Modos de operación de Homelab](/es/homelab/operating-modes)
+- [Roles de nodo](/es/homelab/node-roles)
+- [Imágenes](/es/stackkits/images)
+
+Última revisión: 2026-11-10

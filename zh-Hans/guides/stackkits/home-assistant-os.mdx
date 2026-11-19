@@ -1,0 +1,48 @@
+---
+title: "在 kombify 上运行 Home Assistant"
+description: "通过 kombify 运行 Home Assistant 的两种方式：作为 Proxmox VE 上的设备来宾机，或作为 StackKits 目录中的容器"
+sidebarTitle: "Home Assistant"
+icon: "house-signal"
+---
+
+kombify 提供两种运行 Home Assistant 的方式。两者均属于智能家居（Smart Home）使用场景。[智能家居指南](/zh-Hans/guides/stackkits/use-cases/smart-home)介绍了安装与日常使用。
+
+<Warning>
+两条路径均处于开发中。单点登录已经实现，但包含浏览器及原生应用登录在内的真实 Home Assistant 启动尚未完成。请将以下细节视为预览范围。
+</Warning>
+
+## 方式 1：将 Home Assistant OS 作为设备来宾机
+
+Home Assistant OS 运行在你已有的 Proxmox VE 节点上的独立虚拟机中。Homelab 负责创建该虚拟机，而 StackKits 绝不会安装到 Home Assistant OS 内部。混合架构的 homelab 可以用一台 Ubuntu 来宾机运行核心服务，再用另一台单独的 Home Assistant OS 来宾机。
+
+| 项目 | 值 |
+| --- | --- |
+| 固定的 Home Assistant OS 版本 | 18.2（官方 KVM 镜像，经过校验和验证） |
+| 架构 | amd64 |
+| 最小规格 | 2 个 CPU 核心、4 GiB 内存、32 GiB 磁盘 |
+| 节点存储 | 活动状态，允许镜像、导入和容器模板 |
+
+当你选择 Smart Home 并选择 Home Assistant OS，且该实例为新建时，向导会提供此来宾机。新版本中更新所固定的版本号绝不会改动已经存在的来宾机。
+
+请先阅读[在 Proxmox VE 上运行 kombify](/zh-Hans/guides/stackkits/proxmox)。其中涵盖连接、授权以及尚未完成验证的内容。
+
+## 方式 2：将 Home Assistant 作为容器
+
+StackKits 目录包含一个可选的 `home-assistant` 模块。它与其他套件服务一同运行 Home Assistant Container（不含 Supervisor 或插件应用）。目录固定采用 Home Assistant 2026.9.4 和用于登录的 `auth_oidc` 扩展 1.2.1。应用更改时不会从网络安装任何扩展。
+
+该路径运行在你自己运维的宿主机上，无论是否配合 Homelab 皆可。用于 Zigbee 或 Z-Wave 的 USB 无线电适配器可以直通给该工作负载。
+
+## 已实现与待完成的事项
+
+- 已实现：通过 Pocket ID 登录，限定在 owner、admin 和 household 分组内。本地 Home Assistant 登录仍保持可用。所有者账户会绑定到其 Pocket ID 身份，不会静默创建任何账户。
+- 已实现：接管现有的受支持 Home Assistant 容器，无需重新创建或修改其账户。现有实例会先以“已观察”状态登记。
+- 尚未完成：包含浏览器和原生应用登录在内的真实 Home Assistant 启动、私有证书颁发机构信任以及恢复验证。
+- 尚未完成：当前版本下设备来宾机的完整实时运行。
+
+恢复备份不会重新配对物理设备。在恢复物理控制操作之前，请先检查设备绑定状态。请参阅[备份与恢复](/zh-Hans/guides/stackkits/back-up-and-restore)。
+
+## 如何在两者之间选择
+
+Home Assistant OS 为你提供完整的 Home Assistant 系统及其自身的更新和应用模型。容器方式更轻量，并与你 homelab 的其余部分共享宿主机。两者互为替代方案。你可以在向导中或你的 StackSpec 里任选其一。
+
+最后审阅：2026-11-10

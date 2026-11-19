@@ -1,0 +1,49 @@
+---
+title: "kombify 与 Proxmox VE 搭配 Komodo、Dockge 或 Portainer"
+description: "kombify 与虚拟化管理程序及容器管理工具之间的关系，以及如何将它们结合使用"
+sidebarTitle: "Proxmox 搭配 Komodo、Dockge、Portainer"
+icon: "server"
+---
+
+本页介绍一种常见组合。[Proxmox VE](https://www.proxmox.com) 运行虚拟机。而诸如 [Komodo](https://komo.do)、[Dockge](https://github.com/louislam/dockge) 或 [Portainer](https://www.portainer.io) 等容器管理器运行在虚拟机内，负责管理 Docker 容器和 Compose 项目。
+
+## 这些工具擅长什么
+
+- **Proxmox VE** 是一个开源虚拟化平台。它运行完整的虚拟机和容器，并提供配套的存储、网络与备份功能。如果你需要虚拟化管理程序，它是标准选择。
+- **Dockge** 是一个带有简洁 Web 编辑器的 Compose stack 管理工具。
+- **Portainer** 为 Docker 环境和团队提供 Web 界面。
+- **Komodo** 跨服务器构建并部署容器、Compose stack 和 Swarm 服务，提供 API 和 CLI。
+
+这些工具为你提供控制权与灵活性，由你决定各部分如何配合。
+
+## kombify 增加了什么
+
+kombify 为整个 homelab 定义身份认证、访问策略、路由、备份和更新，并通过一份定义加以应用。它不会取代虚拟化管理程序或容器管理器。
+
+- 在 Proxmox 上，kombify 将你的现有安装作为底座。Homelab 创建来宾虚拟机，StackKit 运行在来宾机内部。请参阅[在 Proxmox VE 上运行 kombify](/zh-Hans/guides/stackkits/proxmox)。该路径仍在开发中，当前版本尚无已验证的生命周期运行记录。
+- Komodo 是 StackKits 中的可选应用平台，需显式选择。其适配器目前为 Beta，完整生命周期验收尚待完成。请参阅 [Komodo](/zh-Hans/stackkits/apps/komodo)。
+- Portainer 不在 kombify 目录中，而 Dockge 仅处于实验阶段。你可以在 kombify 宿主机旁运行其中任一工具，它们管理的将是并不归属 kombify 的容器。
+
+## kombify 目前的局限性
+
+- kombify 仍处于 1.0 之前阶段，发布频率较高。
+- 兼容性仍在验证中。请参阅[系统兼容性](/zh-Hans/stackkits/reference/os-compatibility)查看当前支持情况。
+- 它不创建也不管理虚拟化存储、磁盘或 RAID。
+- 将现有的 Compose 项目纳入 homelab 的登录、路由和备份体系尚未实现，因此这类项目仍留在 kombify 定义之外。
+
+## kombify 目前能做什么
+
+- 通过 Pocket ID 使用通行密钥登录，没有默认密码。
+- 为每个服务设置明确的访问策略。
+- 恢复到隔离的暂存副本。
+- 更新前先拍摄快照。
+- 从同一份定义完成计划、应用与验证。
+- 每次安装都自带一个本地 MCP 服务器。
+
+## 结合使用
+
+一种合理的架构是在硬件上运行 Proxmox VE，并用 kombify 定义一台来宾虚拟机来承载你希望明确定义且可重复部署的服务。其余虚拟机和容器继续在 Proxmox 上用你偏好的工具管理。如果你希望为 Docker 保留带 Web 界面的管理工具，可以继续像现在一样运行 Portainer 或 Komodo。kombify 不要求你放弃它们。
+
+如果你想要完全的手动控制，并且愿意自己组装登录、备份与更新机制，请选择仅使用 Proxmox 搭配容器管理器的方案。
+
+最后审阅：2026-11-10
