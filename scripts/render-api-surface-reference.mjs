@@ -4,7 +4,7 @@
 // navigation, and `api-surface.json` (kombify.api-surface/v1) becomes the
 // `<binary> api` command pages. Pages are generated, never hand-edited.
 //
-// Usage: node scripts/render-api-surface-reference.mjs --product techstack \
+// Usage: node scripts/render-api-surface-reference.mjs --product homelab \
 //   --surface <api-surface.json> --openapi <openapi.public.yaml> \
 //   --release <tag> --source-sha <sha> (--write | --check)
 import { createHash } from 'node:crypto'
@@ -20,14 +20,14 @@ const SCHEMA = 'kombify.api-surface/v1'
 // Product runtime facts that live in the product binary, not in the surface:
 // where `<binary> api` sends requests and which credentials it reads.
 export const PRODUCTS = {
-  techstack: {
-    name: 'Techstack',
-    tab: 'Techstack',
-    binary: 'techstack',
-    referenceDir: 'techstack/reference',
+  homelab: {
+    name: 'Homelab',
+    tab: 'Homelab',
+    binary: 'homelab',
+    referenceDir: 'homelab/reference',
     environment: [
-      ['TECHSTACK_API_URL', 'API base URL. Defaults to `https://api.kombify.io/v1/techstack`; set it to the address of your own Techstack instance to call that instance directly.'],
-      ['TECHSTACK_API_TOKEN', 'Bearer token sent with every request. Without it the CLI uses the session stored by `techstack login`, and fails with exit code 3 when there is none or it has expired.'],
+      ['HOMELAB_API_URL', 'API base URL. Defaults to `https://api.kombify.io/v1/homelab`; set it to the address of your own Homelab instance to call that instance directly.'],
+      ['HOMELAB_API_TOKEN', 'Bearer token sent with every request. Without it the CLI uses the session stored by `homelab login`, and fails with exit code 3 when there is none or it has expired.'],
     ],
   },
 }

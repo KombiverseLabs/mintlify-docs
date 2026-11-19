@@ -1,0 +1,88 @@
+---
+title: "homelab api CLI-Referenz"
+description: "Jeder homelab-api-Befehl mit seinen Optionen und Exit-Codes"
+sidebarTitle: "Übersicht"
+icon: square-terminal
+release: "v0.32.8"
+---
+<Note>Generiert aus dem Homelab-Release v0.32.8 (Quelle `4c7d219a5d56`). Für eine installierte Version ist `homelab api <command> --help` maßgeblich.</Note>
+
+`homelab api` ruft die Homelab API genau so auf, wie die [API-Referenz](#api-referenz) sie beschreibt: ein Befehl pro öffentlicher Operation, generiert aus dem API-Vertrag des Release. Jeder Befehl gibt JSON ohne die Antwort-Hülle auf stdout aus; Fehler gehen als strukturiertes Fehlerobjekt an stderr.
+
+## Authentifizierung
+
+| Variable | Bedeutung |
+| --- | --- |
+| `HOMELAB_API_URL` | Basis-URL der API. Standard ist `https://api.kombify.io/v1/homelab`; setze sie auf die Adresse deiner eigenen Homelab-Instanz, um diese Instanz direkt aufzurufen. |
+| `HOMELAB_API_TOKEN` | Bearer-Token, das mit jeder Anfrage gesendet wird. Ohne dieses Token nutzt das CLI die von `homelab login` gespeicherte Session und bricht mit Exit-Code 3 ab, wenn keine vorhanden oder sie abgelaufen ist. |
+
+## Universelle Optionen
+
+| Option | Gilt für | Beschreibung |
+| --- | --- | --- |
+| `--fields <paths>` | jeden Befehl | Kommagetrennte Punkt-Pfade, die in der Ausgabe erhalten bleiben; bei Arrays pro Element angewendet. |
+| `--ndjson` | jeden Befehl | Arrays als einen kompakten JSON-Wert pro Zeile ausgeben. |
+| `--dry-run` | ändernde Befehle | Die aufgelöste Anfrage als JSON ausgeben, ohne sie zu autorisieren oder zu senden. |
+| `--idempotency-key <key>` | ändernde Befehle | Idempotency-Key-Header; Standard ist eine neue UUID. |
+| `--body <json\|@path\|->` | Befehle mit JSON-Body | Basis-Request-Body als Literal, Datei oder stdin; Argument-Flags überschreiben seine Eigenschaften. |
+| `--file <path\|->` | Befehle mit Datei-Body | Request-Body-Datei, die mit dem deklarierten Content-Type gesendet wird. |
+| `--yes` | Befehle mit Bestätigung | Ohne Rückfrage bestätigen; ohne interaktives Terminal erforderlich. |
+
+Befehle, die als bestätigungspflichtig markiert sind, fragen im Terminal nach `yes`. Ohne Terminal senden sie die Anfrage nur, wenn `--yes` gesetzt ist; andernfalls geben sie einen `CONFIRMATION_REQUIRED`-Fehler aus und beenden sich mit Exit-Code 9.
+
+## Exit-Codes
+
+| Code | Bedeutung |
+| --- | --- |
+| 0 | Erfolg. |
+| 1 | Jeder andere Fehler. |
+| 2 | Ungültige Eingabe (HTTP 400/422). |
+| 3 | Nicht authentifiziert (HTTP 401). |
+| 4 | Abgelehnt, Zahlung erforderlich oder Rate Limit erreicht (HTTP 402/403/429). |
+| 5 | Nicht gefunden (HTTP 404). |
+| 6 | Konflikt (HTTP 409). |
+| 7 | Server- oder Transportfehler (HTTP 5xx). |
+| 9 | Bestätigung erforderlich oder abgelehnt. |
+
+## Agent-Kontext
+
+`homelab api agent-context` gibt diesen Befehlskatalog für KI-Agents als Markdown aus, mit `--json` als JSON: jeden Befehl mit Aufruf, Argumenten, Bestätigung, Verfügbarkeit und MCP-Tool-Namen sowie die universellen Optionen und Exit-Codes von oben.
+
+## Befehle
+
+| Befehlsgruppe | Umfasst |
+| --- | --- |
+| [`homelab api addons`](/de/homelab/reference/cli/addons) | Add-ons |
+| [`homelab api agents`](/de/homelab/reference/cli/agents) | Agents |
+| [`homelab api auth`](/de/homelab/reference/cli/auth) | Auth |
+| [`homelab api autoinstall`](/de/homelab/reference/cli/autoinstall) | Health |
+| [`homelab api client-pairing`](/de/homelab/reference/cli/client-pairing) | Client Binding |
+| [`homelab api discovery`](/de/homelab/reference/cli/discovery) | Discovery |
+| [`homelab api drift`](/de/homelab/reference/cli/drift) | Stacks - Drift |
+| [`homelab api features`](/de/homelab/reference/cli/features) | Features |
+| [`homelab api health`](/de/homelab/reference/cli/health) | Health |
+| [`homelab api homelab`](/de/homelab/reference/cli/homelab) | Stacks |
+| [`homelab api install-scripts`](/de/homelab/reference/cli/install-scripts) | Workers |
+| [`homelab api instance`](/de/homelab/reference/cli/instance) | Instance |
+| [`homelab api inventory`](/de/homelab/reference/cli/inventory) | Inventory |
+| [`homelab api jobs`](/de/homelab/reference/cli/jobs) | Jobs |
+| [`homelab api managed-runtimes`](/de/homelab/reference/cli/managed-runtimes) | Jobs, Stacks |
+| [`homelab api monitor`](/de/homelab/reference/cli/monitor) | Metrics |
+| [`homelab api monthly-runtimes`](/de/homelab/reference/cli/monthly-runtimes) | Jobs, Monthly Runtime, Stacks |
+| [`homelab api pairing-tokens`](/de/homelab/reference/cli/pairing-tokens) | Trust |
+| [`homelab api runtime`](/de/homelab/reference/cli/runtime) | Runtime |
+| [`homelab api servers`](/de/homelab/reference/cli/servers) | Inventory, Jobs, RIL, Servers |
+| [`homelab api services`](/de/homelab/reference/cli/services) | Jobs, Services |
+| [`homelab api stack-identity`](/de/homelab/reference/cli/stack-identity) | Auth |
+| [`homelab api stackkits`](/de/homelab/reference/cli/stackkits) | StackKits |
+| [`homelab api stacks`](/de/homelab/reference/cli/stacks) | Inventory, Jobs, Stacks, Stacks - Drift, Stacks - Import/Export, Stacks - Specs |
+| [`homelab api system`](/de/homelab/reference/cli/system) | Health, Metrics |
+| [`homelab api system-accounts`](/de/homelab/reference/cli/system-accounts) | Auth |
+| [`homelab api tunnel`](/de/homelab/reference/cli/tunnel) | Tunnel |
+| [`homelab api unifier`](/de/homelab/reference/cli/unifier) | Unifier |
+| [`homelab api wallet`](/de/homelab/reference/cli/wallet) | Wallet |
+| [`homelab api workers`](/de/homelab/reference/cli/workers) | Pre-Checks, Workers |
+
+## API-Referenz
+
+Die Homelab-API-Referenz in diesem Abschnitt wird aus dem öffentlichen OpenAPI-Dokument desselben Release generiert.

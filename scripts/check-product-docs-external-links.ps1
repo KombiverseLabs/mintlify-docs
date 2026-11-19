@@ -5,7 +5,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $destinations = @(
-    "https://techstack.kombify.io",
+    "https://homelab.kombify.io",
     "https://speechkit.cc",
     "https://github.com/kombifyio/SpeechKit",
     "https://github.com/kombifyio/SpeechKit/releases/latest",

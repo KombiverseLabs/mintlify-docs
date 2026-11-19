@@ -1,0 +1,413 @@
+---
+title: "homelab api servers"
+description: "homelab api servers कमांड के लिए जनरेट किया गया संदर्भ"
+sidebarTitle: "servers"
+release: "v0.41.15"
+---
+<Note>Generated from the Homelab v0.41.15 release (source `b5b268760b34`). For an installed version, `homelab api <command> --help` is authoritative.</Note>
+
+## homelab api servers detach
+
+ग्राहक द्वारा संचालित एक सटीक BYO सर्वर का एक्सेस रद्द करें और उसे अलग करें।
+
+टर्मिनल कैनोनिकल सर्वर रसीद बनाए रखता है और कोई प्रोवाइडर API कॉल नहीं करता।
+
+```bash
+homelab api servers detach <server-id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन सर्वर के क्रेडेंशियल रद्द करता है और मशीन को छुए बिना उसे प्रबंधन से हटा देता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/detach` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `detach_self_owned_server` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+| `--confirm-server-id` | string | **आवश्यक।** serverId पथ पैरामीटर के ठीक बराबर होना चाहिए। |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## homelab api servers get
+
+कैनोनिकल सर्वर लाइफ़साइकल, कनेक्शन, हेल्थ और चैनल प्राप्त करें।
+
+```bash
+homelab api servers get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_server_runtime` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+
+## homelab api servers list
+
+कैनोनिकल नोड रनटाइम स्टेट सूचीबद्ध करें।
+
+कैनोनिकल `node_id` और `kit_deployment_id` पहचानों के साथ ओनर-स्कोप्ड नोड लौटाता है।
+
+```bash
+homelab api servers list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_server_runtimes` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--kit-deployment-id` | string | — |
+
+## homelab api servers maintenance cancel
+
+Cancel an owned maintenance job before execution starts.
+
+Uses the same tenant, entitlement, server and requesting-owner scope as the job read. Cancellation and execution claim use the same queued-state compare-and-set. Repeating a successful cancellation returns its receipt; a claimed or finished job returns maintenance_not_cancellable. Cancelling never claims to stop a command that has already reached the server.
+
+```bash
+homelab api servers maintenance cancel <server-id> <job-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/actions/{jobId}/cancel` |
+| Changes state | Yes |
+| MCP tool | None |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `<job-id>` | string | **Required.** |
+
+## homelab api servers maintenance get
+
+स्वामित्व वाले सर्वर का एक मेंटेनेंस जॉब पढ़ें।
+
+POST की तरह ही सीमित: Edge-हस्ताक्षरित `homelab.servers.maintenance` एंटाइटलमेंट, टेनेंट, सर्वर का स्वामित्व, और ऐसा जॉब जो इसी सर्वर का हो और कॉलर ने अनुरोध किया हो। बाकी सब कुछ 404 है। मेंटेनेंस जॉब का अपना लेजर होता है और वे `/api/v1/jobs/&#123;id&#125;` से नहीं मिलते। कोई लॉग एंडपॉइंट नहीं है: जॉब अपना परिणाम साथ रखता है, और विफलता अपना स्थिर कोड उपयोगकर्ता मार्गदर्शन के साथ रखती है।
+
+```bash
+homelab api servers maintenance get <server-id> <job-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/actions/{jobId}` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_server_maintenance_job` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+| `<job-id>` | string | **आवश्यक।** |
+
+## homelab api servers maintenance impact
+
+Preview service and stack impact before confirming OS maintenance.
+
+Requires the signed maintenance entitlement and ownership of the server. Lists canonical service placement and stack membership, with reasons and inventory freshness and completeness. An empty services array means no affected services only when inventory.status is current. An incomplete, stale or unavailable inventory cannot authorize maintenance. The digest binds the server, operation and material dependency snapshot; ordinary observation timestamps do not invalidate unchanged impact. Responses are private and must not be cached.
+
+```bash
+homelab api servers maintenance impact <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/maintenance-impact` |
+| Changes state | No |
+| MCP tool | `get_server_maintenance_impact` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<server-id>` | string | **Required.** Canonical server runtime ID. |
+| `--action` | string | **Required.** One of `os_update`, `reboot`. |
+
+## homelab api servers maintenance run
+
+अपने सर्वर के OS अपडेट प्लान, OS अपडेट या रीबूट को कतार में रखें।
+
+Requires the Edge-signed `homelab.servers.maintenance` entitlement, ownership of the server in the tenant, and current server-bound standing authority for delegated native MCP calls. These three ordinary actions require no fresh MFA or separate owner_approved assertion. Reboot and os_update require expected_impact_digest from the preview the user confirmed. Impact is compared atomically at admission and again at execution claim; changed or incomplete evidence sends no command and requires a refreshed preview and renewed confirmation with a new request key. The body is decoded strictly: exact lowercase keys, no duplicates, no unknown fields. A replay with the same Idempotency-Key returns the stored receipt before target validation. One reboot or OS update and, separately, one update plan may be active per server; a job not finished by its deadline fails with `deadline_exceeded` and frees its slot. The action is offered in `allowed_actions` only when the server agent advertises `stackkit.host-maintenance.v1`, and `reboot` only when the server also reports `host_boot_id`. Refusals are client-error-envelope/v1 documents; 409 `reason_code` is one of control_plane_host, substrate_node, protected_demo_server, service_locked, maintenance_active, node_operation_active, plan_stale, agent_capability_missing, boot_id_unknown, agent_not_connected, heartbeat_stale, inventory_revision_stale, idempotency_key_reused, impact_confirmation_required, impact_changed or impact_unavailable; 403 carries entitlement_required or maintenance_origin_authority_denied.
+
+```bash
+homelab api servers maintenance run <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/actions` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `run_server_maintenance_action` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+| `--action` | string | **आवश्यक।** इनमें से एक: `os_update_plan`, `os_update`, `reboot`. |
+| `--expected-impact-digest` | string | Required for os_update and reboot, forbidden for os_update_plan. snapshot_digest of the current impact preview confirmed for this exact server and action. Changing it under an existing Idempotency-Key is a conflict; a renewed confirmation uses a new key. |
+| `--expected-inventory-revision` | integer | **आवश्यक।** |
+| `--expected-plan-digest` | string | केवल os_update: इसी सर्वर के पूर्ण os_update_plan का plan_digest, जो अधिकतम 15 मिनट पुराना हो। |
+| `--owner-approved` | boolean | वैकल्पिक लेगेसी फ़ील्ड; यह रखरखाव प्राधिकरण नहीं देता। |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## homelab api servers network get
+
+सर्वर के नेटवर्क तथ्य और दर्ज घरेलू नेटवर्क बदलाव पढ़ें।
+
+सर्वर के kombify Guard द्वारा अंतिम बार देखा गया नेटवर्क (पता, गेटवे, सबनेट, इंटरफ़ेस, WiFi नेटवर्क), सर्वर के दूसरे नेटवर्क में दिखाई देने पर kombify द्वारा बनाया गया `network_move` रिकॉर्ड और उसके बाद हुई दोबारा बाइंडिंग की स्थिति। स्थान बदला हुआ सर्वर स्वयं दोबारा बाइंड होता है; `can_rebind` बताता है कि Owner अभी दोबारा बाइंडिंग शुरू कर सकता है या नहीं।
+
+```bash
+homelab api servers network get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/network` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_server_network` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+
+## homelab api servers network rebind
+
+स्थान बदले हुए सर्वर को उसके वर्तमान नेटवर्क से दोबारा बाइंड करें।
+
+सर्वर पर उसके kombify Guard के माध्यम से `stackkit network rebind` चलाता है: नोड अपना LAN पता फिर पहचानता है, हस्ताक्षरित LAN DNS कस्टडी रिकॉर्ड दोबारा जारी करता है और वर्कस्पेस दोबारा जनरेट तथा लागू करता है। रिक्वेस्ट में बॉडी नहीं होती। Owner, Inventory operate अनुमति, `homelab.servers.maintenance` एंटाइटलमेंट और कनेक्टेड Guard आवश्यक हैं (अन्यथा 409 `server_network_not_ready`)। दोबारा बाइंडिंग पहले से कतार में या चल रही हो तो दूसरी जोड़ने के बजाय उसी का जॉब लौटाता है।
+
+```bash
+homelab api servers network rebind <server-id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन सर्वर के वर्तमान नेटवर्क पते को फिर पहचानता है, उसका हस्ताक्षरित स्थानीय DNS रिकॉर्ड फिर जारी करता है और उसका वर्कस्पेस फिर लागू करता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/network/rebind` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | `rebind_server_network` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+
+## homelab api servers ports
+
+किसी एक कैनोनिकल सर्वर के लिए प्रमाणित ओनर की पोर्ट इन्वेंटरी प्राप्त करें।
+
+Inventory/MCP सरफ़ेस वाली उसी केंद्रीय पोर्ट अथॉरिटी पर सर्वर-विवरण UI प्रक्षेपण, जो कैनोनिकल ओनर-स्कोप्ड सर्वर रीड सीमा के ज़रिए अधिकृत होता है।
+
+```bash
+homelab api servers ports <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/ports` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_server_runtime_ports` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+
+## homelab api servers reach set
+
+सर्वर को kombify.me पते पर प्रकाशित करें या उसका प्रकाशन रोकें।
+
+डिफ़ॉल्ट रूप से कुछ प्रकाशित नहीं होता: पेयर किए गए सर्वर का सार्वजनिक रूट नहीं होता और रिले कोई ट्रैफ़िक नहीं ले जाता। Owner स्पष्ट `service` नाम और `target_port` देकर इसे प्रत्येक सर्वर के लिए सक्षम करता है (ओरिजिन हमेशा Guard होस्ट का लूपबैक है, कभी दूसरी मशीन नहीं) और कभी भी वापस ले सकता है। रिले Guard को प्रमाणित करता है, विज़िटर को नहीं, इसलिए उस पोर्ट पर उत्तर देने वाली सेवा को अपनी सुरक्षा स्वयं करनी होगी। सक्षम करने के लिए Owner, `homelab.servers.maintenance` एंटाइटलमेंट और नया मल्टी-फ़ैक्टर साइन-इन चाहिए (कारण `server_reach_step_up_required`); वापस लेना कभी इस शर्त से नहीं रोका जाता। सर्वर रीड मॉडल का reach भाग लौटाता है; उसके बाद रिकंसाइलर रूट बनाता या हटाता है।
+
+```bash
+homelab api servers reach set <server-id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन सर्वर की सेवा को सार्वजनिक kombify.me पते पर प्रकाशित करता है जिसे इंटरनेट पर कोई भी खोल सकता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/servers/{serverId}/reach` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+| `--enabled` | boolean | **आवश्यक।** |
+| `--service` | string | सक्षम करते समय आवश्यक। रूट लेबल; kombify.me रूट &lt;base&gt;-&lt;service&gt;-&lt;server suffix&gt; है। |
+| `--target-port` | integer | सक्षम करते समय आवश्यक। Guard होस्ट के लूपबैक पर सेवा का सुनने वाला पोर्ट (होस्ट निश्चित है)। |
+| `--target-scheme` | string | इनमें से एक: `http`, `https`. डिफ़ॉल्ट `"http"`. |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## homelab api servers security auto-repair get
+
+स्वचालित सुरक्षा मरम्मत के लिए Owner की मंज़ूरी पढ़ें।
+
+बिना मंज़ूरी या समाप्त मंज़ूरी वाला सर्वर केवल अवलोकन मोड में रहता है।
+
+```bash
+homelab api servers security auto-repair get <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/security/auto-repair` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `get_server_security_auto_repair` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+
+## homelab api servers security auto-repair set
+
+नियंत्रणों के छोटे सुरक्षित समूह की स्वचालित मरम्मत मंज़ूर करें या वापस लें।
+
+डिफ़ॉल्ट रूप से बंद है। मंज़ूरी सुरक्षित समूह के नियंत्रणों को नाम देती है (`allowed_controls`: ब्रूट-फ़ोर्स सुरक्षा, फ़ायरवॉल नीति, कर्नेल पैरामीटर और स्वचालित सुरक्षा अपडेट; SSH नियंत्रण कभी नहीं), अधिकतम 90 दिन में समाप्त होती है और स्वयं नवीनीकृत नहीं होती। प्रभावी रहने तक कंट्रोल प्लेन उसी सीमा में नामित नियंत्रण की मरम्मत करता है जिसमें ताज़ा प्रमाण विचलन दिखाता है, जैसे ऑपरेटर मरम्मत में होता है। Owner, `homelab.servers.maintenance` एंटाइटलमेंट और नया मल्टी-फ़ैक्टर साइन-इन आवश्यक हैं। `enabled: false` मंज़ूरी वापस लेता है।
+
+```bash
+homelab api servers security auto-repair set <server-id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन मंज़ूरी समाप्त होने तक kombify Guard को नामित होस्ट सुरक्षा नियंत्रणों की हर बार पूछे बिना मरम्मत करने देता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `PUT /api/v1/servers/{serverId}/security/auto-repair` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+| `--controls` | string\[\] | — |
+| `--enabled` | boolean | **आवश्यक।** |
+| `--expires-at` | string | — |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## homelab api servers security findings
+
+एक सर्वर के खुले निष्कर्ष और हाल का निष्कर्ष इतिहास सूचीबद्ध करें।
+
+सर्वर के `security`, `recovery` और Guard अलर्ट के पीछे निष्कर्ष लेजर। एक निष्कर्ष एक घटना-क्रम है: कोई तथ्य पहली बार गलत देखे जाने पर खुलता है और फिर सही देखे जाने पर हल होता है, अधिकतम एक अलर्ट (`alerted_at`) और एक समाधान के साथ। इतिहास 90 दिन रखा जाता है।
+
+```bash
+homelab api servers security findings <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/security/findings` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_server_security_findings` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+
+## homelab api servers security repairs list
+
+एक सर्वर की हाल की सुरक्षा मरम्मत सूचीबद्ध करें।
+
+```bash
+homelab api servers security repairs list <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/security/repairs` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_server_security_repairs` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+
+## homelab api servers security repairs request
+
+नामित विचलित होस्ट सुरक्षा नियंत्रणों की मरम्मत करें।
+
+उन नियंत्रणों की सीमित मरम्मत माँगता है जिन्हें ताज़ा होस्ट सुरक्षा प्रमाण विचलित और स्वतः मरम्मत योग्य दिखाता है। सर्वर का Owner, Edge-हस्ताक्षरित `homelab.servers.maintenance` एंटाइटलमेंट और नया मल्टी-फ़ैक्टर साइन-इन (अधिकतम 300 सेकंड पुराना) आवश्यक हैं। मरम्मत टाइप किए गए, जर्नल में दर्ज Guard कमांड के रूप में जाती है जो ठीक नामित नियंत्रणों के लिए `stackkit host security repair --apply` चलाता है; StackKits कुछ भी बदलने से पहले ऐसे बदलाव को मना करता है जो प्रबंधन मार्ग काट दे या Owner का एक्सेस रोक दे। सीमाएँ: एक सर्वर पर एक समय में एक मरम्मत (409 `repair_in_progress`), प्रत्येक नियंत्रण के लिए कूलडाउन (429 `repair_cooldown`), प्रत्येक नियंत्रण का दैनिक प्रयास बजट (429 `repair_attempts_exhausted`) और लगातार विफलताओं के बाद सर्किट ब्रेकर (429 `repair_circuit_open`); 429 उत्तरों में `retry_after` आता है। अनुरूप नियंत्रण (409 `control_not_drifted`), मंज़ूर अपवाद वाला (`control_has_exception`), मैनुअल (`control_not_repairable`), अधिकृत SSH कुंजी के बिना अवरुद्ध (`needs_authorized_key`) या बिना अवलोकन वाला नियंत्रण अस्वीकार होता है। बॉडी सख़्ती से डिकोड होती है।
+
+```bash
+homelab api servers security repairs request <server-id> [flags]
+```
+
+<Warning>पुष्टि आवश्यक है: यह ऑपरेशन सर्वर पर उसके kombify Guard से नामित होस्ट सुरक्षा नियंत्रण (फ़ायरवॉल, SSH, ब्रूट-फ़ोर्स सुरक्षा, स्वचालित अपडेट) बहाल करता है। `--yes` दें या प्रॉम्प्ट का उत्तर दें; `--yes` के बिना गैर-इंटरैक्टिव रन किसी भी रिक्वेस्ट से पहले एग्ज़िट कोड 9 के साथ रुक जाता है।</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/security/repairs` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+| `--controls` | string\[\] | **आवश्यक।** |
+| `--body` | json | JSON रिक्वेस्ट बॉडी (`application/json`) लिटरल के रूप में, `@path` के रूप में, या stdin के लिए `-`। |
+
+## homelab api servers security verify
+
+kombify Guard से होस्ट सुरक्षा का ताज़ा अवलोकन माँगें।
+
+दर्ज करता है कि होस्ट बेसलाइन का ताज़ा अवलोकन चाहिए। Guard अगले चेक-इन पर (लगभग एक मिनट में) नई रिपोर्ट देता है; होस्ट पर कुछ नहीं बदलता। सर्वर का `security` रीड मॉडल केवल उस रिपोर्ट से अपडेट होता है, इस रिक्वेस्ट से कभी नहीं। दूसरे टेनेंट या Owner का सर्वर 404 देता है; Guard के बिना सर्वर 409 `guard_not_connected` देता है।
+
+```bash
+homelab api servers security verify <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/servers/{serverId}/security/verify` |
+| स्टेट बदलता है | हाँ |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |
+
+## homelab api servers summary
+
+प्रमाणित ओनर का सर्वर-उपस्थिति सारांश पढ़ें।
+
+कैनोनिकल इन्वेंटरी सूची वाले उसी टेनेंट और ओनर नीति दायरे में केवल एक गिनती और उपस्थिति फ़्लैग लौटाता है। वैकल्पिक tenant क्वेरी Gateway संगतता के लिए है और प्रमाणित पहचान के टेनेंट से ठीक मेल खानी चाहिए; बेमेल होने पर किसी भी स्टोर रीड से पहले अस्वीकार किया जाता है। कोई सर्वर, टेनेंट या सब्जेक्ट पहचानकर्ता नहीं लौटाया जाता।
+
+```bash
+homelab api servers summary [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/summary` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | कोई नहीं |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `--tenant` | string | — |
+
+## homelab api servers transitions
+
+सहेजी गई सर्वर स्टेट टाइमलाइन सूचीबद्ध करें।
+
+```bash
+homelab api servers transitions <server-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/servers/{serverId}/transitions` |
+| स्टेट बदलता है | नहीं |
+| MCP टूल | `list_server_runtime_transitions` |
+
+| आर्ग्युमेंट | प्रकार | विवरण |
+| --- | --- | --- |
+| `<server-id>` | string | **आवश्यक।** कैनोनिकल सर्वर रनटाइम ID। |

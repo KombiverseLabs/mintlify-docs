@@ -12,7 +12,7 @@ weekly digest by hand.
 | Page | Holds | Written by |
 | --- | --- | --- |
 | `changelog/overview` | The hand-written weekly updates of all products up to 2026-10-16, kept as history | Nobody; frozen |
-| `changelog/<product>` for `stackkits`, `techstack`, `speechkit`, `cloud` | One `<Update>` per release, tagged `Stable` or `Early Access`, and one per ISO week, tagged `Weekly digest`, newest first | `kombify-workspace/scripts/release-notes.mjs` |
+| `changelog/<product>` for `stackkits`, `homelab`, `speechkit`, `cloud` | One `<Update>` per release, tagged `Stable` or `Early Access`, and one per ISO week, tagged `Weekly digest`, newest first | `kombify-workspace/scripts/release-notes.mjs` |
 
 A product page does not exist until its first entry. The first
 `changelog-entry` creates the page, its `docs.json` navigation entry and its

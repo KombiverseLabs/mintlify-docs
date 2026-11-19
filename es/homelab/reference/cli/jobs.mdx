@@ -1,0 +1,84 @@
+---
+title: "homelab api jobs"
+description: "Referencia generada de los comandos homelab api jobs"
+sidebarTitle: "jobs"
+release: "v0.32.8"
+---
+<Note>Generado a partir del release v0.32.8 de Homelab (fuente `4c7d219a5d56`). Para una versión instalada, `homelab api <command> --help` es la fuente autorizada.</Note>
+
+## homelab api jobs get
+
+Obtiene el estado actual de un trabajo propio.
+
+Esta es la superficie canónica de sondeo para la UI, los clientes de la API, las herramientas MCP y los agentes. `waiting_enrollment` expone una espera no terminal; el acceso al destino sigue sin estar disponible hasta que el trabajo se reanuda y alcanza un estado terminal de éxito.
+
+```bash
+homelab api jobs get <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs/{id}` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_job` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<id>` | string | **Obligatorio.** ID del recurso. |
+
+## homelab api jobs list
+
+Lista los trabajos propiedad del usuario autenticado.
+
+Devuelve el mismo estado de trabajos, limitado al propietario, que usan la UI del operador y los clientes de automatización. Un trabajo con `state: waiting` sigue activo y el proceso actual del orquestador programa su siguiente comprobación; no es una acción fallida del proveedor. Si esa programación queda obsoleta tras reiniciar el proceso, usa la operación `resumeStackEnrollment` con el destino exacto.
+
+```bash
+homelab api jobs list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_jobs` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--page` | integer | Número de página (predeterminado: 1). |
+| `--per-page` | integer | Predeterminado: `50`. |
+| `--stack-id` | string | — |
+| `--state` | string | Uno de `pending`, `running`, `waiting`, `completed`, `failed`, `canceled`. |
+| `--type` | string | — |
+| `--search` | string | — |
+
+## homelab api jobs logs
+
+Obtiene los logs del trabajo.
+
+```bash
+homelab api jobs logs <id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs/{id}/logs` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_job_logs` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<id>` | string | **Obligatorio.** ID del recurso. |
+
+## homelab api jobs stats
+
+Obtiene las estadísticas de la cola de trabajos.
+
+```bash
+homelab api jobs stats [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/jobs/stats` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_job_stats` |

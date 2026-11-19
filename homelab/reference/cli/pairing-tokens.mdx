@@ -1,0 +1,67 @@
+---
+title: "homelab api pairing-tokens"
+description: "Generated reference for the homelab api pairing-tokens commands"
+sidebarTitle: "pairing-tokens"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.49.2"
+content_hash: "sha256:16adb9eda64db29656ee84714b9bc71b814dadfb07fbbf8a52e89200b968f6c3"
+source_hash: "2614eaba28d89093eab7aca7ba7268dde5a823e8"
+---
+<Note>Generated from the Homelab v0.49.2 release (source `2614eaba28d8`). For an installed version, `homelab api <command> --help` is authoritative.</Note>
+
+## homelab api pairing-tokens create
+
+Create pairing token for worker registration.
+
+```bash
+homelab api pairing-tokens create [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/trust/pairing-tokens` |
+| Changes state | Yes |
+| MCP tool | `create_pairing_token` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--environment-class` | string | Explicit owner placement declaration; omit when unknown. One of `local`, `cloud`. |
+| `--name` | string | — |
+| `--server-provisioning-mode` | string | One of `install-command`, `connect-remote`. |
+| `--stack-id` | string | — |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## homelab api pairing-tokens delete
+
+Delete pairing token.
+
+```bash
+homelab api pairing-tokens delete <id> [flags]
+```
+
+<Warning>Requires confirmation: This operation revokes the pairing token; devices that have not paired yet can no longer use it. Pass `--yes` or answer the prompt; a non-interactive run without `--yes` stops before any request with exit code 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `DELETE /api/v1/trust/pairing-tokens/{id}` |
+| Changes state | Yes |
+| MCP tool | `delete_pairing_token` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<id>` | string | **Required.** Resource ID. |
+
+## homelab api pairing-tokens list
+
+List pairing tokens.
+
+```bash
+homelab api pairing-tokens list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/trust/pairing-tokens` |
+| Changes state | No |
+| MCP tool | `list_pairing_tokens` |

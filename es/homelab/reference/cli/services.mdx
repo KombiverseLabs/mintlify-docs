@@ -1,0 +1,266 @@
+---
+title: "homelab api services"
+description: "Referencia generada de los comandos homelab api services"
+sidebarTitle: "services"
+release: "v0.41.15"
+---
+<Note>Generated from the Homelab v0.41.15 release (source `b5b268760b34`). For an installed version, `homelab api <command> --help` is authoritative.</Note>
+
+## homelab api services execute-application-adoption
+
+Ejecuta el plan de origen exacto revisado con aprobación explícita del propietario.
+
+Revalida el digest conservado, la identidad del origen, la revisión y el release. Solo un recibo de custodia autenticado de la CLI fijada establece la pertenencia. Conserva las cuentas, la configuración y los datos persistentes; no crea un runtime nuevo. No admite el traslado a otro Node ni una adopción genérica.
+
+```bash
+homelab api services execute-application-adoption [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/adoption-plans/{planId}/execute` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `execute_application_adoption` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--service-id` | string | **Obligatorio.** ID canónico del runtime del servicio. |
+| `--plan-id` | string | **Obligatorio.** |
+| `--expected-inventory-revision` | integer | **Obligatorio.** |
+| `--mode` | string | Uno de `adopt_in_place`. |
+| `--owner-approved` | boolean | Predeterminado `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## homelab api services get
+
+Obtiene el estado deseado y observado, la salud, el acceso y las capacidades de acción de un servicio.
+
+```bash
+homelab api services get <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_service_runtime` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<service-id>` | string | **Obligatorio.** ID canónico del runtime del servicio. |
+
+## homelab api services list
+
+Lista el estado canónico medido del runtime de los servicios.
+
+```bash
+homelab api services list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services` |
+| Cambia el estado | No |
+| Herramienta MCP | `list_service_runtimes` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--stack-id` | string | — |
+| `--server-id` | string | — |
+
+## homelab api services logs
+
+Lee la página más reciente, acotada y redactada, del log de un servicio de StackKits.
+
+```bash
+homelab api services logs <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/registry/services/{serviceId}/logs` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_managed_service_logs` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<service-id>` | string | **Obligatorio.** ID canónico del runtime del servicio. |
+| `--limit` | integer | Predeterminado: `100`. |
+| `--cursor` | string | — |
+
+## homelab api services metrics
+
+Consulta métricas de recursos medidas para un servicio propio.
+
+Usa el backend existente de consultas de telemetría del Guard y fija el tenant, el servidor canónico y los selectores de contenedores a partir del inventario autorizado del servicio. Un vector vacío significa que no se midió ninguna métrica de recursos.
+
+```bash
+homelab api services metrics [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/metrics` |
+| Cambia el estado | No |
+| Herramienta MCP | `get_service_metrics` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--service-id` | string | **Obligatorio.** |
+
+## homelab api services prepare-application-adoption
+
+Evalúa un Home Assistant Container existente exacto para adoptarlo en su ubicación actual.
+
+Conserva la evaluación vinculada al origen en el almacén durable de jobs existente. Requiere un Guard conectado y el release publicado exacto de la CLI con la capacidad necesaria. Esta operación de solo lectura no establece pertenencia a Stacked.
+
+```bash
+homelab api services prepare-application-adoption [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/adoption-plans` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `prepare_application_adoption` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--service-id` | string | **Obligatorio.** ID canónico del runtime del servicio. |
+| `--expected-inventory-revision` | integer | **Obligatorio.** |
+| `--mode` | string | Uno de `adopt_in_place`. |
+| `--owner-approved` | boolean | Predeterminado `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## homelab api services read-application-adoption-plan
+
+Consulta la evaluación conservada de la aplicación y su progreso durable.
+
+```bash
+homelab api services read-application-adoption-plan [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/adoption-plans/{planId}` |
+| Cambia el estado | No |
+| Herramienta MCP | `read_application_adoption_plan` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--service-id` | string | **Obligatorio.** ID canónico del runtime del servicio. |
+| `--plan-id` | string | **Obligatorio.** |
+
+## homelab api services read-application-connector
+
+Consulta el estado del conector propiedad del nodo y la admisión de transporte publicada actual.
+
+Devuelve una proyección sin secretos. Si no está disponible el catálogo que lo respalda, permanece como SourcePreview no ejecutable; la evidencia obsoleta en un pin compatible requiere una verificación de solo lectura actual. La posibilidad de ejecución exige además autoridad canónica vigente de clave del host, nodo y lease.
+
+```bash
+homelab api services read-application-connector [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/services/{serviceId}/connector` |
+| Cambia el estado | No |
+| Herramienta MCP | `read_application_connector` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--service-id` | string | **Obligatorio.** ID canónico del runtime del servicio. |
+
+## homelab api services release-application-lifecycle
+
+Libera una vinculación de ciclo de vida adoptada sin eliminar ni detener su runtime.
+
+```bash
+homelab api services release-application-lifecycle [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/release` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `release_application_lifecycle` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--service-id` | string | **Obligatorio.** ID canónico del runtime del servicio. |
+| `--expected-inventory-revision` | integer | **Obligatorio.** |
+| `--mode` | string | Uno de `adopt_in_place`. |
+| `--owner-approved` | boolean | Predeterminado `false`. |
+| `--plan-digest` | string | — |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## homelab api services run-action
+
+Pone en cola una acción de servicio de StackKits autorizada por el propietario.
+
+Deriva la autoridad sobre el stack, el servidor, el agente, el kit y el servicio a partir de un inventario canónico actualizado. Las repeticiones exactas convergen mediante un recibo de trabajo duradero; el Idempotency-Key sin procesar nunca se persiste. Las mutaciones van seguidas de una verificación de StackKits antes de que cambie el estado medido. Las acciones ejecutadas por el agente se rechazan con 409 `maintenance_active` mientras el servidor se reinicia o se actualiza.
+
+```bash
+homelab api services run-action <service-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/registry/services/{serviceId}/actions` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `run_managed_service_action` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `<service-id>` | string | **Obligatorio.** ID canónico del runtime del servicio. |
+| `--body` | json | **Obligatorio.** Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## homelab api services setup-application-connector
+
+Asegura o revoca un conector Home Assistant propio declarado en su nodo.
+
+Requiere propiedad reciente verificada por el backend, autoridad operate positiva, inventario actual exacto y aprobación del propietario. Solo transporta metadatos de correlación definidos mediante Guard a la CLI publicada fijada; siguen siendo obligatorias su autoridad local signedApply y la autorización de configuración del propietario. Guarda la intención durable antes del envío; ante una confirmación desconocida solo reconcilia la operación original en modo de solo lectura. La v0.51.8 actual carece del catálogo compatible y devuelve SourcePreview no ejecutable. Las credenciales permanecen bajo custodia del nodo.
+
+```bash
+homelab api services setup-application-connector [flags]
+```
+
+<Warning>Requiere confirmación. Esta operación emite o revoca la credencial revisada del conector Home Assistant propiedad del nodo para este servicio exacto. Pasa `--yes` o responde a la pregunta; una ejecución no interactiva sin `--yes` se detiene antes de cualquier solicitud con el código de salida 9.</Warning>
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/connector` |
+| Cambia el estado | Sí |
+| Herramienta MCP | `setup_application_connector` |
+
+| Argumento | Tipo | Descripción |
+| --- | --- | --- |
+| `--service-id` | string | **Obligatorio.** ID canónico del runtime del servicio. |
+| `--action` | string | **Obligatorio.** Uno de `ensure`, `revoke`. |
+| `--expected-inventory-revision` | integer | **Obligatorio.** |
+| `--lifespan-days` | integer | **Obligatorio.** |
+| `--owner-approved` | boolean | **Obligatorio.** Uno de `true`. |
+| `--body` | json | Cuerpo de la solicitud JSON (`application/json`) como literal, `@path` o `-` para stdin. |
+
+## homelab api services verify-application-connector
+
+Refresh the current node-owned connector through a distinct read-only job.
+
+Retains the original signed setup operation and exact receipt, requires current published catalog and positive backend node/resource authority, and never reissues setup. Ordinary authenticated inventory reconciliation uses the same consumer for stale projections. Current v0.51.8 remains nondispatchable SourcePreview.
+
+```bash
+homelab api services verify-application-connector [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/services/{serviceId}/connector/verify` |
+| Changes state | No |
+| MCP tool | `verify_application_connector` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--service-id` | string | **Required.** Canonical service runtime ID. |
+| `--body` | json | **Required.** JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |

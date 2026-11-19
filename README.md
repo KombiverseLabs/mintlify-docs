@@ -15,7 +15,7 @@ dashboard.
 | --- | --- |
 | Start | Product entry points and current availability. |
 | StackKits | Released kits, modules, workflows, CLI and MCP documentation. |
-| Techstack | Preview product boundary, operating modes, availability, release-bound API and `techstack api` CLI reference. |
+| Homelab | Preview product boundary, operating modes, availability, release-bound API and `homelab api` CLI reference. |
 | SpeechKit | Released Windows beta, voice modes, Go framework. |
 | Identity & Access | The identity boundary relevant to StackKits. |
 | Changelog | Customer-facing product updates. |
@@ -24,11 +24,11 @@ Truth sources, never the retired legacy documentation repository:
 
 - StackKits and SpeechKit: public releases and assets (synced into `data/`
   by generated-only pull requests).
-- Techstack: the product contract and preview status, with no public installer
-  or source distribution presented. The reference under `techstack/reference/`
+- Homelab: the product contract and preview status, with no public installer
+  or source distribution presented. The reference under `homelab/reference/`
   is generated only from `api/surface/openapi.public.yaml` and
   `api/surface/api-surface.json` of a published release
-  (`.github/workflows/techstack-release-docs.yml`); without both, it does not
+  (`.github/workflows/homelab-release-docs.yml`); without both, it does not
   exist.
 - Workspace standards define documentation and delivery policy and are linked,
   never copied.
@@ -64,7 +64,7 @@ documentation changes use the same publisher and merge batch afterwards.
 ### OpenAPI prose catalogs
 
 The optional `scripts/i18n/openapi_locale.py` producer binds a catalog to the
-exact bytes of the current Gateway or Techstack public OpenAPI projection. It
+exact bytes of the current Gateway or Homelab public OpenAPI projection. It
 does not modify either release sync producer, navigation, or the served tree.
 Use Python 3.13 in a dedicated virtual environment and install the complete,
 hash-locked dependencies with `python -m pip install --require-hashes --only-binary=:all: -r
@@ -81,7 +81,7 @@ python scripts/i18n/openapi_locale.py extract gateway <outside-checkout>/gateway
 python scripts/i18n/openapi_locale.py reconstruct gateway <outside-checkout>/gateway.fr.json <outside-checkout>/gateway.fr.yaml
 ```
 
-Use `techstack` for the other contract. Extraction creates empty translation
+Use `homelab` for the other contract. Extraction creates empty translation
 slots; fill and review every entry against the exact source before reconstruction.
 Any source-byte change requires a new catalog and review. Duplicate keys or
 pointers, incomplete or extra entries, changed source text, empty translations,
@@ -126,12 +126,12 @@ How the pieces fit:
   `pending_translation`; presence enforcement via `--strict` is no longer
   supported, and the obsolete `I18N_STRICT` environment variable is ignored
   with a diagnostic.
-- Translations retain product names (kombify, StackKits, Techstack, Companion,
+- Translations retain product names (kombify, StackKits, Homelab, Companion,
   SpeechKit, Paperwork, kombify Cloud, kombify Sites, Simulate, CUE) and point
   internal links to `/<code>/...`.
 
 - Generated English pages (`stackkits/reference/cli/*`,
-  `techstack/reference/cli/*`, release pages) are rendered from release data;
+  `homelab/reference/cli/*`, release pages) are rendered from release data;
   their localized copies arrive with the next translation pull request.
 
 Locale semantics are in `KOMBIFY-DESIGN-SYSTEM-STANDARD.md` §11.
@@ -166,12 +166,12 @@ mise run local:e2e
 | `scripts/check-stackkits-release-truth.ps1` | Installer commands on the current public release, no stale lifecycle wording. |
 | `scripts/check-stackkits-external-links.ps1` | Optional registered StackKits destinations actually offered as publishable literals. |
 | `scripts/check-speechkit-release-truth.ps1` | Validate offered SpeechKit claims and mutable download links; check existing generated release blocks. |
-| `scripts/check-techstack-public-boundary.ps1` | Validate existing generated references against one release and source SHA; reject private API operations. |
-| `scripts/check-product-docs-external-links.ps1` | Optional registered Techstack and SpeechKit destinations actually offered as publishable literals. |
+| `scripts/check-homelab-public-boundary.ps1` | Validate existing generated references against one release and source SHA; reject private API operations. |
+| `scripts/check-product-docs-external-links.ps1` | Optional registered Homelab and SpeechKit destinations actually offered as publishable literals. |
 | `scripts/check-code-example-relevance.ps1` | Executable and structured examples only on pages with a topic-specific workflow or configuration. |
 | `scripts/render-api-surface-reference.mjs` | Render a release's OpenAPI and `api-surface.json` into the API and CLI reference; `--check` reports drift. |
 
-The Techstack reference workflow reads published releases from `kombifyio/TechStack`. Its generated `source_hash` identifies the public mirror commit at the release tag; it is not the private StackKits source commit. Dispatch-provided artifact digests must describe the public mirror files and are checked against the downloaded files when present.
+The Homelab reference workflow reads published releases from `kombifyio/Homelab`. Its generated `source_hash` identifies the public mirror commit at the release tag; it is not the private StackKits source commit. Dispatch-provided artifact digests must describe the public mirror files and are checked against the downloaded files when present.
 
 ## Telemetry regression journey
 

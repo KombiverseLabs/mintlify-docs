@@ -14,7 +14,7 @@ info:
 
     | Prefix | Service | Description |
     |--------|---------|-------------|
-    | `/v1/orchestrator` | Techstack | Core orchestration, projects, users, billing |
+    | `/v1/orchestrator` | Homelab | Core orchestration, projects, users, billing |
     | `/v1/simulation` | kombiSim | Infrastructure simulation engine |
     | `/v1/stackkits` | StackKits | IaC/CUE logic service (coming soon) |
     | `/v1/subdomains` | kombify-Me | Subdomain registry & tunnel gateway |
@@ -24,7 +24,7 @@ info:
     | `/v1/admin` | kombify-Administration | Protected operator and administration APIs |
     | `/v1/connectors` | Gateway Connector Vault | Connector catalog and opaque grant metadata |
     | `/v1/harnesses` | Gateway harness policy | Harness settings projection and connector bindings |
-    | `/v1/ril` | Gateway RIL preflight -> TechStack | RIL server/action policy preflight and forwarding |
+    | `/v1/ril` | Gateway RIL preflight -> Homelab | RIL server/action policy preflight and forwarding |
     | `/v1/agents` | kombify-Agents | Canonical agent runtime API |
     | `/a2a` | kombify-Agents | Agent-to-Agent federation (JSON-RPC) |
 
@@ -97,7 +97,7 @@ tags:
   - name: harnesses
     description: Gateway harness connector settings and projection surfaces
   - name: ril
-    description: Gateway RIL policy preflight before TechStack/StackKits execution
+    description: Gateway RIL policy preflight before Homelab/StackKits execution
 
 paths:
   # ==========================================================================
@@ -126,13 +126,13 @@ paths:
                     example: kombify-gateway
 
   # ==========================================================================
-  # Techstack Health / Readiness
+  # Homelab Health / Readiness
   # ==========================================================================
   /health:
     get:
-      summary: Techstack health check
-      description: Proxied to the Techstack backend. Returns backend health status.
-      operationId: techstackHealth
+      summary: Homelab health check
+      description: Proxied to the Homelab backend. Returns backend health status.
+      operationId: homelabHealth
       tags: [orchestrator]
       security: []
       responses:
@@ -145,9 +145,9 @@ paths:
 
   /ready:
     get:
-      summary: Techstack readiness probe
-      description: Checks if the Techstack backend can accept traffic.
-      operationId: techstackReady
+      summary: Homelab readiness probe
+      description: Checks if the Homelab backend can accept traffic.
+      operationId: homelabReady
       tags: [orchestrator]
       security: []
       responses:
@@ -161,19 +161,19 @@ paths:
           description: Backend is not ready
 
   # ==========================================================================
-  # Orchestrator (Techstack)
+  # Orchestrator (Homelab)
   # ==========================================================================
   /v1/orchestrator:
     get:
       summary: Orchestrator API root
       description: |
-        All `/v1/orchestrator/**` requests are proxied to the Techstack backend.
+        All `/v1/orchestrator/**` requests are proxied to the Homelab backend.
         Path is stripped — `/v1/orchestrator/foo` becomes `/foo` on the backend.
       operationId: orchestratorRoot
       tags: [orchestrator]
       responses:
         "200":
-          description: Successful response from Techstack
+          description: Successful response from Homelab
         "401":
           $ref: "#/components/responses/Unauthorized"
         "429":
@@ -206,7 +206,7 @@ paths:
               type: object
       responses:
         "200":
-          description: AI response from Techstack
+          description: AI response from Homelab
         "401":
           $ref: "#/components/responses/Unauthorized"
         "429":
@@ -965,11 +965,11 @@ paths:
     get:
       summary: Tenant-scoped RIL server presence
       description: >-
-        Returns the authenticated user's Techstack server count for ril-ops
+        Returns the authenticated user's Homelab server count for ril-ops
         availability gating. Requires a user or delegated user (OBO), a
         matching organization, and a RIL read entitlement. An optional
         `tenant` query value must exactly match the authenticated organization.
-        The compatibility alias `/v1/techstack/servers/summary` has the same
+        The compatibility alias `/v1/homelab/servers/summary` has the same
         policy and response contract.
       operationId: getRilServerSummary
       tags: [ril]
@@ -1010,7 +1010,7 @@ paths:
             type: string
       responses:
         "200":
-          description: Proxied TechStack response after Gateway policy
+          description: Proxied Homelab response after Gateway policy
         "403":
           description: Entitlement, tenant, signal, or raw tool denied
     post:
@@ -1025,7 +1025,7 @@ paths:
             type: string
       responses:
         "200":
-          description: Proxied TechStack response after Gateway policy
+          description: Proxied Homelab response after Gateway policy
         "409":
           description: Connector grant, binding, or approval required
 
@@ -1049,7 +1049,7 @@ components:
       required: true
       schema:
         type: string
-        enum: [workbench, workbench-panel, workbench-studio, cloud, administration, paperwork, cmo, techstack, mobile]
+        enum: [workbench, workbench-panel, workbench-studio, cloud, administration, paperwork, cmo, homelab, mobile]
     HarnessContextKind:
       name: contextKind
       in: query

@@ -1,0 +1,46 @@
+---
+title: "homelab api autoinstall"
+description: "Generated reference for the homelab api autoinstall commands"
+sidebarTitle: "autoinstall"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.49.2"
+content_hash: "sha256:16adb9eda64db29656ee84714b9bc71b814dadfb07fbbf8a52e89200b968f6c3"
+source_hash: "2614eaba28d89093eab7aca7ba7268dde5a823e8"
+---
+<Note>Generated from the Homelab v0.49.2 release (source `2614eaba28d8`). For an installed version, `homelab api <command> --help` is authoritative.</Note>
+
+## homelab api autoinstall run
+
+Install missing dependencies.
+
+Installs the missing host dependencies (OpenTofu, cloudflared, Docker) on the machine a self-hosted Homelab runs on, all of them or the named ones. Only the owner of a self-hosted Homelab may call it, and an agent acts with the owner's reach there; hosted Homelab refuses every caller with 403 `host_install_unavailable` (reason_code `hosted_control_plane`) before anything is detected.
+
+```bash
+homelab api autoinstall run [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/autoinstall/install` |
+| Changes state | Yes |
+| MCP tool | `install_host_dependencies` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--dependencies` | string\[\] | Names of the missing dependencies to install; all when omitted. |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## homelab api autoinstall status
+
+Check missing dependencies.
+
+```bash
+homelab api autoinstall status [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/autoinstall/status` |
+| Changes state | No |
+| MCP tool | None |

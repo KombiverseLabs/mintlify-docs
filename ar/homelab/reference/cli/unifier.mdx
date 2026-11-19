@@ -1,0 +1,123 @@
+---
+title: "homelab api unifier"
+description: "مرجع مولَّد لأوامر homelab api unifier"
+sidebarTitle: "unifier"
+release: "v0.32.8"
+---
+<Note>مولَّد من إصدار Homelab v0.32.8 (المصدر `4c7d219a5d56`). بالنسبة إلى إصدار مثبَّت، فإن `homelab api <command> --help` هو المرجع.</Note>
+
+## homelab api unifier analyze
+
+تحليل المواصفة للحصول على المتطلبات (المرحلة 1).
+
+آمن وغير متغير النتيجة (idempotent). يُرجع متطلبات العتاد والإضافات المكتشفة وبيانات الاعتماد المطلوبة.
+
+```bash
+homelab api unifier analyze [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/analyze` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `analyze_spec` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--body` | json | **مطلوب.** جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## homelab api unifier pipeline preview
+
+معاينة نتائج خط المعالجة دون آثار جانبية.
+
+آمن وغير متغير النتيجة (idempotent). يعرض ما سيُولَّد. تُرجع حالات فشل التحقق في الواجهة الخلفية أو تحديد StackKit الرمز 200 مع data.valid=false وdata.errors المنظَّمة؛ بينما تبقى المدخلات المشوّهة وحالات فشل المصادقة أخطاء HTTP.
+
+```bash
+homelab api unifier pipeline preview [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/pipeline/preview` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `preview_pipeline` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--body` | json | **مطلوب.** جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## homelab api unifier pipeline run
+
+تشغيل خط معالجة الموحِّد كاملاً (validate + analyze + unify + generate).
+
+ذو آثار جانبية -- يولّد ملفات مُخرجات IaC.
+
+```bash
+homelab api unifier pipeline run [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/pipeline` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `run_pipeline` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--body` | json | **مطلوب.** جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## homelab api unifier pipeline validate
+
+التحقق من مدخلات خط المعالجة دون تنفيذ.
+
+```bash
+homelab api unifier pipeline validate [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/pipeline/validate` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `validate_pipeline` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--body` | json | **مطلوب.** جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## homelab api unifier unify
+
+توحيد المواصفات (المرحلة 2).
+
+```bash
+homelab api unifier unify [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/unify` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `unify_spec` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--body` | json | **مطلوب.** جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |
+
+## homelab api unifier validate
+
+التحقق من مواصفة stack مقابل مخططات CUE.
+
+آمن وغير متغير النتيجة (idempotent). بلا آثار جانبية.
+
+```bash
+homelab api unifier validate [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/unifier/validate` |
+| يغيّر الحالة | نعم |
+| أداة MCP | `validate_spec` |
+
+| الوسيط | النوع | الوصف |
+| --- | --- | --- |
+| `--body` | json | **مطلوب.** جسم طلب JSON (`application/json`) كقيمة حرفية أو `@path` أو `-` لـ stdin. |

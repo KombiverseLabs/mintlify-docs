@@ -42,7 +42,7 @@ stackkit host conformance [flags]
 
 Gestiona el destinatario sellado de entrega de host de este nodo.
 
-La entrega sellada de hosts lleva a este nodo elementos de Wallet, destinos de backup y acceso SSH. La autoridad que entrega sella cada valor con la clave destinataria de este nodo (HPKE, pkg/hostdelivery); solo este nodo lo abre en su propia custodia. Techstack y Guard transportan únicamente texto cifrado y referencias.
+La entrega sellada de hosts lleva a este nodo elementos de Wallet, destinos de backup y acceso SSH. La autoridad que entrega sella cada valor con la clave destinataria de este nodo (HPKE, pkg/hostdelivery); solo este nodo lo abre en su propia custodia. Homelab y Guard transportan únicamente texto cifrado y referencias.
 
 ```bash
 stackkit host delivery [flags]
@@ -236,7 +236,7 @@ Programa un reinicio de este nodo.
 
 Programa un reinicio de este nodo tras un breve retraso y regresa de inmediato.
 
-El boot_id_before devuelto identifica el arranque actual, de modo que quien llama puede saber que el nodo volvió al leer un ID de arranque distinto. El comando rechaza un nodo que ejecuta el plano de control de Techstack, un nodo donde apt o dpkg mantiene su bloqueo o se ejecuta una actualización del host, y un nodo que no puede arrancar sin supervisión (volúmenes en /etc/crypttab que necesitan una frase de contraseña, o sin apt).
+El boot_id_before devuelto identifica el arranque actual, de modo que quien llama puede saber que el nodo volvió al leer un ID de arranque distinto. El comando rechaza un nodo que ejecuta el plano de control de Homelab, un nodo donde apt o dpkg mantiene su bloqueo o se ejecuta una actualización del host, y un nodo que no puede arrancar sin supervisión (volúmenes en /etc/crypttab que necesitan una frase de contraseña, o sin apt).
 
 Cuando termina el retraso, una guarda vuelve a comprobar, espera hasta 15 minutos a que termine cualquier operación de paquetes y solicita el reinicio mientras mantiene los bloqueos de dpkg. Un nodo que sigue ocupado no se reinicia; su ID de arranque se mantiene igual.
 
@@ -303,7 +303,7 @@ Observa este nodo frente a la base de seguridad de hosts de StackKits y restaura
 
 `verify` nunca cambia el host. Produce stackkit.host-security-evidence/v1 para el firewall, sshd, la protección contra fuerza bruta, las actualizaciones de seguridad automáticas y pendientes, el estado de reinicio, los parámetros del kernel, los listeners expuestos y la caducidad de los certificados, y para la confianza de CA SSH y el certificado de host entregados a este nodo (`host ssh apply`) una vez registrados. Cada control está conforme, desviado, desconocido o es una excepción aprobada por el propietario, y la evidencia caduca: una observación obsoleta es desconocida y un control desconocido nunca cuenta como conforme.
 
-Funciona por sí solo (Standard Mode, sin cuenta) y mediante la CLI fijada cuando Techstack administra el despliegue (`--mode` advanced).
+Funciona por sí solo (Standard Mode, sin cuenta) y mediante la CLI fijada cuando Homelab administra el despliegue (`--mode` advanced).
 
 ```bash
 stackkit host security [flags]
@@ -349,7 +349,7 @@ stackkit host security repair [flags]
 | `--kit` | string | — | Slug del Kit que se registrará (predeterminado: el Kit de la StackSpec del workspace) |
 | `--local-node` | string | — | Node local exacto del ResolvedPlan proporcionado |
 | `--management-source` | stringArray | — | Red que siempre debe poder acceder a ssh, como CIDR (repetible) |
-| `--mode` | string | `standard` | Modo de ciclo de vida que se registrará: standard, o advanced cuando Techstack administra este despliegue |
+| `--mode` | string | `standard` | Modo de ciclo de vida que se registrará: standard, o advanced cuando Homelab administra este despliegue |
 | `--no-record` | bool | — | No escribe la evidencia posterior a la reparación bajo .stackkit/ |
 | `--resolved-plan` | string | — | ResolvedPlan canónico verificado con cuyos listeners declarados se evalúa la exposición |
 | `--site-kind` | string | — | Tipo de Site de este host: home o cloud (predeterminado: se infiere del Kit; modern-homelab lo necesita) |
@@ -404,7 +404,7 @@ stackkit host security verify [flags]
 | `--kit` | string | — | Slug del Kit que se registrará (predeterminado: el Kit de la StackSpec del workspace) |
 | `--local-node` | string | — | Node local exacto del ResolvedPlan proporcionado |
 | `--management-source` | stringArray | — | Red que siempre debe poder acceder a ssh, como CIDR (repetible) |
-| `--mode` | string | `standard` | Modo de ciclo de vida que se registrará: standard, o advanced cuando Techstack administra este despliegue |
+| `--mode` | string | `standard` | Modo de ciclo de vida que se registrará: standard, o advanced cuando Homelab administra este despliegue |
 | `--no-record` | bool | — | No escribe la evidencia bajo .stackkit/ |
 | `--resolved-plan` | string | — | ResolvedPlan canónico verificado con cuyos listeners declarados se evalúa la exposición |
 | `--site-kind` | string | — | Tipo de Site de este host: home o cloud (predeterminado: se infiere del Kit; modern-homelab lo necesita) |
@@ -418,7 +418,7 @@ sudo stackkit host security verify
 # Machine-readable, advanced mode, exit non-zero on any drifted control
 sudo stackkit host security verify --mode advanced --json --fail-on-drift
 
-# What the Techstack host pre-step runs: only the controls the baseline enforces decide the exit code; patch lag, pending reboot, exposure and certificates are still observed and reported
+# What the Homelab host pre-step runs: only the controls the baseline enforces decide the exit code; patch lag, pending reboot, exposure and certificates are still observed and reported
 sudo stackkit host security verify --mode advanced --json --fail-on-drift --drift-scope enforced
 
 # Judge exposure against the ports the verified plan declares

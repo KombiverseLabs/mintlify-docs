@@ -1,0 +1,121 @@
+---
+title: "homelab api ril"
+description: "Generated reference for the homelab api ril commands"
+sidebarTitle: "ril"
+generated: true
+generated_by: "render-api-surface-reference"
+release: "v0.49.2"
+content_hash: "sha256:16adb9eda64db29656ee84714b9bc71b814dadfb07fbbf8a52e89200b968f6c3"
+source_hash: "2614eaba28d89093eab7aca7ba7268dde5a823e8"
+---
+<Note>Generated from the Homelab v0.49.2 release (source `2614eaba28d8`). For an installed version, `homelab api <command> --help` is authoritative.</Note>
+
+## homelab api ril action-cards create
+
+Create a governed action card for one owned server.
+
+Stores a card that describes one approved-action primitive, its target and its evidence sink for the authenticated owner. The card starts as `awaiting_grant` (no `grant` given) or `awaiting_approval` and runs nothing until it is approved and executed. An executor-bound primitive (`check-backup`, `run-backup`, `start-service`, `stop-service`, `restart-service`, `update-service`, `verify-stackkit-state`) takes its contract hash from the stack's pinned StackKits release. The caller names only its target scope and the input that selects the target (the `runtime-instance-ref` service key of a start, stop, restart or update); Homelab derives every target ref (server, StackKits node, current worker) and the derived inputs (an adopted application's exact container `application-ref`, the update's target release, the backup contract) from fresh inventory and refuses a supplied ref that differs. It requires the card's connector binding, which must carry the primitive's grant scope when the card executes; it carries no grant, waits in `awaiting_approval` and cannot be approved by a person: its one Gateway Decision is answered by the acting agent's equipment when it is executed. The body is decoded strictly and must stay under 64 KiB.
+
+```bash
+homelab api ril action-cards create [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /v1/ril/action-cards` |
+| Changes state | Yes |
+| MCP tool | `create_action_card` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `--action` | object | **Required.** |
+| `--id` | string | Optional card id; generated when omitted. |
+| `--server-id` | string | **Required.** |
+| `--severity` | string | Default `"info"`. |
+| `--title` | string | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## homelab api ril action-cards execute
+
+Run one approved governed action card on its server.
+
+Starts the durable workflow of a card that the owner approved and that holds a live grant, after checking that the caller may operate the card's server. An executor-bound card first files its one Gateway Decision, which the acting agent's equipment answers at once (an owner's Deny or standing exclusion refuses it), and is admitted against fresh inventory and the server's lifecycle authority (its VM lease, or the owner's own admitted server). `execution_id`, `trace_id` and `idempotency_key` bind one execution; repeating them returns the stored result. A card of operation class `drift-correction` also needs `compensation_card_id`, any other card must not send it. A missing approval or grant, an expired grant and a connector binding that does not match answer 403 or 409 with a stable `reason_code`.
+
+```bash
+homelab api ril action-cards execute <card-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /v1/ril/action-cards/{cardId}/execute` |
+| Changes state | Yes |
+| MCP tool | `execute_action_card` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<card-id>` | string | **Required.** |
+| `--compensation-card-id` | string | Required for drift-correction cards; forbidden for others. |
+| `--execution-id` | string | **Required.** |
+| `--execution-idempotency-key` | string | **Required.** |
+| `--trace-id` | string | **Required.** |
+| `--body` | json | JSON request body (`application/json`) as a literal, `@path` or `-` for stdin. |
+
+## homelab api ril action-cards get
+
+Get one governed action card of the authenticated owner.
+
+Returns the card with its status, approval receipt, execution identity and public-safe evidence. This is the polling surface of a card started through `execute_action_card` or a managed `start`, `stop`, `restart`, `update` or `backup` (`run_managed_service_action` returns its id as `action_card_id`). A failed `check-backup` card (the same check for every kit) carries `user_guidance`: what is missing on the server (no backup set up, no backup source on this server, repository not ready, no verified snapshot yet) and how to set it up.
+
+```bash
+homelab api ril action-cards get <card-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /v1/ril/action-cards/{cardId}` |
+| Changes state | No |
+| MCP tool | `get_action_card` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<card-id>` | string | **Required.** |
+
+## homelab api ril action-cards receipt
+
+Read the persisted step receipt of one governed action card.
+
+Returns the authenticated owner's terminal card receipt: execution and completion counts from the append-only transition audit, verification readback, wrapped public-safe evidence and the approval receipt hash and Gateway Decision id. A foreign card id answers like an unknown one. A non-terminal card or a card without persisted evidence or approval returns 409; older cards are not backfilled. Query parameters are refused. The response is private and must not be cached.
+
+```bash
+homelab api ril action-cards receipt <card-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /v1/ril/action-cards/{cardId}/receipt` |
+| Changes state | No |
+| MCP tool | `get_action_step_receipt` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<card-id>` | string | **Required.** |
+
+## homelab api ril workflow-runs get
+
+Read one owned workflow run's sanitized audit and optional action receipt.
+
+Returns the authenticated owner's run, steps and up to 500 lifecycle audit events. Inputs, outputs, context, raw errors and connector material are excluded. The optional receipt is present only when the run's card is terminal and has persisted evidence and approval. Missing cards and cards without a receipt omit it; other receipt read failures return 503. A foreign run id answers like an unknown one. Query parameters are refused. The response is private and must not be cached.
+
+```bash
+homelab api ril workflow-runs get <run-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /v1/ril/workflow-runs/{runId}` |
+| Changes state | No |
+| MCP tool | `get_ril_workflow_run` |
+
+| Argument | Type | Description |
+| --- | --- | --- |
+| `<run-id>` | string | **Required.** |

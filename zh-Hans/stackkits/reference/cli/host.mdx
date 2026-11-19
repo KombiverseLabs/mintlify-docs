@@ -42,7 +42,7 @@ stackkit host conformance [flags]
 
 管理此节点的密封主机交付接收方。
 
-密封主机交付会把 Wallet 项目、备份目标和 SSH 访问权限交付到此节点。交付方会用此节点的接收方密钥（HPKE，pkg/hostdelivery）分别密封每个值；只有此节点能将其打开并存入自身托管。Techstack 和 Guard 只传递密文和引用。
+密封主机交付会把 Wallet 项目、备份目标和 SSH 访问权限交付到此节点。交付方会用此节点的接收方密钥（HPKE，pkg/hostdelivery）分别密封每个值；只有此节点能将其打开并存入自身托管。Homelab 和 Guard 只传递密文和引用。
 
 ```bash
 stackkit host delivery [flags]
@@ -236,7 +236,7 @@ stackkit host prepare
 
 在短暂延迟后安排此节点重启，并立即返回。
 
-返回的 boot_id_before 标识当前这次启动，因此调用方可以通过读取到不同的 boot ID 来判断节点已重新上线。在以下情况下命令会拒绝执行：节点运行着 Techstack 控制平面，apt 或 dpkg 持有其锁或正在进行主机更新，或节点无法无人值守启动（/etc/crypttab 中有需要口令的卷，或没有 apt）。
+返回的 boot_id_before 标识当前这次启动，因此调用方可以通过读取到不同的 boot ID 来判断节点已重新上线。在以下情况下命令会拒绝执行：节点运行着 Homelab 控制平面，apt 或 dpkg 持有其锁或正在进行主机更新，或节点无法无人值守启动（/etc/crypttab 中有需要口令的卷，或没有 apt）。
 
 延迟结束时，守卫会再次检查，最多等待 15 分钟让所有包操作完成，并在持有 dpkg 锁的同时请求重启。仍然繁忙的节点不会被重启；其 boot ID 保持不变。
 
@@ -303,7 +303,7 @@ stackkit host remediate --auto-reversible --yes
 
 'verify' 绝不会更改主机。它会为防火墙、sshd、暴力破解防护、自动和待处理的安全更新、重启状态、内核参数、公开的监听器和证书到期情况，以及已记录的、交付到此节点的 SSH CA 信任和主机证书（'host ssh apply'）生成 stackkit.host-security-evidence/v1。每项控制的状态为 compliant、drifted、unknown 或经 Owner 批准的例外，且证据会到期：过期的观察结果为 unknown，而 unknown 控制绝不能算作 compliant。
 
-它既可独立运行（Standard Mode，无需账号），也可在 Techstack 管理部署时通过固定版本的 CLI 运行（`--mode` advanced）。
+它既可独立运行（Standard Mode，无需账号），也可在 Homelab 管理部署时通过固定版本的 CLI 运行（`--mode` advanced）。
 
 ```bash
 stackkit host security [flags]
@@ -349,7 +349,7 @@ stackkit host security repair [flags]
 | `--kit` | string | — | 要记录的 Kit slug（默认为工作区 StackSpec 的 Kit） |
 | `--local-node` | string | — | 所提供 ResolvedPlan 中的确切本地 Node |
 | `--management-source` | stringArray | — | 必须始终能够访问 ssh 的网络，以 CIDR 表示（可重复指定） |
-| `--mode` | string | `standard` | 要记录的生命周期模式：standard；Techstack 管理此部署时为 advanced |
+| `--mode` | string | `standard` | 要记录的生命周期模式：standard；Homelab 管理此部署时为 advanced |
 | `--no-record` | bool | — | 不在 .stackkit/ 下写入修复后的证据 |
 | `--resolved-plan` | string | — | 经过验证的规范 ResolvedPlan，用于依据其声明的监听器判断暴露情况 |
 | `--site-kind` | string | — | 此主机的 Site 类型：home 或 cloud（默认根据 Kit 推断；modern-homelab 需要此项） |
@@ -404,7 +404,7 @@ stackkit host security verify [flags]
 | `--kit` | string | — | 要记录的 Kit slug（默认为工作区 StackSpec 的 Kit） |
 | `--local-node` | string | — | 所提供 ResolvedPlan 中的确切本地 Node |
 | `--management-source` | stringArray | — | 必须始终能够访问 ssh 的网络，以 CIDR 表示（可重复指定） |
-| `--mode` | string | `standard` | 要记录的生命周期模式：standard；Techstack 管理此部署时为 advanced |
+| `--mode` | string | `standard` | 要记录的生命周期模式：standard；Homelab 管理此部署时为 advanced |
 | `--no-record` | bool | — | 不在 .stackkit/ 下写入证据 |
 | `--resolved-plan` | string | — | 经过验证的规范 ResolvedPlan，用于依据其声明的监听器判断暴露情况 |
 | `--site-kind` | string | — | 此主机的 Site 类型：home 或 cloud（默认根据 Kit 推断；modern-homelab 需要此项） |
@@ -418,7 +418,7 @@ sudo stackkit host security verify
 # Machine-readable, advanced mode, exit non-zero on any drifted control
 sudo stackkit host security verify --mode advanced --json --fail-on-drift
 
-# What the Techstack host pre-step runs: only the controls the baseline enforces decide the exit code; patch lag, pending reboot, exposure and certificates are still observed and reported
+# What the Homelab host pre-step runs: only the controls the baseline enforces decide the exit code; patch lag, pending reboot, exposure and certificates are still observed and reported
 sudo stackkit host security verify --mode advanced --json --fail-on-drift --drift-scope enforced
 
 # Judge exposure against the ports the verified plan declares

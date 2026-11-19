@@ -45,7 +45,7 @@ Ground claims in `codeintel_search`, `codeintel_repo_overview`,
   as a product. Successors: Notifications and Central, Gateway, AI Platform,
   `codeintel`.
 - Product display names are not repository names. Canonical: StackKits,
-  Techstack, Kombify Cloud, Kombify AI, Kombify Workbench, Kombify Companion,
+  Homelab, Kombify Cloud, Kombify AI, Kombify Workbench, Kombify Companion,
   SpeechKit. The customer MCP connector displays as "Kombify".
 - Do not state a capability as present unless the code shows it. Planned work
   belongs to `ROADMAP.md`, not here.

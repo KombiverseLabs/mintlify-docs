@@ -140,7 +140,7 @@ Write-Host "navigation_pages: $($pages.Count)"
 & (Join-Path $PSScriptRoot "check-content-rules.ps1")
 & (Join-Path $PSScriptRoot "check-stackkits-release-truth.ps1")
 & (Join-Path $PSScriptRoot "check-speechkit-release-truth.ps1")
-& (Join-Path $PSScriptRoot "check-techstack-public-boundary.ps1")
+& (Join-Path $PSScriptRoot "check-homelab-public-boundary.ps1")
 & (Join-Path $PSScriptRoot "check-code-example-relevance.ps1")
 
 if (-not $SkipExternalLinks) {

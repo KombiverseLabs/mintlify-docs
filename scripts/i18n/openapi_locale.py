@@ -13,7 +13,7 @@ from openapi_spec_validator import validate
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCES = {
-    'techstack': 'techstack/reference/api/openapi.yaml',
+    'homelab': 'homelab/reference/api/openapi.yaml',
     'gateway': 'identity/reference/api/openapi.yaml',
 }
 # These subtrees contain values/code, not OpenAPI documentation objects. Never
@@ -24,7 +24,7 @@ OPAQUE = {'example', 'examples', 'default', 'enum', 'const', 'externalValue'}
 NAMED_MAPS = {'properties', 'patternProperties', '$defs', 'schemas', 'responses',
               'parameters', 'requestBodies', 'headers', 'securitySchemes',
               'links', 'callbacks', 'pathItems', 'content', 'encoding'}
-PRODUCT_TITLES = {'kombify Gateway API', 'kombify-TechStack API'}
+PRODUCT_TITLES = {'kombify Gateway API', 'kombify-Homelab API'}
 
 class UniqueLoader(yaml.SafeLoader):
     pass

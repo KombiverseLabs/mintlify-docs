@@ -42,7 +42,7 @@ stackkit host conformance [flags]
 
 इस नोड का सीलबंद होस्ट डिलीवरी रिसिपिएंट प्रबंधित करें।
 
-सीलबंद होस्ट डिलीवरी इस नोड तक Wallet आइटम, बैकअप लक्ष्य और SSH एक्सेस पहुँचाती है। डिलीवर करने वाला प्राधिकार हर मान को इस नोड की रिसिपिएंट की (HPKE, pkg/hostdelivery) से सील करता है; केवल यह नोड उसे अपनी कस्टडी में खोलता है। Techstack और Guard केवल सिफ़रटेक्स्ट और संदर्भ वहन करते हैं।
+सीलबंद होस्ट डिलीवरी इस नोड तक Wallet आइटम, बैकअप लक्ष्य और SSH एक्सेस पहुँचाती है। डिलीवर करने वाला प्राधिकार हर मान को इस नोड की रिसिपिएंट की (HPKE, pkg/hostdelivery) से सील करता है; केवल यह नोड उसे अपनी कस्टडी में खोलता है। Homelab और Guard केवल सिफ़रटेक्स्ट और संदर्भ वहन करते हैं।
 
 ```bash
 stackkit host delivery [flags]
@@ -236,7 +236,7 @@ stackkit host prepare
 
 थोड़ी देरी के बाद इस नोड का रीबूट शेड्यूल करें और तुरंत लौट आएँ।
 
-लौटाया गया boot_id_before वर्तमान बूट की पहचान करता है, ताकि कॉलर अलग boot ID पढ़कर जान सके कि नोड वापस आ गया। कमांड उस नोड को अस्वीकार करती है जो Techstack कंट्रोल प्लेन चलाता है, जहाँ apt या dpkg लॉक रखता है या होस्ट अपडेट चल रहा है, और जो बिना निगरानी बूट नहीं हो सकता (/etc/crypttab में ऐसे वॉल्यूम जिन्हें पासफ़्रेज़ चाहिए, या apt नहीं है)।
+लौटाया गया boot_id_before वर्तमान बूट की पहचान करता है, ताकि कॉलर अलग boot ID पढ़कर जान सके कि नोड वापस आ गया। कमांड उस नोड को अस्वीकार करती है जो Homelab कंट्रोल प्लेन चलाता है, जहाँ apt या dpkg लॉक रखता है या होस्ट अपडेट चल रहा है, और जो बिना निगरानी बूट नहीं हो सकता (/etc/crypttab में ऐसे वॉल्यूम जिन्हें पासफ़्रेज़ चाहिए, या apt नहीं है)।
 
 देरी समाप्त होने पर एक गार्ड फिर जाँचता है, किसी भी पैकेज ऑपरेशन के पूरा होने के लिए 15 मिनट तक प्रतीक्षा करता है और dpkg लॉक पकड़े हुए रीबूट का अनुरोध करता है। जो नोड व्यस्त रहता है उसे रीबूट नहीं किया जाता; उसकी boot ID वही रहती है।
 
@@ -303,7 +303,7 @@ stackkit host remediate --auto-reversible --yes
 
 'verify' होस्ट को कभी नहीं बदलता। यह फ़ायरवॉल, sshd, ब्रूट-फ़ोर्स सुरक्षा, स्वचालित और लंबित सुरक्षा अपडेट, रीबूट स्थिति, कर्नेल पैरामीटर, खुले listeners और प्रमाणपत्र की समाप्ति के लिए, और (एक बार दर्ज होने पर) इस नोड को डिलीवर किए गए SSH CA ट्रस्ट और होस्ट सर्टिफ़िकेट ('host ssh apply') के लिए stackkit.host-security-evidence/v1 बनाता है। हर नियंत्रण compliant, drifted, unknown या ओनर द्वारा स्वीकृत अपवाद होता है, और साक्ष्य की समय-सीमा समाप्त होती है: पुराना अवलोकन unknown होता है और unknown नियंत्रण कभी compliant नहीं माना जाता।
 
-यह अपने आप (Standard Mode, बिना अकाउंट) और Techstack द्वारा डिप्लॉयमेंट प्रबंधित किए जाने पर पिन की गई CLI के माध्यम से (`--mode` advanced) काम करता है।
+यह अपने आप (Standard Mode, बिना अकाउंट) और Homelab द्वारा डिप्लॉयमेंट प्रबंधित किए जाने पर पिन की गई CLI के माध्यम से (`--mode` advanced) काम करता है।
 
 ```bash
 stackkit host security [flags]
@@ -349,7 +349,7 @@ stackkit host security repair [flags]
 | `--kit` | string | — | दर्ज किया जाने वाला Kit slug (डिफ़ॉल्ट: वर्कस्पेस StackSpec का Kit) |
 | `--local-node` | string | — | दिए गए ResolvedPlan का सटीक स्थानीय Node |
 | `--management-source` | stringArray | — | वह नेटवर्क जिसे हमेशा ssh तक पहुँचना चाहिए, CIDR के रूप में (दोहराया जा सकता है) |
-| `--mode` | string | `standard` | दर्ज किया जाने वाला लाइफ़साइकिल मोड: standard, या Techstack द्वारा यह डिप्लॉयमेंट प्रबंधित होने पर advanced |
+| `--mode` | string | `standard` | दर्ज किया जाने वाला लाइफ़साइकिल मोड: standard, या Homelab द्वारा यह डिप्लॉयमेंट प्रबंधित होने पर advanced |
 | `--no-record` | bool | — | repair के बाद का साक्ष्य .stackkit/ के अंतर्गत न लिखें |
 | `--resolved-plan` | string | — | सत्यापित कैनोनिकल ResolvedPlan, जिसके घोषित listeners के अनुसार एक्सपोज़र का आकलन किया जाए |
 | `--site-kind` | string | — | इस होस्ट का Site प्रकार: home या cloud (डिफ़ॉल्ट: Kit से अनुमानित; modern-homelab के लिए आवश्यक) |
@@ -404,7 +404,7 @@ stackkit host security verify [flags]
 | `--kit` | string | — | दर्ज किया जाने वाला Kit slug (डिफ़ॉल्ट: वर्कस्पेस StackSpec का Kit) |
 | `--local-node` | string | — | दिए गए ResolvedPlan का सटीक स्थानीय Node |
 | `--management-source` | stringArray | — | वह नेटवर्क जिसे हमेशा ssh तक पहुँचना चाहिए, CIDR के रूप में (दोहराया जा सकता है) |
-| `--mode` | string | `standard` | दर्ज किया जाने वाला लाइफ़साइकिल मोड: standard, या Techstack द्वारा यह डिप्लॉयमेंट प्रबंधित होने पर advanced |
+| `--mode` | string | `standard` | दर्ज किया जाने वाला लाइफ़साइकिल मोड: standard, या Homelab द्वारा यह डिप्लॉयमेंट प्रबंधित होने पर advanced |
 | `--no-record` | bool | — | साक्ष्य .stackkit/ के अंतर्गत न लिखें |
 | `--resolved-plan` | string | — | सत्यापित कैनोनिकल ResolvedPlan, जिसके घोषित listeners के अनुसार एक्सपोज़र का आकलन किया जाए |
 | `--site-kind` | string | — | इस होस्ट का Site प्रकार: home या cloud (डिफ़ॉल्ट: Kit से अनुमानित; modern-homelab के लिए आवश्यक) |
@@ -418,7 +418,7 @@ sudo stackkit host security verify
 # Machine-readable, advanced mode, exit non-zero on any drifted control
 sudo stackkit host security verify --mode advanced --json --fail-on-drift
 
-# What the Techstack host pre-step runs: only the controls the baseline enforces decide the exit code; patch lag, pending reboot, exposure and certificates are still observed and reported
+# What the Homelab host pre-step runs: only the controls the baseline enforces decide the exit code; patch lag, pending reboot, exposure and certificates are still observed and reported
 sudo stackkit host security verify --mode advanced --json --fail-on-drift --drift-scope enforced
 
 # Judge exposure against the ports the verified plan declares

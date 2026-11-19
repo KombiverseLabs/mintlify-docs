@@ -163,7 +163,7 @@ function validateMainUseCase(value, label) {
 
 /**
  * StackKits `AuthoringModule.computeProfileFacts` and `acceleratorProfileFacts`
- * (internal/usecasecatalog) carry the declared numeric footprint Techstack
+ * (internal/usecasecatalog) carry the declared numeric footprint Homelab
  * sizes a selection with. They are validated against their real shape but stay
  * unrendered install internals, like every other module-local field.
  */

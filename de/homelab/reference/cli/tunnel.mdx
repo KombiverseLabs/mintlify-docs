@@ -1,0 +1,149 @@
+---
+title: "homelab api tunnel"
+description: "Generierte Referenz für die Befehle unter homelab api tunnel"
+sidebarTitle: "tunnel"
+release: "v0.32.8"
+---
+<Note>Generiert aus dem Homelab-Release v0.32.8 (Quelle `4c7d219a5d56`). Für eine installierte Version ist `homelab api <command> --help` maßgeblich.</Note>
+
+## homelab api tunnel install-command
+
+Worker-Installationsbefehl mit Tunnel-URL generieren.
+
+```bash
+homelab api tunnel install-command [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/tunnel/install-command` |
+| Ändert Zustand | Ja |
+| MCP-Tool | Keine |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `--token` | string | **Erforderlich.** |
+| `--body` | json | JSON-Request-Body (`application/json`) als Literal, `@path` oder `-` für stdin. |
+
+## homelab api tunnel registry-url
+
+Öffentliche Tunnel-Registry-URL abrufen.
+
+```bash
+homelab api tunnel registry-url [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/tunnel/registry-url` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `get_tunnel_registry_url` |
+
+## homelab api tunnel start
+
+Cloudflare-Tunnel starten.
+
+```bash
+homelab api tunnel start [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/tunnel/start` |
+| Ändert Zustand | Ja |
+| MCP-Tool | `start_tunnel` |
+
+## homelab api tunnel status
+
+Verbindungsstatus des Tunnels abrufen.
+
+```bash
+homelab api tunnel status [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/tunnel/status` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `get_tunnel_status` |
+
+## homelab api tunnel stop
+
+Cloudflare-Tunnel stoppen.
+
+```bash
+homelab api tunnel stop [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/tunnel/stop` |
+| Ändert Zustand | Ja |
+| MCP-Tool | `stop_tunnel` |
+
+## homelab api tunnel subdomains list
+
+Die eigenen kombify.me-Subdomains des Aufrufers zur Diagnose auflisten; die Registrierung gehört zu StackKits.
+
+Erfordert einen authentifizierten Aufrufer. Mit der gemeinsamen Plattform-Identität ist die Liste auf die Owner-Bindung des Aufrufers begrenzt.
+
+```bash
+homelab api tunnel subdomains list [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/tunnel/subdomains` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `list_tunnel_subdomains` |
+
+## homelab api tunnel subdomains services
+
+Services unter einer der eigenen kombify.me-Basis-Subdomains des Aufrufers auflisten.
+
+```bash
+homelab api tunnel subdomains services <base-id> [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/tunnel/subdomains/{baseId}/services` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `list_tunnel_subdomain_services` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `<base-id>` | string | **Erforderlich.** |
+
+## homelab api tunnel topology
+
+Netzwerktopologie erkennen.
+
+```bash
+homelab api tunnel topology [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `GET /api/v1/tunnel/topology` |
+| Ändert Zustand | Nein |
+| MCP-Tool | `get_topology` |
+
+## homelab api tunnel validate-url
+
+Eigene Tunnel-URL validieren.
+
+```bash
+homelab api tunnel validate-url [flags]
+```
+
+| | |
+| --- | --- |
+| HTTP | `POST /api/v1/tunnel/validate-url` |
+| Ändert Zustand | Ja |
+| MCP-Tool | `validate_tunnel_url` |
+
+| Argument | Typ | Beschreibung |
+| --- | --- | --- |
+| `--url` | string | — |
+| `--body` | json | JSON-Request-Body (`application/json`) als Literal, `@path` oder `-` für stdin. |
