@@ -1,0 +1,86 @@
+---
+title: "API-Stabilität und Abkündigung"
+description: "Auf welche Teile der kombify-API du bauen kannst, wie Änderungen versioniert werden und wie lange eine Entfernung angekündigt wird."
+sidebarTitle: "API-Stabilität"
+icon: "code-branch"
+---
+
+Die kombify-API wird unter `https://api.kombify.io` bereitgestellt. Diese Seite
+sagt, auf welche Routenfamilien du dich verlassen kannst und wie kombify sie
+ändert.
+
+## Stabilitätsklassen
+
+Jede Routenfamilie hat eine Klasse. Die Klasse gilt für die Operationen in der
+API-Referenz. Eine Route, die nicht in der Referenz steht, ist nicht Teil der
+API, auf die du baust.
+
+| Klasse | Was sie für dich bedeutet |
+| --- | --- |
+| Stable | Du kannst darauf bauen. Sie ist ab dem API-Release 1.0 eingefroren: Änderungen innerhalb einer Version fügen nur hinzu. |
+| Protocol | Die Nachrichten folgen einem gemeinsamen Protokoll (A2A, AG-UI, A2UI, MCP, der Connect-Vertrag). Pfade und Fehlerformat sind wie bei Stable eingefroren; Nachrichtenformen folgen den Versionen des Protokolls selbst. |
+| Preview | Dokumentiert, aber das Produkt dahinter kann sich noch ändern. Änderungen stehen in den Release-Notes, ohne Abkündigungsfrist. |
+
+| Klasse | Routenfamilien |
+| --- | --- |
+| Stable | `/v1/ai`, `/v1/embed`, `/v1/agents`, `/v1/orchestrator`, `/v1/homelab`, `/v1/speechkit`, `/v1/notifications`, `/v1/subdomains`, `/v1/content`, `/v1/connectors`, `/v1/harnesses`, `/v1/ril`, `/v1/decisions`, `/v1/supply-dock`, `/v2/supply-dock` |
+| Protocol | `/a2a`, `/ag-ui`, `/a2ui`, `/v1/mcp/knowledge`, `/v1/connect` |
+
+Jede andere dokumentierte Routenfamilie ist Preview, bis diese Seite sie
+aufführt.
+
+## Versionierung
+
+Die Hauptversion ist das erste Pfadsegment, etwa `/v1`. Innerhalb einer Version
+sind diese Änderungen additiv und können jederzeit erscheinen: eine neue Route,
+ein neues optionales Anfragefeld, ein neues Antwortfeld, ein neuer Wert in einer
+offenen Antwortliste, ein neuer Ablehnungs-`reason_code`. Schreib deinen Client
+so, dass er Felder ignoriert, die er nicht kennt.
+
+Diese Änderungen sind brechend und erscheinen nur als neue Hauptversion neben
+der alten: angenommene Eingaben verengen, ein optionales Feld verpflichtend
+machen, Typ oder Bedeutung eines Feldes ändern, die Statusklasse eines
+bestehenden Ergebnisses ändern und Anmelde- oder Freischaltungsanforderungen für
+einen bestehenden Aufrufer verschärfen, ohne eine neue, dokumentierte Ablehnung.
+
+Das Entfernen einer Route, eines Feldes oder eines Ablehnungs-`reason_code` ist
+innerhalb einer Version nur über die folgende Abkündigungsfolge erlaubt.
+Sicherheits- und Rechtskorrekturen können einen Vertrag brechen, bevor eine
+Frist endet; die Release-Note sagt das dann und nennt den Migrationspfad.
+
+Health- und Discovery-Endpunkte (`/gateway/health`, `/.well-known/*`) sind
+unversioniert und folgen der additiven Regel. `/v1/blog` wird eingestellt und
+ist nicht Teil der Einfrierung.
+
+## Abkündigung
+
+Eine Route, ein Feld oder ein `reason_code` der Klassen Stable oder Protocol
+wird erst nach dieser Folge entfernt:
+
+1. **Ankündigung.** Die API-Referenz markiert die Operation als abgekündigt mit
+   ihrem Nachfolger (bei einem Feld oder `reason_code` sagt das die Operation,
+   die es zurückgibt), und die Release-Note nennt es. Die Ankündigung setzt ein
+   Enddatum.
+2. **Signal.** Ab dem ankündigenden Release antwortet eine abgekündigte Route mit
+   den Headern `Deprecation` und `Sunset` und einem `Link`-Header mit
+   `rel="successor-version"`, der auf den Ersatz verweist. Ein Feld oder
+   `reason_code` wird in der Referenz und in der Release-Note angekündigt.
+3. **Frist.** Zwischen der Ankündigung und der Entfernung einer Route liegen
+   mindestens 180 Tage, bei einem Feld oder `reason_code` mindestens 90 Tage.
+   Wenn Aufrufer es zum Enddatum noch nutzen, verschiebt sich das Datum nach
+   hinten.
+4. **Entfernung.** Nach der Entfernung antwortet die Route mit `410` und nennt
+   ihren Nachfolger noch mindestens ein Release lang, bevor der Pfad frei wird.
+
+Preview-Routen haben keine Frist; ihre Entfernung erscheint trotzdem in den
+Release-Notes.
+
+## Abgelöste Routen ohne Enddatum
+
+`GET /v1/agents/workbench-orchestrator/harnesses` wird durch
+`GET /v1/agents/harnesses` abgelöst. Dafür ist kein Enddatum angekündigt, also
+läuft keine Abkündigungsfrist. Wenn eines angekündigt wird, gilt die obige
+Folge.
+
+Siehe auch den [Changelog](/de/changelog/overview) und
+[Identität in StackKits](/de/identity/overview).

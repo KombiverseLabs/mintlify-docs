@@ -1,0 +1,125 @@
+---
+title: "Guard-Architektur und Operationswahrheit"
+description: "Wie Serveridentität, dauerhafte Operationen und begrenzte Ausführung ein erklärbares Ergebnis sichern"
+sidebarTitle: "Architektur"
+icon: "diagram-project"
+mode: "explanation"
+---
+
+Guard trennt vier Fragen: **welcher Server verbunden ist, wer eine Änderung
+anfordern darf, welcher Executor die Wirkung besitzt und welcher Nachweis sein
+Ergebnis zeigt**. Diese Trennung zählt, wenn ein Server neu startet, eine
+Verbindung abbricht oder ein Client eine Anfrage wiederholt.
+
+Dies ist eine Architekturerklärung. Die
+[veröffentlichte Referenz](/de/homelab/reference/cli/overview) nennt ihr
+Release; die installierte Version und der qualifizierte Transport bestimmen,
+welches Verhalten verfügbar ist. [Verfügbarkeit](/de/homelab/availability)
+beschreibt den öffentlichen und den Vorschau-Umfang.
+
+## Identität ist keine Berechtigung
+
+Die Einbindung bindet einen Server an die vorgesehene Homelab-Installation.
+Guards Host-Schlüssel-Design macht diese Bindung von einem auf dem Server
+erzeugten Schlüssel abhängig, statt kopierte Bearer-Anmeldedaten als
+ausreichende Host-Identität zu behandeln. Serveridentität, der
+Anwendungs-Owner und die Anmeldung eines Benutzers sind verschiedene Fakten.
+
+Die veröffentlichte [Worker-Referenz](/de/homelab/reference/cli/workers) bietet
+Identitätsprüfung und Upgrade-Operationen. Eine alte, nur auf Bearer-Daten
+gestützte Bindung ist bis zur Freigabe des vorgeschlagenen Host-Schlüssels über
+den dokumentierten Owner-Ablauf nur beobachtend. Einen Schlüssel aufzulisten
+oder einen Server zu entdecken gewährt keine zusätzlichen Rechte.
+
+Selbst ein authentifizierter Guard muss eine Operation erhalten, die für die
+richtige Ressource, die richtige Fähigkeit und die richtige Server-Generation
+zugelassen ist. Ein Ersatzserver darf nicht die Berechtigung erben, die Befehle
+eines alten Servers erneut abzuspielen.
+
+## Eine Anfrage, eine dauerhafte Operationsidentität
+
+Das dauerhafte HTTPS-Befehlprofil ist um diese Reihenfolge herum entworfen:
+
+<Steps>
+  <Step title="Die Operation zulassen">
+    Homelab lässt einen Befehl zu, der an das vorgesehene Ziel und die Nutzlast
+    gebunden ist.
+  </Step>
+  <Step title="Die Absicht vor der Wirkung sichern">
+    Guard zeichnet die Absicht dauerhaft auf und prüft die Server-Generation.
+  </Step>
+  <Step title="Über den Owner ausführen">
+    Der zuständige Executor führt die typisierte Operation aus und gibt ihr
+    Ergebnis und den Prüfnachweis zurück.
+  </Step>
+  <Step title="Das Ergebnis vor der Zustellung sichern">
+    Guard zeichnet das Ergebnis auf und stellt dann das ursprüngliche Ergebnis an
+    Homelab zu.
+  </Step>
+  <Step title="Dasselbe Ergebnis bestätigen">
+    Homelab bestätigt dauerhaft genau diese Befehls- und Ergebnisidentität.
+  </Step>
+</Steps>
+
+Die Absicht bindet die Befehlsidentität, die Ziel-Generation und den
+Payload-Digest, bevor eine Nebenwirkung eintritt. Das lokale Journal sichert ein
+Ergebnis vor der Zustellung. Ein erneuter Versuch kann das ursprüngliche
+Ergebnis noch einmal zustellen, ohne eine weitere Ausführung zu genehmigen.
+Fencing verhindert, dass ein veralteter Prozess oder eine veraltete Generation
+eine Änderung fortsetzt.
+
+| Unterbrechung | Erforderliche Auslegung |
+| --- | --- |
+| Vor der dauerhaften Absicht | Die Operation wurde nicht zur Ausführung zugelassen |
+| Nachdem das Ergebnis aufgezeichnet und bevor es zugestellt wurde | Das aufgezeichnete Ergebnis abrufen und unter der ursprünglichen Identität zustellen |
+| Nach der Wirkung, aber bevor ihr Ergebnis aufgezeichnet werden konnte | Das Ergebnis ist unbekannt, bis eine Beobachtung es klärt |
+| Nach der Zustellung und vor der Bestätigung | Dasselbe Ergebnis erneut zustellen; Unklarheit über die Zustellung gewährt keine weitere Wirkung |
+
+Das ist keine allgemeine Exactly-once-Garantie. Wenn das System nicht
+feststellen kann, ob eine Wirkung eingetreten ist, können sowohl das Raten auf
+Erfolg als auch das blinde Wiederholen dem Server schaden.
+
+## Unklarheit bleibt sichtbar
+
+Die veröffentlichten [Worker-Operationen](/de/homelab/reference/cli/workers)
+beschreiben ungeklärte Ergebnisse und ihren Abgleich. Ein ungeklärtes Ergebnis
+sperrt weitere Änderungen. Ein Timeout kann ändern, wie das Problem einem
+Operator angezeigt wird; er hebt die Sperre nicht selbst auf.
+
+Eine autorisierte Klärung zeichnet auf, ob die Wirkung als eingetreten
+verifiziert, als nicht vorhanden verifiziert oder ausdrücklich als weiterhin
+unbekannt akzeptiert wurde. Sie umfasst den Akteur und eine Prüfung der
+Revision. Das Akzeptieren von Unklarheit erlaubt Fortschritt, macht aber eine
+unbekannte Operation nicht nachträglich zu einer erfolgreichen.
+
+## Begrenzte Ausführung und Privilegien
+
+Guard überwacht typisierte Operationen über den Executor, dem sie gehören.
+StackKits besitzt die Host-Baseline und den Anwendungs-Lebenszyklus. Homelab
+besitzt Provider-Operationen und die Koordination. Guard erzeugt keinen zweiten
+Lebenszyklus und nutzt keine allgemeine Remote-Shell als Ersatz für diese
+Verträge.
+
+Das Linux-Design mit geteilten Rechten lässt den Guard-Daemon ohne Privilegien
+laufen und übergibt zugelassene privilegierte Wirkungen an einen eingeschränkten
+Executor. Dieser Executor bleibt eine sensible Grenze: Erlaubte Operationen
+können den Host wesentlich verändern. Die Rechteisolation hängt vom unterstützten
+Betriebssystemprofil und dessen Qualifizierung ab und gilt nicht automatisch für
+jede Installation.
+
+## Transportsicherheit und Operationszuverlässigkeit sind getrennt
+
+HTTPS-Polling und gRPC/mTLS sind getrennte Transportprofile. Verschlüsselung und
+ein gültiges Zertifikat beweisen für sich genommen weder die Dauerhaftigkeit des
+Journals noch Generation-Fencing oder die Bindung an den Host-Schlüssel. Das
+gRPC/mTLS-Profil ist nicht für die vollen Guard-Garantien des dauerhaften
+HTTPS-Profils qualifiziert.
+
+Ebenso belegt ein Heartbeat nur aktuellen Kontakt. Er beweist nicht, dass ein
+authentifizierter Befehl und sein Ergebnis einen vollständigen Umlauf
+abgeschlossen haben, dass die Baseline aktuell ist oder dass eine Anwendung
+wiederherstellbar ist.
+
+Lies [Schutz- und Wiederherstellungsnachweise](/de/homelab/guard/protection-and-recovery),
+um zu sehen, wie diese Operationsgarantien mit dem Zustand deiner Dienste
+zusammenhängen.

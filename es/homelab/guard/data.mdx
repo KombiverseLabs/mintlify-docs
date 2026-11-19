@@ -1,0 +1,112 @@
+---
+title: "Qué envía y conserva Guard"
+description: "Los datos que kombify Guard reporta desde tu servidor, adónde van, cuánto tiempo se conservan y qué nunca envía"
+sidebarTitle: "Datos que envía Guard"
+icon: "database"
+---
+
+kombify Guard reporta un conjunto pequeño y fijo de datos sobre tu servidor para
+que Homelab pueda mostrar su estado, su situación de seguridad y los resultados
+de sus operaciones. Esta página enumera esos datos, indica adónde van y cuánto
+tiempo se conservan, y nombra lo que Guard nunca envía.
+
+<Note>
+Homelab es anterior a la versión 1.0 y la operación conectada está en vista
+previa; consulta [disponibilidad](/es/homelab/availability). La retención de
+abajo es la que aplica la versión actual. Cuando no se indica un plazo, aún no
+está confirmado y esta página no lo declara.
+</Note>
+
+## Adónde van los datos
+
+- **Homelab autogestionado:** Guard solo reporta a tu propio Homelab. kombify no
+  recibe nada a menos que conectes esa instalación.
+- **Conectado o gestionado:** Guard reporta al Homelab operado por kombify a
+  través de su conexión autenticada y vinculada a una clave (consulta
+  [emparejar un servidor](/es/homelab/guard/pairing)).
+
+Guard siempre se conecta hacia fuera por HTTPS. No abres ningún puerto entrante
+para él. Cada informe se vincula a tu cuenta al ingerirse, y cada lectura se
+limita a ella: ningún cliente puede leer los nombres de host, las direcciones ni
+las métricas de otro cliente.
+
+## Qué reporta Guard
+
+| Qué | Ejemplos | Para qué se usa |
+| --- | --- | --- |
+| Identidad del servidor | Identificadores del servidor y del propietario, la huella de la clave pública del servidor, la versión de Guard | Autenticar el servidor y vincularlo a ti |
+| Actividad | Hora del último informe, ID de arranque, un digest del ID de máquina (nunca el ID de máquina), estado del diario, número de operaciones sin resolver | Mostrar si el servidor está conectado y detectar reinicios o clones |
+| Uso de recursos | CPU, memoria, swap, carga, disco por punto de montaje, tiempo de actividad; CPU y memoria por contenedor | Capacidad y estado |
+| Detalles del host | Nombre de host, sistema operativo y versión, arquitectura, CPU, RAM y tamaño de disco, versión del entorno de ejecución, direcciones IP públicas, privadas y locales, claves públicas de host SSH, puertos a la escucha, posición de red observada (dirección, puerta de enlace, subred, interfaz, nombre de la red inalámbrica), estado de las unidades | Alcanzabilidad, fijación del host SSH, comprobaciones de exposición y detección de un cambio a otra red |
+| Servicios | Nombre, versión y modo del StackKit, nombres de servicios y contenedores, referencias de imagen, estado comprobado, endpoints | Operar y verificar tus servicios |
+| Postura de seguridad | Qué controles del host cumplen, se han desviado o son desconocidos, valores esperados y observados, excepciones aprobadas, versión de la base | Mostrar y alertar sobre la configuración asegurada |
+| Postura de recuperación | Antigüedad y estado de la última copia de seguridad, resultado de la última restauración verificada | Mostrar si el servidor es recuperable |
+| Recibos de operación | ID de comando, acción, estado del resultado, un resumen acotado del resultado, líneas de registro censuradas | Un registro auditable de lo que se ejecutó |
+
+Guard recoge cifras de recursos cada 30 segundos por defecto y pide al host una
+observación de seguridad nueva cada 15 minutos. Observar el host no cambia nada
+en él.
+
+Hay una clase más, opcional. Si una automatización de domótica del servidor está
+configurada para notificarte, Guard reenvía solo el texto del aviso que escribió
+su autor (como máximo 280 caracteres) para que te llegue como notificación. Está
+desactivada por defecto, se activa por automatización y nunca envía estados de
+entidades, presencia, cerraduras, cámaras ni historial de sensores.
+
+<Note>
+Las métricas y los nombres de etiquetas son una lista de permitidos que se aplica
+dos veces: en el servidor, antes de almacenar nada localmente, y otra vez cuando
+llegan los datos. Un valor que no está en la lista se descarta, de modo que un
+recopilador con fallos no pueda ampliar lo que sale de tu host.
+</Note>
+
+## Qué nunca envía Guard
+
+- Contenido de aplicaciones: los archivos, bases de datos, mensajes o fotos que
+  guardan tus servicios.
+- Variables de entorno, secretos o credenciales de tus aplicaciones.
+- Datos personales de las personas de tu hogar.
+- La dirección de correo del propietario. Es configuración de StackKits, no un
+  dato de Guard.
+
+El contenido de las aplicaciones llega a kombify solo mediante un componente
+separado y de solo lectura con su propio modelo de consentimiento, nunca por la
+conexión, la cola, los recibos o los registros de Guard.
+
+## Cuánto tiempo se conservan
+
+| Dato | Conservación |
+| --- | --- |
+| Historial de hallazgos de seguridad | 90 días después de resolver un hallazgo |
+| Métricas de recursos | Unos 15 días; los gráficos de tendencia del panel conservan puntos más gruesos hasta 30 días |
+| Estado actual de un servidor | Mientras el servidor está emparejado |
+| Datos sin enviar durante una interrupción | En una cola local acotada del servidor (8 MiB por defecto, unas seis horas). Cuando se desborda, se descartan los datos más antiguos y un marcador registra el hueco. |
+
+Tras una interrupción, Guard envía lo que encoló, empezando por lo más antiguo.
+Un hueco se informa de forma explícita y nunca se rellena en silencio.
+
+## Qué pasa con los datos cuando desvinculas un servidor
+
+Desvincular un servidor revoca sus credenciales y termina su alcance remoto,
+como se describe en
+[revocar y desvincular](/es/homelab/guard/revoke-and-uninstall). En el servidor,
+Guard elimina después su clave de identidad, su credencial, la telemetría
+encolada y los registros de operación que Homelab ha confirmado. El registro del
+servidor permanece en Homelab como un registro desvinculado con su pista de
+auditoría, y el historial ya recogido caduca según los plazos anteriores.
+
+El contrato de datos también fija el objetivo de eliminar el inventario, las
+métricas y la postura de un servidor desvinculado en un plazo de 30 días. Esta
+versión aún no confirma esa eliminación automática, así que no se declara aquí
+como garantía.
+
+## Relacionado
+
+<CardGroup cols={2}>
+  <Card title="Emparejar un servidor" icon="link" href="/es/homelab/guard/pairing">
+    Cómo se vincula un servidor a ti y qué ves mientras ocurre.
+  </Card>
+  <Card title="Revocar, desvincular y desinstalar" icon="plug-circle-xmark" href="/es/homelab/guard/revoke-and-uninstall">
+    Termina el acceso de un servidor y elimina Guard del host.
+  </Card>
+</CardGroup>

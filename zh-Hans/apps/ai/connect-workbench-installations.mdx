@@ -1,0 +1,95 @@
+---
+title: "连接你的 Workbench 安装"
+description: "与其他安装共享某个 Workbench 桌面环境、进行配对，并撤销访问"
+sidebarTitle: "连接安装"
+icon: "link"
+---
+
+kombify Connect 让你其他的 Workbench 桌面安装能够在这台电脑上的某个环境中工作：使用它的项目、会话线程，以及（如果你允许）它的终端。由你选择哪台电脑共享其环境，以及哪些安装可以访问它。你可以随时收回该访问权限。
+
+<Warning>
+Workbench Desktop 中的 kombify Connect 处于 Beta 阶段。界面、名称以及你的账户可用的功能仍可能变化。
+</Warning>
+
+## 开始之前
+
+- 你需要一个 kombify 账户。如果还没有，请先[创建账户](/zh-Hans/apps/cloud/get-started)。
+- Connect 属于 Workbench Desktop 的 **Connected** 版本。**Standalone** 版本没有 kombify 账户，也没有 Connect。请参阅[Standalone 与 Connected 版本](#standalone-and-connected-editions)。
+- 每个参与的安装都必须登录同一个 kombify 账户。
+- 在其他安装使用共享环境期间，共享电脑必须开机并运行 Workbench Desktop。它只建立出站连接，因此你无需在路由器上开放任何端口。
+
+## 共享这台电脑的环境
+
+<Steps>
+  <Step title="打开 Connections">
+    在 Workbench Desktop 中打开 **Settings**，然后选择 **Connections**。**kombify Connect** 一行与该环境的设置中你的 kombify 账户放在一起。
+  </Step>
+  <Step title="开启共享">
+    打开 **Share this environment through kombify Connect**。应出现“Environment shared”提示。主屏幕也会以 **Share this computer** 的形式提供该操作。
+  </Step>
+</Steps>
+
+如果开关不可用，其旁边的文字会说明原因。例如，你尚未登录、该安装尚未注册，或电脑无法打开其 Connect 密钥。
+
+## 配对另一个安装
+
+配对码会把又一个安装连接到你所共享的环境。
+
+<Steps>
+  <Step title="在共享电脑上创建配对码">
+    在 **Pair another installation** 下选择 **Create code**。仅当另一个安装也应在此环境中获得终端时，才先打开 **Terminal**。配对码有效期为 10 分钟，且只能使用一次。
+  </Step>
+  <Step title="在另一台安装上输入配对码">
+    在另一台安装上打开 **Settings**，然后打开 **Connections**。在 **Use a pairing code** 下输入配对码并选择 **Pair**。应出现“Installation paired”提示。
+  </Step>
+  <Step title="打开共享环境">
+    共享环境会出现在另一台安装的 **Remote environments** 下。像打开本地环境一样打开它的项目和会话线程。
+  </Step>
+</Steps>
+
+配对码只能用于登录同一账户的安装，且永远不能用于创建它的那台安装。若已超过 10 分钟，请创建新配对码。
+
+### 让新安装自动连接
+
+除了逐个配对安装，你还可以打开 **Automatically connect new devices**。此后登录你账户的新安装会获得对你共享环境的访问权限。配对码仍可用于一次性连接。如果有其他人使用登录了你账户的电脑，请保持关闭。
+
+## 查看谁拥有访问权限
+
+**kombify Connect devices** 会列出你账户的每个安装及其状态，以及它的密钥如何受到保护：位于 TPM 中、由操作系统保护，或以软件方式保护。标记为“this device”的条目就是你正在使用的电脑。状态显示为 **Access to this environment**（或 **with terminal**）的是你配对过的安装，**Active** 是已登录但无访问权限的安装，**Waiting for confirmation** 是新安装，**Revoked** 是被你排除的安装。
+
+## 撤销访问
+
+- **单个安装：**在 **kombify Connect devices** 中选择其旁边的 **Revoke**。应出现“Installation revoked”提示。它已打开的会话会结束（通常在几秒内），且再也无法访问你的任何环境。如果共享某环境的电脑当时无法连接，请等它恢复在线后再选择一次 **Revoke**。
+- **只撤销某个安装的访问权限、保留该安装：** 选择其旁边的 **Remove access**。它会失去已获得的访问权限（包括终端），但仍注册在你的账户下，因此你之后可以再次配对。
+- **所有人：** 关闭 **Share this environment through kombify Connect**。应出现“Environment no longer shared”提示。现有的远程会话会结束。
+
+撤销对该安装是最终的：被撤销的安装无法再次配对。如果之后仍需要访问，请改用 **Remove access**。
+
+<span id="standalone-and-connected-editions"></span>
+## Standalone 与 Connected 版本
+
+Workbench Desktop 有两个版本，各有独立的安装程序：
+
+| | Standalone | Connected |
+| --- | --- | --- |
+| kombify 账户 | 无 | 必需 |
+| kombify Connect | 不包含 | 包含 |
+| 向 kombify 发送错误报告 | 无 | 仅元数据，不含提示内容或文件 |
+
+两个版本在你的电脑上保存各自独立的数据。更新始终留在你已安装的版本内，绝不会切换版本。
+
+若要切换版本，请安装另一个版本。不会自动复制任何内容：磁盘上的项目保持原位，你需要在新的版本中自行添加它们。会话线程和设置保留在创建它们的版本中。你可以同时保留两个版本。
+
+这两个版本以前称为 Local（现为 Standalone）和 Cloud（现为 Connected）。Standalone 并不意味着离线。请参阅[有账户或无账户，以及使用哪种 AI](/zh-Hans/start/account-and-ai)。
+
+## 出问题时
+
+- **“Could not redeem the pairing code”。** 配对码已过期、已被使用，或两个安装登录了不同账户。请在共享电脑上创建新配对码，并检查两端的账户。
+- **“kombify Connect is unavailable”。** Connect 可能尚未对你的账户开放，或无法连接到该服务。请稍后重试。
+- **共享环境没有出现。** 请检查共享电脑是否开机、Workbench Desktop 是否在那里运行，以及共享是否仍处于开启状态。
+- **仍然无法解决。** 请写信至 [info@kombify.io](mailto:info@kombify.io)，说明你当时所在的界面以及事情发生的时间，且绝不要发送密码或配对码。
+
+## 接下来阅读
+
+- [打开 Workbench](/zh-Hans/apps/ai/open-the-workbench)，了解浏览器中的 Companion Studio。
+- [kombify AI 中你的数据会怎样](/zh-Hans/apps/ai/your-data-and-privacy)

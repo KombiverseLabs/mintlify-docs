@@ -1,0 +1,95 @@
+---
+title: "Login-Gateway"
+description: "Wie StackKits eine Forward-Auth-Anmeldung vor deine selbst gehosteten Dienste setzt und was es bietet und was nicht"
+sidebarTitle: "Login-Gateway"
+icon: shield-check
+---
+
+Das Login-Gateway ist das Plattformmodul von StackKits, das eine einzige
+Anmeldung vor die Dienste deines eigenen Deployments setzt. Es ist
+Authentifizierung innerhalb eines Deployments, das du selbst betreibst. Es hat
+nichts mit der Anmeldung bei kombify.io, kombify Cloud oder anderen gehosteten
+kombify-Oberflächen zu tun. Für diese siehe
+[Identität in StackKits](/de/identity/overview).
+
+## Was es ist
+
+Das Login-Gateway ist ein Verbindungsmodul: Es läuft in keinem eigenen Container.
+Es deklariert die Forward-Auth-Middleware `login-gateway` auf
+[Traefik](/de/stackkits/apps/traefik) und verbindet
+[TinyAuth](/de/stackkits/apps/tinyauth) (den Forward-Auth-Einstiegspunkt) mit
+[PocketID](/de/stackkits/apps/pocketid) (dem lokalen OIDC-Identitätsanbieter). Das
+Modul setzt Traefik 3.0 oder neuer und TinyAuth 4.0 oder neuer voraus.
+
+Wenn du einen geschützten Dienst öffnest, fragt Traefik bei TinyAuth nach, ob du
+eine gültige Sitzung hast. Ohne eine wirst du zur Anmeldung unter `auth.<domain>`
+geschickt, PocketID authentifiziert dich, und du kehrst mit einer Sitzung zum
+Dienst zurück.
+
+## Zuständigkeit
+
+Du besitzt und betreibst das Deployment, das lokale Owner-Konto und dessen
+Wiederherstellungsmaterial. Das Konto, das deine Dienste schützt, lebt in deinem
+eigenen PocketID. Es ist kein kombify-Konto, und kombify setzt es nicht für dich
+zurück.
+
+## Welche Kits es enthalten
+
+Die Definitionen von Basement Kit und Cloud Kit führen das Login-Gateway beide
+als Standard-Plattformdienst neben Traefik, TinyAuth und PocketID, ohne
+Alternativen. Siehe [Basement Kit](/de/stackkits/kits/basement-kit) und
+[Cloud Kit](/de/stackkits/kits/cloud-kit).
+
+## Betriebsmodus und Voraussetzungen
+
+- Es schützt Dienste, die von einem StackKit bereitgestellt und mit der Option
+  Login-Gateway hinzugefügt wurden.
+- Es braucht das gemeinsame Docker-Netzwerk, das die Plattformdienste nutzen.
+- Seine Voreinstellungen sind eine Sitzung von 24 Stunden (`sessionExpiry`,
+  86400 Sekunden, mindestens 300) und ein vorgeschriebener zweiter Faktor für
+  Admin-Benutzer (`requireMfaForAdmins`).
+
+## Deine eigenen Anwendungen schützen
+
+Wähle die Anwendung und ihre Exposition in der
+[StackSpec](/de/guides/stackkits/configure-stack-spec) und folge dann der
+[Anwendungsbereitstellung](/de/guides/stackkits/application-delivery). Prüfe die
+erzeugten Routen und bestätige, dass die erwarteten privaten Dienste eine
+Authentifizierung verlangen, bevor du sie nutzt. Die öffentliche Exposition
+bleibt eine ausdrückliche Entscheidung für die Dienste, die sie brauchen.
+
+## Status
+
+Das Modul ist in der StackKits-Quelle als Entwurf markiert (Reifegrad `draft`,
+Version 0.1.0). Seine Definition ist ein Gerüst, und die Durchsetzung über jeden
+Dienst hängt von der Kompositions-Engine ab. Behandle das obige Verhalten als den
+beabsichtigten Vertrag, und bestätige es in deinem eigenen Rollout statt
+anzunehmen, dass jede Route geschützt ist:
+
+```bash
+stackkit verify --json
+```
+
+## Authelia und andere Alternativen
+
+Der veröffentlichte Katalog bietet PocketID mit TinyAuth. Authelia ist kein
+auswählbarer Katalogdienst: Es kommt nur als Konfigurationstyp im
+StackKits-Foundation-Schema vor, und seine frühere Add-on-Definition wurde
+entfernt. Plane kein Deployment um Authelia herum, und erwarte in den
+Kit-Definitionen keine Alternative zum Login-Gateway. Wenn sich das ändert,
+erscheint es zuerst in der Liste der
+[Plattformdienste](/de/stackkits/apps/overview) einer veröffentlichten Version.
+
+## Wenn etwas schiefgeht
+
+- Eine Route fragt nicht nach einer Anmeldung: Vergleiche den Hostnamen mit der
+  erzeugten Route und führe im Workspace-Ordner aus:
+
+  ```bash
+  stackkit verify --json
+  ```
+
+- Du kannst dich nicht anmelden: Nutze das Owner-Konto, das in
+  [PocketID](/de/stackkits/apps/pocketid) angelegt wurde, kein kombify
+  Cloud-Konto.
+- Mehr Prüfungen: [Fehlerbehebung](/de/guides/stackkits/troubleshooting).

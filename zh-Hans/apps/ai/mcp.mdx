@@ -1,0 +1,56 @@
+---
+title: "客户 MCP 访问"
+description: "客户端点及其托管登录要求。"
+sidebarTitle: "客户 MCP"
+icon: "network-wired"
+---
+
+面向客户的 MCP 地址是 `https://api.kombify.io/mcp`。访问需要使用托管登录，并使用为你的账户启用的权限。
+
+## 连接信息
+
+该端点公布了以下身份验证要求：
+
+| 设置 | 值 |
+| --- | --- |
+| 服务器名称 | `kombify` |
+| 客户端点 | `https://api.kombify.io/mcp` |
+| 登录服务 | `https://login.kombify.io/` |
+| 必需的 OAuth 范围 | `mcp:connect` |
+| 受保护资源元数据 | `https://api.kombify.io/.well-known/oauth-protected-resource/mcp` |
+
+公共客户端使用带 PKCE 的 OAuth 授权。登录服务为 PKCE 公布 `S256`。支持该流程的客户端通过登录服务完成登录；请勿将账户密码和访问令牌写入聊天消息。
+
+<Note>
+公布的端点和登录要求并不能确定某个账户启用了哪些工具。请使用客户端在授权后收到的目录来检查其可用工具和权限。
+</Note>
+
+## 访问与错误
+
+未经授权的请求会收到 HTTP 401，以及一个指向受保护资源元数据的质询。该服务还要求账户具备客户 MCP 访问权限，并在其访问指南中以 `mcp.customer.access` 标识。已登录的账户仍需接受权限和授权范围检查。
+
+如果授权失败，或你的客户端没有可用的工具，请保留返回的错误码并联系 [info@kombify.io](mailto:info@kombify.io)。仅凭空目录无法判断原因。请勿向支持团队发送密码或令牌。
+
+## 权限边界
+
+已连接的助手仍受你账户的权限和操作策略限制。客户访问不会授予员工管理、基础设施管理或数据库凭据。为你的账户返回的工具定义了客户端可以请求的操作。
+
+## 精选客户功能
+
+你自己的 MCP 客户端会收到一份精选的产品读取目录。产品访问权限、资源权限以及针对你客户端的授权，共同决定登录后会出现这些工具中的哪些。
+
+| 功能类别 | 范围 | 示例工具名称 |
+| --- | --- | --- |
+| 读取 | 查看你的 Homelab 服务器清单和健康状态。 | `homelab_list_servers`, `homelab_server_health` |
+
+这些示例描述的是精选目录，而不是账户范围的工具授权。请使用客户端工具发现返回的名称和输入架构。读取工具仍需要对所请求资源的权限。删除内容、资源预配和付费操作在 kombify 中仍是独立的操作。
+
+## 本地 StackKits
+
+[StackKits MCP 连接器](/zh-Hans/stackkits/reference/mcp-connector)用于操作你的本地 Homelab。它与托管的客户端点分开配置。你的本地所有者身份仍是本地堆栈的权威来源。
+
+## 相关页面
+
+- [StackKits 中的身份](/zh-Hans/identity/overview)
+- [AI Guide 和 Workbench](/zh-Hans/apps/ai/overview)
+- [安全与隐私](/zh-Hans/apps/security-and-privacy)

@@ -1,0 +1,139 @@
+---
+title: "Protección y evidencia de recuperación de Guard"
+description: "Comprende el alcance de seguridad, las reparaciones acotadas y la diferencia entre una copia de seguridad y una recuperación demostrada"
+sidebarTitle: "Protección y recuperación"
+icon: "clipboard-check"
+mode: "explanation"
+---
+
+Un servidor puede estar conectado mientras su configuración está desactualizada.
+Una aplicación puede estar en ejecución mientras su copia de seguridad es
+inservible. El modelo de protección de Guard describe esto como condiciones
+separadas, cada una con un alcance, un momento de la evidencia y un propietario
+responsable.
+
+Los controles siguientes explican la arquitectura y los contratos de operación
+publicados. La cobertura depende de la versión instalada, del sistema operativo y
+del vínculo con el ciclo de vida de las aplicaciones. No afirman que todos los
+perfiles hayan sido cualificados; consulta
+[disponibilidad](/es/homelab/availability).
+
+## Protección del host y protección de las aplicaciones
+
+| Alcance | Qué se puede establecer | Límite |
+| --- | --- | --- |
+| Base del host | Cortafuegos y exposición observados, configuración de SSH, protección contra fuerza bruta, actualizaciones y controles del sistema admitidos | Un host asegurado no demuestra que cada aplicación sea segura |
+| Aplicación apilada | Evidencia de configuración y ciclo de vida de una aplicación con un vínculo de StackKits aceptado | Solo se admiten operaciones de ciclo de vida compatibles y autorizadas |
+| Aplicación no apilada | Inventario y observaciones disponibles mediante integraciones concedidas explícitamente | El descubrimiento no concede autoridad para actualizarla, reiniciarla, reconfigurarla ni adoptarla |
+
+Las instalaciones mixtas mantienen estos límites por aplicación. Un servicio
+instalado a mano no pasa a estar gestionado solo porque Guard se ejecute en su
+host. La adopción requiere un vínculo explícito de ciclo de vida; sus datos y sus
+responsabilidades existentes deben entenderse antes de admitir cambios.
+
+## Las observaciones de la base tienen más de dos estados
+
+- **Conforme:** el control medido coincide con la base elegida.
+- **Desviado:** el estado observado difiere de esa base.
+- **Desconocido:** falta la evidencia actual, está desactualizada o no se puede
+  obtener.
+- **Excepción aprobada:** una desviación concreta tiene un alcance y un motivo
+  explícitos.
+
+Una excepción no es lo mismo que un control superado. Un hallazgo útil explica el
+recurso afectado, la versión de la base, el momento de la observación y la
+siguiente acción disponible. Las comprobaciones no compatibles y las
+observaciones no disponibles siguen visibles.
+
+La [referencia de servidores](/es/homelab/reference/cli/servers) distingue una
+solicitud de observación de seguridad nueva del informe en sí. Solicitar la
+verificación no cambia nada en el host; solo la observación devuelta actualiza su
+evidencia de seguridad.
+
+## Una reparación es una operación autorizada aparte
+
+Detectar no autoriza a remediar. El contrato publicado de reparación de la
+seguridad del host acepta controles con nombre a través de la operación de
+StackKits correspondiente, con autorización del propietario y los requisitos de
+autenticación documentados. Rechaza los cambios que cortarían la ruta de gestión
+o dejarían al propietario fuera.
+
+Los límites de concurrencia, los tiempos de espera por control, los presupuestos
+de intentos y los interruptores automáticos acotan las reparaciones repetidas. Un
+control que ya es conforme, está cubierto por una excepción aprobada, no es
+reparable automáticamente o le falta un requisito previo no se reescribe en
+silencio. Los requisitos exactos y los códigos de rechazo están en las
+[operaciones de servidor publicadas](/es/homelab/reference/cli/servers).
+
+Por ejemplo, cambiar los ajustes de SSH sin una clave autorizada utilizable puede
+eliminar la única ruta de recuperación. Rechazar ese cambio conserva el acceso y,
+a la vez, explica el requisito previo que falta.
+
+## Una copia de seguridad todavía no es una recuperación
+
+StackKits conserva la custodia de la copia de seguridad y la restauración del
+nodo; Homelab coordina las operaciones autorizadas y Guard reporta la evidencia
+resultante.
+
+| Evidencia | Qué te dice |
+| --- | --- |
+| Configuración de copia de seguridad | Hay una política o un destino de copia configurados |
+| Copia de seguridad correcta | Una operación de copia concreta se completó |
+| Verificación de integridad | Los datos de copia comprobados pasaron las verificaciones de integridad elegidas |
+| Restauración aislada | El punto de recuperación indicado se restauró en el entorno de prueba |
+| Recuperación de la aplicación | La aplicación restaurada y sus datos necesarios pasaron las comprobaciones especificadas |
+
+Son niveles de prueba distintos. Un informe de restauración debería indicar su
+punto de recuperación, destino, versiones, momento de la observación y
+comprobaciones. Una restauración aislada de archivos no establece una base de
+datos operativa, un inicio de sesión de usuario ni una aplicación completa. La
+recuperabilidad también depende de que la configuración necesaria, el material de
+descifrado y las dependencias estén disponibles cuando hagan falta.
+
+Un simulacro debe evitar que los servicios restaurados produzcan efectos no
+deseados en producción, como enviar notificaciones. El tiempo de recuperación y
+la antigüedad de los datos recuperables deben medirse para el escenario probado;
+ninguno de los dos se deduce solo de una tarea de copia de seguridad en verde.
+
+## Confianza y salud de las actualizaciones
+
+El diseño de actualizaciones de Guard separa la verificación del artefacto
+publicado de la activación por etapas y la recuperación. Una versión auténtica
+todavía puede fallar al arrancar. La evidencia debe mostrar que la versión
+admitida se activó correctamente o que la recuperación restauró una versión
+anterior admisible conservando la identidad y el estado de las operaciones.
+
+Esto describe la propia ruta de actualización de Guard. No promete reversión
+transaccional para cada aplicación o migración de base de datos. Esos cambios
+siguen con el ciclo de vida compatible de StackKits y su contrato de recuperación
+de datos.
+
+## Interpretar la preparación de Guard
+
+El contrato completo de "Guard listo" exige evidencia reciente de los siete
+hechos siguientes. Un panel con siete indicadores no demuestra por sí solo que su
+evidencia cumpla este contrato.
+
+| Hecho | Evidencia necesaria |
+| --- | --- |
+| Vinculado | Alta confirmada e identidad de host aceptada |
+| Conectado | Un ciclo reciente y autenticado de comando y resultado |
+| Operaciones durables | Un diario sano sin ningún resultado de operación sin resolver |
+| Configuración asegurada | Una base actual que sea conforme o tenga excepciones aprobadas y acotadas |
+| Al día | Un artefacto de Guard firmado en la versión mínima o superior, con las actualizaciones de seguridad del sistema operativo dentro de la política |
+| Recuperable | Una copia de seguridad reciente y una restauración aislada verificada dentro de la política elegida |
+| Alcanzable y gobernado | Una ruta prevista verificada, registro del recurso y revocación operativa |
+
+El último hecho se refiere a la ruta autorizada prevista; no exige hacer pública
+cada aplicación. Una ruta desactivada o no probada no puede contar como prueba de
+alcance verificado. La frescura de un latido no sustituye a un ciclo de comando,
+y un agregado no debe ocultar evidencia desconocida.
+
+La preparación se limita a la versión, al perfil de servidor y a las
+comprobaciones realmente cualificadas. No es una certificación, ni una garantía de
+detección de endpoints, ni una promesa de cero interrupciones, compromisos o
+pérdida de datos.
+
+Consulta [Arquitectura de Guard](/es/homelab/guard/architecture) para los
+resultados de las operaciones, y [kombify.me](/es/kombify-me/overview) para el
+modelo de alcanzabilidad documentado.

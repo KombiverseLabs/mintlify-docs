@@ -1,0 +1,86 @@
+---
+title: "Estabilidad y obsolescencia de la API"
+description: "En qué partes de la API de kombify puedes basarte, cómo se versionan los cambios y con cuánta antelación se anuncia una retirada."
+sidebarTitle: "Estabilidad de la API"
+icon: "code-branch"
+---
+
+La API de kombify se sirve en `https://api.kombify.io`. Esta página indica en qué
+familias de rutas puedes confiar y cómo las cambia kombify.
+
+## Clases de estabilidad
+
+Cada familia de rutas tiene una clase. La clase se aplica a las operaciones de la
+referencia de la API. Una ruta que no está en la referencia no forma parte de la
+API en la que te basas.
+
+| Clase | Qué significa para ti |
+| --- | --- |
+| Stable | Puedes basarte en ella. Está congelada desde la versión 1.0 de la API: los cambios dentro de una versión solo añaden cosas. |
+| Protocol | Los mensajes siguen un protocolo compartido (A2A, AG-UI, A2UI, MCP, el contrato de Connect). Las rutas y el formato de error están congelados como en Stable; las formas de los mensajes siguen las versiones del propio protocolo. |
+| Preview | Documentada, pero el producto que hay detrás todavía puede cambiar. Los cambios se listan en las notas de la versión, sin plazo de obsolescencia. |
+
+| Clase | Familias de rutas |
+| --- | --- |
+| Stable | `/v1/ai`, `/v1/embed`, `/v1/agents`, `/v1/orchestrator`, `/v1/homelab`, `/v1/speechkit`, `/v1/notifications`, `/v1/subdomains`, `/v1/content`, `/v1/connectors`, `/v1/harnesses`, `/v1/ril`, `/v1/decisions`, `/v1/supply-dock`, `/v2/supply-dock` |
+| Protocol | `/a2a`, `/ag-ui`, `/a2ui`, `/v1/mcp/knowledge`, `/v1/connect` |
+
+Cualquier otra familia de rutas documentada es Preview hasta que esta página la
+incluya.
+
+## Versionado
+
+La versión mayor es el primer segmento de la ruta, como `/v1`. Dentro de una
+versión, estos cambios son aditivos y pueden llegar en cualquier momento: una
+ruta nueva, un campo de solicitud opcional nuevo, un campo de respuesta nuevo, un
+valor nuevo en una lista de respuesta abierta, un `reason_code` de denegación
+nuevo. Escribe tu cliente para que ignore los campos que no conoce.
+
+Estos cambios son incompatibles y solo se publican como una nueva versión mayor
+junto a la anterior: restringir la entrada aceptada, hacer obligatorio un campo
+opcional, cambiar el tipo o el significado de un campo, cambiar la clase de
+estado de un resultado existente y endurecer los requisitos de inicio de sesión o
+de habilitación para un invocador existente sin una denegación nueva y
+documentada.
+
+Eliminar una ruta, un campo o un `reason_code` de denegación solo se permite
+dentro de una versión mediante la secuencia de obsolescencia siguiente. Las
+correcciones de seguridad y legales pueden romper un contrato antes de que
+termine un plazo; la nota de la versión lo dice entonces e indica la ruta de
+migración.
+
+Los endpoints de salud y descubrimiento (`/gateway/health`, `/.well-known/*`) no
+tienen versión y siguen la regla aditiva. `/v1/blog` se está retirando y no forma
+parte de la congelación.
+
+## Obsolescencia
+
+Una ruta, un campo o un `reason_code` de clase Stable o Protocol se elimina solo
+después de esta secuencia:
+
+1. **Anuncio.** La referencia de la API marca la operación como obsoleta con su
+   sucesora (en el caso de un campo o un `reason_code`, lo indica la operación
+   que lo devuelve) y la nota de la versión lo nombra. El anuncio fija una fecha
+   de retirada.
+2. **Señal.** Desde la versión que lo anuncia, una ruta obsoleta responde con las
+   cabeceras `Deprecation` y `Sunset` y una cabecera `Link` con
+   `rel="successor-version"` que apunta al reemplazo. Un campo o un `reason_code`
+   se anuncia en la referencia y en la nota de la versión.
+3. **Plazo.** Pasan al menos 180 días entre el anuncio y la eliminación de una
+   ruta, y al menos 90 días para un campo o un `reason_code`. Si los invocadores
+   todavía lo usan en la fecha de retirada, la fecha se pospone.
+4. **Eliminación.** Tras la eliminación, la ruta responde `410` y nombra a su
+   sucesora durante al menos una versión más antes de que la ruta quede libre.
+
+Las rutas Preview no tienen plazo; su eliminación aparece igualmente en las notas
+de la versión.
+
+## Rutas sustituidas sin fecha de retirada
+
+`GET /v1/agents/workbench-orchestrator/harnesses` queda sustituida por
+`GET /v1/agents/harnesses`. No se anuncia fecha de retirada para ella, así que no
+corre ningún plazo de obsolescencia. Cuando se anuncie una, se aplica la
+secuencia anterior.
+
+Consulta también el [Registro de cambios](/es/changelog/overview) y
+[Identidad en StackKits](/es/identity/overview).

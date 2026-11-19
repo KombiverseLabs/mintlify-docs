@@ -1,0 +1,52 @@
+---
+title: "API 稳定性与弃用"
+description: "kombify API 的哪些部分可以依赖、变更如何版本化，以及移除会提前多久公布。"
+sidebarTitle: "API 稳定性"
+icon: "code-branch"
+---
+
+kombify API 通过 `https://api.kombify.io` 提供。本页说明哪些路由族可以依赖，以及 kombify 如何更改它们。
+
+## 稳定性类别
+
+每个路由族都有一个类别。该类别适用于 API 参考中的操作。未出现在参考中的路由不属于你可以依赖的 API。
+
+| 类别 | 对你的含义 |
+| --- | --- |
+| Stable | 你可以依赖它。它自 API 1.0 发布起冻结：一个版本内的变更只做新增。 |
+| Protocol | 消息遵循共享协议（A2A、AG-UI、A2UI、MCP、Connect 约定）。路径与错误格式像 Stable 一样冻结；消息结构遵循协议自身的版本。 |
+| Preview | 有文档，但其背后的产品仍可能变化。变更会列在发布说明中，没有弃用期。 |
+
+| 类别 | 路由族 |
+| --- | --- |
+| Stable | `/v1/ai`、`/v1/embed`、`/v1/agents`、`/v1/orchestrator`、`/v1/homelab`、`/v1/speechkit`、`/v1/notifications`、`/v1/subdomains`、`/v1/content`、`/v1/connectors`、`/v1/harnesses`、`/v1/ril`、`/v1/decisions`、`/v1/supply-dock`、`/v2/supply-dock` |
+| Protocol | `/a2a`、`/ag-ui`、`/a2ui`、`/v1/mcp/knowledge`、`/v1/connect` |
+
+其他已记录的路由族在本页列出之前均属于 Preview。
+
+## 版本化
+
+主版本是路径的第一段，例如 `/v1`。在一个版本内，以下变更属于新增，可能随时出现：新路由、新的可选请求字段、新的响应字段、开放响应列表中的新值、新的拒绝 `reason_code`。请让客户端忽略它不认识的字段。
+
+以下变更属于破坏性变更，只会作为新的主版本与旧版本并存发布：收窄接受的输入、把可选字段改为必填、更改字段的类型或含义、更改现有结果的状态类别，以及在没有新的、有文档的拒绝的情况下收紧对现有调用方的登录或权限范围要求。
+
+在一个版本内移除路由、字段或拒绝 `reason_code`，只能通过下面的弃用流程。安全与法律修正可以在期限结束前违反约定；此时发布说明会说明这一点并给出迁移路径。
+
+健康与发现端点（`/gateway/health`、`/.well-known/*`）不带版本，遵循新增规则。`/v1/blog` 正在停用，不在冻结范围内。
+
+## 弃用
+
+Stable 或 Protocol 类别的路由、字段或 `reason_code` 只有经过以下流程才会被移除：
+
+1. **公布。** API 参考把该操作标记为已弃用并给出其后继（对于字段或 `reason_code`，由返回它的操作说明），发布说明也会提及。公布会设定停用日期。
+2. **信号。** 从公布的那个版本起，已弃用的路由会返回 `Deprecation` 和 `Sunset` 响应头，以及一个带有指向替代项 `rel="successor-version"` 的 `Link` 响应头。字段或 `reason_code` 会在参考和发布说明中公布。
+3. **期限。** 从公布到移除路由之间至少经过 180 天，字段或 `reason_code` 至少 90 天。如果调用方在停用日期仍在使用，日期会向后推迟。
+4. **移除。** 移除之后，该路由会在路径被释放前至少再返回一个版本的 `410` 并指出其后继。
+
+Preview 路由没有期限；它们的移除仍会出现在发布说明中。
+
+## 没有停用日期的被取代路由
+
+`GET /v1/agents/workbench-orchestrator/harnesses` 已被 `GET /v1/agents/harnesses` 取代。它没有公布停用日期，因此不运行弃用期。一旦公布，上面的流程即适用。
+
+另请参阅[更新日志](/zh-Hans/changelog/overview)和 [StackKits 中的身份](/zh-Hans/identity/overview)。

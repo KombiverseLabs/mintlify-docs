@@ -1,0 +1,158 @@
+---
+title: "Deine Workbench-Installationen verbinden"
+description: "Teile eine Workbench-Desktop-Umgebung mit deinen anderen Installationen, koppele sie und widerrufe den Zugriff"
+sidebarTitle: "Installationen verbinden"
+icon: "link"
+---
+
+kombify Connect lässt deine anderen Workbench-Desktop-Installationen in einer
+Umgebung auf diesem Computer arbeiten: in ihren Projekten, Threads und, wenn du
+es erlaubst, ihrem Terminal. Du wählst, welcher Computer seine Umgebung teilt
+und welche Installationen darauf zugreifen dürfen. Du kannst diesen Zugriff
+jederzeit zurücknehmen.
+
+<Warning>
+kombify Connect in Workbench Desktop ist in der Beta. Bildschirme, Namen und
+der Funktionsumfang für dein Konto können sich noch ändern.
+</Warning>
+
+## Bevor du beginnst
+
+- Du brauchst ein kombify-Konto. Wenn du noch keines hast, erstelle zuerst
+  eines unter [Konto erstellen](/de/apps/cloud/get-started).
+- Connect gehört zur Edition **Connected** von Workbench Desktop. Die Edition
+  **Standalone** hat kein kombify-Konto und kein Connect. Siehe
+  [Standalone- und Connected-Edition](#standalone-and-connected-editions).
+- Jede beteiligte Installation muss am selben kombify-Konto angemeldet sein.
+- Der teilende Computer muss eingeschaltet sein und Workbench Desktop
+  ausführen, während andere seine Umgebung nutzen. Er baut nur ausgehende
+  Verbindungen auf, du öffnest also keine Ports an deinem Router.
+
+## Die Umgebung dieses Computers teilen
+
+<Steps>
+  <Step title="Connections öffnen">
+    Öffne in Workbench Desktop die **Settings** und wähle **Connections**. Die
+    Zeile **kombify Connect** steht bei deinem kombify-Konto in den
+    Einstellungen dieser Umgebung.
+  </Step>
+  <Step title="Teilen einschalten">
+    Schalte **Share this environment through kombify Connect** ein. Erwarte die
+    Meldung "Environment shared". Der Startbildschirm bietet dasselbe als
+    **Share this computer** an.
+  </Step>
+</Steps>
+
+Wenn der Schalter nicht verfügbar ist, steht daneben, warum. Zum Beispiel bist
+du nicht angemeldet, die Installation ist noch nicht registriert, oder der
+Computer konnte seinen Connect-Schlüssel nicht öffnen.
+
+## Eine weitere Installation koppeln
+
+Ein Kopplungscode verbindet eine weitere Installation mit der Umgebung, die du
+geteilt hast.
+
+<Steps>
+  <Step title="Einen Code auf dem teilenden Computer erzeugen">
+    Wähle unter **Pair another installation** die Option **Create code**.
+    Schalte vorher nur dann **Terminal** ein, wenn die andere Installation auch
+    ein Terminal in dieser Umgebung bekommen soll. Der Code ist 10 Minuten
+    gültig und funktioniert einmal.
+  </Step>
+  <Step title="Den Code auf der anderen Installation eingeben">
+    Öffne auf der anderen Installation die **Settings** und dann
+    **Connections**. Gib den Code unter **Use a pairing code** ein und wähle
+    **Pair**. Erwarte die Meldung "Installation paired".
+  </Step>
+  <Step title="Die geteilte Umgebung öffnen">
+    Die geteilte Umgebung erscheint auf der anderen Installation unter
+    **Remote environments**. Öffne ihre Projekte und Threads wie lokale.
+  </Step>
+</Steps>
+
+Ein Code funktioniert nur auf einer Installation, die am selben Konto
+angemeldet ist, und nie auf der Installation, die ihn erzeugt hat. Wenn 10
+Minuten vergangen sind, erzeuge einen neuen Code.
+
+### Neue Installationen automatisch verbinden lassen
+
+Statt jede Installation einzeln zu koppeln, kannst du **Automatically connect
+new devices** einschalten. Neue Installationen, die sich an deinem Konto
+anmelden, erhalten dann Zugriff auf deine geteilten Umgebungen. Kopplungscodes
+bleiben für einmalige Verbindungen verfügbar. Lass das aus, wenn andere
+Personen Computer nutzen, die an deinem Konto angemeldet sind.
+
+## Sehen, wer Zugriff hat
+
+**kombify Connect devices** listet jede Installation deines Kontos mit ihrem
+Status und damit, wie ihr Schlüssel geschützt ist: im TPM, durch das
+Betriebssystem oder in Software. Der Eintrag mit der Markierung "this device"
+ist der Computer, den du gerade benutzt. Der Status lautet **Access to this
+environment** (oder **with terminal**) für eine Installation, die du gekoppelt
+hast, **Active** für eine angemeldete ohne Zugriff, **Waiting for confirmation**
+für eine neue und **Revoked** für eine, die du ausgeschlossen hast.
+
+## Zugriff widerrufen
+
+- **Eine Installation:** Wähle in **kombify Connect devices** daneben
+  **Revoke**. Erwarte die Meldung "Installation revoked". Ihre offenen Sitzungen
+  enden, normalerweise innerhalb von Sekunden, und sie erreicht keine deiner
+  Umgebungen mehr. Wenn ein Computer, der eine Umgebung teilt, in diesem Moment
+  nicht erreichbar ist, wähle **Revoke** erneut, sobald er wieder online ist.
+- **Den Zugriff einer Installation, ohne die Installation zu entfernen:** Wähle
+  daneben **Remove access**. Sie verliert den erteilten Zugriff, einschließlich
+  des Terminals, bleibt aber bei deinem Konto registriert, sodass du sie später
+  erneut koppeln kannst.
+- **Alle:** Schalte **Share this environment through kombify Connect** aus.
+  Erwarte die Meldung "Environment no longer shared". Bestehende entfernte
+  Sitzungen enden.
+
+Ein Widerruf ist endgültig für diese Installation: Eine widerrufene Installation
+lässt sich nicht erneut koppeln. Wenn du später Zugriff möchtest, nutze
+stattdessen **Remove access**.
+
+<span id="standalone-and-connected-editions"></span>
+## Standalone- und Connected-Edition
+
+Workbench Desktop gibt es in zwei Editionen mit getrennten Installern:
+
+| | Standalone | Connected |
+| --- | --- | --- |
+| kombify-Konto | keines | erforderlich |
+| kombify Connect | nicht enthalten | enthalten |
+| Fehlerberichte an kombify | keine | nur Metadaten, keine Eingaben oder Dateien |
+
+Die beiden Editionen halten getrennte Daten auf deinem Computer. Ein Update
+bleibt immer in der Edition, die du installiert hast, und wechselt sie nie.
+
+Um die Edition zu wechseln, installiere die andere Edition. Nichts wird
+automatisch übernommen: Deine Projekte auf der Festplatte bleiben, wo sie sind,
+und du fügst sie in der neuen Edition selbst hinzu. Threads und Einstellungen
+bleiben in der Edition, die sie erzeugt hat. Du kannst beide Editionen
+installiert lassen.
+
+Diese Editionen hießen früher Local (jetzt Standalone) und Cloud (jetzt
+Connected). Standalone bedeutet nicht offline. Siehe
+[Mit oder ohne Konto, und welche KI](/de/start/account-and-ai).
+
+## Wenn etwas schiefgeht
+
+- **"Could not redeem the pairing code".** Der Code ist abgelaufen, wurde schon
+  verwendet, oder die beiden Installationen sind an verschiedenen Konten
+  angemeldet. Erzeuge auf dem teilenden Computer einen neuen Code und prüfe das
+  Konto auf beiden Seiten.
+- **"kombify Connect is unavailable".** Connect ist für dein Konto vielleicht
+  noch nicht verfügbar, oder der Dienst ist nicht erreichbar. Versuche es später
+  erneut.
+- **Die geteilte Umgebung erscheint nicht.** Prüfe, ob der teilende Computer
+  eingeschaltet ist, Workbench Desktop dort läuft und das Teilen noch aktiv ist.
+- **Du kommst trotzdem nicht weiter.** Schreib an
+  [info@kombify.io](mailto:info@kombify.io), nenne den Bildschirm, auf dem du
+  warst, und wann es passiert ist, und schicke niemals ein Passwort oder einen
+  Kopplungscode mit.
+
+## Was du als Nächstes lesen kannst
+
+- [Die Workbench öffnen](/de/apps/ai/open-the-workbench), für Companion Studio
+  in deinem Browser.
+- [Was in kombify AI mit deinen Daten passiert](/de/apps/ai/your-data-and-privacy)

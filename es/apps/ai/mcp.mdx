@@ -1,0 +1,82 @@
+---
+title: "Acceso MCP para clientes"
+description: "El endpoint para clientes y sus requisitos de inicio de sesión alojado."
+sidebarTitle: "MCP para clientes"
+icon: "network-wired"
+---
+
+La dirección MCP para clientes es `https://api.kombify.io/mcp`. El acceso
+requiere el inicio de sesión alojado y los permisos habilitados para tu cuenta.
+
+## Información de conexión
+
+El endpoint anuncia estos requisitos de autenticación:
+
+| Ajuste | Valor |
+| --- | --- |
+| Nombre del servidor | `kombify` |
+| Endpoint para clientes | `https://api.kombify.io/mcp` |
+| Servicio de inicio de sesión | `https://login.kombify.io/` |
+| Ámbito OAuth obligatorio | `mcp:connect` |
+| Metadatos del recurso protegido | `https://api.kombify.io/.well-known/oauth-protected-resource/mcp` |
+
+Los clientes públicos usan la autorización OAuth con PKCE. El servicio de inicio
+de sesión anuncia `S256` para PKCE. Un cliente que admite este flujo gestiona el
+inicio de sesión a través del servicio de inicio de sesión; mantén las
+contraseñas de cuenta y los tokens de acceso fuera de los mensajes de chat.
+
+<Note>
+El endpoint anunciado y los requisitos de inicio de sesión no determinan qué
+herramientas están habilitadas para una cuenta. Usa el catálogo que tu cliente
+recibe tras la autorización para comprobar sus herramientas y permisos
+disponibles.
+</Note>
+
+## Acceso y errores
+
+Una solicitud sin autorización recibe HTTP 401 y un desafío que apunta a los
+metadatos del recurso protegido. El servicio también requiere acceso MCP para
+clientes en la cuenta, identificado como `mcp.customer.access` en sus
+indicaciones de acceso. Una cuenta con sesión iniciada sigue sujeta a las
+comprobaciones de permisos y de habilitación.
+
+Si la autorización falla o tu cliente no tiene herramientas utilizables,
+conserva el código de error devuelto y escribe a
+[info@kombify.io](mailto:info@kombify.io). Un catálogo vacío por sí solo no
+identifica la causa. No envíes contraseñas ni tokens al soporte.
+
+## Límites de permisos
+
+Un asistente conectado sigue limitado por los permisos de tu cuenta y por la
+política de acciones. El acceso para clientes no concede administración de
+personal, gestión de infraestructura ni credenciales de base de datos. Las
+herramientas devueltas para tu cuenta definen las acciones que tu cliente puede
+solicitar.
+
+## Capacidades curadas para clientes
+
+Tu propio cliente MCP recibe un catálogo curado de lecturas de producto. El
+acceso al producto, los permisos de recursos y las concesiones para tu cliente
+determinan cuáles de estas herramientas aparecen tras el inicio de sesión.
+
+| Clase de capacidad | Ámbito | Nombres de herramienta de ejemplo |
+| --- | --- | --- |
+| Lectura | Consultar el inventario y el estado de los servidores de tu Homelab. | `homelab_list_servers`, `homelab_server_health` |
+
+Estos ejemplos describen el catálogo curado, no una concesión de herramientas
+para toda la cuenta. Usa los nombres y esquemas de entrada que devuelve el
+descubrimiento de herramientas de tu cliente. Una herramienta de lectura también
+necesita permiso sobre el recurso solicitado. Eliminar contenido, aprovisionar y
+las acciones de pago siguen siendo acciones separadas en kombify.
+
+## StackKits locales
+
+El [conector MCP de StackKits](/es/stackkits/reference/mcp-connector) opera tu
+Homelab local. Se configura por separado del endpoint alojado para clientes. Tu
+identidad de propietario local sigue siendo la autoridad del stack local.
+
+## Páginas relacionadas
+
+- [Identidad en StackKits](/es/identity/overview)
+- [AI Guide y Workbench](/es/apps/ai/overview)
+- [Seguridad y privacidad](/es/apps/security-and-privacy)

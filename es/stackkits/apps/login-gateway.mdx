@@ -1,0 +1,91 @@
+---
+title: "Gateway de inicio de sesión"
+description: "Cómo StackKits pone un inicio de sesión forward-auth delante de tus servicios autoalojados, y qué se ofrece y qué no"
+sidebarTitle: "Gateway de inicio de sesión"
+icon: shield-check
+---
+
+El gateway de inicio de sesión es el módulo de plataforma de StackKits que pone
+un único inicio de sesión delante de los servicios de tu propio despliegue. Es
+autenticación dentro de un despliegue que tú operas. No tiene nada que ver con
+iniciar sesión en kombify.io, kombify Cloud u otras superficies alojadas de
+kombify. Para esas, consulta [Identidad en StackKits](/es/identity/overview).
+
+## Qué es
+
+El gateway de inicio de sesión es un módulo de enlace: no ejecuta ningún
+contenedor propio. Declara el middleware forward-auth `login-gateway` en
+[Traefik](/es/stackkits/apps/traefik) y conecta
+[TinyAuth](/es/stackkits/apps/tinyauth) (el punto de entrada forward-auth) con
+[PocketID](/es/stackkits/apps/pocketid) (el proveedor de identidad OIDC local).
+El módulo requiere Traefik 3.0 o posterior y TinyAuth 4.0 o posterior.
+
+Cuando abres un servicio protegido, Traefik pregunta a TinyAuth si tienes una
+sesión válida. Si no la tienes, te envía al inicio de sesión en `auth.<domain>`,
+PocketID te autentica y vuelves al servicio con una sesión.
+
+## Responsabilidad
+
+Tú eres dueño y operas el despliegue, la cuenta de propietario local y su
+material de recuperación. La cuenta que protege tus servicios vive en tu propio
+PocketID. No es una cuenta de kombify, y kombify no la restablece por ti.
+
+## Qué kits lo incluyen
+
+Las definiciones de Basement Kit y Cloud Kit incluyen el gateway de inicio de
+sesión como servicio de plataforma predeterminado junto a Traefik, TinyAuth y
+PocketID, sin alternativas. Consulta [Basement Kit](/es/stackkits/kits/basement-kit)
+y [Cloud Kit](/es/stackkits/kits/cloud-kit).
+
+## Modo de despliegue y requisitos previos
+
+- Protege los servicios desplegados por un StackKit que se añaden con la opción
+  de gateway de inicio de sesión.
+- Necesita la red Docker compartida que usan los servicios de plataforma.
+- Sus valores predeterminados son una sesión de 24 horas (`sessionExpiry`, 86400
+  segundos, como mínimo 300) y un segundo factor obligatorio para usuarios
+  administradores (`requireMfaForAdmins`).
+
+## Proteger tus propias aplicaciones
+
+Elige la aplicación y su exposición en el
+[StackSpec](/es/guides/stackkits/configure-stack-spec) y luego sigue la
+[Entrega de aplicaciones](/es/guides/stackkits/application-delivery). Revisa las
+rutas generadas y confirma que los servicios privados esperados exigen
+autenticación antes de usarlos. Mantén la exposición pública como una decisión
+explícita para los servicios que la necesitan.
+
+## Estado
+
+El módulo está marcado como borrador en el código de StackKits (madurez `draft`,
+versión 0.1.0). Su definición está esbozada y la aplicación en cada servicio
+depende del motor de composición. Trata el comportamiento anterior como el
+contrato previsto y confírmalo en tu propio despliegue en lugar de suponer que
+todas las rutas están protegidas:
+
+```bash
+stackkit verify --json
+```
+
+## Authelia y otras alternativas
+
+El catálogo publicado ofrece PocketID con TinyAuth. Authelia no es un servicio
+de catálogo seleccionable: solo aparece como tipo de configuración en el esquema
+de base de StackKits, y su definición anterior como complemento se eliminó. No
+planifiques un despliegue en torno a Authelia ni esperes una alternativa al
+gateway de inicio de sesión en las definiciones de los kits. Si eso cambia,
+aparecerá primero en la lista de
+[servicios de plataforma](/es/stackkits/apps/overview) de una versión publicada.
+
+## Si algo va mal
+
+- Una ruta no pide inicio de sesión: compara el nombre de host con la ruta
+  generada y ejecuta esto en la carpeta de tu espacio de trabajo:
+
+  ```bash
+  stackkit verify --json
+  ```
+
+- No puedes iniciar sesión: usa la cuenta de propietario creada en
+  [PocketID](/es/stackkits/apps/pocketid), no una cuenta de kombify Cloud.
+- Más comprobaciones: [Solución de problemas](/es/guides/stackkits/troubleshooting).

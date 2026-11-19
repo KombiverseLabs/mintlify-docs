@@ -1,0 +1,156 @@
+---
+title: "Conecta tus instalaciones de Workbench"
+description: "Comparte un entorno de Workbench Desktop con tus otras instalaciones, emparéjalas y revoca el acceso"
+sidebarTitle: "Conectar instalaciones"
+icon: "link"
+---
+
+kombify Connect permite que tus otras instalaciones de Workbench Desktop
+trabajen en un entorno de este ordenador: en sus proyectos, sus hilos y, si lo
+permites, su terminal. Tú eliges qué ordenador comparte su entorno y qué
+instalaciones pueden acceder a él. Puedes retirar ese acceso en cualquier
+momento.
+
+<Warning>
+kombify Connect en Workbench Desktop está en Beta. Las pantallas, los nombres y
+lo que está disponible para tu cuenta todavía pueden cambiar.
+</Warning>
+
+## Antes de empezar
+
+- Necesitas una cuenta de kombify. Si no tienes una, créala primero en
+  [Crear una cuenta](/es/apps/cloud/get-started).
+- Connect forma parte de la edición **Connected** de Workbench Desktop. La
+  edición **Standalone** no tiene cuenta de kombify ni Connect. Consulta
+  [Ediciones Standalone y Connected](#standalone-and-connected-editions).
+- Todas las instalaciones que participen deben haber iniciado sesión con la
+  misma cuenta de kombify.
+- El ordenador que comparte debe estar encendido y ejecutando Workbench Desktop
+  mientras otras personas usan su entorno. Solo abre conexiones salientes, así
+  que no abres ningún puerto en tu router.
+
+## Compartir el entorno de este ordenador
+
+<Steps>
+  <Step title="Abrir Connections">
+    En Workbench Desktop, abre **Settings** y elige **Connections**. La fila
+    **kombify Connect** aparece junto a tu cuenta de kombify en los ajustes de
+    este entorno.
+  </Step>
+  <Step title="Activar la compartición">
+    Activa **Share this environment through kombify Connect**. Deberías ver el
+    mensaje "Environment shared". La pantalla de inicio también ofrece esto como
+    **Share this computer**.
+  </Step>
+</Steps>
+
+Si el interruptor no está disponible, el texto que lo acompaña explica por qué.
+Por ejemplo, no has iniciado sesión, la instalación aún no está registrada o el
+ordenador no ha podido abrir su clave de Connect.
+
+## Emparejar otra instalación
+
+Un código de emparejamiento conecta una instalación más al entorno que has
+compartido.
+
+<Steps>
+  <Step title="Crear un código en el ordenador que comparte">
+    En **Pair another installation**, elige **Create code**. Activa antes
+    **Terminal** solo si la otra instalación también debe recibir un terminal en
+    este entorno. El código es válido durante 10 minutos y funciona una vez.
+  </Step>
+  <Step title="Introducir el código en la otra instalación">
+    En la otra instalación, abre **Settings** y luego **Connections**. En
+    **Use a pairing code**, introduce el código y elige **Pair**. Deberías ver
+    el mensaje "Installation paired".
+  </Step>
+  <Step title="Abrir el entorno compartido">
+    El entorno compartido aparece en la otra instalación bajo **Remote
+    environments**. Abre sus proyectos e hilos como harías con los locales.
+  </Step>
+</Steps>
+
+Un código solo funciona en una instalación que haya iniciado sesión con la
+misma cuenta, y nunca en la instalación que lo creó. Si pasan 10 minutos, crea
+un código nuevo.
+
+### Permitir que las instalaciones nuevas se conecten automáticamente
+
+En lugar de emparejar cada instalación, puedes activar **Automatically connect
+new devices**. Las instalaciones nuevas que inicien sesión con tu cuenta
+obtendrán entonces acceso a tus entornos compartidos. Los códigos de
+emparejamiento siguen disponibles para conexiones puntuales. Déjalo desactivado
+si otras personas usan ordenadores con sesión iniciada en tu cuenta.
+
+## Ver quién tiene acceso
+
+**kombify Connect devices** enumera todas las instalaciones de tu cuenta con su
+estado y con cómo se protege su clave: en el TPM, por el sistema operativo o por
+software. La entrada marcada como "this device" es el ordenador que estás
+usando. El estado dice **Access to this environment** (o **with terminal**) en
+una instalación que emparejaste, **Active** en una que inició sesión sin acceso,
+**Waiting for confirmation** en una nueva y **Revoked** en una que has
+excluido.
+
+## Revocar el acceso
+
+- **Una instalación:** en **kombify Connect devices**, elige **Revoke** junto a
+  ella. Deberías ver el mensaje "Installation revoked". Sus sesiones abiertas
+  terminan, normalmente en cuestión de segundos, y ya no puede alcanzar ninguno
+  de tus entornos. Si un ordenador que comparte un entorno no se puede alcanzar
+  en ese momento, elige **Revoke** otra vez cuando vuelva a estar conectado.
+- **El acceso de una instalación, conservando la instalación:** elige **Remove
+  access** junto a ella. Pierde el acceso que se le concedió, incluido el
+  terminal, pero sigue registrada en tu cuenta, así que puedes volver a
+  emparejarla más adelante.
+- **Todo el mundo:** desactiva **Share this environment through kombify
+  Connect**. Deberías ver el mensaje "Environment no longer shared". Las
+  sesiones remotas existentes terminan.
+
+Revocar es definitivo para esa instalación: una instalación revocada no se puede
+volver a emparejar. Si quieres acceso más adelante, usa **Remove access** en su
+lugar.
+
+<span id="standalone-and-connected-editions"></span>
+## Ediciones Standalone y Connected
+
+Workbench Desktop se ofrece en dos ediciones con instaladores separados:
+
+| | Standalone | Connected |
+| --- | --- | --- |
+| Cuenta de kombify | ninguna | obligatoria |
+| kombify Connect | no incluido | incluido |
+| Informes de errores a kombify | ninguno | solo metadatos, sin indicaciones ni archivos |
+
+Las dos ediciones guardan datos separados en tu ordenador. Una actualización se
+queda siempre dentro de la edición que instalaste y nunca la cambia.
+
+Para cambiar de edición, instala la otra edición. Nada se copia
+automáticamente: tus proyectos en disco se quedan donde están y los añades tú
+en la nueva edición. Los hilos y los ajustes se quedan en la edición que los
+creó. Puedes mantener instaladas las dos ediciones.
+
+Estas ediciones se llamaban antes Local (ahora Standalone) y Cloud (ahora
+Connected). Standalone no significa sin conexión. Consulta
+[Con o sin cuenta, y qué IA](/es/start/account-and-ai).
+
+## Si algo va mal
+
+- **"Could not redeem the pairing code".** El código caducó, ya se había usado
+  o las dos instalaciones tienen sesión iniciada con cuentas distintas. Crea un
+  código nuevo en el ordenador que comparte y comprueba la cuenta en ambos.
+- **"kombify Connect is unavailable".** Puede que Connect todavía no esté
+  disponible para tu cuenta, o que no se pueda alcanzar el servicio. Inténtalo
+  más tarde.
+- **El entorno compartido no aparece.** Comprueba que el ordenador que comparte
+  está encendido, que Workbench Desktop se ejecuta allí y que la compartición
+  sigue activa.
+- **Sigues atascado.** Escribe a [info@kombify.io](mailto:info@kombify.io),
+  indica en qué pantalla estabas y cuándo ocurrió, y nunca envíes una
+  contraseña ni un código de emparejamiento.
+
+## Qué leer a continuación
+
+- [Abrir Workbench](/es/apps/ai/open-the-workbench), para Companion Studio en
+  tu navegador.
+- [Qué pasa con tus datos en kombify AI](/es/apps/ai/your-data-and-privacy)

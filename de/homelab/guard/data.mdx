@@ -1,0 +1,116 @@
+---
+title: "Was Guard sendet und speichert"
+description: "Welche Daten kombify Guard von deinem Server meldet, wohin sie gehen, wie lange sie gespeichert werden und was er niemals sendet"
+sidebarTitle: "Daten, die Guard sendet"
+icon: "database"
+---
+
+kombify Guard meldet eine kleine, feste Menge an Fakten über deinen Server,
+damit Homelab seinen Zustand, seinen Sicherheitsstatus und seine
+Operationsergebnisse zeigen kann. Diese Seite listet diese Fakten auf, sagt,
+wohin sie gehen und wie lange sie gespeichert werden, und nennt, was Guard
+niemals sendet.
+
+<Note>
+Homelab steht vor 1.0 und der verbundene Betrieb ist Vorschau-Umfang; siehe
+[Verfügbarkeit](/de/homelab/availability). Die Aufbewahrung unten ist das, was
+das aktuelle Release durchsetzt. Wo keine Frist genannt ist, ist sie noch nicht
+bestätigt, und diese Seite nennt keine.
+</Note>
+
+## Wohin die Daten gehen
+
+- **Selbst verwaltetes Homelab:** Guard meldet nur an dein eigenes Homelab.
+  kombify erhält nichts, solange du diese Installation nicht verbindest.
+- **Verbunden oder verwaltet:** Guard meldet an das von kombify betriebene
+  Homelab über seine authentifizierte, schlüsselgebundene Verbindung (siehe
+  [einen Server koppeln](/de/homelab/guard/pairing)).
+
+Guard verbindet sich immer nach außen über HTTPS. Du öffnest dafür keinen
+eingehenden Port. Jede Meldung wird bei der Annahme an dein Konto gebunden, und
+jeder Lesezugriff ist darauf beschränkt: Kein Kunde kann Hostnamen, Adressen
+oder Messwerte eines anderen Kunden lesen.
+
+## Was Guard meldet
+
+| Was | Beispiele | Wofür |
+| --- | --- | --- |
+| Serveridentität | Server- und Owner-Kennungen, der Fingerabdruck des öffentlichen Schlüssels des Servers, Guard-Version | Den Server authentifizieren und an dich binden |
+| Erreichbarkeit | Zeit der letzten Meldung, Boot-ID, ein Digest der Maschinen-ID (niemals die Maschinen-ID selbst), Zustand des Journals, Anzahl ungeklärter Operationen | Zeigen, ob der Server verbunden ist, und Neustarts oder Klone erkennen |
+| Ressourcennutzung | CPU, Arbeitsspeicher, Swap, Last, Speicher je Einhängepunkt, Laufzeit; CPU und Arbeitsspeicher je Container | Kapazität und Zustand |
+| Host-Details | Hostname, Betriebssystem und Version, Architektur, CPU, RAM und Speichergröße, Laufzeitumgebung, öffentliche, private und lokale IP-Adressen, öffentliche SSH-Host-Schlüssel, lauschende Ports, beobachtete Netzwerkposition (Adresse, Gateway, Subnetz, Schnittstelle, Name des Funknetzes), Zustand der Laufwerke | Erreichbarkeit, SSH-Host-Pinning, Prüfung der Exposition und Erkennen eines Wechsels in ein anderes Netz |
+| Dienste | StackKit-Name, Version und Modus, Dienst- und Containernamen, Image-Referenzen, geprüfter Zustand, Endpunkte | Deine Dienste betreiben und überprüfen |
+| Sicherheitsstatus | Welche Host-Kontrollen konform, abgewichen oder unbekannt sind, erwartete und beobachtete Werte, freigegebene Ausnahmen, Baseline-Version | Die gesicherte Konfiguration zeigen und darauf aufmerksam machen |
+| Wiederherstellungsstatus | Alter und Status des letzten Backups, Ergebnis der letzten geprüften Wiederherstellung | Zeigen, ob der Server wiederherstellbar ist |
+| Operationsbelege | Befehls-ID, Aktion, Ergebnisstatus, eine begrenzte Ergebniszusammenfassung, bereinigte Logzeilen | Eine prüfbare Aufzeichnung dessen, was ausgeführt wurde |
+
+Guard erhebt Ressourcenwerte standardmäßig etwa alle 30 Sekunden und bittet den
+Host etwa alle 15 Minuten um eine frische Sicherheitsbeobachtung. Das Beobachten
+des Hosts ändert nichts an ihm.
+
+Eine weitere Klasse ist optional. Wenn eine Smart-Home-Automatisierung auf dem
+Server so eingerichtet ist, dass sie dich benachrichtigt, leitet Guard nur den
+Hinweistext weiter, den ihr Autor geschrieben hat (höchstens 280 Zeichen), damit
+er dich als Benachrichtigung erreichen kann. Sie ist standardmäßig aus, wird pro
+Automatisierung eingeschaltet und sendet niemals Entitätszustände, Anwesenheit,
+Schlösser, Kameras oder Sensorverläufe.
+
+<Note>
+Messwerte und Labelnamen sind eine Positivliste, die zweimal durchgesetzt wird:
+auf dem Server, bevor lokal etwas gespeichert wird, und erneut bei der Ankunft
+der Daten. Ein Wert, der nicht auf der Liste steht, wird verworfen, sodass ein
+fehlerhafter Collector den Umfang dessen, was deinen Host verlässt, nicht
+erweitern kann.
+</Note>
+
+## Was Guard niemals sendet
+
+- Anwendungsinhalte: die Dateien, Datenbanken, Nachrichten oder Fotos, die
+  deine Dienste enthalten.
+- Umgebungsvariablen, Geheimnisse oder Zugangsdaten deiner Anwendungen.
+- Persönliche Daten der Menschen in deinem Haushalt.
+- Die E-Mail-Adresse des Owners. Sie ist StackKits-Konfiguration, keine
+  Guard-Daten.
+
+Anwendungsinhalte erreichen kombify nur über eine getrennte, schreibgeschützte
+Komponente mit eigenem Einwilligungsmodell, niemals über Guards Verbindung,
+Spool, Belege oder Logs.
+
+## Wie lange die Daten gespeichert werden
+
+| Daten | Gespeichert |
+| --- | --- |
+| Verlauf der Sicherheitsbefunde | 90 Tage, nachdem ein Befund geklärt wurde |
+| Ressourcenmesswerte | Etwa 15 Tage; die Trenddiagramme im Cockpit behalten gröbere Punkte bis zu 30 Tage |
+| Aktueller Zustand eines Servers | Solange der Server gekoppelt ist |
+| Ungesendete Daten während einer Störung | In einer begrenzten lokalen Warteschlange auf dem Server (standardmäßig 8 MiB, grob sechs Stunden). Läuft sie über, werden die ältesten Daten verworfen und ein Marker hält die Lücke fest. |
+
+Nach einer Störung sendet Guard, was es eingereiht hat, das Älteste zuerst. Eine
+Lücke wird ausdrücklich gemeldet und nie stillschweigend gefüllt.
+
+## Was mit den Daten passiert, wenn du einen Server trennst
+
+Das Trennen eines Servers widerruft seine Zugangsdaten und beendet seine
+entfernte Reichweite, wie in
+[Widerrufen und trennen](/de/homelab/guard/revoke-and-uninstall) beschrieben.
+Auf dem Server löscht Guard dann seinen Identitätsschlüssel, seine
+Zugangsdaten, seine eingereihte Telemetrie und die Operationsaufzeichnungen, die
+Homelab bestätigt hat. Der Datensatz des Servers bleibt in Homelab als getrennter
+Datensatz mit seinem Prüfpfad, und bereits erhobene Verläufe altern innerhalb der
+oben genannten Fristen aus.
+
+Der Datenvertrag setzt außerdem das Ziel, Inventar, Messwerte und
+Sicherheitsstatus eines getrennten Servers innerhalb von 30 Tagen zu entfernen.
+Dieses Release bestätigt diese automatische Entfernung noch nicht, deshalb wird
+sie hier nicht als Garantie genannt.
+
+## Verwandtes
+
+<CardGroup cols={2}>
+  <Card title="Einen Server koppeln" icon="link" href="/de/homelab/guard/pairing">
+    Wie ein Server an dich gebunden wird und was du dabei siehst.
+  </Card>
+  <Card title="Widerrufen, trennen und deinstallieren" icon="plug-circle-xmark" href="/de/homelab/guard/revoke-and-uninstall">
+    Den Zugriff eines Servers beenden und Guard vom Host entfernen.
+  </Card>
+</CardGroup>

@@ -1,0 +1,55 @@
+---
+title: "登录网关"
+description: "StackKits 如何为你的自托管服务前置一个 forward-auth 登录，以及提供与不提供哪些内容"
+sidebarTitle: "登录网关"
+icon: shield-check
+---
+
+登录网关是 StackKits 的平台模块，为你在自己部署中的服务前置一个统一的登录入口。它属于你自己运营的部署内部的身份验证，与登录 kombify.io、kombify Cloud 或其他托管 kombify 界面毫无关系。若要了解后者，请参阅 [StackKits 中的身份](/zh-Hans/identity/overview)。
+
+## 它是什么
+
+登录网关是一个粘合模块：它本身不运行任何容器。它在 [Traefik](/zh-Hans/stackkits/apps/traefik) 上声明 `login-gateway` forward-auth 中间件，并把 [TinyAuth](/zh-Hans/stackkits/apps/tinyauth)（forward-auth 入口）与 [PocketID](/zh-Hans/stackkits/apps/pocketid)（本地 OIDC 身份提供方）连接起来。该模块要求 Traefik 3.0 或更高版本，以及 TinyAuth 4.0 或更高版本。
+
+打开受保护的服务时，Traefik 会向 TinyAuth 询问你是否有有效会话。若没有，你会被送到 `auth.<domain>` 登录，由 PocketID 完成身份验证，然后你带着会话回到该服务。
+
+## 归属
+
+部署、本地所有者账户及其恢复材料由你拥有并运营。保护你服务的账户位于你自己的 PocketID 中。它不是 kombify 账户，kombify 也不会为你重置它。
+
+## 哪些套件包含它
+
+Basement Kit 和 Cloud Kit 的定义都把登录网关列为默认平台服务，与 Traefik、TinyAuth 和 PocketID 并列，且没有替代项。请参阅 [Basement Kit](/zh-Hans/stackkits/kits/basement-kit) 和 [Cloud Kit](/zh-Hans/stackkits/kits/cloud-kit)。
+
+## 部署模式与前提条件
+
+- 它保护由某个 StackKit 部署、并以登录网关选项添加的服务。
+- 它需要平台服务所使用的共享 Docker 网络。
+- 其默认值为 24 小时会话（`sessionExpiry`，86400 秒，至少 300）以及管理员用户必须使用第二因素（`requireMfaForAdmins`）。
+
+## 保护你自己的应用
+
+在 [StackSpec](/zh-Hans/guides/stackkits/configure-stack-spec) 中选择应用及其暴露方式，然后按[应用交付](/zh-Hans/guides/stackkits/application-delivery)操作。检查生成的路由，并在使用前确认预期的私有服务确实要求身份验证。对需要公开暴露的服务，仍要作出明确的选择。
+
+## 状态
+
+该模块在 StackKits 源码中被标记为草案（成熟度为 `draft`，版本 0.1.0）。其定义仍是脚手架，跨每个服务的实际执行取决于组合引擎。请把上述行为当作预期的约定，并在你自己的部署中加以确认，而不要假定每条路由都受到保护：
+
+```bash
+stackkit verify --json
+```
+
+## Authelia 与其他替代方案
+
+已发布的目录提供 PocketID 搭配 TinyAuth。Authelia 不是可选的目录服务：它只作为配置类型出现在 StackKits 基础架构中，其早期的附加组件定义已被移除。不要围绕 Authelia 规划部署，也不要指望套件定义中提供登录网关的替代方案。如果这一点发生变化，它会先出现在已发布版本的[平台服务](/zh-Hans/stackkits/apps/overview)列表中。
+
+## 出问题时
+
+- 某条路由不要求登录：将主机名与生成的路由进行比对，并在工作区文件夹中运行：
+
+  ```bash
+  stackkit verify --json
+  ```
+
+- 无法登录：请使用在 [PocketID](/zh-Hans/stackkits/apps/pocketid) 中创建的所有者账户，而不是 kombify Cloud 账户。
+- 更多检查：[故障排除](/zh-Hans/guides/stackkits/troubleshooting)。

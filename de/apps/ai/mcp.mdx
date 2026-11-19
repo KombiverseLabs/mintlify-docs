@@ -1,0 +1,84 @@
+---
+title: "Customer-MCP-Zugang"
+description: "Der Kunden-Endpunkt und seine Anforderungen an die gehostete Anmeldung."
+sidebarTitle: "Customer-MCP"
+icon: "network-wired"
+---
+
+Die Kundenadresse für MCP ist `https://api.kombify.io/mcp`. Der Zugang setzt die
+gehostete Anmeldung und die für dein Konto freigegebenen Berechtigungen voraus.
+
+## Verbindungsinformationen
+
+Der Endpunkt gibt diese Authentifizierungsanforderungen bekannt:
+
+| Einstellung | Wert |
+| --- | --- |
+| Servername | `kombify` |
+| Kunden-Endpunkt | `https://api.kombify.io/mcp` |
+| Anmeldedienst | `https://login.kombify.io/` |
+| Erforderlicher OAuth-Scope | `mcp:connect` |
+| Metadaten der geschützten Ressource | `https://api.kombify.io/.well-known/oauth-protected-resource/mcp` |
+
+Öffentliche Clients nutzen die OAuth-Autorisierung mit PKCE. Der Anmeldedienst
+gibt `S256` für PKCE an. Ein Client, der diesen Ablauf unterstützt, wickelt die
+Anmeldung über den Anmeldedienst ab; halte Kontopasswörter und Zugangstoken aus
+Chatnachrichten heraus.
+
+<Note>
+Der bekannt gegebene Endpunkt und die Anmeldeanforderungen belegen nicht,
+welche Werkzeuge für ein Konto freigeschaltet sind. Nutze den Katalog, den dein
+Client nach der Autorisierung erhält, um seine verfügbaren Werkzeuge und
+Berechtigungen zu prüfen.
+</Note>
+
+## Zugang und Fehler
+
+Eine Anfrage ohne Autorisierung erhält HTTP 401 und eine Aufforderung, die auf
+die Metadaten der geschützten Ressource verweist. Der Dienst setzt außerdem den
+Customer-MCP-Zugang für das Konto voraus, der in seinen Zugangshinweisen als
+`mcp.customer.access` bezeichnet wird. Ein angemeldetes Konto unterliegt
+weiterhin Berechtigungs- und Freischaltungsprüfungen.
+
+Wenn die Autorisierung fehlschlägt oder dein Client keine nutzbaren Werkzeuge
+hat, behalte den zurückgegebenen Fehlercode und wende dich an
+[info@kombify.io](mailto:info@kombify.io). Ein leerer Katalog allein benennt
+die Ursache nicht. Schicke dem Support keine Passwörter oder Token.
+
+## Berechtigungsgrenzen
+
+Ein verbundener Assistent bleibt durch die Berechtigungen deines Kontos und die
+Aktionsrichtlinie begrenzt. Der Kundenzugang gewährt keine Mitarbeiterverwaltung,
+keine Infrastrukturverwaltung und keine Datenbank-Anmeldedaten. Die für dein
+Konto zurückgegebenen Werkzeuge bestimmen, welche Aktionen dein Client anfordern
+kann.
+
+## Kuratierte Kundenfunktionen
+
+Dein eigener MCP-Client erhält einen kuratierten Katalog von Lesezugriffen auf
+Produktdaten. Produktzugang, Ressourcenberechtigungen und die Freigaben für
+deinen Client bestimmen, welche dieser Werkzeuge nach der Anmeldung erscheinen.
+
+| Funktionsklasse | Umfang | Beispielhafte Werkzeugnamen |
+| --- | --- | --- |
+| Lesen | Das Serverinventar und den Zustand deines Homelab einsehen. | `homelab_list_servers`, `homelab_server_health` |
+
+Diese Beispiele beschreiben den kuratierten Katalog, nicht eine
+kontoweite Werkzeugfreigabe. Nutze die Namen und Eingabeschemata, die die
+Werkzeugerkennung deines Clients zurückgibt. Auch ein Lesewerkzeug braucht eine
+Berechtigung für die angeforderte Ressource. Das Löschen von Inhalten, das
+Bereitstellen von Ressourcen und bezahlte Aktionen bleiben in kombify getrennte
+Aktionen.
+
+## Lokale StackKits
+
+Der [StackKits-MCP-Connector](/de/stackkits/reference/mcp-connector) betreibt
+dein lokales Homelab. Er wird getrennt vom gehosteten Kunden-Endpunkt
+konfiguriert. Deine lokale Owner-Identität bleibt für den lokalen Stack
+maßgeblich.
+
+## Verwandte Seiten
+
+- [Identität in StackKits](/de/identity/overview)
+- [AI Guide und Workbench](/de/apps/ai/overview)
+- [Sicherheit und Datenschutz](/de/apps/security-and-privacy)

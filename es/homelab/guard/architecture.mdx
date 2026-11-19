@@ -1,0 +1,121 @@
+---
+title: "Arquitectura de Guard y verdad operativa"
+description: "Cómo la identidad del servidor, las operaciones durables y la ejecución acotada preservan un resultado explicable"
+sidebarTitle: "Arquitectura"
+icon: "diagram-project"
+mode: "explanation"
+---
+
+Guard separa cuatro preguntas: **qué servidor está conectado, quién puede pedir
+un cambio, qué ejecutor posee el efecto y qué evidencia muestra su resultado**.
+Mantenerlas separadas importa cuando un servidor se reinicia, una conexión se
+cae o un cliente reintenta una solicitud.
+
+Esta es una explicación de arquitectura. La
+[referencia publicada](/es/homelab/reference/cli/overview) identifica su versión;
+la versión instalada y el transporte cualificado determinan el comportamiento
+disponible. [Disponibilidad](/es/homelab/availability) describe el alcance
+público y el de vista previa.
+
+## La identidad no es permiso
+
+El alta vincula un servidor con su instalación de Homelab prevista. El diseño de
+clave de host de Guard hace que ese vínculo dependa de una clave generada en el
+servidor, en lugar de tratar una credencial bearer copiada como identidad de host
+suficiente. La identidad del servidor, el propietario de la aplicación y el
+inicio de sesión de un usuario son hechos distintos.
+
+La [referencia de workers](/es/homelab/reference/cli/workers) publicada expone la
+inspección de identidad y las operaciones de actualización. Un vínculo heredado
+basado solo en bearer es de solo observación hasta que se aprueba la clave de
+host propuesta mediante el flujo de propietario documentado. Listar una clave o
+descubrir un servidor no concede derechos adicionales.
+
+Incluso un Guard autenticado debe recibir una operación admitida para el recurso,
+la capacidad y la generación de servidor correctos. Un servidor de reemplazo no
+debe heredar el permiso para repetir los comandos de un servidor antiguo.
+
+## Una solicitud, una identidad de operación durable
+
+El perfil de comandos HTTPS durables está diseñado en torno a esta secuencia:
+
+<Steps>
+  <Step title="Admitir la operación">
+    Homelab admite un comando vinculado al destino y la carga útil previstos.
+  </Step>
+  <Step title="Preservar la intención antes del efecto">
+    Guard registra la intención de forma durable y comprueba la generación del
+    servidor.
+  </Step>
+  <Step title="Ejecutar a través del propietario">
+    El ejecutor propietario realiza la operación tipada y devuelve su resultado y
+    la evidencia de verificación.
+  </Step>
+  <Step title="Preservar el resultado antes de la entrega">
+    Guard registra el resultado y luego entrega el resultado original a Homelab.
+  </Step>
+  <Step title="Acusar recibo del mismo resultado">
+    Homelab acusa recibo de forma durable de exactamente esa identidad de comando
+    y resultado.
+  </Step>
+</Steps>
+
+La intención vincula la identidad del comando, la generación del destino y el
+digest de la carga útil antes de cualquier efecto secundario. El diario local
+preserva un resultado antes de la entrega. Un reintento puede volver a entregar
+el resultado original sin autorizar otra ejecución. El fencing impide que un
+proceso o una generación obsoletos continúen una mutación.
+
+| Interrupción | Interpretación obligatoria |
+| --- | --- |
+| Antes de la intención durable | La operación no fue admitida para ejecución |
+| Después de registrar el resultado y antes de entregarlo | Recuperar el resultado registrado y entregarlo bajo la identidad original |
+| Después del efecto pero antes de poder registrar su resultado | El resultado es desconocido hasta que una observación lo resuelva |
+| Después de la entrega y antes del acuse de recibo | Volver a entregar el mismo resultado; la incertidumbre de la entrega no concede otro efecto |
+
+Esto no es una garantía genérica de exactamente una vez. Si el sistema no puede
+determinar si ocurrió un efecto, suponer éxito o repetirlo a ciegas pueden dañar
+igualmente el servidor.
+
+## La incertidumbre sigue siendo visible
+
+Las [operaciones de worker](/es/homelab/reference/cli/workers) publicadas
+describen los resultados sin resolver y su reconciliación. Un resultado sin
+resolver bloquea cambios posteriores. Un tiempo de espera agotado puede cambiar
+cómo se presenta el problema a un operador; no libera el bloqueo por sí mismo.
+
+Una resolución autorizada registra si el efecto se verificó como aplicado, se
+verificó como ausente o se aceptó explícitamente como todavía desconocido.
+Incluye al actor y una comprobación de revisión. Aceptar la incertidumbre permite
+avanzar, pero no convierte retroactivamente una operación desconocida en una
+exitosa.
+
+## Ejecución acotada y privilegios
+
+Guard supervisa operaciones tipadas a través del ejecutor que las posee.
+StackKits posee la base del host y el ciclo de vida de las aplicaciones. Homelab
+posee las operaciones de proveedor y la coordinación. Guard no crea un segundo
+ciclo de vida ni usa un shell remoto general como sustituto de esos contratos.
+
+El diseño de separación de privilegios de Linux ejecuta el demonio de Guard sin
+privilegios y delega los efectos privilegiados admitidos a un ejecutor
+restringido. Ese ejecutor sigue siendo un límite sensible: las operaciones
+permitidas pueden cambiar materialmente el host. El aislamiento de privilegios
+depende del perfil de sistema operativo compatible y de su cualificación, y no
+se aplica automáticamente a todas las instalaciones.
+
+## La seguridad del transporte y la fiabilidad de las operaciones son cosas distintas
+
+El sondeo HTTPS y gRPC/mTLS son perfiles de transporte distintos. El cifrado y un
+certificado válido no demuestran por sí mismos la durabilidad del diario, el
+fencing entre generaciones ni el vínculo con la clave de host. El perfil
+gRPC/mTLS no está cualificado para todas las garantías de Guard del perfil HTTPS
+durable.
+
+Del mismo modo, un latido establece contacto reciente. No demuestra que un
+comando autenticado y su resultado completaran un ciclo, que la base esté al día
+ni que una aplicación sea recuperable.
+
+Lee [Evidencia de protección y recuperación](/es/homelab/guard/protection-and-recovery)
+para saber cómo se relacionan estas garantías de operación con el estado de tus
+servicios.

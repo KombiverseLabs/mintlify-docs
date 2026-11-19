@@ -1,0 +1,144 @@
+---
+title: "Guards Schutz- und Wiederherstellungsnachweise"
+description: "Verstehe Sicherheitsumfang, begrenzte Reparaturen und den Unterschied zwischen einem Backup und einer nachgewiesenen Wiederherstellung"
+sidebarTitle: "Schutz und Wiederherstellung"
+icon: "clipboard-check"
+mode: "explanation"
+---
+
+Ein Server kann verbunden sein, während seine Konfiguration veraltet ist. Eine
+Anwendung kann laufen, während ihr Backup unbrauchbar ist. Guards Schutzmodell
+beschreibt das als getrennte Zustände mit einem Umfang, einem Zeitpunkt des
+Nachweises und einem verantwortlichen Owner.
+
+Die folgenden Kontrollen erklären die Architektur und die veröffentlichten
+Operationsverträge. Die Abdeckung hängt vom installierten Release, vom
+Betriebssystem und von der Bindung an den Anwendungs-Lebenszyklus ab. Sie
+behaupten nicht, dass jedes Profil qualifiziert wurde; siehe
+[Verfügbarkeit](/de/homelab/availability).
+
+## Host-Schutz und Anwendungsschutz
+
+| Umfang | Was sich feststellen lässt | Grenze |
+| --- | --- | --- |
+| Host-Baseline | Beobachtete Firewall und Exposition, SSH-Konfiguration, Schutz gegen Brute-Force, Updates und unterstützte Systemkontrollen | Ein gesicherter Host beweist nicht, dass jede Anwendung sicher ist |
+| Gestapelte Anwendung | Konfigurations- und Lebenszyklusnachweise für eine Anwendung mit akzeptierter StackKits-Bindung | Es werden nur unterstützte, autorisierte Lebenszyklus-Operationen zugelassen |
+| Nicht gestapelte Anwendung | Inventar und Beobachtungen, die über ausdrücklich gewährte Integrationen verfügbar sind | Das Entdecken gewährt keine Befugnis, sie zu aktualisieren, neu zu starten, umzukonfigurieren oder zu übernehmen |
+
+Gemischte Installationen behalten diese Grenzen pro Anwendung. Ein manuell
+installierter Dienst wird nicht verwaltet, nur weil Guard auf seinem Host läuft.
+Die Übernahme erfordert eine ausdrückliche Bindung an den Lebenszyklus; ihre
+Daten und bestehenden Zuständigkeiten müssen verstanden sein, bevor Änderungen
+zugelassen werden.
+
+## Baseline-Beobachtungen haben mehr als zwei Zustände
+
+- **Konform:** Die gemessene Kontrolle entspricht der gewählten Baseline.
+- **Abgewichen:** Der beobachtete Zustand weicht von dieser Baseline ab.
+- **Unbekannt:** Aktueller Nachweis fehlt, ist veraltet oder lässt sich nicht
+  beschaffen.
+- **Freigegebene Ausnahme:** Eine bestimmte Abweichung hat einen ausdrücklichen
+  Umfang und Grund.
+
+Eine Ausnahme ist nicht dasselbe wie eine bestandene Kontrolle. Ein brauchbarer
+Befund nennt die betroffene Ressource, die Baseline-Version, den Zeitpunkt der
+Beobachtung und die verfügbare nächste Aktion. Nicht unterstützte Prüfungen und
+nicht verfügbare Beobachtungen bleiben sichtbar.
+
+Die [Server-Referenz](/de/homelab/reference/cli/servers) unterscheidet eine
+Anfrage nach einer frischen Sicherheitsbeobachtung vom Bericht selbst. Eine
+Überprüfung anzufordern ändert nichts am Host; nur die zurückgegebene
+Beobachtung aktualisiert seinen Sicherheitsnachweis.
+
+## Eine Reparatur ist eine separate autorisierte Operation
+
+Das Erkennen autorisiert keine Behebung. Der veröffentlichte Vertrag für die
+Reparatur der Host-Sicherheit nimmt benannte Kontrollen über die zuständige
+StackKits-Operation an, mit Owner-Autorisierung und den dokumentierten
+Authentifizierungsanforderungen. Er lehnt Änderungen ab, die den
+Verwaltungspfad abschneiden oder den Owner aussperren würden.
+
+Nebenläufigkeitsgrenzen, Abklingzeiten pro Kontrolle, Versuchsbudgets und
+Trennschalter begrenzen wiederholte Reparaturen. Eine Kontrolle, die bereits
+konform ist, von einer freigegebenen Ausnahme abgedeckt ist, nicht automatisch
+reparierbar ist oder der eine Voraussetzung fehlt, wird nicht stillschweigend
+überschrieben. Genaue Anforderungen und Ablehnungscodes stehen in den
+[veröffentlichten Server-Operationen](/de/homelab/reference/cli/servers).
+
+Zum Beispiel kann das Ändern von SSH-Einstellungen ohne einen nutzbaren
+autorisierten Schlüssel den einzigen Wiederherstellungspfad entfernen. Diese
+Änderung abzulehnen bewahrt den Zugang und erklärt zugleich die fehlende
+Voraussetzung.
+
+## Ein Backup ist noch keine Wiederherstellung
+
+StackKits behält die Verantwortung für Backup und Wiederherstellung des Nodes;
+Homelab koordiniert autorisierte Operationen, und Guard meldet den daraus
+entstehenden Nachweis.
+
+| Nachweis | Was er dir sagt |
+| --- | --- |
+| Backup-Konfiguration | Eine Backup-Richtlinie oder ein Ziel ist konfiguriert |
+| Erfolgreiches Backup | Eine bestimmte Backup-Operation ist abgeschlossen |
+| Integritätsprüfung | Die geprüften Backup-Daten haben die gewählten Integritätsprüfungen bestanden |
+| Isolierte Wiederherstellung | Der benannte Wiederherstellungspunkt wurde in der getesteten Umgebung wiederhergestellt |
+| Anwendungswiederherstellung | Die wiederhergestellte Anwendung und ihre benötigten Daten haben die angegebenen Prüfungen bestanden |
+
+Das sind verschiedene Nachweisstufen. Ein Wiederherstellungsbericht sollte
+seinen Wiederherstellungspunkt, sein Ziel, die Versionen, den Zeitpunkt der
+Beobachtung und die Prüfungen nennen. Eine isolierte Dateiwiederherstellung
+beweist weder eine funktionierende Datenbank noch eine Benutzeranmeldung noch
+eine vollständige Anwendung. Die Wiederherstellbarkeit hängt auch davon ab, dass
+die benötigte Konfiguration, das Entschlüsselungsmaterial und die Abhängigkeiten
+zur Verfügung stehen, wenn sie gebraucht werden.
+
+Eine Übung muss verhindern, dass wiederhergestellte Dienste unbeabsichtigte
+Wirkung im Livebetrieb entfalten, etwa Benachrichtigungen senden. Die
+Wiederherstellungszeit und das Alter der wiederherstellbaren Daten müssen für
+das getestete Szenario gemessen werden; beides folgt nicht aus einem grünen
+Backup-Job allein.
+
+## Update-Vertrauen und Update-Zustand
+
+Guards Update-Design trennt die Prüfung des veröffentlichten Artefakts von der
+gestaffelten Aktivierung und Wiederherstellung. Ein authentisches Release kann
+trotzdem nicht starten. Der Nachweis muss zeigen, dass die zugelassene Version
+erfolgreich aktiviert wurde oder dass die Wiederherstellung eine zulässige
+vorherige Version wiederhergestellt hat, während Identität und Operationszustand
+erhalten blieben.
+
+Das beschreibt Guards eigenen Update-Pfad. Es verspricht keinen transaktionalen
+Rollback für jede Anwendung oder Datenbankmigration. Solche Änderungen bleiben
+beim unterstützten StackKits-Lebenszyklus und seinem Vertrag zur
+Datenwiederherstellung.
+
+## Guards Bereitschaft auslegen
+
+Der vollständige Vertrag für "Guard bereit" verlangt frische Nachweise für alle
+sieben Fakten unten. Ein Panel mit sieben Indikatoren beweist für sich genommen
+nicht, dass ihre Nachweise diesen Vertrag erfüllen.
+
+| Fakt | Benötigter Nachweis |
+| --- | --- |
+| Gebunden | Bestätigte Einbindung und akzeptierte Host-Identität |
+| Verbunden | Ein kürzlicher authentifizierter Umlauf von Befehl und Ergebnis |
+| Operationen dauerhaft | Ein gesundes Journal ohne ungeklärten Operationsausgang |
+| Konfiguration gesichert | Eine aktuelle Baseline, die konform ist oder freigegebene, begrenzte Ausnahmen hat |
+| Aktuell | Ein signiertes Guard-Artefakt auf oder über der Mindestversion, mit Sicherheitsupdates des Betriebssystems innerhalb der Richtlinie |
+| Wiederherstellbar | Ein frisches Backup und eine geprüfte isolierte Wiederherstellung innerhalb der gewählten Richtlinie |
+| Erreichbar und geregelt | Eine geprüfte beabsichtigte Route, eine Ressourcenregistrierung und ein funktionierender Widerruf |
+
+Der letzte Fakt betrifft die beabsichtigte autorisierte Route; er verlangt nicht,
+jede Anwendung öffentlich zu machen. Eine deaktivierte oder ungetestete Route
+kann nicht als Nachweis geprüfter Erreichbarkeit zählen. Frische eines
+Heartbeats kann einen Befehlsumlauf nicht ersetzen, und eine Summe darf
+unbekannte Nachweise nicht verbergen.
+
+Die Bereitschaft bezieht sich auf das Release, das Serverprofil und die
+tatsächlich qualifizierten Prüfungen. Sie ist keine Zertifizierung, keine
+Garantie zur Endpunkterkennung und kein Versprechen von null Ausfällen,
+Kompromittierung oder Datenverlust.
+
+Siehe [Guard-Architektur](/de/homelab/guard/architecture) für Operationsausgänge
+und [kombify.me](/de/kombify-me/overview) für das dokumentierte
+Erreichbarkeitsmodell.
