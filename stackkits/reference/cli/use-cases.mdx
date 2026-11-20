@@ -5,7 +5,7 @@ sidebarTitle: "use-cases"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
 content_hash: "sha256:ca552278db6ce214303c44848fb22b80d7f266fe7363c16b9640f39a5d0feab1"
-source_hash: "0eba50543642ec66977ec6c4d6b198fc4b3a431b"
+source_hash: "ae69569e8b735e1df5ede814b33e028b4ff4838c"
 ---
 Select optional kit use cases.
 
@@ -116,7 +116,7 @@ The command stops only that application, copies each of its governed volumes int
 
 `--rollback` &lt;operation-id&gt; stops the application again, verifies the retained copy, copies it back, proves the live data equals the checkpoint and selects the prior release; the next apply starts the prior release on exactly that data, and data written since the checkpoint is discarded. Rolling back a checkpoint that never completed releases it and restarts the unchanged application. While an operation is open, apply starts only the release it expects (or a later StackKits default that supersedes it); without one, apply refuses every move to an earlier release. `--finalize` &lt;operation-id&gt; removes the retained data once the change is accepted (or after the rollback was applied). `--status` reads a record.
 
-On a node Homelab manages, a forward change also needs `--capability`: the exact Homelab-signed application-release.update capability for this use case, release, digest and tested or untested kind, verified offline against the Owner-approved Advanced trust before the application is stopped. The record keeps that authority, and the result reports the prior and target StackSpec hashes so Homelab's desired state follows the override. A standalone node takes no capability.
+On a node Techstack manages, a forward change also needs `--capability`: the exact Techstack-signed application-release.update capability for this use case, release, digest and tested or untested kind, verified offline against the Owner-approved Advanced trust before the application is stopped. The record keeps that authority, and the result reports the prior and target StackSpec hashes so Techstack's desired state follows the override. A standalone node takes no capability.
 
 ```bash
 stackkit use-cases upgrade [slug] [flags]
@@ -126,7 +126,7 @@ stackkit use-cases upgrade [slug] [flags]
 | --- | --- | --- | --- |
 | `--accept-untested` | bool | — | Accept a release the catalog has not tested (inside the module's release track only) |
 | `--apply` | bool | — | Run checkpoint, generate, apply and live verify, rolling back automatically on failure |
-| `--capability` | string | — | Homelab application-release.update capability file; required on a Homelab-managed node |
+| `--capability` | string | — | Techstack application-release.update capability file; required on a Techstack-managed node |
 | `--digest` | string | — | Exact sha256 manifest digest of the `--to` release; required for a release outside the catalog |
 | `--expected-spec-hash` | string | — | Require the current canonical spec hash |
 | `--finalize` | string | — | Remove the retained data of this release operation |

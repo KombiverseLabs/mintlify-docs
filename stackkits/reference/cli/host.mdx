@@ -5,7 +5,7 @@ sidebarTitle: "host"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
 content_hash: "sha256:ca552278db6ce214303c44848fb22b80d7f266fe7363c16b9640f39a5d0feab1"
-source_hash: "0eba50543642ec66977ec6c4d6b198fc4b3a431b"
+source_hash: "ae69569e8b735e1df5ede814b33e028b4ff4838c"
 ---
 Provider-neutral host contract operations.
 
@@ -46,7 +46,7 @@ stackkit host conformance [flags]
 
 Manage this node's sealed host delivery recipient.
 
-Sealed host delivery brings Wallet items, backup targets and SSH access to this node. A delivering authority seals each value to this node's recipient key (HPKE, pkg/hostdelivery); only this node opens it into its own custody. Homelab and Guard carry ciphertext and references only.
+Sealed host delivery brings Wallet items, backup targets and SSH access to this node. A delivering authority seals each value to this node's recipient key (HPKE, pkg/hostdelivery); only this node opens it into its own custody. Techstack and Guard carry ciphertext and references only.
 
 ```bash
 stackkit host delivery [flags]
@@ -240,7 +240,7 @@ Schedule a reboot of this node.
 
 Schedule a reboot of this node after a short delay and return immediately.
 
-The returned boot_id_before identifies the current boot, so a caller can tell the node came back by reading a different boot ID. The command refuses a node that runs the Homelab control plane, a node where apt or dpkg holds its lock or a host update runs, and a node that cannot boot unattended (volumes in /etc/crypttab that need a passphrase, or no apt).
+The returned boot_id_before identifies the current boot, so a caller can tell the node came back by reading a different boot ID. The command refuses a node that runs the Techstack control plane, a node where apt or dpkg holds its lock or a host update runs, and a node that cannot boot unattended (volumes in /etc/crypttab that need a passphrase, or no apt).
 
 When the delay ends a guard checks again, waits up to 15 minutes for any package operation to finish, and requests the reboot while holding the dpkg locks. A node that stays busy is not rebooted; its boot ID stays the same.
 
@@ -307,7 +307,7 @@ Observe this node against the StackKits host security baseline, and restore what
 
 'verify' never changes the host. It produces stackkit.host-security-evidence/v1 for the firewall, sshd, brute-force protection, automatic and pending security updates, reboot state, kernel parameters, exposed listeners and certificate expiry, and for the SSH CA trust and host certificate delivered to this node ('host ssh apply') once they are recorded. Every control is compliant, drifted, unknown or an owner-approved exception, and the evidence expires: a stale observation is unknown, and an unknown control never counts as compliant.
 
-It works on its own (Standard Mode, no account) and through the pinned CLI when Homelab manages the deployment (`--mode` advanced).
+It works on its own (Standard Mode, no account) and through the pinned CLI when Techstack manages the deployment (`--mode` advanced).
 
 ```bash
 stackkit host security [flags]
@@ -367,7 +367,7 @@ stackkit host security repair [flags]
 | `--kit` | string | — | Kit slug to record (default: the kit of the workspace StackSpec) |
 | `--local-node` | string | — | Exact local Node in the supplied ResolvedPlan |
 | `--management-source` | stringArray | — | Network that must always reach ssh, as a CIDR (repeatable) |
-| `--mode` | string | `standard` | Lifecycle mode to record: standard, or advanced when Homelab manages this deployment |
+| `--mode` | string | `standard` | Lifecycle mode to record: standard, or advanced when Techstack manages this deployment |
 | `--no-record` | bool | — | Do not write the post-repair evidence under .stackkit/ |
 | `--resolved-plan` | string | — | Verified canonical ResolvedPlan whose declared listeners to judge exposure against |
 | `--site-kind` | string | — | Site kind of this host: home or cloud (default: inferred from the kit; modern-homelab needs it) |
@@ -422,7 +422,7 @@ stackkit host security verify [flags]
 | `--kit` | string | — | Kit slug to record (default: the kit of the workspace StackSpec) |
 | `--local-node` | string | — | Exact local Node in the supplied ResolvedPlan |
 | `--management-source` | stringArray | — | Network that must always reach ssh, as a CIDR (repeatable) |
-| `--mode` | string | `standard` | Lifecycle mode to record: standard, or advanced when Homelab manages this deployment |
+| `--mode` | string | `standard` | Lifecycle mode to record: standard, or advanced when Techstack manages this deployment |
 | `--no-record` | bool | — | Do not write the evidence under .stackkit/ |
 | `--resolved-plan` | string | — | Verified canonical ResolvedPlan whose declared listeners to judge exposure against |
 | `--site-kind` | string | — | Site kind of this host: home or cloud (default: inferred from the kit; modern-homelab needs it) |
@@ -436,7 +436,7 @@ sudo stackkit host security verify
 # Machine-readable, advanced mode, exit non-zero on any drifted control
 sudo stackkit host security verify --mode advanced --json --fail-on-drift
 
-# What the Homelab host pre-step runs: only the controls the baseline enforces decide the exit code; patch lag, pending reboot, exposure and certificates are still observed and reported
+# What the Techstack host pre-step runs: only the controls the baseline enforces decide the exit code; patch lag, pending reboot, exposure and certificates are still observed and reported
 sudo stackkit host security verify --mode advanced --json --fail-on-drift --drift-scope enforced
 
 # Judge exposure against the ports the verified plan declares
