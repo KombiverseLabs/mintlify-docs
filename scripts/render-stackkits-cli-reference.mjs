@@ -13,6 +13,12 @@ export const CLI_GENERATOR = 'stackkit docs emit-cli-reference'
 export const CLI_PAGE_DIR = 'stackkits/reference/cli'
 const SCHEMA = 'stackkits-cli-reference/v1'
 
+// The six commands a reader needs first sit at the top level of the CLI group;
+// every other command stays inside its lifecycle group, so the sidebar shows
+// the everyday path first and the specialized commands one click away
+// (platform-m09kf.4.2, D-2026-11-21-03).
+const CORE_COMMANDS = ['init', 'apply', 'status', 'verify', 'backup', 'connect']
+
 // The published install path comes from the StackKits release (stackkit docs
 // emit-cli-reference, source internal/publicpath/public-path.json); no page
 // types its own copy of an install or init command.
@@ -212,6 +218,9 @@ export function renderCliReference(reference, { sourceSha, contentHash }) {
   const topLevel = reference.commands.filter((command) => command.parent === 'stackkit')
   const pages = new Map()
   const groupPages = []
+  const corePages = CORE_COMMANDS.map((name) => topLevel.find((command) => pageName(command.path) === name && current(command)))
+    .filter((command) => command)
+    .map((command) => `${CLI_PAGE_DIR}/${pageName(command.path)}`)
 
   let overview = frontmatter({ title: 'CLI reference', description: 'Every stackkit command with its flags and examples', sidebarTitle: 'Overview', icon: 'square-terminal', contentHash, sourceSha })
   overview += `${text(reference.short)}. These pages list every \`stackkit\` command with its flags and examples. They are generated from the StackKits command definitions; if your installed version is older, \`stackkit <command> --help\` is authoritative for it.\n\n`
@@ -230,7 +239,11 @@ export function renderCliReference(reference, { sourceSha, contentHash }) {
       overview += `| [${code(command.path)}](/${CLI_PAGE_DIR}/${pageName(command.path)}) | ${cell(command.short)} |\n`
     }
     overview += '\n'
-    groupPages.push({ group: group.title, pages: members.map((command) => `${CLI_PAGE_DIR}/${pageName(command.path)}`) })
+    // A core command is listed once, at the top level of the CLI group.
+    const navigationPages = members
+      .filter((command) => !corePages.includes(`${CLI_PAGE_DIR}/${pageName(command.path)}`))
+      .map((command) => `${CLI_PAGE_DIR}/${pageName(command.path)}`)
+    if (navigationPages.length) groupPages.push({ group: group.title, pages: navigationPages })
     for (const command of members) {
       const name = pageName(command.path)
       const body = frontmatter({ title: command.path, description: command.short || command.path, sidebarTitle: name, contentHash, sourceSha }) + renderCommand(command, byPath, -1, command.path).replace(/^#+ .*\n\n/, '') + '\n'
@@ -252,14 +265,15 @@ export function renderCliReference(reference, { sourceSha, contentHash }) {
     group: 'CLI',
     icon: 'square-terminal',
     root: `${CLI_PAGE_DIR}/overview`,
-    pages: [...groupPages, ...(retired.length ? [`${CLI_PAGE_DIR}/legacy`] : [])],
+    pages: [...corePages, ...groupPages, ...(retired.length ? [`${CLI_PAGE_DIR}/legacy`] : [])],
   }
   return { pages, navigation, publicPath }
 }
 
 // The CLI group is found by its root page wherever docs.json places it, so the
-// committed navigation owns its label, icon and position; only the command
-// pages are regenerated. A tab without it gets the group at the top of Reference.
+// committed navigation owns its label, icon and position; the command pages and
+// the page list are regenerated, with the core commands first. A tab without it
+// gets the group at the top of Reference.
 function findGroup(entries, root) {
   for (const entry of entries ?? []) {
     if (!entry || typeof entry !== 'object') continue

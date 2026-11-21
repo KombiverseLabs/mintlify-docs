@@ -195,7 +195,7 @@ foreach ($file in $mdxFiles) {
     $relative = $fullRelative -replace '^(?:de|es|zh-Hans|hi|ar)/', ''
     $isLocalized = $relative -ne $fullRelative
     # Release history records shipped CLI contracts; it is not a topic workflow.
-    if ($relative -eq "changelog/overview.mdx") {
+    if ($relative -like "changelog/*.mdx") {
         continue
     }
     $lines = Get-Content -LiteralPath $file.FullName
