@@ -50,6 +50,35 @@ cat .stackkit/access.json
 
 After the command you should see the following: the folder `~/my-homelab` exists, `stackkit version` prints the installed version, the latest log reports the result of the setup, and `.stackkit/access.json` holds your local access details.
 
+## The address you get without configuring anything
+
+You do not have to pick a domain. The installer chooses the default that fits
+the host it detects:
+
+| Where you install | Zone the installer selects | What it means |
+| --- | --- | --- |
+| A home server or mini PC | `*.lab.home` | A private home zone. Your devices reach it on your own network, and the kit runs standalone with no kombify account. |
+| A public VPS or cloud host | `*.kombify.me` | The public zone, because private home addresses are not reachable from a public server. |
+
+On a public host the installer switches to `*.kombify.me` on its own when
+`*.lab.home` would not be reachable there, and it tells you when it does. Bring
+your own domain only if you want a different name.
+
+On a home server, `*.lab.home` works out of the box for devices on your own
+network. On a public VPS, the zone is only selected for you: a reachable origin
+and `stackkit connect` are still needed before `*.kombify.me` names are
+activated.
+
+A public host needs a reachable origin and an account before it actually serves
+public names. `stackkit connect` binds the server to your kombify account; from
+then on your apps get `{base}-{app}.kombify.me` names, and you decide per app
+whether it stays home-only or is reachable from the internet.
+
+<Note>
+  kombify.me is Beta software. Names, headers and error shapes can still
+  change, so do not treat it as a general-availability release.
+</Note>
+
 Need a different installer? Use [Choose a kit](/guides/stackkits/choosing-a-kit)
 for the toolchain-only path, [Cloud Kit](/stackkits/kits/cloud-kit) for a VPS
 you already operate, or the [CLI walkthrough](/guides/stackkits/cli-walkthrough)
