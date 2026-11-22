@@ -4,8 +4,8 @@ description: "Manage the standalone local identity plane"
 sidebarTitle: "identity"
 generated: true
 generated_by: "stackkit docs emit-cli-reference"
-content_hash: "sha256:ca552278db6ce214303c44848fb22b80d7f266fe7363c16b9640f39a5d0feab1"
-source_hash: "ae69569e8b735e1df5ede814b33e028b4ff4838c"
+content_hash: "sha256:079052cc8b7107b9f47a296ece10f21680e0a6a25ca47816b1fc43328406e75c"
+source_hash: "8bc5270ef2174c153ca91a9e29be813870fb74f5"
 ---
 Manage the standalone local identity plane.
 
@@ -19,7 +19,7 @@ Subcommands: [`stackkit identity agent-link`](#stackkit-identity-agent-link), [`
 
 Pin, show or remove the Gateway key that kombify agent envelopes are verified against.
 
-A kombify agent reaches this node's /mcp with a Gateway-signed envelope that the Access Gate verifies against the key pinned here at linking and maps through the D10 reference to a Homelab account. Techstack delivers the link over the Guard when the server is registered as a Connect node and whenever the key or the linked members change. install pins the key document for this node's own Guard enrollment and maps the owner's kombify subject to the Owner of this node's custody and each linked member to their account. Pinning a key, re-keying and changing the owner need the Owner's passkey step-up in the Hub (the request waits up to `--wait` and stays open for five minutes; a later dispatch picks up the approval); a change of the linked members under the pinned key does not. A higher binding generation or a new Gateway key id replaces the pin; an unchanged request changes nothing. remove deletes the pin when the node is unlinked, status shows what is pinned.
+A kombify agent reaches this node's /mcp with a Gateway-signed envelope that the Access Gate verifies against the key pinned here at linking and maps through the D10 reference to a Homelab account. Homelab delivers the link over the Guard when the server is registered as a Connect node and whenever the key or the linked members change. install pins the key document for this node's own Guard enrollment and maps the owner's kombify subject to the Owner of this node's custody and each linked member to their account. Pinning a key, re-keying and changing the owner need the Owner's passkey step-up in the Hub (the request waits up to `--wait` and stays open for five minutes; a later dispatch picks up the approval); a change of the linked members under the pinned key does not. A higher binding generation or a new Gateway key id replaces the pin; an unchanged request changes nothing. remove deletes the pin when the node is unlinked, status shows what is pinned.
 
 ```bash
 stackkit identity agent-link [flags]
@@ -37,7 +37,7 @@ stackkit identity agent-link install [flags]
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
-| `--expect-sha256` | string | — | Required: the sha256:&lt;hex&gt; digest of the file's exact bytes (the request Techstack dispatched) |
+| `--expect-sha256` | string | — | Required: the sha256:&lt;hex&gt; digest of the file's exact bytes (the request Homelab dispatched) |
 | `--file` | string | — | Workspace-relative stackkit.home-agent-link-request/v1 JSON (no secret: the public key, the owner's kombify subject and the linked members' kombify subjects and Pocket ID usernames) |
 | `--json` | bool | — | Emit the pinned link as a command result |
 | `--owner-approve` | bool | — | Approve pinning this key for agent access to this node (a new key or owner also needs the Owner's passkey step-up) |
@@ -68,7 +68,7 @@ stackkit identity agent-link status [flags]
 
 Join this server to the homelab's Authority, or approve and manage joined servers at the Authority.
 
-Several servers of one homelab share one Authority, the server that runs Pocket ID. A further server prepares a join request, the Owner approves it with a passkey step-up at the Authority, which signs a trust bundle and an intermediate CA for the server's hostnames, and the joining server installs the bundle after the Owner confirmed its root fingerprint there. Techstack only carries the request and the bundle.
+Several servers of one homelab share one Authority, the server that runs Pocket ID. A further server prepares a join request, the Owner approves it with a passkey step-up at the Authority, which signs a trust bundle and an intermediate CA for the server's hostnames, and the joining server installs the bundle after the Owner confirmed its root fingerprint there. Homelab only carries the request and the bundle.
 
 ```bash
 stackkit identity join [flags]
@@ -190,9 +190,9 @@ stackkit identity join status [flags]
 
 ### stackkit identity join zone
 
-Report this server's place in the homelab DNS zone, or install the zone Techstack assembled.
+Report this server's place in the homelab DNS zone, or install the zone Homelab assembled.
 
-Techstack assembles the homelab zone from every server's zone site and carries it to each server. A server installs only what its join trust vouches for: the Authority the names the Owner approved for each joined server, a joined server the Authority at its bundle's LAN address and other servers as the Authority's signed verification state lists them. DNS answers are never identity: TLS verifies each name under the root.
+Homelab assembles the homelab zone from every server's zone site and carries it to each server. A server installs only what its join trust vouches for: the Authority the names the Owner approved for each joined server, a joined server the Authority at its bundle's LAN address and other servers as the Authority's signed verification state lists them. DNS answers are never identity: TLS verifies each name under the root.
 
 ```bash
 stackkit identity join zone [flags]
@@ -212,7 +212,7 @@ stackkit identity join zone install [flags]
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
-| `--zone` | string | — | **Required.** The homelab zone (stackkit.homelab-dns-zone/v1) Techstack assembled |
+| `--zone` | string | — | **Required.** The homelab zone (stackkit.homelab-dns-zone/v1) Homelab assembled |
 
 #### stackkit identity join zone site
 
