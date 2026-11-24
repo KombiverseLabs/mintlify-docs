@@ -7,106 +7,73 @@ icon: "house"
 # kombify documentation
 
 Turn a computer you already own into a running homelab with Photos, Files and
-Vault. It runs on your own hardware, with no kombify account required, and you
-can add a public HTTPS address later if you want one.
-
-Choose the door that matches where you want to run it.
+Vault. It runs on your own hardware, needs no kombify account, and can add a
+public HTTPS address when you want one.
 
 <CardGroup cols={3}>
   <Card title="Set up your homelab in 10 minutes" icon="stopwatch" href="/stackkits/install-in-10-minutes">
-    One command on a spare Linux machine. End with running services, an owner
-    passkey and your access details in one file.
+    One command on a spare Linux machine. You end with running services, an
+    owner passkey and your access details in one file.
   </Card>
-  <Card title="Self-host on your own hardware" icon="server" href="/stackkits/quickstart">
-    Plan, apply and verify every service from one readable definition.
+  <Card title="Connect Cloud and Kubi" icon="cloud" href="/apps/cloud/overview">
+    Create a kombify Cloud account, connect the server you run, and ask Kubi to
+    operate it for you.
   </Card>
-  <Card title="Managed apps and cloud" icon="cloud" href="/apps/cloud/overview">
-    Let kombify host and operate the server, connect a server you own, or use a
-    managed one — and invite your household.
+  <Card title="StackKits reference" icon="square-terminal" href="/stackkits/reference/cli/overview">
+    Every command, flag and example for the CLI that installs and keeps your
+    homelab.
   </Card>
 </CardGroup>
 
-## Where your apps get their addresses
+## Your addresses
 
-The installer picks the address zone that fits the host it detects, so you
-choose no domain before you start.
+One command gives your apps HTTPS names, and you configure no domain first.
+Public `*.kombify.me` names are the frictionless default: no domain, no DNS
+setup and no certificate on a phone or laptop. Local network only is the
+explicit alternative when you want nothing reachable from outside.
 
-| Where you install | Zone the installer selects | What you get |
+| Mode | Addresses | What it takes |
 | --- | --- | --- |
-| A home server or mini PC | `*.lab.home` | A private home zone for devices on your own network. The kit runs standalone, with no kombify account. |
-| A public VPS or cloud host | `*.kombify.me` | The public zone, because private home addresses are not reachable from a public server. |
+| Public names | `*.kombify.me` | The default on a public server. On a home server, set `DOMAIN=kombify.me` before the one-liner and turn on a reach path with `stackkit reach`. |
+| Local network only | `*.lab.home` | The default on a home server, and always available as an explicit choice: set `DOMAIN=lab.home`. Each device needs the one-time DNS and CA step. |
 
-A public host needs a reachable origin and an account before it actually
-serves public names. `stackkit connect` binds the server to your kombify
-account; from then on your apps get `{base}-{app}.kombify.me` names, and you
-decide per app whether it stays home-only or is reachable from the internet.
+`stackkit connect` binds the server to your kombify account, which is what
+activates `{base}-{app}.kombify.me` names. You then decide per app whether it
+stays home-only or is reachable from the internet.
 
 <Note>
   kombify.me is Beta software. Names, headers and error shapes can still
-  change, so do not treat it as a general-availability release.
+  change.
 </Note>
 
-<CardGroup cols={2}>
-  <Card title="kombify.me addresses" icon="globe" href="/kombify-me/overview">
-    Public HTTPS names for services that are already reachable, plus an optional
-    private relay for targets that are not.
-  </Card>
-  <Card title="Get your first address" icon="bolt" href="/kombify-me/get-your-first-address">
-    Choose a name, point it at your app and switch it on.
-  </Card>
-</CardGroup>
+## The six commands
 
-## Compare before you choose
-
-kombify is a layer beside and on top of the tools you may already run, not a
-replacement for a hypervisor, a NAS operating system or an app platform. These
-pages say what each other tool does well, when it is the right choice today, and
-the limits kombify has.
-
-<CardGroup cols={2}>
-  <Card title="Proxmox VE with Komodo, Dockge or Portainer" icon="server" href="/start/compare/proxmox-komodo">
-    Run the StackKit inside a guest VM on a hypervisor you already own.
-  </Card>
-  <Card title="Umbrel, CasaOS and ZimaOS" icon="box" href="/start/compare/umbrel-casaos">
-    Appliances with an app store, and when that is the right choice today.
-  </Card>
-  <Card title="All comparisons" icon="scale-balanced" href="/start/compare/overview">
-    Coolify, Runtipi, TrueNAS, Unraid and Synology next to kombify.
-  </Card>
-  <Card title="CLI and reference" icon="square-terminal" href="/stackkits/reference/cli/overview">
-    Every `stackkit` command with its flags and examples.
-  </Card>
-</CardGroup>
-
-## The commands you will actually use
-
-These cover the standalone lifecycle basics of a server you run yourself:
+These cover setup, day-2 operation and the optional connection to kombify:
 
 | Command | What it does |
 | --- | --- |
-| `stackkit init` | Initialize a new deployment from a StackKit |
-| `stackkit apply` | Apply infrastructure changes |
-| `stackkit status` | Show deployment status |
-| `stackkit verify` | Run post-deployment verification checks |
-| `stackkit backup` | Manage backups (Kopia engine) |
+| <code>stackkit init</code> | Initialize a new deployment from a StackKit |
+| <code>stackkit apply</code> | Apply infrastructure changes |
+| <code>stackkit status</code> | Show deployment status |
+| <code>stackkit verify</code> | Run post-deployment verification checks |
+| <code>stackkit backup</code> | Manage backups (Kopia engine) |
+| <code>stackkit connect</code> | Bind the server to your kombify account for public `*.kombify.me` names |
 
-One command is optional. `stackkit connect` binds the server to your kombify
-account, which is what activates public `*.kombify.me` names and the connected
-features. The five commands above work without it.
+The [CLI reference](/stackkits/reference/cli/overview) lists every command with
+its flags and examples; the rest of the command tree sits under Advanced
+Reference there.
 
-The [CLI reference](/stackkits/reference/cli/overview) lists every command
-with its flags and examples.
+## More
 
-## Also worth knowing
-
-- [Images](/stackkits/images): golden images are qualified but not published as a
-  download yet. To install on your own hardware today, use a prepared Linux host
-  and the installer from [Install in 10 minutes](/stackkits/install-in-10-minutes).
+- [Compare with other tools](/start/compare/overview): Proxmox VE with Komodo,
+  Dockge or Portainer, plus Coolify, Umbrel, CasaOS, TrueNAS and Unraid.
+- [kombify.me addresses](/kombify-me/overview): public HTTPS names for services
+  that are already reachable, plus an optional private relay.
 - [Identity](/identity/overview): local owner identity, protected application
   routes and optional hosted sign-in.
 - [Use cases](/guides/stackkits/use-cases/overview): Photos, Files, Vault and
   more, with the applications that provide them.
-- [kombify AI and SpeechKit](/apps/ai/overview): the AI and speech
-  capabilities that plug into your homelab.
+- [kombify AI and SpeechKit](/apps/ai/overview): the AI and speech capabilities
+  that plug into your homelab.
 - [Community](https://github.com/kombifyio/StackKits/discussions): questions,
   ideas and help from other homelabbers.

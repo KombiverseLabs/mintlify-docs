@@ -52,22 +52,16 @@ After the command you should see the following: the folder `~/my-homelab` exists
 
 ## The address you get without configuring anything
 
-You do not have to pick a domain. The installer chooses the default that fits
-the host it detects:
+You do not have to pick a domain. One command gives your apps HTTPS names.
 
-| Where you install | Zone the installer selects | What it means |
+| Mode | Addresses | What it takes |
 | --- | --- | --- |
-| A home server or mini PC | `*.lab.home` | A private home zone. Your devices reach it on your own network, and the kit runs standalone with no kombify account. |
-| A public VPS or cloud host | `*.kombify.me` | The public zone, because private home addresses are not reachable from a public server. |
+| Public names | `*.kombify.me` | The default on a public VPS or cloud host. On a home server, set `DOMAIN=kombify.me` before the one-liner and turn on a reach path with `stackkit reach`. Your phone or laptop needs no DNS change and no certificate. |
+| Local network only | `*.lab.home` | The default on a home server, and an explicit choice anywhere: set `DOMAIN=lab.home`. Devices on your network need the one-time DNS and CA step. |
 
 On a public host the installer switches to `*.kombify.me` on its own when
 `*.lab.home` would not be reachable there, and it tells you when it does. Bring
 your own domain only if you want a different name.
-
-On a home server, `*.lab.home` works out of the box for devices on your own
-network. On a public VPS, the zone is only selected for you: a reachable origin
-and `stackkit connect` are still needed before `*.kombify.me` names are
-activated.
 
 A public host needs a reachable origin and an account before it actually serves
 public names. `stackkit connect` binds the server to your kombify account; from
