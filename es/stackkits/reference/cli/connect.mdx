@@ -1,0 +1,24 @@
+---
+title: "stackkit connect"
+description: "Vincula este servidor a tu cuenta de kombify (basta una cuenta gratuita)"
+sidebarTitle: "connect"
+---
+Vincula este servidor a tu cuenta de kombify (basta una cuenta gratuita).
+
+Vincula este servidor, que ya ejecuta el paquete público, a la cuenta de kombify que creó el emparejamiento en la configuración de Homelab. Después el servidor muestra su estado en kombify Cloud; los cambios adicionales corresponden a los planes de pago. Pega el emparejamiento de un solo uso en el aviso oculto del terminal. La automatización puede usar `--token-file` o `KOMBI_TOKEN`, nunca un argumento de token. El origen del plano de control proviene de `--server` o `KOMBI_SERVER` (valor público predeterminado `https://homelab.kombify.io`). Para un plano de control autoalojado, copia el origen exacto `--server` desde su configuración de servidor propio en kombify Cloud. Un servidor ya vinculado informa de su enlace y no cambia nada. Ejecútalo como root en Linux.
+
+```bash
+stackkit connect [flags]
+```
+
+| Opción | Tipo | Predeterminado | Descripción |
+| --- | --- | --- | --- |
+| `--server` | string | — | origen del plano de control del que procede el emparejamiento (`KOMBI_SERVER`, de lo contrario `https://homelab.kombify.io`); copia los orígenes autoalojados desde tu configuración de servidor propio |
+| `--token-file` | string | — | archivo privado que contiene el emparejamiento de un solo uso (de lo contrario `KOMBI_TOKEN`, y si no, un aviso oculto en el terminal) |
+
+**Ejemplos**
+
+```bash
+sudo stackkit connect --server https://homelab.kombify.io
+sudo stackkit connect --server https://your-homelab.example --token-file /root/kombify-pairing
+```

@@ -1,0 +1,24 @@
+---
+title: "stackkit connect"
+description: "اربط هذا الخادم بحسابك في kombify (يكفي حساب مجاني)"
+sidebarTitle: "connect"
+---
+اربط هذا الخادم بحسابك في kombify (يكفي حساب مجاني).
+
+اربط هذا الخادم، الذي يشغّل الحزمة العامة بالفعل، بحساب kombify الذي أنشأ الاقتران في إعداد Homelab. يعرض الخادم حالته بعد ذلك في kombify Cloud؛ وتبقى التغييرات الإضافية ضمن الخطط المدفوعة. الصق رمز الاقتران أحادي الاستخدام في مطالبة الطرفية المخفية. يمكن للأتمتة استخدام `--token-file` أو `KOMBI_TOKEN`، ولا تستخدم أبداً وسيطة رمز في سطر الأوامر. يأتي أصل مستوى التحكم من `--server` أو `KOMBI_SERVER` (الافتراضي العام `https://homelab.kombify.io`). لمستوى تحكم مستضاف ذاتياً، انسخ أصل `--server` الدقيق من إعداد الخادم الخاص في kombify Cloud. يبلّغ الخادم المرتبط بالفعل عن ربطه ولا يغيّر شيئاً. شغّله بصلاحية root على Linux.
+
+```bash
+stackkit connect [flags]
+```
+
+| الخيار | النوع | الافتراضي | الوصف |
+| --- | --- | --- | --- |
+| `--server` | string | — | أصل مستوى التحكم الذي صدر منه الاقتران (`KOMBI_SERVER`، وإلا `https://homelab.kombify.io`)؛ انسخ الأصول المستضافة ذاتياً من إعداد الخادم الخاص |
+| `--token-file` | string | — | ملف خاص يحتوي على رمز الاقتران أحادي الاستخدام (وإلا `KOMBI_TOKEN`، ثم مطالبة طرفية مخفية) |
+
+**أمثلة**
+
+```bash
+sudo stackkit connect --server https://homelab.kombify.io
+sudo stackkit connect --server https://your-homelab.example --token-file /root/kombify-pairing
+```

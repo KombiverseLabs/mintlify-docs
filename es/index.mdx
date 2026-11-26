@@ -1,69 +1,81 @@
 ---
 title: "Documentación de kombify"
-description: "Usa StackKits, SpeechKit y la beta de Homelab."
+description: "Convierte un ordenador disponible en un homelab en marcha con Photos, Files y Vault — en tu propio hardware, en la nube o gestionado por kombify."
 icon: "house"
 ---
 
 # Documentación de kombify
 
-Esta documentación pública cubre el estándar publicado de homelab StackKits,
-la beta actual de Homelab incluidas las direcciones públicas kombify.me,
-kombify Cloud (la parte de cuenta a la que se puede conectar un homelab),
-kombify AI y el framework de voz SpeechKit. Cada área de producto indica qué
-artefactos son públicos y qué funciones siguen en vista previa.
+Convierte un ordenador que ya tienes en un homelab en marcha con Photos, Files
+y Vault. Funciona en tu propio hardware, no necesita cuenta de kombify y puede
+añadir una dirección HTTPS pública cuando lo desees.
 
-<Info>
-StackKits y SpeechKit tienen versiones públicas independientes. Homelab ya
-cuenta con una Beta de código abierto sin firmar para Windows, pensada para la
-orquestación local sin cuenta.
-</Info>
-
-<CardGroup cols={2}>
-  <Card title="Instalar StackKits" icon="rocket" href="/es/stackkits/quickstart">
-    Empieza con el instalador publicado, inicializa un stack local, valida el
-    plan, aplícalo y verifica el resultado.
+<CardGroup cols={3}>
+  <Card title="Configura tu homelab en 10 minutos" icon="stopwatch" href="/es/stackkits/install-in-10-minutes">
+    Un solo comando en una máquina Linux disponible. Terminas con servicios en
+    marcha, una clave de acceso de propietario y tus datos de acceso en un
+    archivo.
   </Card>
-  <Card title="Entender StackKits" icon="boxes-stacked" href="/es/stackkits/overview">
-    Descubre qué gestiona el estándar StackKits y cómo encajan los kits, las
-    aplicaciones, los planes y las evidencias.
+  <Card title="Conecta Cloud y Kubi" icon="cloud" href="/es/apps/cloud/overview">
+    Crea una cuenta de kombify Cloud, conecta el servidor que ejecutas y pide a
+    Kubi que lo opere por ti.
   </Card>
-  <Card title="Instalar Homelab Beta" icon="windows" href="/es/homelab/install-windows">
-    Descarga el cliente de Windows sin firmar, conecta un servidor local y usa
-    kombify.me cuando un servicio necesite un nombre HTTPS público.
-  </Card>
-  <Card title="kombify Cloud" icon="cloud" href="/es/apps/cloud/overview">
-    Crea una cuenta, conecta tu propio servidor o deja que kombify aprovisione
-    uno, e invita a tu hogar. Cloud está en beta.
-  </Card>
-  <Card title="kombify AI" icon="sparkles" href="/es/apps/ai/overview">
-    Pregunta a AI Guide, trabaja con Companion o deja que kombify AI atienda un
-    homelab conectado (vista previa).
-  </Card>
-  <Card title="Instalar SpeechKit" icon="microphone" href="/es/speechkit/overview">
-    Descarga la beta de Windows o la beta de dictado para macOS, o empieza con
-    el framework público de Go.
-  </Card>
-  <Card title="Concepto de identidad" icon="shield-halved" href="/es/identity/overview">
-    Comprende la identidad local del propietario, las rutas de aplicación
-    protegidas y el inicio de sesión alojado opcional.
-  </Card>
-  <Card title="Direcciones de kombify.me" icon="globe" href="/es/kombify-me/overview">
-    Ingress conectado de Homelab: dale a un servicio accesible un nombre HTTPS
-    público o reenvía un destino HTTP privado a través del agente de nodo.
+  <Card title="Referencia de StackKits" icon="square-terminal" href="/es/stackkits/reference/cli/overview">
+    Cada comando, opción y ejemplo de la CLI que instala y mantiene tu homelab.
   </Card>
 </CardGroup>
 
-## Autoridad de las versiones
+## Tus direcciones
 
-Las instrucciones basadas en versiones enlazan al artefacto público actual y no
-a una versión congelada, de modo que un enlace de descarga de aquí siempre lleva
-a la última versión publicada. Cuando una página indica una versión, esa línea
-se genera a partir de la versión publicada y se concilia automáticamente. Las
-funciones en vista previa se etiquetan por separado y no reciben pasos de
-descarga o instalación inventados.
+Un solo comando da nombres HTTPS a tus aplicaciones sin configurar un dominio
+antes. Los nombres públicos `*.kombify.me` son la opción predeterminada sin
+fricción: sin dominio, sin configuración DNS y sin certificado en tu teléfono o
+portátil. Solo red local es la alternativa explícita cuando no quieres nada
+accesible desde fuera.
+
+| Modo | Direcciones | Qué requiere |
+| --- | --- | --- |
+| Nombres públicos | `*.kombify.me` | Predeterminado en un servidor público. En un servidor doméstico, define `DOMAIN=kombify.me` antes del comando único y activa una ruta de acceso con `stackkit reach`. |
+| Solo red local | `*.lab.home` | Predeterminado en un servidor doméstico y siempre disponible de forma explícita con `DOMAIN=lab.home`. Cada dispositivo necesita el paso único de DNS y CA. |
+
+`stackkit connect` vincula el servidor a tu cuenta de kombify, lo que activa
+los nombres `{base}-{app}.kombify.me`. Después decides por aplicación si
+permanece solo en casa o accesible desde internet.
 
 <Note>
-Esta documentación excluye deliberadamente la infraestructura interna de
-desarrollo, los detalles de implementación privados y las promesas de producto
-no compatibles.
+  kombify.me es software en Beta. Los nombres, cabeceras y formatos de error
+  pueden seguir cambiando.
 </Note>
+
+## Los seis comandos
+
+Cubren la instalación, la operación diaria y la conexión opcional a kombify:
+
+| Comando | Qué hace |
+| --- | --- |
+| <code>stackkit init</code> | Inicializa un nuevo despliegue desde un StackKit |
+| <code>stackkit apply</code> | Aplica los cambios de infraestructura |
+| <code>stackkit status</code> | Muestra el estado del despliegue |
+| <code>stackkit verify</code> | Ejecuta comprobaciones posteriores al despliegue |
+| <code>stackkit backup</code> | Gestiona copias de seguridad (motor Kopia) |
+| <code>stackkit connect</code> | Vincula el servidor a tu cuenta de kombify para nombres públicos `*.kombify.me` |
+
+La [referencia de CLI](/es/stackkits/reference/cli/overview) enumera cada
+comando con sus opciones y ejemplos; el resto del árbol de comandos se agrupa
+allí bajo Referencia avanzada.
+
+## Más
+
+- [Comparar con otras herramientas](/es/start/compare/overview): Proxmox VE con
+  Komodo, Dockge o Portainer, además de Coolify, Umbrel, CasaOS, TrueNAS y
+  Unraid.
+- [Direcciones kombify.me](/es/kombify-me/overview): nombres HTTPS públicos
+  para servicios ya accesibles y un relé privado opcional.
+- [Identidad](/es/identity/overview): identidad local del propietario, rutas de
+  aplicación protegidas e inicio de sesión alojado opcional.
+- [Casos de uso](/es/guides/stackkits/use-cases/overview): Photos, Files, Vault
+  y más, con las aplicaciones que los proporcionan.
+- [kombify AI y SpeechKit](/es/apps/ai/overview): las capacidades de IA y voz
+  que se conectan a tu homelab.
+- [Comunidad](https://github.com/kombifyio/StackKits/discussions): preguntas,
+  ideas y ayuda de otras personas con homelab.

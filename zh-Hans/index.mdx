@@ -1,48 +1,60 @@
 ---
 title: "kombify 文档"
-description: "使用 StackKits、SpeechKit 和 Homelab Beta。"
+description: "将闲置电脑变成运行中的家庭实验室，包含 Photos、Files 和 Vault —— 运行在你自己的硬件上、云端或由 kombify 代管。"
 icon: "house"
 ---
 
 # kombify 文档
 
-本公开文档涵盖已发布的 StackKits homelab 标准、包含公开 kombify.me 地址在内的当前 Homelab Beta、kombify Cloud（可连接 homelab 的账户部分）、kombify AI 以及 SpeechKit 语音框架。每个产品部分均会说明哪些产物已公开提供，以及哪些功能仍处于预览阶段。
+将你已有的电脑变成运行中的家庭实验室，开箱即用 Photos、Files 和 Vault。它运行在你自己的硬件上，无需 kombify 账户，并可在需要时添加公开 HTTPS 地址。
 
-<Info>
-StackKits 和 SpeechKit 均有独立的公开发布版本。Homelab 现已提供未签名的开源 Windows Beta 版本，可在无需账号的情况下进行本地编排。
-</Info>
-
-<CardGroup cols={2}>
-  <Card title="安装 StackKits" icon="rocket" href="/zh-Hans/stackkits/quickstart">
-    从已发布的安装程序开始：初始化本地技术栈、验证计划、应用计划，并检查结果。
+<CardGroup cols={3}>
+  <Card title="10 分钟搭建家庭实验室" icon="stopwatch" href="/zh-Hans/stackkits/install-in-10-minutes">
+    在闲置 Linux 机器上运行一条命令。完成后即可获得运行中的服务、所有者通行密钥以及集中保存在单个文件中的访问信息。
   </Card>
-  <Card title="了解 StackKits" icon="boxes-stacked" href="/zh-Hans/stackkits/overview">
-    了解 StackKits 标准负责什么，以及套件、应用、计划和证据如何协同工作。
+  <Card title="连接 Cloud 与 Kubi" icon="cloud" href="/zh-Hans/apps/cloud/overview">
+    创建 kombify Cloud 账户，连接你运行的服务器，并让 Kubi 代你运维。
   </Card>
-  <Card title="安装 Homelab Beta" icon="windows" href="/zh-Hans/homelab/install-windows">
-    下载未签名的 Windows 客户端，连接本地服务器，并在服务需要公共 HTTPS 名称时使用 kombify.me。
-  </Card>
-  <Card title="kombify Cloud" icon="cloud" href="/zh-Hans/apps/cloud/overview">
-    创建账户、连接你自己的服务器或由 kombify 预配服务器，并邀请家庭成员加入。Cloud 目前处于 Beta 阶段。
-  </Card>
-  <Card title="kombify AI" icon="sparkles" href="/zh-Hans/apps/ai/overview">
-    向 AI Guide 提问、使用 Companion 协作，或让 kombify AI 照看已连接的 homelab（预览）。
-  </Card>
-  <Card title="安装 SpeechKit" icon="microphone" href="/zh-Hans/speechkit/overview">
-    下载 Windows 测试版或 macOS 听写测试版，也可以从公开的 Go 框架开始。
-  </Card>
-  <Card title="身份概念" icon="shield-halved" href="/zh-Hans/identity/overview">
-    了解本地所有者身份、受保护的应用路由以及可选的托管登录。
-  </Card>
-  <Card title="kombify.me 地址" icon="globe" href="/zh-Hans/kombify-me/overview">
-    已连接的 Homelab 入口：为可访问的服务提供公共 HTTPS 名称，或通过节点代理中继私有 HTTP 目标。
+  <Card title="StackKits 参考" icon="square-terminal" href="/zh-Hans/stackkits/reference/cli/overview">
+    用于安装和维护家庭实验室的 CLI 全部命令、参数与示例。
   </Card>
 </CardGroup>
 
-## 发布权威
+## 你的地址
 
-基于发布版本的说明会链接到当前的公开制品，而不是某个固定版本，因此这里的下载链接始终指向最新发布的版本。凡是页面中标明版本的地方，该行内容都由已发布的版本生成并自动核对。处于预览阶段的功能会单独标注，不提供合成的下载或安装步骤。
+一条命令即可为应用分配 HTTPS 名称，无需提前配置域名。公开 `*.kombify.me` 名称是免配置的默认选项：无需域名、无需 DNS 设置，也无需在手机或笔记本上安装证书。若你希望任何服务都不可从外部访问，可显式选择仅限本地网络。
+
+| 模式 | 地址 | 所需条件 |
+| --- | --- | --- |
+| 公开名称 | `*.kombify.me` | 公网服务器默认启用。在家庭服务器上，运行单行命令前设置 `DOMAIN=kombify.me`，再通过 `stackkit reach` 启用访问路径。 |
+| 仅限本地网络 | `*.lab.home` | 家庭服务器默认启用，也可随时通过 `DOMAIN=lab.home` 显式选择。每台设备需完成一次 DNS 和 CA 配置步骤。 |
+
+`stackkit connect` 会将服务器绑定到你的 kombify 账户，从而激活 `{base}-{app}.kombify.me` 名称。之后你可以按应用逐一决定仅限家庭内网或对互联网开放。
 
 <Note>
-本文档有意不包含内部开发基础设施、私有实现细节和不受支持的产品声明。
+  kombify.me 处于 Beta 阶段。名称、请求头和错误格式仍可能变化。
 </Note>
+
+## 六个核心命令
+
+这六个命令覆盖了安装、日常运维以及可选的 kombify 连接：
+
+| 命令 | 作用 |
+| --- | --- |
+| <code>stackkit init</code> | 从 StackKit 初始化新部署 |
+| <code>stackkit apply</code> | 应用基础设施变更 |
+| <code>stackkit status</code> | 查看部署状态 |
+| <code>stackkit verify</code> | 运行部署后验证检查 |
+| <code>stackkit backup</code> | 管理备份（Kopia 引擎） |
+| <code>stackkit connect</code> | 将服务器绑定到 kombify 账户以启用公开 `*.kombify.me` 名称 |
+
+[CLI 参考](/zh-Hans/stackkits/reference/cli/overview)列出了所有命令的参数与示例；其余命令收纳在其中的“高级参考”分组下。
+
+## 更多
+
+- [与其他工具对比](/zh-Hans/start/compare/overview)：Proxmox VE 搭配 Komodo、Dockge 或 Portainer，以及 Coolify、Umbrel、CasaOS、TrueNAS 和 Unraid。
+- [kombify.me 地址](/zh-Hans/kombify-me/overview)：为已可达服务提供公开 HTTPS 名称，并提供可选私密中继。
+- [身份](/zh-Hans/identity/overview)：本地所有者身份、受保护的应用路由以及可选托管登录。
+- [使用场景](/zh-Hans/guides/stackkits/use-cases/overview)：Photos、Files、Vault 等场景及对应应用。
+- [kombify AI 与 SpeechKit](/zh-Hans/apps/ai/overview)：可接入你家庭实验室的 AI 与语音能力。
+- [社区](https://github.com/kombifyio/StackKits/discussions)：与其他家庭实验室用户的问答、想法与互助。

@@ -1,0 +1,24 @@
+---
+title: "stackkit connect"
+description: "将此服务器绑定到你的 kombify 账户（免费账户即可）"
+sidebarTitle: "connect"
+---
+将此服务器绑定到你的 kombify 账户（免费账户即可）。
+
+将这台已运行公开软件包的服务器绑定到在 Homelab 设置中创建配对信息的 kombify 账户。完成后，服务器会在 kombify Cloud 中显示其状态；进一步的变更操作属于付费方案范围。请在终端的隐藏提示处粘贴一次性配对信息。自动化脚本可使用 `--token-file` 或 `KOMBI_TOKEN`，切勿将令牌直接作为命令行参数传入。控制平面来源取自 `--server` 或 `KOMBI_SERVER`（公开默认值为 `https://homelab.kombify.io`）。对于自托管控制平面，请从 kombify Cloud 中的自有服务器设置复制准确的 `--server` 来源地址。已绑定的服务器会报告当前绑定关系且不做任何更改。请在 Linux 上以 root 身份运行。
+
+```bash
+stackkit connect [flags]
+```
+
+| 参数 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `--server` | string | — | 生成配对信息的控制平面来源（`KOMBI_SERVER`，否则为 `https://homelab.kombify.io`）；自托管来源请从自有服务器设置中复制 |
+| `--token-file` | string | — | 保存一次性配对信息的私密文件（否则使用 `KOMBI_TOKEN`，再其次为终端隐藏提示） |
+
+**示例**
+
+```bash
+sudo stackkit connect --server https://homelab.kombify.io
+sudo stackkit connect --server https://your-homelab.example --token-file /root/kombify-pairing
+```

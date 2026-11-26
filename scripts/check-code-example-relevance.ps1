@@ -145,13 +145,23 @@ $allowedInlineCommands = @{
     "stackkits/kits/modern-homelab.mdx" = @(
         "stackkit logs latest --json"
     )
+    "index.mdx" = @(
+        "stackkit reach",
+        "stackkit connect"
+    )
+    "stackkits/overview.mdx" = @(
+        "stackkit connect"
+    )
     "stackkits/quickstart.mdx" = @(
         "stackkit version",
-        "stackkit logs latest --json"
+        "stackkit logs latest --json",
+        "stackkit reach",
+        "stackkit connect"
     )
     "stackkits/install-in-10-minutes.mdx" = @(
         "stackkit version",
-        "stackkit logs latest --json"
+        "stackkit logs latest --json",
+        "stackkit reach"
     )
     "stackkits/apps/login-gateway.mdx" = @(
         "stackkit verify --json"

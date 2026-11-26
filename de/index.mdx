@@ -1,58 +1,82 @@
 ---
 title: "kombify-Dokumentation"
-description: "Nutze StackKits, SpeechKit und die Homelab-Beta."
+description: "Mach aus einem vorhandenen Rechner ein laufendes Homelab mit Photos, Files und Vault — auf eigener Hardware, in der Cloud oder von kombify betrieben."
 icon: "house"
 ---
 
 # kombify-Dokumentation
 
-Wähle die Tür, die dazu passt, wie du dein Homelab betreiben willst: kombify
-betreibt es für dich, du betreibst es auf deiner eigenen Hardware, oder du
-verbindest die KI und die Werkzeuge darum herum.
+Mach aus einem Rechner, den du bereits besitzt, ein laufendes Homelab mit
+Photos, Files und Vault. Es läuft auf deiner eigenen Hardware, braucht kein
+kombify-Konto und kann auf Wunsch eine öffentliche HTTPS-Adresse hinzufügen.
 
 <CardGroup cols={3}>
-  <Card title="Verwaltete Apps & Cloud" icon="cloud" href="/de/apps/cloud/overview">
-    Lass kombify den Server bereitstellen und betreiben. Erstelle ein Konto,
-    verbinde einen Server, den du selbst betreibst, oder nutze einen
-    bereitgestellten, und lade deinen Haushalt ein.
+  <Card title="Homelab in 10 Minuten einrichten" icon="stopwatch" href="/de/stackkits/install-in-10-minutes">
+    Ein Befehl auf einer freien Linux-Maschine. Am Ende laufen deine Dienste
+    mit eigenem Owner-Passkey und allen Zugangsdaten in einer Datei.
   </Card>
-  <Card title="Selbst hosten auf deiner Hardware" icon="server" href="/de/stackkits/quickstart">
-    Installiere StackKits auf einer Maschine, die du bereits betreibst, und
-    plane, wende an und prüfe deine Dienste. Proxmox VE und Homelab-Appliances
-    sind ebenfalls abgedeckt.
+  <Card title="Cloud und Kubi verbinden" icon="cloud" href="/de/apps/cloud/overview">
+    Erstelle ein kombify-Cloud-Konto, verbinde den Server, den du betreibst,
+    und lass Kubi ihn für dich betreiben.
   </Card>
-  <Card title="kombify KI & Werkzeuge verbinden" icon="sparkles" href="/de/apps/ai/overview">
-    Frage den AI Guide, arbeite mit dem Companion, verbinde einen eigenen
-    Agenten über MCP und ergänze Sprachsteuerung mit SpeechKit.
+  <Card title="StackKits-Referenz" icon="square-terminal" href="/de/stackkits/reference/cli/overview">
+    Jeder Befehl, jedes Flag und jedes Beispiel für die CLI, die dein Homelab
+    installiert und aktuell hält.
   </Card>
 </CardGroup>
 
-## Gut zu wissen
+## Deine Adressen
 
-- [Identität](/de/identity/overview): lokale Owner-Identität, geschützte
-  Anwendungsrouten und optionale gehostete Anmeldung.
-- [kombify.me-Adressen](/de/kombify-me/overview): Gib einem erreichbaren Dienst
-  einen öffentlichen HTTPS-Namen oder leite ein privates Ziel über den
-  Node-Agent weiter.
-- [Vergleiche](/de/start/compare/overview): wie kombify neben Umbrel, CasaOS,
-  Proxmox VE, Coolify und anderen Homelab-Werkzeugen einzuordnen ist.
+Ein Befehl gibt deinen Apps HTTPS-Namen, ohne dass du vorher eine Domain
+einrichtest. Öffentliche `*.kombify.me`-Namen sind der reibungslose Standard:
+keine Domain, kein DNS-Setup und kein Zertifikat auf Telefon oder Laptop.
+Nur im lokalen Netzwerk ist die bewusste Alternative, wenn nichts von außen
+erreichbar sein soll.
 
-<Info>
-StackKits und SpeechKit haben eigenständige öffentliche Releases. Homelab hat
-jetzt eine unsignierte Open-Source-Beta für Windows zur kontofreien lokalen
-Orchestrierung.
-</Info>
+| Modus | Adressen | Was du dafür brauchst |
+| --- | --- | --- |
+| Öffentliche Namen | `*.kombify.me` | Standard auf einem öffentlichen Server. Auf einem Heimserver setze `DOMAIN=kombify.me` vor dem Einzeiler und schalte einen Zugangsweg mit `stackkit reach` ein. |
+| Nur im lokalen Netzwerk | `*.lab.home` | Standard auf einem Heimserver und überall gezielt wählbar mit `DOMAIN=lab.home`. Jedes Gerät braucht den einmaligen DNS- und CA-Schritt. |
 
-## Release-Autorität
-
-Release-basierte Anleitungen verlinken auf das aktuelle öffentliche Artefakt
-statt auf eine eingefrorene Version, sodass ein Download-Link hier immer zum
-neuesten veröffentlichten Release führt. Wo eine Seite eine Version nennt, wird
-diese Zeile aus dem veröffentlichten Release erzeugt und automatisch abgeglichen.
-Funktionen in der Vorschau sind separat gekennzeichnet und erhalten keine erfundenen
-Download- oder Installationsschritte.
+`stackkit connect` bindet den Server an dein kombify-Konto und aktiviert damit
+`{base}-{app}.kombify.me`-Namen. Danach entscheidest du pro App, ob sie nur im
+Heimnetz bleibt oder aus dem Internet erreichbar ist.
 
 <Note>
-Diese Dokumentation schließt interne Entwicklungsinfrastruktur, private
-Implementierungsdetails und nicht unterstützte Produktversprechen bewusst aus.
+  kombify.me ist Beta-Software. Namen, Header und Fehlerformate können sich
+  noch ändern.
 </Note>
+
+## Die sechs Befehle
+
+Diese decken Einrichtung, laufenden Betrieb und die optionale Verbindung zu
+kombify ab:
+
+| Befehl | Aufgabe |
+| --- | --- |
+| <code>stackkit init</code> | Neues Deployment aus einem StackKit initialisieren |
+| <code>stackkit apply</code> | Infrastrukturänderungen anwenden |
+| <code>stackkit status</code> | Deployment-Status anzeigen |
+| <code>stackkit verify</code> | Prüfungen nach dem Deployment ausführen |
+| <code>stackkit backup</code> | Backups verwalten (Kopia-Engine) |
+| <code>stackkit connect</code> | Server für öffentliche `*.kombify.me`-Namen an dein kombify-Konto binden |
+
+Die [CLI-Referenz](/de/stackkits/reference/cli/overview) listet jeden Befehl
+mit Flags und Beispielen; der übrige Befehlsbaum liegt dort unter Erweiterte
+Referenz.
+
+## Mehr
+
+- [Mit anderen Werkzeugen vergleichen](/de/start/compare/overview): Proxmox VE
+  mit Komodo, Dockge oder Portainer sowie Coolify, Umbrel, CasaOS, TrueNAS und
+  Unraid.
+- [kombify.me-Adressen](/de/kombify-me/overview): öffentliche HTTPS-Namen für
+  bereits erreichbare Dienste sowie ein optionales privates Relay.
+- [Identität](/de/identity/overview): lokale Owner-Identität, geschützte
+  Anwendungsrouten und optionale gehostete Anmeldung.
+- [Anwendungsfälle](/de/guides/stackkits/use-cases/overview): Photos, Files,
+  Vault und mehr, samt den Anwendungen dahinter.
+- [kombify AI und SpeechKit](/de/apps/ai/overview): die KI- und
+  Sprachfunktionen, die sich mit deinem Homelab verbinden.
+- [Community](https://github.com/kombifyio/StackKits/discussions): Fragen,
+  Ideen und Hilfe von anderen Homelab-Betreibern.
