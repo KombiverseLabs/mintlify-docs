@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import { reportDeliveryFinding } from "./lib/delivery-report.mjs";
+import { childReleaseDisposition } from "./lib/delivery-failure-diagnostic.mjs";
 import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { appendFileSync, readFileSync, realpathSync } from "node:fs";
@@ -41,25 +43,71 @@ function substitute(value, variables) {
   });
 }
 
-function normalizeSteps(spec, profile, label) {
-  if (Array.isArray(spec)) return spec;
+export function deliveryOperationProfileKey(profile) {
+  switch (profile) {
+    case "fast-pre-1.0": return "fast";
+    case "stable-1.0-plus": return "stable";
+    case "early-access": return "early-access";
+    default: fail("DELIVERY_PROFILE must be fast-pre-1.0, stable-1.0-plus or early-access");
+  }
+}
+
+export function deliveryOperationSteps(spec, profile, label = "operation") {
+  const profileKey = deliveryOperationProfileKey(profile);
+  if (Array.isArray(spec) && profileKey !== "early-access") return spec;
   if (!spec || typeof spec !== "object") {
     fail(`${label} must be a step array or a profile map`);
   }
-  const profileKey = profile === "stable-1.0-plus" ? "stable" : "fast";
-  const steps = spec[profileKey] ?? spec.default;
-  if (!Array.isArray(steps)) {
-    fail(`${label}.${profileKey} must be a step array`);
+  const steps = Object.hasOwn(spec, profileKey) ? spec[profileKey]
+    : profileKey === "early-access" ? undefined : spec.default;
+  if (!Array.isArray(steps) || steps.length === 0) {
+    fail(`${label}.${profileKey} must be a nonempty explicit step array`);
   }
   return steps;
 }
+
+// A group's role in its product's release (CI-CD-PLATFORM-STANDARD.md §4.6
+// "Side publications"). Absent is "gating": a group that does not complete
+// fails the Delivery, as before. "side" is a side publication (a package
+// registry, a store build, a public source mirror): the shared
+// delivery-operation.yml reports its failed publish, promote or stable smoke as
+// a side outcome of its own and keeps the Delivery run green. Any other value
+// refuses before an effect, so a typo never turns a gating group into a side one.
+export const SIDE_RELEASE_ROLE = "side";
+export function deliveryGroupReleaseRole(group) {
+  if (!group || typeof group !== "object" || !Object.hasOwn(group, "release_role")) return "gating";
+  if (group.release_role !== SIDE_RELEASE_ROLE) {
+    fail(`group ${group.id ?? "<missing>"} release_role must be "${SIDE_RELEASE_ROLE}" when declared`);
+  }
+
+  return SIDE_RELEASE_ROLE;
+}
+
+// Artifact policy needs the source-bound contract, not just the group's role field.
+export function validateSidePublicationGroup(group, artifacts) {
+  if (deliveryGroupReleaseRole(group) !== SIDE_RELEASE_ROLE) return;
+  const byId = new Map((artifacts ?? []).map(artifact => [artifact.id, artifact]));
+  if (!Array.isArray(group.artifacts) || !group.artifacts.length) fail(`side group ${group.id} has no artifacts`);
+  for (const id of group.artifacts) {
+    const artifact = byId.get(id);
+    if (!artifact?.class || ["container-service", "worker-api", "worker-web", "native-host", "database-migration", "managed-data-service"].includes(artifact.class)) {
+      fail(`side group ${group.id} artifact ${id} must resolve to a publication, never a runtime or data service`);
+    }
+  }
+}
+
+// A child counts for the operation when its run completed successfully or its
+// activation readback was observed (`complete_at`). A `trailing` child only
+// follows such a child and never decides the operation.
+const settledWorkflow = (run) =>
+  (run.status === "completed" && run.conclusion === "success") || Boolean(run.activation) || run.production_complete === true;
 
 // This is an operation observation, not publication authority. The shared
 // workflow binds it to its already validated plan before composing a receipt.
 export function readDeliveryOperationResult(serialized, expected) {
   if (!serialized) return { status: "pending", evidence: [] };
   const result = JSON.parse(serialized);
-  const fields = ["schema_version", "status", "workflows", "deferred", ...Object.keys(expected)];
+  const fields = ["schema_version", "status", "workflows", "deferred", "ui_lab_uploads", ...Object.keys(expected)];
   if (
     !result || Array.isArray(result) || result.schema_version !== 1 ||
     Object.keys(result).some((key) => !fields.includes(key)) ||
@@ -73,22 +121,68 @@ export function readDeliveryOperationResult(serialized, expected) {
   for (const run of result.workflows) {
     if (
       !run || Array.isArray(run) ||
-      Object.keys(run).some((key) => !["repository", "run_id", "head_sha", "status", "conclusion"].includes(key)) ||
+      Object.keys(run).some((key) => !["repository", "run_id", "head_sha", "status", "conclusion", "activation", "trailing", "production_complete"].includes(key)) ||
+      (run.production_complete !== undefined && typeof run.production_complete !== "boolean") ||
+      (run.trailing !== undefined && (run.trailing !== true || run.activation !== undefined ||
+        (run.status === "completed" && run.conclusion !== "success"))) ||
+      (run.activation !== undefined && (
+        !run.activation || Array.isArray(run.activation) || typeof run.activation !== "object" ||
+        Object.keys(run.activation).some((key) => !["job_id", "job", "step"].includes(key)) ||
+        !Number.isSafeInteger(run.activation.job_id) || run.activation.job_id <= 0 ||
+        typeof run.activation.job !== "string" || run.activation.job.trim() === "" ||
+        (run.activation.step !== undefined && (typeof run.activation.step !== "string" || run.activation.step.trim() === ""))
+      )) ||
       !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(run.repository ?? "") ||
       !Number.isSafeInteger(run.run_id) || run.run_id <= 0 ||
       !/^[0-9a-f]{40}$/.test(run.head_sha ?? "") ||
       !["queued", "in_progress", "waiting", "pending", "requested", "completed"].includes(run.status) ||
       !(run.conclusion === null || /^[a-z_]+$/.test(run.conclusion ?? "")) ||
-      (result.status === "passed" && (run.status !== "completed" || run.conclusion !== "success"))
+      (result.status === "passed" && !run.trailing && !settledWorkflow(run))
     ) fail("operation result contains invalid workflow evidence");
     evidence.push({
       kind: run.status === "completed" && run.conclusion === "success"
         ? "github-workflow-completed" : "github-workflow-acknowledged",
       uri: `https://github.com/${run.repository}/actions/runs/${run.run_id}`,
     });
+    // The child's activation readback: the exact job the observation ended at.
+    if (run.activation) {
+      evidence.push({
+        kind: "github-workflow-activation-confirmed",
+        uri: `https://github.com/${run.repository}/actions/runs/${run.run_id}/job/${run.activation.job_id}`,
+      });
+    }
   }
   if (result.status === "passed" && result.deferred.length > 0) {
     fail("delegated operation evidence cannot be passed");
+  }
+  if (result.workflows.some((run) => run.trailing) && !result.workflows.some((run) => !run.trailing && settledWorkflow(run))) {
+    fail("trailing workflow evidence needs the settled activation it follows");
+  }
+  const uploads = result.ui_lab_uploads ?? [];
+  if (!Array.isArray(uploads) || (uploads.length && (expected.profile !== "early-access" || expected.operation !== "publish"))) {
+    fail("Worker upload evidence belongs only to the admitted Early Access publication");
+  }
+  if (expected.profile === "early-access" && expected.operation === "publish" && result.status === "passed" && uploads.length !== 1) {
+    fail("Early Access publication requires one retained Worker upload observation");
+  }
+  for (const upload of uploads) {
+    const keys = ["schema", "source_sha", "plan_digest", "release_id", "child_run_id", "artifact_id", "archive_digest",
+      "worker_version_id", "preview_url", "target_id", "authenticated_acceptance"];
+    if (!upload || Object.keys(upload).length !== keys.length || Object.keys(upload).some(key => !keys.includes(key)) ||
+        upload.schema !== "delivery.ui-lab-upload-observation/v1" || upload.source_sha !== expected.source_sha ||
+        upload.plan_digest !== expected.plan_digest || upload.release_id !== expected.release_id ||
+        !Number.isSafeInteger(upload.child_run_id) || upload.child_run_id <= 0 ||
+        !Number.isSafeInteger(upload.artifact_id) || upload.artifact_id <= 0 ||
+        !/^sha256:[a-f0-9]{64}$/.test(upload.archive_digest ?? "") ||
+        !/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(upload.worker_version_id ?? "") ||
+        !/^https:\/\/[a-f0-9]{8}-kombify-ui-lab\.[a-z0-9-]+\.workers\.dev$/.test(upload.preview_url ?? "") ||
+        !upload.preview_url.startsWith(`https://${upload.worker_version_id.slice(0, 8)}-`) ||
+        upload.target_id !== "brand-ui-lab-cloudflare-worker-early-access" || upload.authenticated_acceptance !== "pending-m13" ||
+        !result.workflows.some(run => run.run_id === upload.child_run_id && run.repository === "KombiverseLabs/kombify-Brand" &&
+          run.status === "completed" && run.conclusion === "success")) fail("Worker upload observation does not match the exact child");
+    evidence.push({ kind: "worker-version-preview", uri: upload.preview_url });
+    evidence.push({ kind: "worker-version-upload-receipt", uri: `https://github.com/KombiverseLabs/kombify-Brand/actions/runs/${upload.child_run_id}/artifacts/${upload.artifact_id}`,
+      digest: upload.archive_digest });
   }
   return { status: result.status, evidence };
 }
@@ -121,54 +215,6 @@ async function resolveRunnerCustody(config) {
   return { runner, contract };
 }
 
-// Fast pre-1.0 publish and promote carry no Candidate receipt: the rollout
-// path deploys and confirms activation only, and product-delivery.yml requests
-// the Candidate E2E after activation (D-2026-10-27-05). Stable 1.0+ keeps its
-// clean, exact-source receipt before publication.
-function verifyCandidateReceipt(variables, operation) {
-  if (!["publish", "promote"].includes(operation)) return;
-  if (variables.DELIVERY_PROFILE !== "stable-1.0-plus") {
-    process.stdout.write(`Candidate E2E: not_required for fast ${operation}; it runs after activation.\n`);
-    return;
-  }
-  const encoded = requireString(variables.CANDIDATE_RECEIPT_B64, "CANDIDATE_RECEIPT_B64 for stable publish/promote");
-  let receipt;
-  try {
-    const decoded = Buffer.from(encoded, "base64");
-    if (decoded.toString("base64") !== encoded) {
-      fail("CANDIDATE_RECEIPT_B64 must be canonical base64");
-    }
-    receipt = JSON.parse(decoded.toString("utf8"));
-  } catch (error) {
-    fail(`CANDIDATE_RECEIPT_B64 is not canonical base64 JSON: ${error.message}`);
-  }
-  if (
-    receipt?.schema_version !== 1 ||
-    receipt?.kind !== "candidate-e2e" ||
-    receipt?.result !== "PASS" ||
-    receipt?.exit_code !== 0 ||
-    receipt?.dirty !== false
-  ) {
-    fail("stable clean Candidate receipt must be a Candidate E2E v1 PASS");
-  }
-  assertCandidateFeatureAcceptance(receipt, {});
-  if (
-    String(receipt.repo ?? "").toLowerCase() !== variables.SOURCE_REPOSITORY.toLowerCase() ||
-    receipt.sha !== variables.SOURCE_SHA
-  ) {
-    fail(
-      `Candidate receipt identity does not match ${variables.SOURCE_REPOSITORY}@${variables.SOURCE_SHA}`,
-    );
-  }
-  const finishedAt = Date.parse(receipt.finished_at ?? "");
-  const ageMs = Date.now() - finishedAt;
-  if (!Number.isFinite(finishedAt) || ageMs < -5 * 60 * 1000 || ageMs > 24 * 60 * 60 * 1000) {
-    fail("Candidate receipt must be fresh within 24 hours");
-  }
-}
-
-// Kept in the standalone runtime so the existing fleet copy/sync path carries
-// the same admission check without another runtime dependency.
 export function assertCandidateFeatureAcceptance(receipt, { required = false, bundleRoot } = {}) {
   const nonempty = (value) => typeof value === "string" && value.trim().length > 0;
   const hash = (value) => typeof value === "string" && /^[0-9a-f]{64}$/.test(value);
@@ -275,16 +321,21 @@ function rateLimitWaitMs(response, body, attempt) {
   return 60_000 * 2 ** (attempt - 1);
 }
 
-async function githubRequest(token, url, options = {}, notFoundDeadline = 0) {
+// `window` (optional) is the life of a GitHub App token: its require(phase, neededMs)
+// throws a named error before a request or a wait would end after it. Without it
+// the token is the job's own github.token, which lives as long as the job.
+async function githubRequest(token, url, options = {}, notFoundDeadline = 0, window = null) {
   const method = options.method ?? "GET";
   const cached = method === "GET" ? conditionalReads.get(url) : undefined;
   let waited = 0;
   for (let attempt = 1; ; attempt += 1) {
+    window?.require("github-request");
     let response;
     let bodyText = "";
     try {
       response = await fetch(url, {
         ...options,
+        ...(method === "GET" && !options.signal ? { signal: AbortSignal.timeout(15_000) } : {}),
         headers: {
           accept: "application/vnd.github+json",
           authorization: `Bearer ${token}`,
@@ -303,6 +354,7 @@ async function githubRequest(token, url, options = {}, notFoundDeadline = 0) {
       // single-attempt because the request may already have taken effect.
       if (method !== "GET") throw error;
       if (attempt > TRANSIENT_READ_RETRIES) throw Object.assign(error, { transientRead: true });
+      window?.require("read-retry", 5_000 * attempt);
       process.stdout.write(
         `GitHub API ${method} ${url} failed on the network (${error?.message ?? error}); reading again instead of failing the delivery.\n`,
       );
@@ -320,6 +372,7 @@ async function githubRequest(token, url, options = {}, notFoundDeadline = 0) {
     const text = bodyText;
     const waitMs = rateLimitWaitMs(response, text, attempt);
     if (waitMs !== null && Number.isFinite(waitMs) && waited + waitMs <= RATE_LIMIT_MAX_WAIT_MS) {
+      window?.require("rate-limit-wait", waitMs);
       process.stdout.write(
         `GitHub API ${method} ${url} is rate limited (${response.status}); waiting ${Math.ceil(waitMs / 1000)}s for the limit to reset instead of failing the delivery.\n`,
       );
@@ -332,6 +385,7 @@ async function githubRequest(token, url, options = {}, notFoundDeadline = 0) {
     const retryDelay = 5_000 * attempt;
     const acknowledgedRunNotVisible = response.status === 404 && Date.now() + retryDelay <= notFoundDeadline;
     if (method === "GET" && ([500, 502, 503, 504].includes(response.status) || acknowledgedRunNotVisible) && attempt <= TRANSIENT_READ_RETRIES) {
+      window?.require("read-retry", retryDelay);
       process.stdout.write(
         `GitHub API ${method} ${url} answered ${response.status}; reading again instead of failing the delivery.\n`,
       );
@@ -344,39 +398,10 @@ async function githubRequest(token, url, options = {}, notFoundDeadline = 0) {
   }
 }
 
-const ACTIVE_RUN_STATUSES = ["queued", "in_progress", "waiting", "pending", "requested"];
-
-async function waitForIdleWorkflows(token, owner, repository, workflows, startedAt, timeoutSeconds) {
-  if (workflows === undefined) return;
-  if (!Array.isArray(workflows) || workflows.length === 0 || workflows.some((name) => typeof name !== "string" || name === "")) {
-    fail("step.wait_for_idle_workflows must be a non-empty array of workflow file names");
-  }
-  const deadline = startedAt + timeoutSeconds * 1000;
-  for (;;) {
-    let busy = null;
-    for (const name of workflows) {
-      for (const status of ACTIVE_RUN_STATUSES) {
-        const runs = await githubRequest(
-          token,
-          `https://api.github.com/repos/${owner}/${repository}/actions/workflows/${encodeURIComponent(name)}/runs?status=${status}&per_page=1`,
-        );
-        if ((runs?.workflow_runs ?? []).length > 0) {
-          busy = `${name} (${status})`;
-          break;
-        }
-      }
-      if (busy) break;
-    }
-    if (!busy) return;
-    if (Date.now() + 20_000 > deadline) {
-      fail(`${owner}/${repository} workflow ${busy} stayed active until the step deadline; dispatch was not sent`);
-    }
-    process.stdout.write(`Waiting for ${busy} to finish before dispatching\n`);
-    await new Promise((resolve) => setTimeout(resolve, 15_000));
-  }
-}
-
-export async function dispatchWorkflow(step, variables, { onAcknowledged, acknowledgedRunId } = {}) {
+// `tokenWindow` is passed only when GH_TOKEN is a GitHub App installation token
+// (one hour). Dispatch needs a usable credential, independently of how much
+// observation fits later. An acknowledged child is never dispatched again.
+export async function dispatchWorkflow(step, variables, { onAcknowledged, acknowledgedRunId, tokenWindow = null } = {}) {
   if (!onAcknowledged && acknowledgedRunId === undefined) {
     fail("workflow dispatch requires the shared exact-child binding uploader");
   }
@@ -442,19 +467,46 @@ export async function dispatchWorkflow(step, variables, { onAcknowledged, acknow
       "workflow observation timeout must be a positive integer; ignition is limited to 300 seconds",
     );
   }
+  // `complete_at` ends the observation at the child's activation readback: the
+  // named job (and step, when given) of the acknowledged run concluded success.
+  // What the child still runs after that point is trailing work; its result is
+  // the child run's own and never this operation's (CI-CD-PLATFORM-STANDARD.md
+  // "Modular evidence and emergency delivery").
+  const completeAt = step.complete_at;
+  if (completeAt !== undefined) {
+    const keys = completeAt && typeof completeAt === "object" && !Array.isArray(completeAt) ? Object.keys(completeAt) : null;
+    if (
+      !waitsForCompletion || !keys || keys.some((key) => !["job", "step"].includes(key)) ||
+      typeof completeAt.job !== "string" || completeAt.job.trim() === "" ||
+      (completeAt.step !== undefined && (typeof completeAt.step !== "string" || completeAt.step.trim() === ""))
+    ) {
+      fail("workflow complete_at needs a job name, an optional step name and an observed (waiting) step");
+    }
+  }
+  // `trailing: true` marks an ignition-only child that only follows an
+  // activation an earlier step of the same operation already read back.
+  if (step.trailing !== undefined && (step.trailing !== true || waitsForCompletion)) {
+    fail("workflow trailing is true and belongs to an ignition-only step");
+  }
   const startedAt = Date.now();
   const workflowUrl = `https://api.github.com/repos/${owner}/${repository}/actions/workflows/${encodeURIComponent(workflow)}`;
+  const request = (url, options = {}, notFoundDeadline = 0) => githubRequest(token, url, options, notFoundDeadline, tokenWindow);
   let runId = acknowledgedRunId;
   if (runId === undefined) {
-    await waitForIdleWorkflows(token, owner, repository, step.wait_for_idle_workflows, startedAt, timeoutSeconds);
     process.stdout.write(
       `Dispatching ${owner}/${repository}/${workflow} at ${ref} with input keys [${Object.keys(inputs).join(", ")}]\n`,
     );
-    const dispatched = await githubRequest(token, `${workflowUrl}/dispatches`, {
-      method: "POST",
-      body: JSON.stringify({ ref, inputs, return_run_details: true }),
-    });
-    runId = dispatched?.workflow_run_id;
+    try {
+      tokenWindow?.require(`dispatch ${workflow}`, 30_000);
+      const dispatched = await request(`${workflowUrl}/dispatches`, {
+        method: "POST",
+        body: JSON.stringify({ ref, inputs, return_run_details: true }),
+      });
+      runId = dispatched?.workflow_run_id;
+    } catch (error) {
+      error.producingFailure = true;
+      throw error;
+    }
   }
   if (!Number.isSafeInteger(runId) || runId <= 0) {
     fail("workflow dispatch acknowledgement has no valid workflow_run_id; dispatch will not be repeated");
@@ -519,11 +571,11 @@ export async function dispatchWorkflow(step, variables, { onAcknowledged, acknow
   }
   report("acknowledged");
   // The native Actions helper must finalize and independently authenticate this
-  // exact binding before this runtime observes or waits for the child.
-  if (onAcknowledged) await onAcknowledged({ runId, repository: `${owner}/${repository}`, workflow, ref });
+  // exact binding before this operation can continue. Use the structured REST
+  // observation for both binding and completion; do not make a second CLI read.
   const progress = setInterval(() => report("progress"), 30000);
   async function findRun() {
-    const run = await githubRequest(token, runUrl, {}, observedAt === null ? visibilityDeadline : 0);
+    const run = await request(runUrl, {}, observedAt === null ? visibilityDeadline : 0);
     if (run?.id !== runId) {
       fail(`workflow run response does not match acknowledged run ${runId}`);
     }
@@ -540,15 +592,38 @@ export async function dispatchWorkflow(step, variables, { onAcknowledged, acknow
 
   const runEvidence = (run) =>
     `run_id=${run.id} source_sha=${variables.SOURCE_SHA} workflow_head_sha=${run.head_sha} url=${run.html_url}`;
-  const acknowledgedRun = (run) => ({
+  const acknowledgedRun = (run, activation) => ({
     id: run.id,
     head_sha: run.head_sha,
     status: run.status,
     conclusion: run.conclusion ?? null,
     html_url: run.html_url,
+    ...(activation ? { activation } : {}),
   });
+  // One read of the acknowledged run's newest jobs. Only an exact, unique and
+  // successful job (and step) is an activation; a failed, cancelled or skipped
+  // one stays with the run's own terminal state below.
+  async function readActivation() {
+    const data = await request(`${runUrl}/jobs?filter=latest&per_page=100`);
+    const listed = Array.isArray(data?.jobs) ? data.jobs : [];
+    // The name must be unique among all jobs of the run: a run with more jobs
+    // than this one page shows cannot prove that, so it is observed to its end.
+    if (!Number.isSafeInteger(data?.total_count) || data.total_count !== listed.length) return null;
+    const jobs = listed.filter((job) => job?.name === completeAt.job);
+    if (jobs.length !== 1) return null;
+    const [job] = jobs;
+    if (job.run_id !== runId || !Number.isSafeInteger(job.id) || job.id <= 0) return null;
+    if (completeAt.step === undefined) {
+      if (job.status !== "completed" || job.conclusion !== "success") return null;
+    } else {
+      const steps = (Array.isArray(job.steps) ? job.steps : []).filter((entry) => entry?.name === completeAt.step);
+      if (steps.length !== 1 || steps[0].status !== "completed" || steps[0].conclusion !== "success") return null;
+    }
+    return { job_id: job.id, job: completeAt.job, ...(completeAt.step === undefined ? {} : { step: completeAt.step }) };
+  }
 
   try {
+    if (onAcknowledged) await onAcknowledged({ runId, repository: `${owner}/${repository}`, workflow, ref, childRun: await findRun() });
     /*
      * `wait_for_completion: false` means "do not wait for the deploy to FINISH".
      * It used to also mean "never look again", and that is how CMO stayed dead
@@ -579,9 +654,11 @@ export async function dispatchWorkflow(step, variables, { onAcknowledged, acknow
             `Workflow ${workflow} completed as ${run.conclusion}: ${runEvidence(run)}\n`,
           );
           if (run.conclusion !== "success") {
-            throw new Error(
-              `workflow ${owner}/${repository}/${workflow} concluded ${run.conclusion} before it could run asynchronously`,
-            );
+            const disposition = await childReleaseDisposition(run, { token });
+            for (const finding of disposition.findings) reportDeliveryFinding({ ...finding, child: run.html_url });
+            if (disposition.producingFailed) throw Object.assign(new Error(`workflow ${owner}/${repository}/${workflow} failed in a producing step`), { producingFailure: true });
+            if (!disposition.complete) reportDeliveryFinding({ cause: "delivery.child-production-pending", summary: "No producing failure was observed; publication remains pending.", child: run.html_url });
+            return { ...acknowledgedRun(run), production_complete: disposition.complete };
           }
           return acknowledgedRun(run);
         }
@@ -611,27 +688,63 @@ export async function dispatchWorkflow(step, variables, { onAcknowledged, acknow
         await new Promise((resolve) => setTimeout(resolve, Math.max(0, Math.min(30_000, deadline - Date.now()))));
         continue;
       }
+      // A run that already completed successfully is the stronger evidence and
+      // needs no job read; every other state asks the jobs first, so a trailing
+      // job that failed after the activation readback cannot undo the activation.
+      if (completeAt && !(run?.status === "completed" && run.conclusion === "success")) {
+        let activation = null;
+        try {
+          activation = await readActivation();
+        } catch (error) {
+          // The jobs read only ends the observation earlier. Whatever it fails
+          // with decides nothing: the run's own state, read above, still does.
+          // An exhausted token window is the exception: no later read can succeed.
+          if (error?.tokenWindow) throw error;
+          process.stdout.write(
+            `Delivery observation could not read the jobs of run ${runId} (${error.message}); observing the run until the step deadline.\n`,
+          );
+        }
+        if (activation) {
+          process.stdout.write(
+            `Workflow ${workflow} activated at job "${activation.job}"${activation.step ? ` step "${activation.step}"` : ""} (job_id=${activation.job_id}, run status=${run.status} conclusion=${run.conclusion ?? "none"}); the rest of the run is trailing work outside this operation: ${runEvidence(run)}\n`,
+          );
+          report("activated");
+          return acknowledgedRun(run, activation);
+        }
+      }
       if (run?.status === "completed") {
         process.stdout.write(
           `Workflow ${workflow} completed as ${run.conclusion}: ${runEvidence(run)}\n`,
         );
         if (run.conclusion !== "success") {
-          throw new Error(
-            `workflow ${owner}/${repository}/${workflow} concluded ${run.conclusion}`,
-          );
+          const disposition = await childReleaseDisposition(run, { token });
+          for (const finding of disposition.findings) reportDeliveryFinding({ ...finding, child: run.html_url });
+          if (disposition.producingFailed) {
+            throw Object.assign(new Error(`workflow ${owner}/${repository}/${workflow} failed in a producing step`), { producingFailure: true });
+          }
+          if (!disposition.complete) reportDeliveryFinding({ cause: "delivery.child-production-pending", summary: "No producing failure was observed; publication remains pending.", child: run.html_url });
+          return { ...acknowledgedRun(run), production_complete: disposition.complete };
         }
         return acknowledgedRun(run);
       }
       await new Promise((resolve) => setTimeout(resolve, 5_000));
     }
-    throw new Error(
-      `workflow ${owner}/${repository}/${workflow} did not complete within ${timeoutSeconds}s${run ? ` (${run.html_url})` : ""}`,
-    );
+    reportDeliveryFinding({ cause: "delivery.child-observation-incomplete", summary: `Child observation ended after ${timeoutSeconds}s; the acknowledged run continues.`, child: run?.html_url });
+    return acknowledgedRun(run ?? { id: runId, ...observed, html_url: `https://github.com/${owner}/${repository}/actions/runs/${runId}` });
   } catch (error) {
     // Preserve the failure and the last verified observation of the ACK-owned
     // run. A timeout or failed GET never becomes synthetic terminal evidence.
     error.workflowRun = { id: runId, ...observed, observed_at_ms: observedAt,
       html_url: `https://github.com/${owner}/${repository}/actions/runs/${runId}` };
+    if (!error.producingFailure) {
+      // The code names the failed check; the finite native read facts (never stderr) say which read answered how.
+      const native = error?.native_command ?? {};
+      const facts = [native.operation, native.http_status && `http_status=${native.http_status}`,
+        Number.isSafeInteger(error?.native_read_attempts) && `attempts=${error.native_read_attempts}`].filter(Boolean).join(" ");
+      reportDeliveryFinding({ cause: "delivery.child-observation-incomplete", summary: facts ? `${error.message} (${facts})` : error.message,
+        code: String(error?.message ?? "").split(" ", 1)[0], child: error.workflowRun.html_url });
+      return acknowledgedRun(error.workflowRun);
+    }
     throw error;
   } finally {
     clearInterval(progress);
@@ -719,7 +832,11 @@ async function executeStep(step, variables, cwd, workflowDispatcher) {
         head_sha: run.head_sha,
         status: run.status,
         conclusion: run.conclusion,
+        ...(run.activation ? { activation: run.activation } : {}),
+        ...(run.production_complete !== undefined ? { production_complete: run.production_complete } : {}),
+        ...(step.trailing === true ? { trailing: true } : {}),
       },
+      ...(run.ui_lab_upload ? { uploadObservation: run.ui_lab_upload } : {}),
     };
   }
 
@@ -760,6 +877,10 @@ export async function runDeliveryOperation({ operation: selectedOperation, workf
     fail(`operation must be one of ${[...OPERATIONS].join(", ")}`);
   }
   const cwd = process.cwd();
+  if (["validate", "smoke", "async"].includes(operation)) {
+    process.stdout.write(`${operation}: not run inside release; verification belongs before merge or after activation.\n`);
+    return;
+  }
   const configPath = path.join(cwd, ".kombify", "delivery-operations.json");
   const config = JSON.parse(await readFile(configPath, "utf8"));
   if (config.schema_version !== 1) fail("schema_version must be 1");
@@ -786,9 +907,7 @@ export async function runDeliveryOperation({ operation: selectedOperation, workf
     SOURCE_REPOSITORY: process.env.SOURCE_REPOSITORY ?? config.repository_id ?? "",
     SOURCE_SHA: process.env.SOURCE_SHA ?? "",
   };
-  if (!["fast-pre-1.0", "stable-1.0-plus"].includes(variables.DELIVERY_PROFILE)) {
-    fail("DELIVERY_PROFILE must be fast-pre-1.0 or stable-1.0-plus");
-  }
+  deliveryOperationProfileKey(variables.DELIVERY_PROFILE);
 
   const groups = Array.isArray(config.groups) ? config.groups : [];
   const matches = groups.filter((group) =>
@@ -805,6 +924,8 @@ export async function runDeliveryOperation({ operation: selectedOperation, workf
   if (group.source_repository !== variables.SOURCE_REPOSITORY) {
     fail(`group ${group.id} source repository does not match ${variables.SOURCE_REPOSITORY}`);
   }
+  validateSidePublicationGroup(group, group.release_role === SIDE_RELEASE_ROLE
+    ? JSON.parse(await readFile(path.join(cwd, ".kombify", "delivery.json"), "utf8")).artifacts : undefined);
 
   if (variables.DELIVERY_ARTIFACT !== group.primary_artifact) {
     process.stdout.write(
@@ -812,8 +933,7 @@ export async function runDeliveryOperation({ operation: selectedOperation, workf
     );
     return;
   }
-  verifyCandidateReceipt(variables, operation);
-  const steps = normalizeSteps(
+  const steps = deliveryOperationSteps(
     group.operations?.[operation],
     variables.DELIVERY_PROFILE,
     `group ${group.id} operation ${operation}`,
@@ -823,11 +943,37 @@ export async function runDeliveryOperation({ operation: selectedOperation, workf
   }
   const workflows = [];
   const deferred = [];
+  const uploads = [];
   for (const [index, step] of steps.entries()) {
     variables.DELIVERY_STEP_INDEX = index;
-    const result = await executeStep(step, variables, cwd, workflowDispatcher);
+    if (step?.trailing === true && !workflows.some((run) => !run.trailing && settledWorkflow(run))) {
+      fail(`group ${group.id} operation ${operation} step ${index} trails no activation an earlier step read back`);
+    }
+    const command = step.task ?? (step.command ?? []).join(" ");
+    const proof = /(?:^|[\s:/_.-])(?:test|typecheck|lint|check|verify|admission|contract)(?:$|[\s:/_.-])/i.test(command);
+    const proofWorkflow = step.inputs?.database_readiness === "true" ||
+      /(?:^|[-_.])(?:test|e2e|smoke|verify|readback)(?:[-_.]|$)/i.test(step.workflow ?? "");
+    if ("http" in step || "assert_files" in step || proof || proofWorkflow) {
+      process.stdout.write(`Step ${index}: verification runs outside release (${command || "HTTP/structural proof"}).\n`);
+      continue;
+    }
+    let result;
+    try { result = await executeStep(step, variables, cwd, workflowDispatcher); }
+    catch (error) {
+      if (!error.workflowRun && ("task" in step || "command" in step)) error.producingFailure = true;
+      throw error;
+    }
     if (result?.workflow) workflows.push(result.workflow);
     if (result?.deferred) deferred.push(result.deferred);
+    if (result?.uploadObservation) uploads.push(result.uploadObservation);
+    // An unsettled child stops the later steps, with one exception: a step that
+    // opted out of waiting and whose child is still running. That child continues
+    // asynchronously, so the steps after it start beside it. Homelab's fast
+    // publish starts the Render image build beside the Guard release this way,
+    // and the image build waits for the signed release (#3396). The operation
+    // stays pending until that child settles.
+    const ignitedAsynchronously = step.wait_for_completion === false && result?.workflow?.status !== "completed";
+    if (result?.workflow && !settledWorkflow(result.workflow) && !ignitedAsynchronously) break;
   }
   const result = {
     schema_version: 1,
@@ -841,13 +987,14 @@ export async function runDeliveryOperation({ operation: selectedOperation, workf
     operation,
     plan_run_id: variables.DELIVERY_PLAN_RUN_ID,
     plan_artifact_name: variables.DELIVERY_PLAN_ARTIFACT_NAME,
-    status: deferred.length > 0 || workflows.some((run) => run.status !== "completed" || run.conclusion !== "success")
+    status: deferred.length > 0 || workflows.some((run) => !run.trailing && !settledWorkflow(run))
       ? "pending" : "passed",
     workflows,
     deferred,
+    ...(uploads.length ? { ui_lab_uploads: uploads } : {}),
   };
   if (process.env.GITHUB_OUTPUT) {
-    appendFileSync(process.env.GITHUB_OUTPUT, `operation-result=${JSON.stringify(result)}\n`);
+    appendFileSync(process.env.GITHUB_OUTPUT, `operation-result=${JSON.stringify(result)}\nproduction-pending=${result.status === "pending"}\n`);
   }
   return result;
 }
