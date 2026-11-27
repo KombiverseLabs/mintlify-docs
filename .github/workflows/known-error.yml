@@ -4,9 +4,9 @@ name: Record known error
 # .kombify/integration-lane.json (D-2026-11-01-08). Do not edit it.
 # Observes all native child workflows for nonblocking Delivery findings, including green runs.
 # Records a red run of a tracked integration or release workflow as one
-# known-error issue per cause (workflow, failed job, failed step). The issue mentions the owner when it
-# opens, lists the commits since the last green run, gets a comment for every further red run and closes
-# itself when the workflow is green again (D-2026-11-11-01). The job is skipped (no minutes) for a
+# known-error issue per cause (workflow, failed job, failed step). The issue lists the commits since the
+# last green run without @mentions or assignees, gets a comment for every further red run and closes
+# itself when the workflow is green again (D-2026-11-11-01, D-2026-11-27-01). The job is skipped (no minutes) for a
 # cancelled or skipped run, for a run of another event than workflow_dispatch, push or schedule and for
 # a run whose head repository is not this repository. A Delivery report issue is built from workflow, job
 # and step names and an allowlisted cause and group only, and closes when its cause is green again.
@@ -39,7 +39,7 @@ jobs:
       RUN_ID: ${{ github.event.workflow_run.id }}
       RUN_URL: ${{ github.event.workflow_run.html_url }}
       HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-      ALERT: "Soulcreek"
+      ALERT: ""
     steps:
       - name: Record the known error
         shell: bash
@@ -52,8 +52,8 @@ jobs:
           const gh = (...args) => execFileSync('gh', args, { encoding: 'utf8', maxBuffer: 1e8, stdio: ['ignore', 'pipe', 'pipe'] });
           const note = line => fs.appendFileSync(summary, `${line}\n`);
           
-          // A red delivery run is a known error (D-2026-11-01-08): one open issue per cause, which tells the owner
-          // (D-2026-11-11-01) and closes itself when the workflow is green again. The cause is the workflow, the
+          // A red delivery run is a known error (D-2026-11-01-08): one open issue per cause (D-2026-11-11-01,
+          // D-2026-11-27-01, no @mentions or assignees) that closes itself when the workflow is green again. The cause is the workflow, the
           // failed job and the failed step. The run title is left out of it: it carries the commit or the reason of
           // one run, so a fingerprint built on it opened a new issue for the same cause in every slot.
           // A failed product-owned operation fails the reporter step "Apply maturity-aware operation result" of its
@@ -134,14 +134,13 @@ jobs:
             const fingerprint = crypto.createHash('sha1').update(cause ? `${WORKFLOW}|${cause.group}|${cause.childWorkflow}|${cause.childStep}` : `${WORKFLOW}|${job}|${step}`).digest('hex').slice(0, 12);
           
             // What the red run carried for the first time: the commits since the newest green run of this workflow.
-            let since = '', suspects = [], authors = [];
+            let since = '', suspects = [];
             try {
               since = gh('api', `repos/${repo}/actions/workflows/${WORKFLOW_ID}/runs?branch=main&status=success&per_page=1`, '--jq', '.workflow_runs[0].head_sha // empty').trim();
               if (since && since !== HEAD_SHA) {
                 const range = JSON.parse(gh('api', `repos/${repo}/compare/${since}...${HEAD_SHA}`, '--jq', '[.commits[] | {sha: .sha[0:9], title: (.commit.message | split("\n")[0]), login: (.author.login // "")}]') || '[]');
                 const changes = range.filter(item => !/^chore(\([^)]*\))?: release\b/.test(item.title));
                 suspects = changes.slice(-30).map(item => `- ${item.sha} ${item.title.slice(0, 120)}${item.login ? ` (${item.login})` : ''}`);
-                authors = [...new Set(changes.map(item => item.login).filter(login => login && !login.endsWith('[bot]')))];
               }
             } catch { /* the issue still names the run */ }
           
@@ -178,10 +177,6 @@ jobs:
               supersede(issues, `The cause is recorded in #${open}.`);
             } else {
               const created = gh('issue', 'create', '--repo', repo, '--label', 'known-error', '--title', `Known error: ${WORKFLOW} / ${label} (${fingerprint})`.slice(0, 250), '--body', body).trim();
-              // The people whose commits the red run carried own the fix; an unassignable login must not lose the issue.
-              for (const login of authors.slice(0, 3)) {
-                try { gh('issue', 'edit', created, '--repo', repo, '--add-assignee', login); } catch { /* not assignable here */ }
-              }
               note(`known error ${fingerprint} (${WORKFLOW} / ${label}) recorded: ${created}`);
               supersede(issues, `The cause is recorded in ${created}.`);
             }
@@ -310,7 +305,7 @@ jobs:
                       gh('issue', 'comment', String(open.number), '--repo', repo, '--body', detail);
                       note(`Delivery report ${finding.cause}: issue #${open.number} updated.`);
                     } else {
-                      const body = [reportMarker, '', `${mention} Delivery continued; this finding does not decide release production.`,
+                      const body = [reportMarker, '', `${mention ? `${mention} ` : ''}Delivery continued; this finding does not decide release production.`,
                         `Workflow: ${WORKFLOW}`, `Job: ${plain(job.name)}`, `Group: ${finding.group || 'n/a'}`, `Cause: ${finding.cause}`, '', detail].join('\n');
                       const created = gh('issue', 'create', '--repo', repo, '--label', 'known-error', '--title', `Delivery report: ${WORKFLOW} / ${finding.cause}`.slice(0, 250), '--body', body).trim();
                       note(`Delivery report ${finding.cause}: ${created}`);
