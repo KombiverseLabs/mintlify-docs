@@ -102,6 +102,14 @@ export function validateSidePublicationGroup(group, artifacts) {
 const settledWorkflow = (run) =>
   (run.status === "completed" && run.conclusion === "success") || Boolean(run.activation) || run.production_complete === true;
 
+// The GitHub Actions run statuses that mean the acknowledged child is still
+// running (not yet terminal). An ignition-only step (`wait_for_completion:
+// false`) is only "ignited asynchronously" when its run is observably in one of
+// these statuses. An unconfirmed `unknown` or missing status is never ignition
+// and stops the steps after it exactly like an unsettled observed child.
+const ACTIVE_WORKFLOW_STATUSES = new Set(["queued", "in_progress", "waiting", "pending", "requested"]);
+const WORKFLOW_RUN_STATUSES = new Set([...ACTIVE_WORKFLOW_STATUSES, "completed"]);
+
 // This is an operation observation, not publication authority. The shared
 // workflow binds it to its already validated plan before composing a receipt.
 export function readDeliveryOperationResult(serialized, expected) {
@@ -135,7 +143,7 @@ export function readDeliveryOperationResult(serialized, expected) {
       !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(run.repository ?? "") ||
       !Number.isSafeInteger(run.run_id) || run.run_id <= 0 ||
       !/^[0-9a-f]{40}$/.test(run.head_sha ?? "") ||
-      !["queued", "in_progress", "waiting", "pending", "requested", "completed"].includes(run.status) ||
+      !WORKFLOW_RUN_STATUSES.has(run.status) ||
       !(run.conclusion === null || /^[a-z_]+$/.test(run.conclusion ?? "")) ||
       (result.status === "passed" && !run.trailing && !settledWorkflow(run))
     ) fail("operation result contains invalid workflow evidence");
@@ -971,8 +979,9 @@ export async function runDeliveryOperation({ operation: selectedOperation, workf
     // asynchronously, so the steps after it start beside it. Homelab's fast
     // publish starts the Render image build beside the Guard release this way,
     // and the image build waits for the signed release (#3396). The operation
-    // stays pending until that child settles.
-    const ignitedAsynchronously = step.wait_for_completion === false && result?.workflow?.status !== "completed";
+    // stays pending until that child settles. Ignition needs positive
+    // confirmation (an active run status), never a merely non-terminal one.
+    const ignitedAsynchronously = step.wait_for_completion === false && ACTIVE_WORKFLOW_STATUSES.has(result?.workflow?.status);
     if (result?.workflow && !settledWorkflow(result.workflow) && !ignitedAsynchronously) break;
   }
   const result = {
