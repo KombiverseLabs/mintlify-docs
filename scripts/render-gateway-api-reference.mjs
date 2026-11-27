@@ -37,11 +37,17 @@ export function renderGatewayReference({ openapi, release, sourceSha, sourceSnap
       : '# This reference describes that published release, not an unqualified newer runtime.',
     '',
   ].join('\n')
-  // A colon followed by a space cannot occur in a plain YAML description.
-  const publicContract = withoutAliasPaths(normalized).replace(
-    /^(\s+description: )(?!["'|>{\[])(.*: .*)$/gm,
-    (_, prefix, value) => prefix + JSON.stringify(value),
-  )
+  // A colon followed by a space cannot occur in a plain YAML description, and
+  // an unquoted comma inside a flow-mapping description splits the mapping.
+  const publicContract = withoutAliasPaths(normalized)
+    .replace(
+      /^(\s+description: )(?!["'|>{\[])(.*: .*)$/gm,
+      (_, prefix, value) => prefix + JSON.stringify(value),
+    )
+    .replace(
+      /^(\s+"[0-9]{3}": \{ description: )(?!["'])(.*,.*)( \})$/gm,
+      (_, prefix, value, suffix) => prefix + JSON.stringify(value) + suffix,
+    )
   return { content: header + publicContract.replace(/\s*$/, '\n'), contentHash, paths: paths.length }
 }
 
